@@ -4,7 +4,7 @@ if testing
 else
   pg = require 'pg'
   cfServices = require '../services/utility/ServiceConfig'
-  dsConfig = cfServices.studyDataSource
+  dsConfig = cfServices.experimentsDataSource
   # uncomment below line to enable debugging for connection pool
   #dsConfig['log'] = (str) -> console.log str
   pool = new pg.Pool dsConfig

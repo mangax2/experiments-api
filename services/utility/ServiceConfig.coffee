@@ -7,7 +7,7 @@ cfServices =
     console.log 'environment is aws cf'
     services = require('@monsantoit/cloud-foundry').services
     dbPassword = process.env.DB_PASSWORD
-    services['studyDataSource'].password = dbPassword
+    services['experimentsDataSource'].password = dbPassword
     services
 
 module.exports = cfServices

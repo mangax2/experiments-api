@@ -1,6 +1,6 @@
 #TODO update for experiments local db
 cfServices =
-  studyDataSource:
+  experimentsDataSource:
     alias: 'experimentsDataSource'
     host: 'dockers02.monsanto.com'
     port: '49100'

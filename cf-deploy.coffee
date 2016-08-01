@@ -10,6 +10,7 @@ module.exports = (cfDeploy) ->
     DB_PASSWORD: "#{postgresPassword}"
   route: 'experiments-api'
   startupCommand: 'npm start'
+  smokeTest: 'nonProd'
   services: [
     'experimentsDataSource'
   ]

@@ -1,0 +1,6 @@
+--compilers coffee:coffee-script/register
+--recursive
+--colors
+--reporter list
+--require test/setup
+--timeout 25000

@@ -2,11 +2,11 @@
 cfServices =
   experimentsDataSource:
     alias: 'experimentsDataSource'
-    host: 'dockers02.monsanto.com'
-    port: '49100'
-    user: 'admin'
-    password: 'admin'
-    database: 'stage'
+    host: 'velocity-experiments-db.c6ftfip45sqv.us-east-1.rds.amazonaws.com'
+    port: '5432'
+    user: 'experiments_user_s'
+    password: process.env.POSTGRES_PASSWORD
+    database: 'nonprod'
     type: 'conn'
     min: 10
     max: 10

@@ -13,7 +13,6 @@ class ExperimentDao extends AbstractDao
     @executeQuery query
 
   getAll: ->
-    console.log("in dao")
     query = entity.select entity.star()
       .from entity
       .toQuery()

@@ -1,7 +1,10 @@
 automationSpecEnv = process.env.NODE_ENV != 'production' && process.env.ENV=='nonprod'
 localEnv = process.env.ENV != 'prod' && process.env.ENV!='nonprod'
 cfServices =
-  if automationSpecEnv
+  if localEnv
+    console.log 'environment is local'
+    require('./localEnvConfig')
+  else if automationSpecEnv
     console.log 'environment is aws nonprod'
     require('./automationTestDBConfig')
   else

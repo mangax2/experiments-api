@@ -8,6 +8,7 @@ module.exports = (cfDeploy) ->
   memoryLimit: "256M"
   environment:
     DB_PASSWORD: "#{postgresPassword}"
+    ENV: process.env.ENV
   route: 'experiments-api'
   startupCommand: 'npm start'
   services: [

@@ -1,8 +1,12 @@
-localDevelopment = process.env.NODE_ENV != 'production'
+automationSpecEnv = process.env.NODE_ENV != 'production' && process.env.ENV=='nonprod'
+localEnv = process.env.ENV != 'prod' && process.env.ENV!='nonprod'
 cfServices =
-  if localDevelopment
+  if localEnv
     console.log 'environment is local'
     require('./localEnvConfig')
+  else if automationSpecEnv
+    console.log 'environment is aws nonprod'
+    require('./automationTestDBConfig')
   else
     console.log 'environment is aws cf'
     services = require('@monsantoit/cloud-foundry').services

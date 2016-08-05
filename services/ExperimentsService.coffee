@@ -36,10 +36,13 @@ class ExperimentsService extends ConnectionManager
         console.log("connection resolved")
         conn = c
         new ExperimentDao(conn).getById id
-      .then (experiment) =>
+      .then (experiments) =>
         @releaseConnection conn
         .then =>
-          resolve experiment
+          if(experiments.length==0)
+            reject "Experiment Not Found for requested experimentId"
+          else
+            resolve experiments[0]
       .catch (err) =>
         @releaseConnection conn
         reject err

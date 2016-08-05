@@ -40,7 +40,7 @@ class ExperimentsService extends ConnectionManager
         @releaseConnection conn
         .then =>
           if(experiments.length==0)
-            reject "Experiment Not Found for requested experimentId"
+            throw validationMessages: ["Experiment Not Found for requested experimentId"]
           else
             resolve experiments[0]
       .catch (err) =>

@@ -1,6 +1,5 @@
 app = require '../app'
 request = require 'supertest'
-ExperimentDao = require '../dao/ExperimentDao'
 
 describe 'the app', ->
 

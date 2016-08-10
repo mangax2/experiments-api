@@ -9,7 +9,7 @@
   options =
     promiseLib: promise
     extend: (obj) ->
-      obj.experiments = new (experiments.Repository)(obj, pgp)
+      obj.experiments = new (experiments)(obj, pgp)
       return
   # Database connection parameters:
   config = cfServices.experimentsDataSource

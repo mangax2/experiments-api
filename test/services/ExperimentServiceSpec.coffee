@@ -4,7 +4,7 @@ db = require '../../db/DbManager'
 
 describe 'the ExperimentsService', ->
 
-  it.only 'getAllExperiments happy path', ->
+  it 'getAllExperiments happy path', ->
     sinon.stub(db.experiments, 'all').resolves([{'id':2}])
     testObject = new ExperimentsService()
 

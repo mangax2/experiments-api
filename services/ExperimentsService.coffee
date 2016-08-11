@@ -5,17 +5,15 @@ _ = require 'underscore'
 
 class ExperimentsService
 
+  createExperiment: (experiment)=>
+    new Promise (resolve, reject) =>
+      db.experiments.repository().tx 'tx1', (t) ->
+        resolve db.experiments.create(t,experiment)
+
   getAllExperiments: =>
     new Promise (resolve, reject) =>
       data = db.experiments.all()
       resolve data
-
-#  TODO fix create call
-  createExperiment: (experiment)=>
-    new Promise (resolve, reject) =>
-      db.experiments.gRep().tx 'tx1', (t) ->
-        resolve db.experiments.create(t,experiment)
-
 
   getExperimentById: (id) =>
     new Promise (resolve, reject) =>

@@ -1,11 +1,11 @@
 module.exports = (rep, pgp) =>
-    gRep:()=> rep
+    repository:()=> rep
     find: (id) => rep.oneOrNone('SELECT * FROM experiments WHERE id = $1', id)
     all: () => rep.any('SELECT * FROM experiments')
 
     # TODO fix persist experimentObj
     create: (t, experimentObj) =>
-        t.result('insert into experiments( name,status)  values($1,$2)',experimentObj.name, experimentObj.status , (r) ->  r.rowCount)
+        t.one("insert into experiments( name,status)  values('#{ experimentObj.name }' , '#{ experimentObj.status }' ) RETURNING id" , (exp) ->  exp)
 #        throw validationMessages: ["roll back transaction"]
 
 

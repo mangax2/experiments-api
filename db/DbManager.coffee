@@ -18,10 +18,10 @@
   pgp = pgPromise(options)
   # Create the database instance with extensions:
   db = pgp(config)
-  {
-    pgp: pgp
-    db: db
-  }
+#  {
+#    pgp: pgp
+#    db: db
+#  }
 
   module.exports = db
 # ---

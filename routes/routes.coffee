@@ -32,6 +32,14 @@ router.get '/experiments/:id', (req, res) ->
   .catch (err) ->
     handleCatch res, err
 
+router.post '/experiment', (req, res) ->
+  experiment = req.body
+  new ExperimentsService().createExperiment experiment
+  .then (id) ->
+    res.json id: id
+  .catch (err) ->
+    handleCatch res, err
+
 
 module.exports = router
 

@@ -33,14 +33,20 @@ router.get '/experiments/:id', (req, res) ->
 
 router.post '/experiment', (req, res) ->
   experiment = req.body
-  console.log(experiment)
-  console.log(experiment.name)
   new ExperimentsService().createExperiment experiment
   .then (id) ->
     res.json id
   .catch (err) ->
     handleCatch res, err
 
+
+router.delete '/experiment/:id', (req, res) ->
+  id = req.params.id
+  new ExperimentsService().deleteExperiment id
+  .then (value) ->
+    res.json value
+  .catch (err) ->
+    handleCatch res, err
 
 module.exports = router
 

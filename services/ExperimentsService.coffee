@@ -26,4 +26,10 @@ class ExperimentsService
        .catch (err) =>
          reject err
 
+  deleteExperiment: (id)=>
+    new Promise (resolve, reject) =>
+      db.experiments.repository().tx 'tx1', (t) ->
+        data = db.experiments.delete(t, id)
+        resolve id
+
 module.exports = ExperimentsService

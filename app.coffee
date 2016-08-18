@@ -6,8 +6,13 @@ log4js = require 'log4js'
 logger = log4js.getLogger 'app'
 
 localDevelopment = process.env.NODE_ENV != 'production'
-
+appBaseUrl = '/experiments-api'
 app = express()
+do ->
+  createPingPage = require '@monsantoit/ping-page'
+  pingPage = createPingPage(require './package.json')
+  app.get path, pingPage for path in ['/ping', "#{appBaseUrl}/ping"]
+
 compression = require 'compression'
 app.use compression()
 app.use bodyParser.json()

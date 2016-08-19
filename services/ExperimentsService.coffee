@@ -26,6 +26,20 @@ class ExperimentsService
        .catch (err) =>
          reject err
 
+  updateExperiment: (id, experiment) =>
+    this.getExperimentById(id)
+    .then (success) ->
+      new Promise (resolve, reject) =>
+        db.experiments.repository().tx 'tx1', (t) ->
+          db.experiments.update(t, id, experiment)
+          .then (data) =>
+              resolve data
+          .catch (err) =>
+            reject err
+    .catch (error) ->
+      throw validationMessages: ["No Experiment Found To Update For ID: #{id}"]
+
+
   deleteExperiment: (id)=>
     new Promise (resolve, reject) =>
       db.experiments.repository().tx 'tx1', (t) ->

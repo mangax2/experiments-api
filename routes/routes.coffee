@@ -31,7 +31,7 @@ router.get '/experiments/:id', (req, res) ->
   .catch (err) ->
     handleCatch res, err
 
-router.post '/experiment', (req, res) ->
+router.post '/experiments', (req, res) ->
   experiment = req.body
   new ExperimentsService().createExperiment experiment
   .then (id) ->
@@ -39,8 +39,17 @@ router.post '/experiment', (req, res) ->
   .catch (err) ->
     handleCatch res, err
 
+router.put '/experiments/:id', (req, res) ->
+  experiment = req.body
+  id = req.params.id
+  new ExperimentsService().updateExperiment id, experiment
+  .then (value) ->
+    res.json value
+  .catch (err) ->
+    handleCatch res, err
 
-router.delete '/experiment/:id', (req, res) ->
+
+router.delete '/experiments/:id', (req, res) ->
   id = req.params.id
   new ExperimentsService().deleteExperiment id
   .then (value) ->

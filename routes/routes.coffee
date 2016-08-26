@@ -2,6 +2,8 @@ express = require 'express'
 log4js = require 'log4js'
 logger = log4js.getLogger 'Router'
 ExperimentsService = require '../services/ExperimentsService'
+ExperimentModelService = require '../services/ExperimentModelService'
+
 
 router = express.Router()
 
@@ -18,6 +20,13 @@ router.get '/ping', (req, res) ->
 
 router.get '/experiments', (req, res) ->
   new ExperimentsService().getAllExperiments()
+  .then (r) ->
+    res.json r
+  .catch (err) ->
+    handleCatch res, err
+
+router.get '/experimentModel', (req, res) ->
+  new ExperimentModelService().getAllModels()
   .then (r) ->
     res.json r
   .catch (err) ->

@@ -25,13 +25,6 @@ router.get '/experiments', (req, res) ->
   .catch (err) ->
     handleCatch res, err
 
-router.get '/experimentModel', (req, res) ->
-  new ExperimentModelService().getAllModels()
-  .then (r) ->
-    res.json r
-  .catch (err) ->
-    handleCatch res, err
-
 router.get '/experiments/:id', (req, res) ->
   id = req.params.id
   new ExperimentsService().getExperimentById id
@@ -61,6 +54,39 @@ router.put '/experiments/:id', (req, res) ->
 router.delete '/experiments/:id', (req, res) ->
   id = req.params.id
   new ExperimentsService().deleteExperiment id
+  .then (value) ->
+    res.json value
+  .catch (err) ->
+    handleCatch res, err
+
+
+router.get '/experimentModel', (req, res) ->
+  new ExperimentModelService().getAllModels()
+  .then (r) ->
+    res.json r
+  .catch (err) ->
+    handleCatch res, err
+
+router.get '/experimentModel/:id', (req, res) ->
+  id = req.params.id
+  new ExperimentModelService().getExperimentModelById id
+  .then (experimentModel) ->
+    res.json experimentModel
+  .catch (err) ->
+    handleCatch res, err
+
+router.post '/experimentModel', (req, res) ->
+  experimentModel = req.body
+  new ExperimentModelService().createExperimentModel experimentModel
+  .then (id) ->
+    res.json id
+  .catch (err) ->
+    handleCatch res, err
+
+
+router.delete '/experimentModel/:id', (req, res) ->
+  id = req.params.id
+  new ExperimentModelService().deleteExperimentModel id
   .then (value) ->
     res.json value
   .catch (err) ->

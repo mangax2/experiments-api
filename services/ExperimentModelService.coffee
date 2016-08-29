@@ -33,6 +33,20 @@ class ExperimentModelService
       db.experimentModel.repository().tx 'txModelCreate', (t) ->
         resolve db.experimentModel.create(t,experimentModel)
 
+  updateExperimentModel: (id, experimentModel) =>
+    this.getExperimentModelById(id)
+    .then (success) ->
+      new Promise (resolve, reject) =>
+        db.experimentModel.repository().tx 'txModelUpdate', (t) ->
+          db.experimentModel.update(t, id, experimentModel)
+          .then (data) =>
+            resolve data
+          .catch (err) =>
+            reject err
+    .catch (error) ->
+      console.log(error)
+      throw validationMessages: ["No experimentModel Found To Update For ID: #{id}"]
+
   deleteExperimentModel: (id)=>
     new Promise (resolve, reject) =>
       db.experimentModel.repository().tx 'txModelDelete', (t) ->

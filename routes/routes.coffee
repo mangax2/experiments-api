@@ -83,6 +83,15 @@ router.post '/experimentModel', (req, res) ->
   .catch (err) ->
     handleCatch res, err
 
+router.put '/experimentModel/:id', (req, res) ->
+  experimentModel = req.body
+  id = req.params.id
+  new ExperimentModelService().updateExperimentModel id, experimentModel
+  .then (value) ->
+    res.json value
+  .catch (err) ->
+    handleCatch res, err
+
 
 router.delete '/experimentModel/:id', (req, res) ->
   id = req.params.id

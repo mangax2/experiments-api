@@ -11,7 +11,7 @@ app = express()
 do ->
   createPingPage = require '@monsantoit/ping-page'
   pingPage = createPingPage(require './package.json')
-  app.get path, pingPage for path in ['/ping', "#{appBaseUrl}/ping"]
+  app.get path, pingPage for path in ['/ping', "#{appBaseUrl}/ping", "#{appBaseUrl}/experimentModel"]
 
 compression = require 'compression'
 app.use compression()

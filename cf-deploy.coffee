@@ -13,5 +13,6 @@ module.exports = (cfDeploy) ->
   route: 'experiments-api'
   startupCommand: 'npm start'
   services: [
-    'experimentsDataSource'
+    'experimentsDataSource',
+    'velocity-home'
   ]

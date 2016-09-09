@@ -21,7 +21,7 @@ module.exports = (rep, pgp) => {
         },
 
         delete: (t, id) => {
-            return t.one("delete from experiments where id=" + id + " RETURNING id")
+            return t.one('delete from experiments where id=" + id + " RETURNING id')
         }
     }
 }

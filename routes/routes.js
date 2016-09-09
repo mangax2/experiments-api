@@ -17,7 +17,7 @@ const handleCatch = (res, err) => {
 }
 
 router.get('/ping', (req, res) => {
-    logger.debug("the user for /ping url is " + req.userProfile.id)
+    logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
 

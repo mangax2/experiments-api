@@ -7,10 +7,10 @@ module.exports = () => {
         const config = {
             appenders: [
                 {
-                    type: "console",
+                    type: 'console',
                     layout: {
-                        type: "pattern",
-                        pattern: "log_level=\"%p\"  app=\"%x{app}\" app_host=\"%x{host}\" instance=\"%x{instanceIndex}\" - %m%n",
+                        type: 'pattern',
+                        pattern: 'log_level=\"%p\"  app=\"%x{app}\" app_host=\"%x{host}\" instance=\"%x{instanceIndex}\" - %m%n',
                         tokens: {
                             app : vcapApplication.application_name,
                             instanceIndex : process.env.CF_INSTANCE_INDEX,

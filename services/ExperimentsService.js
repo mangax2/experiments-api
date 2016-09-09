@@ -1,9 +1,9 @@
-"use strict";
+'use strict'
 
 const db = require('../db/DbManager')
 const log4js = require('log4js')
-const logger = log4js.getLogger('ExperimentsService')
-const _ = require('underscore')
+// const logger = log4js.getLogger('ExperimentsService')
+// const _ = require('underscore')
 
 class ExperimentsService{
     createExperiment(experiment){
@@ -25,7 +25,7 @@ class ExperimentsService{
         return new Promise((resolve, reject) => {
             return db.experiments.find(id).then((data) => {
                 if(!data){
-                    throw {validationMessages: ["Experiment Not Found for requested experimentId"]}
+                    throw {validationMessages: ['Experiment Not Found for requested experimentId']}
                 }
                 else{
                     return resolve(data)
@@ -48,7 +48,7 @@ class ExperimentsService{
                 })
             })
         }).catch((error) => {
-            throw {validationMessages: ["No Experiment Found To Update For ID: " + id]}
+            throw {validationMessages: ['No Experiment Found To Update For ID: ' + id]}
         })
     }
 

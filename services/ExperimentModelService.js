@@ -14,7 +14,7 @@ class ExperimentModelService {
         return new Promise((resolve, reject) => {
             return db.experimentModel.find(id).then((data) => {
                 if(!data){
-                    throw {validationMessages: ["ExperimentModel Not Found for requested experimentModelId"]}
+                    throw {validationMessages: ['ExperimentModel Not Found for requested experimentModelId']}
                 }
                 else{
                     return resolve(data)
@@ -45,7 +45,7 @@ class ExperimentModelService {
                 })
             })
         }).catch((error) => {
-            throw {validationMessages: ["No experimentModel Found To Update For ID: " + id]}
+            throw {validationMessages: ['No experimentModel Found To Update For ID: ' + id]}
         })
     }
 

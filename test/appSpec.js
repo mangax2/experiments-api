@@ -1,8 +1,8 @@
-const app = require('../app');
-const request = require('supertest');
+const app = require('../app')
+const request = require('supertest')
 
 describe('the app', function() {
-    const experimentId = {}.experimentId;
+    // const experimentId = {}.experimentId
     return it('GET all experiments', (done) => {
         return request(app).get('/experiments-api/experiments').expect('Content-Type', 'application/json; charset=utf-8').expect((res) => {
             const b = res.body

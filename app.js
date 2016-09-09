@@ -11,18 +11,18 @@ const appBaseUrl = '/experiments-api'
 
 const app = express()
 
-const x = (function() {
-  var createPingPage, i, len, pingPage, ref, results
-  createPingPage = require('@monsantoit/ping-page')
-  pingPage = createPingPage(require('./package.json'))
-  ref = ['/ping', appBaseUrl + "/ping"]
-  results = []
-  for (i = 0, len = ref.length; i < len; i++) {
-    const path = ref[i]
-    results.push(app.get(path, pingPage))
-  }
-  return results
-})()
+// const x = (function() {
+//   var createPingPage, i, len, pingPage, ref, results
+//   createPingPage = require('@monsantoit/ping-page')
+//   pingPage = createPingPage(require('./package.json'))
+//   ref = ['/ping', appBaseUrl + "/ping"]
+//   results = []
+//   for (i = 0, len = ref.length; i < len; i++) {
+//     const path = ref[i]
+//     results.push(app.get(path, pingPage))
+//   }
+//   return results
+// })()
 
 const compression = require('compression')
 app.use(compression())

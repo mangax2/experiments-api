@@ -6,7 +6,7 @@ module.exports = (cfDeploy) ->
   diskLimit: "256M"
   instances: 2
   memoryLimit: "256M"
-  smokeTest: 'nonProd'
+#  smokeTest: 'nonProd'
   environment:
     DB_PASSWORD: "#{postgresPassword}"
     ENV: process.env.ENV

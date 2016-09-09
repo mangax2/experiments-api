@@ -1,4 +1,4 @@
-require("babel-core/register");
+require("babel-register");
 const express = require('express')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
 // const path = require('path')

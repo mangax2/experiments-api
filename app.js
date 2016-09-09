@@ -1,3 +1,4 @@
+require("babel-core/register");
 const express = require('express')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
 // const path = require('path')
@@ -59,7 +60,7 @@ process.on('uncaughtException', function(error) {
     return process.exit(1)
 })
 
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3000
 
 const server = app.listen(port, function() {
     const address = server.address()

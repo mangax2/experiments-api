@@ -1,4 +1,3 @@
-require('babel-register')
 const express = require('express')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
 const path = require('path')
@@ -28,7 +27,7 @@ const compression = require('compression')
 app.use(compression())
 app.use(bodyParser.json())
 
-localDevProfile = {
+const localDevProfile = {
   id: 'testuser'
 }
 
@@ -62,7 +61,7 @@ process.on('uncaughtException', function(error) {
 
 const port = process.env.PORT || 3001
 
-server = app.listen(port, function() {
+const server = app.listen(port, function() {
   var address, url
   address = server.address()
   url = "http://" + (address.host || 'localhost') + ":" + port

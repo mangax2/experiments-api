@@ -3,9 +3,9 @@ global.should = chai.should()
 // chai appears to be broken when trying to compare thrown exceptions
 global.should.throw = (thefunction, functionargs, expectedException) => {
     try{
-        thefunction.apply(functionargs)
+        return thefunction.apply(functionargs)
     }catch(error){
-        error.should.eql(expectedException)
+        return error.should.eql(expectedException)
     }
 }
 

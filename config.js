@@ -1,7 +1,7 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
 
-let config = {}
+const config = {}
 
 config.env = process.env.NODE_ENV || 'local'
 config.port = process.env.PORT || 3000

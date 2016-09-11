@@ -20,15 +20,15 @@ router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
-//
-// router.get('/experiments', (req, res) => {
-//     return new ExperimentsService().getAllExperiments().then((r) => {
-//         return res.json(r)
-//     }).catch((err) => {
-//         return handleCatch(res, err)
-//     })
-// })
-//
+
+router.get('/experiments', (req, res) => {
+    return new ExperimentsService().getAllExperiments().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
 // router.get('/experiments/:id', (req, res) => {
 //     const id = req.params.id
 //     return new ExperimentsService().getExperimentById(id).then((experiment) => {

@@ -1,6 +1,6 @@
 import db from '../db/DbManager'
 import log4js from 'log4js'
-const logger = log4js.getLogger('ExperimentsModelService')
+// const logger = log4js.getLogger('ExperimentsModelService')
 
 class ExperimentModelService {
     getAllModels(){
@@ -44,7 +44,7 @@ class ExperimentModelService {
                     })
                 })
             })
-        }).catch((error) => {
+        }).catch(() => {
             throw {validationMessages: ['No experimentModel Found To Update For ID: ' + id]}
         })
     }
@@ -52,7 +52,7 @@ class ExperimentModelService {
     deleteExperimentModel(id){
         return new Promise((resolve, reject) => {
             return db.experimentModel.repository().tx('txModelDelete', (t) => {
-                const data = db.experimentModel.delete(t, id)
+                db.experimentModel.delete(t, id)
                 return resolve(id)
             })
         })

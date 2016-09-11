@@ -1,8 +1,10 @@
+import config from '../../../config'
+
 let cfServices, dbPassword, services
 
-const automationSpecEnv = process.env.NODE_ENV !== 'production' && process.env.ENV === 'nonprod'
-const localEnv = process.env.ENV !== 'prod' && process.env.ENV !== 'nonprod'
+const automationSpecEnv = config.node_env !== 'production' && config.env === 'nonprod'
+const localEnv = config.env !== 'prod' && config.env !== 'nonprod'
 
-cfServices = localEnv ? (console.log('environment is local'), require('./localEnvConfig')) : automationSpecEnv ? (console.log('environment is aws nonprod'), require('./automationTestDBConfig')) : (console.log('environment is aws cf'), services = require('@monsantoit/cloud-foundry').services, dbPassword = process.env.DB_PASSWORD, services['experimentsDataSource'].password = dbPassword, services)
+cfServices = localEnv ? (console.info('environment is local'), require('./localEnvConfig')) : automationSpecEnv ? (console.info('environment is aws nonprod'), require('./automationTestDBConfig')) : (console.info('environment is aws cf'), services = require('@monsantoit/cloud-foundry').services, dbPassword = config.db_password, services['experimentsDataSource'].password = dbPassword, services)
 
 module.exports = cfServices

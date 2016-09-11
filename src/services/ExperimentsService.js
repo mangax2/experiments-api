@@ -1,7 +1,7 @@
 'use strict'
 
 const db = require('../db/DbManager')
-const log4js = require('log4js')
+// const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
 // const _ = require('underscore')
 
@@ -47,7 +47,7 @@ class ExperimentsService{
                     })
                 })
             })
-        }).catch((error) => {
+        }).catch(() => {
             throw {validationMessages: ['No Experiment Found To Update For ID: ' + id]}
         })
     }
@@ -55,7 +55,7 @@ class ExperimentsService{
     deleteExperiment(id){
         return new Promise((resolve, reject) => {
             return db.experiments.repository().tx('tx1', (t) => {
-                const data = db.experiments.delete(t, id)
+                db.experiments.delete(t, id)
                 return resolve(id)
             })
         })

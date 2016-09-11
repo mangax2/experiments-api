@@ -1,15 +1,18 @@
-module.exports = (rep, pgp) => {
+/*eslint quotes: ["warn", "double"]*/
+
+//removed pgp from function arguments
+module.exports = (rep) => {
     return {
         repository: () => {
             return rep
         },
 
         find: (id) => {
-            return rep.oneOrNone('SELECT * FROM experiments WHERE id = $1', id)
+            return rep.oneOrNone("SELECT * FROM experiments WHERE id = $1", id)
         },
 
         all: () => {
-            return rep.any('SELECT * FROM experiments')
+            return rep.any("SELECT * FROM experiments")
         },
 
         create: (t, experimentObj) => {
@@ -21,7 +24,7 @@ module.exports = (rep, pgp) => {
         },
 
         delete: (t, id) => {
-            return t.one('delete from experiments where id=" + id + " RETURNING id')
+            return t.one("delete from experiments where id=" + id + " RETURNING id")
         }
     }
 }

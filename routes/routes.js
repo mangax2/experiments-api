@@ -5,17 +5,17 @@ const log4js = require('log4js')
 //
 const logger = log4js.getLogger('Router')
 const router = express.Router()
-//
-// const handleCatch = (res, err) => {
-//     if(err.validationMessages){
-//         return res.status(400).json(err)
-//     }
-//     else{
-//         logger.error(err)
-//         return res.status(500).json({message: err})
-//     }
-// }
-//
+
+const handleCatch = (res, err) => {
+    if(err.validationMessages){
+        return res.status(400).json(err)
+    }
+    else{
+        logger.error(err)
+        return res.status(500).json({message: err})
+    }
+}
+
 router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})

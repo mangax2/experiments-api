@@ -15,4 +15,6 @@ config.watchUncaughtException = process.on('uncaughtException', function(error) 
     return config.exit
 })
 
+console.info(config)
+
 module.exports = config

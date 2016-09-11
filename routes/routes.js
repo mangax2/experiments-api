@@ -1,6 +1,6 @@
 const express = require('express')
 const log4js = require('log4js')
-// const ExperimentsService = require('../services/ExperimentsService')
+const ExperimentsService = require('../services/ExperimentsService')
 // const ExperimentModelService = require('../services/ExperimentModelService')
 //
 const logger = log4js.getLogger('Router')

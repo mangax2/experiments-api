@@ -1,4 +1,4 @@
-require("babel-register");
+// require("babel-register");
 const express = require('express')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
 // const path = require('path')
@@ -38,21 +38,21 @@ app.use(createProfileMiddleware({
 
 app.use('/experiments-api', require('./routes/routes'))
 
-app.use(function(error, req, res, next) {
-    if (error != null) {
-        console.error(error)
-        res.status(error.status || 500)
-        if (typeof error.body === 'object') {
-            logger.error('error.body')
-            return res.json(error.body)
-        } else {
-            logger.error(error.message || error.toString())
-            return res.send(error.message || error.toString())
-        }
-    } else {
-        return next()
-    }
-})
+// app.use(function(error, req, res, next) {
+//     if (error != null) {
+//         console.error(error)
+//         res.status(error.status || 500)
+//         if (typeof error.body === 'object') {
+//             logger.error('error.body')
+//             return res.json(error.body)
+//         } else {
+//             logger.error(error.message || error.toString())
+//             return res.send(error.message || error.toString())
+//         }
+//     } else {
+//         return next()
+//     }
+// })
 
 process.on('uncaughtException', function(error) {
     logger.fatal(error)

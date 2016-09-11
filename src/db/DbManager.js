@@ -11,7 +11,7 @@ const options = {
     promiseLib: promise,
     extend: (obj) => {
         obj.experiments = new (experiments)(obj, pgp)
-        // obj.experimentModel = new (experimentModel)(obj, pgp)
+        obj.experimentModel = new (experimentModel)(obj, pgp)
     }
 }
 

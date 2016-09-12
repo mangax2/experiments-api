@@ -37,9 +37,9 @@ class ExperimentsService{
     }
 
     updateExperiment(id, experiment){
-        this.getExperimentsById(id).then((success) => {
+        return this.getExperimentById(id).then((success) => {
             return new Promise((resolve, reject) => {
-                return db.experiments.repository.tx('tx1', (t) => {
+                return db.experiments.repository().tx('tx1', (t) => {
                     return db.experiments.update(t, id, experiment).then((data) => {
                         return resolve(data)
                     }).catch((err) => {
@@ -47,7 +47,7 @@ class ExperimentsService{
                     })
                 })
             })
-        }).catch(() => {
+        }).catch((err) => {
             throw {validationMessages: ['No Experiment Found To Update For ID: ' + id]}
         })
     }

@@ -51,7 +51,7 @@ router.put('/experiments/:id', (req, res) => {
     const experiment = req.body
     const id = req.params.id
 
-    return ExperimentsService().updateExperiment(id, experiment).then((value) => {
+    return new ExperimentsService().updateExperiment(id, experiment).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return handleCatch(res, err)

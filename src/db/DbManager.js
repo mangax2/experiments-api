@@ -1,4 +1,4 @@
-import promise from 'bluebird'
+import promise from 'bluebird';
 import experiments from '../repos/experiments'
 import experimentModel from '../repos/experimentModel'
 import pgPromise from 'pg-promise'

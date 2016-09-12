@@ -23,7 +23,7 @@ module.exports = (rep) => {
             return t.one("UPDATE experiments SET name='" + experimentObj.name + "', status='" + experimentObj.status + "' WHERE id=" + id + " RETURNING *", (exp) => { return exp})
         },
 
-        delete: (t, id) => {
+        "delete": (t, id) => {
             return t.one("delete from experiments where id=" + id + " RETURNING id")
         }
     }

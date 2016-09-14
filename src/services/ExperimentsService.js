@@ -3,7 +3,6 @@
 const db = require('../db/DbManager')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
-// const _ = require('underscore')
 
 class ExperimentsService{
     createExperiment(experiment){

@@ -3,10 +3,11 @@ const ExperimentsService = require('../../src/services/ExperimentsService')
 const db = require('../../src/db/DbManager')
 
 describe('the ExperimentsService', () => {
-    return it('getAllExperiments happy path', (done) => {
+    it('getAllExperiments happy path', (done) => {
         sinon.stub(db.experiments, 'all').resolves([{'id': 2}])
+
         const testObject = new ExperimentsService()
-        return testObject.getAllExperiments().then((experiments) => {
+        testObject.getAllExperiments().then((experiments) => {
             experiments.length.should.equal(1)
             experiments[0]['id'].should.equal(2)
         }).then(done, done)

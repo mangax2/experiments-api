@@ -11,7 +11,6 @@ global.should.throw = (thefunction, functionargs, expectedException) => {
 
 chai.use(require('chai-as-promised'))
 chai.use(require('sinon-chai'))
-const sinon = require('sinon')
 require('sinon-as-promised')
 process.env.NODE_ENV = 'UNITTEST'
 

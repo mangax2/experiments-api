@@ -8,7 +8,7 @@
     "build-server": "babel -d ./build src",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "start": "NODE_ENV=production node ./build/app",
-    "test": "mocha test",
+    "test": "istanbul cover ./node_modules/.bin/_mocha test",
     "test:dev": "mocha --watch test",
     "eslint": "eslint src; exit 0"
   },

@@ -5,10 +5,11 @@
   "main": "app.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
+    "coverage": "nyc report",
     "build-server": "babel -d ./build src",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "start": "NODE_ENV=production node ./build/app",
-    "test": "istanbul cover ./node_modules/.bin/_mocha test",
+    "test": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha test",
     "test:dev": "mocha --watch test",
     "eslint": "eslint src; exit 0"
   },
@@ -43,9 +44,9 @@
     "chai-as-promised": "~5.3.0",
     "cross-env": "~2.0.1",
     "eslint": "~3.5.0",
-    "istanbul": "~0.4.5",
     "mocha": "~3.0.2",
     "nodemon": "~1.10.2",
+    "nyc":"~8.3.0",
     "piping": "~0.3.2",
     "sinon": "~1.17.5",
     "sinon-as-promised": "~4.0.2",
@@ -58,6 +59,18 @@
   "engines": {
     "node": "~4.4.4",
     "npm": "2.15.x"
+  },
+  "nyc": {
+    "exclude": [
+      "config.js",
+      "src/app.js",
+      "src/db/DbManager.js",
+      "src/repos/*.js",
+      "src/routes/*.js",
+      "src/services/utility/*Config.js",
+      "node_modules",
+      "test"
+    ]
   },
   "license": "ISC"
 }

@@ -24,6 +24,7 @@ build
 
 # Coveralls
 coverage
+.nyc_output
 
 # Benchmarking
 benchmarks/graphs

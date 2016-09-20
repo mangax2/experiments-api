@@ -1,5 +1,6 @@
 const express = require('express')
 const log4js = require('log4js')
+const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
 
@@ -19,6 +20,11 @@ const handleCatch = (res, err) => {
 router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
+})
+
+router.get('/api-docs', (req, res) => {
+
+    return res.json(swaggerDoc)
 })
 
 router.get('/experiments', (req, res) => {

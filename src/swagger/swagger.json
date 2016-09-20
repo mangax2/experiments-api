@@ -1,0 +1,200 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Experiments API",
+        "description": "Experiment APIs to create experiment model",
+        "version": "1.0.0"
+    },
+    "host": "api.uber.com",
+    "schemes": [
+        "https"
+    ],
+    "basePath": "/experiments-api",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/experiments": {
+            "get": {
+                "summary": "get all experiment entities",
+                "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
+                "tags": [
+                    "Experiments get"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of experiments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Experiment"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "post one experiment entity",
+                "description": "Creates new experiment in Experiments System.\n",
+                "tags": [
+                    "Experiment",
+                    "Create"
+                ],
+                "parameters": [
+                    {
+                        "name": "experiment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experiment entity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}": {
+            "get": {
+                "summary": "get one experiment entity",
+                "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
+                "tags": [
+                    "Experiment"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experiment entity",
+                        "schema": {
+                            "type": "object",
+                            "items": {
+                                "$ref": "#/definitions/Experiment"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one experiment entity",
+                "description": "delete experiment entity in Experiments System.\n",
+                "tags": [
+                    "Experiment"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experiment entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one experiment entity",
+                "description": "update experiment entiry in Experiments System.\n",
+                "tags": [
+                    "Experiment",
+                    "Update"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "experiment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experiment entity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "No Experiment Found To Update For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Experiment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for experiment entity"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the experiment entity."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "status of the experiment entity."
+                }
+            }
+        },
+        "ExperimentPayload": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of the experiment entity."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "status of the experiment entity."
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

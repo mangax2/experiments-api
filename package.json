@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "coverage": "nyc report",
-    "build-server": "babel -d ./build src",
+    "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "start": "NODE_ENV=production node ./build/app",
     "test": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha test",

@@ -64,7 +64,7 @@
                 "summary": "get one experiment entity",
                 "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
                 "tags": [
-                    "Experiment"
+                    "Experiments"
                 ],
                 "parameters": [
                     {
@@ -90,7 +90,7 @@
                 "summary": "delete one experiment entity",
                 "description": "delete experiment entity in Experiments System.\n",
                 "tags": [
-                    "Experiment"
+                    "Experiments"
                 ],
                 "parameters": [
                     {
@@ -113,7 +113,7 @@
                 "summary": "put one experiment entity",
                 "description": "update experiment entiry in Experiments System.\n",
                 "tags": [
-                    "Experiment"
+                    "Experiments"
                 ],
                 "parameters": [
                     {

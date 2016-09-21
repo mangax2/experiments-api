@@ -19,7 +19,7 @@
                 "summary": "get all experiment entities",
                 "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
                 "tags": [
-                    "Experiments get"
+                    "Experiments"
                 ],
                 "responses": {
                     "200": {
@@ -37,8 +37,7 @@
                 "summary": "post one experiment entity",
                 "description": "Creates new experiment in Experiments System.\n",
                 "tags": [
-                    "Experiment",
-                    "Create"
+                    "Experiments"
                 ],
                 "parameters": [
                     {
@@ -114,8 +113,7 @@
                 "summary": "put one experiment entity",
                 "description": "update experiment entiry in Experiments System.\n",
                 "tags": [
-                    "Experiment",
-                    "Update"
+                    "Experiment"
                 ],
                 "parameters": [
                     {

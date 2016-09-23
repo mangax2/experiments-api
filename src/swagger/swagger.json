@@ -5,7 +5,7 @@
         "description": "Experiment APIs to create experiment model",
         "version": "1.0.0"
     },
-    "host": "api.uber.com",
+    "host": "api01-np.agro.services",
     "schemes": [
         "https"
     ],

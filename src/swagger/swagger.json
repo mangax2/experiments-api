@@ -17,7 +17,7 @@
         "/experiments": {
             "get": {
                 "summary": "get all experiment entities",
-                "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
+                "description": "The Experiments endpoint returns information about the experiment entities in Experiments System.\n",
                 "tags": [
                     "Experiments"
                 ],
@@ -29,6 +29,18 @@
                             "items": {
                                 "$ref": "#/definitions/Experiment"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -50,10 +62,31 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Experiment entity",
+                    "201": {
+                        "description": "Experiment Created",
                         "schema": {
                             "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -83,28 +116,29 @@
                                 "$ref": "#/definitions/Experiment"
                             }
                         }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "delete one experiment entity",
-                "description": "delete experiment entity in Experiments System.\n",
-                "tags": [
-                    "Experiments"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "string",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Experiment entity",
+                    },
+                    "400": {
+                        "description": "Invalid ID",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -135,11 +169,73 @@
                     "200": {
                         "description": "Experiment entity",
                         "schema": {
-                            "type": "number"
+                            "$ref": "#/definitions/Experiment"
                         }
                     },
                     "400": {
-                        "description": "No Experiment Found To Update For ID",
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one experiment entity",
+                "description": "delete experiment entity in Experiments System.\n",
+                "tags": [
+                    "Experiments"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Experiment Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

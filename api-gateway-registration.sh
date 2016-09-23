@@ -11,11 +11,11 @@ swagger_url=$GATEWAY_SWAGGER_URL
 
 payload=$(cat << EndOfMessage
  {
- "name" : "Envision Datasets API",
+ "name" : "Experiments API",
  "securityPolicy" : "OAuthSecurity",
  "operationalPolicies" : ["CORSAllowAll","BasicAuditing"],
  "apiVisibilityInfo" : { "apiVisibility" : "Registered" },
- "emailsToInviteAsAdmins" : ["ajay.2.kumar@monsanto.com,"kyle.mcclendon@monsanto.com,"kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],
+ "emailsToInviteAsAdmins" : ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],
  "serviceMaturityTag" : "Level2",
  "targetEndpoints" : ["http://${CF_DOMAIN}/"],
  "proxyEndpointInfo": {

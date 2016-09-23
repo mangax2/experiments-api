@@ -36,9 +36,9 @@ const localDevProfile = {
     id: 'testuser'
 }
 
-app.use(createProfileMiddleware({
-    localDevProfile: localDevProfile
-}))
+// app.use(createProfileMiddleware({
+//     localDevProfile: localDevProfile
+// }))
 
 app.use('/experiments-api', require('./routes/routes'))
 

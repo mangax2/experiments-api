@@ -2,7 +2,8 @@
     "swagger": "2.0",
     "info": {
         "title": "Experiments API",
-        "description": "Experiment APIs to create experiment model"
+        "description": "Experiment APIs to create experiment model",
+        "version": "v1"
     },
     "host": "api01-np.agro.services",
     "schemes": [

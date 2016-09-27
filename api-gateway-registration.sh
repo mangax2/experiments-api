@@ -27,7 +27,8 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
     "groups": ["Cosmos"],
     "requires-approval": true,
     "platform-tag": "api",
-    "tags": ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"]
+    "tags": ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"],
+    "additional-operations": [{"method":"GET", "uri":"/experiments-api/ping"}]
   },
   "swagger": $swagger
 }]

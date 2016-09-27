@@ -20,7 +20,7 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
     "target-endpoints": ["${targetEndpoint}"],
     "proxy-endpoint-info": {
       "protocol": "https",
-      "deployment-zone": $DEPLOYMENT_ZONE,
+      "deployment-zone": "${DEPLOYMENT_ZONE}",
       "root-path": "experiments-api"
     },
     "api-admin-emails": ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],

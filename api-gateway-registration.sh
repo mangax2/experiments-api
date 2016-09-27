@@ -1,38 +1,48 @@
 #!/bin/bash
 
-#These $ values are expected from the environment set up by Jenkins
+namePostfix="-np"
+if [ -z "$namePostfix" ]; then cfPostfix=""; else cfPostfix="-np"; fi
 
-export PING=$PING_URL
-export NEXUS_PW=$NEXUS_PW
+targetEndpoint="http://${CF_DOMAIN}/"
+# swagger=$(curl ${targetEndpoint}/api-docs/swagger.json)
+swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
 
-# Update this field with the URL of your Swagger Document
-#   that you'd like to register as an API in Akana
-swagger_url=$GATEWAY_SWAGGER_URL
+#    "description": undefined,
+#    "cname": undefined,
+#      "deployment-zone": "api01${namePostfix}.agro.services",  ### no -01 in dev...
 
-payload=$(cat << EndOfMessage
- {
- "name" : "Experiments API",
- "securityPolicy" : "OAuthSecurity",
- "operationalPolicies" : ["CORSAllowAll","BasicAuditing"],
- "apiVisibilityInfo" : { "apiVisibility" : "Registered" },
- "emailsToInviteAsAdmins" : ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],
- "serviceMaturityTag" : "Level2",
- "targetEndpoints" : ["http://${CF_DOMAIN}/"],
- "proxyEndpointInfo": {
-            "protocol": "https",
-            "deploymentZone": "$DEPLOYMENT_ZONE",
-            "rootPath": "experiments-api"
-          },
- "tags" : ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"],
- "platformTag" : "field"
- }
+ payload=$(cat << EndOfMessage
+[{
+  "api-gateway": {
+    "name": "Experiments API",
+    "security-policy": "OAuthSecurity",
+    "operational-policies": ["CORSAllowAll","BasicAuditing","DetailedAuditingOnError"],
+    "target-endpoints": ["${targetEndpoint}"],
+    "proxy-endpoint-info": {
+      "protocol": "https",
+      "deployment-zone": $DEPLOYMENT_ZONE,
+      "root-path": "experiments-api"
+    },
+    "api-admin-emails": ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],
+    "groups": ["Cosmos"],
+    "requires-approval": true,
+    "platform-tag": "api",
+    "tags": ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"]
+  },
+  "swagger": $swagger
+}]
 EndOfMessage
 )
 echo $payload
-### Do not modify any of the below script.
-# Note that there are 3 commands run together with `&&`. If one
-#  command fails, then it does not run the last command.
-# (1) Download the script (JAR)
-# (2) run it with the above arguments
-# (3) delete it
-curl -u tpsjenkins:$NEXUS_PW -L 'https://nexus.agro.services/service/local/repositories/releases/content/com/monsanto/arch/register-api_2.11/0.1.8/register-api_2.11-0.1.8-assembly.jar' -o register-api.jar && java -jar register-api.jar SwaggerRegistration "$payload" $swagger_url && rm register-api.jar
+
+payloadFilename="registeration-temp-`date +"%s"`.json"
+$(echo ${payload} > ${payloadFilename})
+echo
+
+# curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d ${payload} $targetEndpoint/apis
+curl -v -X PUT -H "Authorization: bearer $ACCESS_TOKEN"-H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis
+# echo "curl -X POST -H \"Cache-Control: no-cache\" -H \"Content-Type: application/json\" -d $payload http://localhost:8080/apis"
+
+echo
+rm ${payloadFilename}
+echo "Deleted temp file ${payloadFilename}"

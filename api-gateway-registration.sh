@@ -41,9 +41,9 @@ payloadFilename="registeration-temp-`date +"%s"`.json"
 $(echo ${payload} > ${payloadFilename})
 echo
 
-# curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d ${payload} $targetEndpoint/apis
+#curl -v -X POST -H "Authorization: bearer $ACCESS_TOKEN" -H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis
+
 curl -v -X PUT -H "Authorization: bearer $ACCESS_TOKEN" -H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis
-# echo "curl -X POST -H \"Cache-Control: no-cache\" -H \"Content-Type: application/json\" -d $payload http://localhost:8080/apis"
 
 echo
 rm ${payloadFilename}

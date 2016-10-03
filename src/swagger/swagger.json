@@ -14,6 +14,211 @@
         "application/json"
     ],
     "paths": {
+        "/experiment-designs": {
+            "get": {
+                "summary": "Get all experiment designs",
+                "description": "Returns all experiment designs that can be used\n",
+                "tags": [
+                    "Experiment Design"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of experiment designs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentDesign"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Adds a new experiment design",
+                "description": "Posts a new experiment design",
+                "tags": [
+                    "Experiment Design"
+                ],
+                "parameters": [
+                    {
+                        "name": "experimentDesign",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentDesignPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ID of newly created experiment design",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiment-designs/{id}": {
+            "get": {
+                "summary": "Get one experiment design entity",
+                "description": "Returns a single experiment design entity\n",
+                "tags": [
+                    "Experiment Design"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of experiment designs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentDesign"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update one experiment design",
+                "description": "Updates a single experiment design entity\n",
+                "tags": [
+                    "Experiment Design"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "experimentDesign",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentDesignPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated Experiment Design entity",
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentDesign"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes one experiment design",
+                "description": "Deletes a single experiment design entity\n",
+                "tags": [
+                    "Experiment Design"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted Experiment Design entity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/experiments": {
             "get": {
                 "summary": "get all experiment entities",
@@ -95,7 +300,7 @@
         "/experiments/{id}": {
             "get": {
                 "summary": "get one experiment entity",
-                "description": "The Experiments endpoint returns information about the experiment entities \nin Experiments System.\n",
+                "description": "The Experiments endpoint returns information about the experiment entities in Experiments System.\n",
                 "tags": [
                     "Experiments"
                 ],
@@ -242,9 +447,232 @@
                     }
                 }
             }
+        },
+        "/factor-types": {
+            "get": {
+                "summary": "Get all factor types",
+                "description": "Returns all factor types that can be used\n",
+                "tags": [
+                    "Factor Type"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of factor types",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorType"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Adds a new factor type",
+                "description": "Creates a new factor type",
+                "tags": [
+                    "Factor Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "factorType",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/FactorTypePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ID of newly created factor type",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/factor-type/{id}": {
+            "get": {
+                "summary": "Get one factor type entity",
+                "description": "Returns a single factor type entity\n",
+                "tags": [
+                    "Factor Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Single Factor Type Entity",
+                        "schema": {
+                            "$ref": "#/definitions/FactorType"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update one factor type",
+                "description": "Updates a single factor type entity\n",
+                "tags": [
+                    "Factor Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "name": "factorType",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/FactorTypePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated Factor Type entity",
+                        "schema": {
+                            "$ref": "#/definitions/FactorType"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes one factor type",
+                "description": "Deletes a single factor type entity\n",
+                "tags": [
+                    "Factor Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted Experimental Design entity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "ExperimentDesign": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for experiment design entity"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of experiment design"
+                }
+            }
+        },
+        "ExperimentDesignPayload": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of experiment design"
+                }
+            }
+        },
         "Experiment": {
             "type": "object",
             "properties": {
@@ -272,6 +700,28 @@
                 "status": {
                     "type": "string",
                     "description": "status of the experiment entity."
+                }
+            }
+        },
+        "FactorType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for factor type"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "name of the factor type"
+                }
+            }
+        },
+        "FactorTypePayload": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "name of the factor type"
                 }
             }
         },

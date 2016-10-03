@@ -13,6 +13,7 @@ class ExperimentsService{
         })
     }
 
+
     getAllExperiments() {
         return new Promise((resolve, reject) => {
             const data = db.experiments.all()

@@ -6,7 +6,7 @@ const cfServices = {
         port: '49100',
         user: 'admin',
         password: 'admin',
-        database: 'stage',
+        database: 'draft',
         type: 'conn',
         min: 10,
         max: 10,

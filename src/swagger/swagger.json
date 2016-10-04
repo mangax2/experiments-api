@@ -222,7 +222,7 @@
         "/experiments": {
             "get": {
                 "summary": "get all experiment entities",
-                "description": "The Experiments endpoint returns information about the experiment entities in Experiments System.\n",
+                "description": "This endpoint returns information about the experiments.\n",
                 "tags": [
                     "Experiments"
                 ],
@@ -232,7 +232,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Experiment"
+                                "$ref": "#/definitions/ExperimentResponse"
                             }
                         }
                     },
@@ -251,8 +251,8 @@
                 }
             },
             "post": {
-                "summary": "post one experiment entity",
-                "description": "Creates new experiment in Experiments System.\n",
+                "summary": "post one or more experiment entities",
+                "description": "Creates new experiments in Experiments System.\n",
                 "tags": [
                     "Experiments"
                 ],
@@ -262,7 +262,10 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ExperimentPayload"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentPayload"
+                            }
                         }
                     }
                 ],
@@ -270,7 +273,10 @@
                     "201": {
                         "description": "Experiment Created",
                         "schema": {
-                            "type": "number"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
                         }
                     },
                     "400": {
@@ -308,7 +314,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "type": "string",
+                        "type": "integer",
                         "required": true
                     }
                 ],
@@ -318,7 +324,7 @@
                         "schema": {
                             "type": "object",
                             "items": {
-                                "$ref": "#/definitions/Experiment"
+                                "$ref": "#/definitions/ExperimentResponse"
                             }
                         }
                     },
@@ -358,7 +364,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "type": "string",
+                        "type": "integer",
                         "required": true
                     },
                     {
@@ -374,7 +380,7 @@
                     "200": {
                         "description": "Experiment entity",
                         "schema": {
-                            "$ref": "#/definitions/Experiment"
+                            "$ref": "#/definitions/ExperimentResponse"
                         }
                     },
                     "400": {
@@ -673,22 +679,66 @@
                 }
             }
         },
-        "Experiment": {
+        "ExperimentResponse": {
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "unique id for experiment entity"
                 },
                 "name": {
                     "type": "string",
                     "description": "name of the experiment entity."
                 },
+                "subjectType": {
+                    "type": "string",
+                    "description": "Subject of the Experiment."
+                },
+                "reps": {
+                    "type": "integer",
+                    "description": "Number of reps."
+                },
+                "ExperimentDesign": {
+                    "type": "string",
+                    "description": "Experiment Design Type"
+                },
                 "status": {
                     "type": "string",
                     "description": "status of the experiment entity."
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
-
+            }
+        },
+        "CreateResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "description": "http status code, 201 for success and 4.x.x for errors."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Resource created or error description in case of error."
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "id of newely created resource or black in case of error."
+                }
             }
         },
         "ExperimentPayload": {
@@ -698,22 +748,21 @@
                     "type": "string",
                     "description": "name of the experiment entity."
                 },
-                "reps":{
-                    "type":"string",
-                    "description":"Number of reps."
-                },
-                "status": {
-                    "type": "string",
-                    "description": "status of the experiment entity."
-                },
-
                 "subjectType": {
                     "type": "string",
                     "description": "Subject of the Experiment."
                 },
-                "ExperimentDesignId": {
+                "reps": {
+                    "type": "integer",
+                    "description": "Number of reps."
+                },
+                "experimentDesign": {
                     "type": "string",
-                    "description": "ExperimentDesign Reference"
+                    "description": "ExperimentDesign Type."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "status of the experiment entity."
                 }
             }
         },
@@ -742,14 +791,14 @@
         "Error": {
             "type": "object",
             "properties": {
-                "code": {
+                "status": {
                     "type": "integer",
                     "format": "int32"
                 },
-                "message": {
+                "code": {
                     "type": "string"
                 },
-                "fields": {
+                "errorMessage": {
                     "type": "string"
                 }
             }

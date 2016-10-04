@@ -3,6 +3,7 @@ const log4js = require('log4js')
 const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
+const ExperimentDesignService = require('../services/ExperimentDesignService')
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -23,8 +24,24 @@ router.get('/ping', (req, res) => {
 })
 
 router.get('/api-docs', (req, res) => {
-
     return res.json(swaggerDoc)
+})
+
+router.get('/experiment-designs', (req, res) => {
+    logger.info("experiment-design")
+    return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.post('/experiment-designs', (req, res) => {
+    const design = req.body
+    return new ExperimentDesignService().createExperimentDesign(design).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
 })
 
 router.get('/experiments', (req, res) => {

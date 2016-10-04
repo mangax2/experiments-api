@@ -1,6 +1,7 @@
 import promise from 'bluebird'
 import experiments from '../repos/experiments'
 import experimentModel from '../repos/experimentModel'
+import experimentDesign from '../repos/experimentDesign'
 import pgPromise from 'pg-promise'
 import cfServices from '../services/utility/ServiceConfig'
 import log4js from 'log4js'
@@ -12,6 +13,7 @@ const options = {
     extend: (obj) => {
         obj.experiments = new (experiments)(obj, pgp)
         obj.experimentModel = new (experimentModel)(obj, pgp)
+        obj.experimentDesign = new (experimentDesign)(obj, pgp)
     }
 }
 

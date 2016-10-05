@@ -29,7 +29,6 @@ router.get('/api-docs', (req, res) => {
 })
 
 router.get('/experiment-designs', (req, res) => {
-    logger.info("experiment-design")
     return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {
         return res.json(r)
     }).catch((err) => {
@@ -39,6 +38,31 @@ router.get('/experiment-designs', (req, res) => {
 router.post('/experiment-designs', (req, res) => {
     const design = req.body
     return new ExperimentDesignService().createExperimentDesign(design).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().getExperimentDesignById(id).then((design) => {
+        return res.json(design)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.put('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().updateExperimentDesign(id, req.body).then((design) => {
+        return res.json(design)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.delete('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().deleteExperimentDesign(id).then((id) => {
         return res.json(id)
     }).catch((err) => {
         return handleCatch(res, err)

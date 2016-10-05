@@ -4,7 +4,7 @@ const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
 const ExperimentDesignService = require('../services/ExperimentDesignService')
-const FactorTypeService = require('../services/FactorTypeService')
+const FactorTypeService = require('../services/factorTypeService')
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -37,7 +37,7 @@ router.get('/experiment-designs', (req, res) => {
 })
 router.post('/experiment-designs', (req, res) => {
     const design = req.body
-    return new ExperimentDesignService().createExperimentDesign(design).then((id) => {
+    return new ExperimentDesignService().createExperimentDesign(design, 'kmccl').then((id) => {
         return res.json(id)
     }).catch((err) => {
         return handleCatch(res, err)
@@ -54,7 +54,7 @@ router.get('/experiment-designs/:id', (req, res) => {
 })
 router.put('/experiment-designs/:id', (req, res) => {
     const id = req.params.id
-    return new ExperimentDesignService().updateExperimentDesign(id, req.body).then((design) => {
+    return new ExperimentDesignService().updateExperimentDesign(id, req.body, 'kmccl').then((design) => {
         return res.json(design)
     }).catch((err) => {
         return handleCatch(res, err)

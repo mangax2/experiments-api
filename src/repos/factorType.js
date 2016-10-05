@@ -1,3 +1,5 @@
+/*eslint quotes: ["warn", "double"]*/
+
 module.exports = (rep) => {
     return {
         repository: () => {

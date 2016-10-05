@@ -1,9 +1,9 @@
 const db = require('../db/DbManager')
 
 class ExperimentsService{
-    createExperimentDesign(experimentDesign){
+    createExperimentDesign(experimentDesign, created_user_id){
         return db.experimentDesign.repository().tx('createExperimentDesignTransaction', (t) => {
-            return db.experimentDesign.create(t,experimentDesign, 'kmccl')
+            return db.experimentDesign.create(t,experimentDesign, created_user_id)
         })
     }
 
@@ -22,8 +22,8 @@ class ExperimentsService{
         })
     }
 
-    updateExperimentDesign(id, experimentDesign){
-        return db.experimentDesign.update(id, experimentDesign, 'kmccl').then((data) => {
+    updateExperimentDesign(id, experimentDesign, modified_user_id){
+        return db.experimentDesign.update(id, experimentDesign, modified_user_id).then((data) => {
             if(!data){
                 throw {validationMessages: ['Experiment Design Not Found']}
             }else{

@@ -23,26 +23,22 @@ class ExperimentsService{
     }
 
     updateExperimentDesign(id, experimentDesign){
-        return db.experimentDesign.repository().tx('updateExperimentDesignTransaction', (t) => {
-            return db.experimentDesign.update(t, id, experimentDesign, 'kmccl').then((data) => {
-                if(!data){
-                    throw {validationMessages: ['Experiment Design Not Found']}
-                }else{
-                    return data
-                }
-            })
+        return db.experimentDesign.update(id, experimentDesign, 'kmccl').then((data) => {
+            if(!data){
+                throw {validationMessages: ['Experiment Design Not Found']}
+            }else{
+                return data
+            }
         })
     }
 
     deleteExperimentDesign(id){
-        return db.experimentDesign.repository().tx('deleteExperimentDesignTransaction', (t) => {
-            return db.experimentDesign.delete(t, id).then((data) => {
-                if(!data){
-                    throw {validationMessages: ['Experiment Design Not Found']}
-                }else{
-                    return data
-                }
-            })
+        return db.experimentDesign.delete(id).then((data) => {
+            if(!data){
+                throw {validationMessages: ['Experiment Design Not Found']}
+            }else{
+                return data
+            }
         })
     }
 }

@@ -18,12 +18,12 @@ module.exports = (rep) => {
             return t.one("INSERT INTO ref_experiment_design(name, created_date, created_user_id, modified_user_id, modified_date) VALUES($1, CURRENT_TIMESTAMP, $2, $3, CURRENT_TIMESTAMP) RETURNING id", [experimentDesignObj.name, created_user_id, created_user_id])
         },
 
-        update: (t, id, experimentDesignObj, modified_user_id) => {
-            return t.oneOrNone("UPDATE ref_experiment_design SET (name, modified_user_id, modified_date) = ($1, $2, CURRENT_TIMESTAMP) WHERE id=$3 RETURNING *", [experimentDesignObj.name, modified_user_id, id])
+        update: (id, experimentDesignObj, modified_user_id) => {
+            return rep.oneOrNone("UPDATE ref_experiment_design SET (name, modified_user_id, modified_date) = ($1, $2, CURRENT_TIMESTAMP) WHERE id=$3 RETURNING *", [experimentDesignObj.name, modified_user_id, id])
         },
 
-        "delete": (t, id) => {
-            return t.oneOrNone("DELETE FROM ref_experiment_design WHERE id=$1 RETURNING id", id)
+        "delete": (id) => {
+            return rep.oneOrNone("DELETE FROM ref_experiment_design WHERE id=$1 RETURNING id", id)
         }
     }
 }

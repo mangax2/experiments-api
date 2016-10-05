@@ -123,7 +123,6 @@ describe('ExperimentDesignService', () => {
 
     describe('deleteExperimentDesign', () => {
         it('deletes an experiment and returns the deleted id', (done) => {
-            findStub.resolves({'id': 1, 'name': 'Split Plot'})
             deleteStub.resolves(1)
 
             const testObject = new ExperimentDesignService()

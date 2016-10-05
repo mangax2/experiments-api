@@ -91,10 +91,40 @@ describe.only('FactorTypeService', () => {
     })
 
     describe('updateFactorType', () => {
+        it('successfully updates factor type with id 1', (done) => {
+            updateStub.resolves({'id': 1, 'type': 'Independent Variable'})
 
+            const testObject = new FactorTypeService()
+            testObject.updateFactorType(1, {'type': 'Independent Variable'}).then((result) => {
+                result.type.should.equal('Independent Variable')
+                result.id.should.equal(1)
+            }).then(done, done)
+        })
+
+        it('fails', (done) => {
+            updateStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+
+            const testObject = new FactorTypeService()
+            testObject.updateFactorType(1, {'type': 'Independent Variable'}).should.be.rejected.and.notify(done)
+        })
     })
 
     describe('deleteFactorType', () => {
+        it('deletes an factor type and returns the deleted id', (done) => {
+            findStub.resolves({'id': 1, 'type': 'Independent Variable'})
+            deleteStub.resolves(1)
 
+            const testObject = new FactorTypeService()
+            testObject.deleteFactorType(1).then((value) =>{
+                value.should.equal(1)
+            }).then(done, done)
+        })
+
+        it('fails', (done) => {
+            deleteStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+
+            const testObject = new FactorTypeService()
+            testObject.deleteFactorType(1).should.be.rejected.and.notify(done)
+        })
     })
 })

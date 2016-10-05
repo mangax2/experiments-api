@@ -25,49 +25,38 @@ class ExperimentsService{
     }
 
     getAllExperiments() {
-        return new Promise((resolve, reject) => {
-            const data = db.experiments.all()
-            return resolve(data)
-        })
+        return db.experiments.all()
     }
 
     getExperimentById(id){
-        return new Promise((resolve, reject) => {
-            return db.experiments.find(id).then((data) => {
-                if(!data){
-                    throw {validationMessages: ['Experiment Not Found for requested experimentId']}
-                }
-                else{
-                    return resolve(data)
-                }
-            }).catch((err) => {
-                return reject(err)
-            })
+       return db.experiments.find(id).then((data) => {
+            if(!data){
+                throw {validationMessages: ['Experiment Not Found for requested experimentId']}
+            }
+            else{
+                return data
+            }
         })
     }
 
     updateExperiment(id, experiment){
-        return this.getExperimentById(id).then((success) => {
-            return new Promise((resolve, reject) => {
-                return db.experiments.repository().tx('tx1', (t) => {
-                    return db.experiments.update(t, id, experiment).then((data) => {
-                        return resolve(data)
-                    }).catch((err) => {
-                        return reject(err)
-                    })
-                })
+            return db.experiments.update(id, experiment).then((data) => {
+                if(!data){
+                    throw {validationMessages: ['Experiment Not Found to Update']}
+                }else{
+                    return data
+                }
             })
-        }).catch((err) => {
-            throw {validationMessages: ['No Experiment Found To Update For ID: ' + id]}
-        })
     }
 
-    deleteExperiment(id){
-        return new Promise((resolve, reject) => {
-            return db.experiments.repository().tx('tx1', (t) => {
-                db.experiments.delete(t, id)
-                return resolve(id)
-            })
+    deleteExperiment(id) {
+        return db.experiments.remove(id).then((data) => {
+            if (!data) {
+                throw {validationMessages: ['Experiment Not Found for requested experimentId']}
+            }
+            else {
+                return data
+            }
         })
     }
 }

@@ -1,15 +1,28 @@
 const sinon = require('sinon')
-const chai = require('chai')
 const FactorTypeService = require('../../src/services/factorTypeService')
 const db = require('../../src/db/DbManager')
 
-const getStub = sinon.stub(db.factorType, 'all')
-const createStub = sinon.stub(db.factorType, 'create')
-const findStub = sinon.stub(db.factorType, 'find')
-const updateStub = sinon.stub(db.factorType, 'update')
-const deleteStub = sinon.stub(db.factorType, 'delete')
-const transactionStub = sinon.stub(db.factorType, 'repository', () => {
-    return {tx: function(transactionName, callback){return callback()}}
+const testPayload = {}
+const testResponse = {}
+const testError = {}
+const tx = {}
+
+let getStub
+let createStub
+let findStub
+let updateStub
+let deleteStub
+let transactionStub
+
+before(() => {
+    getStub = sinon.stub(db.factorType, 'all')
+    createStub = sinon.stub(db.factorType, 'create')
+    findStub = sinon.stub(db.factorType, 'find')
+    updateStub = sinon.stub(db.factorType, 'update')
+    deleteStub = sinon.stub(db.factorType, 'delete')
+    transactionStub = sinon.stub(db.factorType, 'repository', () => {
+        return {tx: function(transactionName, callback){return callback(tx)}}
+    })
 })
 
 after(() => {
@@ -21,110 +34,151 @@ after(() => {
     transactionStub.restore()
 })
 
-describe.only('FactorTypeService', () => {
+describe('FactorTypeService', () => {
     describe('createFactorType', () => {
-        it('creates transaction and calls create method on repository', (done) => {
+        it('creates transaction and calls create method on repository', () => {
             createStub.resolves(1)
             const testObject = new FactorTypeService()
-            testObject.createFactorType({'type': 'Independent Variable'}).then((result) => {
+
+            return testObject.createFactorType(testPayload, 'pnwatt').then((result) => {
                 result.should.equal(1)
-                done()
+                sinon.assert.calledWithExactly(
+                    createStub,
+                    sinon.match.same(tx),
+                    sinon.match.same(testPayload),
+                    'pnwatt')
             })
         })
 
-        it('fails', (done) => {
-            createStub.rejects({
-                'status': 500,
-                'code': 'Internal Server Error',
-                'errorMessage': 'Please Contact Support'})
-
+        it('fails', () => {
+            createStub.rejects(testError)
             const testObject = new FactorTypeService()
 
-            testObject.createFactorType({
-                'type': 'Independent Variable'
-            }).should.be.rejected.and.notify(done)
+            return testObject.createFactorType(testPayload).should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(
+                    createStub,
+                    sinon.match.same(tx),
+                    sinon.match.same(testPayload),
+                    'pnwatt')
+                err.should.equal(testError)
+            })
         })
     })
 
     describe('getAllFactorTypes', () => {
-        it('retrieves all', (done) => {
-            getStub.resolves([
-                {
-                    'id': 1,
-                    'type': 'Independent Variable'
-                },
-                {
-                    'id': 2,
-                    'type': 'Exogenous Variable'
-                }
-            ])
+        it('retrieves all', () => {
+            getStub.resolves(testResponse)
 
             const testObject = new FactorTypeService()
 
-            testObject.getAllFactorTypes().then((types) => {
-                types.length.should.equal(2)
-                types[0]['id'].should.equal(1)
-                types[0]['type'].should.equal("Independent Variable")
-                types[1]['id'].should.equal(2)
-                types[1]['type'].should.equal("Exogenous Variable")
-            }).then(done, done)
+            return testObject.getAllFactorTypes().then((types) => {
+                sinon.assert.calledOnce(getStub)
+                types.should.equal(testResponse)
+            })
         })
     })
 
     describe('getFactorTypeById', () => {
-        it('successfully gets factor type with id 1', (done) => {
-            findStub.resolves({'id': 1, 'type': 'Independent Variable'})
+        it('successfully gets factor type with id 1', () => {
+            findStub.resolves(testResponse)
 
             const testObject = new FactorTypeService()
-            testObject.getFactorTypeById(1).then((result) => {
-                result.id.should.equal(1)
-                result.type.should.equal('Independent Variable')
-            }).then(done, done)
+            return testObject.getFactorTypeById(1).then((result) => {
+                sinon.assert.calledWithExactly(findStub, 1)
+                result.should.equal(testResponse)
+            })
         })
 
-        it('fails', (done) => {
-            findStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+        it('fails', () => {
+            findStub.rejects(testError)
 
             const testObject = new FactorTypeService()
-            testObject.getFactorTypeById(1).should.be.rejected.and.notify(done)
+            return testObject.getFactorTypeById(1).should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(findStub, 1)
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to no data', () => {
+            findStub.resolves(null)
+
+            const testObject = new FactorTypeService()
+            return testObject.getFactorTypeById(1).should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(findStub, 1)
+                err.validationMessages.length.should.equal(1)
+                err.validationMessages[0].should.equal("Factor Type Not Found")
+            })
         })
     })
 
     describe('updateFactorType', () => {
-        it('successfully updates factor type with id 1', (done) => {
-            updateStub.resolves({'id': 1, 'type': 'Independent Variable'})
+        it('successfully updates factor type with id 1', () => {
+            updateStub.resolves(testResponse)
 
             const testObject = new FactorTypeService()
-            testObject.updateFactorType(1, {'type': 'Independent Variable'}).then((result) => {
-                result.type.should.equal('Independent Variable')
-                result.id.should.equal(1)
-            }).then(done, done)
+            return testObject.updateFactorType(1, testPayload, 'pnwatt').then((result) => {
+                sinon.assert.calledWithExactly(
+                    updateStub,
+                    sinon.match.same(tx),
+                    1,
+                    sinon.match.same(testPayload),
+                    'pnwatt')
+                result.should.equal(testResponse)
+            })
         })
 
-        it('fails', (done) => {
-            updateStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+        it('fails', () => {
+            updateStub.rejects(testError)
 
             const testObject = new FactorTypeService()
-            testObject.updateFactorType(1, {'type': 'Independent Variable'}).should.be.rejected.and.notify(done)
+            return testObject.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(updateStub, tx, 1, sinon.match.same(testPayload), 'pnwatt')
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to no data', () => {
+            updateStub.resolves(null)
+
+            const testObject = new FactorTypeService()
+            return testObject.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(updateStub, tx, 1, sinon.match.same(testPayload), 'pnwatt')
+                err.validationMessages.length.should.equal(1)
+                err.validationMessages[0].should.equal("Factor Type Not Found")
+            })
         })
     })
 
     describe('deleteFactorType', () => {
-        it('deletes an factor type and returns the deleted id', (done) => {
-            findStub.resolves({'id': 1, 'type': 'Independent Variable'})
+        it('deletes an factor type and returns the deleted id', () => {
             deleteStub.resolves(1)
 
             const testObject = new FactorTypeService()
-            testObject.deleteFactorType(1).then((value) =>{
+            return testObject.deleteFactorType(1).then((value) =>{
+                sinon.assert.calledWithExactly(deleteStub, tx, 1)
                 value.should.equal(1)
-            }).then(done, done)
+            })
         })
 
-        it('fails', (done) => {
-            deleteStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+        it('fails', () => {
+            deleteStub.rejects(testError)
 
             const testObject = new FactorTypeService()
-            testObject.deleteFactorType(1).should.be.rejected.and.notify(done)
+            return testObject.deleteFactorType(1).should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(deleteStub, tx, 1)
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to no data', () => {
+            deleteStub.resolves(null)
+
+            const testObject = new FactorTypeService()
+            return testObject.deleteFactorType(1).should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(deleteStub, tx, 1)
+                err.validationMessages.length.should.equal(1)
+                err.validationMessages[0].should.equal("Factor Type Not Found")
+            })
         })
     })
 })

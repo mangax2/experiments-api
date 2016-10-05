@@ -25,13 +25,25 @@ class FactorTypeService {
 
     updateFactorType(id, factorType, modified_user_id) {
         return db.factorType.repository().tx('updateFactorType', (tx) => {
-            return db.factorType.update(tx, id, factorType, modified_user_id)
+            return db.factorType.update(tx, id, factorType, modified_user_id).then((data) => {
+                if (!data) {
+                    throw { validationMessages: ['Factor Type Not Found']}
+                } else {
+                    return data
+                }
+            })
         })
     }
 
     deleteFactorType(id) {
         return db.factorType.repository().tx('deleteFactorType', (tx) => {
-            return db.factorType.delete(tx, id)
+            return db.factorType.delete(tx, id).then((data) => {
+                if (!data) {
+                    throw { validationMessages: ['Factor Type Not Found']}
+                } else {
+                    return data
+                }
+            })
         })
     }
 }

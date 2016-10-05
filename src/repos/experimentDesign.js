@@ -19,7 +19,7 @@ module.exports = (rep) => {
         },
 
         update: (t, id, experimentDesignObj, modified_user_id) => {
-            return t.one("UPDATE ref_experiment_design SET (name, modified_user_id, modified_date) = ($1, $2, CURRENT_TIMESTAMP) WHERE id=$3 RETURNING *", [experimentDesignObj.name, modified_user_id, id])
+            return t.oneOrNone("UPDATE ref_experiment_design SET (name, modified_user_id, modified_date) = ($1, $2, CURRENT_TIMESTAMP) WHERE id=$3 RETURNING *", [experimentDesignObj.name, modified_user_id, id])
         },
 
         "delete": (t, id) => {

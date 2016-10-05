@@ -11,16 +11,25 @@ let updateStub = undefined
 let transactionStub = undefined
 let deleteStub = undefined
 
+before(() => {
+    transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
+        return {tx: function(transactionName, callback){return callback()}}
+    })
+})
+
 afterEach(() => {
     if(getStub){ getStub.restore()}
     if(createStub) { createStub.restore()}
     if(findStub){ findStub.restore()}
     if(updateStub){ updateStub.restore()}
-    if(transactionStub){ transactionStub.restore()}
     if(deleteStub){ deleteStub.restore()}
 })
 
-describe('the ExperimentDesignService', () => {
+after(() => {
+    transactionStub.restore()
+})
+
+describe.only('the ExperimentDesignService', () => {
     it('getAllExperimentDesign', (done) => {
         getStub = sinon.stub(db.experimentDesign, 'all')
         getStub.resolves([{'id': 1, 'name': 'Split Plot'}, {'id': 2, 'name': 'Strip Plot'}])
@@ -44,9 +53,6 @@ describe('the ExperimentDesignService', () => {
     it('createExperimentDesign', (done) => {
         createStub = sinon.stub(db.experimentDesign, 'create')
         createStub.resolves(1)
-        transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
-            return {tx: function(transactionName, callback){return callback()}}
-        })
 
         const testObject = new ExperimentDesignService()
         testObject.createExperimentDesign({'name': 'Split Split Plot'}).then((result) => {
@@ -96,11 +102,6 @@ describe('the ExperimentDesignService', () => {
     it('updateExperimentDesign', (done) => {
         updateStub = sinon.stub(db.experimentDesign, 'update')
         updateStub.resolves({'id': 1, 'name': 'Group Block'})
-        findStub = sinon.stub(db.experimentDesign, 'find')
-        findStub.resolves({'id': 1, 'name': 'Split Plot'})
-        transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
-            return {tx: function(transactionName, callback){return callback()}}
-        })
 
         const testObject = new ExperimentDesignService()
         testObject.updateExperimentDesign(1, {'name': 'Group Block'}).then((design) => {
@@ -110,9 +111,6 @@ describe('the ExperimentDesignService', () => {
     })
 
     it('updateExperimentDesign fails', (done) => {
-        findStub = sinon.stub(db.experimentDesign, 'find')
-        findStub.resolves({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
-
         updateStub = sinon.stub(db.experimentDesign, 'update')
         updateStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
 
@@ -120,7 +118,7 @@ describe('the ExperimentDesignService', () => {
         expect(testObject.updateExperimentDesign(1, {'name': 'Group Block'})).to.be.rejected.and.notify(done)
     })
 
-    it('updateExperimentDesign fails due to no experiment', (done) => {
+    it('updateExperimentDesign fails with no data', (done) => {
         findStub = sinon.stub(db.experimentDesign, 'find')
         findStub.resolves(null)
 
@@ -137,9 +135,6 @@ describe('the ExperimentDesignService', () => {
         findStub.resolves({'id': 1, 'name': 'Split Plot'})
         deleteStub = sinon.stub(db.experimentDesign, 'delete')
         deleteStub.resolves(1)
-        transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
-            return {tx: function(transactionName, callback){return callback()}}
-        })
 
         const testObject = new ExperimentDesignService()
         testObject.deleteExperimentDesign(1).then((value) =>{
@@ -148,21 +143,16 @@ describe('the ExperimentDesignService', () => {
     })
 
     it('deleteExperimentDesign fails', (done) => {
-        findStub = sinon.stub(db.experimentDesign, 'find')
-        findStub.resolves({'id': 1, 'name': 'Split Plot'})
         deleteStub = sinon.stub(db.experimentDesign, 'delete')
         deleteStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
-        transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
-            return {tx: function(transactionName, callback){return callback()}}
-        })
 
         const testObject = new ExperimentDesignService()
         expect(testObject.deleteExperimentDesign(1)).to.be.rejected.and.notify(done)
     })
 
     it('deleteExperimentDesign fails', (done) => {
-        findStub = sinon.stub(db.experimentDesign, 'find')
-        findStub.resolves(null)
+        deleteStub = sinon.stub(db.experimentDesign, 'delete')
+        deleteStub.resolves(null)
 
         const testObject = new ExperimentDesignService()
         expect(testObject.deleteExperimentDesign(1)).to.be.rejected

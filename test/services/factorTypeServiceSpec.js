@@ -3,30 +3,22 @@ const chai = require('chai')
 const FactorTypeService = require('../../src/services/factorTypeService')
 const db = require('../../src/db/DbManager')
 
-let getStub = undefined
-let createStub = undefined
-let findStub = undefined
-let updateStub = undefined
-let transactionStub = undefined
-let deleteStub = undefined
-
-before(() => {
-    createStub = sinon.stub(db.factorType, 'create')
-    getStub = sinon.stub(db.factorType, 'all')
-
-    transactionStub = sinon.stub(db.factorType, 'repository', () => {
-        return {tx: function(transactionName, callback){return callback()}}
-    })
+const getStub = sinon.stub(db.factorType, 'all')
+const createStub = sinon.stub(db.factorType, 'create')
+const findStub = sinon.stub(db.factorType, 'find')
+const updateStub = sinon.stub(db.factorType, 'update')
+const deleteStub = sinon.stub(db.factorType, 'delete')
+const transactionStub = sinon.stub(db.factorType, 'repository', () => {
+    return {tx: function(transactionName, callback){return callback()}}
 })
 
 after(() => {
-    if(getStub) { getStub.restore()}
-    if(createStub) { createStub.restore()}
-    if(findStub) { findStub.restore()}
-    if(updateStub) { updateStub.restore()}
-    if(deleteStub) { deleteStub.restore()}
-
-    if(transactionStub) {transactionStub.restore()}
+    getStub.restore()
+    createStub.restore()
+    findStub.restore()
+    updateStub.restore()
+    deleteStub.restore()
+    transactionStub.restore()
 })
 
 describe.only('FactorTypeService', () => {
@@ -34,7 +26,7 @@ describe.only('FactorTypeService', () => {
         it('creates transaction and calls create method on repository', (done) => {
             createStub.resolves(1)
             const testObject = new FactorTypeService()
-            testObject.createFactorType({'name': 'Independent Variable'}).then((result) => {
+            testObject.createFactorType({'type': 'Independent Variable'}).then((result) => {
                 result.should.equal(1)
                 done()
             })
@@ -49,7 +41,7 @@ describe.only('FactorTypeService', () => {
             const testObject = new FactorTypeService()
 
             testObject.createFactorType({
-                'name': 'Independent Variable'
+                'type': 'Independent Variable'
             }).should.be.rejected.and.notify(done)
         })
     })
@@ -59,11 +51,11 @@ describe.only('FactorTypeService', () => {
             getStub.resolves([
                 {
                     'id': 1,
-                    'name': 'Independent Variable'
+                    'type': 'Independent Variable'
                 },
                 {
                     'id': 2,
-                    'name': 'Exogenous Variable'
+                    'type': 'Exogenous Variable'
                 }
             ])
 
@@ -72,15 +64,30 @@ describe.only('FactorTypeService', () => {
             testObject.getAllFactorTypes().then((types) => {
                 types.length.should.equal(2)
                 types[0]['id'].should.equal(1)
-                types[0]['name'].should.equal("Independent Variable")
+                types[0]['type'].should.equal("Independent Variable")
                 types[1]['id'].should.equal(2)
-                types[1]['name'].should.equal("Exogenous Variable")
+                types[1]['type'].should.equal("Exogenous Variable")
             }).then(done, done)
         })
     })
 
     describe('getFactorTypeById', () => {
+        it('successfully gets factor type with id 1', (done) => {
+            findStub.resolves({'id': 1, 'type': 'Independent Variable'})
 
+            const testObject = new FactorTypeService()
+            testObject.getFactorTypeById(1).then((result) => {
+                result.id.should.equal(1)
+                result.type.should.equal('Independent Variable')
+            }).then(done, done)
+        })
+
+        it('fails', (done) => {
+            findStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+
+            const testObject = new FactorTypeService()
+            testObject.getFactorTypeById(1).should.be.rejected.and.notify(done)
+        })
     })
 
     describe('updateFactorType', () => {

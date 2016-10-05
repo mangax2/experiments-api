@@ -7,12 +7,14 @@ const db = require('../../src/db/DbManager')
 const getStub =sinon.stub(db.experiments,'all')
 const findStub =sinon.stub(db.experiments,'find')
 const updateStub = sinon.stub(db.experiments, 'update')
+const createStub = sinon.stub(db.experiments, 'create')
 const removeStub = sinon.stub(db.experiments, 'remove')
 
 after(() => {
     getStub.restore()
     findStub.restore()
     updateStub.restore()
+    createStub.restore()
     removeStub.restore()
 })
 
@@ -106,6 +108,43 @@ describe('ExperimentsService', () => {
 
         })
 
+    })
+
+
+    describe('create Experiments', () => {
+        const experimentsObj=[{
+            "name": "exp1002",
+            "subjectType": "plant",
+            "reps": 20,
+            "refExperimentDesignId": 2,
+            "createdDate": "2016-10-05T15:19:12.026Z",
+            "createdUserId": "akuma11",
+            "modifiedUserId": "akuma11",
+            "modifiedDate": "2016-10-05T15:19:12.026Z",
+            "status": "ACTIVE"
+        }]
+
+        const expectedResult= [
+            {
+                "status":201,
+                 "message":'Resource created',
+                "id":1
+            }
+        ]
+        it('succeeds and returns newly created experiment ids', (done) => {
+            createStub.resolves({id:1})
+            const testObject = new ExperimentsService()
+            testObject.createExperiment(experimentsObj).then((result) => {
+                result.should.eql(expectedResult)
+            }).then(done, done)
+        })
+
+        it('fails', (done) => {
+            createStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+
+            const testObject = new ExperimentsService()
+            testObject.createExperiment(experimentsObj).should.be.rejected.and.notify(done)
+        })
     })
 
 

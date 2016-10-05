@@ -1,7 +1,6 @@
 'use strict'
 
 const db = require('../db/DbManager')
-const AppUtil = require('./utility/AppUtil')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
 
@@ -43,12 +42,14 @@ class ExperimentsService{
             })
     }
 
-    deleteExperiment(id){
-        return new Promise((resolve, reject) => {
-            return db.experiments.repository().tx('tx1', (t) => {
-                db.experiments.delete(t, id)
-                return resolve(id)
-            })
+    deleteExperiment(id) {
+        return db.experiments.remove(id).then((data) => {
+            if (!data) {
+                throw {validationMessages: ['Experiment Not Found for requested experimentId']}
+            }
+            else {
+                return data
+            }
         })
     }
 }

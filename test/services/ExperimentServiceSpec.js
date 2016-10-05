@@ -7,11 +7,13 @@ const db = require('../../src/db/DbManager')
 const getStub =sinon.stub(db.experiments,'all')
 const findStub =sinon.stub(db.experiments,'find')
 const updateStub = sinon.stub(db.experiments, 'update')
+const removeStub = sinon.stub(db.experiments, 'remove')
 
 after(() => {
     getStub.restore()
     findStub.restore()
     updateStub.restore()
+    removeStub.restore()
 })
 
 
@@ -104,7 +106,6 @@ describe('ExperimentsService', () => {
 
         })
 
-
     })
 
 
@@ -158,6 +159,37 @@ describe('ExperimentsService', () => {
             testObject.updateExperiment(30).catch((err) => {
                 err.validationMessages.length.should.equal(1)
                 err.validationMessages[0].should.equal("Experiment Not Found to Update")
+            }).then(done, done)
+
+        })
+
+
+    })
+
+    describe('Delete Experiment:', () => {
+
+        it('Success and Return experimentId', (done)=> {
+            const id=30
+            removeStub.resolves(id)
+            const testObject = new ExperimentsService()
+            testObject.deleteExperiment(30).then((id)=> {
+                id.should.equal(30)
+            }).then(done,done)
+        })
+
+        it('fails', (done) => {
+            removeStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+            const testObject = new ExperimentsService()
+            testObject.deleteExperiment(30).should.be.rejected.and.notify(done)
+        })
+
+        it('fails When it returns no result',(done)=>{
+            removeStub.resolves(null)
+            const testObject = new ExperimentsService()
+            testObject.deleteExperiment(30).should.be.rejected
+            testObject.deleteExperiment(30).catch((err) => {
+                err.validationMessages.length.should.equal(1)
+                err.validationMessages[0].should.equal("Experiment Not Found for requested experimentId")
             }).then(done, done)
 
         })

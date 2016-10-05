@@ -27,8 +27,8 @@ module.exports = (rep) => {
             })
         },
 
-        "delete": (t, id) => {
-            return t.one("delete from experiment where id=" + id + " RETURNING id")
+        remove: (id) => {
+            return rep.oneOrNone("delete from experiment where id=" + id + " RETURNING id")
         }
     }
 }

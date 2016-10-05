@@ -1,5 +1,3 @@
-'use strict'
-
 const db = require('../db/DbManager')
 
 class ExperimentsService{
@@ -9,7 +7,7 @@ class ExperimentsService{
         })
     }
 
-    getAllExperimentDesigns() {
+    getAllExperimentDesigns(){
         return db.experimentDesign.all()
     }
 

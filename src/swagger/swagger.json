@@ -114,8 +114,20 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -169,6 +181,12 @@
                             "$ref": "#/definitions/Error"
                         }
                     },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -206,6 +224,12 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

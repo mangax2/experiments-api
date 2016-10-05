@@ -1,9 +1,9 @@
-const express = require('express')
-const log4js = require('log4js')
-const swaggerDoc = require('../swagger/swagger.json')
-const ExperimentsService = require('../services/ExperimentsService')
-const ExperimentModelService = require('../services/ExperimentModelService')
-const ExperimentDesignService = require('../services/ExperimentDesignService')
+import express from 'express'
+import log4js from 'log4js'
+import swaggerDoc from '../swagger/swagger.json'
+import ExperimentsService from '../services/ExperimentsService'
+import ExperimentModelService from '../services/ExperimentModelService'
+import ExperimentDesignService from '../services/ExperimentDesignService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()

@@ -21,7 +21,7 @@ afterEach(() => {
 })
 
 describe('the ExperimentDesignService', () => {
-    it('getAllExperimentDesign happy path', (done) => {
+    it('getAllExperimentDesign', (done) => {
         getStub = sinon.stub(db.experimentDesign, 'all')
         getStub.resolves([{'id': 1, 'name': 'Split Plot'}, {'id': 2, 'name': 'Strip Plot'}])
 

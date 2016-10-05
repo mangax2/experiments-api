@@ -112,6 +112,7 @@ describe('ExperimentsService', () => {
 
 
     describe('create Experiments', () => {
+
         const experimentsObj=[{
             "name": "exp1002",
             "subjectType": "plant",
@@ -127,11 +128,42 @@ describe('ExperimentsService', () => {
         const expectedResult= [
             {
                 "status":201,
-                 "message":'Resource created',
+                "message":'Resource created',
                 "id":1
             }
         ]
-        it('succeeds and returns newly created experiment ids', (done) => {
+
+        it('succeeds and returns newly created experiment id with status and message for one experiment create request', (done) => {
+
+            createStub.resolves({id:1})
+            const testObject = new ExperimentsService()
+            testObject.createExperiment(experimentsObj).then((result) => {
+                result.should.eql(expectedResult)
+            }).then(done, done)
+        })
+
+        it('succeeds and returns list of experiment ids with status and message for batch experiment create request', (done) => {
+            experimentsObj.push(
+                {
+                    "name": "exp1003",
+                    "subjectType": "plant",
+                    "reps": 20,
+                    "refExperimentDesignId": 2,
+                    "createdDate": "2016-10-05T15:19:12.026Z",
+                    "createdUserId": "akuma11",
+                    "modifiedUserId": "akuma11",
+                    "modifiedDate": "2016-10-05T15:19:12.026Z",
+                    "status": "ACTIVE"
+                }
+            )
+            expectedResult.push(
+                    {
+                        "status":201,
+                        "message":'Resource created',
+                        "id":1
+                    }
+            )
+
             createStub.resolves({id:1})
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).then((result) => {

@@ -2,20 +2,26 @@
 
 const db = require('../db/DbManager')
 const AppUtil = require('./utility/AppUtil')
+const ExperimentsValidator = require('../validations/ExperimentsValidator')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService{
 
-    createExperiment(experiment){
+    createExperiment(experiments){
 
-        return db.experiments.repository().tx('tx1', (t) => {
-           return Promise.all(experiment.map(ex =>
-                 db.experiments.create(t,ex)
-            )).then(data => {
-                return  AppUtil.createPostResponse(data)
+      return  new ExperimentsValidator().validate(experiments).then(() => {
+            return db.experiments.repository().tx('tx1', (t) => {
+                return Promise.all(experiments.map(ex =>
+                    db.experiments.create(t,ex)
+                )).then(data => {
+                    return  AppUtil.createPostResponse(data)
+                })
             })
+
         })
+
+
     }
 
     getAllExperiments() {

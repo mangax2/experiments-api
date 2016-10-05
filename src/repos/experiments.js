@@ -16,9 +16,8 @@ module.exports = (rep) => {
         },
 
         create: (t, experimentObj) => {
-            console.log (experimentObj)
             return t.one("insert into experiment(name, subject_type, reps, ref_experiment_design_id, created_date," +
-                " created_user_id, modified_date, modified_user_id, status) values('" + experimentObj.name + "' , '" + experimentObj.subjectType + "' , '" + Number(experimentObj.reps) + "' , '" + experimentObj.ref_experiment_design_id + "' , CURRENT_TIMESTAMP , '"+ experimentObj.userId + "' , CURRENT_TIMESTAMP , '"+ experimentObj.userId + "' , '" + experimentObj.status + "' ) RETURNING id", (id) => { return id })
+                " created_user_id, modified_date, modified_user_id, status) values($1 , $2 , $3, $4, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6,  $7)  RETURNING id",[experimentObj.name, experimentObj.subjectType ,Number(experimentObj.reps), experimentObj.ref_experiment_design_id,experimentObj.userId,experimentObj.userId, experimentObj.status], (id) => { return id })
         },
 
         update: (t, id, experimentObj) => {

@@ -1,18 +1,22 @@
 'use strict'
 
 const db = require('../db/DbManager')
+const AppUtil = require('./utility/AppUtil')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService{
+
     createExperiment(experiment){
-        return new Promise((resolve, reject) => {
-            return db.experiments.repository().tx('tx1', (t) => {
-                return resolve(db.experiments.create(t,experiment))
+
+        return db.experiments.repository().tx('tx1', (t) => {
+           return Promise.all(experiment.map(ex =>
+                 db.experiments.create(t,ex)
+            )).then(data => {
+                return  AppUtil.createPostResponse(data)
             })
         })
     }
-
 
     getAllExperiments() {
         return new Promise((resolve, reject) => {

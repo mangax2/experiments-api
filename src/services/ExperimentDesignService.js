@@ -1,5 +1,3 @@
-'use strict'
-
 const db = require('../db/DbManager')
 
 class ExperimentsService{
@@ -9,7 +7,7 @@ class ExperimentsService{
         })
     }
 
-    getAllExperimentDesigns() {
+    getAllExperimentDesigns(){
         return db.experimentDesign.all()
     }
 
@@ -25,17 +23,25 @@ class ExperimentsService{
     }
 
     updateExperimentDesign(id, experimentDesign){
-        return this.getExperimentDesignById(id).then(() => {
-            return db.experimentDesign.repository().tx('tx1', (t) => {
-                return db.experimentDesign.update(t, id, experimentDesign, 'kmccl')
+        return db.experimentDesign.repository().tx('tx1', (t) => {
+            return db.experimentDesign.update(t, id, experimentDesign, 'kmccl').then((data) => {
+                if(!data){
+                    throw {validationMessages: ['Experiment Design Not Found']}
+                }else{
+                    return data
+                }
             })
         })
     }
 
     deleteExperimentDesign(id){
-        return this.getExperimentDesignById(id).then(() => {
-            return db.experimentDesign.repository().tx('tx1', (t) => {
-                return db.experimentDesign.delete(t, id)
+        return db.experimentDesign.repository().tx('tx1', (t) => {
+            return db.experimentDesign.delete(t, id).then((data) => {
+                if(!data){
+                    throw {validationMessages: ['Experiment Design Not Found']}
+                }else{
+                    return data
+                }
             })
         })
     }

@@ -27,22 +27,23 @@ router.get('/api-docs', (req, res) => {
     return res.json(swaggerDoc)
 })
 
-router.get('/experiments', (req, res) => {
-    return new ExperimentsService().getAllExperiments().then((r) => {
-        return res.json(r)
-    }).catch((err) => {
+router.get('/experiments',(req,res) => {
+    new ExperimentsService().getAllExperiments().then((experiments)=> {
+            return res.json(experiments)
+        }
+    ).catch((err) => {
         return handleCatch(res, err)
     })
 })
 
-router.get('/experiments/:id', (req, res) => {
-    const id = req.params.id
-    return new ExperimentsService().getExperimentById(id).then((experiment) => {
+router.get('/experiments/:id', (req,res) => {
+    new ExperimentsService().getExperimentById(req.params.id).then((experiment)=> {
         return res.json(experiment)
     }).catch((err) => {
         return handleCatch(res, err)
     })
 })
+
 
 router.post('/experiments', (req, res) => {
     const experiment = req.body

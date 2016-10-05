@@ -55,7 +55,8 @@
     "sql-generate": "~1.4.0",
     "superagent": "~2.2.0",
     "superagent-as-promised": "~4.0.0",
-    "supertest": "~2.0.0"
+    "supertest": "~2.0.0",
+    "validate.js": "^0.10.0"
   },
   "engines": {
     "node": "~4.4.4",

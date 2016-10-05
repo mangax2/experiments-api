@@ -1,11 +1,8 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const expect = chai.expect
-const chaiAsPromised = require('chai-as-promised')
 const ExperimentDesignService = require('../../src/services/ExperimentDesignService')
 const db = require('../../src/db/DbManager')
-const log4js = require('log4js')
-const logger = log4js.getLogger('ExperimentsService')
 
 let stub = undefined
 

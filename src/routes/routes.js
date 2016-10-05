@@ -4,6 +4,7 @@ const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
 const ExperimentDesignService = require('../services/ExperimentDesignService')
+const FactorTypeService = require('../services/FactorTypeService')
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -134,6 +135,51 @@ router.delete('/experimentModel/:id', (req, res) => {
 
     return new ExperimentModelService().deleteExperimentModel(id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/factor-types', (req, res) => {
+    return new FactorTypeService().getAllFactorTypes().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    return new FactorTypeService().getFactorTypeById(id).then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.post('/factor-types', (req, res) => {
+    const factorType = req.body
+    return new FactorTypeService().createFactorType(factorType, 'pnwatt').then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.put('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    const factorType = req.body
+    return new FactorTypeService().updateFactorType(id, factorType, 'pnwatt').then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.delete('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    return new FactorTypeService().deleteFactorType(id).then((r) => {
+        return res.json(r)
     }).catch((err) => {
         return handleCatch(res, err)
     })

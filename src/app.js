@@ -5,16 +5,14 @@ if(config.node_env !== 'production'){
 }
 const express = require('express')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
-// const path = require('path')
+const inflector = require('json-inflector')
 const bodyParser = require('body-parser')
 const log4js = require('log4js')
-
 const logger = log4js.getLogger('app')
 // const localDevelopment = config.node_env !== 'production'
 const appBaseUrl = '/experiments-api'
-
 const app = express()
-
+app.use(inflector())
 const pingFunc = (function() {
     var createPingPage, i, len, pingPage, ref, results
     createPingPage = require('@monsantoit/ping-page')

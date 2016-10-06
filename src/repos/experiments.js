@@ -8,23 +8,27 @@ module.exports = (rep) => {
         },
 
         find: (id) => {
-            return rep.oneOrNone("SELECT * FROM experiments WHERE id = $1", id)
+            return rep.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
         },
 
         all: () => {
-            return rep.any("SELECT * FROM experiments")
+            return rep.any("SELECT * FROM experiment")
         },
 
         create: (t, experimentObj) => {
-            return t.one("insert into experiments( name,status)  values('" + experimentObj.name + "' , '" + experimentObj.status + "' ) RETURNING id", (id) => { return id })
+            return t.one("insert into experiment(name, subject_type, reps, ref_experiment_design_id, created_date," +
+                " created_user_id, status) values($(name) , $(subjectType) , $(reps), $(refExperimentDesignId), CURRENT_TIMESTAMP, $(userId),  $(status))  RETURNING id",experimentObj, (id) => { return id })
         },
 
-        update: (t, id, experimentObj) => {
-            return t.one("UPDATE experiments SET name='" + experimentObj.name + "', status='" + experimentObj.status + "' WHERE id=" + id + " RETURNING *", (exp) => { return exp})
+        update: (id, experimentObj) => {
+            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, reps, ref_experiment_design_id, created_date," +
+                " created_user_id, modified_date, modified_user_id, status) = ($(name),$(subjectType),$(reps),$(refExperimentDesignId),CURRENT_TIMESTAMP,$(createdUserId),CURRENT_TIMESTAMP,$(modifiedUserId),$(status)) WHERE id="+id+" RETURNING *",experimentObj,(exp) =>{
+                    return exp
+            })
         },
 
-        "delete": (t, id) => {
-            return t.one("delete from experiments where id=" + id + " RETURNING id")
+        remove: (id) => {
+            return rep.oneOrNone("delete from experiment where id=" + id + " RETURNING id")
         }
     }
 }

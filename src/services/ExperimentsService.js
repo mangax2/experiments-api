@@ -7,10 +7,8 @@ const ExperimentsValidator = require('../validations/ExperimentsValidator')
 // const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService{
-
     createExperiment(experiments){
-
-      return  new ExperimentsValidator().validate(experiments).then(() => {
+        return  new ExperimentsValidator().validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
                 return Promise.all(experiments.map(ex =>
                     db.experiments.create(t,ex)
@@ -18,10 +16,7 @@ class ExperimentsService{
                     return  AppUtil.createPostResponse(data)
                 })
             })
-
         })
-
-
     }
 
     getAllExperiments() {
@@ -29,7 +24,7 @@ class ExperimentsService{
     }
 
     getExperimentById(id){
-       return db.experiments.find(id).then((data) => {
+        return db.experiments.find(id).then((data) => {
             if(!data){
                 throw {validationMessages: ['Experiment Not Found for requested experimentId']}
             }
@@ -40,13 +35,13 @@ class ExperimentsService{
     }
 
     updateExperiment(id, experiment){
-            return db.experiments.update(id, experiment).then((data) => {
-                if(!data){
-                    throw {validationMessages: ['Experiment Not Found to Update']}
-                }else{
-                    return data
-                }
-            })
+        return db.experiments.update(id, experiment).then((data) => {
+            if(!data){
+                throw {validationMessages: ['Experiment Not Found to Update']}
+            }else{
+                return data
+            }
+        })
     }
 
     deleteExperiment(id) {

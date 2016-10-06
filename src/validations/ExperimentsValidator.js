@@ -13,22 +13,16 @@ class ExperimentsValidator extends BaseValidator {
             'reps': {'paramName': 'reps', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 100}, 'required': true},
             'refExperimentDesignId':{'paramName': 'refExperimentDesignId', 'type': 'refData', 'required': true},
             'status':{'paramName': 'status', 'type': 'constant', 'data':['DRAFT','ACTIVE'], 'required': true}
-
         }
     }
 
     validate(experiments){
-
-      return  Promise.all(
+        return Promise.all(
             experiments.map(experiment=> this.validateExperiment(experiment))
-
         )
-
-
     }
 
     validateExperiment(experiment){
-
         return new Promise((resolve, reject) => {
             // this.maxLength(experiment.name, experimentConstraints.name.length, experimentConstraints.name.paramName)
             this.schemaCheck(experiment.name, this.experimentSchema.name)
@@ -37,14 +31,10 @@ class ExperimentsValidator extends BaseValidator {
             this.schemaCheck(experiment.refExperimentDesignId, this.experimentSchema.refExperimentDesignId)
             this.schemaCheck(experiment.status, this.experimentSchema.status)
 
-
             this.check()
             resolve()
-            }
-        )
-
+        })
     }
-
 }
 
 module.exports = ExperimentsValidator

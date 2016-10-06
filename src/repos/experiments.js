@@ -17,14 +17,12 @@ module.exports = (rep) => {
 
         create: (t, experimentObj) => {
             return t.one("insert into experiment(name, subject_type, reps, ref_experiment_design_id, created_date," +
-                " created_user_id, status) values($(name) , $(subjectType) , $(reps), $(refExperimentDesignId), CURRENT_TIMESTAMP, $(userId),  $(status))  RETURNING id",experimentObj, (id) => { return id })
+                " created_user_id, status) values($(name) , $(subjectType) , $(reps), $(refExperimentDesignId), CURRENT_TIMESTAMP, $(userId),  $(status))  RETURNING id",experimentObj)
         },
 
         update: (id, experimentObj) => {
             return rep.oneOrNone("UPDATE experiment SET (name, subject_type, reps, ref_experiment_design_id, created_date," +
-                " created_user_id, modified_date, modified_user_id, status) = ($(name),$(subjectType),$(reps),$(refExperimentDesignId),CURRENT_TIMESTAMP,$(createdUserId),CURRENT_TIMESTAMP,$(modifiedUserId),$(status)) WHERE id="+id+" RETURNING *",experimentObj,(exp) =>{
-                    return exp
-            })
+                " created_user_id, modified_date, modified_user_id, status) = ($(name),$(subjectType),$(reps),$(refExperimentDesignId),CURRENT_TIMESTAMP,$(createdUserId),CURRENT_TIMESTAMP,$(modifiedUserId),$(status)) WHERE id="+id+" RETURNING *",experimentObj)
         },
 
         remove: (id) => {

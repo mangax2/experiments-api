@@ -12,7 +12,6 @@ const logger = log4js.getLogger('DbManager')
 const options = {
     promiseLib: promise,
     extend: (obj) => {
-        console.log("inside promise options")
         obj.experiments = new (experiments)(obj, pgp)
         obj.experimentModel = new (experimentModel)(obj, pgp)
         obj.experimentDesign = new (experimentDesign)(obj, pgp)

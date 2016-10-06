@@ -1,11 +1,11 @@
 'use strict'
 
-const validator = require('validator');
+const validator = require('validator')
 
 class BaseValidator {
-      constructor(){
-          this.messages =[]
-      }
+    constructor(){
+        this.messages = []
+    }
 
     schemaCheck(value, schema){
         if(schema.required){
@@ -16,58 +16,42 @@ class BaseValidator {
             if(schema.type=='numeric'){
                 this.checkNumeric(value, schema.paramName)
                 this.checkNumericRange(value,schema.numericRange,schema.paramName)
-
             }else if(schema.type=='text'){
                 this.checkLength(value, schema.lengthRange, schema.paramName)
             } else if(schema.type=='constant'){
                 this.checkConstants(value, schema.data,  schema.paramName)
-
-
             }
-
         }
-
     }
 
     checkLength(value, lengthRange, name){
-
-           if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {
-               this.messages.push(name + " length is out of range(min=" + lengthRange.min + " max=" + lengthRange.max + ")")
-           }
-
-
+        if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {
+            this.messages.push(name + ' length is out of range(min=' + lengthRange.min + ' max=' + lengthRange.max + ')')
+        }
     }
 
     checkRequired(value, name){
         if(value==undefined || value==null || validator.isEmpty(value.toString())){
-            this.messages.push(name+ " is required")
-
+            this.messages.push(name+ ' is required')
         }
     }
 
     checkNumeric(value, name){
-
         if(!validator.isNumeric(value.toString())){
-            this.messages.push(name+ " must be numeric")
-
+            this.messages.push(name+ ' must be numeric')
         }
     }
 
     checkNumericRange(value, numericRange, name){
-
         if (value<numericRange.min || value >numericRange.max) {
-            this.messages.push(name + " value is out of numeric range(min=" + lengthRange.min + " max=" + lengthRange.max + ")")
+            this.messages.push(name + ' value is out of numeric range(min=' + numericRange.min + ' max=' + numericRange.max + ')')
         }
-
-
     }
 
-
     checkConstants(value, data, name){
-        console.log('inside checkConstants'+data.indexOf(value))
+        // console.log('inside checkConstants'+data.indexOf(value))
         if(data.indexOf(value)==-1){
-            this.messages.push(name+ " requires a valid value")
-
+            this.messages.push(name+ ' requires a valid value')
         }
     }
 
@@ -76,7 +60,6 @@ class BaseValidator {
             throw {validationMessages: this.messages}
         }
     }
-
 }
 
 module.exports = BaseValidator

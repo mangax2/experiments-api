@@ -1,5 +1,3 @@
-/*eslint quotes: ["warn", "double"]*/
-
 //removed pgp from function arguments
 module.exports = (rep) => {
     return {

@@ -17,7 +17,7 @@ module.exports = (rep) => {
 
         create: (t, experimentObj) => {
             return t.one("insert into experiment(name, subject_type, reps, ref_experiment_design_id, created_date," +
-                " created_user_id, modified_date, modified_user_id, status) values($1 , $2 , $3, $4, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6,  $7)  RETURNING id",[experimentObj.name, experimentObj.subjectType ,Number(experimentObj.reps), experimentObj.ref_experiment_design_id,experimentObj.userId,experimentObj.userId, experimentObj.status], (id) => { return id })
+                " created_user_id, status) values($(name) , $(subjectType) , $(reps), $(refExperimentDesignId), CURRENT_TIMESTAMP, $(userId),  $(status))  RETURNING id",experimentObj, (id) => { return id })
         },
 
         update: (id, experimentObj) => {

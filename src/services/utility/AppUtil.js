@@ -8,8 +8,8 @@
      static createResponseElements(id) {
             const responseObj = {
                 'status': 201,
-                'message' : "Resource created",
-                 "id": id
+                'message' : 'Resource created',
+                 'id': id
         }
         return responseObj
       }

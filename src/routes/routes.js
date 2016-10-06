@@ -3,6 +3,8 @@ const log4js = require('log4js')
 const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
+const ExperimentDesignService = require('../services/ExperimentDesignService')
+const FactorTypeService = require('../services/factorTypeService')
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -23,10 +25,54 @@ router.get('/ping', (req, res) => {
 })
 
 router.get('/api-docs', (req, res) => {
-
     return res.json(swaggerDoc)
 })
 
+router.get('/experiment-designs', (req, res) => {
+    return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.post('/experiment-designs', (req, res) => {
+    const design = req.body
+    return new ExperimentDesignService().createExperimentDesign(design, 'kmccl').then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().getExperimentDesignById(id).then((design) => {
+        return res.json(design)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.put('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().updateExperimentDesign(id, req.body, 'kmccl').then((design) => {
+        return res.json(design)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+router.delete('/experiment-designs/:id', (req, res) => {
+    const id = req.params.id
+    return new ExperimentDesignService().deleteExperimentDesign(id).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/experiments', (req, res) => {
+    return new ExperimentsService().getAllExperiments().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
 router.get('/experiments',(req,res) => {
     new ExperimentsService().getAllExperiments().then((experiments)=> {
             return res.json(experiments)
@@ -43,7 +89,6 @@ router.get('/experiments/:id', (req,res) => {
         return handleCatch(res, err)
     })
 })
-
 
 router.post('/experiments', (req, res) => {
     const experiment = req.body
@@ -118,6 +163,51 @@ router.delete('/experimentModel/:id', (req, res) => {
 
     return new ExperimentModelService().deleteExperimentModel(id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/factor-types', (req, res) => {
+    return new FactorTypeService().getAllFactorTypes().then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.get('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    return new FactorTypeService().getFactorTypeById(id).then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.post('/factor-types', (req, res) => {
+    const factorType = req.body
+    return new FactorTypeService().createFactorType(factorType, 'pnwatt').then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.put('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    const factorType = req.body
+    return new FactorTypeService().updateFactorType(id, factorType, 'pnwatt').then((r) => {
+        return res.json(r)
+    }).catch((err) => {
+        return handleCatch(res, err)
+    })
+})
+
+router.delete('/factor-types/:id', (req, res) => {
+    const id = req.params.id
+    return new FactorTypeService().deleteFactorType(id).then((r) => {
+        return res.json(r)
     }).catch((err) => {
         return handleCatch(res, err)
     })

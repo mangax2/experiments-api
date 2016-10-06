@@ -114,8 +114,20 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -169,6 +181,12 @@
                             "$ref": "#/definitions/Error"
                         }
                     },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -206,6 +224,12 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Experiment Design Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -528,7 +552,7 @@
                 }
             }
         },
-        "/factor-type/{id}": {
+        "/factor-types/{id}": {
             "get": {
                 "summary": "Get one factor type entity",
                 "description": "Returns a single factor type entity\n",
@@ -550,8 +574,20 @@
                             "$ref": "#/definitions/FactorType"
                         }
                     },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Factor Type Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -605,6 +641,12 @@
                             "$ref": "#/definitions/Error"
                         }
                     },
+                    "404": {
+                        "description": "Factor Type Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -642,6 +684,12 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Factor Type Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

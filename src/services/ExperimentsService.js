@@ -35,12 +35,14 @@ class ExperimentsService{
     }
 
     updateExperiment(id, experiment){
-        return db.experiments.update(id, experiment).then((data) => {
-            if(!data){
-                throw {validationMessages: ['Experiment Not Found to Update']}
-            }else{
-                return data
-            }
+        return  new ExperimentsValidator().validate([experiment]).then(() => {
+            return db.experiments.update(id, experiment).then((data) => {
+                if(!data){
+                    throw {validationMessages: ['Experiment Not Found to Update']}
+                }else{
+                    return data
+                }
+            })
         })
     }
 

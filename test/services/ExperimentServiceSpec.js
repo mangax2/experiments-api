@@ -186,7 +186,7 @@ describe('ExperimentsService', () => {
     describe('Update Experiment:', () => {
 
         it('Success and Return experiment', (done)=> {
-            const experimentObj={
+            const experimentResObj={
                 'id': 30,
                 'name': 'exp1002',
                 'subjectType': 'plant',
@@ -198,19 +198,29 @@ describe('ExperimentsService', () => {
                 'modifiedDate': '2016-10-05T15:19:12.026Z',
                 'status': 'ACTIVE'
             }
+            const experimentReqObj={
+                'name': 'exp1002',
+                'subjectType': 'plant',
+                'reps': 20,
+                'refExperimentDesignId': 2,
+                'createdDate': '2016-10-05T15:19:12.026Z',
+                'createdUserId': 'akuma11',
+                'modifiedUserId': 'akuma11',
+                'modifiedDate': '2016-10-05T15:19:12.026Z',
+                'status': 'ACTIVE'
+            }
             updateStub.resolves(
-                experimentObj
+                experimentResObj
             )
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30,experimentObj).then((experiment)=> {
+            testObject.updateExperiment(30,experimentReqObj).then((experiment)=> {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
             }).then(done,done)
         })
 
         it('fails', (done) => {
-            const experimentObj={
-                'id': 30,
+            const experimentReqObj={
                 'name': 'exp1002',
                 'subjectType': 'plant',
                 'reps': 20,
@@ -223,14 +233,25 @@ describe('ExperimentsService', () => {
             }
             updateStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30,experimentObj).should.be.rejected.and.notify(done)
+            testObject.updateExperiment(30,experimentReqObj).should.be.rejected.and.notify(done)
         })
 
         it('fails When it returns no result',(done)=>{
             updateStub.resolves(null)
+            const experimentReqObj={
+                'name': 'exp1002',
+                'subjectType': 'plant',
+                'reps': 20,
+                'refExperimentDesignId': 2,
+                'createdDate': '2016-10-05T15:19:12.026Z',
+                'createdUserId': 'akuma11',
+                'modifiedUserId': 'akuma11',
+                'modifiedDate': '2016-10-05T15:19:12.026Z',
+                'status': 'ACTIVE'
+            }
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30).should.be.rejected
-            testObject.updateExperiment(30).catch((err) => {
+            testObject.updateExperiment(30,experimentReqObj).should.be.rejected
+            testObject.updateExperiment(30,experimentReqObj).catch((err) => {
                 err.validationMessages.length.should.equal(1)
                 err.validationMessages[0].should.equal('Experiment Not Found to Update')
             }).then(done, done)

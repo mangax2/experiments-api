@@ -8,15 +8,23 @@ const FactorTypeService = require('../services/factorTypeService')
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
+const _ = require('lodash')
 
 const handleCatch = (res, err) => {
-    if(err.validationMessages){
-        return res.status(400).json(err)
+    if (err) {
+        if (_.isArray(err)) {
+            const errorArray = _.map(err, function (x) {
+                return (x.output.payload)
+            })
+            return res.status(400).json(errorArray)
+        } else {
+            return res.status(err.output.statusCode).json(err.output.payload)
+        }
     }
-    else{
-        logger.error(err)
-        return res.status(500).json({message: err})
+    else {
+        return res.status(500).json(err)
     }
+
 }
 
 router.get('/ping', (req, res) => {
@@ -69,16 +77,16 @@ router.delete('/experiment-designs/:id', (req, res) => {
     })
 })
 
-router.get('/experiments',(req,res) => {
+router.get('/experiments', (req, res) => {
     new ExperimentsService().getAllExperiments().then((experiments)=> {
-        return res.json(experiments)
-    }
+            return res.json(experiments)
+        }
     ).catch((err) => {
         return handleCatch(res, err)
     })
 })
 
-router.get('/experiments/:id', (req,res) => {
+router.get('/experiments/:id', (req, res) => {
     new ExperimentsService().getExperimentById(req.params.id).then((experiment)=> {
         return res.json(experiment)
     }).catch((err) => {

@@ -1,6 +1,8 @@
 'use strict'
 
 const validator = require('validator')
+const boom = require('boom')
+const _ = require('lodash')
 
 class BaseValidator {
     constructor(){
@@ -57,7 +59,7 @@ class BaseValidator {
 
     check(){
         if (this.messages.length > 0 ){
-            throw {validationMessages: this.messages}
+            throw  _.map(this.messages,function(x){return boom.badRequest(x)})
         }
     }
 }

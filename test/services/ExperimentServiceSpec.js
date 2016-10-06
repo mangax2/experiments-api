@@ -4,13 +4,17 @@ const ExperimentsService = require('../../src/services/ExperimentsService')
 const db = require('../../src/db/DbManager')
 
 const tx = {}
-const getStub =sinon.stub(db.experiments,'all')
-const findStub =sinon.stub(db.experiments,'find')
+const getStub = sinon.stub(db.experiments, 'all')
+const findStub = sinon.stub(db.experiments, 'find')
 const updateStub = sinon.stub(db.experiments, 'update')
 const createStub = sinon.stub(db.experiments, 'create')
 const removeStub = sinon.stub(db.experiments, 'remove')
 const transactionStub = sinon.stub(db.experiments, 'repository', () => {
-    return {tx: function(transactionName, callback){return callback(tx)}}
+    return {
+        tx: function (transactionName, callback) {
+            return callback(tx)
+        }
+    }
 })
 
 after(() => {
@@ -57,7 +61,7 @@ describe('ExperimentsService', () => {
             testObject.getAllExperiments().then((experiments)=> {
                 experiments.length.should.equal(2)
                 experiments[0].id.should.equal(30)
-            }).then(done,done)
+            }).then(done, done)
         })
 
         it('fails', (done) => {
@@ -86,12 +90,12 @@ describe('ExperimentsService', () => {
                     'modifiedDate': '2016-10-05T15:19:12.026Z',
                     'status': 'ACTIVE'
                 },
-              )
+            )
             const testObject = new ExperimentsService()
             testObject.getExperimentById(30).then((experiment)=> {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1001')
-            }).then(done,done)
+            }).then(done, done)
         })
 
         it('fails', (done) => {
@@ -100,13 +104,13 @@ describe('ExperimentsService', () => {
             testObject.getExperimentById(30).should.be.rejected.and.notify(done)
         })
 
-        it('fails When it returns no result',(done)=>{
+        it('fails When it returns no result', (done)=> {
             findStub.resolves(null)
             const testObject = new ExperimentsService()
             testObject.getExperimentById(30).should.be.rejected
             testObject.getExperimentById(30).catch((err) => {
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal('Experiment Not Found for requested experimentId')
+                err.output.statusCode.should.equal(404)
+                err.message.should.equal('Experiment Not Found for requested experimentId')
             }).then(done, done)
 
         })
@@ -116,7 +120,7 @@ describe('ExperimentsService', () => {
 
     describe('create Experiments', () => {
 
-        const experimentsObj=[{
+        const experimentsObj = [{
             'name': 'exp1002',
             'subjectType': 'plant',
             'reps': 20,
@@ -128,17 +132,17 @@ describe('ExperimentsService', () => {
             'status': 'ACTIVE'
         }]
 
-        const expectedResult= [
+        const expectedResult = [
             {
-                'status':201,
-                'message':'Resource created',
-                'id':1
+                'status': 201,
+                'message': 'Resource created',
+                'id': 1
             }
         ]
 
         it('succeeds and returns newly created experiment id with status and message for one experiment create request', (done) => {
 
-            createStub.resolves({id:1})
+            createStub.resolves({id: 1})
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)
@@ -160,14 +164,14 @@ describe('ExperimentsService', () => {
                 }
             )
             expectedResult.push(
-                    {
-                        'status':201,
-                        'message':'Resource created',
-                        'id':1
-                    }
+                {
+                    'status': 201,
+                    'message': 'Resource created',
+                    'id': 1
+                }
             )
 
-            createStub.resolves({id:1})
+            createStub.resolves({id: 1})
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)
@@ -175,7 +179,11 @@ describe('ExperimentsService', () => {
         })
 
         it('fails', (done) => {
-            createStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+            createStub.rejects({
+                'status': 500,
+                'code': 'Internal Server Error',
+                'errorMessage': 'Please Contact Support'
+            })
 
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).should.be.rejected.and.notify(done)
@@ -186,7 +194,7 @@ describe('ExperimentsService', () => {
     describe('Update Experiment:', () => {
 
         it('Success and Return experiment', (done)=> {
-            const experimentResObj={
+            const experimentResObj = {
                 'id': 30,
                 'name': 'exp1002',
                 'subjectType': 'plant',
@@ -198,7 +206,7 @@ describe('ExperimentsService', () => {
                 'modifiedDate': '2016-10-05T15:19:12.026Z',
                 'status': 'ACTIVE'
             }
-            const experimentReqObj={
+            const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
                 'reps': 20,
@@ -213,14 +221,14 @@ describe('ExperimentsService', () => {
                 experimentResObj
             )
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30,experimentReqObj).then((experiment)=> {
+            testObject.updateExperiment(30, experimentReqObj).then((experiment)=> {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
-            }).then(done,done)
+            }).then(done, done)
         })
 
         it('fails', (done) => {
-            const experimentReqObj={
+            const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
                 'reps': 20,
@@ -231,14 +239,18 @@ describe('ExperimentsService', () => {
                 'modifiedDate': '2016-10-05T15:19:12.026Z',
                 'status': 'ACTIVE'
             }
-            updateStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+            updateStub.rejects({
+                'status': 500,
+                'code': 'Internal Server Error',
+                'errorMessage': 'Please Contact Support'
+            })
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30,experimentReqObj).should.be.rejected.and.notify(done)
+            testObject.updateExperiment(30, experimentReqObj).should.be.rejected.and.notify(done)
         })
 
-        it('fails When it returns no result',(done)=>{
+        it('fails When it returns no result', (done)=> {
             updateStub.resolves(null)
-            const experimentReqObj={
+            const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
                 'reps': 20,
@@ -250,10 +262,10 @@ describe('ExperimentsService', () => {
                 'status': 'ACTIVE'
             }
             const testObject = new ExperimentsService()
-            testObject.updateExperiment(30,experimentReqObj).should.be.rejected
-            testObject.updateExperiment(30,experimentReqObj).catch((err) => {
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal('Experiment Not Found to Update')
+            testObject.updateExperiment(30, experimentReqObj).should.be.rejected
+            testObject.updateExperiment(30, experimentReqObj).catch((err) => {
+                err.output.statusCode.should.equal(404)
+                err.message.should.equal('Experiment Not Found to Update')
             }).then(done, done)
 
         })
@@ -264,27 +276,31 @@ describe('ExperimentsService', () => {
     describe('Delete Experiment:', () => {
 
         it('Success and Return experimentId', (done)=> {
-            const id=30
+            const id = 30
             removeStub.resolves(id)
             const testObject = new ExperimentsService()
             testObject.deleteExperiment(30).then((id)=> {
                 id.should.equal(30)
-            }).then(done,done)
+            }).then(done, done)
         })
 
         it('fails', (done) => {
-            removeStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+            removeStub.rejects({
+                'status': 500,
+                'code': 'Internal Server Error',
+                'errorMessage': 'Please Contact Support'
+            })
             const testObject = new ExperimentsService()
             testObject.deleteExperiment(30).should.be.rejected.and.notify(done)
         })
 
-        it('fails When it returns no result',(done)=>{
+        it('fails When it returns no result', (done)=> {
             removeStub.resolves(null)
             const testObject = new ExperimentsService()
             testObject.deleteExperiment(30).should.be.rejected
             testObject.deleteExperiment(30).catch((err) => {
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal('Experiment Not Found for requested experimentId')
+                err.output.statusCode.should.equal(404)
+                err.message.should.equal('Experiment Not Found for requested experimentId')
             }).then(done, done)
 
         })

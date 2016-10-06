@@ -1,19 +1,19 @@
 'use strict'
-
+const boom = require('boom')
 const db = require('../db/DbManager')
 const AppUtil = require('./utility/AppUtil')
 const ExperimentsValidator = require('../validations/ExperimentsValidator')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
 
-class ExperimentsService{
-    createExperiment(experiments){
-        return  new ExperimentsValidator().validate(experiments).then(() => {
+class ExperimentsService {
+    createExperiment(experiments) {
+        return new ExperimentsValidator().validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
                 return Promise.all(experiments.map(ex =>
-                    db.experiments.create(t,ex)
+                    db.experiments.create(t, ex)
                 )).then(data => {
-                    return  AppUtil.createPostResponse(data)
+                    return AppUtil.createPostResponse(data)
                 })
             })
         })
@@ -23,23 +23,23 @@ class ExperimentsService{
         return db.experiments.all()
     }
 
-    getExperimentById(id){
+    getExperimentById(id) {
         return db.experiments.find(id).then((data) => {
-            if(!data){
-                throw {validationMessages: ['Experiment Not Found for requested experimentId']}
+            if (!data) {
+                throw   boom.notFound('Experiment Not Found for requested experimentId')
             }
-            else{
+            else {
                 return data
             }
         })
     }
 
-    updateExperiment(id, experiment){
-        return  new ExperimentsValidator().validate([experiment]).then(() => {
+    updateExperiment(id, experiment) {
+        return new ExperimentsValidator().validate([experiment]).then(() => {
             return db.experiments.update(id, experiment).then((data) => {
-                if(!data){
-                    throw {validationMessages: ['Experiment Not Found to Update']}
-                }else{
+                if (!data) {
+                    throw   boom.notFound('Experiment Not Found to Update')
+                } else {
                     return data
                 }
             })
@@ -49,7 +49,7 @@ class ExperimentsService{
     deleteExperiment(id) {
         return db.experiments.remove(id).then((data) => {
             if (!data) {
-                throw {validationMessages: ['Experiment Not Found for requested experimentId']}
+                throw   boom.notFound('Experiment Not Found for requested experimentId')
             }
             else {
                 return data

@@ -2,6 +2,7 @@
 const boom = require('boom')
 const db = require('../db/DbManager')
 const AppUtil = require('./utility/AppUtil')
+const AppError = require('./utility/AppError')
 const ExperimentsValidator = require('../validations/ExperimentsValidator')
 // const log4js = require('log4js')
 // const logger = log4js.getLogger('ExperimentsService')
@@ -53,7 +54,7 @@ class ExperimentsService {
     getExperimentById(id) {
         return db.experiments.find(id).then((data) => {
             if (!data) {
-                throw   boom.notFound('Experiment Not Found for requested experimentId')
+                throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
                 return data
@@ -65,7 +66,7 @@ class ExperimentsService {
         return new ExperimentsValidator().validate([experiment]).then(() => {
             return db.experiments.update(id, experiment).then((data) => {
                 if (!data) {
-                    throw   boom.notFound('Experiment Not Found to Update')
+                    throw   AppError.notFound('Experiment Not Found to Update')
                 } else {
                     return data
                 }
@@ -76,7 +77,7 @@ class ExperimentsService {
     deleteExperiment(id) {
         return db.experiments.remove(id).then((data) => {
             if (!data) {
-                throw   boom.notFound('Experiment Not Found for requested experimentId')
+                throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
                 return data

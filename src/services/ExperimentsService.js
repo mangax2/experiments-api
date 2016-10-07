@@ -8,20 +8,9 @@ const ExperimentsValidator = require('../validations/ExperimentsValidator')
 
 class ExperimentsService {
 
-
-    // createExperiment(experiments) {
-    //     return new ExperimentsValidator().validate(experiments).then(() => {
-    //         return db.experiments.repository().tx('tx1', (t) => {
-    //             return Promise.all(experiments.map(ex =>
-    //                 db.experiments.create(t, ex)
-    //             )).then(data => {
-    //                 return AppUtil.createPostResponse(data)
-    //             })
-    //         })
-    //     })
-    // }
-
     createExperiment(experiments) {
+        console.log('createExperiment')
+
         return new ExperimentsValidator().validate(experiments).then(() => {
 
             return   Promise.all(experiments.map(exp =>

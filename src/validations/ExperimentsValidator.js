@@ -1,13 +1,14 @@
 'use strict'
 
 const BaseValidator = require('./BaseValidator')
+const SchemaValidator= require ('./SchemaValidator')
 
 
-class ExperimentsValidator extends BaseValidator {
+class ExperimentsValidator extends SchemaValidator {
 
-    constructor() {
-        super()
-        this.experimentSchema = {
+
+    getSchema(){
+        return {
             'name': {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             'subjectType': {
                 'paramName': 'subjectType',
@@ -22,26 +23,12 @@ class ExperimentsValidator extends BaseValidator {
         }
     }
 
-    validate(experiments) {
+    performValidations(targetObject){
         return Promise.all(
-            experiments.map(experiment=> this.validateExperiment(experiment))
-        ).then(() =>{
-            this.check()
+            targetObject.map(experiment=> super.performValidations(experiment))
+        )
 
-        })
 
-    }
-
-    validateExperiment(experiment) {
-        return new Promise((resolve, reject) => {
-            // this.maxLength(experiment.name, experimentConstraints.name.length, experimentConstraints.name.paramName)
-            this.schemaCheck(experiment.name, this.experimentSchema.name)
-            this.schemaCheck(experiment.subjectType, this.experimentSchema.subjectType)
-            this.schemaCheck(experiment.reps, this.experimentSchema.reps)
-            this.schemaCheck(experiment.refExperimentDesignId, this.experimentSchema.refExperimentDesignId)
-            this.schemaCheck(experiment.status, this.experimentSchema.status)
-            resolve()
-        })
     }
 }
 

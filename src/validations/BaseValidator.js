@@ -9,22 +9,20 @@ class BaseValidator {
         this.messages = []
     }
 
-    schemaCheck(value, schema){
-        if(schema.required){
-            this.checkRequired(value, schema.paramName)
-        }
+    validate(targetObject){
+       return this.performValidations(targetObject).then(()=> {
 
-        if(value!=undefined && value!=null) {
-            if(schema.type=='numeric'){
-                this.checkNumeric(value, schema.paramName)
-                this.checkNumericRange(value,schema.numericRange,schema.paramName)
-            }else if(schema.type=='text'){
-                this.checkLength(value, schema.lengthRange, schema.paramName)
-            } else if(schema.type=='constant'){
-                this.checkConstants(value, schema.data,  schema.paramName)
-            }
-        }
+            this.check()
+
+        })
+
     }
+
+    performValidations(targetObject){
+        return Promise.reject("performValidations validation method not implemented")
+
+    }
+
 
     checkLength(value, lengthRange, name){
         if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {

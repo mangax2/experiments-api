@@ -14,28 +14,31 @@ let updateStub
 let deleteStub
 let transactionStub
 
-before(() => {
-    getStub = sinon.stub(db.experimentDesign, 'all')
-    createStub = sinon.stub(db.experimentDesign, 'create')
-    findStub = sinon.stub(db.experimentDesign, 'find')
-    updateStub = sinon.stub(db.experimentDesign, 'update')
-    deleteStub = sinon.stub(db.experimentDesign, 'delete')
-    transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
-        return {tx: function(transactionName, callback){return callback(tx)}}
-    })
-})
 
-after(() => {
-    getStub.restore()
-    createStub.restore()
-    findStub.restore()
-    updateStub.restore()
-    deleteStub.restore()
-    transactionStub.restore()
-})
 
 
 describe('ExperimentDesignService', () => {
+    before(() => {
+        getStub = sinon.stub(db.experimentDesign, 'all')
+        createStub = sinon.stub(db.experimentDesign, 'create')
+        findStub = sinon.stub(db.experimentDesign, 'find')
+        updateStub = sinon.stub(db.experimentDesign, 'update')
+        deleteStub = sinon.stub(db.experimentDesign, 'delete')
+        transactionStub = sinon.stub(db.experimentDesign, 'repository', () => {
+            return {tx: function(transactionName, callback){return callback(tx)}}
+        })
+
+    })
+
+    after(() => {
+        getStub.restore()
+        createStub.restore()
+        findStub.restore()
+        updateStub.restore()
+        deleteStub.restore()
+        transactionStub.restore()
+
+    })
     describe('getAllExperimentDesign', () => {
         it('succeeds and returns 2 experiment designs', () => {
             getStub.resolves(testResponse)

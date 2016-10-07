@@ -4,29 +4,47 @@ const ExperimentsService = require('../../src/services/ExperimentsService')
 const db = require('../../src/db/DbManager')
 
 const tx = {}
-const getStub = sinon.stub(db.experiments, 'all')
-const findStub = sinon.stub(db.experiments, 'find')
-const updateStub = sinon.stub(db.experiments, 'update')
-const createStub = sinon.stub(db.experiments, 'create')
-const removeStub = sinon.stub(db.experiments, 'remove')
-const transactionStub = sinon.stub(db.experiments, 'repository', () => {
-    return {
-        tx: function (transactionName, callback) {
-            return callback(tx)
-        }
-    }
-})
-
-after(() => {
-    getStub.restore()
-    findStub.restore()
-    updateStub.restore()
-    createStub.restore()
-    removeStub.restore()
-})
+let getStub
+let findStub
+let expDesignFindStub
+let updateStub
+let createStub
+let removeStub
+let transactionStub
 
 
 describe('ExperimentsService', () => {
+    before(() => {
+        getStub = sinon.stub(db.experiments, 'all')
+
+        expDesignFindStub = sinon.stub(db.experimentDesign, 'find')
+        updateStub = sinon.stub(db.experiments, 'update')
+        createStub = sinon.stub(db.experiments, 'create')
+        removeStub = sinon.stub(db.experiments, 'remove')
+        findStub = sinon.stub(db.experiments, 'find')
+        transactionStub = sinon.stub(db.experiments, 'repository', () => {
+            return {
+                tx: function (transactionName, callback) {
+                    return callback(tx)
+                }
+            }
+        })
+
+
+    })
+
+    after(() => {
+
+        getStub.restore()
+        findStub.restore()
+        expDesignFindStub.restore()
+        updateStub.restore()
+        createStub.restore()
+        removeStub.restore()
+        console.log("done after :exp ")
+
+    })
+
 
     describe('Get All Experiments:', () => {
 
@@ -143,6 +161,7 @@ describe('ExperimentsService', () => {
         it('succeeds and returns newly created experiment id with status and message for one experiment create request', (done) => {
 
             createStub.resolves({id: 1})
+            expDesignFindStub.resolves({id: 2})
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)
@@ -172,6 +191,7 @@ describe('ExperimentsService', () => {
             )
 
             createStub.resolves({id: 1})
+            expDesignFindStub.resolves({id: 2})
             const testObject = new ExperimentsService()
             testObject.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)

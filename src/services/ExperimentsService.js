@@ -1,5 +1,4 @@
 'use strict'
-const boom = require('boom')
 const db = require('../db/DbManager')
 const AppUtil = require('./utility/AppUtil')
 const AppError = require('./utility/AppError')

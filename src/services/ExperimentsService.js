@@ -7,6 +7,8 @@ const ExperimentsValidator = require('../validations/ExperimentsValidator')
 // const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
+
+
     createExperiment(experiments) {
         return new ExperimentsValidator().validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
@@ -18,6 +20,31 @@ class ExperimentsService {
             })
         })
     }
+
+    // createExperiment(experiments) {
+    //     return new ExperimentsValidator().validate(experiments).then(() => {
+    //
+    //         return   Promise.all(experiments.map(exp =>
+    //             db.experimentDesign.find(exp.refExperimentDesignId).then((d) =>{
+    //                 if (!d) {
+    //                     throw   boom.badRequest('Invalid refExperimentDesignId')
+    //                 }
+    //
+    //             })
+    //
+    //         )).then(() => {
+    //             return db.experiments.repository().tx('tx1', (t) => {
+    //                 return Promise.all(experiments.map(ex =>
+    //                     db.experiments.create(t, ex)
+    //                 )).then(data => {
+    //                     return AppUtil.createPostResponse(data)
+    //                 })
+    //             })
+    //         })
+    //
+    //
+    //     })
+    // }
 
     getAllExperiments() {
         return db.experiments.all()

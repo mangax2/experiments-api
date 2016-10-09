@@ -4,10 +4,14 @@ const BaseValidator = require('../../src/validations/BaseValidator')
 
 
 describe('BaseValidator', () => {
+    const testObject = new BaseValidator()
 
+    afterEach(() => {
+        testObject.messages = []
+
+
+    })
     describe('checkLength ', () => {
-        const testObject = new BaseValidator()
-
         it('returns no error message when value is within length range', () => {
             testObject.checkLength('testValue', {'min': 1, 'max': 100}, 'param1')
             testObject.messages.length.should.equal(0)
@@ -22,8 +26,6 @@ describe('BaseValidator', () => {
 
 
     describe('required check', () => {
-        const testObject = new BaseValidator()
-
         it('returns no error message when value not empty', () => {
             const testObject = new BaseValidator()
             testObject.checkRequired('testValue', 'param1')
@@ -40,8 +42,6 @@ describe('BaseValidator', () => {
 
 
     describe('checkNumeric check', () => {
-        const testObject = new BaseValidator()
-
         it('returns no error message when value not is number', () => {
             const testObject = new BaseValidator()
             testObject.checkNumeric(10, 'param1')
@@ -60,8 +60,6 @@ describe('BaseValidator', () => {
 
 
     describe('checkNumericRange ', () => {
-        const testObject = new BaseValidator()
-
         it('returns no error message when value is within numeric range', () => {
             testObject.checkNumericRange(20, {'min': 1, 'max': 100}, 'param1')
             testObject.messages.length.should.equal(0)
@@ -78,8 +76,6 @@ describe('BaseValidator', () => {
 
 
     describe('checkConstants check', () => {
-        const testObject = new BaseValidator()
-
         it('returns no error message when value not is valid constant', () => {
             const testObject = new BaseValidator()
             testObject.checkConstants("ACTIVE", ['ACTIVE'], 'param1')
@@ -94,27 +90,13 @@ describe('BaseValidator', () => {
         })
 
     })
+    describe('performValidations', () => {
+        it('returns error when performValidations is not implemented by subclass ', () => {
+            chai.expect(testObject.performValidations()).to.eventually
+                .be.rejectedWith("performValidations validation method not implemented'")
 
-
-    // describe('check', () => {
-    //     const testObject = new BaseValidator()
-    //
-    //      it('Throw exception when value is not a valid constant', () => {
-    //         testObject.checkConstants('ACTIVE1', ['ACTIVE'], 'param1')
-    //         testObject.messages.length.should.equal(1)
-    //         testObject.messages[0].should.equal("param1 requires a valid value")
-    //          const errorMessage={
-    //              "validationMessages": [
-    //                  "param1 requires a valid value"
-    //              ]
-    //          }
-    //          chai.assert.throws(testObject.check(), Error, errorMessage)
-    //
-    //
-    //     })
-    //
-    // })
-
+        })
+    })
 
 })
 

@@ -85,9 +85,8 @@ router.delete('/experiment-designs/:id', (req, res) => {
 
 router.get('/experiments', (req, res) => {
     new ExperimentsService().getAllExperiments().then((experiments)=> {
-            return res.json(experiments)
-        }
-    ).catch((err) => {
+        return res.json(experiments)
+    }).catch((err) => {
         return handleCatch(res, err)
     })
 })

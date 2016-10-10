@@ -13,7 +13,7 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
 
  payload=$(cat << EndOfMessage
 [{
-  "api-id":"${API_ID}"",
+  "api-id":"${API_ID}",
   "api-gateway": {
     "name": "Experiments API",
     "security-policy": "OAuthSecurity",

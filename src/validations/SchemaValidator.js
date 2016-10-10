@@ -1,5 +1,4 @@
 'use strict'
-const validator = require('validator')
 const BaseValidator = require('./BaseValidator')
 const _ = require('lodash')
 
@@ -8,7 +7,7 @@ export class SchemaValidator extends BaseValidator {
 
     schemaCheck(targetObject, schema) {
         _.map(_.keys(targetObject), (key)=> {
-            const elementSchema = schema.find(x=>x.paramName == key);
+            const elementSchema = schema.find(x=>x.paramName == key)
             if (elementSchema != null && elementSchema != undefined) {
                 this.schemaElementCheck(targetObject[key], elementSchema)
 
@@ -37,7 +36,7 @@ export class SchemaValidator extends BaseValidator {
 
 
     performValidations(targetObject) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.schemaCheck(targetObject, this.getSchema())
             resolve()
         })

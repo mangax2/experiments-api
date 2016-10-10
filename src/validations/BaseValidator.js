@@ -3,6 +3,8 @@
 const validator = require('validator')
 const AppError = require('../services/utility/AppError')
 const _ = require('lodash')
+const log4js = require('log4js')
+const logger = log4js.getLogger('BaseValidator')
 
 class BaseValidator {
     constructor() {
@@ -19,6 +21,7 @@ class BaseValidator {
     }
 
     performValidations(targetObject) {
+        logger.error ("performValidations validation method not implemented to validate"+targetObject)
         return Promise.reject("performValidations validation method not implemented")
 
     }

@@ -1,6 +1,5 @@
 'use strict'
 
-const BaseValidator = require('./BaseValidator')
 const SchemaValidator = require('./SchemaValidator')
 
 

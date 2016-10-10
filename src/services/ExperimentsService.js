@@ -9,7 +9,7 @@ const logger = log4js.getLogger('ExperimentsService')
 class ExperimentsService {
 
     createExperiment(experiments) {
-        return new ExperimentsValidator().validate(experiments).then(() => {
+        return this.validator().validate(experiments).then(() => {
             return   Promise.all(experiments.map(exp =>
                 db.experimentDesign.find(exp.refExperimentDesignId).then((d) =>{
                     if (!d) {
@@ -36,6 +36,7 @@ class ExperimentsService {
     getExperimentById(id) {
         return db.experiments.find(id).then((data) => {
             if (!data) {
+                logger.error('Experiment Not Found for requested experimentId'+id)
                 throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
@@ -48,6 +49,7 @@ class ExperimentsService {
         return new ExperimentsValidator().validate([experiment]).then(() => {
             return db.experiments.update(id, experiment).then((data) => {
                 if (!data) {
+                    logger.error("Experiment Not Found to Update for id= "+id)
                     throw   AppError.notFound('Experiment Not Found to Update')
                 } else {
                     return data
@@ -59,12 +61,17 @@ class ExperimentsService {
     deleteExperiment(id) {
         return db.experiments.remove(id).then((data) => {
             if (!data) {
+                logger.error("Experiment Not Found for requested experimentId= "+id)
                 throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
                 return data
             }
         })
+    }
+
+    validator(){
+        new ExperimentsValidator()
     }
 }
 

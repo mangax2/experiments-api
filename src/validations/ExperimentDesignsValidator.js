@@ -3,7 +3,7 @@ import SchemaValidator from './SchemaValidator'
 class ExperimentDesignsValidator extends SchemaValidator {
     getSchema() {
         return [
-            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
         ]
     }
 

@@ -13,7 +13,7 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
 
  payload=$(cat << EndOfMessage
 [{
-  "api-id":"d123b6a7-1d35-42c8-bff4-0af4f1acc99b.enterpriseapi",
+  "api-id":"40d33d7a-f2fa-4444-95b0-5310e7f71773.enterpriseapi",
   "api-gateway": {
     "name": "Experiments API",
     "security-policy": "OAuthSecurity",
@@ -43,7 +43,7 @@ echo
 
 #curl -v -X POST -H "Authorization: bearer $ACCESS_TOKEN" -H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis
 
-curl -v -X PUT -H "Authorization: bearer $ACCESS_TOKEN" -H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis
+curl -v -X PUT -H "Authorization: bearer $ACCESS_TOKEN" -H "Cache-Control: no-cache" -H "Content-Type: application/json" --data @${payloadFilename} https://api01-np.agro.services/api-gateway-api/v2/apis/40d33d7a-f2fa-4444-95b0-5310e7f71773.enterpriseapi
 
 echo
 rm ${payloadFilename}

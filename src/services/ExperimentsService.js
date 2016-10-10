@@ -46,7 +46,7 @@ class ExperimentsService {
     }
 
     updateExperiment(id, experiment) {
-        return new ExperimentsValidator().validate([experiment]).then(() => {
+        return this.validator().validate([experiment]).then(() => {
             return db.experiments.update(id, experiment).then((data) => {
                 if (!data) {
                     logger.error("Experiment Not Found to Update for id= "+id)

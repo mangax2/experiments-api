@@ -101,8 +101,11 @@ describe('ExperimentDesignService', () => {
             createStub.rejects(testError)
 
             return experimentDesignService.createExperimentDesign(testPayload, 'kmccl').should.be.rejected.then((err) => {
-                createStub.neverCalledWith(
-                    undefined).should.equal(true)
+                sinon.assert.calledWithExactly(
+                    createStub,
+                    sinon.match.same(tx),
+                    sinon.match.same(testPayload),
+                    'kmccl')
                 err.should.equal(testError)
             })
         })

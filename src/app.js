@@ -1,9 +1,10 @@
 const config = require('../config')
 
-if(config.node_env !== 'production'){
+if (config.node_env !== 'production') {
     require('babel-register')
 }
 const express = require('express')
+const _ = require('lodash')
 const createProfileMiddleware = require('@monsantoit/profile-middleware')
 const inflector = require('json-inflector')
 const bodyParser = require('body-parser')
@@ -13,7 +14,7 @@ const logger = log4js.getLogger('app')
 const appBaseUrl = '/experiments-api'
 const app = express()
 app.use(inflector())
-const pingFunc = (function() {
+const pingFunc = (function () {
     var createPingPage, i, len, pingPage, ref, results
     createPingPage = require('@monsantoit/ping-page')
     pingPage = createPingPage(require('../package.json'))
@@ -39,32 +40,29 @@ const localDevProfile = {
 // }))
 
 app.use('/experiments-api', require('./routes/routes'))
-
-app.use(function(error, req, res, next) {
-    if (error != null) {
-        console.error(error)
-        res.status(error.status || 500)
-        if (typeof error.body === 'object') {
-            logger.error('error.body')
-            return res.json(error.body)
+app.use(function (err, req, res, next) {
+    if (err) {
+        if (_.isArray(err)) {
+            const errorArray = _.map(err, function (x) {
+                return (x.output.payload)
+            })
+            return res.status(400).json(errorArray)
         } else {
-            logger.error(error.message || error.toString())
-            return res.send(error.message || error.toString())
+            if (err.output) {
+                return res.status(err.output.statusCode).json(err.output.payload)
+            } else {
+                return res.status(500).json(err)
+            }
         }
-    } else {
-        return next()
+    }
+    else {
+        return res.status(500).json(err)
     }
 })
 
-// process.on('uncaughtException', function(error) {
-//     logger.fatal(error)
-//     logger.fatal('Fatal error encountered, exiting now')
-//     return config.exit
-// })
-
 const port = config.port
 
-const server = app.listen(port, function() {
+const server = app.listen(port, function () {
     const address = server.address()
     const url = 'http://' + (address.host || 'localhost') + ':' + port
     return logger.info('Listening at ' + url)

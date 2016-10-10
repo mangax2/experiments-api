@@ -1,11 +1,16 @@
-'use strict'
-
-const db = require('../db/DbManager')
+import db from '../db/DbManager'
+import FactorTypesValidator from '../validations/FactorTypesValidator'
 
 class FactorTypeService {
+    constructor(){
+        this._validator = new FactorTypesValidator()
+    }
+
     createFactorType(factorType, created_user_id) {
-        return db.factorType.repository().tx('createFactorType', (tx) => {
-            return db.factorType.create(tx, factorType, created_user_id)
+        return this._validator.validate([factorType]).then(() => {
+            return db.factorType.repository().tx('createFactorType', (tx) => {
+                return db.factorType.create(tx, factorType, created_user_id)
+            })
         })
     }
 
@@ -24,13 +29,15 @@ class FactorTypeService {
     }
 
     updateFactorType(id, factorType, modified_user_id) {
-        return db.factorType.repository().tx('updateFactorType', (tx) => {
-            return db.factorType.update(tx, id, factorType, modified_user_id).then((data) => {
-                if (!data) {
-                    throw { validationMessages: ['Factor Type Not Found']}
-                } else {
-                    return data
-                }
+        return this._validator.validate([factorType]).then(() => {
+            return db.factorType.repository().tx('updateFactorType', (tx) => {
+                return db.factorType.update(tx, id, factorType, modified_user_id).then((data) => {
+                    if (!data) {
+                        throw {validationMessages: ['Factor Type Not Found']}
+                    } else {
+                        return data
+                    }
+                })
             })
         })
     }

@@ -7,40 +7,56 @@ const testResponse = {}
 const testError = {}
 const tx = {}
 
-let getStub
 let createStub
-let findStub
-let updateStub
 let deleteStub
+let factorTypesService
+let findStub
+let getStub
 let transactionStub
+let updateStub
+let validateStub
 
 before(() => {
-    getStub = sinon.stub(db.factorType, 'all')
     createStub = sinon.stub(db.factorType, 'create')
-    findStub = sinon.stub(db.factorType, 'find')
-    updateStub = sinon.stub(db.factorType, 'update')
     deleteStub = sinon.stub(db.factorType, 'delete')
+    factorTypesService = new FactorTypeService()
+    findStub = sinon.stub(db.factorType, 'find')
+    getStub = sinon.stub(db.factorType, 'all')
     transactionStub = sinon.stub(db.factorType, 'repository', () => {
         return {tx: function(transactionName, callback){return callback(tx)}}
     })
+    updateStub = sinon.stub(db.factorType, 'update')
+    validateStub = sinon.stub(factorTypesService._validator, 'validate')
+})
+
+afterEach(() => {
+    createStub.reset()
+    deleteStub.reset()
+    findStub.reset()
+    getStub.reset()
+    transactionStub.reset()
+    updateStub.reset()
+    validateStub.reset()
+
 })
 
 after(() => {
-    getStub.restore()
     createStub.restore()
-    findStub.restore()
-    updateStub.restore()
     deleteStub.restore()
+    findStub.restore()
+    getStub.restore()
     transactionStub.restore()
+    updateStub.restore()
+    validateStub.restore()
 })
 
 describe('FactorTypeService', () => {
     describe('createFactorType', () => {
         it('creates transaction and calls create method on repository', () => {
             createStub.resolves(1)
-            const testObject = new FactorTypeService()
+            validateStub.resolves()
 
-            return testObject.createFactorType(testPayload, 'pnwatt').then((result) => {
+            return factorTypesService.createFactorType(testPayload, 'pnwatt').then((result) => {
                 result.should.equal(1)
                 sinon.assert.calledWithExactly(
                     createStub,
@@ -52,9 +68,9 @@ describe('FactorTypeService', () => {
 
         it('fails', () => {
             createStub.rejects(testError)
-            const testObject = new FactorTypeService()
+            validateStub.resolves()
 
-            return testObject.createFactorType(testPayload).should.be.rejected.then((err) => {
+            return factorTypesService.createFactorType(testPayload, 'pnwatt').should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(
                     createStub,
                     sinon.match.same(tx),
@@ -63,15 +79,21 @@ describe('FactorTypeService', () => {
                 err.should.equal(testError)
             })
         })
+
+        it('fails due to validation error', () => {
+            validateStub.rejects()
+
+            return factorTypesService.createFactorType(testPayload, 'pnwatt').should.be.rejected.then((err) => {
+                createStub.called.should.equal(false)
+            })
+        })
     })
 
     describe('getAllFactorTypes', () => {
         it('retrieves all', () => {
             getStub.resolves(testResponse)
 
-            const testObject = new FactorTypeService()
-
-            return testObject.getAllFactorTypes().then((types) => {
+            return factorTypesService.getAllFactorTypes().then((types) => {
                 sinon.assert.calledOnce(getStub)
                 types.should.equal(testResponse)
             })
@@ -82,8 +104,7 @@ describe('FactorTypeService', () => {
         it('successfully gets factor type with id 1', () => {
             findStub.resolves(testResponse)
 
-            const testObject = new FactorTypeService()
-            return testObject.getFactorTypeById(1).then((result) => {
+            return factorTypesService.getFactorTypeById(1).then((result) => {
                 sinon.assert.calledWithExactly(findStub, 1)
                 result.should.equal(testResponse)
             })
@@ -92,8 +113,7 @@ describe('FactorTypeService', () => {
         it('fails', () => {
             findStub.rejects(testError)
 
-            const testObject = new FactorTypeService()
-            return testObject.getFactorTypeById(1).should.be.rejected.then((err) => {
+            return factorTypesService.getFactorTypeById(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(findStub, 1)
                 err.should.equal(testError)
             })
@@ -102,8 +122,7 @@ describe('FactorTypeService', () => {
         it('fails due to no data', () => {
             findStub.resolves(null)
 
-            const testObject = new FactorTypeService()
-            return testObject.getFactorTypeById(1).should.be.rejected.then((err) => {
+            return factorTypesService.getFactorTypeById(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(findStub, 1)
                 err.validationMessages.length.should.equal(1)
                 err.validationMessages[0].should.equal("Factor Type Not Found")
@@ -114,9 +133,9 @@ describe('FactorTypeService', () => {
     describe('updateFactorType', () => {
         it('successfully updates factor type with id 1', () => {
             updateStub.resolves(testResponse)
+            validateStub.resolves()
 
-            const testObject = new FactorTypeService()
-            return testObject.updateFactorType(1, testPayload, 'pnwatt').then((result) => {
+            return factorTypesService.updateFactorType(1, testPayload, 'pnwatt').then((result) => {
                 sinon.assert.calledWithExactly(
                     updateStub,
                     sinon.match.same(tx),
@@ -129,9 +148,9 @@ describe('FactorTypeService', () => {
 
         it('fails', () => {
             updateStub.rejects(testError)
+            validateStub.resolves()
 
-            const testObject = new FactorTypeService()
-            return testObject.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
+            return factorTypesService.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(updateStub, tx, 1, sinon.match.same(testPayload), 'pnwatt')
                 err.should.equal(testError)
             })
@@ -139,12 +158,20 @@ describe('FactorTypeService', () => {
 
         it('fails due to no data', () => {
             updateStub.resolves(null)
+            validateStub.resolves()
 
-            const testObject = new FactorTypeService()
-            return testObject.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
+            return factorTypesService.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(updateStub, tx, 1, sinon.match.same(testPayload), 'pnwatt')
                 err.validationMessages.length.should.equal(1)
                 err.validationMessages[0].should.equal("Factor Type Not Found")
+            })
+        })
+
+        it('fails due to validation error', () => {
+            validateStub.rejects()
+
+            return factorTypesService.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
+                updateStub.called.should.equal(false)
             })
         })
     })
@@ -153,8 +180,7 @@ describe('FactorTypeService', () => {
         it('deletes an factor type and returns the deleted id', () => {
             deleteStub.resolves(1)
 
-            const testObject = new FactorTypeService()
-            return testObject.deleteFactorType(1).then((value) =>{
+            return factorTypesService.deleteFactorType(1).then((value) =>{
                 sinon.assert.calledWithExactly(deleteStub, tx, 1)
                 value.should.equal(1)
             })
@@ -163,8 +189,7 @@ describe('FactorTypeService', () => {
         it('fails', () => {
             deleteStub.rejects(testError)
 
-            const testObject = new FactorTypeService()
-            return testObject.deleteFactorType(1).should.be.rejected.then((err) => {
+            return factorTypesService.deleteFactorType(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(deleteStub, tx, 1)
                 err.should.equal(testError)
             })
@@ -173,8 +198,7 @@ describe('FactorTypeService', () => {
         it('fails due to no data', () => {
             deleteStub.resolves(null)
 
-            const testObject = new FactorTypeService()
-            return testObject.deleteFactorType(1).should.be.rejected.then((err) => {
+            return factorTypesService.deleteFactorType(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(deleteStub, tx, 1)
                 err.validationMessages.length.should.equal(1)
                 err.validationMessages[0].should.equal("Factor Type Not Found")

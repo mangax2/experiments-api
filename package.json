@@ -29,6 +29,7 @@
     "es6-promise": "~3.3.0",
     "express": "~4.14.0",
     "express-promise": "~0.4.0",
+    "hoek": "^4.1.0",
     "json-inflector": "^1.1.0",
     "lodash": "~4.15.0",
     "log4js": "~0.6.38",

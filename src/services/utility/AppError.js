@@ -1,4 +1,5 @@
 'use strict'
+const Hoek = require('hoek')
 // Declare internals
 
 const internals = {

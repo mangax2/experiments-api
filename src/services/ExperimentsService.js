@@ -13,6 +13,7 @@ class ExperimentsService {
             return   Promise.all(experiments.map(exp =>
                 db.experimentDesign.find(exp.refExperimentDesignId).then((d) =>{
                     if (!d) {
+                        logger.error('Invalid refExperimentDesignId')
                         throw   AppError.badRequest('Invalid refExperimentDesignId')
                     }
                 })

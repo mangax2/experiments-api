@@ -11,19 +11,25 @@ const router = express.Router()
 const _ = require('lodash')
 
 const handleCatch = (res, err) => {
-    if (err) {
-        if (_.isArray(err)) {
-            const errorArray = _.map(err, function (x) {
-                return (x.output.payload)
-            })
-            return res.status(400).json(errorArray)
-        } else {
-            return res.status(err.output.statusCode).json(err.output.payload)
+    try{
+        if (err) {
+            if (_.isArray(err)) {
+                const errorArray = _.map(err, function (x) {
+                    return (x.output.payload)
+                })
+                return res.status(400).json(errorArray)
+            } else {
+                return res.status(err.output.statusCode).json(err.output.payload)
+            }
         }
-    }
-    else {
+        else {
+            return res.status(500).json(err)
+        }
+    } catch(e) {
+
         return res.status(500).json(err)
     }
+
 
 }
 
@@ -94,7 +100,7 @@ router.get('/experiments/:id', (req, res) => {
     })
 })
 
-router.post('/experiments', (req, res) => {
+router.post('/experiments', (req, res) => {2
     const experiment = req.body
     return new ExperimentsService().createExperiment(experiment).then((id) => {
         return res.json(id)

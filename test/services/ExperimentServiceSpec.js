@@ -60,7 +60,7 @@ describe('ExperimentsService', () => {
                     'createdUserId': 'akuma11',
                     'modifiedUserId': 'akuma11',
                     'modifiedDate': '2016-10-05T15:19:12.026Z',
-                    'status': 'ACTIVE'
+                    'status': 'ACTIVE',
                 },
                 {
                     'id': 35,
@@ -144,8 +144,7 @@ describe('ExperimentsService', () => {
             'reps': 20,
             'refExperimentDesignId': 2,
             'createdDate': '2016-10-05T15:19:12.026Z',
-            'createdUserId': 'akuma11',
-            'modifiedUserId': 'akuma11',
+            'userId': 'akuma11',
             'modifiedDate': '2016-10-05T15:19:12.026Z',
             'status': 'ACTIVE'
         }]
@@ -176,9 +175,7 @@ describe('ExperimentsService', () => {
                     'reps': 20,
                     'refExperimentDesignId': 2,
                     'createdDate': '2016-10-05T15:19:12.026Z',
-                    'createdUserId': 'akuma11',
-                    'modifiedUserId': 'akuma11',
-                    'modifiedDate': '2016-10-05T15:19:12.026Z',
+                    'userId': 'akuma11',
                     'status': 'ACTIVE'
                 }
             )
@@ -220,10 +217,7 @@ describe('ExperimentsService', () => {
                 'subjectType': 'plant',
                 'reps': 20,
                 'refExperimentDesignId': 2,
-                'createdDate': '2016-10-05T15:19:12.026Z',
-                'createdUserId': 'akuma11',
-                'modifiedUserId': 'akuma11',
-                'modifiedDate': '2016-10-05T15:19:12.026Z',
+                'userId': 'akuma11',
                 'status': 'ACTIVE'
             }
             const experimentReqObj = {
@@ -231,10 +225,7 @@ describe('ExperimentsService', () => {
                 'subjectType': 'plant',
                 'reps': 20,
                 'refExperimentDesignId': 2,
-                'createdDate': '2016-10-05T15:19:12.026Z',
-                'createdUserId': 'akuma11',
-                'modifiedUserId': 'akuma11',
-                'modifiedDate': '2016-10-05T15:19:12.026Z',
+                'userId': 'akuma11',
                 'status': 'ACTIVE'
             }
             updateStub.resolves(
@@ -276,14 +267,13 @@ describe('ExperimentsService', () => {
                 'reps': 20,
                 'refExperimentDesignId': 2,
                 'createdDate': '2016-10-05T15:19:12.026Z',
-                'createdUserId': 'akuma11',
-                'modifiedUserId': 'akuma11',
-                'modifiedDate': '2016-10-05T15:19:12.026Z',
+                'userId': 'akuma11',
                 'status': 'ACTIVE'
             }
             const testObject = new ExperimentsService()
             testObject.updateExperiment(30, experimentReqObj).should.be.rejected
             testObject.updateExperiment(30, experimentReqObj).catch((err) => {
+                console.log('jhdfdhfjdhjgdfjghjfdh'+err)
                 err.output.statusCode.should.equal(404)
                 err.message.should.equal('Experiment Not Found to Update')
             }).then(done, done)

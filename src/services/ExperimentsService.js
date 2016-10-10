@@ -1,4 +1,3 @@
-'use strict'
 const db = require('../db/DbManager')
 const AppUtil = require('./utility/AppUtil')
 const AppError = require('./utility/AppError')
@@ -10,8 +9,8 @@ class ExperimentsService {
 
     createExperiment(experiments) {
         return this.validator().validate(experiments).then(() => {
-            return   Promise.all(experiments.map(exp =>
-                db.experimentDesign.find(exp.refExperimentDesignId).then((d) =>{
+            return Promise.all(experiments.map(exp =>
+                db.experimentDesign.find(exp.refExperimentDesignId).then((d) => {
                     if (!d) {
                         logger.error('Invalid refExperimentDesignId')
                         throw   AppError.badRequest('Invalid refExperimentDesignId')
@@ -36,7 +35,7 @@ class ExperimentsService {
     getExperimentById(id) {
         return db.experiments.find(id).then((data) => {
             if (!data) {
-                logger.error('Experiment Not Found for requested experimentId'+id)
+                logger.error('Experiment Not Found for requested experimentId' + id)
                 throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
@@ -49,8 +48,8 @@ class ExperimentsService {
         return this.validator().validate([experiment]).then(() => {
             return db.experiments.update(id, experiment).then((data) => {
                 if (!data) {
-                    logger.error("Experiment Not Found to Update for id= "+id)
-                    throw   AppError.notFound('Experiment Not Found to Update')
+                    logger.error("Experiment Not Found to Update for id= " + id)
+                    throw  AppError.notFound('Experiment Not Found to Update')
                 } else {
                     return data
                 }
@@ -61,7 +60,7 @@ class ExperimentsService {
     deleteExperiment(id) {
         return db.experiments.remove(id).then((data) => {
             if (!data) {
-                logger.error("Experiment Not Found for requested experimentId= "+id)
+                logger.error("Experiment Not Found for requested experimentId= " + id)
                 throw   AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
@@ -70,7 +69,7 @@ class ExperimentsService {
         })
     }
 
-    validator(){
+    validator() {
         return new ExperimentsValidator()
     }
 }

@@ -1,16 +1,18 @@
-'use strict'
 const BaseValidator = require('./BaseValidator')
 const _ = require('lodash')
-
+const log4js = require('log4js')
+const logger = log4js.getLogger('SchemaValidator')
 
 export class SchemaValidator extends BaseValidator {
 
-    schemaCheck(targetObject, schema) {
-        _.map(_.keys(targetObject), (key)=> {
-            const elementSchema = schema.find(x=>x.paramName == key)
-            if (elementSchema != null && elementSchema != undefined) {
-                this.schemaElementCheck(targetObject[key], elementSchema)
 
+    schemaCheck(targetObject, schema) {
+        _.map(schema, (elementSchema) => {
+            const key = _.keys(targetObject).find(x=>x == elementSchema.paramName)
+            if (key == null || key == undefined) {
+                this.schemaElementCheck(null, elementSchema)
+            } else {
+                this.schemaElementCheck(targetObject[key], elementSchema)
             }
         })
 
@@ -37,13 +39,17 @@ export class SchemaValidator extends BaseValidator {
 
     performValidations(targetObject) {
         return new Promise((resolve) => {
+            if (this.getSchema() == null || this.getSchema() == undefined) {
+                logger.error('getSchema not implemented')
+                throw 'getSchema not implemented'
+            }
             this.schemaCheck(targetObject, this.getSchema())
             resolve()
         })
     }
 
     getSchema() {
-
+        logger.error('getSchema not implemented')
         throw 'getSchema not implemented'
 
     }

@@ -1,4 +1,3 @@
-//removed pgp from function arguments
 module.exports = (rep) => {
     return {
         repository: () => {
@@ -19,8 +18,8 @@ module.exports = (rep) => {
         },
 
         update: (id, experimentObj) => {
-            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, reps, ref_experiment_design_id, created_date," +
-                " created_user_id, modified_date, modified_user_id, status) = ($(name),$(subjectType),$(reps),$(refExperimentDesignId),CURRENT_TIMESTAMP,$(createdUserId),CURRENT_TIMESTAMP,$(modifiedUserId),$(status)) WHERE id="+id+" RETURNING *",experimentObj)
+            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, reps, ref_experiment_design_id,"+
+                "modified_date, modified_user_id, status) = ($(name),$(subjectType),$(reps),$(refExperimentDesignId),CURRENT_TIMESTAMP,$(userId),$(status)) WHERE id="+id+" RETURNING *",experimentObj)
         },
 
         remove: (id) => {

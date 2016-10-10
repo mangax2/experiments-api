@@ -1,5 +1,3 @@
-'use strict'
-
 const validator = require('validator')
 const AppError = require('../services/utility/AppError')
 const _ = require('lodash')
@@ -13,16 +11,13 @@ class BaseValidator {
 
     validate(targetObject) {
         return this.performValidations(targetObject).then(()=> {
-
             this.check()
-
         })
-
     }
 
     performValidations(targetObject) {
-        logger.error ("performValidations validation method not implemented to validate"+targetObject)
-        return Promise.reject("performValidations validation method not implemented")
+        logger.error("performValidations validation method not implemented to validate" + targetObject)
+        return Promise.reject("Server error, please contact support")
 
     }
 
@@ -52,7 +47,6 @@ class BaseValidator {
     }
 
     checkConstants(value, data, name) {
-        // console.log('inside checkConstants'+data.indexOf(value))
         if (data.indexOf(value) == -1) {
             this.messages.push(name + ' requires a valid value')
         }
@@ -60,7 +54,9 @@ class BaseValidator {
 
     check() {
         if (this.messages.length > 0) {
-            throw  _.map(this.messages, function (x) {
+            const copyMessages = this.messages
+            this.messages = []
+            throw  _.map(copyMessages, function (x) {
                 return AppError.badRequest(x)
             })
         }

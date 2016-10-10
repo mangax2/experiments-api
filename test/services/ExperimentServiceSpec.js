@@ -41,7 +41,6 @@ describe('ExperimentsService', () => {
         updateStub.restore()
         createStub.restore()
         removeStub.restore()
-        console.log("done after :exp ")
 
     })
 

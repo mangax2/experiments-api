@@ -71,7 +71,7 @@ class ExperimentsService {
     }
 
     validator(){
-        new ExperimentsValidator()
+        return new ExperimentsValidator()
     }
 }
 

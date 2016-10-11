@@ -44,12 +44,12 @@ app.use(function (err, req, res, next) {
     if (err) {
         if (_.isArray(err)) {
             const errorArray = _.map(err, function (x) {
-                return (x.output.payload)
+                return (x)
             })
             return res.status(400).json(errorArray)
         } else {
-            if (err.output) {
-                return res.status(err.output.statusCode).json(err.output.payload)
+            if (err.status) {
+                return res.status(err.status).json(err)
             } else {
                 return res.status(500).json(err)
             }

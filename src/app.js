@@ -1,3 +1,5 @@
+require('../log4js-conf')
+
 const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
 const swaggerTools = require('swagger-tools')

@@ -54,21 +54,4 @@ exports.notFound = function (message, data) {
 }
 
 
-exports.internal = function (message, data, statusCode) {
-    return internals.serverError(message, data, statusCode, exports.internal)
-}
-
-
-internals.serverError = function (message, data, statusCode, ctor) {
-    let error
-    if (data instanceof Error) {
-        error = exports.wrap(data, statusCode, message)
-    }
-    else {
-        error = internals.create(statusCode || 500, message, undefined, ctor)
-        error.data = data
-    }
-    return error
-}
-
 

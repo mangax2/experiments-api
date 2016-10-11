@@ -1,0 +1,32 @@
+/**
+ * Created by kprat1 on 12/10/16.
+ */
+module.exports = (rep) => {
+    return {
+        repository: () => {
+            return rep
+        },
+
+        find: (id) => {
+            return rep.oneOrNone("SELECT * FROM hypothesis WHERE id = $1", id)
+        },
+
+        all: () => {
+            return rep.any("SELECT * FROM hypothesis")
+        },
+
+        create: (t, hypothesisObj) => {
+            return t.one("insert into hypothesis(description, is_null, status, experiment_id, created_date," +
+                " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", hypothesisObj)
+        },
+
+        update: (id, hypothesisObj) => {
+            return rep.oneOrNone("UPDATE experiment SET (description, is_null, status, experiment_id," +
+                "modified_date, modified_user_id) = ($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId)) WHERE id=" + id + " RETURNING *", hypothesisObj)
+        },
+
+        remove: (id) => {
+            return rep.oneOrNone("delete from hypothesis where id=" + id + " RETURNING id")
+        }
+    }
+}

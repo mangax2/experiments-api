@@ -181,6 +181,15 @@ describe('ExperimentsService', () => {
             })
         })
 
+        it('fails due to not finding experiment design', () => {
+            expDesignFindStub.rejects(testError)
+
+            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                createStub.called.should.equal(false)
+            })
+        })
+
         it('fails due to validation error', () => {
             validateStub.rejects("Validation Failure")
 

@@ -169,7 +169,6 @@ describe('ExperimentDesignService', () => {
             validateStub.rejects("Failed Validation")
 
             return experimentDesignService.updateExperimentDesign(1, testPayload, 'kmccl').should.be.rejected.then((err) => {
-                console.log(updateStub.callCount)
                 updateStub.called.should.equal(false)
             })
         })

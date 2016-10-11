@@ -1,13 +1,13 @@
-const db = require('../db/DbManager')
-const AppUtil = require('./utility/AppUtil')
-const AppError = require('./utility/AppError')
-const ExperimentsValidator = require('../validations/ExperimentsValidator')
-const log4js = require('log4js')
+import db from "../db/DbManager";
+import AppUtil from "./utility/AppUtil";
+import AppError from "./utility/AppError";
+import ExperimentsValidator from "../validations/ExperimentsValidator";
+import log4js from "log4js";
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
 
-    constructor(){
+    constructor() {
         this._validator = new ExperimentsValidator()
     }
 

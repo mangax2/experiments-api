@@ -1,8 +1,8 @@
-import db from '../db/DbManager'
-import FactorTypesValidator from '../validations/FactorTypesValidator'
-
+import db from "../db/DbManager";
+import FactorTypesValidator from "../validations/FactorTypesValidator";
+import AppError from "./utility/AppError";
 class FactorTypeService {
-    constructor(){
+    constructor() {
         this._validator = new FactorTypesValidator()
     }
 
@@ -21,7 +21,7 @@ class FactorTypeService {
     getFactorTypeById(id) {
         return db.factorType.find(id).then((data) => {
             if (!data) {
-                throw {validationMessages: ['Factor Type Not Found']}
+                throw AppError.notFound('Factor Type Not Found')
             } else {
                 return data
             }
@@ -33,7 +33,7 @@ class FactorTypeService {
             return db.factorType.repository().tx('updateFactorType', (tx) => {
                 return db.factorType.update(tx, id, factorType, modified_user_id).then((data) => {
                     if (!data) {
-                        throw {validationMessages: ['Factor Type Not Found']}
+                        throw AppError.notFound('Factor Type Not Found')
                     } else {
                         return data
                     }
@@ -46,7 +46,7 @@ class FactorTypeService {
         return db.factorType.repository().tx('deleteFactorType', (tx) => {
             return db.factorType.delete(tx, id).then((data) => {
                 if (!data) {
-                    throw { validationMessages: ['Factor Type Not Found']}
+                    throw AppError.notFound('Factor Type Not Found')
                 } else {
                     return data
                 }

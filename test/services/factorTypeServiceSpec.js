@@ -124,8 +124,8 @@ describe('FactorTypeService', () => {
 
             return factorTypesService.getFactorTypeById(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(findStub, 1)
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Factor Type Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Factor Type Not Found")
             })
         })
     })
@@ -162,8 +162,8 @@ describe('FactorTypeService', () => {
 
             return factorTypesService.updateFactorType(1, testPayload, 'pnwatt').should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(updateStub, tx, 1, sinon.match.same(testPayload), 'pnwatt')
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Factor Type Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Factor Type Not Found")
             })
         })
 
@@ -200,8 +200,8 @@ describe('FactorTypeService', () => {
 
             return factorTypesService.deleteFactorType(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(deleteStub, tx, 1)
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Factor Type Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Factor Type Not Found")
             })
         })
     })

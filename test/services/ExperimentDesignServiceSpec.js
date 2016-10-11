@@ -134,8 +134,8 @@ describe('ExperimentDesignService', () => {
             findStub.resolves(null)
 
             return experimentDesignService.getExperimentDesignById(1).should.be.rejected.then((err) => {
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Experiment Design Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Experiment Design Not Found")
             })
         })
     })
@@ -179,8 +179,8 @@ describe('ExperimentDesignService', () => {
 
             return experimentDesignService.updateExperimentDesign(1, testPayload, 'kmccl').should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(updateStub, 1, sinon.match.same(testPayload), 'kmccl')
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Experiment Design Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Experiment Design Not Found")
             })
         })
     })
@@ -209,8 +209,8 @@ describe('ExperimentDesignService', () => {
 
             return experimentDesignService.deleteExperimentDesign(1).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(deleteStub, 1)
-                err.validationMessages.length.should.equal(1)
-                err.validationMessages[0].should.equal("Experiment Design Not Found")
+                err.status.should.equal(404)
+                err.message.should.equal("Experiment Design Not Found")
             })
         })
     })

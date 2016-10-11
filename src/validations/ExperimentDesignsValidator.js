@@ -1,4 +1,5 @@
 import SchemaValidator from './SchemaValidator'
+import * as _ from 'lodash'
 
 class ExperimentDesignsValidator extends SchemaValidator {
     getSchema() {
@@ -9,7 +10,7 @@ class ExperimentDesignsValidator extends SchemaValidator {
 
     performValidations(targetObject) {
         return Promise.all(
-            targetObject.map(experimentDesign=> super.performValidations(experimentDesign))
+            _.map(targetObject, experimentDesign=> super.performValidations(experimentDesign))
         )
     }
 }

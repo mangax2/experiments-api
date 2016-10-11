@@ -3,137 +3,108 @@ const chai = require('chai')
 const ExperimentsService = require('../../src/services/ExperimentsService')
 const db = require('../../src/db/DbManager')
 
+const testPayload = {}
+const testResponse = {}
+const testError = {}
 const tx = {}
-let getStub
-let findStub
-let expDesignFindStub
-let updateStub
+
 let createStub
+let expDesignFindStub
+let experimentsService
+let findStub
+let getStub
 let removeStub
 let transactionStub
+let updateStub
+let validateStub
 
-
-describe('ExperimentsService', () => {
+describe.only('ExperimentsService', () => {
     before(() => {
-        getStub = sinon.stub(db.experiments, 'all')
-
-        expDesignFindStub = sinon.stub(db.experimentDesign, 'find')
-        updateStub = sinon.stub(db.experiments, 'update')
         createStub = sinon.stub(db.experiments, 'create')
-        removeStub = sinon.stub(db.experiments, 'remove')
+        expDesignFindStub = sinon.stub(db.experimentDesign, 'find')
+        experimentsService = new ExperimentsService()
         findStub = sinon.stub(db.experiments, 'find')
+        getStub = sinon.stub(db.experiments, 'all')
+        removeStub = sinon.stub(db.experiments, 'remove')
         transactionStub = sinon.stub(db.experiments, 'repository', () => {
-            return {
-                tx: function (transactionName, callback) {
-                    return callback(tx)
-                }
-            }
+            return { tx: function (transactionName, callback) {return callback(tx)} }
         })
-
-
+        updateStub = sinon.stub(db.experiments, 'update')
+        validateStub = sinon.stub(experimentsService._validator, 'validate')
     })
 
     after(() => {
-
-        getStub.restore()
-        findStub.restore()
-        expDesignFindStub.restore()
-        updateStub.restore()
         createStub.restore()
+        expDesignFindStub.restore()
+        findStub.restore()
+        getStub.restore()
         removeStub.restore()
+        transactionStub.restore()
+        updateStub.restore()
+        validateStub.restore()
 
     })
 
+    afterEach(() => {
+        createStub.reset()
+        expDesignFindStub.reset()
+        findStub.reset()
+        getStub.reset()
+        removeStub.reset()
+        transactionStub.reset()
+        updateStub.reset()
+        validateStub.reset()
+    })
 
     describe('Get All Experiments:', () => {
+        it('Success', ()=> {
+            getStub.resolves(testResponse)
 
-        it('Success and Return 2 Experiments', (done)=> {
-            getStub.resolves([
-                {
-                    'id': 30,
-                    'name': 'exp1001',
-                    'subjectType': 'plant',
-                    'reps': 20,
-                    'refExperimentDesignId': 2,
-                    'createdDate': '2016-10-05T15:19:12.026Z',
-                    'createdUserId': 'akuma11',
-                    'modifiedUserId': 'akuma11',
-                    'modifiedDate': '2016-10-05T15:19:12.026Z',
-                    'status': 'ACTIVE',
-                },
-                {
-                    'id': 35,
-                    'name': 'exp1001',
-                    'subjectType': 'plant',
-                    'reps': 20,
-                    'refExperimentDesignId': 2,
-                    'createdDate': '2016-10-05T15:49:45.700Z',
-                    'createdUserId': 'akuma11',
-                    'modifiedUserId': 'akuma11',
-                    'modifiedDate': '2016-10-05T15:49:45.700Z',
-                    'status': 'ACTIVE'
-                }
-            ])
-            const testObject = new ExperimentsService()
-            testObject.getAllExperiments().then((experiments)=> {
-                experiments.length.should.equal(2)
-                experiments[0].id.should.equal(30)
-            }).then(done, done)
+            return experimentsService.getAllExperiments().then((experiments)=> {
+                sinon.assert.calledOnce(getStub)
+                experiments.should.equal(testResponse)
+            })
         })
 
-        it('fails', (done) => {
-            getStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
+        it('fails', () => {
+            getStub.rejects(testError)
 
-            const testObject = new ExperimentsService()
-            testObject.getAllExperiments().should.be.rejected.and.notify(done)
+            return experimentsService.getAllExperiments().should.be.rejected.then((err) => {
+                sinon.assert.calledWithExactly(getStub)
+                err.should.equal(testError)
+            })
         })
-
-
     })
 
     describe('Get Experiment By Id:', () => {
+        it('Success and Return experiment with Id', ()=> {
+            findStub.resolves(testResponse)
 
-        it('Success and Return experiment with Id', (done)=> {
-            findStub.resolves(
-                {
-                    'id': 30,
-                    'name': 'exp1001',
-                    'subjectType': 'plant',
-                    'reps': 20,
-                    'refExperimentDesignId': 2,
-                    'createdDate': '2016-10-05T15:19:12.026Z',
-                    'createdUserId': 'akuma11',
-                    'modifiedUserId': 'akuma11',
-                    'modifiedDate': '2016-10-05T15:19:12.026Z',
-                    'status': 'ACTIVE'
-                },
-            )
-            const testObject = new ExperimentsService()
-            testObject.getExperimentById(30).then((experiment)=> {
-                experiment.id.should.equal(30)
-                experiment.name.should.equal('exp1001')
-            }).then(done, done)
+            return experimentsService.getExperimentById(30).then((experiment)=> {
+                sinon.assert.calledWithExactly(findStub, 30)
+                experiment.should.equal(testResponse)
+            })
         })
 
-        it('fails', (done) => {
-            findStub.rejects({'status': 500, 'code': 'Internal Server Error', 'errorMessage': 'Please Contact Support'})
-            const testObject = new ExperimentsService()
-            testObject.getExperimentById(30).should.be.rejected.and.notify(done)
+        it('fails', () => {
+            findStub.rejects(testError)
+
+            return experimentsService.getExperimentById(30).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(findStub, 30)
+            })
         })
 
-        it('fails When it returns no result', (done)=> {
+        it('fails When it returns no result', ()=> {
             findStub.resolves(null)
-            const testObject = new ExperimentsService()
-            testObject.getExperimentById(30).should.be.rejected
-            testObject.getExperimentById(30).catch((err) => {
-                err.status.should.equal(404)
+
+            return experimentsService.getExperimentById(30).should.be.rejected.then((err) => {
+                err.output.statusCode.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
-            }).then(done, done)
-
+                sinon.assert.calledWithExactly(findStub, 30)
+            })
         })
-
     })
-
 
     describe('create Experiments', () => {
 
@@ -156,17 +127,22 @@ describe('ExperimentsService', () => {
             }
         ]
 
-        it('succeeds and returns newly created experiment id with status and message for one experiment create request', (done) => {
-
+        it('succeeds and returns newly created experiment id with status and message for one experiment create request', () => {
             createStub.resolves({id: 1})
             expDesignFindStub.resolves({id: 2})
-            const testObject = new ExperimentsService()
-            testObject.createExperiment(experimentsObj).then((result) => {
+            validateStub.resolves()
+
+            return experimentsService.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)
-            }).then(done, done)
+                createStub.calledOnce.should.equal(true)
+                sinon.assert.calledWithExactly(
+                    createStub,
+                    sinon.match.same(tx),
+                    sinon.match.same(experimentsObj[0]))
+            })
         })
 
-        it('succeeds and returns list of experiment ids with status and message for batch experiment create request', (done) => {
+        it('succeeds and returns list of experiment ids with status and message for batch experiment create request', () => {
             experimentsObj.push(
                 {
                     'name': 'exp1003',
@@ -188,28 +164,35 @@ describe('ExperimentsService', () => {
 
             createStub.resolves({id: 1})
             expDesignFindStub.resolves({id: 2})
-            const testObject = new ExperimentsService()
-            testObject.createExperiment(experimentsObj).then((result) => {
+            validateStub.resolves()
+
+            return experimentsService.createExperiment(experimentsObj).then((result) => {
                 result.should.eql(expectedResult)
-            }).then(done, done)
+                createStub.calledTwice.should.equal(true)
+            })
         })
 
-        it('fails', (done) => {
-            createStub.rejects({
-                'status': 500,
-                'code': 'Internal Server Error',
-                'errorMessage': 'Please Contact Support'
-            })
+        it('fails', () => {
+            createStub.rejects(testError)
+            validateStub.resolves()
 
-            const testObject = new ExperimentsService()
-            testObject.createExperiment(experimentsObj).should.be.rejected.and.notify(done)
+            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to validation error', () => {
+            validateStub.rejects("Validation Failure")
+
+            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
+                createStub.called.should.equal(false)
+            })
         })
     })
 
-
     describe('Update Experiment:', () => {
 
-        it('Success and Return experiment', (done)=> {
+        it('Success and Return experiment', ()=> {
             const experimentResObj = {
                 'id': 30,
                 'name': 'exp1002',
@@ -230,14 +213,20 @@ describe('ExperimentsService', () => {
             updateStub.resolves(
                 experimentResObj
             )
-            const testObject = new ExperimentsService()
-            testObject.updateExperiment(30, experimentReqObj).then((experiment)=> {
+            validateStub.resolves()
+
+            return experimentsService.updateExperiment(30, experimentReqObj).then((experiment)=> {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
-            }).then(done, done)
+                sinon.assert.calledWithExactly(
+                    updateStub,
+                    30,
+                    sinon.match.same(experimentReqObj)
+                )
+            })
         })
 
-        it('fails', (done) => {
+        it('fails', () => {
             const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
@@ -249,17 +238,22 @@ describe('ExperimentsService', () => {
                 'modifiedDate': '2016-10-05T15:19:12.026Z',
                 'status': 'ACTIVE'
             }
-            updateStub.rejects({
-                'status': 500,
-                'code': 'Internal Server Error',
-                'errorMessage': 'Please Contact Support'
+            updateStub.rejects(testError)
+            validateStub.resolves()
+
+            return experimentsService.updateExperiment(30, experimentReqObj).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    updateStub,
+                    30,
+                    sinon.match.same(experimentReqObj)
+                )
             })
-            const testObject = new ExperimentsService()
-            testObject.updateExperiment(30, experimentReqObj).should.be.rejected.and.notify(done)
         })
 
-        it('fails When it returns no result', (done)=> {
+        it('fails When it returns no result', ()=> {
             updateStub.resolves(null)
+            validateStub.resolves()
             const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
@@ -269,52 +263,50 @@ describe('ExperimentsService', () => {
                 'userId': 'akuma11',
                 'status': 'ACTIVE'
             }
-            const testObject = new ExperimentsService()
-            testObject.updateExperiment(30, experimentReqObj).should.be.rejected
-            testObject.updateExperiment(30, experimentReqObj).catch((err) => {
-                console.log('jhdfdhfjdhjgdfjghjfdh'+err)
-                err.status.should.equal(404)
-                err.message.should.equal('Experiment Not Found to Update')
-            }).then(done, done)
 
+            return experimentsService.updateExperiment(30, experimentReqObj).should.be.rejected.then((err) => {
+                err.output.statusCode.should.equal(404)
+                err.message.should.equal('Experiment Not Found to Update')
+            })
         })
 
+        it('fails due to validation error', () => {
+            validateStub.rejects()
 
+            return experimentsService.updateExperiment(30, testPayload).should.be.rejected.then((err) => {
+                updateStub.called.should.equal(false)
+            })
+        })
     })
 
     describe('Delete Experiment:', () => {
 
-        it('Success and Return experimentId', (done)=> {
-            const id = 30
-            removeStub.resolves(id)
-            const testObject = new ExperimentsService()
-            testObject.deleteExperiment(30).then((id)=> {
+        it('Success and Return experimentId', ()=> {
+            removeStub.resolves(30)
+            return experimentsService.deleteExperiment(30).then((id)=> {
                 id.should.equal(30)
-            }).then(done, done)
-        })
-
-        it('fails', (done) => {
-            removeStub.rejects({
-                'status': 500,
-                'code': 'Internal Server Error',
-                'errorMessage': 'Please Contact Support'
             })
-            const testObject = new ExperimentsService()
-            testObject.deleteExperiment(30).should.be.rejected.and.notify(done)
         })
 
-        it('fails When it returns no result', (done)=> {
+        it('fails', () => {
+            removeStub.rejects(testError)
+
+            return experimentsService.deleteExperiment(30).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                removeStub.calledOnce.should.equal(true)
+                sinon.assert.calledWithExactly(
+                    removeStub,
+                    30)
+            })
+        })
+
+        it('fails When it returns no result', ()=> {
             removeStub.resolves(null)
-            const testObject = new ExperimentsService()
-            testObject.deleteExperiment(30).should.be.rejected
-            testObject.deleteExperiment(30).catch((err) => {
-                err.status.should.equal(404)
+            return experimentsService.deleteExperiment(30).should.be.rejected.then((err) => {
+                err.output.statusCode.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
-            }).then(done, done)
+            })
 
         })
-
-
     })
-
 })

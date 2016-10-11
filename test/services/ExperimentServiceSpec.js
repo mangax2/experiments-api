@@ -126,7 +126,7 @@ describe('ExperimentsService', () => {
             const testObject = new ExperimentsService()
             testObject.getExperimentById(30).should.be.rejected
             testObject.getExperimentById(30).catch((err) => {
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
             }).then(done, done)
 
@@ -273,7 +273,7 @@ describe('ExperimentsService', () => {
             testObject.updateExperiment(30, experimentReqObj).should.be.rejected
             testObject.updateExperiment(30, experimentReqObj).catch((err) => {
                 console.log('jhdfdhfjdhjgdfjghjfdh'+err)
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found to Update')
             }).then(done, done)
 
@@ -308,7 +308,7 @@ describe('ExperimentsService', () => {
             const testObject = new ExperimentsService()
             testObject.deleteExperiment(30).should.be.rejected
             testObject.deleteExperiment(30).catch((err) => {
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
             }).then(done, done)
 

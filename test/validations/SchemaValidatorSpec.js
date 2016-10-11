@@ -1,8 +1,6 @@
 const sinon = require('sinon')
-const chai = require('chai')
 const SchemaValidator = require('../../src/validations/SchemaValidator')
 const AppError = require('../../src/services/utility/AppError')
-
 
 describe('SchemaValidator', () => {
     const testObject = new SchemaValidator()
@@ -32,6 +30,57 @@ describe('SchemaValidator', () => {
 
     })
 
+
+    describe('schemaCheck ', () => {
+        const targetObj = {
+            "subjectType": "plant",
+            "userId": "akuma11",
+            "reps": "2",
+            "refExperimentDesignId": 2,
+            "status": "ACTIVE"
+        }
+
+        const schemaArray = [
+            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+            {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}, 'required': true},
+            {'paramName': 'reps', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 1000}, 'required': true},
+            {'paramName': 'refExperimentDesignId', 'type': 'refData', 'required': true},
+            {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
+            {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
+        ]
+
+        it('returns error message when value is required', () => {
+            (function () {
+                testObject.schemaCheck(targetObj, schemaArray)
+                testObject.check()
+            }).should.throw('Error: name is required')
+
+        })
+
+        it('returns error message when targetObj is empty object', () => {
+
+            (function () {
+                testObject.schemaCheck({}, schemaArray)
+                testObject.check()
+            }).should.throw('Error: name is required,Error: subjectType is required,Error: reps is required,Error: refExperimentDesignId is required,Error: status is required,Error: userId is required')
+
+        })
+
+
+    })
+
+
+    describe('getSchema ', () => {
+
+        it('returns error message when getSchema is called directly', () => {
+            (function () {
+                testObject.getSchema()
+            }).should.throw('getSchema not implemented')
+
+        })
+
+
+    })
 
 })
 

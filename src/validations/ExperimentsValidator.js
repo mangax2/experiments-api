@@ -1,5 +1,3 @@
-'use strict'
-
 const SchemaValidator = require('./SchemaValidator')
 const _ = require('lodash')
 const AppError = require('../services/utility/AppError')
@@ -21,7 +19,7 @@ class ExperimentsValidator extends SchemaValidator {
     performValidations(targetObject) {
         if (_.isArray(targetObject)) {
             return Promise.all(
-                targetObject.map(experiment=> super.performValidations(experiment))
+                _.map(targetObject, experiment=> super.performValidations(experiment))
             )
 
         } else {

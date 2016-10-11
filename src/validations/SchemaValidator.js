@@ -39,10 +39,10 @@ export class SchemaValidator extends BaseValidator {
 
     performValidations(targetObject) {
         return new Promise((resolve) => {
-            if (this.getSchema() == null || this.getSchema() == undefined) {
-                logger.error('getSchema not implemented')
-                throw 'getSchema not implemented'
-            }
+            // if (this.getSchema()) {
+            //     logger.error('getSchema not implemented')
+            //     throw 'getSchema not implemented'
+            // }
             this.schemaCheck(targetObject, this.getSchema())
             resolve()
         })

@@ -1,5 +1,4 @@
 const sinon = require('sinon')
-const chai = require('chai')
 const ExperimentsValidator = require('../../src/validations/ExperimentsValidator')
 const AppError = require('../../src/services/utility/AppError')
 
@@ -39,7 +38,14 @@ describe('ExperimentValidator', () => {
             "status": "ACTIVE"
         }]
         it('returns resolved promise when good value passed for schema validation', () => {
-            testObject.performValidations(targetObj).should.be.fulfilled
+            return testObject.performValidations(targetObj).should.be.fulfilled
+
+        })
+
+        it('returns rejected promise when targetObject is not an array', () => {
+            return testObject.performValidations({}).should.be.rejected.then((err) => {
+                err.should.be.equal('Experiments request object needs to be an array')
+            })
 
         })
 

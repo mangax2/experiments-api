@@ -1,9 +1,9 @@
 /**
  * Created by kprat1 on 12/10/16.
  */
-import db from "../db/DbManager";
-import AppError from "./utility/AppError";
-import log4js from "log4js";
+import db from "../db/DbManager"
+import AppError from "./utility/AppError"
+import log4js from "log4js"
 const logger = log4js.getLogger('HypothesisService')
 
 
@@ -29,7 +29,7 @@ class HypothesisService {
     }
 
     deleteHypothesis(id) {
-      return  db.hypothesis.remove(id).then((hypothesis)=> {
+        return db.hypothesis.remove(id).then((hypothesis)=> {
             if (!hypothesis) {
                 throw AppError.notFound("Hypothesis Not Found")
             } else {

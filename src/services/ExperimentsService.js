@@ -1,8 +1,8 @@
-import db from "../db/DbManager";
-import AppUtil from "./utility/AppUtil";
-import AppError from "./utility/AppError";
-import ExperimentsValidator from "../validations/ExperimentsValidator";
-import log4js from "log4js";
+import db from "../db/DbManager"
+import AppUtil from "./utility/AppUtil"
+import AppError from "./utility/AppError"
+import ExperimentsValidator from "../validations/ExperimentsValidator"
+import log4js from "log4js"
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
@@ -16,8 +16,8 @@ class ExperimentsService {
             return Promise.all(experiments.map(exp =>
                 db.experimentDesign.find(exp.refExperimentDesignId).then((d) => {
                     if (!d) {
-                        logger.error('Invalid refExperimentDesignId')
-                        throw AppError.badRequest('Invalid refExperimentDesignId')
+                        logger.error('Invalid Experiment Design')
+                        throw AppError.badRequest('Invalid Experiment Design')
                     }
                 })
             )).then(() => {

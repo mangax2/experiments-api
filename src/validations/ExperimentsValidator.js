@@ -17,14 +17,13 @@ class ExperimentsValidator extends SchemaValidator {
     }
 
     performValidations(targetObject) {
-        if (_.isArray(targetObject)) {
+        if (_.isArray(targetObject) && targetObject.length>0) {
             return Promise.all(
                 _.map(targetObject, experiment=> super.performValidations(experiment))
             )
 
         } else {
-            return Promise.reject('Experiments request object needs to be an array')
-
+            throw AppError.badRequest('Experiments request object needs to be an array')
         }
 
 

@@ -1,6 +1,6 @@
-import db from "../db/DbManager";
-import FactorTypesValidator from "../validations/FactorTypesValidator";
-import AppError from "./utility/AppError";
+import db from "../db/DbManager"
+import FactorTypesValidator from "../validations/FactorTypesValidator"
+import AppError from "./utility/AppError"
 class FactorTypeService {
     constructor() {
         this._validator = new FactorTypesValidator()

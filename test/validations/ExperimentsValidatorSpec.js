@@ -43,9 +43,9 @@ describe('ExperimentValidator', () => {
         })
 
         it('returns rejected promise when targetObject is not an array', () => {
-            return testObject.performValidations({}).should.be.rejected.then((err) => {
-                err.should.be.equal('Experiments request object needs to be an array')
-            })
+            (()=>{
+                testObject.performValidations({})
+            }).should.throw("Experiments request object needs to be an array")
 
         })
 

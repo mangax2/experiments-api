@@ -185,8 +185,9 @@ describe('ExperimentsService', () => {
             expDesignFindStub.resolves(null)
 
             return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
-                // err.should.equal(testError)
                 createStub.called.should.equal(false)
+                err.status.should.equal(400)
+                err.errorMessage.should.equal("Invalid Experiment Design")
             })
         })
 

@@ -10,7 +10,7 @@ const logger = log4js.getLogger('Router')
 const router = express.Router()
 
 
-router.get('/ping', (req, res, next) => {
+router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
@@ -208,7 +208,6 @@ router.get('/hypotheses/:id', (req, res, next)=> {
     return new HypothesisService().getHypothesisById(id).then((hypothesis)=> {
         return res.json(hypothesis)
     }).catch((err)=> {
-        console.log(err)
         return next(err)
     })
 })

@@ -18,7 +18,7 @@ let transactionStub
 let updateStub
 let validateStub
 
-describe.only('ExperimentsService', () => {
+describe('ExperimentsService', () => {
     before(() => {
         createStub = sinon.stub(db.experiments, 'create')
         expDesignFindStub = sinon.stub(db.experimentDesign, 'find')
@@ -99,7 +99,7 @@ describe.only('ExperimentsService', () => {
             findStub.resolves(null)
 
             return experimentsService.getExperimentById(30).should.be.rejected.then((err) => {
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
                 sinon.assert.calledWithExactly(findStub, 30)
             })
@@ -265,7 +265,7 @@ describe.only('ExperimentsService', () => {
             }
 
             return experimentsService.updateExperiment(30, experimentReqObj).should.be.rejected.then((err) => {
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found to Update')
             })
         })
@@ -303,7 +303,7 @@ describe.only('ExperimentsService', () => {
         it('fails When it returns no result', ()=> {
             removeStub.resolves(null)
             return experimentsService.deleteExperiment(30).should.be.rejected.then((err) => {
-                err.output.statusCode.should.equal(404)
+                err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
             })
 

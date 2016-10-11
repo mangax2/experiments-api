@@ -1,25 +1,25 @@
 const internals = {
-    STATUS_CODES: Object.setPrototypeOf({
+    STATUS_CODES: {
         '400': 'Bad Request',
         '401': 'Unauthorized',
         '403': 'Forbidden',
         '404': 'Not Found',
         '500': 'Internal Server Error',
-    }, null)
+    }
 }
 
-internals.create = function (statusCode, message, data, ctor) {
-    const error = new Error(message ? message : undefined)       // Avoids settings null message
-    Error.captureStackTrace(error, ctor)                       // Filter the stack to our external API
+function create(statusCode, message, data, ctor) {
+    const error = new Error(message ? message : undefined)
+    Error.captureStackTrace(error, ctor)
     if (data) {
         error.data = data
     }
-    internals.initialize(error, statusCode, message)
+    initialize(error, statusCode, message)
     return error
 }
 
 
-internals.initialize = function (error, statusCode, message) {
+function initialize (error, statusCode, message) {
     error.status = statusCode
     error.code = internals.STATUS_CODES[statusCode] || 'Unknown'
     if (statusCode === 500) {
@@ -27,30 +27,35 @@ internals.initialize = function (error, statusCode, message) {
     }
     else if (message) {
         error.errorMessage = message
+    }else{
+        error.errorMessage =  error.code
     }
     return error
 }
 
+exports.create=function(status,message,data){
+    return create(status,message,data,exports.create)
+}
+
 
 exports.badRequest = function (message, data) {
-    return internals.create(400, message, data, exports.badRequest)
+    return create(400, message, data, exports.badRequest)
 }
 
 
 exports.unauthorized = function (message, data) {
-    return internals.create(401, message, data, exports.unauthorized)
+    return create(401, message, data, exports.unauthorized)
 
 
 }
 
 exports.forbidden = function (message, data) {
-
-    return internals.create(403, message, data, exports.forbidden)
+    return create(403, message, data, exports.forbidden)
 }
 
 
 exports.notFound = function (message, data) {
-    return internals.create(404, message, data, exports.notFound)
+    return create(404, message, data, exports.notFound)
 }
 
 

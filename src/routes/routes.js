@@ -1,10 +1,10 @@
-const express = require('express')
-const log4js = require('log4js')
-const ExperimentsService = require('../services/ExperimentsService')
-const ExperimentModelService = require('../services/ExperimentModelService')
-const ExperimentDesignService = require('../services/ExperimentDesignService')
-const FactorTypeService = require('../services/factorTypeService')
-const HypothesisService = require('../services/HypothesisService')
+import express from 'express'
+import log4js from 'log4js'
+import ExperimentsService from '../services/ExperimentsService'
+import ExperimentModelService from '../services/ExperimentModelService'
+import ExperimentDesignService from '../services/ExperimentDesignService'
+import FactorTypeService from '../services/factorTypeService'
+import HypothesisService from '../services/HypothesisService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()

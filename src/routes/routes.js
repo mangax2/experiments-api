@@ -1,6 +1,5 @@
 const express = require('express')
 const log4js = require('log4js')
-const swaggerDoc = require('../swagger/swagger.json')
 const ExperimentsService = require('../services/ExperimentsService')
 const ExperimentModelService = require('../services/ExperimentModelService')
 const ExperimentDesignService = require('../services/ExperimentDesignService')
@@ -15,9 +14,6 @@ router.get('/ping', (req,res,next) => {
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
 
-router.get('/api-docs', (req,res,next) => {
-    return res.json(swaggerDoc)
-})
 
 router.get('/experiment-designs', (req,res,next) => {
     return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {

@@ -1,5 +1,6 @@
 const config = require('../config')
-
+const swaggerDoc = require('./swagger/swagger.json')
+const swaggerTools = require('swagger-tools')
 if (config.node_env !== 'production') {
     require('babel-register')
 }
@@ -39,7 +40,13 @@ const localDevProfile = {
 //     localDevProfile: localDevProfile
 // }))
 
-app.use('/experiments-api', require('./routes/routes'))
+app.use(appBaseUrl, require('./routes/routes'))
+
+swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
+    app.use(appBaseUrl, middleware.swaggerUi())
+})
+
+
 app.use(function (err, req, res, next) {
     if (err) {
         if (_.isArray(err)) {

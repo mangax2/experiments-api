@@ -1,6 +1,7 @@
 const log4js = require('log4js')
 
 module.exports = () => {
+    const logLevel = "DEBUG"
     const isRunningInCloudFoundry = () => { return process.env.VCAP_APPLICATION }
     if(isRunningInCloudFoundry){
         const vcapApplication = JSON.parse(process.env.VCAP_APPLICATION)
@@ -19,7 +20,11 @@ module.exports = () => {
                         }
                     }
                 }
-            ]
+            ],
+            levels:
+                {
+                    "[all]": logLevel
+                }
         }
 
         return log4js.configure(config,{})

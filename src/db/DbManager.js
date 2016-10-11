@@ -3,6 +3,7 @@ import experiments from '../repos/experiments'
 import experimentModel from '../repos/experimentModel'
 import experimentDesign from '../repos/experimentDesign'
 import factorType from '../repos/factorType'
+import hypothesis from '../repos/hypothesis'
 import pgPromise from 'pg-promise'
 import cfServices from '../services/utility/ServiceConfig'
 import log4js from 'log4js'
@@ -16,6 +17,7 @@ const options = {
         obj.experimentModel = new (experimentModel)(obj, pgp)
         obj.experimentDesign = new (experimentDesign)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
+        obj.hypothesis = new (hypothesis)(obj, pgp)
     }
 }
 

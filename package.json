@@ -9,7 +9,7 @@
     "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "start": "NODE_ENV=production node ./build/app",
-    "test": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha test",
+    "test": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "mocha --watch test",
     "eslint": "eslint src; exit 0",
     "check-coverage": "nyc check-coverage --lines 16"
@@ -67,16 +67,20 @@
     "npm": "2.15.x"
   },
   "nyc": {
+    "require": [
+      "babel-core/register"
+    ],
     "exclude": [
-      "config.js",
+      "src/repos",
+      "src/**/*Config.js",
+      "src/db/",
       "src/app.js",
-      "src/db/DbManager.js",
-      "src/repos/*.js",
       "src/routes/*.js",
-      "src/services/utility/*Config.js",
       "node_modules",
+      "*.js",
       "test"
-    ]
+    ],
+    "all": true
   },
   "license": "ISC"
 }

@@ -31,7 +31,7 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
     "tags": ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"],
     "additional-operations": [{"method":"GET", "uri":"/ping"}]
   },
-  "swagger": "{
+  "swagger": {
                   "swagger": "2.0",
                   "info": {
                       "title": "Experiments API",
@@ -886,7 +886,6 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
                       }
                   }
               }
-"
 }]
 EndOfMessage
 )

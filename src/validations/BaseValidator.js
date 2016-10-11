@@ -56,7 +56,7 @@ class BaseValidator {
         if (this.messages.length > 0) {
             const copyMessages = this.messages
             this.messages = []
-            throw  _.map(copyMessages, function (x) {
+            throw _.map(copyMessages, function(x){
                 return AppError.badRequest(x)
             })
         }

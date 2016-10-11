@@ -2,15 +2,34 @@ const sinon = require('sinon')
 const chai = require('chai')
 const BaseValidator = require('../../src/validations/BaseValidator')
 
-
 describe('BaseValidator', () => {
     const testObject = new BaseValidator()
+    let baseStub
 
     afterEach(() => {
+        if(baseStub){ baseStub.restore()}
         testObject.messages = []
-
-
     })
+
+    describe('validate', () => {
+        it('fails due to not allowing call to performValidations in BaseValidator class', () => {
+            return testObject.validate({}).should.be.rejected
+        })
+
+        it('returns a check with no messages', () => {
+            baseStub = sinon.stub(testObject, 'performValidations').resolves()
+            testObject.validate.bind(testObject, {}).should.not.throw()
+        })
+
+        it('throws an error with messages', () => {
+            baseStub = sinon.stub(testObject, 'performValidations').resolves()
+            testObject.messages.push("Test Bad Validation")
+            return testObject.validate({}).should.be.rejected.then((err) => {
+                err[0].errorMessage.should.equal("Test Bad Validation")
+            })
+        })
+    })
+
     describe('checkLength ', () => {
         it('returns no error message when value is within length range', () => {
             testObject.checkLength('testValue', {'min': 1, 'max': 100}, 'param1')
@@ -23,7 +42,6 @@ describe('BaseValidator', () => {
         })
 
     })
-
 
     describe('required check', () => {
         it('returns no error message when value not empty', () => {
@@ -39,7 +57,6 @@ describe('BaseValidator', () => {
         })
 
     })
-
 
     describe('checkNumeric check', () => {
         it('returns no error message when value not is number', () => {
@@ -57,7 +74,6 @@ describe('BaseValidator', () => {
         })
 
     })
-
 
     describe('checkNumericRange ', () => {
         it('returns no error message when value is within numeric range', () => {
@@ -92,8 +108,8 @@ describe('BaseValidator', () => {
     })
     describe('performValidations', () => {
         it('returns error when performValidations is not implemented by subclass ', () => {
-            chai.expect(testObject.performValidations()).to.eventually
-                .be.rejectedWith("performValidations validation method not implemented'")
+            return chai.expect(testObject.performValidations()).to.eventually
+                .be.rejectedWith("Server error, please contact support")
 
         })
     })

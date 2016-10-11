@@ -1,4 +1,5 @@
 import SchemaValidator from './SchemaValidator'
+import * as _ from 'lodash'
 
 class FactorTypesValidator extends SchemaValidator {
     getSchema() {
@@ -9,7 +10,7 @@ class FactorTypesValidator extends SchemaValidator {
 
     performValidations(targetObject) {
         return Promise.all(
-            targetObject.map(factorType=> super.performValidations(factorType))
+            _.map(targetObject, factorType=> super.performValidations(factorType))
         )
     }
 }

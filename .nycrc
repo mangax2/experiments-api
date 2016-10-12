@@ -1,0 +1,16 @@
+{
+    "require": [
+      "babel-core/register"
+    ],
+    "exclude": [
+      "src/*.js",
+      "src/routes",
+      "src/repos",
+      "src/**/*Config.js",
+      "src/db/",
+      "node_modules",
+      "*.js",
+      "test"
+    ],
+    "all": true
+}

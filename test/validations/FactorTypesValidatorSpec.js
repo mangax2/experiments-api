@@ -18,9 +18,16 @@ describe('FactorTypesValidator', () => {
     describe('performValidations ', () => {
         it('returns resolved promise when good value passed for schema validation', () => {
             const targetObj = [{
-                "name": "testDesign",
+                "type": "testDesign",
             }]
             return factorTypesValidator.performValidations(targetObj).should.be.fulfilled
+        })
+
+        it('returns rejected promise when targetObject is not an array', () => {
+            (()=>{
+                factorTypesValidator.performValidations({})
+            }).should.throw("Factor Types request object needs to be an array")
+
         })
 
 

@@ -10,8 +10,8 @@
       "src/db/",
       "node_modules",
       "*.js",
-      "test"
+      "test",
       "build"
     ],
-    all: true
+    "all": true
 }

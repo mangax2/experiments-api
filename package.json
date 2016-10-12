@@ -11,7 +11,7 @@
     "test": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "mocha --watch test",
     "eslint": "eslint src; exit 0",
-    "check-coverage": "nyc check-coverage --lines 16"
+    "check-coverage": "nyc check-coverage --lines 90 --statements 90 --branches 90 --functions 90"
   },
   "repository": {
     "type": "git",

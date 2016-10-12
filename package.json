@@ -70,13 +70,10 @@
     "require": [
       "babel-core/register"
     ],
-    "all": true,
     "exclude": [
       "src/repos",
       "src/**/*Config.js",
       "src/db/",
-      "src/app.js",
-      "src/routes/*.js",
       "node_modules",
       "*.js",
       "test"

@@ -70,6 +70,7 @@
     "require": [
       "babel-core/register"
     ],
+    "all": true,
     "exclude": [
       "src/repos",
       "src/**/*Config.js",
@@ -79,8 +80,7 @@
       "node_modules",
       "*.js",
       "test"
-    ],
-    "all": true
+    ]
   },
   "license": "ISC"
 }

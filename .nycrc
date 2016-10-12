@@ -11,6 +11,7 @@
       "node_modules",
       "*.js",
       "test"
+      "build"
     ],
-    "all": true
+    all: true
 }

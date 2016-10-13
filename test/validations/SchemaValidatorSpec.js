@@ -46,14 +46,15 @@ describe('SchemaValidator', () => {
             {'paramName': 'reps', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 1000}, 'required': true},
             {'paramName': 'refExperimentDesignId', 'type': 'refData', 'required': true},
             {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
-            {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
+            {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+            {'paramName': 'isNull', 'type': 'boolean', 'required': true}
         ]
 
         it('returns error message when value is required', () => {
             (function () {
                 testObject.schemaCheck(targetObj, schemaArray)
                 testObject.check()
-            }).should.throw('Error: name is required')
+            }).should.throw('Error: name is required,Error: isNull is required')
 
         })
 
@@ -65,7 +66,6 @@ describe('SchemaValidator', () => {
             }).should.throw('Error: name is required,Error: subjectType is required,Error: reps is required,Error: refExperimentDesignId is required,Error: status is required,Error: userId is required')
 
         })
-
 
     })
 

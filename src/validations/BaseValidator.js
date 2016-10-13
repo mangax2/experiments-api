@@ -52,8 +52,15 @@ class BaseValidator {
         }
     }
 
+    checkBoolean(value, name) {
+        if (!validator.isBoolean(value.toString())) {
+            this.messages.push(name + ' must be boolean')
+        }
+    }
+
     check() {
         if (this.messages.length > 0) {
+
             const copyMessages = this.messages
             this.messages = []
             throw _.map(copyMessages, function(x){

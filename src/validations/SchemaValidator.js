@@ -32,6 +32,9 @@ export class SchemaValidator extends BaseValidator {
             } else if (elementSchema.type == 'constant') {
                 this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
             }
+            else if (elementSchema.type == 'boolean') {
+                this.checkBoolean(elementValue, elementSchema.paramName)
+            }
         }
 
     }
@@ -39,10 +42,6 @@ export class SchemaValidator extends BaseValidator {
 
     performValidations(targetObject) {
         return new Promise((resolve) => {
-            // if (this.getSchema()) {
-            //     logger.error('getSchema not implemented')
-            //     throw 'getSchema not implemented'
-            // }
             this.schemaCheck(targetObject, this.getSchema())
             resolve()
         })

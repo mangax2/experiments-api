@@ -75,6 +75,24 @@ describe('BaseValidator', () => {
 
     })
 
+
+    describe('checkBoolean check', () => {
+        it('returns no error message when value is boolean', () => {
+            const testObject = new BaseValidator()
+            testObject.checkBoolean(true, 'param1')
+            testObject.messages.length.should.equal(0)
+
+        })
+
+        it('returns error when value is not boolean', () => {
+            testObject.checkBoolean('text', 'param1')
+            testObject.messages.length.should.equal(1)
+            testObject.messages[0].should.equal("param1 must be boolean")
+
+        })
+
+    })
+
     describe('checkNumericRange ', () => {
         it('returns no error message when value is within numeric range', () => {
             testObject.checkNumericRange(20, {'min': 1, 'max': 100}, 'param1')
@@ -106,6 +124,14 @@ describe('BaseValidator', () => {
         })
 
     })
+
+
+
+
+
+
+
+
     describe('performValidations', () => {
         it('returns error when performValidations is not implemented by subclass ', () => {
             return chai.expect(testObject.performValidations()).to.eventually

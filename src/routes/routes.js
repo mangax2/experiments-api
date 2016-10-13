@@ -6,6 +6,7 @@ import ExperimentDesignService from '../services/ExperimentDesignService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
 
+
 const logger = log4js.getLogger('Router')
 const router = express.Router()
 
@@ -95,7 +96,6 @@ router.put('/experiments/:id', (req, res, next) => {
 
 router.delete('/experiments/:id', (req, res, next) => {
     const id = req.params.id
-
     return new ExperimentsService().deleteExperiment(id).then((value) => {
         return res.json(value)
     }).catch((err) => {
@@ -217,6 +217,28 @@ router.delete('/hypotheses/:id', (req, res, next)=> {
     return new HypothesisService().deleteHypothesis(id).then((hypothesis)=> {
         return res.json(hypothesis)
     }).catch((err)=> {
+        return next(err)
+    })
+
+
+})
+
+
+router.post('/hypotheses', (req, res, next) => {
+    const hypotheses = req.body
+    return new HypothesisService().createHypothesis(hypotheses).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/hypotheses/:id', (req, res, next) => {
+    const hypotheses = req.body
+    const id= req.params.id
+    return new HypothesisService().updateHypothesis(id,hypotheses).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
         return next(err)
     })
 })

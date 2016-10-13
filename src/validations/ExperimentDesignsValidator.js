@@ -1,5 +1,6 @@
 import SchemaValidator from './SchemaValidator'
 import * as _ from 'lodash'
+import AppError from '../services/utility/AppError'
 
 class ExperimentDesignsValidator extends SchemaValidator {
     getSchema() {
@@ -9,9 +10,14 @@ class ExperimentDesignsValidator extends SchemaValidator {
     }
 
     performValidations(targetObject) {
-        return Promise.all(
-            _.map(targetObject, experimentDesign=> super.performValidations(experimentDesign))
-        )
+        if (_.isArray(targetObject) && targetObject.length > 0) {
+            return Promise.all(
+                _.map(targetObject, experimentDesign=> super.performValidations(experimentDesign))
+            )
+
+        } else {
+            throw AppError.badRequest('Experiment Designs request object needs to be an array')
+        }
     }
 }
 

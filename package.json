@@ -5,14 +5,13 @@
   "main": "app.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
-    "coverage": "nyc report",
     "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "start": "NODE_ENV=production node ./build/app",
     "test": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "mocha --watch test",
     "eslint": "eslint src; exit 0",
-    "check-coverage": "nyc check-coverage --lines 16"
+    "check-coverage": "nyc check-coverage --lines 90 --statements 90 --branches 90 --functions 90"
   },
   "repository": {
     "type": "git",
@@ -65,22 +64,6 @@
   "engines": {
     "node": "~4.4.4",
     "npm": "2.15.x"
-  },
-  "nyc": {
-    "require": [
-      "babel-core/register"
-    ],
-    "exclude": [
-      "src/repos",
-      "src/**/*Config.js",
-      "src/db/",
-      "src/app.js",
-      "src/routes/*.js",
-      "node_modules",
-      "*.js",
-      "test"
-    ],
-    "all": true
   },
   "license": "ISC"
 }

@@ -31,11 +31,11 @@ class HypothesisValidator extends SchemaValidator {
     }
 
     checkBusinessKey(hypothesisObj){
-        const uniqArray=_.uniq(_.map(hypothesisObj,(hypothesis)=>{
-              _.pick(hypothesis,['description','experimentId','isNull'])
+        const uniqArray = _.uniq(_.map(hypothesisObj,(hypothesis)=>{
+            return _.pick(hypothesis,['description','experimentId','isNull'])
         }))
 
-        if(uniqArray.length!==hypothesisObj.length){
+        if(uniqArray.length!=hypothesisObj.length){
             throw AppError.badRequest('Exact hypothesis already exist for some experiments')
         }
     }

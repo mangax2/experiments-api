@@ -29,7 +29,7 @@ swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
     "requires-approval": true,
     "platform-tag": "api",
     "tags": ["experiments-api","experiments","velocity-experiments-api","velocity-experiments","cosmos"],
-    "additional-operations": [{"method":"GET", "uri":"/ping"}]
+    "additional-operations": [{"method":"GET", "uri":"/ping"},{"method":"GET", "uri":"/api-docs"}]
   },
   "swagger": $swagger
 }]

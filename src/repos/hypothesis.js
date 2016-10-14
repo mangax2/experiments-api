@@ -19,6 +19,13 @@ module.exports = (rep) => {
             return rep.one("insert into hypothesis(description, is_null, status, experiment_id, created_date," +
                 " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", hypothesisObj)
         },
+        batchCreate: (hypothesisObj) => {
+
+            return rep.tx(t=>t.batch(hypothesisObj.map(l=>t.one(
+                "insert into hypothesis(description, is_null, status, experiment_id, created_date," +
+                " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", l)
+            )))
+        },
 
         update: (id, hypothesisObj) => {
             return rep.oneOrNone("UPDATE hypothesis SET (description, is_null, status, experiment_id," +

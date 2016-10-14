@@ -220,17 +220,18 @@ router.delete('/hypotheses/:id', (req, res, next)=> {
         return next(err)
     })
 
-
 })
 
 
 router.post('/hypotheses', (req, res, next) => {
+
     const hypotheses = req.body
     return new HypothesisService().createHypothesis(hypotheses).then((id) => {
         return res.json(id)
     }).catch((err) => {
         return next(err)
     })
+
 })
 
 router.put('/hypotheses/:id', (req, res, next) => {

@@ -113,9 +113,7 @@ describe('ExperimentsService', () => {
             'subjectType': 'plant',
             'reps': 20,
             'refExperimentDesignId': 2,
-            'createdDate': '2016-10-05T15:19:12.026Z',
             'userId': 'akuma11',
-            'modifiedDate': '2016-10-05T15:19:12.026Z',
             'status': 'ACTIVE'
         }]
 

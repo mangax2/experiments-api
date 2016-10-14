@@ -1022,7 +1022,7 @@
                     "description": "description of the experiment entity."
                 },
                 "isNull": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Type of Hypotheses."
                 },
                 "status": {
@@ -1101,7 +1101,7 @@
                     "description": "description of the hypothesis entity."
                 },
                 "isNull": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "hypothesis type."
                 },
                 "status": {

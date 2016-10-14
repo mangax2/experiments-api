@@ -203,6 +203,15 @@ router.get('/hypotheses', (req, res, next)=> {
         return next(err)
     })
 })
+
+router.get('/experiments/:id/hypotheses', (req, res, next)=> {
+    const id = req.params.id
+    return new HypothesisService().getHypothesesByExperimentId(id).then((hypotheses)=> {
+        return res.json(hypotheses)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
 router.get('/hypotheses/:id', (req, res, next)=> {
     const id = req.params.id
     return new HypothesisService().getHypothesisById(id).then((hypothesis)=> {

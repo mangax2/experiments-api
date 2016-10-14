@@ -18,19 +18,19 @@ class HypothesisService {
     }
 
     createHypothesis(hypotheses) {
-        return  this.validateHypothesis(hypotheses).then(()=> {
-            return  db.hypothesis.batchCreate(hypotheses)
+        return this.validateHypothesis(hypotheses).then(()=> {
+            return db.hypothesis.batchCreate(hypotheses)
         })
 
     }
 
-    validateHypothesis(hypotheses){
-        return this._validator.validate(hypotheses).then(()=>{
+    validateHypothesis(hypotheses) {
+        return this._validator.validate(hypotheses).then(()=> {
             return Promise.all(hypotheses.map((hypothesis)=> {
                 return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                     return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
-                        if(hypothesisObj)
-                            throw AppError.badRequest("Exact hypothesis already exist For the experimentId: "+hypothesis.experimentId)
+                        if (hypothesisObj)
+                            throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
                     })
                 })
 
@@ -44,6 +44,20 @@ class HypothesisService {
     getAllHypothesis() {
         return db.hypothesis.all()
     }
+
+    getHypothesesByExperimentId(experimentId) {
+        return db.experiments.find(experimentId).then((data) => {
+            if (!data) {
+                throw AppError.notFound('Experiment Not Found for requested experimentId')
+            } else {
+                return db.hypothesis.findByExperimentId(experimentId)
+
+            }
+        })
+
+    }
+
+
     getHypothesisById(id) {
         return db.hypothesis.find(id).then((hypothesis)=> {
             if (!hypothesis) {
@@ -65,11 +79,11 @@ class HypothesisService {
 
     }
 
-    getHypothesisByExperimentAndDescriptionAndType(experimentId,description,isNull){
-        return db.hypothesis.getHypothesisByExperimentAndDescriptionAndType(experimentId,description,isNull)
+    getHypothesisByExperimentAndDescriptionAndType(experimentId, description, isNull) {
+        return db.hypothesis.getHypothesisByExperimentAndDescriptionAndType(experimentId, description, isNull)
     }
 
-    updateHypothesis(id,hypothesis) {
+    updateHypothesis(id, hypothesis) {
         return this._validator.validate([hypothesis]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
                 return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {

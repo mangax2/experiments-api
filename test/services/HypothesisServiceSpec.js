@@ -3,7 +3,6 @@
  */
 const sinon = require('sinon')
 const chai = require('chai')
-const ExperimentsService = require('../../src/services/ExperimentsService')
 const HypothesisService = require('../../src/services/HypothesisService')
 const db = require('../../src/db/DbManager')
 
@@ -13,6 +12,7 @@ const testError = {}
 const tx = {}
 
 let createStub
+let createBatchStub
 let experimentsService
 let hypothesisService
 let findStub
@@ -21,32 +21,51 @@ let removeStub
 let transactionStub
 let updateStub
 let validateStub
+let businessKeyValidateStub
+let getExperimentByIdStub
+let getHypothesisByIdSub
+let hypothesisValidator
 
 describe('HypothesisService', () => {
     before(() => {
+
         createStub = sinon.stub(db.hypothesis, 'create')
-        experimentsService = new ExperimentsService()
+        createBatchStub = sinon.stub(db.hypothesis, 'batchCreate')
         hypothesisService = new HypothesisService()
         findStub = sinon.stub(db.hypothesis, 'find')
         getStub = sinon.stub(db.hypothesis, 'all')
         removeStub = sinon.stub(db.hypothesis, 'remove')
         updateStub = sinon.stub(db.hypothesis, 'update')
+        validateStub=sinon.stub(hypothesisService,'validateHypothesis')
+        businessKeyValidateStub=sinon.stub(hypothesisService,'getHypothesisByExperimentAndDescriptionAndType')
+        getExperimentByIdStub=sinon.stub(hypothesisService._experimentService,'getExperimentById')
+
     })
 
     after(() => {
         createStub.restore()
+        createBatchStub.restore()
         findStub.restore()
         getStub.restore()
         removeStub.restore()
         updateStub.restore()
+        validateStub.restore()
+        getExperimentByIdStub.restore()
+        businessKeyValidateStub.restore()
+
     })
 
     afterEach(() => {
         createStub.reset()
+        createBatchStub.reset()
         findStub.reset()
         getStub.reset()
         removeStub.reset()
         updateStub.reset()
+        validateStub.reset()
+        getExperimentByIdStub.reset()
+        businessKeyValidateStub.reset()
+
     })
 
     describe('Get All Hypothesis:', () => {
@@ -128,4 +147,109 @@ describe('HypothesisService', () => {
 
         })
     })
+
+    describe('Create Hypothesis:',()=>{
+        it('Success',()=>{
+            validateStub.resolves()
+            getExperimentByIdStub.resolves()
+            businessKeyValidateStub.resolves()
+            createBatchStub.resolves(1)
+            return hypothesisService.createHypothesis(testPayload).then((response)=>{
+                sinon.assert.calledOnce(validateStub)
+                sinon.assert.calledOnce(createBatchStub)
+                response.should.equal(1)
+            })
+        })
+        it('fails', () => {
+            createBatchStub.rejects(testError)
+            validateStub.resolves()
+
+            return hypothesisService.createHypothesis(testPayload).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to validation error', () => {
+            validateStub.rejects()
+
+            return hypothesisService.createHypothesis(testPayload).should.be.rejected.then((err) => {
+                createBatchStub.called.should.equal(false)
+            })
+        })
+
+    })
+
+    describe('Update Hypothesis:',()=>{
+        before(() => {
+            getHypothesisByIdSub = sinon.stub(hypothesisService, 'getHypothesisById')
+            hypothesisValidator = sinon.stub(hypothesisService._validator, 'validate')
+        })
+        it('Success',()=>{
+            hypothesisValidator.resolves()
+            getHypothesisByIdSub.resolves()
+            businessKeyValidateStub.resolves()
+            getExperimentByIdStub.resolves()
+            updateStub.resolves(testResponse)
+            return hypothesisService.updateHypothesis(20,testPayload).then((response)=>{
+                sinon.assert.calledOnce(getExperimentByIdStub)
+                sinon.assert.calledOnce(hypothesisValidator)
+                sinon.assert.calledOnce(updateStub)
+                sinon.assert.calledOnce(businessKeyValidateStub)
+                sinon.assert.calledOnce(getHypothesisByIdSub)
+                response.should.equal(testResponse)
+            })
+        })
+
+        it('fails', () => {
+            updateStub.rejects(testError)
+            hypothesisValidator.resolves()
+            getHypothesisByIdSub.resolves()
+            businessKeyValidateStub.resolves()
+            getExperimentByIdStub.resolves()
+
+            return hypothesisService.updateHypothesis(20,testPayload).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails due to validation error', () => {
+            hypothesisValidator.rejects()
+
+            return hypothesisService.updateHypothesis(20,testPayload).should.be.rejected.then((err) => {
+                updateStub.called.should.equal(false)
+                businessKeyValidateStub.called.should.equal(false)
+                getExperimentByIdStub.called.should.equal(false)
+            })
+        })
+
+        it('fails due to experiment Id not found error', () => {
+            hypothesisValidator.resolves()
+            getHypothesisByIdSub.resolves()
+            businessKeyValidateStub.resolves()
+            getExperimentByIdStub.rejects()
+
+            return hypothesisService.updateHypothesis(20,testPayload).should.be.rejected.then((err) => {
+                updateStub.called.should.equal(false)
+            })
+        })
+
+        it('fails due to Invalid Hypothesis Id', () => {
+            hypothesisValidator.resolves()
+            getHypothesisByIdSub.rejects()
+
+
+            return hypothesisService.updateHypothesis(20,testPayload).should.be.rejected.then((err) => {
+                updateStub.called.should.equal(false)
+                getExperimentByIdStub.rejects().called.should.equal(false)
+            })
+        })
+
+
+
+    })
+
+
+
+
+
 })

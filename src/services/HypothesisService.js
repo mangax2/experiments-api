@@ -12,29 +12,38 @@ const logger = log4js.getLogger('HypothesisService')
 
 class HypothesisService {
 
-    createHypothesis(hypotheses) {
+    constructor() {
+        this._validator = new HypothesisValidator()
+        this._experimentService = new ExperimentsService()
+    }
 
-        return Promise.all(hypotheses.map((hypothesis)=> {
-            return new HypothesisValidator().validate([hypothesis]).then(()=> {
-                return new ExperimentsService().getExperimentById(hypothesis.experimentId).then(()=> {
+    createHypothesis(hypotheses) {
+        return  this.validateHypothesis(hypotheses).then(()=> {
+            return  db.hypothesis.batchCreate(hypotheses)
+        })
+
+    }
+
+    validateHypothesis(hypotheses){
+        return this._validator.validate(hypotheses).then(()=>{
+            return Promise.all(hypotheses.map((hypothesis)=> {
+                return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                     return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
                         if(hypothesisObj)
                             throw AppError.badRequest("Exact hypothesis already exist For the experimentId: "+hypothesis.experimentId)
-                        return db.hypothesis.create(hypothesis)
                     })
                 })
 
-            })
 
-        }))
+            }))
+        })
+
 
     }
 
     getAllHypothesis() {
         return db.hypothesis.all()
     }
-
-
     getHypothesisById(id) {
         return db.hypothesis.find(id).then((hypothesis)=> {
             if (!hypothesis) {
@@ -61,12 +70,12 @@ class HypothesisService {
     }
 
     updateHypothesis(id,hypothesis) {
-        return new HypothesisValidator().validate([hypothesis]).then(()=> {
+        return this._validator.validate([hypothesis]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
                 return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
                     if (hypothesisObj)
                         throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
-                    return new ExperimentsService().getExperimentById(hypothesis.experimentId).then(()=> {
+                    return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                         return db.hypothesis.update(id, hypothesis)
                     })
 

@@ -26,10 +26,10 @@ let getExperimentByIdStub
 let getHypothesisByIdSub
 let hypothesisValidator
 let findByExperimentIdStub
+let getByBusinessKeyStub
 
 describe('HypothesisService', () => {
     before(() => {
-
         createStub = sinon.stub(db.hypothesis, 'create')
         createBatchStub = sinon.stub(db.hypothesis, 'batchCreate')
         hypothesisService = new HypothesisService()
@@ -38,10 +38,8 @@ describe('HypothesisService', () => {
         findByExperimentIdStub = sinon.stub(db.hypothesis, 'findByExperimentId')
         removeStub = sinon.stub(db.hypothesis, 'remove')
         updateStub = sinon.stub(db.hypothesis, 'update')
-        validateStub=sinon.stub(hypothesisService,'validateHypothesis')
-        businessKeyValidateStub=sinon.stub(hypothesisService,'getHypothesisByExperimentAndDescriptionAndType')
+        getByBusinessKeyStub = sinon.stub(db.hypothesis, 'getHypothesisByExperimentAndDescriptionAndType')
         getExperimentByIdStub=sinon.stub(hypothesisService._experimentService,'getExperimentById')
-
     })
 
     after(() => {
@@ -51,9 +49,10 @@ describe('HypothesisService', () => {
         getStub.restore()
         removeStub.restore()
         updateStub.restore()
-        validateStub.restore()
         getExperimentByIdStub.restore()
         businessKeyValidateStub.restore()
+        findByExperimentIdStub.restore()
+        getByBusinessKeyStub.restore()
         findByExperimentIdStub.restore()
 
     })
@@ -65,9 +64,8 @@ describe('HypothesisService', () => {
         getStub.reset()
         removeStub.reset()
         updateStub.reset()
-        validateStub.reset()
         getExperimentByIdStub.reset()
-        businessKeyValidateStub.reset()
+        getByBusinessKeyStub.reset()
 
     })
 
@@ -152,6 +150,10 @@ describe('HypothesisService', () => {
     })
 
     describe('Create Hypothesis:',()=>{
+        before(()=>{
+            businessKeyValidateStub=sinon.stub(hypothesisService,'getHypothesisByExperimentAndDescriptionAndType')
+            validateStub=sinon.stub(hypothesisService,'validateHypothesis')
+        })
         it('Success',()=>{
             validateStub.resolves()
             getExperimentByIdStub.resolves()
@@ -179,6 +181,14 @@ describe('HypothesisService', () => {
                 createBatchStub.called.should.equal(false)
             })
         })
+        after(()=>{
+            businessKeyValidateStub.restore()
+            validateStub.restore()
+        })
+        afterEach(()=>{
+            businessKeyValidateStub.reset()
+            validateStub.reset()
+        })
 
     })
 
@@ -186,6 +196,7 @@ describe('HypothesisService', () => {
         before(() => {
             getHypothesisByIdSub = sinon.stub(hypothesisService, 'getHypothesisById')
             hypothesisValidator = sinon.stub(hypothesisService._validator, 'validate')
+            businessKeyValidateStub=sinon.stub(hypothesisService,'getHypothesisByExperimentAndDescriptionAndType')
         })
         it('Success',()=>{
             hypothesisValidator.resolves()
@@ -239,17 +250,64 @@ describe('HypothesisService', () => {
         it('fails due to Invalid Hypothesis Id', () => {
             hypothesisValidator.resolves()
             getHypothesisByIdSub.rejects()
-
-
             return hypothesisService.updateHypothesis(20,testPayload).should.be.rejected.then((err) => {
                 updateStub.called.should.equal(false)
                 getExperimentByIdStub.rejects().called.should.equal(false)
             })
         })
 
+        it('Throws Error when hypothesis Exists for Businesskey during update', () => {
+            hypothesisValidator.resolves()
+            getHypothesisByIdSub.resolves()
+            businessKeyValidateStub.resolves({})
 
+            const testPayloadNew={experimentId:10}
 
+            return hypothesisService.updateHypothesis(20,testPayloadNew).should.be.rejected.then((err)=>{
+                err.message.should.equal("Exact hypothesis already exist For the experimentId: 10")
+            })
+        })
+
+        after(()=>{
+            businessKeyValidateStub.restore()
+            getHypothesisByIdSub.restore()
+            hypothesisValidator.restore()
+        })
+        afterEach(()=>{
+            businessKeyValidateStub.reset()
+            getHypothesisByIdSub.reset()
+            hypothesisValidator.reset()
+        })
     })
+
+    describe('Get Hypothesis by Experiment Id, Description and isNull Status:',()=> {
+
+        it('Success',()=>{
+            getByBusinessKeyStub.resolves(testResponse)
+            return hypothesisService.getHypothesisByExperimentAndDescriptionAndType(1,"testDescription",false).then((response)=>{
+                sinon.assert.calledOnce(getByBusinessKeyStub)
+            })
+        })
+    })
+
+
+    describe('Validate Hypothesis',()=> {
+        before(() => {
+            getHypothesisByIdSub = sinon.stub(hypothesisService, 'getHypothesisById')
+            hypothesisValidator = sinon.stub(hypothesisService._validator, 'validate')
+            businessKeyValidateStub=sinon.stub(hypothesisService,'getHypothesisByExperimentAndDescriptionAndType')
+        })
+        it('Throws Error when hypothesis Exists for Businesskey during validate',()=>{
+            hypothesisValidator.resolves()
+            getExperimentByIdStub.resolves()
+            businessKeyValidateStub.resolves({})
+            const testPayloadNew=[{experimentId:10}]
+            return hypothesisService.createHypothesis(testPayloadNew).should.be.rejected.then((err)=>{
+                err.message.should.equal("Exact hypothesis already exist For the experimentId: 10")
+            })
+        })
+    })
+
 
 
     describe('Get Hypothesis By experiment Id:', () => {

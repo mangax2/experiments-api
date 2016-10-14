@@ -346,10 +346,7 @@
                     "200": {
                         "description": "Experiment entity",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ExperimentResponse"
-                            }
+                            "$ref": "#/definitions/ExperimentResponse"
                         }
                     },
                     "400": {
@@ -459,6 +456,58 @@
                     },
                     "400": {
                         "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/hypotheses": {
+            "get": {
+                "summary": "get all hypotheses for given experiment id.",
+                "description": "This endpoint returns information about the hypotheses entities associated with one Experiment.\n",
+                "tags": [
+                    "Hypothesis"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hypotheses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/HypothesisResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

@@ -15,6 +15,11 @@ module.exports = (rep) => {
             return rep.any("SELECT * FROM hypothesis")
         },
 
+        findByExperimentId: (experimentId) => {
+            return rep.any("SELECT * FROM hypothesis where experiment_id=$1", experimentId)
+        },
+
+
         create: (hypothesisObj) => {
             return rep.one("insert into hypothesis(description, is_null, status, experiment_id, created_date," +
                 " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", hypothesisObj)

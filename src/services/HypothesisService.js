@@ -46,13 +46,8 @@ class HypothesisService {
     }
 
     getHypothesesByExperimentId(experimentId) {
-        return db.experiments.find(experimentId).then((data) => {
-            if (!data) {
-                throw AppError.notFound('Experiment Not Found for requested experimentId')
-            } else {
-                return db.hypothesis.findByExperimentId(experimentId)
-
-            }
+        return this._experimentService.getExperimentById(experimentId).then(()=> {
+            return db.hypothesis.findByExperimentId(experimentId)
         })
 
     }

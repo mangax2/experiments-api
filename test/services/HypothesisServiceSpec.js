@@ -25,6 +25,7 @@ let businessKeyValidateStub
 let getExperimentByIdStub
 let getHypothesisByIdSub
 let hypothesisValidator
+let findByExperimentIdStub
 
 describe('HypothesisService', () => {
     before(() => {
@@ -34,6 +35,7 @@ describe('HypothesisService', () => {
         hypothesisService = new HypothesisService()
         findStub = sinon.stub(db.hypothesis, 'find')
         getStub = sinon.stub(db.hypothesis, 'all')
+        findByExperimentIdStub = sinon.stub(db.hypothesis, 'findByExperimentId')
         removeStub = sinon.stub(db.hypothesis, 'remove')
         updateStub = sinon.stub(db.hypothesis, 'update')
         validateStub=sinon.stub(hypothesisService,'validateHypothesis')
@@ -52,6 +54,7 @@ describe('HypothesisService', () => {
         validateStub.restore()
         getExperimentByIdStub.restore()
         businessKeyValidateStub.restore()
+        findByExperimentIdStub.restore()
 
     })
 
@@ -249,7 +252,27 @@ describe('HypothesisService', () => {
     })
 
 
+    describe('Get Hypothesis By experiment Id:', () => {
 
+        it('Success and Return hypotheses list', ()=> {
+            getExperimentByIdStub.resolves({})
+            findByExperimentIdStub.resolves(testResponse)
+
+            return hypothesisService.getHypothesesByExperimentId(1).then((hypothesis)=> {
+                sinon.assert.calledWithExactly(findByExperimentIdStub, 1)
+                hypothesis.should.equal(testResponse)
+            })
+        })
+
+        it('fails', () => {
+            getExperimentByIdStub.rejects()
+
+            return hypothesisService.getHypothesesByExperimentId(-1).should.be.rejected.then((err) => {
+                findByExperimentIdStub.called.should.equal(false)
+            })
+        })
+
+    })
 
 
 })

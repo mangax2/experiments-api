@@ -346,7 +346,7 @@
                     "200": {
                         "description": "Experiment entity",
                         "schema": {
-                            "type": "object",
+                            "type": "array",
                             "items": {
                                 "$ref": "#/definitions/ExperimentResponse"
                             }
@@ -380,7 +380,7 @@
             },
             "put": {
                 "summary": "put one experiment entity",
-                "description": "update experiment entiry in Experiments System.\n",
+                "description": "update experiment entity in Experiments System.\n",
                 "tags": [
                     "Experiments"
                 ],
@@ -465,6 +465,244 @@
                     },
                     "404": {
                         "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/hypotheses": {
+            "get": {
+                "summary": "get all hypotheses entities",
+                "description": "This endpoint returns information about the hypotheses.\n",
+                "tags": [
+                    "Hypotheses"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of hypotheses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/HypothesisResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "post one or more experiment entities",
+                "description": "Creates new hypotheses in Experiments System.\n",
+                "tags": [
+                    "Hypotheses"
+                ],
+                "parameters": [
+                    {
+                        "name": "hypotheses",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/HypothesisPayload"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "hypotheses Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/hypotheses/{id}": {
+            "get": {
+                "summary": "get one hypothesis entity",
+                "description": "The hypotheses endpoint returns information about the hypothesis entities in Experiments System.\n",
+                "tags": [
+                    "Hypotheses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hypotheses entity",
+                        "schema": {
+                            "$ref": "#/definitions/HypothesisResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Hypothesis Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one hypothesis entity",
+                "description": "update Hypothesis entity in Experiments System.\n",
+                "tags": [
+                    "Hypotheses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
+                    {
+                        "name": "hypothesis",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/HypothesisPayload"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hypothesis entity",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/HypothesisResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Hypothesis Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one hypothesis entity",
+                "description": "delete hypothesis entity in Experiments System.\n",
+                "tags": [
+                    "Hypothesis"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "hypothesis Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Hypothesis Found For ID",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -772,6 +1010,47 @@
                 }
             }
         },
+        "HypothesisResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for experiment entity"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "description of the experiment entity."
+                },
+                "isNull": {
+                    "type": "string",
+                    "description": "Type of Hypotheses."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "status of Hypotheses."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "ExperimentId of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
         "CreateResponse": {
             "type": "object",
             "properties": {
@@ -811,6 +1090,31 @@
                 "status": {
                     "type": "string",
                     "description": "status of the experiment entity."
+                }
+            }
+        },
+        "HypothesisPayload": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "description of the hypothesis entity."
+                },
+                "isNull": {
+                    "type": "string",
+                    "description": "hypothesis type."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Hypotheses status - ACTIVE, INACTIVE."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "experimentId of experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
                 }
             }
         },

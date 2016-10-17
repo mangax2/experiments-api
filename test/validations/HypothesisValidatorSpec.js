@@ -32,6 +32,25 @@ describe('HypothesisValidator', () => {
             "userId": "kprat1"
 
         }]
+        const targetOb=[{
+
+            "description": "abc",
+            "isNull": false,
+            "status": "ACTIVE",
+            "experimentId":3,
+            "userId": "kprat1"
+
+        },
+            {
+
+                "description": "abc",
+                "isNull": false,
+                "status": "ACTIVE",
+                "experimentId": 3,
+                "userId": "kprat1"
+
+            }
+        ]
         it('returns resolved promise when good value passed for schema validation', () => {
             return testObject.performValidations(targetObj).should.be.fulfilled
 
@@ -45,6 +64,12 @@ describe('HypothesisValidator', () => {
         })
 
 
+        it('returns rejected promise when targetObject has same hypothesis', () => {
+            (function () {
+                testObject.checkBusinessKey(targetOb)
+            }).should.throw('duplicate hypothesis with same experiment id exists')
+
+        })
     })
 
 

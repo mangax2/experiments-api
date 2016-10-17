@@ -21,7 +21,7 @@ class HypothesisValidator extends SchemaValidator {
             return Promise.all(
                 _.map(hypothesisObj, (hypothesis) => super.performValidations(hypothesis))
             ).then(()=>{
-                this.checkBusinessKey(hypothesisObj)
+                  this.checkBusinessKey(hypothesisObj)
             })
         } else {
             throw AppError.badRequest('Hypothesis request object needs to be an array')
@@ -31,16 +31,13 @@ class HypothesisValidator extends SchemaValidator {
     }
 
     checkBusinessKey(hypothesisObj){
-        const uniqArray = _.uniq(_.map(hypothesisObj,(hypothesis)=>{
+        const uniqArray = _.uniqWith(_.map(hypothesisObj,(hypothesis)=>{
             return _.pick(hypothesis,['description','experimentId','isNull'])
-        }))
-
+        }), _.isEqual)
         if(uniqArray.length!=hypothesisObj.length){
-            throw AppError.badRequest('Exact hypothesis already exist for some experiments')
+              throw AppError.badRequest('duplicate hypothesis with same experiment id exists')
         }
     }
-
-
 }
 
 

@@ -19,7 +19,9 @@ class HypothesisService {
 
     createHypothesis(hypotheses) {
         return this.validateHypothesis(hypotheses).then(()=> {
-            return db.hypothesis.batchCreate(hypotheses)
+            return db.hypothesis.batchCreate(hypotheses).then(data => {
+                return AppUtil.createPostResponse(data)
+            })
         })
 
     }

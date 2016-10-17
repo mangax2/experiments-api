@@ -480,7 +480,7 @@
                 "summary": "get all hypotheses for given experiment id.",
                 "description": "This endpoint returns information about the hypotheses entities associated with one Experiment.\n",
                 "tags": [
-                    "Hypothesis"
+                    "Hypotheses"
                 ],
                 "parameters": [
                     {

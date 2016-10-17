@@ -82,7 +82,7 @@ class HypothesisService {
         return this._validator.validate([hypothesis]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
                 return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
-                    if (hypothesisObj)
+                    if (hypothesisObj && hypothesisObj.id!=id)
                         throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
                     return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                         return db.hypothesis.update(id, hypothesis)

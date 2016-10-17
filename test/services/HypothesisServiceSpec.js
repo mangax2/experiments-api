@@ -257,10 +257,10 @@ describe('HypothesisService', () => {
             })
         })
 
-        it('Throws Error when hypothesis Exists for Businesskey during update', () => {
+        it('Throws Error when hypothesis Exists for Businesskey during update for different hypothesis id', () => {
             hypothesisValidator.resolves()
             getHypothesisByIdSub.resolves()
-            businessKeyValidateStub.resolves({})
+            businessKeyValidateStub.resolves({id:21})
 
             const testPayloadNew = {experimentId: 10}
 
@@ -268,6 +268,7 @@ describe('HypothesisService', () => {
                 err.message.should.equal("Exact hypothesis already exist For the experimentId: 10")
             })
         })
+
 
         after(()=> {
             businessKeyValidateStub.restore()

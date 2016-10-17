@@ -19,7 +19,7 @@
                 "summary": "Get all experiment designs",
                 "description": "Returns all experiment designs that can be used\n",
                 "tags": [
-                    "Experiment Design"
+                    "Experiment Designs"
                 ],
                 "responses": {
                     "200": {
@@ -49,7 +49,7 @@
                 "summary": "Adds a new experiment design",
                 "description": "Posts a new experiment design",
                 "tags": [
-                    "Experiment Design"
+                    "Experiment Designs"
                 ],
                 "parameters": [
                     {
@@ -94,7 +94,7 @@
                 "summary": "Get one experiment design entity",
                 "description": "Returns a single experiment design entity\n",
                 "tags": [
-                    "Experiment Design"
+                    "Experiment Designs"
                 ],
                 "parameters": [
                     {
@@ -144,7 +144,7 @@
                 "summary": "Update one experiment design",
                 "description": "Updates a single experiment design entity\n",
                 "tags": [
-                    "Experiment Design"
+                    "Experiment Designs"
                 ],
                 "parameters": [
                     {
@@ -199,7 +199,7 @@
                 "summary": "Deletes one experiment design",
                 "description": "Deletes a single experiment design entity\n",
                 "tags": [
-                    "Experiment Design"
+                    "Experiment Designs"
                 ],
                 "parameters": [
                     {
@@ -480,7 +480,7 @@
                 "summary": "get all hypotheses for given experiment id.",
                 "description": "This endpoint returns information about the hypotheses entities associated with one Experiment.\n",
                 "tags": [
-                    "Hypothesis"
+                    "Hypotheses"
                 ],
                 "parameters": [
                     {
@@ -727,7 +727,7 @@
                 "summary": "delete one hypothesis entity",
                 "description": "delete hypothesis entity in Experiments System.\n",
                 "tags": [
-                    "Hypothesis"
+                    "Hypotheses"
                 ],
                 "parameters": [
                     {
@@ -770,7 +770,7 @@
                 "summary": "Get all factor types",
                 "description": "Returns all factor types that can be used\n",
                 "tags": [
-                    "Factor Type"
+                    "Factor Types"
                 ],
                 "responses": {
                     "200": {
@@ -800,7 +800,7 @@
                 "summary": "Adds a new factor type",
                 "description": "Creates a new factor type",
                 "tags": [
-                    "Factor Type"
+                    "Factor Types"
                 ],
                 "parameters": [
                     {
@@ -844,7 +844,7 @@
                 "summary": "Get one factor type entity",
                 "description": "Returns a single factor type entity\n",
                 "tags": [
-                    "Factor Type"
+                    "Factor Types"
                 ],
                 "parameters": [
                     {
@@ -891,7 +891,7 @@
                 "summary": "Update one factor type",
                 "description": "Updates a single factor type entity\n",
                 "tags": [
-                    "Factor Type"
+                    "Factor Types"
                 ],
                 "parameters": [
                     {
@@ -946,7 +946,7 @@
                 "summary": "Deletes one factor type",
                 "description": "Deletes a single factor type entity\n",
                 "tags": [
-                    "Factor Type"
+                    "Factor Types"
                 ],
                 "parameters": [
                     {

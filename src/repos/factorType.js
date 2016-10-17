@@ -1,5 +1,3 @@
-/*eslint quotes: ["warn", "double"]*/
-
 module.exports = (rep) => {
     return {
         repository: () => {
@@ -19,7 +17,7 @@ module.exports = (rep) => {
         },
 
         update: (t, id, factorTypeObj, modified_user_id) => {
-            return t.one("UPDATE ref_factor_type SET type=$1, modified_user_id=$2, modified_date=CURRENT_TIMESTAMP WHERE id=$3 RETURNING *", [factorTypeObj.type, modified_user_id, id])
+            return t.oneOrNone("UPDATE ref_factor_type SET type=$1, modified_user_id=$2, modified_date=CURRENT_TIMESTAMP WHERE id=$3 RETURNING *", [factorTypeObj.type, modified_user_id, id])
         },
 
         "delete": (t, id) => {

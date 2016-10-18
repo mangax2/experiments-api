@@ -3,17 +3,20 @@ const chai = require('chai')
 const BaseValidator = require('../../src/validations/BaseValidator')
 const ReferentialIntegrityService = require('../../src/services/ReferentialIntegrityService')
 let riFindStub
+let riFindByBusnessKeyStub
 describe('BaseValidator', () => {
     const testObject = new BaseValidator()
     let baseStub
 
     before(() => {
         riFindStub = sinon.stub(testObject.referentialIntegrityService, 'getById')
+        riFindByBusnessKeyStub = sinon.stub(testObject.referentialIntegrityService, 'getByBusinessKey')
 
     })
 
     after(() => {
         riFindStub.restore()
+        riFindByBusnessKeyStub.restore()
     })
 
     afterEach(() => {
@@ -163,6 +166,27 @@ describe('BaseValidator', () => {
             })
         })
 
+
+    })
+
+    describe('checkRIBusiness', () => {
+        it('returns error message when dup record found by busness key', () => {
+            riFindByBusnessKeyStub.resolves({id:1})
+            return testObject.checkRIBusiness(1, {}, 'entity',['k1','k2']).then(()=> {
+                testObject.messages.length.should.equal(1)
+                testObject.messages[0].should.equal("entity already exists for given business keys: k1,k2")
+
+            })
+        })
+
+        it('returns no error message when dup record not found by busness key', () => {
+            riFindByBusnessKeyStub.resolves(undefined)
+            return testObject.checkRIBusiness(1, {}, 'entity',['k1','k2']).then(()=> {
+                testObject.messages.length.should.equal(0)
+
+
+            })
+        })
 
     })
 

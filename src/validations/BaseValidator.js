@@ -8,6 +8,7 @@ import ReferentialIntegrityService from '../services/ReferentialIntegrityService
 class BaseValidator {
     constructor() {
         this.messages = []
+        this.referentialIntegrityService = new ReferentialIntegrityService()
     }
 
     validate(targetObject) {
@@ -60,7 +61,7 @@ class BaseValidator {
     }
 
     checkReferentialIntegrityById(id, entity, entityName){
-        return new ReferentialIntegrityService().getById(id, entity).then((data) => {
+        return this.referentialIntegrityService.getById(id, entity).then((data) => {
             if(!data){
                 this.messages.push(`No ${entityName} found with id ${id}`)
             }

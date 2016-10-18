@@ -1,13 +1,25 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const BaseValidator = require('../../src/validations/BaseValidator')
-
+const ReferentialIntegrityService = require('../../src/services/ReferentialIntegrityService')
+let riFindStub
 describe('BaseValidator', () => {
     const testObject = new BaseValidator()
     let baseStub
 
+    before(() => {
+        riFindStub = sinon.stub(testObject.referentialIntegrityService, 'getById')
+
+    })
+
+    after(() => {
+        riFindStub.restore()
+    })
+
     afterEach(() => {
-        if(baseStub){ baseStub.restore()}
+        if (baseStub) {
+            baseStub.restore()
+        }
         testObject.messages = []
     })
 
@@ -126,18 +138,32 @@ describe('BaseValidator', () => {
     })
 
 
-
-
-
-
-
-
     describe('performValidations', () => {
         it('returns error when performValidations is not implemented by subclass ', () => {
             return chai.expect(testObject.performValidations()).to.eventually
                 .be.rejectedWith("Server error, please contact support")
 
         })
+    })
+
+    describe('checkReferentialIntegrityById', () => {
+        it('returns error message when id not found', () => {
+            riFindStub.resolves(undefined)
+            return testObject.checkReferentialIntegrityById(1, {}, 'entity').then(()=> {
+                testObject.messages.length.should.equal(1)
+                testObject.messages[0].should.equal("No entity found with id 1")
+
+            })
+        })
+
+        it('returns no error message when id  found', () => {
+            riFindStub.resolves({id: 1})
+            return testObject.checkReferentialIntegrityById(1, {}, 'entity').then(()=> {
+                testObject.messages.length.should.equal(0)
+            })
+        })
+
+
     })
 
 })

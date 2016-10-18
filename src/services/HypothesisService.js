@@ -7,6 +7,7 @@ import AppUtil from "./utility/AppUtil"
 import log4js from "log4js"
 import HypothesisValidator from '../validations/HypothesisValidator'
 import ExperimentsService from './ExperimentsService'
+import * as _ from 'lodash'
 const logger = log4js.getLogger('HypothesisService')
 
 
@@ -28,7 +29,7 @@ class HypothesisService {
 
     validateHypothesis(hypotheses) {
         return this._validator.validate(hypotheses).then(()=> {
-            return Promise.all(hypotheses.map((hypothesis)=> {
+            return Promise.all(_.map(hypotheses, (hypothesis)=> {
                 return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                     return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
                         if (hypothesisObj)

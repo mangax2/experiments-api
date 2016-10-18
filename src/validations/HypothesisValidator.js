@@ -1,6 +1,3 @@
-/**
- * Created by kprat1 on 12/10/16.
- */
 import SchemaValidator from "./SchemaValidator"
 import _ from 'lodash'
 import AppError from '../services/utility/AppError'

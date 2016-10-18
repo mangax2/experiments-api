@@ -159,18 +159,18 @@ describe('HypothesisService', () => {
             validateStub.resolves()
             getExperimentByIdStub.resolves()
             businessKeyValidateStub.resolves()
-            createBatchStub.resolves(1)
-            return hypothesisService.createHypothesis(testPayload).then((response)=> {
+            createBatchStub.resolves([{id: 1}])
+            return hypothesisService.createHypothesis([testPayload]).then((response)=> {
                 sinon.assert.calledOnce(validateStub)
                 sinon.assert.calledOnce(createBatchStub)
-                response.should.equal(1)
+                response[0].id.should.equal(1)
             })
         })
         it('fails', () => {
             createBatchStub.rejects(testError)
             validateStub.resolves()
 
-            return hypothesisService.createHypothesis(testPayload).should.be.rejected.then((err) => {
+            return hypothesisService.createHypothesis([testPayload]).should.be.rejected.then((err) => {
                 err.should.equal(testError)
             })
         })

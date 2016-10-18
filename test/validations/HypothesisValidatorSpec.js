@@ -3,19 +3,23 @@
  */
 const  sinon =require('sinon')
 const  HypothesisValidator  = require('../../src/validations/HypothesisValidator')
+const ReferentialIntegrityService = require('../../src/services/ReferentialIntegrityService')
+
 const  AppError  = require('../../src/services/utility/AppError')
 import db from '../../src/db/DbManager'
 
 let baseValidatorStub
-
+let getByBusinessKeyStub
 describe('HypothesisValidator', () => {
     const testObject = new HypothesisValidator()
 
     before(() => {
         baseValidatorStub = sinon.stub(testObject, 'checkReferentialIntegrityById')
+        getByBusinessKeyStub= sinon.stub(testObject.referentialIntegrityService, 'getByBusinessKey')
     })
     after(() => {
         baseValidatorStub.restore()
+        getByBusinessKeyStub.restore()
     })
     const schemaArray = [
         {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 300}, 'required': true},
@@ -64,6 +68,7 @@ describe('HypothesisValidator', () => {
         ]
         it('returns resolved promise when good value passed for schema validation', () => {
             baseValidatorStub.resolves()
+            getByBusinessKeyStub.resolves(undefined)
             return testObject.performValidations(targetObj).should.be.fulfilled
 
         })

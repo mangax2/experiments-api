@@ -39,7 +39,7 @@ export class SchemaValidator extends BaseValidator {
                     this.checkBoolean(elementValue, elementSchema.paramName)
                 }
 
-                if(elementSchema.type == 'refData'){
+                if(this.messages.length==0 && elementSchema.type == 'refData'){
                     return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName).then(() => {
                         resolve()
                     })
@@ -48,7 +48,7 @@ export class SchemaValidator extends BaseValidator {
                     resolve()
                 }
             }
-            else if(elementSchema.type == 'businessKey'){
+            else if(this.messages.length==0 && elementSchema.type == 'businessKey'){
                 const vals = _.map(elementSchema.keys, (key) => {
                     return targetObject[key]
                 })

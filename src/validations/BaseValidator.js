@@ -60,10 +60,18 @@ class BaseValidator {
         }
     }
 
-    checkReferentialIntegrityById(id, entity, entityName){
+    checkReferentialIntegrityById(id, entity, entityName) {
         return this.referentialIntegrityService.getById(id, entity).then((data) => {
-            if(!data){
+            if (!data) {
                 this.messages.push(`No ${entityName} found with id ${id}`)
+            }
+        })
+    }
+
+    checkRIBusiness(vals, entity, entityName, keys){
+        return this.referentialIntegrityService.getByBusinessKey(vals, entity).then((data) => {
+            if(data){
+                this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
             }
         })
     }

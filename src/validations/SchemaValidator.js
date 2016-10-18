@@ -10,15 +10,15 @@ export class SchemaValidator extends BaseValidator {
             _.map(schema, (elementSchema) => {
                 const key = _.keys(targetObject).find(x=>x == elementSchema.paramName)
                 if (key == null || key == undefined) {
-                    return this.schemaElementCheck(null, elementSchema)
+                    return this.schemaElementCheck(null, elementSchema, targetObject)
                 } else {
-                    return this.schemaElementCheck(targetObject[key], elementSchema)
+                    return this.schemaElementCheck(targetObject[key], elementSchema, targetObject)
                 }
             })
         )
     }
 
-    schemaElementCheck(elementValue, elementSchema) {
+    schemaElementCheck(elementValue, elementSchema, targetObject) {
         return new Promise((resolve, reject) => {
             if (elementSchema.required) {
                 this.checkRequired(elementValue, elementSchema.paramName)
@@ -47,6 +47,18 @@ export class SchemaValidator extends BaseValidator {
                 else{
                     resolve()
                 }
+            }
+            else if(elementSchema.type == 'businessKey'){
+                const vals = _.map(elementSchema.keys, (key) => {
+                    return targetObject[key]
+                })
+
+                this.checkRIBusiness(vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys).then(() => {
+                    resolve()
+                })
+            }
+            else{
+                resolve()
             }
         })
     }

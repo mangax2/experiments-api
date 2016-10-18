@@ -8,6 +8,7 @@ export class ReferentialIntegrityService {
     }
 
     getByBusinessKey(keys, entity){
+        return entity.findByBusinessKey(keys)
         // switch(entity){
             // case "ref_experiment_design":
             //     return db.experimentDesign.find(id)

@@ -42,6 +42,10 @@ module.exports = (rep) => {
         },
         getHypothesisByExperimentAndDescriptionAndType:(experimentId,description,isNull) => {
             return rep.oneOrNone("SELECT * FROM hypothesis where experiment_id = $1 and description = $2 and is_null = $3", [experimentId, description , isNull])
+        },
+        findByBusinessKey: (keys) => {
+            return rep.oneOrNone("SELECT * FROM hypothesis where experiment_id = $1 and description = $2 and is_null = $3", keys)
+
         }
     }
 }

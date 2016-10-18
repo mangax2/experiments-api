@@ -22,7 +22,9 @@ describe('HypothesisValidator', () => {
         {'paramName': 'isNull', 'type': 'boolean', 'required': true},
         {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
         {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments},
-        {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
+        {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+        {'paramName': 'Hypothesis', 'type': 'businessKey', 'keys': ['experimentId', 'description', 'isNull'], 'entity': db.hypothesis}
+
 
     ]
 
@@ -77,7 +79,7 @@ describe('HypothesisValidator', () => {
         it('returns rejected promise when targetObject has same hypothesis', () => {
             (function () {
                 testObject.checkBusinessKey(targetOb)
-            }).should.throw('duplicate hypothesis with same experiment id exists')
+            }).should.throw('duplicate hypotheses in request payload with same experiment id')
 
         })
     })

@@ -8,6 +8,7 @@ import log4js from "log4js"
 import HypothesisValidator from '../validations/HypothesisValidator'
 import ExperimentsService from './ExperimentsService'
 import * as _ from 'lodash'
+import ReferentialIntegrityService from './ReferentialIntegrityService'
 const logger = log4js.getLogger('HypothesisService')
 
 
@@ -28,20 +29,20 @@ class HypothesisService {
     }
 
     validateHypothesis(hypotheses) {
-        return this._validator.validate(hypotheses).then(()=> {
-            return Promise.all(_.map(hypotheses, (hypothesis)=> {
-                return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
-                    return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
-                        if (hypothesisObj)
-                            throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
-                    })
-                })
+        return this._validator.validate(hypotheses)
+            // return Promise.all(_.map(hypotheses, (hypothesis)=> {
+            //     return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
+            //         const keys = [hypothesis.experimentId, hypothesis.description, hypothesis.isNull]
+            //         return new ReferentialIntegrityService().getByBusinessKey(keys, db.hypothesis).then((hypothesisObj)=> {
+            //             if (hypothesisObj) {
+            //                 throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
+            //             }
+            //         })
+            //     })
 
 
-            }))
-        })
-
-
+            // }))
+        // })
     }
 
     getAllHypothesis() {
@@ -84,16 +85,16 @@ class HypothesisService {
     updateHypothesis(id, hypothesis) {
         return this._validator.validate([hypothesis]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
-                return this.getHypothesisByExperimentAndDescriptionAndType(hypothesis.experimentId, hypothesis.description, hypothesis.isNull).then((hypothesisObj)=> {
-                    if (hypothesisObj && hypothesisObj.id!=id)
-                        throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
-                    return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
+                // return new ReferentialIntegrityService().findByBusinessKey([hypothesis.experimentId, hypothesis.description, hypothesis.isNull], db.hypothesis).then((hypothesisObj)=> {
+                //     if (hypothesisObj && hypothesisObj.id!=id)
+                //         throw AppError.badRequest("Exact hypothesis already exist For the experimentId: " + hypothesis.experimentId)
+                //     return this._experimentService.getExperimentById(hypothesis.experimentId).then(()=> {
                         return db.hypothesis.update(id, hypothesis)
-                    })
+                    // })
 
                 })
             })
-        })
+        // })
     }
 
 

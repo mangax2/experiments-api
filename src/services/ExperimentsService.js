@@ -13,20 +13,11 @@ class ExperimentsService {
 
     createExperiment(experiments) {
         return this._validator.validate(experiments).then(() => {
-            return Promise.all(experiments.map(exp =>
-                db.experimentDesign.find(exp.refExperimentDesignId).then((d) => {
-                    if (!d) {
-                        logger.error('Invalid Experiment Design')
-                        throw AppError.badRequest('Invalid Experiment Design')
-                    }
-                })
-            )).then(() => {
-                return db.experiments.repository().tx('tx1', (t) => {
-                    return Promise.all(experiments.map(ex =>
-                        db.experiments.create(t, ex)
-                    )).then(data => {
-                        return AppUtil.createPostResponse(data)
-                    })
+            return db.experiments.repository().tx('tx1', (t) => {
+                return Promise.all(experiments.map(ex =>
+                    db.experiments.create(t, ex)
+                )).then(data => {
+                    return AppUtil.createPostResponse(data)
                 })
             })
         })

@@ -2,7 +2,7 @@ import db from '../db/DbManager'
 import ExperimentDesignsValidator from '../validations/ExperimentDesignsValidator'
 import AppError from './utility/AppError'
 
-class ExperimentsService{
+class ExperimentDesignService{
 
     constructor(){
         this._validator = new ExperimentDesignsValidator()
@@ -54,4 +54,4 @@ class ExperimentsService{
     }
 }
 
-module.exports = ExperimentsService
+module.exports = ExperimentDesignService

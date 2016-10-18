@@ -1,15 +1,24 @@
 const sinon = require('sinon')
 const ExperimentsValidator = require('../../src/validations/ExperimentsValidator')
 const AppError = require('../../src/services/utility/AppError')
+import db from '../../src/db/DbManager'
 
+let baseValidatorStub
+let testObject
 
 describe('ExperimentValidator', () => {
-    const testObject = new ExperimentsValidator()
+
+    before(() => {
+        testObject = new ExperimentsValidator()
+        baseValidatorStub = sinon.stub(testObject, 'checkReferentialIntegrityById')
+    })
+    after(() => {
+        if(baseValidatorStub){ baseValidatorStub.restore() }
+    })
     const schemaArray = [
         {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-        {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}, 'required': true},
-        {'paramName': 'reps', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 1000}, 'required': true},
-        {'paramName': 'refExperimentDesignId', 'type': 'refData', 'required': true},
+        {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}},
+        {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
         {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
         {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
     ]
@@ -17,10 +26,7 @@ describe('ExperimentValidator', () => {
     describe('getSchema ', () => {
 
         it('returns schema array', () => {
-
             testObject.getSchema().should.eql(schemaArray)
-
-
         })
 
 
@@ -33,11 +39,11 @@ describe('ExperimentValidator', () => {
             "name": "exp1002fsdfdsdfsdfsdfdsfsd",
             "subjectType": "plant",
             "userId": "akuma11",
-            "reps": "2",
             "refExperimentDesignId": 2,
             "status": "ACTIVE"
         }]
         it('returns resolved promise when good value passed for schema validation', () => {
+            baseValidatorStub.resolves()
             return testObject.performValidations(targetObj).should.be.fulfilled
 
         })

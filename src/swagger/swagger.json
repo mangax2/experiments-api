@@ -1029,10 +1029,6 @@
                     "type": "string",
                     "description": "Subject of the Experiment."
                 },
-                "reps": {
-                    "type": "integer",
-                    "description": "Number of reps."
-                },
                 "ExperimentDesign": {
                     "type": "string",
                     "description": "Experiment Design Type"
@@ -1127,10 +1123,6 @@
                 "subjectType": {
                     "type": "string",
                     "description": "Subject of the Experiment."
-                },
-                "reps": {
-                    "type": "integer",
-                    "description": "Number of reps."
                 },
                 "experimentDesign": {
                     "type": "string",

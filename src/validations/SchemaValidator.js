@@ -5,46 +5,54 @@ const logger = log4js.getLogger('SchemaValidator')
 
 export class SchemaValidator extends BaseValidator {
 
-
     schemaCheck(targetObject, schema) {
-        _.map(schema, (elementSchema) => {
-            const key = _.keys(targetObject).find(x=>x == elementSchema.paramName)
-            if (key == null || key == undefined) {
-                this.schemaElementCheck(null, elementSchema)
-            } else {
-                this.schemaElementCheck(targetObject[key], elementSchema)
-            }
-        })
-
+        return Promise.all(
+            _.map(schema, (elementSchema) => {
+                const key = _.keys(targetObject).find(x=>x == elementSchema.paramName)
+                if (key == null || key == undefined) {
+                    return this.schemaElementCheck(null, elementSchema)
+                } else {
+                    return this.schemaElementCheck(targetObject[key], elementSchema)
+                }
+            })
+        )
     }
 
     schemaElementCheck(elementValue, elementSchema) {
-        if (elementSchema.required) {
-            this.checkRequired(elementValue, elementSchema.paramName)
-        }
-
-        if (elementValue != undefined && elementValue != null) {
-            if (elementSchema.type == 'numeric') {
-                this.checkNumeric(elementValue, elementSchema.paramName)
-                this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
-            } else if (elementSchema.type == 'text') {
-                this.checkLength(elementValue, elementSchema.lengthRange, elementSchema.paramName)
-            } else if (elementSchema.type == 'constant') {
-                this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
+        return new Promise((resolve, reject) => {
+            if (elementSchema.required) {
+                this.checkRequired(elementValue, elementSchema.paramName)
             }
-            else if (elementSchema.type == 'boolean') {
-                this.checkBoolean(elementValue, elementSchema.paramName)
-            }
-        }
 
+            if (elementValue != undefined && elementValue != null) {
+                if (elementSchema.type == 'numeric') {
+                    this.checkNumeric(elementValue, elementSchema.paramName)
+                    if(elementSchema.numericRange) {
+                        this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
+                    }
+                } else if (elementSchema.type == 'text') {
+                    this.checkLength(elementValue, elementSchema.lengthRange, elementSchema.paramName)
+                } else if (elementSchema.type == 'constant') {
+                    this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
+                }
+                else if (elementSchema.type == 'boolean') {
+                    this.checkBoolean(elementValue, elementSchema.paramName)
+                }
+
+                if(elementSchema.type == 'refData'){
+                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName).then(() => {
+                        resolve()
+                    })
+                }
+                else{
+                    resolve()
+                }
+            }
+        })
     }
 
-
     performValidations(targetObject) {
-        return new Promise((resolve) => {
-            this.schemaCheck(targetObject, this.getSchema())
-            resolve()
-        })
+        return this.schemaCheck(targetObject, this.getSchema())
     }
 
     getSchema() {

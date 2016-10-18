@@ -35,16 +35,14 @@ describe('SchemaValidator', () => {
         const targetObj = {
             "subjectType": "plant",
             "userId": "akuma11",
-            "reps": "2",
             "refExperimentDesignId": 2,
             "status": "ACTIVE"
         }
 
         const schemaArray = [
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}, 'required': true},
-            {'paramName': 'reps', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 1000}, 'required': true},
-            {'paramName': 'refExperimentDesignId', 'type': 'refData', 'required': true},
+            {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}},
+            {'paramName': 'refExperimentDesignId', 'type': 'refData'},
             {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             {'paramName': 'isNull', 'type': 'boolean', 'required': true}
@@ -63,7 +61,7 @@ describe('SchemaValidator', () => {
             (function () {
                 testObject.schemaCheck({}, schemaArray)
                 testObject.check()
-            }).should.throw('Error: name is required,Error: subjectType is required,Error: reps is required,Error: refExperimentDesignId is required,Error: status is required,Error: userId is required')
+            }).should.throw('Error: name is required,Error: status is required,Error: userId is required')
 
         })
 

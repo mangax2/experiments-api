@@ -111,7 +111,6 @@ describe('ExperimentsService', () => {
         const experimentsObj = [{
             'name': 'exp1002',
             'subjectType': 'plant',
-            'reps': 20,
             'refExperimentDesignId': 2,
             'userId': 'akuma11',
             'status': 'ACTIVE'
@@ -145,7 +144,6 @@ describe('ExperimentsService', () => {
                 {
                     'name': 'exp1003',
                     'subjectType': 'plant',
-                    'reps': 20,
                     'refExperimentDesignId': 2,
                     'createdDate': '2016-10-05T15:19:12.026Z',
                     'userId': 'akuma11',
@@ -179,16 +177,6 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('fails due to not finding experiment design', () => {
-            expDesignFindStub.resolves(null)
-
-            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
-                createStub.called.should.equal(false)
-                err.status.should.equal(400)
-                err.errorMessage.should.equal("Invalid Experiment Design")
-            })
-        })
-
         it('fails due to validation error', () => {
             validateStub.rejects("Validation Failure")
 
@@ -205,7 +193,6 @@ describe('ExperimentsService', () => {
                 'id': 30,
                 'name': 'exp1002',
                 'subjectType': 'plant',
-                'reps': 20,
                 'refExperimentDesignId': 2,
                 'userId': 'akuma11',
                 'status': 'ACTIVE'
@@ -213,7 +200,6 @@ describe('ExperimentsService', () => {
             const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
-                'reps': 20,
                 'refExperimentDesignId': 2,
                 'userId': 'akuma11',
                 'status': 'ACTIVE'
@@ -222,6 +208,7 @@ describe('ExperimentsService', () => {
                 experimentResObj
             )
             validateStub.resolves()
+            expDesignFindStub.resolves({})
 
             return experimentsService.updateExperiment(30, experimentReqObj).then((experiment)=> {
                 experiment.id.should.equal(30)
@@ -238,7 +225,6 @@ describe('ExperimentsService', () => {
             const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
-                'reps': 20,
                 'refExperimentDesignId': 2,
                 'createdDate': '2016-10-05T15:19:12.026Z',
                 'createdUserId': 'akuma11',
@@ -265,7 +251,6 @@ describe('ExperimentsService', () => {
             const experimentReqObj = {
                 'name': 'exp1002',
                 'subjectType': 'plant',
-                'reps': 20,
                 'refExperimentDesignId': 2,
                 'createdDate': '2016-10-05T15:19:12.026Z',
                 'userId': 'akuma11',

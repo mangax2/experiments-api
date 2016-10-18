@@ -4,6 +4,7 @@
 import SchemaValidator from "./SchemaValidator"
 import _ from 'lodash'
 import AppError from '../services/utility/AppError'
+import db from '../db/DbManager'
 
 class HypothesisValidator extends SchemaValidator {
 
@@ -12,7 +13,7 @@ class HypothesisValidator extends SchemaValidator {
             {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 300}, 'required': true},
             {'paramName': 'isNull', 'type': 'boolean', 'required': true},
             {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
-            {'paramName': 'experimentId', 'type': 'refData', 'required': true},
+            {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
         ]
     }

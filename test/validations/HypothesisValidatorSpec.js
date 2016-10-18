@@ -4,15 +4,24 @@
 const  sinon =require('sinon')
 const  HypothesisValidator  = require('../../src/validations/HypothesisValidator')
 const  AppError  = require('../../src/services/utility/AppError')
+import db from '../../src/db/DbManager'
 
+let baseValidatorStub
 
 describe('HypothesisValidator', () => {
     const testObject = new HypothesisValidator()
+
+    before(() => {
+        baseValidatorStub = sinon.stub(testObject, 'checkReferentialIntegrityById')
+    })
+    after(() => {
+        baseValidatorStub.restore()
+    })
     const schemaArray = [
         {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 300}, 'required': true},
         {'paramName': 'isNull', 'type': 'boolean', 'required': true},
         {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
-        {'paramName': 'experimentId', 'type': 'refData', 'required': true},
+        {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments},
         {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
 
     ]
@@ -52,6 +61,7 @@ describe('HypothesisValidator', () => {
             }
         ]
         it('returns resolved promise when good value passed for schema validation', () => {
+            baseValidatorStub.resolves()
             return testObject.performValidations(targetObj).should.be.fulfilled
 
         })

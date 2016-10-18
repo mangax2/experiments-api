@@ -17,8 +17,48 @@ describe('SchemaValidator', () => {
                 })
                 testObject.check()
             }).should.throw('name is required')
+        })
 
+        it('checks valid numeric', () => {
+            (function() {
+                testObject.schemaElementCheck(1, {
+                    'paramName': 'number',
+                    'type': 'numeric'
+                })
+                testObject.check()
+            }).should.not.throw()
+        })
 
+        it('checks invalid numeric', () => {
+            (function() {
+                testObject.schemaElementCheck("a", {
+                    'paramName': 'number',
+                    'type': 'numeric'
+                })
+                testObject.check()
+            }).should.throw()
+        })
+
+        it('checks valid numeric range', () => {
+            (function() {
+                testObject.schemaElementCheck(3, {
+                    'paramName': 'number',
+                    'type': 'numeric',
+                    'numericRange': {'min': 0, 'max': 50}
+                })
+                testObject.check()
+            }).should.not.throw()
+        })
+
+        it('checks invalid numeric range', () => {
+            (function() {
+                testObject.schemaElementCheck(200, {
+                    'paramName': 'number',
+                    'type': 'numeric',
+                    'numericRange': {'min': 0, 'max': 50}
+                })
+                testObject.check()
+            }).should.throw()
         })
 
 
@@ -45,7 +85,9 @@ describe('SchemaValidator', () => {
             {'paramName': 'refExperimentDesignId', 'type': 'refData'},
             {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'isNull', 'type': 'boolean', 'required': true}
+            {'paramName': 'isNull', 'type': 'boolean', 'required': true},
+            {'paramName': 'number', 'type': 'numeric'},
+            {'paramName': 'number', 'type': 'numeric', 'numericRange': {'min': 0, 'max': 100}}
         ]
 
         it('returns error message when value is required', () => {

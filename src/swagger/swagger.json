@@ -1011,6 +1011,10 @@
                 "name": {
                     "type": "string",
                     "description": "name of experiment design"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
                 }
             }
         },
@@ -1131,6 +1135,10 @@
                 "status": {
                     "type": "string",
                     "description": "status of the experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
                 }
             }
         },
@@ -1178,6 +1186,10 @@
                 "type": {
                     "type": "string",
                     "description": "name of the factor type"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
                 }
             }
         },

@@ -221,7 +221,6 @@ router.get('/hypotheses/:id', (req, res, next)=> {
 router.put('/hypotheses/:id', (req, res, next) => {
     const hypothesis = req.body
     const id= req.params.id
-    hypothesis['id'] = id
     return new HypothesisService().updateHypothesis(id,hypothesis).then((id) => {
         return res.json(id)
     }).catch((err) => {

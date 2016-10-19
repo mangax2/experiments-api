@@ -57,7 +57,9 @@ class HypothesisService {
     }
 
     updateHypothesis(id, hypothesis) {
-        return this._validator.validate([hypothesis]).then(()=> {
+        const hypothesisRequestObj=hypothesis
+        hypothesisRequestObj.id=id
+        return this._validator.validate([hypothesisRequestObj]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
                 return db.hypothesis.update(id, hypothesis)
             })

@@ -171,10 +171,10 @@ describe('BaseValidator', () => {
 
     describe('checkRIBusiness', () => {
         it('returns error message when dup record found by busness key', () => {
-            riFindByBusnessKeyStub.resolves({id:1})
-            return testObject.checkRIBusiness(1, {}, 'entity',['k1','k2']).then(()=> {
+            riFindByBusnessKeyStub.resolves({id:2})
+            return testObject.checkRIBusiness(1, [{}], 'entity', 'Hypothesis', ['k1','k2']).then(()=> {
                 testObject.messages.length.should.equal(1)
-                testObject.messages[0].should.equal("entity already exists for given business keys: k1,k2")
+                testObject.messages[0].should.equal("Hypothesis already exists for given business keys: k1,k2")
 
             })
         })

@@ -4,7 +4,6 @@ import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
 class HypothesisValidator extends SchemaValidator {
-
     getSchema() {
         return [
             {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 300}, 'required': true},
@@ -38,6 +37,5 @@ class HypothesisValidator extends SchemaValidator {
         }
     }
 }
-
 
 module.exports = HypothesisValidator

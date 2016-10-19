@@ -1,9 +1,10 @@
-const validator = require('validator')
-const AppError = require('../services/utility/AppError')
-const _ = require('lodash')
-const log4js = require('log4js')
-const logger = log4js.getLogger('BaseValidator')
+import validator from 'validator'
+import AppError from '../services/utility/AppError'
+import * as _ from 'lodash'
+import log4js from 'log4js'
 import ReferentialIntegrityService from '../services/ReferentialIntegrityService'
+
+const logger = log4js.getLogger('BaseValidator')
 
 class BaseValidator {
     constructor() {
@@ -68,9 +69,9 @@ class BaseValidator {
         })
     }
 
-    checkRIBusiness(vals, entity, entityName, keys){
+    checkRIBusiness(hypothesisId, vals, entity, entityName, keys){
         return this.referentialIntegrityService.getByBusinessKey(vals, entity).then((data) => {
-            if(data){
+            if(data && data['id'] != hypothesisId){
                 this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
             }
         })

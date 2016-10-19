@@ -1,10 +1,10 @@
-const BaseValidator = require('./BaseValidator')
-const _ = require('lodash')
-const log4js = require('log4js')
+import BaseValidator from './BaseValidator'
+import * as _ from 'lodash'
+import log4js from 'log4js'
+
 const logger = log4js.getLogger('SchemaValidator')
 
 export class SchemaValidator extends BaseValidator {
-
     schemaCheck(targetObject, schema) {
         return Promise.all(
             _.map(schema, (elementSchema) => {
@@ -53,7 +53,7 @@ export class SchemaValidator extends BaseValidator {
                     return targetObject[key]
                 })
 
-                this.checkRIBusiness(vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys).then(() => {
+                this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys).then(() => {
                     resolve()
                 })
             }
@@ -70,9 +70,7 @@ export class SchemaValidator extends BaseValidator {
     getSchema() {
         logger.error('getSchema not implemented')
         throw 'getSchema not implemented'
-
     }
-
 }
 
 module.exports = SchemaValidator

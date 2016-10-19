@@ -3,7 +3,6 @@ import ExperimentDesignsValidator from '../validations/ExperimentDesignsValidato
 import AppError from './utility/AppError'
 
 class ExperimentDesignService{
-
     constructor(){
         this._validator = new ExperimentDesignsValidator()
     }

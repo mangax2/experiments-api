@@ -1,6 +1,3 @@
-/**
- * Created by kprat1 on 12/10/16.
- */
 module.exports = (rep) => {
     return {
         repository: () => {
@@ -19,13 +16,11 @@ module.exports = (rep) => {
             return rep.any("SELECT * FROM hypothesis where experiment_id=$1", experimentId)
         },
 
-
         create: (hypothesisObj) => {
             return rep.one("insert into hypothesis(description, is_null, status, experiment_id, created_date," +
                 " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", hypothesisObj)
         },
         batchCreate: (hypothesisObj) => {
-
             return rep.tx(t=>t.batch(hypothesisObj.map(l=>t.one(
                 "insert into hypothesis(description, is_null, status, experiment_id, created_date," +
                 " created_user_id) values($(description) , $(isNull) , $(status), $(experimentId), CURRENT_TIMESTAMP, $(userId))  RETURNING id", l)
@@ -40,9 +35,11 @@ module.exports = (rep) => {
         remove: (id) => {
             return rep.oneOrNone("delete from hypothesis where id=" + id + " RETURNING id")
         },
+
         getHypothesisByExperimentAndDescriptionAndType:(experimentId,description,isNull) => {
             return rep.oneOrNone("SELECT * FROM hypothesis where experiment_id = $1 and description = $2 and is_null = $3", [experimentId, description , isNull])
         },
+
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM hypothesis where experiment_id = $1 and description = $2 and is_null = $3", keys)
 

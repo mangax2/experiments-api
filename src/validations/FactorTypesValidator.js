@@ -14,7 +14,6 @@ class FactorTypesValidator extends SchemaValidator {
             return Promise.all(
                 _.map(targetObject, factorType=> super.performValidations(factorType))
             )
-
         } else {
             throw AppError.badRequest('Factor Types request object needs to be an array')
         }

@@ -1,10 +1,9 @@
-const SchemaValidator = require('./SchemaValidator')
-const _ = require('lodash')
-const AppError = require('../services/utility/AppError')
+import SchemaValidator from './SchemaValidator'
+import * as _ from 'lodash'
+import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
 class ExperimentsValidator extends SchemaValidator {
-
     getSchema() {
         return [
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
@@ -24,7 +23,6 @@ class ExperimentsValidator extends SchemaValidator {
             throw AppError.badRequest('Experiments request object needs to be an array')
         }
     }
-
 }
 
 module.exports = ExperimentsValidator

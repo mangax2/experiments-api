@@ -1,6 +1,5 @@
 import promise from 'bluebird'
 import experiments from '../repos/experiments'
-import experimentModel from '../repos/experimentModel'
 import experimentDesign from '../repos/experimentDesign'
 import factorType from '../repos/factorType'
 import hypothesis from '../repos/hypothesis'
@@ -14,7 +13,6 @@ const options = {
     promiseLib: promise,
     extend: (obj) => {
         obj.experiments = new (experiments)(obj, pgp)
-        obj.experimentModel = new (experimentModel)(obj, pgp)
         obj.experimentDesign = new (experimentDesign)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
         obj.hypothesis = new (hypothesis)(obj, pgp)

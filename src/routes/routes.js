@@ -1,7 +1,6 @@
 import express from 'express'
 import log4js from 'log4js'
 import ExperimentsService from '../services/ExperimentsService'
-import ExperimentModelService from '../services/ExperimentModelService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
@@ -92,51 +91,6 @@ router.put('/experiments/:id', (req, res, next) => {
 router.delete('/experiments/:id', (req, res, next) => {
     const id = req.params.id
     return new ExperimentsService().deleteExperiment(id).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.get('/experimentModel', (req, res, next) => {
-    return new ExperimentModelService().getAllModels().then((r) => {
-        return res.json(r)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-router.post('/experimentModel', (req, res, next) => {
-    const experimentModel = req.body
-
-    return new ExperimentModelService().createExperimentModel(experimentModel).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.get('/experimentModel/:id', (req, res, next) => {
-    const id = req.params.id
-    new ExperimentModelService().getExperimentModelById(id).then((experimentModel) => {
-        return res.json(experimentModel)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-router.put('/experimentModel/:id', (req, res, next) => {
-    const experimentModel = req.body
-    const id = req.params.id
-
-    return new ExperimentModelService().updateExperimentModel(id, experimentModel).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-router.delete('/experimentModel/:id', (req, res, next) => {
-    const id = req.params.id
-
-    return new ExperimentModelService().deleteExperimentModel(id).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return next(err)

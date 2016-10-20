@@ -13,13 +13,13 @@ module.exports = (rep) => {
         },
 
         create: (t, experimentObj) => {
-            return t.one("insert into experiment(name, subject_type, ref_experiment_design_id, created_date," +
-                " created_user_id, status) values($1, $2, $3, CURRENT_TIMESTAMP, $4,  $5)  RETURNING id",[experimentObj.name, experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.userId, experimentObj.status])
+            return t.one("insert into experiment(name, subject_type, ref_experiment_design_id, status,created_user_id, created_date," +
+                "modified_user_id, modified_date) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id",[experimentObj.name, experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, experimentObj.userId])
         },
 
         update: (id, experimentObj) => {
-            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, ref_experiment_design_id,"+
-                "modified_date, modified_user_id, status) = ($1,$2,$3,CURRENT_TIMESTAMP,$4,$5) WHERE id="+id+" RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.userId, experimentObj.status])
+            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, ref_experiment_design_id,status,"+
+                "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id="+id+" RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, experimentObj.userId])
         },
 
         remove: (id) => {

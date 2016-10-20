@@ -11,7 +11,6 @@ const testResponse = {}
 const testError = {}
 const tx = {}
 
-let createStub
 let createBatchStub
 let experimentsService
 let hypothesisService
@@ -30,7 +29,6 @@ let getByBusinessKeyStub
 
 describe('HypothesisService', () => {
     before(() => {
-        createStub = sinon.stub(db.hypothesis, 'create')
         createBatchStub = sinon.stub(db.hypothesis, 'batchCreate')
         hypothesisService = new HypothesisService()
         findStub = sinon.stub(db.hypothesis, 'find')
@@ -43,7 +41,6 @@ describe('HypothesisService', () => {
     })
 
     after(() => {
-        createStub.restore()
         createBatchStub.restore()
         findStub.restore()
         getStub.restore()
@@ -58,7 +55,7 @@ describe('HypothesisService', () => {
     })
 
     afterEach(() => {
-        createStub.reset()
+        // createStub.reset()
         createBatchStub.reset()
         findStub.reset()
         getStub.reset()

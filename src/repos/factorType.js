@@ -13,7 +13,7 @@ module.exports = (rep) => {
         },
 
         create: (t, factorTypeObj, created_user_id) => {
-            return t.one("INSERT into ref_factor_type(type, created_date, created_user_id) values($1, CURRENT_TIMESTAMP, $2) RETURNING id", [factorTypeObj.type, created_user_id])
+            return t.one("INSERT into ref_factor_type(type, created_user_id, created_date, modified_user_id, modified_date) values($1, $2, CURRENT_TIMESTAMP, $2, CURRENT_TIMESTAMP) RETURNING id", [factorTypeObj.type, created_user_id])
         },
 
         update: (t, id, factorTypeObj, modified_user_id) => {

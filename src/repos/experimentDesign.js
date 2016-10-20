@@ -13,7 +13,7 @@ module.exports = (rep) => {
         },
 
         create: (t, experimentDesignObj, created_user_id) => {
-            return t.one("INSERT INTO ref_experiment_design(name, created_date, created_user_id, modified_user_id, modified_date) VALUES($1, CURRENT_TIMESTAMP, $2, $3, CURRENT_TIMESTAMP) RETURNING id", [experimentDesignObj.name, created_user_id, created_user_id])
+            return t.one("INSERT INTO ref_experiment_design(name, created_user_id, created_date, modified_user_id, modified_date) VALUES($1, $2,CURRENT_TIMESTAMP, $2, CURRENT_TIMESTAMP) RETURNING id", [experimentDesignObj.name, created_user_id])
         },
 
         update: (id, experimentDesignObj, modified_user_id) => {

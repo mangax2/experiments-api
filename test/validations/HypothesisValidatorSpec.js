@@ -22,7 +22,7 @@ describe('HypothesisValidator', () => {
         getByBusinessKeyStub.restore()
     })
     const schemaArray = [
-        {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 300}, 'required': true},
+        {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 1000}, 'required': false},
         {'paramName': 'isNull', 'type': 'boolean', 'required': true},
         {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
         {'paramName': 'experimentId', 'type': 'numeric', 'required': true},

@@ -148,7 +148,7 @@ CREATE TABLE dependent_variable
 CREATE TABLE hypothesis
 (
   id serial NOT NULL,
-  description character varying NOT NULL,
+  description character varying,
   is_null boolean NOT NULL DEFAULT false,
   status character varying NOT NULL,
   experiment_id integer NOT NULL,

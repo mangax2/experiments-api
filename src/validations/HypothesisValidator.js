@@ -6,7 +6,7 @@ import db from '../db/DbManager'
 class HypothesisValidator extends SchemaValidator {
     getSchema() {
         return [
-            {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 1, 'max': 1000}, 'required': false},
+            {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 0, 'max': 1000}, 'required': false},
             {'paramName': 'isNull', 'type': 'boolean', 'required': true},
             {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},

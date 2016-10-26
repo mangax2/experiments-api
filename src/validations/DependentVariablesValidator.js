@@ -4,10 +4,11 @@ import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
 class DependentVariablesValidator extends SchemaValidator {
-    getSchema() {
-        return [
+    getSchema(operationName) {
+        const schema = [
             {'paramName': 'required', 'type': 'boolean', 'required': true},
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
+            {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
             {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments, 'required': true},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             {
@@ -17,12 +18,18 @@ class DependentVariablesValidator extends SchemaValidator {
                 'entity': db.dependentVariable
             }
         ]
+        switch (operationName) {
+            case 'POST': return schema
+            case 'PUT': return schema.concat([{'paramName': 'id', 'type': 'numeric', 'required': true},
+                {'paramName': 'id', 'type': 'refData', 'entity': db.dependentVariable, 'operation': 'PUT'}])
+        }
+
     }
 
-    performValidations(targetObject) {
+    performValidations(targetObject, operationName) {
         if (_.isArray(targetObject) && targetObject.length > 0) {
             return Promise.all(
-                _.map(targetObject, dv=> super.performValidations(dv))
+                _.map(targetObject, dv=> super.performValidations(dv, operationName))
             ).then(()=> {
                 this.checkBusinessKey(targetObject)
             })

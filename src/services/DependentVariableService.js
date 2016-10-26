@@ -13,7 +13,7 @@ class DependentVariableService {
     }
 
     createDependentVariables(dependentVariables) {
-        return this._validator.validate(dependentVariables).then(() => {
+        return this._validator.validate(dependentVariables,'POST').then(() => {
             return db.experiments.repository().tx('createDependentVariablesTx', (t) => {
                 return db.dependentVariable.batchCreate(t, dependentVariables).then(data => {
                     return AppUtil.createPostResponse(data)
@@ -38,15 +38,12 @@ class DependentVariableService {
         })
     }
 
-    updateDependentVariable(id, dependentVariable) {
-        return this._validator.validate([dependentVariable]).then(() => {
-            return db.dependentVariable.update(id, dependentVariable).then((data) => {
-                if (!data) {
-                    logger.error("Dependent Variable Not Found to Update for id = " + id)
-                    throw AppError.notFound('Dependent Variable Not Found to Update')
-                } else {
-                    return data
-                }
+    batchUpdateDependentVariables(dependentVariables) {
+        return this._validator.validate(dependentVariables,'PUT').then(() => {
+            return db.experiments.repository().tx('createDependentVariablesTx', (t) => {
+                return db.dependentVariable.batchUpdate(t, dependentVariables).then(data => {
+                    return AppUtil.createPutResponse(data)
+                })
             })
         })
     }

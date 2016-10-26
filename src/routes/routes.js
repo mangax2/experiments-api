@@ -218,16 +218,16 @@ router.get('/dependent-variables/:id', (req, res, next) => {
         return next(err)
     })
 })
-router.put('/dependent-variables/:id', (req, res, next) => {
-    const experiment = req.body
-    const id = req.params.id
 
-    return new DependentVariableService().updateDependentVariable(id, experiment).then((value) => {
+router.put('/dependent-variables', (req, res, next) => {
+    const dependentVariables = req.body
+    return new DependentVariableService().batchUpdateDependentVariables(dependentVariables).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return next(err)
     })
 })
+
 router.delete('/dependent-variables/:id', (req, res, next) => {
     const id = req.params.id
     return new DependentVariableService().deleteDependentVariable(id).then((value) => {

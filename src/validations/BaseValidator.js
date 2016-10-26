@@ -12,8 +12,8 @@ class BaseValidator {
         this.referentialIntegrityService = new ReferentialIntegrityService()
     }
 
-    validate(targetObject) {
-        return this.performValidations(targetObject).then(()=> {
+    validate(targetObject, operationName) {
+        return this.performValidations(targetObject, operationName).then(()=> {
             this.check()
         })
     }

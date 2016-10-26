@@ -63,11 +63,11 @@ export class SchemaValidator extends BaseValidator {
         })
     }
 
-    performValidations(targetObject) {
-        return this.schemaCheck(targetObject, this.getSchema())
+    performValidations(targetObject, operationName) {
+        return this.schemaCheck(targetObject, this.getSchema(operationName))
     }
 
-    getSchema() {
+    getSchema(operationName) {
         logger.error('getSchema not implemented')
         throw 'getSchema not implemented'
     }

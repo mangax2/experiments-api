@@ -21,7 +21,7 @@ class HypothesisValidator extends SchemaValidator {
             return Promise.all(
                 _.map(hypothesisObj, (hypothesis) => super.performValidations(hypothesis))
             ).then(()=>{
-                  this.checkBusinessKey(hypothesisObj)
+                this.checkBusinessKey(hypothesisObj)
             })
         } else {
             throw AppError.badRequest('Hypothesis request object needs to be an array')
@@ -33,7 +33,7 @@ class HypothesisValidator extends SchemaValidator {
             return _.pick(hypothesis,['description','experimentId','isNull'])
         }), _.isEqual)
         if(uniqArray.length!=hypothesisObj.length){
-              throw AppError.badRequest('duplicate hypotheses in request payload with same experiment id')
+            throw AppError.badRequest('duplicate hypotheses in request payload with same experiment id')
         }
     }
 }

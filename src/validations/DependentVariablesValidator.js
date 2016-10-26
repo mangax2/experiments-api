@@ -8,17 +8,22 @@ class DependentVariablesValidator extends SchemaValidator {
         return [
             {'paramName': 'required', 'type': 'boolean', 'required': true},
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
-            {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments, 'required': true},
+            {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments, 'required': true},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'DependentVariable', 'type': 'businessKey', 'keys': ['experimentId','name'], 'entity': db.dependentVariable}
+            {
+                'paramName': 'DependentVariable',
+                'type': 'businessKey',
+                'keys': ['experimentId', 'name'],
+                'entity': db.dependentVariable
+            }
         ]
     }
 
     performValidations(targetObject) {
-        if (_.isArray(targetObject) && targetObject.length>0) {
+        if (_.isArray(targetObject) && targetObject.length > 0) {
             return Promise.all(
                 _.map(targetObject, dv=> super.performValidations(dv))
-            ).then(()=>{
+            ).then(()=> {
                 this.checkBusinessKey(targetObject)
             })
         } else {
@@ -26,11 +31,11 @@ class DependentVariablesValidator extends SchemaValidator {
         }
     }
 
-    checkBusinessKey(ObjArray){
-        const uniqArray = _.uniqWith(_.map(ObjArray,(obj)=>{
-            return _.pick(obj,['experimentId','name'])
+    checkBusinessKey(ObjArray) {
+        const uniqArray = _.uniqWith(_.map(ObjArray, (obj)=> {
+            return _.pick(obj, ['experimentId', 'name'])
         }), _.isEqual)
-        if(uniqArray.length!=ObjArray.length){
+        if (uniqArray.length != ObjArray.length) {
             throw AppError.badRequest('duplicate dependent variable name in request payload with same experiment id')
         }
     }

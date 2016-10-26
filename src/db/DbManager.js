@@ -3,6 +3,7 @@ import experiments from '../repos/experiments'
 import experimentDesign from '../repos/experimentDesign'
 import factorType from '../repos/factorType'
 import hypothesis from '../repos/hypothesis'
+import dependentVariable from '../repos/dependentVariable'
 import pgPromise from 'pg-promise'
 import cfServices from '../services/utility/ServiceConfig'
 import log4js from 'log4js'
@@ -16,6 +17,7 @@ const options = {
         obj.experimentDesign = new (experimentDesign)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
         obj.hypothesis = new (hypothesis)(obj, pgp)
+        obj.dependentVariable = new (dependentVariable)(obj, pgp)
     }
 }
 

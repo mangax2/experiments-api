@@ -4,6 +4,8 @@ import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
+import DependentVariableService from '../services/DependentVariableService'
+
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -189,6 +191,50 @@ router.delete('/hypotheses/:id', (req, res, next)=> {
         return next(err)
     })
 
+})
+
+
+router.get('/dependent-variables', (req, res, next) => {
+    new DependentVariableService().getAllDependentVariables().then((dependentVariables)=> {
+        return res.json(dependentVariables)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/dependent-variables', (req, res, next) => {
+    const dependentVariables = req.body
+    return new DependentVariableService().createDependentVariables(dependentVariables).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/dependent-variables/:id', (req, res, next) => {
+    new DependentVariableService().getDependentVariableById(req.params.id).then((dependentVariable)=> {
+        return res.json(dependentVariable)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+router.put('/dependent-variables/:id', (req, res, next) => {
+    const experiment = req.body
+    const id = req.params.id
+
+    return new DependentVariableService().updateDependentVariable(id, experiment).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+router.delete('/dependent-variables/:id', (req, res, next) => {
+    const id = req.params.id
+    return new DependentVariableService().deleteDependentVariable(id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
 })
 
 module.exports = router

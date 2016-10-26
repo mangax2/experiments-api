@@ -69,9 +69,9 @@ class BaseValidator {
         })
     }
 
-    checkRIBusiness(hypothesisId, vals, entity, entityName, keys){
+    checkRIBusiness(entityId, vals, entity, entityName, keys){
         return this.referentialIntegrityService.getByBusinessKey(vals, entity).then((data) => {
-            if(data && data['id'] != hypothesisId){
+            if(data && data['id'] != entityId){
                 this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
             }
         })

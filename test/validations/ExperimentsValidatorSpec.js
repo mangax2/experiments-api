@@ -17,7 +17,7 @@ describe('ExperimentValidator', () => {
     })
     const schemaArray = [
         {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-        {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}},
+        {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 0, 'max': 100}},
         {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
         {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
         {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}

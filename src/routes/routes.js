@@ -2,6 +2,7 @@ import express from 'express'
 import log4js from 'log4js'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
+import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
 import DependentVariableService from '../services/DependentVariableService'
@@ -236,5 +237,56 @@ router.delete('/dependent-variables/:id', (req, res, next) => {
         return next(err)
     })
 })
+
+router.get('/factors', (req, res, next) => {
+    new FactorService().getAllFactors().then((factors) => {
+        return res.json(factors)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/factors', (req, res, next) => {
+    return new FactorService().batchCreateFactors(req.body).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        logger.info(err)
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/factors', (req, res, next)=> {
+    return new FactorService().getFactorsByExperimentId(req.params.id).then((factors)=> {
+        return res.json(factors)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/factors/:id', (req, res, next) => {
+    new FactorService().getFactorById(req.params.id).then((factors) => {
+        return res.json(factors)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/factors', (req, res, next) => {
+    return new FactorService().batchUpdateFactors(req.body).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.delete('/factors/:id', (req, res, next) => {
+    return new FactorService().deleteFactor(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
 
 module.exports = router

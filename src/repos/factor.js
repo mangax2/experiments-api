@@ -8,6 +8,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("SELECT * FROM factor WHERE id = $1", id)
         },
 
+        findByExperimentId: (experimentId) => {
+            return rep.any("SELECT * FROM factor WHERE experiment_id=$1", experimentId)
+        },
+
         all: () => {
             return rep.any("SELECT * FROM factor")
         },
@@ -30,7 +34,7 @@ module.exports = (rep) => {
                     factor => t.oneOrNone(
                         "UPDATE factor SET (name, ref_factor_type_id, experiment_id, modified_user_id, modified_date) = " +
                         "($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id=$5 RETURNING *",
-                        [factor.name, factor.refFactorTypeId, factor.experiment_id, factor.userId, factor.id]
+                        [factor.name, factor.refFactorTypeId, factor.experimentId, factor.userId, factor.id]
                     )
                 )
             )
@@ -41,7 +45,7 @@ module.exports = (rep) => {
         },
 
         findByBusinessKey: (keys) => {
-            return rep.oneOrNone("SELECT * FROM factor WHERE experiemnt_id=$1 and name=$2", keys)
+            return rep.oneOrNone("SELECT * FROM factor WHERE experiment_id=$1 and name=$2", keys)
         }
     }
 }

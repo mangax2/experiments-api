@@ -2,6 +2,7 @@ import express from 'express'
 import log4js from 'log4js'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
+import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
@@ -248,7 +249,7 @@ router.delete('/dependent-variables/:id', (req, res, next) => {
 })
 
 router.get('/factors', (req, res, next) => {
-    new FactorService().getAllFactors().then((factors) => {
+    return new FactorService().getAllFactors().then((factors) => {
         return res.json(factors)
     }).catch((err) => {
         return next(err)
@@ -259,7 +260,6 @@ router.post('/factors', (req, res, next) => {
     return new FactorService().batchCreateFactors(req.body).then((id) => {
         return res.json(id)
     }).catch((err) => {
-        logger.info(err)
         return next(err)
     })
 })
@@ -273,7 +273,7 @@ router.get('/experiments/:id/factors', (req, res, next)=> {
 })
 
 router.get('/factors/:id', (req, res, next) => {
-    new FactorService().getFactorById(req.params.id).then((factors) => {
+    return new FactorService().getFactorById(req.params.id).then((factors) => {
         return res.json(factors)
     }).catch((err) => {
         return next(err)
@@ -296,6 +296,53 @@ router.delete('/factors/:id', (req, res, next) => {
     })
 })
 
+router.get('/factorLevels', (req, res, next) => {
+    return new FactorLevelService().getAllFactorLevels().then((factorLevels) => {
+        return res.json(factorLevels)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/factorLevels', (req, res, next) => {
+    return new FactorLevelService().batchCreateFactorLevels(req.body).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/factors/:id/factorLevels', (req, res, next)=> {
+    return new FactorLevelService().getFactorLevelsByFactorId(req.params.id).then((factorLevels)=> {
+        return res.json(factorLevels)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/factorLevels/:id', (req, res, next) => {
+    return new FactorLevelService().getFactorLevelById(req.params.id).then((factorLevel) => {
+        return res.json(factorLevel)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/factorLevels', (req, res, next) => {
+    return new FactorLevelService().batchUpdateFactorLevels(req.body).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.delete('/factorLevels/:id', (req, res, next) => {
+    return new FactorLevelService().deleteFactorLevel(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
 
 
 module.exports = router

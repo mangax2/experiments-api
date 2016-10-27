@@ -15,9 +15,7 @@ class FactorService {
     batchCreateFactors(factors) {
         return this._validator.validate(factors, 'POST').then(() => {
             return db.factor.repository().tx('createFactorsTx', (t) => {
-                logger.info("Before batch create")
                 return db.factor.batchCreate(t, factors).then(data => {
-                    logger.info("After batch create")
                     return AppUtil.createPostResponse(data)
                 })
             })

@@ -51,8 +51,8 @@ class DependentVariableService {
     deleteDependentVariable(id) {
         return db.dependentVariable.remove(id).then((data) => {
             if (!data) {
-                logger.error("Dependent Variable  Not Found for requested id = " + id)
-                throw AppError.notFound('Dependent Variable  Not Found for requested id')
+                logger.error("Dependent Variable Not Found for requested id = " + id)
+                throw AppError.notFound('Dependent Variable Not Found for requested id')
             }
             else {
                 return data

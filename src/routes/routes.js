@@ -204,7 +204,7 @@ router.get('/dependent-variables', (req, res, next) => {
 
 router.post('/dependent-variables', (req, res, next) => {
     const dependentVariables = req.body
-    return new DependentVariableService().createDependentVariables(dependentVariables).then((id) => {
+    return new DependentVariableService().batchCreateDependentVariables(dependentVariables).then((id) => {
         return res.json(id)
     }).catch((err) => {
         return next(err)

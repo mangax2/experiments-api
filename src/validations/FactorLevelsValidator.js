@@ -22,7 +22,7 @@ class FactorLevelsValidator extends SchemaValidator {
             case 'PUT': return schema.concat(
                 [
                     {'paramName': 'id', 'type': 'numeric', 'required': true},
-                    {'paramName': 'id', 'type': 'refData', 'entity': db.factorLevel, 'operation': 'PUT'}
+                    {'paramName': 'id', 'type': 'refData', 'entity': db.factorLevel}
                 ]
             )
         }

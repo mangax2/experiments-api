@@ -167,6 +167,15 @@ router.get('/experiments/:id/hypotheses', (req, res, next)=> {
     })
 })
 
+router.get('/experiments/:id/dependent-variables', (req, res, next)=> {
+    const id = req.params.id
+    return new DependentVariableService().getDependentVariablesByExperimentId(id).then((dependentVariables)=> {
+        return res.json(dependentVariables)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
 router.get('/hypotheses/:id', (req, res, next)=> {
     const id = req.params.id
     return new HypothesisService().getHypothesisById(id).then((hypothesis)=> {

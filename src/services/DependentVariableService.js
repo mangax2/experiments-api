@@ -2,6 +2,8 @@ import db from "../db/DbManager"
 import AppUtil from "./utility/AppUtil"
 import AppError from "./utility/AppError"
 import DependentVariablesValidator from "../validations/DependentVariablesValidator"
+import ExperimentsService from './ExperimentsService'
+
 import log4js from "log4js"
 
 const logger = log4js.getLogger('DependentVariableService')
@@ -10,6 +12,7 @@ class DependentVariableService {
 
     constructor() {
         this._validator = new DependentVariablesValidator()
+        this._experimentService = new ExperimentsService()
     }
 
     batchCreateDependentVariables(dependentVariables) {
@@ -24,6 +27,12 @@ class DependentVariableService {
 
     getAllDependentVariables() {
         return db.dependentVariable.all()
+    }
+
+    getDependentVariablesByExperimentId(experimentId) {
+        return this._experimentService.getExperimentById(experimentId).then(()=> {
+            return db.dependentVariable.findByExperimentId(experimentId)
+        })
     }
 
     getDependentVariableById(id) {
@@ -51,8 +60,8 @@ class DependentVariableService {
     deleteDependentVariable(id) {
         return db.dependentVariable.remove(id).then((data) => {
             if (!data) {
-                logger.error("Dependent Variable  Not Found for requested id = " + id)
-                throw AppError.notFound('Dependent Variable  Not Found for requested id')
+                logger.error("Dependent Variable Not Found for requested id = " + id)
+                throw AppError.notFound('Dependent Variable Not Found for requested id')
             }
             else {
                 return data

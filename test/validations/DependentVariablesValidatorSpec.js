@@ -36,7 +36,7 @@ describe('DependentVariablesValidator', () => {
     ]
 
     const schemaArrayForPutOperation=schemaArrayForPostOperation.concat([{'paramName': 'id', 'type': 'numeric', 'required': true},
-        {'paramName': 'id', 'type': 'refData', 'entity': db.dependentVariable, 'operation': 'PUT'}])
+        {'paramName': 'id', 'type': 'refData', 'entity': db.dependentVariable}])
 
     describe('getSchema', () => {
         it('returns schema array for POST operation', () => {

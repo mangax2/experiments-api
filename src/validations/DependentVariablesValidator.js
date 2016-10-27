@@ -21,7 +21,7 @@ class DependentVariablesValidator extends SchemaValidator {
         switch (operationName) {
             case 'POST': return schema
             case 'PUT': return schema.concat([{'paramName': 'id', 'type': 'numeric', 'required': true},
-                {'paramName': 'id', 'type': 'refData', 'entity': db.dependentVariable, 'operation': 'PUT'}])
+                {'paramName': 'id', 'type': 'refData', 'entity': db.dependentVariable}])
         }
 
     }

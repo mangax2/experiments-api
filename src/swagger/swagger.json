@@ -527,6 +527,110 @@
                 }
             }
         },
+        "/experiments/{id}/dependent-variables": {
+            "get": {
+                "summary": "get all dependent variables for given experiment id.",
+                "description": "This endpoint returns information about the dependent variable entities associated with one Experiment.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dependent Variables",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariableResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/factors": {
+            "get": {
+                "summary": "get all factors  for given experiment id.",
+                "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Factors",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/hypotheses": {
             "get": {
                 "summary": "get all hypotheses entities",
@@ -765,6 +869,654 @@
                 }
             }
         },
+        "/dependent-variables/{id}": {
+            "get": {
+                "summary": "get one dependent variable entity",
+                "description": "The dependent variables endpoint returns information about the dependent variable entities in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "dependent Variable entity",
+                        "schema": {
+                            "$ref": "#/definitions/DependentVariableResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Dependent Variable Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one Dependent Variable entity",
+                "description": "delete Dependent Variable entity in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Dependent Variable Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Dependent Variable Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dependent-variables": {
+            "post": {
+                "summary": "post one or more dependent variable entities",
+                "description": "Creates new Dependent Variables in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "DependentVariables ",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariablePayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Dependent Variable Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+
+            "put": {
+                "summary": "put one or more dependent variable entities",
+                "description": "Update Dependent Variables in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "DependentVariables",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariablePayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+
+        },
+        "/factors/{id}": {
+            "get": {
+                "summary": "get one factor entity",
+                "description": "The factors endpoint returns information about the factor entities in Experiments System.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "factor entity",
+                        "schema": {
+                            "$ref": "#/definitions/FactorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Factor Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one factor entity",
+                "description": "delete factor entity in Experiments System.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Factor Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Factor Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/factors/{id}/factor-levels": {
+            "get": {
+                "summary": "get all factors  for given factor id.",
+                "description": "This endpoint returns information about the factor entities associated with one Factor.\n",
+                "tags": [
+                    "Factor Levels"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Factors",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/factors": {
+            "post": {
+                "summary": "post one or more factor entities",
+                "description": "Creates new factor entity in Experiments System.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "Factors ",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Factor Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+
+            "put": {
+                "summary": "put one or more factor entities",
+                "description": "Update factor in Experiments System.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "Factors",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+
+        },
+
+        "/factor-levels/{id}": {
+            "get": {
+                "summary": "get one factor level entity",
+                "description": "The factor-levels endpoint returns information about the factor level entity in Experiments System.\n",
+                "tags": [
+                    "Factor Levels"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "factor-level entity",
+                        "schema": {
+                            "$ref": "#/definitions/FactorLevelResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Factor Level Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one factor level entity",
+                "description": "delete factor level entity in Experiments System.\n",
+                "tags": [
+                    "Factor Levels"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Factor Level Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Factor Level Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/factor-levels": {
+            "post": {
+                "summary": "post one or more factor level entities",
+                "description": "Creates new factor level entities in Experiments System.\n",
+                "tags": [
+                    "Factor Levels"
+                ],
+                "parameters": [
+                    {
+                        "name": "Factor Levels ",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorLevelPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Factor Level Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+
+            "put": {
+                "summary": "put one or more factor level entities",
+                "description": "Update factor level in Experiments System.\n",
+                "tags": [
+                    "Factor Levels"
+                ],
+                "parameters": [
+                    {
+                        "name": "Factor Levels",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorLevelPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+
+        },
+
         "/factor-types": {
             "get": {
                 "summary": "Get all factor types",
@@ -1064,11 +1816,11 @@
             "properties": {
                 "id": {
                     "type": "integer",
-                    "description": "unique id for experiment entity"
+                    "description": "unique id for entity"
                 },
                 "description": {
                     "type": "string",
-                    "description": "description of the experiment entity."
+                    "description": "description of the entity."
                 },
                 "isNull": {
                     "type": "boolean",
@@ -1081,6 +1833,113 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "ExperimentId of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "DependentVariableResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "boolean vaule to specify dependent variable is required or not."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "ExperimentId of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "FactorResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the factor."
+                },
+                "refFactorTypeId": {
+                    "type": "integer",
+                    "description": "id of FactorType entity"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "FactorLevelResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "name of the factor level."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity"
                 },
                 "createdDate": {
                     "type": "string",
@@ -1114,6 +1973,23 @@
                 "id": {
                     "type": "integer",
                     "description": "id of newely created resource or black in case of error."
+                }
+            }
+        },
+        "UpdateResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "description": "http status code, 200 for success and 4.x.x for errors."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Resource updated or error description in case of error."
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "id of updated resource or black in case of error."
                 }
             }
         },
@@ -1186,6 +2062,136 @@
                 "type": {
                     "type": "string",
                     "description": "name of the factor type"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "DependentVariablePayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "required": {
+                    "type": "boolean",
+                    "description": "is rquired boolean value."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "experimentId of experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "DependentVariablePayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of dependent varable to update."
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "is rquired boolean value."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "experimentId of experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "FactorPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of the factor."
+                },
+                "refFactorTypeId": {
+                    "type": "integer",
+                    "description": "id of FactorType entity."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "FactorPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of factor to update."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the factor."
+                },
+                "refFactorTypeId": {
+                    "type": "integer",
+                    "description": "id of FactorType entity."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "FactorLevelPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "value of the factor."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity."
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "userId for audit use."
+                }
+            }
+        },
+        "FactorLevelPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of factorLevel to update."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the factor."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity."
                 },
                 "userId": {
                     "type": "string",

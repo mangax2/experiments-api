@@ -17,6 +17,9 @@ let removeStub
 let transactionStub
 let updateStub
 let validateStub
+let findByExperimentIdStub
+let getExperimentByIdStub
+
 
 describe('DependentVariableService', () => {
     before(() => {
@@ -24,6 +27,7 @@ describe('DependentVariableService', () => {
         expFindStub = sinon.stub(db.experiments, 'find')
         dependentVariableService = new DependentVariableService()
         findStub = sinon.stub(db.dependentVariable, 'find')
+        findByExperimentIdStub = sinon.stub(db.dependentVariable, 'findByExperimentId')
         getStub = sinon.stub(db.dependentVariable, 'all')
         removeStub = sinon.stub(db.dependentVariable, 'remove')
         transactionStub = sinon.stub(db.dependentVariable, 'repository', () => {
@@ -31,17 +35,21 @@ describe('DependentVariableService', () => {
         })
         updateStub = sinon.stub(db.dependentVariable, 'batchUpdate')
         validateStub = sinon.stub(dependentVariableService._validator, 'validate')
+        getExperimentByIdStub = sinon.stub(dependentVariableService._experimentService, 'getExperimentById')
+
     })
 
     after(() => {
         createStub.restore()
         expFindStub.restore()
         findStub.restore()
+        findByExperimentIdStub.restore()
         getStub.restore()
         removeStub.restore()
         transactionStub.restore()
         updateStub.restore()
         validateStub.restore()
+        getExperimentByIdStub.restore()
 
     })
 
@@ -49,11 +57,13 @@ describe('DependentVariableService', () => {
         createStub.reset()
         expFindStub.reset()
         findStub.reset()
+        findByExperimentIdStub.reset()
         getStub.reset()
         removeStub.reset()
         transactionStub.reset()
         updateStub.reset()
         validateStub.reset()
+        getExperimentByIdStub.reset()
     })
 
     describe('Get All Dependent Variables:', () => {
@@ -104,6 +114,27 @@ describe('DependentVariableService', () => {
                 sinon.assert.calledWithExactly(findStub, 30)
             })
         })
+    })
+
+    describe('Get dependent variables By experiment Id:', () => {
+
+        it('Success and Return dependent variables', ()=> {
+            getExperimentByIdStub.resolves({})
+            findByExperimentIdStub.resolves(testResponse)
+
+            return dependentVariableService.getDependentVariablesByExperimentId(1).then((dvs)=> {
+                sinon.assert.calledWithExactly(findByExperimentIdStub, 1)
+                dvs.should.equal(testResponse)
+            })
+        })
+
+        it('fails', () => {
+            getExperimentByIdStub.rejects()
+            return dependentVariableService.getDependentVariablesByExperimentId(-1).should.be.rejected.then((err) => {
+                findByExperimentIdStub.called.should.equal(false)
+            })
+        })
+
     })
 
     describe('Create Dependent Variables', () => {

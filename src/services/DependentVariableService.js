@@ -16,9 +16,13 @@ class DependentVariableService {
     }
 
     batchCreateDependentVariables(dependentVariables) {
+        console.log("begin")
         return this._validator.validate(dependentVariables,'POST').then(() => {
-            return db.experiments.repository().tx('createDependentVariablesTx', (t) => {
+            console.log("validated")
+            return db.dependentVariable.repository().tx('createDependentVariablesTx', (t) => {
+                console.log("transaction")
                 return db.dependentVariable.batchCreate(t, dependentVariables).then(data => {
+                    console.log("batch")
                     return AppUtil.createPostResponse(data)
                 })
             })
@@ -49,7 +53,7 @@ class DependentVariableService {
 
     batchUpdateDependentVariables(dependentVariables) {
         return this._validator.validate(dependentVariables,'PUT').then(() => {
-            return db.experiments.repository().tx('updateDependentVariablesTx', (t) => {
+            return db.dependentVariable.repository().tx('updateDependentVariablesTx', (t) => {
                 return db.dependentVariable.batchUpdate(t, dependentVariables).then(data => {
                     return AppUtil.createPutResponse(data)
                 })

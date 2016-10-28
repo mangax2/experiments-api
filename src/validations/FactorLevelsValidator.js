@@ -4,8 +4,8 @@ import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
 class FactorLevelsValidator extends SchemaValidator {
-    getSchema(operationName) {
-        const schema = [
+    static get POST_VALIDATION_SCHEMA() {
+        return [
             {'paramName': 'value', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
             {'paramName': 'factorId', 'type': 'numeric', 'required': true},
             {'paramName': 'factorId', 'type': 'refData', 'entity': db.factor, 'required': true},
@@ -17,13 +17,20 @@ class FactorLevelsValidator extends SchemaValidator {
                 'entity': db.factorLevel
             }
         ]
+    }
+
+    static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
+        return [
+            {'paramName': 'id', 'type': 'numeric', 'required': true},
+            {'paramName': 'id', 'type': 'refData', 'entity': db.factorLevel}
+        ]
+    }
+
+    getSchema(operationName) {
         switch(operationName) {
-            case 'POST': return schema
-            case 'PUT': return schema.concat(
-                [
-                    {'paramName': 'id', 'type': 'numeric', 'required': true},
-                    {'paramName': 'id', 'type': 'refData', 'entity': db.factorLevel}
-                ]
+            case 'POST': return FactorLevelsValidator.POST_VALIDATION_SCHEMA
+            case 'PUT': return FactorLevelsValidator.POST_VALIDATION_SCHEMA.concat(
+                FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS
             )
         }
     }
@@ -36,7 +43,9 @@ class FactorLevelsValidator extends SchemaValidator {
                 this.checkBusinessKey(factorLevelObj)
             })
         } else {
-            throw AppError.badRequest('Factor Level request object needs to be an array')
+            return Promise.reject(
+                AppError.badRequest('Factor Level request object needs to be an array')
+            )
         }
     }
 

@@ -12,9 +12,13 @@ class BaseValidator {
         this.referentialIntegrityService = new ReferentialIntegrityService()
     }
 
+    hasErrors() {
+        return this.messages.length > 0
+    }
+
     validate(targetObject, operationName) {
         return this.performValidations(targetObject, operationName).then(()=> {
-            this.check()
+            return this.check()
         })
     }
 
@@ -69,9 +73,9 @@ class BaseValidator {
         })
     }
 
-    checkRIBusiness(entityId, vals, entity, entityName, keys){
+    checkRIBusiness(entityId, vals, entity, entityName, keys) {
         return this.referentialIntegrityService.getByBusinessKey(vals, entity).then((data) => {
-            if(data && data['id'] != entityId){
+            if (data && data['id'] != entityId) {
                 this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
             }
         })
@@ -81,9 +85,14 @@ class BaseValidator {
         if (this.messages.length > 0) {
             const copyMessages = this.messages
             this.messages = []
-            throw _.map(copyMessages, function(x){
-                return AppError.badRequest(x)
-            })
+            return Promise.reject(
+                _.map(copyMessages, function (x) {
+                        return AppError.badRequest(x)
+                    }
+                )
+            )
+        } else {
+            return Promise.resolve()
         }
     }
 }

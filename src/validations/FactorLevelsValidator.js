@@ -8,7 +8,7 @@ class FactorLevelsValidator extends SchemaValidator {
         return [
             {'paramName': 'value', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
             {'paramName': 'factorId', 'type': 'numeric', 'required': true},
-            {'paramName': 'factorId', 'type': 'refData', 'entity': db.factor, 'required': true},
+            {'paramName': 'factorId', 'type': 'refData', 'entity': db.factor},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             {
                 'paramName': 'FactorLevel',

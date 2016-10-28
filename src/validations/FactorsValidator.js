@@ -10,7 +10,7 @@ class FactorsValidator extends SchemaValidator {
             {'paramName': 'refFactorTypeId', 'type': 'numeric', 'required': true},
             {'paramName': 'refFactorTypeId', 'type': 'refData', 'entity': db.factorType, 'required': true},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
-            {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments, 'required': true},
+            {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments},
             {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             {
                 'paramName': 'Factor',
@@ -42,7 +42,9 @@ class FactorsValidator extends SchemaValidator {
             return Promise.all(
                 _.map(factorObj, (factor) => super.performValidations(factor, operationName))
             ).then(() => {
-                this.checkBusinessKey(factorObj)
+                if (!this.hasErrors()) {
+                    this.checkBusinessKey(factorObj)
+                }
             })
         } else {
             return Promise.reject(

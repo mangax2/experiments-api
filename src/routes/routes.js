@@ -296,7 +296,7 @@ router.delete('/factors/:id', (req, res, next) => {
     })
 })
 
-router.get('/factorLevels', (req, res, next) => {
+router.get('/factor-levels', (req, res, next) => {
     return new FactorLevelService().getAllFactorLevels().then((factorLevels) => {
         return res.json(factorLevels)
     }).catch((err) => {
@@ -304,7 +304,7 @@ router.get('/factorLevels', (req, res, next) => {
     })
 })
 
-router.post('/factorLevels', (req, res, next) => {
+router.post('/factor-levels', (req, res, next) => {
     return new FactorLevelService().batchCreateFactorLevels(req.body).then((id) => {
         return res.json(id)
     }).catch((err) => {
@@ -312,7 +312,7 @@ router.post('/factorLevels', (req, res, next) => {
     })
 })
 
-router.get('/factors/:id/factorLevels', (req, res, next)=> {
+router.get('/factors/:id/factor-levels', (req, res, next)=> {
     return new FactorLevelService().getFactorLevelsByFactorId(req.params.id).then((factorLevels)=> {
         return res.json(factorLevels)
     }).catch((err)=> {
@@ -320,7 +320,7 @@ router.get('/factors/:id/factorLevels', (req, res, next)=> {
     })
 })
 
-router.get('/factorLevels/:id', (req, res, next) => {
+router.get('/factor-levels/:id', (req, res, next) => {
     return new FactorLevelService().getFactorLevelById(req.params.id).then((factorLevel) => {
         return res.json(factorLevel)
     }).catch((err) => {
@@ -328,7 +328,7 @@ router.get('/factorLevels/:id', (req, res, next) => {
     })
 })
 
-router.put('/factorLevels', (req, res, next) => {
+router.put('/factor-levels', (req, res, next) => {
     return new FactorLevelService().batchUpdateFactorLevels(req.body).then((value) => {
         return res.json(value)
     }).catch((err) => {
@@ -336,7 +336,7 @@ router.put('/factorLevels', (req, res, next) => {
     })
 })
 
-router.delete('/factorLevels/:id', (req, res, next) => {
+router.delete('/factor-levels/:id', (req, res, next) => {
     return new FactorLevelService().deleteFactorLevel(req.params.id).then((value) => {
         return res.json(value)
     }).catch((err) => {

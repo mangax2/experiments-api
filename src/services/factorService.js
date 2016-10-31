@@ -1,6 +1,7 @@
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
+import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
 import log4js from 'log4js'
 
@@ -10,6 +11,7 @@ class FactorService {
 
     constructor() {
         this._validator = new FactorsValidator()
+        this._experimentService = new ExperimentsService()
     }
 
     batchCreateFactors(factors) {
@@ -27,7 +29,9 @@ class FactorService {
     }
 
     getFactorsByExperimentId(id) {
-        return db.factor.findByExperimentId(id)
+        return this._experimentService.getExperimentById(id).then(()=> {
+            return db.factor.findByExperimentId(id)
+        })
     }
 
     getFactorById(id) {

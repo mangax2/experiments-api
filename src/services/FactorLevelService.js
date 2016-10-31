@@ -2,6 +2,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import FactorLevelsValidator from '../validations/FactorLevelsValidator'
+import FactorService from './factorService'
 import log4js from 'log4js'
 
 const logger = log4js.getLogger('FactorLevelService')
@@ -10,6 +11,7 @@ class FactorLevelService {
 
     constructor() {
         this._validator = new FactorLevelsValidator()
+        this._factorService = new FactorService()
     }
 
     batchCreateFactorLevels(factorLevels) {
@@ -27,7 +29,9 @@ class FactorLevelService {
     }
 
     getFactorLevelsByFactorId(id) {
-        return db.factorLevel.findByFactorId(id)
+        return this._factorService.getFactorById(id).then(()=> {
+            return db.factorLevel.findByFactorId(id)
+        })
     }
 
     getFactorLevelById(id) {

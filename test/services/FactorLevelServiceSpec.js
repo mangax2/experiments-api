@@ -14,6 +14,7 @@ describe('FactorLevelService', () => {
     const testError = {}
     const tx = {}
 
+    let getFactorByIdStub
     let createPostResponseStub
     let createPutResponseStub
     let notFoundStub
@@ -30,6 +31,7 @@ describe('FactorLevelService', () => {
     before(() => {
         target = new FactorLevelService()
 
+        getFactorByIdStub = sinon.stub(target._factorService, 'getFactorById')
         createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
@@ -47,6 +49,7 @@ describe('FactorLevelService', () => {
     })
 
     afterEach(() => {
+        getFactorByIdStub.reset()
         createPostResponseStub.reset()
         createPutResponseStub.reset()
         notFoundStub.reset()
@@ -62,6 +65,7 @@ describe('FactorLevelService', () => {
     })
 
     after(() => {
+        getFactorByIdStub.restore()
         createPostResponseStub.restore()
         createPutResponseStub.restore()
         notFoundStub.restore()
@@ -138,12 +142,36 @@ describe('FactorLevelService', () => {
     })
 
     describe('getFactorLevelsByFactorId', () => {
-        it('returns promise from findByFactorId method', () => {
-            const testPromise = {}
-            findByFactorIdStub.returns(testPromise)
+        it('returns rejected promise when getByFactorId fails', () => {
+            getFactorByIdStub.rejects(testError)
 
-            target.getFactorLevelsByFactorId(5).should.equal(testPromise)
-            sinon.assert.calledWith(findByFactorIdStub, 5)
+            return target.getFactorLevelsByFactorId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getFactorByIdStub, 7)
+                sinon.assert.notCalled(findByFactorIdStub)
+            })
+        })
+
+        it('returns rejected promise when getByFactorId fails', () => {
+            getFactorByIdStub.resolves()
+            findByFactorIdStub.rejects(testError)
+
+            return target.getFactorLevelsByFactorId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getFactorByIdStub, 7)
+                sinon.assert.calledWith(findByFactorIdStub, 7)
+            })
+        })
+
+        it('returns resolved promise from getByFactorId method upon success', () => {
+            getFactorByIdStub.resolves()
+            findByFactorIdStub.resolves(testData)
+
+            return target.getFactorLevelsByFactorId(7).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledWith(getFactorByIdStub, 7)
+                sinon.assert.calledWith(findByFactorIdStub, 7)
+            })
         })
     })
 

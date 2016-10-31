@@ -14,6 +14,7 @@ describe('FactorService', () => {
     const testError = {}
     const tx = {}
 
+    let getExperimentByIdStub
     let createPostResponseStub
     let createPutResponseStub
     let notFoundStub
@@ -30,6 +31,7 @@ describe('FactorService', () => {
     before(() => {
         target = new FactorService()
 
+        getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
         createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
@@ -47,6 +49,7 @@ describe('FactorService', () => {
     })
 
     afterEach(() => {
+        getExperimentByIdStub.reset()
         createPostResponseStub.reset()
         createPutResponseStub.reset()
         notFoundStub.reset()
@@ -62,6 +65,7 @@ describe('FactorService', () => {
     })
 
     after(() => {
+        getExperimentByIdStub.restore()
         createPostResponseStub.restore()
         createPutResponseStub.restore()
         notFoundStub.restore()
@@ -138,12 +142,36 @@ describe('FactorService', () => {
     })
 
     describe('getFactorsByExperimentId', () => {
-        it('returns promise from findByExperimentId method', () => {
-            const testPromise = {}
-            findByExperimentIdStub.returns(testPromise)
+        it('returns rejected promise when getByExperimentId fails', () => {
+            getExperimentByIdStub.rejects(testError)
 
-            target.getFactorsByExperimentId(5).should.equal(testPromise)
-            sinon.assert.calledWith(findByExperimentIdStub, 5)
+            return target.getFactorsByExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.notCalled(findByExperimentIdStub)
+            })
+        })
+
+        it('returns rejected promise when getByExperimentId fails', () => {
+            getExperimentByIdStub.resolves()
+            findByExperimentIdStub.rejects(testError)
+
+            return target.getFactorsByExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(findByExperimentIdStub, 7)
+            })
+        })
+
+        it('returns resolved promise from getByExperimentId method upon success', () => {
+            getExperimentByIdStub.resolves()
+            findByExperimentIdStub.resolves(testData)
+
+            return target.getFactorsByExperimentId(7).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(findByExperimentIdStub, 7)
+            })
         })
     })
 

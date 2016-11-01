@@ -7,6 +7,7 @@ import FactorService from '../services/factorService'
 import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
 import DependentVariableService from '../services/DependentVariableService'
+import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 
 
 const logger = log4js.getLogger('Router')
@@ -243,6 +244,15 @@ router.delete('/dependent-variables/:id', (req, res, next) => {
     const id = req.params.id
     return new DependentVariableService().deleteDependentVariable(id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/factorDependentComposite/:id', (req, res, next) => {
+    console.log("getNew")
+    return new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id).then((success) => {
+        return res.json(success)
     }).catch((err) => {
         return next(err)
     })

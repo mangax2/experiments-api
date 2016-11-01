@@ -7,10 +7,10 @@ class ExperimentDesignService{
         this._validator = new ExperimentDesignsValidator()
     }
 
-    createExperimentDesign(experimentDesign, created_user_id){
+    createExperimentDesign(experimentDesign, context){
         return this._validator.validate([experimentDesign]).then(() => {
             return db.experimentDesign.repository().tx('createExperimentDesignTransaction', (t) => {
-                return db.experimentDesign.create(t,experimentDesign, created_user_id)
+                return db.experimentDesign.create(t,experimentDesign, context)
             })
         })
     }
@@ -30,9 +30,9 @@ class ExperimentDesignService{
         })
     }
 
-    updateExperimentDesign(id, experimentDesign, modified_user_id){
+    updateExperimentDesign(id, experimentDesign, context){
         return this._validator.validate([experimentDesign]).then(() => {
-            return db.experimentDesign.update(id, experimentDesign, modified_user_id).then((data) => {
+            return db.experimentDesign.update(id, experimentDesign, context).then((data) => {
                 if(!data){
                     throw AppError.notFound('Experiment Design Not Found')
                 }else{

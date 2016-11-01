@@ -7,6 +7,10 @@ const testPayload = {}
 const testResponse = {}
 const testError = {}
 const tx = {}
+const context ={
+    userId:"akuma11"
+
+}
 
 let createStub
 let expDesignFindStub
@@ -129,13 +133,14 @@ describe('ExperimentsService', () => {
             expDesignFindStub.resolves({id: 2})
             validateStub.resolves()
 
-            return experimentsService.createExperiment(experimentsObj).then((result) => {
+            return experimentsService.createExperiment(experimentsObj, context).then((result) => {
                 result.should.eql(expectedResult)
                 createStub.calledOnce.should.equal(true)
                 sinon.assert.calledWithExactly(
                     createStub,
                     sinon.match.same(tx),
-                    sinon.match.same(experimentsObj[0]))
+                    sinon.match.same(experimentsObj[0]),
+                    context)
             })
         })
 
@@ -210,13 +215,14 @@ describe('ExperimentsService', () => {
             validateStub.resolves()
             expDesignFindStub.resolves({})
 
-            return experimentsService.updateExperiment(30, experimentReqObj).then((experiment)=> {
+            return experimentsService.updateExperiment(30, experimentReqObj, context).then((experiment)=> {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
                 sinon.assert.calledWithExactly(
                     updateStub,
                     30,
-                    sinon.match.same(experimentReqObj)
+                    sinon.match.same(experimentReqObj),
+                    context
                 )
             })
         })
@@ -235,12 +241,13 @@ describe('ExperimentsService', () => {
             updateStub.rejects(testError)
             validateStub.resolves()
 
-            return experimentsService.updateExperiment(30, experimentReqObj).should.be.rejected.then((err) => {
+            return experimentsService.updateExperiment(30, experimentReqObj, context).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     updateStub,
                     30,
-                    sinon.match.same(experimentReqObj)
+                    sinon.match.same(experimentReqObj),
+                    context
                 )
             })
         })

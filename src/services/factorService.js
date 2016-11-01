@@ -14,10 +14,10 @@ class FactorService {
         this._experimentService = new ExperimentsService()
     }
 
-    batchCreateFactors(factors) {
+    batchCreateFactors(factors, context) {
         return this._validator.validate(factors, 'POST').then(() => {
             return db.factor.repository().tx('createFactorsTx', (t) => {
-                return db.factor.batchCreate(t, factors).then(data => {
+                return db.factor.batchCreate(t, factors, context).then(data => {
                     return AppUtil.createPostResponse(data)
                 })
             })
@@ -45,10 +45,10 @@ class FactorService {
         })
     }
 
-    batchUpdateFactors(factors) {
+    batchUpdateFactors(factors, context) {
         return this._validator.validate(factors, 'PUT').then(() => {
             return db.factor.repository().tx('updateFactorsTx', (t) => {
-                return db.factor.batchUpdate(t, factors).then(data => {
+                return db.factor.batchUpdate(t, factors, context).then(data => {
                     return AppUtil.createPutResponse(data)
                 })
             })

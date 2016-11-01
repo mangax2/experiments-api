@@ -14,10 +14,10 @@ class FactorLevelService {
         this._factorService = new FactorService()
     }
 
-    batchCreateFactorLevels(factorLevels) {
+    batchCreateFactorLevels(factorLevels, context) {
         return this._validator.validate(factorLevels, 'POST').then(() => {
             return db.factorLevel.repository().tx('createFactorLevelsTx', (t) => {
-                return db.factorLevel.batchCreate(t, factorLevels).then(data => {
+                return db.factorLevel.batchCreate(t, factorLevels, context).then(data => {
                     return AppUtil.createPostResponse(data)
                 })
             })
@@ -45,10 +45,10 @@ class FactorLevelService {
         })
     }
 
-    batchUpdateFactorLevels(factorLevels) {
+    batchUpdateFactorLevels(factorLevels, context) {
         return this._validator.validate(factorLevels, 'PUT').then(() => {
             return db.factorLevel.repository().tx('updateFactorLevelsTx', (t) => {
-                return db.factorLevel.batchUpdate(t, factorLevels).then(data => {
+                return db.factorLevel.batchUpdate(t, factorLevels, context).then(data => {
                     return AppUtil.createPutResponse(data)
                 })
             })

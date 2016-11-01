@@ -16,25 +16,25 @@ module.exports = (rep) => {
             return rep.any("SELECT * FROM factor_level")
         },
 
-        batchCreate: (t, factorLevels) => {
+        batchCreate: (t, factorLevels, context) => {
             return t.batch(
                 factorLevels.map(
                     factorLevel => t.one(
                         "INSERT INTO factor_level(value, factor_id, created_user_id, created_date, modified_user_id, modified_date) " +
                         "VALUES($1, $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP) RETURNING id",
-                        [factorLevel.value, factorLevel.factorId, factorLevel.userId]
+                        [factorLevel.value, factorLevel.factorId, context.userId]
                     )
                 )
             )
         },
 
-        batchUpdate: (t, factorLevels) => {
+        batchUpdate: (t, factorLevels, context) => {
             return t.batch(
                 factorLevels.map(
                     factorLevel => t.oneOrNone(
                         "UPDATE factor_level SET (value, factor_id, modified_user_id, modified_date) = " +
                         "($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4 RETURNING *",
-                        [factorLevel.value, factorLevel.factorId, factorLevel.userId, factorLevel.id]
+                        [factorLevel.value, factorLevel.factorId, context.userId, factorLevel.id]
                     )
                 )
             )

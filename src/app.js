@@ -18,7 +18,7 @@ const appBaseUrl = '/experiments-api'
 const app = express()
 
 const requestContext = require('./middleware/requestContext')
-//app.use(requestContext)
+app.use(requestContext)
 
 app.use(inflector())
 const pingFunc = (function () {

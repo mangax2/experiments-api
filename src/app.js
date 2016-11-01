@@ -16,6 +16,10 @@ const logger = log4js.getLogger('app')
 // const localDevelopment = config.node_env !== 'production'
 const appBaseUrl = '/experiments-api'
 const app = express()
+
+const requestContext = require('./middleware/requestContext')
+//app.use(requestContext)
+
 app.use(inflector())
 const pingFunc = (function () {
     var createPingPage, i, len, pingPage, ref, results

@@ -25,66 +25,38 @@ class FactorDependentCompositeService {
     }
 
     getAllVariablesByExperimentId(experimentId){
-        return db.tx('getAllVariablesByExperimentId', (t) => {
-            return Promise.all(
-                [
-                    this._factorService.getFactorsByExperimentId(experimentId).then((values) => {
-                        return Promise.all(_.map(values, (value) => { return this._factorLevelService.getFactorLevelsByFactorId(value.id)})).then((levels) => {
-                            return [values, _.flatten(levels)]
-                        })
-                    }),
-                    this._dependentVariableService.getDependentVariablesByExperimentId(experimentId),
-                    this._factorTypeService.getAllFactorTypes()
-                ]
-            ).then((value) => {
-                const object = {
-                    independentVariables: [],
-                    exogenousVariables: [],
-                    dependentVariables: []
-                }
-
-                _.map(value[2], (factorType) => {
-                    const id = factorType.id
-                    const type = factorType.type
-
-                    const factorsByType = _.filter(value[0][0], (factor)=> {
-                        return factor.ref_factor_type_id == id
+        return Promise.all(
+            [
+                this._factorService.getFactorsByExperimentId(experimentId).then((values) => {
+                    return Promise.all(_.map(values, (value) => { return this._factorLevelService.getFactorLevelsByFactorId(value.id)})).then((levels) => {
+                        return [values, levels]
                     })
+                }),
+                this._dependentVariableService.getDependentVariablesByExperimentId(experimentId),
+                this._factorTypeService.getAllFactorTypes()
+            ]
+        ).then((value) => {
+            const object = {
+                independent: [],
+                exogenous: [],
+                dependent: []
+            }
 
-                    const typeVariables = _.map(factorsByType, (factor) => {
-                        const factorId = factor.id
-
-                        const levelsByFactor = _.filter(value[0][1], (level) => {
-                            return level.factor_id === factorId
-                        })
-
-                        const levelValues = _.map(levelsByFactor, (level) => {
-                            return level.value
-                        })
-
-                        return {name: factor.name, levels: levelValues}
-                    })
-
-                    switch(type){
-                        case 'Independent':
-                            object.independentVariables = typeVariables
-                            break
-                        case 'Exogenous':
-                            object.exogenousVariables = typeVariables
-                    }
-                })
-
-                const dependentVariables = _.map(value[1], (dependentVariable) => {
-                    return {name: dependentVariable.name, required: dependentVariable.required}
-                })
-
-                object.dependentVariables = dependentVariables
-
-                return object
-            }).catch((err) => {
-                console.log(err)
+            const variables = _.map(value[0][0], (variable, index)=>{
+                const levels = _.map(value[0][1][index], (level) => { return level.value})
+                const type = _.find(value[2], {id: variable.ref_factor_type_id}).type.toLowerCase()
+                return {name: variable.name, type: type, levels: levels}
             })
 
+            _.each(variables, (variable) => {
+                object[variable.type].push(variable)
+            })
+
+            object.dependent = _.map(value[1], (dependentVariable) => {
+                return {name: dependentVariable.name, required: dependentVariable.required}
+            })
+
+            return object
         })
     }
 }

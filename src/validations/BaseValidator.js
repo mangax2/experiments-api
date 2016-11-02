@@ -16,16 +16,15 @@ class BaseValidator {
         return this.messages.length > 0
     }
 
-    validate(targetObject, operationName) {
-        return this.performValidations(targetObject, operationName).then(()=> {
+    validate(targetObject, operationName, optionalTransaction) {
+        return this.performValidations(targetObject, operationName, optionalTransaction).then(()=> {
             return this.check()
         })
     }
 
-    performValidations(targetObject) {
+    performValidations(targetObject, operationName, optionalTransaction) {
         logger.error("performValidations validation method not implemented to validate" + targetObject)
         return Promise.reject("Server error, please contact support")
-
     }
 
 
@@ -65,16 +64,16 @@ class BaseValidator {
         }
     }
 
-    checkReferentialIntegrityById(id, entity, entityName) {
-        return this.referentialIntegrityService.getById(id, entity).then((data) => {
+    checkReferentialIntegrityById(id, entity, entityName, optionalTransaction) {
+        return this.referentialIntegrityService.getById(id, entity, optionalTransaction).then((data) => {
             if (!data) {
                 this.messages.push(`No ${entityName} found with id ${id}`)
             }
         })
     }
 
-    checkRIBusiness(entityId, vals, entity, entityName, keys) {
-        return this.referentialIntegrityService.getByBusinessKey(vals, entity).then((data) => {
+    checkRIBusiness(entityId, vals, entity, entityName, keys, optionalTransaction) {
+        return this.referentialIntegrityService.getByBusinessKey(vals, entity, optionalTransaction).then((data) => {
             if (data && data['id'] != entityId) {
                 this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
             }

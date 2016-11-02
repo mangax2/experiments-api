@@ -192,7 +192,7 @@ CREATE TABLE factor_level
   CONSTRAINT factor_level_pk PRIMARY KEY (id),
   CONSTRAINT "Factor_Level_Factor" FOREIGN KEY (factor_id)
       REFERENCES factor (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
+      ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 

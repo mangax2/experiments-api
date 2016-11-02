@@ -26,6 +26,7 @@ describe('FactorService', () => {
     let batchCreateStub
     let batchUpdateStub
     let removeStub
+    let removeByExperimentIdStub
     let findByBusinessKeyStub
 
     before(() => {
@@ -45,6 +46,7 @@ describe('FactorService', () => {
         batchCreateStub = sinon.stub(db.factor, 'batchCreate')
         batchUpdateStub = sinon.stub(db.factor, 'batchUpdate')
         removeStub = sinon.stub(db.factor, 'remove')
+        removeByExperimentIdStub = sinon.stub(db.factor, 'removeByExperimentId')
         findByBusinessKeyStub = sinon.stub(db.factor, 'findByBusinessKey')
     })
 
@@ -61,6 +63,7 @@ describe('FactorService', () => {
         batchCreateStub.reset()
         batchUpdateStub.reset()
         removeStub.reset()
+        removeByExperimentIdStub.reset()
         findByBusinessKeyStub.reset()
     })
 
@@ -77,6 +80,7 @@ describe('FactorService', () => {
         batchCreateStub.restore()
         batchUpdateStub.restore()
         removeStub.restore()
+        removeByExperimentIdStub.restore()
         findByBusinessKeyStub.restore()
     })
 
@@ -142,7 +146,7 @@ describe('FactorService', () => {
     })
 
     describe('getFactorsByExperimentId', () => {
-        it('returns rejected promise when getByExperimentId fails', () => {
+        it('returns rejected promise when getExperimentById fails', () => {
             getExperimentByIdStub.rejects(testError)
 
             return target.getFactorsByExperimentId(7).should.be.rejected.then((err) => {
@@ -152,7 +156,7 @@ describe('FactorService', () => {
             })
         })
 
-        it('returns rejected promise when getByExperimentId fails', () => {
+        it('returns rejected promise when findByExperimentId fails', () => {
             getExperimentByIdStub.resolves()
             findByExperimentIdStub.rejects(testError)
 
@@ -311,6 +315,40 @@ describe('FactorService', () => {
                 r.should.equal(testData)
                 sinon.assert.calledWith(removeStub, 7)
                 sinon.assert.notCalled(notFoundStub)
+            })
+        })
+    })
+
+    describe('deleteFactorsForExperimentId', () => {
+        it('returns rejected promise when getExperimentById fails', () => {
+            getExperimentByIdStub.rejects(testError)
+
+            return target.deleteFactorsForExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.notCalled(removeByExperimentIdStub)
+            })
+        })
+
+        it('returns rejected promise when getByExperimentId fails', () => {
+            getExperimentByIdStub.resolves()
+            removeByExperimentIdStub.rejects(testError)
+
+            return target.deleteFactorsForExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+            })
+        })
+
+        it('returns resolved promise from getByExperimentId method upon success', () => {
+            getExperimentByIdStub.resolves()
+            removeByExperimentIdStub.resolves(testData)
+
+            return target.deleteFactorsForExperimentId(7).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(removeByExperimentIdStub, 7)
             })
         })
     })

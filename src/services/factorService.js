@@ -14,13 +14,24 @@ class FactorService {
         this._experimentService = new ExperimentsService()
     }
 
-    batchCreateFactors(factors) {
-        return this._validator.validate(factors, 'POST').then(() => {
-            return db.factor.repository().tx('createFactorsTx', (t) => {
-                return db.factor.batchCreate(t, factors).then(data => {
-                    return AppUtil.createPostResponse(data)
+    _createOrUseExistingTransaction(tx, txName, callback) {
+        if (tx) {
+            return callback(tx)
+        } else {
+            return db.factor.repository().tx(txName, callback)
+        }
+    }
+
+    batchCreateFactors(factors, optionalTransaction) {
+        return this._validator.validate(factors, 'POST', optionalTransaction).then(() => {
+            return this._createOrUseExistingTransaction(
+                optionalTransaction,
+                'createFactorsTx',
+                (tx) => {
+                    return db.factor.batchCreate(tx, factors).then(data => {
+                        return AppUtil.createPostResponse(data)
+                    })
                 })
-            })
         })
     }
 
@@ -64,6 +75,17 @@ class FactorService {
                 return data
             }
         })
+    }
+
+    deleteFactorsForExperimentId(id, optionalTransaction) {
+        return this._createOrUseExistingTransaction(
+            optionalTransaction,
+            'deleteFactorsForExperimentId',
+            (tx) => {
+                return this._experimentService.getExperimentById(id, tx).then(() => {
+                    return db.factor.removeByExperimentId(tx, id)
+                })
+            })
     }
 }
 

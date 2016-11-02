@@ -8,6 +8,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
         },
 
+        findTx: (t, id) => {
+            return t.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
+        },
+
         all: () => {
             return rep.any("SELECT * FROM experiment")
         },

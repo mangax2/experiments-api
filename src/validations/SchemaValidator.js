@@ -5,20 +5,20 @@ import log4js from 'log4js'
 const logger = log4js.getLogger('SchemaValidator')
 
 export class SchemaValidator extends BaseValidator {
-    schemaCheck(targetObject, schema) {
+    schemaCheck(targetObject, schema, optionalTransaction) {
         return Promise.all(
             _.map(schema, (elementSchema) => {
                 const key = _.keys(targetObject).find(x=>x == elementSchema.paramName)
                 if (key == null || key == undefined) {
-                    return this.schemaElementCheck(null, elementSchema, targetObject)
+                    return this.schemaElementCheck(null, elementSchema, targetObject, optionalTransaction)
                 } else {
-                    return this.schemaElementCheck(targetObject[key], elementSchema, targetObject)
+                    return this.schemaElementCheck(targetObject[key], elementSchema, targetObject, optionalTransaction)
                 }
             })
         )
     }
 
-    schemaElementCheck(elementValue, elementSchema, targetObject) {
+    schemaElementCheck(elementValue, elementSchema, targetObject, optionalTransaction) {
         return new Promise((resolve, reject) => {
             if (elementSchema.required) {
                 this.checkRequired(elementValue, elementSchema.paramName)
@@ -40,7 +40,7 @@ export class SchemaValidator extends BaseValidator {
                 }
 
                 if(!this.hasErrors() && elementSchema.type == 'refData'){
-                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName).then(() => {
+                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName, optionalTransaction).then(() => {
                         resolve()
                     })
                 }
@@ -53,7 +53,7 @@ export class SchemaValidator extends BaseValidator {
                     return targetObject[key]
                 })
 
-                this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys).then(() => {
+                this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys, optionalTransaction).then(() => {
                     resolve()
                 })
             }
@@ -63,8 +63,8 @@ export class SchemaValidator extends BaseValidator {
         })
     }
 
-    performValidations(targetObject, operationName) {
-        return this.schemaCheck(targetObject, this.getSchema(operationName))
+    performValidations(targetObject, operationName, optionalTransaction) {
+        return this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
     }
 
     getSchema(operationName) {

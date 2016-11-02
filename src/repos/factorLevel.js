@@ -8,6 +8,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("SELECT * FROM factor_level WHERE id = $1", id)
         },
 
+        findTx: (t, id) => {
+            return t.oneOrNone("SELECT * FROM factor_level WHERE id = $1", id)
+        },
+
         findByFactorId: (factorId) => {
             return rep.any("SELECT * FROM factor_level WHERE factor_id = $1", factorId)
         },
@@ -46,6 +50,10 @@ module.exports = (rep) => {
 
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
+        },
+
+        findByBusinessKeyTx: (t, keys) => {
+            return t.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
         }
     }
 }

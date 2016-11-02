@@ -12,6 +12,14 @@ class ExperimentsService {
         this._validator = new ExperimentsValidator()
     }
 
+    _createOrUseExistingTransaction(tx, txName, callback) {
+        if (tx) {
+            return callback(tx)
+        } else {
+            return db.experiments.repository().tx(txName, callback)
+        }
+    }
+
     createExperiment(experiments) {
         return this._validator.validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
@@ -28,16 +36,21 @@ class ExperimentsService {
         return db.experiments.all()
     }
 
-    getExperimentById(id) {
-        return db.experiments.find(id).then((data) => {
-            if (!data) {
-                logger.error('Experiment Not Found for requested experimentId = ' + id)
-                throw AppError.notFound('Experiment Not Found for requested experimentId')
-            }
-            else {
-                return data
-            }
-        })
+    getExperimentById(id, optionalTransaction) {
+        return this._createOrUseExistingTransaction(
+            optionalTransaction,
+            'getExperimentById',
+            (tx) => {
+                return db.experiments.findTx(tx, id).then((data) => {
+                    if (!data) {
+                        logger.error('Experiment Not Found for requested experimentId = ' + id)
+                        throw AppError.notFound('Experiment Not Found for requested experimentId')
+                    }
+                    else {
+                        return data
+                    }
+                })
+            })
     }
 
     updateExperiment(id, experiment) {

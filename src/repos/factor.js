@@ -8,6 +8,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("SELECT * FROM factor WHERE id = $1", id)
         },
 
+        findTx: (tx, id) => {
+            return tx.oneOrNone("SELECT * FROM factor WHERE id = $1", id)
+        },
+
         findByExperimentId: (experimentId) => {
             return rep.any("SELECT * FROM factor WHERE experiment_id=$1", experimentId)
         },
@@ -44,8 +48,16 @@ module.exports = (rep) => {
             return rep.oneOrNone("DELETE FROM factor WHERE id=$1 RETURNING id", id)
         },
 
+        removeByExperimentId: (t, experimentId) => {
+            return t.any("DELETE FROM factor WHERE experiment_id = $1 RETURNING id", experimentId)
+        },
+
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM factor WHERE experiment_id=$1 and name=$2", keys)
+        },
+
+        findByBusinessKeyTx: (tx, keys) => {
+            return tx.oneOrNone("SELECT * FROM factor WHERE experiment_id=$1 and name=$2", keys)
         }
     }
 }

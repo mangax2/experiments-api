@@ -32,6 +32,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("delete from dependent_variable where id=" + id + " RETURNING id")
         },
 
+        removeByExperimentId: (tx, experimentId) => {
+            return tx.any("DELETE FROM dependent_variable where experiment_id=$1 RETURNING id", experimentId)
+        },
+
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
 

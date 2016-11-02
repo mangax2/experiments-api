@@ -37,10 +37,10 @@ class FactorsValidator extends SchemaValidator {
         }
     }
 
-    performValidations(factorObj, operationName) {
+    performValidations(factorObj, operationName, optionalTransaction) {
         if (_.isArray(factorObj) && factorObj.length > 0) {
             return Promise.all(
-                _.map(factorObj, (factor) => super.performValidations(factor, operationName))
+                _.map(factorObj, (factor) => super.performValidations(factor, operationName, optionalTransaction))
             ).then(() => {
                 if (!this.hasErrors()) {
                     this.checkBusinessKey(factorObj)

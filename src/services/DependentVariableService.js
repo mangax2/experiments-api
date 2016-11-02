@@ -15,10 +15,18 @@ class DependentVariableService {
         this._experimentService = new ExperimentsService()
     }
 
-    batchCreateDependentVariables(dependentVariables) {
+    _createOrUseExistingTransaction(tx, txName, callback) {
+        if (tx) {
+            return callback(tx)
+        } else {
+            return db.dependentVariable.repository().tx(txName, callback)
+        }
+    }
+
+    batchCreateDependentVariables(dependentVariables, optionalTransaction) {
         return this._validator.validate(dependentVariables,'POST').then(() => {
-            return db.dependentVariable.repository().tx('createDependentVariablesTx', (t) => {
-                return db.dependentVariable.batchCreate(t, dependentVariables).then(data => {
+            return this._createOrUseExistingTransaction(optionalTransaction, 'createDependentVariablesTx', (tx) => {
+                return db.dependentVariable.batchCreate(tx, dependentVariables).then(data => {
                     return AppUtil.createPostResponse(data)
                 })
             })
@@ -69,7 +77,17 @@ class DependentVariableService {
         })
     }
 
-
+    deleteDependentVariablesForExperimentId(experimentId, optionalTransaction) {
+        return this._createOrUseExistingTransaction(
+            optionalTransaction,
+            'deleteDependentVariablesForExperimentId',
+            (tx) => {
+                return this._experimentService.getExperimentById(experimentId, tx).then(()=> {
+                    return db.dependentVariable.removeByExperimentId(tx, experimentId)
+                })
+            }
+        )
+    }
 }
 
 module.exports = DependentVariableService

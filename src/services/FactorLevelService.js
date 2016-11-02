@@ -14,10 +14,18 @@ class FactorLevelService {
         this._factorService = new FactorService()
     }
 
-    batchCreateFactorLevels(factorLevels) {
-        return this._validator.validate(factorLevels, 'POST').then(() => {
-            return db.factorLevel.repository().tx('createFactorLevelsTx', (t) => {
-                return db.factorLevel.batchCreate(t, factorLevels).then(data => {
+    _createOrUseExistingTransaction(tx, txName, callback) {
+        if (tx) {
+            return callback(tx)
+        } else {
+            return db.factorLevel.repository().tx(txName, callback)
+        }
+    }
+
+    batchCreateFactorLevels(factorLevels, optionalTransaction) {
+        return this._validator.validate(factorLevels, 'POST', optionalTransaction).then(() => {
+            return this._createOrUseExistingTransaction(optionalTransaction, 'createFactorLevelsTx', (tx) => {
+                return db.factorLevel.batchCreate(tx, factorLevels).then(data => {
                     return AppUtil.createPostResponse(data)
                 })
             })

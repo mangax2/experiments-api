@@ -249,6 +249,14 @@ router.delete('/dependent-variables/:id', (req, res, next) => {
     })
 })
 
+router.post('/factorDependentComposite', (req, res, next) => {
+    return new FactorDependentCompositeService().persistAllVariables(req.body).then((success) => {
+        return res.json(success)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
 router.get('/factorDependentComposite/:id', (req, res, next) => {
     console.log("getNew")
     return new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id).then((success) => {

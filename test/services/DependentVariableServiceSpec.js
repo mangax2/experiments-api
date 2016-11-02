@@ -3,25 +3,26 @@ const chai = require('chai')
 const DependentVariableService = require('../../src/services/DependentVariableService')
 const db = require('../../src/db/DbManager')
 
-const testPayload = {}
-const testResponse = {}
-const testError = {}
-const tx = {}
-
-let createStub
-let expFindStub
-let dependentVariableService
-let findStub
-let getStub
-let removeStub
-let transactionStub
-let updateStub
-let validateStub
-let findByExperimentIdStub
-let getExperimentByIdStub
-
-
 describe('DependentVariableService', () => {
+    const testData = {}
+    const testPayload = {}
+    const testResponse = {}
+    const testError = {}
+    const tx = {}
+
+    let createStub
+    let expFindStub
+    let dependentVariableService
+    let findStub
+    let getStub
+    let removeStub
+    let removeByExperimentIdStub
+    let transactionStub
+    let updateStub
+    let validateStub
+    let findByExperimentIdStub
+    let getExperimentByIdStub
+
     before(() => {
         createStub = sinon.stub(db.dependentVariable, 'batchCreate')
         expFindStub = sinon.stub(db.experiments, 'find')
@@ -30,6 +31,7 @@ describe('DependentVariableService', () => {
         findByExperimentIdStub = sinon.stub(db.dependentVariable, 'findByExperimentId')
         getStub = sinon.stub(db.dependentVariable, 'all')
         removeStub = sinon.stub(db.dependentVariable, 'remove')
+        removeByExperimentIdStub = sinon.stub(db.dependentVariable, 'removeByExperimentId')
         transactionStub = sinon.stub(db.dependentVariable, 'repository', () => {
             return { tx: function (transactionName, callback) {return callback(tx)} }
         })
@@ -46,6 +48,7 @@ describe('DependentVariableService', () => {
         findByExperimentIdStub.restore()
         getStub.restore()
         removeStub.restore()
+        removeByExperimentIdStub.restore()
         transactionStub.restore()
         updateStub.restore()
         validateStub.restore()
@@ -60,6 +63,7 @@ describe('DependentVariableService', () => {
         findByExperimentIdStub.reset()
         getStub.reset()
         removeStub.reset()
+        removeByExperimentIdStub.reset()
         transactionStub.reset()
         updateStub.reset()
         validateStub.reset()
@@ -314,6 +318,40 @@ describe('DependentVariableService', () => {
                 err.message.should.equal('Dependent Variable Not Found for requested id')
             })
 
+        })
+    })
+
+    describe('deleteDependentVariablesForExperimentId', () => {
+        it('returns rejected promise when getExperimentById fails', () => {
+            getExperimentByIdStub.rejects(testError)
+
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.notCalled(removeByExperimentIdStub)
+            })
+        })
+
+        it('returns rejected promise when getByExperimentId fails', () => {
+            getExperimentByIdStub.resolves()
+            removeByExperimentIdStub.rejects(testError)
+
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+            })
+        })
+
+        it('returns resolved promise from getByExperimentId method upon success', () => {
+            getExperimentByIdStub.resolves()
+            removeByExperimentIdStub.resolves(testData)
+
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+            })
         })
     })
 })

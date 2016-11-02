@@ -22,6 +22,11 @@ module.exports = (rep) => {
 
         "delete": (id) => {
             return rep.oneOrNone("DELETE FROM ref_experiment_design WHERE id=$1 RETURNING id", id)
+        },
+
+        findByBusinessKey: (keys) => {
+            return rep.oneOrNone("SELECT * FROM ref_experiment_design where name = $1", keys)
+
         }
     }
 }

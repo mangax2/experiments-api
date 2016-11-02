@@ -5,7 +5,7 @@ if [ -z "$namePostfix" ]; then cfPostfix=""; else cfPostfix="-np"; fi
 
 targetEndpoint="http://${CF_DOMAIN}/"
 # swagger=$(curl -H "oauth_resourceownerinfo: user_id=testUser"  ${targetEndpoint}/api-docs/swagger.json)
-swagger=$(curl $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
+swagger=$(curl -H "oauth_resourceownerinfo: user_id=testUser" $SWAGGER_URL | tr "\n" " " | tr "\t" " " | tr "  " " ")
 
 #    "description": undefined,
 #    "cname": undefined,

@@ -24,12 +24,15 @@ class DependentVariableService {
     }
 
     batchCreateDependentVariables(dependentVariables, optionalTransaction) {
-        return this._validator.validate(dependentVariables,'POST').then(() => {
-            return this._createOrUseExistingTransaction(optionalTransaction, 'createDependentVariablesTx', (tx) => {
-                return db.dependentVariable.batchCreate(tx, dependentVariables).then(data => {
-                    return AppUtil.createPostResponse(data)
+        return this._validator.validate(dependentVariables, 'POST', optionalTransaction).then(() => {
+            return this._createOrUseExistingTransaction(
+                optionalTransaction,
+                'createDependentVariablesTx',
+                (tx) => {
+                    return db.dependentVariable.batchCreate(tx, dependentVariables).then(data => {
+                        return AppUtil.createPostResponse(data)
+                    })
                 })
-            })
         })
     }
 
@@ -56,7 +59,7 @@ class DependentVariableService {
     }
 
     batchUpdateDependentVariables(dependentVariables) {
-        return this._validator.validate(dependentVariables,'PUT').then(() => {
+        return this._validator.validate(dependentVariables, 'PUT').then(() => {
             return db.dependentVariable.repository().tx('updateDependentVariablesTx', (t) => {
                 return db.dependentVariable.batchUpdate(t, dependentVariables).then(data => {
                     return AppUtil.createPutResponse(data)

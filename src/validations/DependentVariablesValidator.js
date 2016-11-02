@@ -26,10 +26,10 @@ class DependentVariablesValidator extends SchemaValidator {
 
     }
 
-    performValidations(targetObject, operationName) {
-        if (_.isArray(targetObject) && targetObject.length > 0) {
+    performValidations(targetObject, operationName, optionalTransaction) {
+        if (_.isArray(targetObject)) {
             return Promise.all(
-                _.map(targetObject, dv=> super.performValidations(dv, operationName))
+                _.map(targetObject, dv=> super.performValidations(dv, operationName, optionalTransaction))
             ).then(()=> {
                 this.checkBusinessKey(targetObject)
             })

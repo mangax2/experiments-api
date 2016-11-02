@@ -107,23 +107,21 @@ class FactorDependentCompositeService {
                                         ids[factorIndex].id)
                                     return this._factorLevelService.batchCreateFactorLevels(levels, tx)
                                 }))
+                            }),
+                            this._factorService.batchCreateFactors(exogenousVariables, tx).then((ids) => {
+                                return Promise.all(_.map(exogenousVariables, (factor, factorIndex) => {
+                                    const levels = FactorDependentCompositeService._mapLevelDTO2DbEntity(
+                                        factor.levels,
+                                        ids[factorIndex].id)
+                                    return this._factorLevelService.batchCreateFactorLevels(levels, tx)
+                                }))
                             })
-                            //,
-                            //this._factorService.batchCreateFactors(exogenousVariables, tx).then((ids) => {
-                            //    return Promise.all(_.map(exogenousVariables, (factor, factorIndex) => {
-                            //        const levels = FactorDependentCompositeService._mapLevelDTO2DbEntity(
-                            //            factor.levels,
-                            //            ids[factorIndex].id)
-                            //        return this._factorLevelService.batchCreateFactorLevels(levels, tx)
-                            //    }))
-                            //})
                         ]
                     )
+                }),
+                this._dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx).then(() => {
+                    return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, tx)
                 })
-                //,
-                //this._dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx).then(() => {
-                //    return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, tx)
-                //})
             ]).then(() => { return "success" })
         })
     }

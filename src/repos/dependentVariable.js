@@ -8,6 +8,10 @@ module.exports = (rep) => {
             return rep.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
         },
 
+        findTx: (t, id) => {
+            return t.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
+        },
+
         all: () => {
             return rep.any("SELECT * FROM dependent_variable")
         },
@@ -39,6 +43,10 @@ module.exports = (rep) => {
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
 
+        },
+
+        findByBusinessKeyTx: (t, keys) => {
+            return t.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
         }
     }
 }

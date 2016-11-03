@@ -80,8 +80,11 @@ describe('ExperimentsService', () => {
         it('Success and Return experiment with Id', ()=> {
             findStub.resolves(testResponse)
 
-            return experimentsService.getExperimentById(30).then((experiment)=> {
-                sinon.assert.calledWithExactly(findStub, 30)
+            return experimentsService.getExperimentById(30, tx).then((experiment)=> {
+                sinon.assert.calledWithExactly(
+                    findStub,
+                    30,
+                    sinon.match.same(tx))
                 experiment.should.equal(testResponse)
             })
         })
@@ -89,19 +92,25 @@ describe('ExperimentsService', () => {
         it('fails', () => {
             findStub.rejects(testError)
 
-            return experimentsService.getExperimentById(30).should.be.rejected.then((err) => {
+            return experimentsService.getExperimentById(30, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWithExactly(findStub, 30)
+                sinon.assert.calledWithExactly(
+                    findStub,
+                    30,
+                    sinon.match.same(tx))
             })
         })
 
         it('fails When it returns no result', ()=> {
             findStub.resolves(null)
 
-            return experimentsService.getExperimentById(30).should.be.rejected.then((err) => {
+            return experimentsService.getExperimentById(30, tx).should.be.rejected.then((err) => {
                 err.status.should.equal(404)
                 err.message.should.equal('Experiment Not Found for requested experimentId')
-                sinon.assert.calledWithExactly(findStub, 30)
+                sinon.assert.calledWithExactly(
+                    findStub,
+                    30,
+                    sinon.match.same(tx))
             })
         })
     })

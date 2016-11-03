@@ -4,6 +4,7 @@ import AppError from './utility/AppError'
 import FactorLevelsValidator from '../validations/FactorLevelsValidator'
 import FactorService from './factorService'
 import log4js from 'log4js'
+import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('FactorLevelService')
 
@@ -14,20 +15,11 @@ class FactorLevelService {
         this._factorService = new FactorService()
     }
 
-    _createOrUseExistingTransaction(tx, txName, callback) {
-        if (tx) {
-            return callback(tx)
-        } else {
-            return db.factorLevel.repository().tx(txName, callback)
-        }
-    }
-
-    batchCreateFactorLevels(factorLevels, optionalTransaction) {
-        return this._validator.validate(factorLevels, 'POST', optionalTransaction).then(() => {
-            return this._createOrUseExistingTransaction(optionalTransaction, 'createFactorLevelsTx', (tx) => {
-                return db.factorLevel.batchCreate(tx, factorLevels).then(data => {
-                    return AppUtil.createPostResponse(data)
-                })
+    @Transactional('createFactorLevelsTx')
+    batchCreateFactorLevels(factorLevels, tx) {
+        return this._validator.validate(factorLevels, 'POST', tx).then(() => {
+            return db.factorLevel.batchCreate(tx, factorLevels).then(data => {
+                return AppUtil.createPostResponse(data)
             })
         })
     }

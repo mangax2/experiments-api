@@ -3,6 +3,7 @@ import AppUtil from "./utility/AppUtil"
 import AppError from "./utility/AppError"
 import ExperimentsValidator from "../validations/ExperimentsValidator"
 import log4js from "log4js"
+import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('ExperimentsService')
 
@@ -10,14 +11,6 @@ class ExperimentsService {
 
     constructor() {
         this._validator = new ExperimentsValidator()
-    }
-
-    _createOrUseExistingTransaction(tx, txName, callback) {
-        if (tx) {
-            return callback(tx)
-        } else {
-            return db.experiments.repository().tx(txName, callback)
-        }
     }
 
     createExperiment(experiments) {
@@ -36,21 +29,17 @@ class ExperimentsService {
         return db.experiments.all()
     }
 
-    getExperimentById(id, optionalTransaction) {
-        return this._createOrUseExistingTransaction(
-            optionalTransaction,
-            'getExperimentById',
-            (tx) => {
-                return db.experiments.findTx(tx, id).then((data) => {
-                    if (!data) {
-                        logger.error('Experiment Not Found for requested experimentId = ' + id)
-                        throw AppError.notFound('Experiment Not Found for requested experimentId')
-                    }
-                    else {
-                        return data
-                    }
-                })
-            })
+    @Transactional('getExperimentById')
+    getExperimentById(id, tx) {
+        return db.experiments.find(id, tx).then((data) => {
+            if (!data) {
+                logger.error('Experiment Not Found for requested experimentId = ' + id)
+                throw AppError.notFound('Experiment Not Found for requested experimentId')
+            }
+            else {
+                return data
+            }
+        })
     }
 
     updateExperiment(id, experiment) {

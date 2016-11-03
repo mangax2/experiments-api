@@ -12,14 +12,13 @@ describe('FactorService', () => {
     const testData = {}
     const testPostResponse = {}
     const testError = {}
-    const tx = {}
+    const tx = {tx: {}}
 
     let getExperimentByIdStub
     let createPostResponseStub
     let createPutResponseStub
     let notFoundStub
     let validateStub
-    let repositoryStub
     let findStub
     let findByExperimentIdStub
     let allStub
@@ -37,9 +36,6 @@ describe('FactorService', () => {
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
         validateStub = sinon.stub(target._validator, 'validate')
-        repositoryStub = sinon.stub(db.factor, 'repository', () => {
-            return { tx: function (transactionName, callback) {return callback(tx)} }
-        })
         findStub = sinon.stub(db.factor, 'find')
         findByExperimentIdStub = sinon.stub(db.factor, 'findByExperimentId')
         allStub = sinon.stub(db.factor, 'all')
@@ -56,7 +52,6 @@ describe('FactorService', () => {
         createPutResponseStub.reset()
         notFoundStub.reset()
         validateStub.reset()
-        repositoryStub.reset()
         findStub.reset()
         findByExperimentIdStub.reset()
         allStub.reset()
@@ -73,7 +68,6 @@ describe('FactorService', () => {
         createPutResponseStub.restore()
         notFoundStub.restore()
         validateStub.restore()
-        repositoryStub.restore()
         findStub.restore()
         findByExperimentIdStub.restore()
         allStub.restore()
@@ -88,12 +82,11 @@ describe('FactorService', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
 
-            return target.batchCreateFactors(testFactors).should.be.rejected.then((err) => {
+            return target.batchCreateFactors(testFactors, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
                     'POST')
-                sinon.assert.notCalled(repositoryStub)
                 sinon.assert.notCalled(batchCreateStub)
                 sinon.assert.notCalled(createPostResponseStub)
             })
@@ -103,15 +96,15 @@ describe('FactorService', () => {
             validateStub.resolves()
             batchCreateStub.rejects(testError)
 
-            return target.batchCreateFactors(testFactors).should.be.rejected.then((err) => {
+            return target.batchCreateFactors(testFactors, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
-                    'POST')
-                sinon.assert.calledOnce(repositoryStub)
+                    'POST',
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(batchCreateStub,
-                    sinon.match.same(tx),
-                    sinon.match.same(testFactors))
+                    sinon.match.same(testFactors),
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(createPostResponseStub)
             })
         })
@@ -121,15 +114,14 @@ describe('FactorService', () => {
             batchCreateStub.resolves(testData)
             createPostResponseStub.returns(testPostResponse)
 
-            return target.batchCreateFactors(testFactors).then((r) => {
+            return target.batchCreateFactors(testFactors, tx).then((r) => {
                 r.should.equal(testPostResponse)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
                     'POST')
-                sinon.assert.calledOnce(repositoryStub)
                 sinon.assert.calledWith(batchCreateStub,
-                    sinon.match.same(tx),
-                    sinon.match.same(testFactors))
+                    sinon.match.same(testFactors),
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(createPostResponseStub,
                     sinon.match.same(testData))
             })
@@ -141,7 +133,7 @@ describe('FactorService', () => {
             const testPromise = {}
             allStub.returns(testPromise)
 
-            target.getAllFactors().should.equal(testPromise)
+            target.getAllFactors(tx).should.equal(testPromise)
         })
     })
 
@@ -149,9 +141,12 @@ describe('FactorService', () => {
         it('returns rejected promise when getExperimentById fails', () => {
             getExperimentByIdStub.rejects(testError)
 
-            return target.getFactorsByExperimentId(7).should.be.rejected.then((err) => {
+            return target.getFactorsByExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(findByExperimentIdStub)
             })
         })
@@ -160,10 +155,16 @@ describe('FactorService', () => {
             getExperimentByIdStub.resolves()
             findByExperimentIdStub.rejects(testError)
 
-            return target.getFactorsByExperimentId(7).should.be.rejected.then((err) => {
+            return target.getFactorsByExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(findByExperimentIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(
+                    findByExperimentIdStub,
+                    7,
+                    sinon.match.same(tx))
             })
         })
 
@@ -171,10 +172,16 @@ describe('FactorService', () => {
             getExperimentByIdStub.resolves()
             findByExperimentIdStub.resolves(testData)
 
-            return target.getFactorsByExperimentId(7).then((data) => {
+            return target.getFactorsByExperimentId(7, tx).then((data) => {
                 data.should.equal(testData)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(findByExperimentIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(
+                    findByExperimentIdStub,
+                    7,
+                    sinon.match.same(tx))
             })
         })
     })
@@ -183,9 +190,12 @@ describe('FactorService', () => {
         it('returns rejected promise when find fails', () => {
             findStub.rejects(testError)
 
-            return target.getFactorById(7).should.be.rejected.then((err) => {
+            return target.getFactorById(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(findStub, 7)
+                sinon.assert.calledWith(
+                    findStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(notFoundStub)
             })
         })
@@ -194,9 +204,12 @@ describe('FactorService', () => {
             findStub.resolves(null)
             notFoundStub.returns(testError)
 
-            return target.getFactorById(7).should.be.rejected.then((err) => {
+            return target.getFactorById(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(findStub, 7)
+                sinon.assert.calledWith(
+                    findStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(notFoundStub, 'Factor Not Found for requested id')
             })
         })
@@ -205,9 +218,12 @@ describe('FactorService', () => {
             findStub.resolves(undefined)
             notFoundStub.returns(testError)
 
-            return target.getFactorById(7).should.be.rejected.then((err) => {
+            return target.getFactorById(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(findStub, 7)
+                sinon.assert.calledWith(
+                    findStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(notFoundStub, 'Factor Not Found for requested id')
             })
         })
@@ -215,9 +231,12 @@ describe('FactorService', () => {
         it('returns resolved promise with data on success', () => {
             findStub.resolves(testData)
 
-            return target.getFactorById(7).then((r) => {
+            return target.getFactorById(7, tx).then((r) => {
                 r.should.equal(testData)
-                sinon.assert.calledWith(findStub, 7)
+                sinon.assert.calledWith(
+                    findStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(notFoundStub)
             })
         })
@@ -227,12 +246,12 @@ describe('FactorService', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
 
-            return target.batchUpdateFactors(testFactors).should.be.rejected.then((err) => {
+            return target.batchUpdateFactors(testFactors, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
-                    'PUT')
-                sinon.assert.notCalled(repositoryStub)
+                    'PUT',
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(batchUpdateStub)
                 sinon.assert.notCalled(createPutResponseStub)
             })
@@ -242,15 +261,15 @@ describe('FactorService', () => {
             validateStub.resolves()
             batchUpdateStub.rejects(testError)
 
-            return target.batchUpdateFactors(testFactors).should.be.rejected.then((err) => {
+            return target.batchUpdateFactors(testFactors, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
-                    'PUT')
-                sinon.assert.calledOnce(repositoryStub)
+                    'PUT',
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(batchUpdateStub,
-                    sinon.match.same(tx),
-                    sinon.match.same(testFactors))
+                    sinon.match.same(testFactors),
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(createPutResponseStub)
             })
         })
@@ -260,15 +279,15 @@ describe('FactorService', () => {
             batchUpdateStub.resolves(testData)
             createPutResponseStub.returns(testPostResponse)
 
-            return target.batchUpdateFactors(testFactors).then((r) => {
+            return target.batchUpdateFactors(testFactors, tx).then((r) => {
                 r.should.equal(testPostResponse)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
-                    'PUT')
-                sinon.assert.calledOnce(repositoryStub)
+                    'PUT',
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(batchUpdateStub,
-                    sinon.match.same(tx),
-                    sinon.match.same(testFactors))
+                    sinon.match.same(testFactors),
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(createPutResponseStub,
                     sinon.match.same(testData))
             })
@@ -279,9 +298,12 @@ describe('FactorService', () => {
         it('returns rejected promise when remove fails', () => {
             removeStub.rejects(testError)
 
-            return target.deleteFactor(7).should.be.rejected.then((err) => {
+            return target.deleteFactor(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(removeStub, 7)
+                sinon.assert.calledWith(
+                    removeStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(notFoundStub)
             })
         })
@@ -290,9 +312,12 @@ describe('FactorService', () => {
             removeStub.resolves(null)
             notFoundStub.returns(testError)
 
-            return target.deleteFactor(7).should.be.rejected.then((err) => {
+            return target.deleteFactor(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(removeStub, 7)
+                sinon.assert.calledWith(
+                    removeStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(notFoundStub, 'Factor Not Found for requested id')
             })
         })
@@ -301,9 +326,12 @@ describe('FactorService', () => {
             removeStub.resolves(undefined)
             notFoundStub.returns(testError)
 
-            return target.deleteFactor(7).should.be.rejected.then((err) => {
+            return target.deleteFactor(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(removeStub, 7)
+                sinon.assert.calledWith(
+                    removeStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.calledWith(notFoundStub, 'Factor Not Found for requested id')
             })
         })
@@ -311,9 +339,12 @@ describe('FactorService', () => {
         it('returns resolved promise with data on success', () => {
             removeStub.resolves(testData)
 
-            return target.deleteFactor(7).then((r) => {
+            return target.deleteFactor(7, tx).then((r) => {
                 r.should.equal(testData)
-                sinon.assert.calledWith(removeStub, 7)
+                sinon.assert.calledWith(
+                    removeStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(notFoundStub)
             })
         })
@@ -323,9 +354,12 @@ describe('FactorService', () => {
         it('returns rejected promise when getExperimentById fails', () => {
             getExperimentByIdStub.rejects(testError)
 
-            return target.deleteFactorsForExperimentId(7).should.be.rejected.then((err) => {
+            return target.deleteFactorsForExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(removeByExperimentIdStub)
             })
         })
@@ -334,10 +368,16 @@ describe('FactorService', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.rejects(testError)
 
-            return target.deleteFactorsForExperimentId(7).should.be.rejected.then((err) => {
+            return target.deleteFactorsForExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(
+                    removeByExperimentIdStub,
+                    7,
+                    sinon.match.same(tx))
             })
         })
 
@@ -345,10 +385,16 @@ describe('FactorService', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.resolves(testData)
 
-            return target.deleteFactorsForExperimentId(7).then((data) => {
+            return target.deleteFactorsForExperimentId(7, tx).then((data) => {
                 data.should.equal(testData)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+                sinon.assert.calledWith(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(
+                    removeByExperimentIdStub,
+                    7,
+                    sinon.match.same(tx))
             })
         })
     })

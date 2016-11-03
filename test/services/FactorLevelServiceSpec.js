@@ -12,7 +12,7 @@ describe('FactorLevelService', () => {
     const testData = {}
     const testPostResponse = {}
     const testError = {}
-    const tx = {}
+    const tx = {tx: {}}
 
     let getFactorByIdStub
     let createPostResponseStub
@@ -89,7 +89,6 @@ describe('FactorLevelService', () => {
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactorLevels),
                     'POST')
-                sinon.assert.notCalled(repositoryStub)
                 sinon.assert.notCalled(batchCreateStub)
                 sinon.assert.notCalled(createPostResponseStub)
             })
@@ -99,13 +98,13 @@ describe('FactorLevelService', () => {
             validateStub.resolves()
             batchCreateStub.rejects(testError)
 
-            return target.batchCreateFactorLevels(testFactorLevels).should.be.rejected.then((err) => {
+            return target.batchCreateFactorLevels(testFactorLevels, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(validateStub,
+                sinon.assert.calledWithExactly(validateStub,
                     sinon.match.same(testFactorLevels),
-                    'POST')
-                sinon.assert.calledOnce(repositoryStub)
-                sinon.assert.calledWith(batchCreateStub,
+                    'POST',
+                    sinon.match.same(tx))
+                sinon.assert.calledWithExactly(batchCreateStub,
                     sinon.match.same(tx),
                     sinon.match.same(testFactorLevels))
                 sinon.assert.notCalled(createPostResponseStub)
@@ -117,12 +116,11 @@ describe('FactorLevelService', () => {
             batchCreateStub.resolves(testData)
             createPostResponseStub.returns(testPostResponse)
 
-            return target.batchCreateFactorLevels(testFactorLevels).then((r) => {
+            return target.batchCreateFactorLevels(testFactorLevels, tx).then((r) => {
                 r.should.equal(testPostResponse)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactorLevels),
                     'POST')
-                sinon.assert.calledOnce(repositoryStub)
                 sinon.assert.calledWith(batchCreateStub,
                     sinon.match.same(tx),
                     sinon.match.same(testFactorLevels))

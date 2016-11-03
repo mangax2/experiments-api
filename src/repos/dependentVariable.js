@@ -4,12 +4,8 @@ module.exports = (rep) => {
             return rep
         },
 
-        find: (id) => {
-            return rep.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
-        },
-
-        findTx: (t, id) => {
-            return t.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
+        find: (id, tx = rep) => {
+            return tx.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
         },
 
         all: () => {
@@ -40,13 +36,9 @@ module.exports = (rep) => {
             return tx.any("DELETE FROM dependent_variable where experiment_id=$1 RETURNING id", experimentId)
         },
 
-        findByBusinessKey: (keys) => {
-            return rep.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
+        findByBusinessKey: (keys, tx = rep) => {
+            return tx.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
 
-        },
-
-        findByBusinessKeyTx: (t, keys) => {
-            return t.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
         }
     }
 }

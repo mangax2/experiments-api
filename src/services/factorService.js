@@ -4,6 +4,7 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
 import log4js from 'log4js'
+import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('FactorService')
 
@@ -14,39 +15,30 @@ class FactorService {
         this._experimentService = new ExperimentsService()
     }
 
-    _createOrUseExistingTransaction(tx, txName, callback) {
-        if (tx) {
-            return callback(tx)
-        } else {
-            return db.factor.repository().tx(txName, callback)
-        }
-    }
-
-    batchCreateFactors(factors, optionalTransaction) {
-        return this._validator.validate(factors, 'POST', optionalTransaction).then(() => {
-            return this._createOrUseExistingTransaction(
-                optionalTransaction,
-                'createFactorsTx',
-                (tx) => {
-                    return db.factor.batchCreate(tx, factors).then(data => {
-                        return AppUtil.createPostResponse(data)
-                    })
-                })
+    @Transactional('batchCreateFactors')
+    batchCreateFactors(factors, tx) {
+        return this._validator.validate(factors, 'POST', tx).then(() => {
+            return db.factor.batchCreate(factors, tx).then(data => {
+                return AppUtil.createPostResponse(data)
+            })
         })
     }
 
-    getAllFactors() {
-        return db.factor.all()
+    @Transactional('getAllFactors')
+    getAllFactors(tx) {
+        return db.factor.all(tx)
     }
 
-    getFactorsByExperimentId(id) {
-        return this._experimentService.getExperimentById(id).then(()=> {
-            return db.factor.findByExperimentId(id)
+    @Transactional('getFactorsByExperimentId')
+    getFactorsByExperimentId(id, tx) {
+        return this._experimentService.getExperimentById(id, tx).then(()=> {
+            return db.factor.findByExperimentId(id, tx)
         })
     }
 
-    getFactorById(id) {
-        return db.factor.find(id).then((data) => {
+    @Transactional('getFactorById')
+    getFactorById(id, tx) {
+        return db.factor.find(id, tx).then((data) => {
             if (!data) {
                 logger.error('Factor Not Found for requested id = ' + id)
                 throw AppError.notFound('Factor Not Found for requested id')
@@ -56,18 +48,18 @@ class FactorService {
         })
     }
 
-    batchUpdateFactors(factors) {
-        return this._validator.validate(factors, 'PUT').then(() => {
-            return db.factor.repository().tx('updateFactorsTx', (t) => {
-                return db.factor.batchUpdate(t, factors).then(data => {
-                    return AppUtil.createPutResponse(data)
-                })
+    @Transactional('batchUpdateFactors')
+    batchUpdateFactors(factors, tx) {
+        return this._validator.validate(factors, 'PUT', tx).then(() => {
+            return db.factor.batchUpdate(factors, tx).then(data => {
+                return AppUtil.createPutResponse(data)
             })
         })
     }
 
-    deleteFactor(id) {
-        return db.factor.remove(id).then((data) => {
+    @Transactional('deleteFactor')
+    deleteFactor(id, tx) {
+        return db.factor.remove(id, tx).then((data) => {
             if (!data) {
                 logger.error('Factor Not Found for requested id = ' + id)
                 throw AppError.notFound('Factor Not Found for requested id')
@@ -77,15 +69,11 @@ class FactorService {
         })
     }
 
-    deleteFactorsForExperimentId(id, optionalTransaction) {
-        return this._createOrUseExistingTransaction(
-            optionalTransaction,
-            'deleteFactorsForExperimentId',
-            (tx) => {
-                return this._experimentService.getExperimentById(id, tx).then(() => {
-                    return db.factor.removeByExperimentId(tx, id)
-                })
-            })
+    @Transactional('deleteFactorsForExperimentId')
+    deleteFactorsForExperimentId(id, tx) {
+        return this._experimentService.getExperimentById(id, tx).then(() => {
+            return db.factor.removeByExperimentId(id, tx)
+        })
     }
 }
 

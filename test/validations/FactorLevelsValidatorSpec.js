@@ -6,6 +6,8 @@ const SchemaValidator = require('../../src/validations/SchemaValidator')
 describe('FactorLevelsValidator', () => {
     const target = new FactorLevelsValidator()
     const testError = new Error('Test Error')
+    const tx = {tx: {}}
+
     let badRequestStub
     let superPerformValidationsStub
     let checkBusinessKeyStub
@@ -57,12 +59,13 @@ describe('FactorLevelsValidator', () => {
             superPerformValidationsStub.rejects(testError)
             checkBusinessKeyStub = sinon.stub(target, 'checkBusinessKey')
 
-            return target.performValidations([testFactor], 'opName').should.be.rejected.then((err) => {
+            return target.performValidations([testFactor], 'opName', tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     superPerformValidationsStub,
                     sinon.match.same(testFactor),
-                    'opName')
+                    'opName',
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(checkBusinessKeyStub)
             })
         })
@@ -75,12 +78,13 @@ describe('FactorLevelsValidator', () => {
                 throw testError
             })
 
-            return target.performValidations(testFactorArray, 'opName').should.be.rejected.then((err) => {
+            return target.performValidations(testFactorArray, 'opName', tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     superPerformValidationsStub,
                     sinon.match.same(testFactor),
-                    'opName')
+                    'opName',
+                    sinon.match.same(tx))
                 sinon.assert.calledWithExactly(
                     checkBusinessKeyStub,
                     sinon.match.same(testFactorArray))
@@ -93,11 +97,12 @@ describe('FactorLevelsValidator', () => {
             superPerformValidationsStub.resolves()
             checkBusinessKeyStub = sinon.stub(target, 'checkBusinessKey')
 
-            return target.performValidations(testFactorArray, 'opName').then(() => {
+            return target.performValidations(testFactorArray, 'opName', tx).then(() => {
                 sinon.assert.calledWithExactly(
                     superPerformValidationsStub,
                     sinon.match.same(testFactor),
-                    'opName')
+                    'opName',
+                    sinon.match.same(tx))
                 sinon.assert.calledWithExactly(
                     checkBusinessKeyStub,
                     sinon.match.same(testFactorArray))

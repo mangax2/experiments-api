@@ -4,12 +4,8 @@ module.exports = (rep) => {
             return rep
         },
 
-        find: (id) => {
-            return rep.oneOrNone("SELECT * FROM factor_level WHERE id = $1", id)
-        },
-
-        findTx: (t, id) => {
-            return t.oneOrNone("SELECT * FROM factor_level WHERE id = $1", id)
+        find: (id, tx = rep) => {
+            return tx.oneOrNone("SELECT * FROM factor_level WHERE id = $1", id)
         },
 
         findByFactorId: (factorId) => {
@@ -48,12 +44,8 @@ module.exports = (rep) => {
             return rep.oneOrNone("DELETE FROM factor_level WHERE id = $1 RETURNING id", id)
         },
 
-        findByBusinessKey: (keys) => {
-            return rep.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
-        },
-
-        findByBusinessKeyTx: (t, keys) => {
-            return t.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
+        findByBusinessKey: (keys, tx) => {
+            return tx.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
         }
     }
 }

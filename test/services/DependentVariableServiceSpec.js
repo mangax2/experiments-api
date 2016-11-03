@@ -1,6 +1,7 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const DependentVariableService = require('../../src/services/DependentVariableService')
+const Transactional = require('../../src/decorators/transactional')
 const db = require('../../src/db/DbManager')
 
 describe('DependentVariableService', () => {
@@ -8,7 +9,7 @@ describe('DependentVariableService', () => {
     const testPayload = {}
     const testResponse = {}
     const testError = {}
-    const tx = {}
+    const tx = {tx: {}}
 
     let createStub
     let expFindStub
@@ -336,10 +337,16 @@ describe('DependentVariableService', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.rejects(testError)
 
-            return dependentVariableService.deleteDependentVariablesForExperimentId(7).should.be.rejected.then((err) => {
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+                sinon.assert.calledWithExactly(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWithExactly(
+                    removeByExperimentIdStub,
+                    sinon.match.same(tx),
+                    7)
             })
         })
 
@@ -347,10 +354,16 @@ describe('DependentVariableService', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.resolves(testData)
 
-            return dependentVariableService.deleteDependentVariablesForExperimentId(7).then((data) => {
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7, tx).then((data) => {
                 data.should.equal(testData)
-                sinon.assert.calledWith(getExperimentByIdStub, 7)
-                sinon.assert.calledWith(removeByExperimentIdStub, 7)
+                sinon.assert.calledWithExactly(
+                    getExperimentByIdStub,
+                    7,
+                    sinon.match.same(tx))
+                sinon.assert.calledWithExactly(
+                    removeByExperimentIdStub,
+                    sinon.match.same(tx),
+                    7)
             })
         })
     })

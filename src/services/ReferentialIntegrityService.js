@@ -1,18 +1,10 @@
 export class ReferentialIntegrityService {
-    getById(id, entity, optionalTransaction){
-        if (optionalTransaction) {
-            return entity.findTx(optionalTransaction, id)
-        } else {
-            return entity.find(id)
-        }
+    getById(id, entity, tx){
+        return entity.find(id, tx)
     }
 
-    getByBusinessKey(keys, entity, optionalTransaction){
-        if (optionalTransaction) {
-            return entity.findByBusinessKeyTx(optionalTransaction, keys)
-        } else {
-            return entity.findByBusinessKey(keys)
-        }
+    getByBusinessKey(keys, entity, tx){
+        return entity.findByBusinessKey(keys, tx)
     }
 }
 

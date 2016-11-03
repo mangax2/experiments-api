@@ -3,6 +3,7 @@ import AppUtil from "./utility/AppUtil"
 import AppError from "./utility/AppError"
 import DependentVariablesValidator from "../validations/DependentVariablesValidator"
 import ExperimentsService from './ExperimentsService'
+import Transactional from '../decorators/transactional'
 
 import log4js from "log4js"
 
@@ -80,16 +81,11 @@ class DependentVariableService {
         })
     }
 
-    deleteDependentVariablesForExperimentId(experimentId, optionalTransaction) {
-        return this._createOrUseExistingTransaction(
-            optionalTransaction,
-            'deleteDependentVariablesForExperimentId',
-            (tx) => {
-                return this._experimentService.getExperimentById(experimentId, tx).then(()=> {
-                    return db.dependentVariable.removeByExperimentId(tx, experimentId)
-                })
-            }
-        )
+    @Transactional('deleteDependentVariablesForExperimentId')
+    deleteDependentVariablesForExperimentId(experimentId, tx) {
+        return this._experimentService.getExperimentById(experimentId, tx).then(()=> {
+            return db.dependentVariable.removeByExperimentId(tx, experimentId)
+        })
     }
 }
 

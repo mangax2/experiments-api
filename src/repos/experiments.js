@@ -4,12 +4,8 @@ module.exports = (rep) => {
             return rep
         },
 
-        find: (id) => {
-            return rep.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
-        },
-
-        findTx: (t, id) => {
-            return t.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
+        find: (id, tx = rep) => {
+            return tx.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
         },
 
         all: () => {

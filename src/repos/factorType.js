@@ -4,11 +4,7 @@ module.exports = (rep) => {
             return rep
         },
 
-        find: (id) => {
-            return rep.oneOrNone("SELECT * FROM ref_factor_type WHERE id = $1", id)
-        },
-
-        findTx: (tx, id) => {
+        find: (id, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM ref_factor_type WHERE id = $1", id)
         },
 

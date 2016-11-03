@@ -11,7 +11,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     }
     const tokens = header.split(',')
     const userIdToken = _.find(tokens, (token) => {
-        return token.startsWith('user_id');
+        return token.startsWith('user_id')
     })
     if (!userIdToken) {
         throw AppError.badRequest('user_id not found within oauth_resourceownerinfo.')

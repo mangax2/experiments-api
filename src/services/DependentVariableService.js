@@ -16,24 +16,12 @@ class DependentVariableService {
         this._experimentService = new ExperimentsService()
     }
 
-    _createOrUseExistingTransaction(tx, txName, callback) {
-        if (tx) {
-            return callback(tx)
-        } else {
-            return db.dependentVariable.repository().tx(txName, callback)
-        }
-    }
-
-    batchCreateDependentVariables(dependentVariables, optionalTransaction) {
-        return this._validator.validate(dependentVariables, 'POST', optionalTransaction).then(() => {
-            return this._createOrUseExistingTransaction(
-                optionalTransaction,
-                'createDependentVariablesTx',
-                (tx) => {
-                    return db.dependentVariable.batchCreate(tx, dependentVariables).then(data => {
-                        return AppUtil.createPostResponse(data)
-                    })
-                })
+    @Transactional('createDependentVariablesTx')
+    batchCreateDependentVariables(dependentVariables, context, tx) {
+        return this._validator.validate(dependentVariables,'POST', tx).then(() => {
+            return db.dependentVariable.batchCreate(tx, dependentVariables, context).then(data => {
+                return AppUtil.createPostResponse(data)
+            })
         })
     }
 
@@ -59,10 +47,10 @@ class DependentVariableService {
         })
     }
 
-    batchUpdateDependentVariables(dependentVariables) {
-        return this._validator.validate(dependentVariables, 'PUT').then(() => {
+    batchUpdateDependentVariables(dependentVariables, context) {
+        return this._validator.validate(dependentVariables,'PUT').then(() => {
             return db.dependentVariable.repository().tx('updateDependentVariablesTx', (t) => {
-                return db.dependentVariable.batchUpdate(t, dependentVariables).then(data => {
+                return db.dependentVariable.batchUpdate(t, dependentVariables, context).then(data => {
                     return AppUtil.createPutResponse(data)
                 })
             })

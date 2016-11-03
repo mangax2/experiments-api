@@ -26,7 +26,6 @@ describe('DependentVariablesValidator', () => {
         {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
         {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
         {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments},
-        {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
         {
             'paramName': 'DependentVariable',
             'type': 'businessKey',

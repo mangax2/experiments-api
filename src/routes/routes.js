@@ -18,17 +18,28 @@ router.get('/ping', (req, res) => {
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
 
-router.get('/experiment-designs', (req, res, next) => {
-    return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {
-        return res.json(r)
+
+router.post('/experiment-designs', (req, res, next) => {
+    const design = req.body
+    return new ExperimentDesignService().createExperimentDesign(design, req.context).then((id) => {
+        return res.json(id)
     }).catch((err) => {
         return next(err)
     })
 })
-router.post('/experiment-designs', (req, res, next) => {
-    const design = req.body
-    return new ExperimentDesignService().createExperimentDesign(design, 'kmccl').then((id) => {
-        return res.json(id)
+router.put('/experiment-designs/:id', (req, res, next) => {
+    const id = req.params.id
+    const design=req.body
+    return new ExperimentDesignService().updateExperimentDesign(id, design, req.context).then((design) => {
+        return res.json(design)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/experiment-designs', (req, res, next) => {
+    return new ExperimentDesignService().getAllExperimentDesigns().then((r) => {
+        return res.json(r)
     }).catch((err) => {
         return next(err)
     })
@@ -42,18 +53,30 @@ router.get('/experiment-designs/:id', (req, res, next) => {
         return next(err)
     })
 })
-router.put('/experiment-designs/:id', (req, res, next) => {
-    const id = req.params.id
-    return new ExperimentDesignService().updateExperimentDesign(id, req.body, 'kmccl').then((design) => {
-        return res.json(design)
-    }).catch((err) => {
-        return next(err)
-    })
-})
+
 router.delete('/experiment-designs/:id', (req, res, next) => {
     const id = req.params.id
     return new ExperimentDesignService().deleteExperimentDesign(id).then((id) => {
         return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/experiments', (req, res, next) => {
+    const experiment = req.body
+    return new ExperimentsService().createExperiment(experiment, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/experiments/:id', (req, res, next) => {
+    const id = req.params.id
+    const experiment = req.body
+    return new ExperimentsService().updateExperiment(id, experiment, req.context).then((value) => {
+        return res.json(value)
     }).catch((err) => {
         return next(err)
     })
@@ -67,14 +90,6 @@ router.get('/experiments', (req, res, next) => {
     })
 })
 
-router.post('/experiments', (req, res, next) => {
-    const experiment = req.body
-    return new ExperimentsService().createExperiment(experiment).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
 
 router.get('/experiments/:id', (req, res, next) => {
     new ExperimentsService().getExperimentById(req.params.id).then((experiment)=> {
@@ -83,20 +98,30 @@ router.get('/experiments/:id', (req, res, next) => {
         return next(err)
     })
 })
-router.put('/experiments/:id', (req, res, next) => {
-    const experiment = req.body
-    const id = req.params.id
 
-    return new ExperimentsService().updateExperiment(id, experiment).then((value) => {
+router.delete('/experiments/:id', (req, res, next) => {
+    const id = req.params.id
+    return new ExperimentsService().deleteExperiment(id).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return next(err)
     })
 })
-router.delete('/experiments/:id', (req, res, next) => {
+
+router.post('/factor-types', (req, res, next) => {
+    const factorType = req.body
+    return new FactorTypeService().createFactorType(factorType, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/factor-types/:id', (req, res, next) => {
     const id = req.params.id
-    return new ExperimentsService().deleteExperiment(id).then((value) => {
-        return res.json(value)
+    const factorType = req.body
+    return new FactorTypeService().updateFactorType(id, factorType, req.context).then((r) => {
+        return res.json(r)
     }).catch((err) => {
         return next(err)
     })
@@ -109,14 +134,7 @@ router.get('/factor-types', (req, res, next) => {
         return next(err)
     })
 })
-router.post('/factor-types', (req, res, next) => {
-    const factorType = req.body
-    return new FactorTypeService().createFactorType(factorType, 'pnwatt').then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
+
 
 router.get('/factor-types/:id', (req, res, next) => {
     const id = req.params.id
@@ -126,15 +144,7 @@ router.get('/factor-types/:id', (req, res, next) => {
         return next(err)
     })
 })
-router.put('/factor-types/:id', (req, res, next) => {
-    const id = req.params.id
-    const factorType = req.body
-    return new FactorTypeService().updateFactorType(id, factorType, 'pnwatt').then((r) => {
-        return res.json(r)
-    }).catch((err) => {
-        return next(err)
-    })
-})
+
 router.delete('/factor-types/:id', (req, res, next) => {
     const id = req.params.id
     return new FactorTypeService().deleteFactorType(id).then((r) => {
@@ -144,18 +154,29 @@ router.delete('/factor-types/:id', (req, res, next) => {
     })
 })
 
+router.post('/hypotheses', (req, res, next) => {
+    const hypotheses = req.body
+    return new HypothesisService().createHypothesis(hypotheses, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/hypotheses/:id', (req, res, next) => {
+    const id= req.params.id
+    const hypothesis = req.body
+    return new HypothesisService().updateHypothesis(id,hypothesis, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
 router.get('/hypotheses', (req, res, next)=> {
     return new HypothesisService().getAllHypothesis().then((hypotheses)=> {
         return res.json(hypotheses)
     }).catch((err)=> {
-        return next(err)
-    })
-})
-router.post('/hypotheses', (req, res, next) => {
-    const hypotheses = req.body
-    return new HypothesisService().createHypothesis(hypotheses).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
         return next(err)
     })
 })
@@ -186,15 +207,7 @@ router.get('/hypotheses/:id', (req, res, next)=> {
         return next(err)
     })
 })
-router.put('/hypotheses/:id', (req, res, next) => {
-    const hypothesis = req.body
-    const id= req.params.id
-    return new HypothesisService().updateHypothesis(id,hypothesis).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
+
 router.delete('/hypotheses/:id', (req, res, next)=> {
     const id = req.params.id
     return new HypothesisService().deleteHypothesis(id).then((hypothesis)=> {
@@ -206,6 +219,25 @@ router.delete('/hypotheses/:id', (req, res, next)=> {
 })
 
 
+router.post('/dependent-variables', (req, res, next) => {
+    const dependentVariables = req.body
+    return new DependentVariableService().batchCreateDependentVariables(dependentVariables, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/dependent-variables', (req, res, next) => {
+    const dependentVariables = req.body
+    return new DependentVariableService().batchUpdateDependentVariables(dependentVariables, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
 router.get('/dependent-variables', (req, res, next) => {
     new DependentVariableService().getAllDependentVariables().then((dependentVariables)=> {
         return res.json(dependentVariables)
@@ -214,27 +246,10 @@ router.get('/dependent-variables', (req, res, next) => {
     })
 })
 
-router.post('/dependent-variables', (req, res, next) => {
-    const dependentVariables = req.body
-    return new DependentVariableService().batchCreateDependentVariables(dependentVariables).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
 
 router.get('/dependent-variables/:id', (req, res, next) => {
     new DependentVariableService().getDependentVariableById(req.params.id).then((dependentVariable)=> {
         return res.json(dependentVariable)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.put('/dependent-variables', (req, res, next) => {
-    const dependentVariables = req.body
-    return new DependentVariableService().batchUpdateDependentVariables(dependentVariables).then((value) => {
-        return res.json(value)
     }).catch((err) => {
         return next(err)
     })
@@ -258,9 +273,24 @@ router.post('/factorDependentComposite', (req, res, next) => {
 })
 
 router.get('/factorDependentComposite/:id', (req, res, next) => {
-    console.log("getNew")
     return new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id).then((success) => {
         return res.json(success)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.post('/factors', (req, res, next) => {
+    return new FactorService().batchCreateFactors(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+router.put('/factors', (req, res, next) => {
+    return new FactorService().batchUpdateFactors(req.body, req.context).then((value) => {
+        return res.json(value)
     }).catch((err) => {
         return next(err)
     })
@@ -269,14 +299,6 @@ router.get('/factorDependentComposite/:id', (req, res, next) => {
 router.get('/factors', (req, res, next) => {
     return new FactorService().getAllFactors().then((factors) => {
         return res.json(factors)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.post('/factors', (req, res, next) => {
-    return new FactorService().batchCreateFactors(req.body).then((id) => {
-        return res.json(id)
     }).catch((err) => {
         return next(err)
     })
@@ -298,13 +320,6 @@ router.get('/factors/:id', (req, res, next) => {
     })
 })
 
-router.put('/factors', (req, res, next) => {
-    return new FactorService().batchUpdateFactors(req.body).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
 
 router.delete('/factors/:id', (req, res, next) => {
     return new FactorService().deleteFactor(req.params.id).then((value) => {
@@ -314,6 +329,24 @@ router.delete('/factors/:id', (req, res, next) => {
     })
 })
 
+
+router.post('/factor-levels', (req, res, next) => {
+    return new FactorLevelService().batchCreateFactorLevels(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/factor-levels', (req, res, next) => {
+    return new FactorLevelService().batchUpdateFactorLevels(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
 router.get('/factor-levels', (req, res, next) => {
     return new FactorLevelService().getAllFactorLevels().then((factorLevels) => {
         return res.json(factorLevels)
@@ -322,13 +355,7 @@ router.get('/factor-levels', (req, res, next) => {
     })
 })
 
-router.post('/factor-levels', (req, res, next) => {
-    return new FactorLevelService().batchCreateFactorLevels(req.body).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
+
 
 router.get('/factors/:id/factor-levels', (req, res, next)=> {
     return new FactorLevelService().getFactorLevelsByFactorId(req.params.id).then((factorLevels)=> {
@@ -346,13 +373,6 @@ router.get('/factor-levels/:id', (req, res, next) => {
     })
 })
 
-router.put('/factor-levels', (req, res, next) => {
-    return new FactorLevelService().batchUpdateFactorLevels(req.body).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
 
 router.delete('/factor-levels/:id', (req, res, next) => {
     return new FactorLevelService().deleteFactorLevel(req.params.id).then((value) => {

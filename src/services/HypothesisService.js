@@ -10,9 +10,9 @@ class HypothesisService {
         this._experimentService = new ExperimentsService()
     }
 
-    createHypothesis(hypotheses) {
+    createHypothesis(hypotheses, context) {
         return this.validateHypothesis(hypotheses).then(()=> {
-            return db.hypothesis.batchCreate(hypotheses).then(data => {
+            return db.hypothesis.batchCreate(hypotheses, context).then(data => {
                 return AppUtil.createPostResponse(data)
             })
         })
@@ -56,12 +56,12 @@ class HypothesisService {
         return db.hypothesis.getHypothesisByExperimentAndDescriptionAndType(experimentId, description, isNull)
     }
 
-    updateHypothesis(id, hypothesis) {
+    updateHypothesis(id, hypothesis, context) {
         const hypothesisRequestObj=hypothesis
         hypothesisRequestObj.id=id
         return this._validator.validate([hypothesisRequestObj]).then(()=> {
             return this.getHypothesisById(id).then(()=> {
-                return db.hypothesis.update(id, hypothesis)
+                return db.hypothesis.update(id, hypothesis, context)
             })
         })
     }

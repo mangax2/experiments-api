@@ -1,11 +1,14 @@
 import SchemaValidator from './SchemaValidator'
 import * as _ from 'lodash'
 import AppError from '../services/utility/AppError'
+import db from '../db/DbManager'
 
 class FactorTypesValidator extends SchemaValidator {
     getSchema() {
         return [
-            {'paramName': 'type', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true}
+            {'paramName': 'type', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+            {'paramName': 'FactorType', 'type': 'businessKey', 'keys': ['type'], 'entity': db.factorType}
+
         ]
     }
 

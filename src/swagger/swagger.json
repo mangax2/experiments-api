@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "title": "Experiments API",
-        "description": "Experiment APIs to create experiment model",
+        "description": "Experiment APIs to create experiment model, requires oauth_resourceownerinfo http header",
         "version": "v1"
     },
     "host": "api01-np.agro.services",
@@ -1763,10 +1763,6 @@
                 "name": {
                     "type": "string",
                     "description": "name of experiment design"
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2011,10 +2007,6 @@
                 "status": {
                     "type": "string",
                     "description": "status of the experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2036,10 +2028,6 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "experimentId of experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2062,10 +2050,6 @@
                 "type": {
                     "type": "string",
                     "description": "name of the factor type"
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2083,10 +2067,6 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "experimentId of experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2108,10 +2088,6 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "experimentId of experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2129,10 +2105,6 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "id of experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2154,10 +2126,6 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "id of experiment entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2171,10 +2139,6 @@
                 "factorId": {
                     "type": "integer",
                     "description": "id of Factor entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },
@@ -2192,10 +2156,6 @@
                 "factorId": {
                     "type": "integer",
                     "description": "id of Factor entity."
-                },
-                "userId": {
-                    "type": "string",
-                    "description": "userId for audit use."
                 }
             }
         },

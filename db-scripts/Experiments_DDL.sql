@@ -79,39 +79,6 @@ CREATE TABLE blocking_factor
 );
 
 
-CREATE TABLE control_treatment
-(
-  id serial NOT NULL,
-  notes character varying NOT NULL,
-  experiment_id integer NOT NULL,
-  created_user_id character varying NOT NULL,
-  created_date timestamp with time zone NOT NULL,
-  modified_user_id character varying NOT NULL,
-  modified_date timestamp with time zone NOT NULL,
-  CONSTRAINT control_treatment_pk PRIMARY KEY (id),
-  CONSTRAINT "Control_Treatment_Experiment" FOREIGN KEY (experiment_id)
-      REFERENCES experiment (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-
-CREATE TABLE control_treatment_variable
-(
-  id serial NOT NULL,
-  name character varying NOT NULL,
-  value character varying NOT NULL,
-  control_treatment_id integer NOT NULL,
-  created_user_id character varying NOT NULL,
-  created_date timestamp with time zone NOT NULL,
-  modified_user_id character varying NOT NULL,
-  modified_date timestamp with time zone NOT NULL,
-  CONSTRAINT control_treatment_variable_pk PRIMARY KEY (id),
-  CONSTRAINT "Control_Treatment_Variable_Control_Treatment" FOREIGN KEY (control_treatment_id)
-      REFERENCES control_treatment (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-
 CREATE TABLE controlled_factor
 (
   id serial NOT NULL,

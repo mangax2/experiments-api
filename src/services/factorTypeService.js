@@ -7,10 +7,10 @@ class FactorTypeService {
         this._validator = new FactorTypesValidator()
     }
 
-    createFactorType(factorType, created_user_id) {
+    createFactorType(factorType, context) {
         return this._validator.validate([factorType]).then(() => {
             return db.factorType.repository().tx('createFactorType', (tx) => {
-                return db.factorType.create(tx, factorType, created_user_id)
+                return db.factorType.create(tx, factorType, context)
             })
         })
     }
@@ -29,10 +29,10 @@ class FactorTypeService {
         })
     }
 
-    updateFactorType(id, factorType, modified_user_id) {
+    updateFactorType(id, factorType, context) {
         return this._validator.validate([factorType]).then(() => {
             return db.factorType.repository().tx('updateFactorType', (tx) => {
-                return db.factorType.update(tx, id, factorType, modified_user_id).then((data) => {
+                return db.factorType.update(tx, id, factorType, context).then((data) => {
                     if (!data) {
                         throw AppError.notFound('Factor Type Not Found')
                     } else {

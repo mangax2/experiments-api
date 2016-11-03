@@ -16,9 +16,9 @@ class FactorService {
     }
 
     @Transactional('batchCreateFactors')
-    batchCreateFactors(factors, tx) {
+    batchCreateFactors(factors, context, tx) {
         return this._validator.validate(factors, 'POST', tx).then(() => {
-            return db.factor.batchCreate(factors, tx).then(data => {
+            return db.factor.batchCreate(factors, context, tx).then(data => {
                 return AppUtil.createPostResponse(data)
             })
         })
@@ -49,9 +49,9 @@ class FactorService {
     }
 
     @Transactional('batchUpdateFactors')
-    batchUpdateFactors(factors, tx) {
+    batchUpdateFactors(factors, context, tx) {
         return this._validator.validate(factors, 'PUT', tx).then(() => {
-            return db.factor.batchUpdate(factors, tx).then(data => {
+            return db.factor.batchUpdate(factors, context, tx).then(data => {
                 return AppUtil.createPutResponse(data)
             })
         })

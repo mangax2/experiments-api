@@ -13,11 +13,11 @@ class ExperimentsService {
         this._validator = new ExperimentsValidator()
     }
 
-    createExperiment(experiments) {
+    createExperiment(experiments, context) {
         return this._validator.validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
                 return Promise.all(experiments.map(ex =>
-                    db.experiments.create(t, ex)
+                    db.experiments.create(t, ex, context)
                 )).then(data => {
                     return AppUtil.createPostResponse(data)
                 })
@@ -42,9 +42,9 @@ class ExperimentsService {
         })
     }
 
-    updateExperiment(id, experiment) {
+    updateExperiment(id, experiment, context) {
         return this._validator.validate([experiment]).then(() => {
-            return db.experiments.update(id, experiment).then((data) => {
+            return db.experiments.update(id, experiment, context).then((data) => {
                 if (!data) {
                     logger.error("Experiment Not Found to Update for id = " + id)
                     throw AppError.notFound('Experiment Not Found to Update')

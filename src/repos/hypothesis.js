@@ -16,16 +16,18 @@ module.exports = (rep) => {
             return rep.any("SELECT * FROM hypothesis where experiment_id=$1", experimentId)
         },
 
-        batchCreate: (hypothesisObj) => {
-            return rep.tx(t=>t.batch(hypothesisObj.map(l=>t.one(
-                "insert into hypothesis(description, is_null, status, experiment_id, created_user_id, created_date," +
-                " modified_user_id, modified_date) values($(description) , $(isNull) , $(status), $(experimentId), $(userId), CURRENT_TIMESTAMP, $(userId), CURRENT_TIMESTAMP)  RETURNING id", l)
+        batchCreate: (hypothesisObj, context) => {
+            return rep.tx(t=>t.batch(hypothesisObj.map(h=>
+                    t.one(
+                        "insert into hypothesis(description, is_null, status, experiment_id, created_user_id, created_date," +
+                        " modified_user_id, modified_date) values($1 , $2 , $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id", [h.description, h.isNull, h.status, h.experimentId, context.userId])
+
             )))
         },
 
-        update: (id, hypothesisObj) => {
+        update: (id, hypothesisObj, context) => {
             return rep.oneOrNone("UPDATE hypothesis SET (description, is_null, status, experiment_id," +
-                "modified_user_id, modified_date) = ($(description) , $(isNull) , $(status), $(experimentId), $(userId), CURRENT_TIMESTAMP) WHERE id=" + id + " RETURNING *", hypothesisObj)
+                "modified_user_id, modified_date) = ($1 , $2 , $3, $4, $5, CURRENT_TIMESTAMP) WHERE id=" + id + " RETURNING *", [hypothesisObj.description, hypothesisObj.isNull, hypothesisObj.status, hypothesisObj.experimentId, context.userId])
         },
 
         remove: (id) => {

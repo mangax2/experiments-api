@@ -11,7 +11,6 @@ class HypothesisValidator extends SchemaValidator {
             {'paramName': 'status', 'type': 'constant', 'data': ['INACTIVE', 'ACTIVE'], 'required': true},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
             {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments},
-            {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
             {'paramName': 'Hypothesis', 'type': 'businessKey', 'keys': ['experimentId', 'description', 'isNull'], 'entity': db.hypothesis}
         ]
     }

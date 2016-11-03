@@ -265,7 +265,7 @@ router.delete('/dependent-variables/:id', (req, res, next) => {
 })
 
 router.post('/factorDependentComposite', (req, res, next) => {
-    return new FactorDependentCompositeService().persistAllVariables(req.body).then((success) => {
+    return new FactorDependentCompositeService().persistAllVariables(req.body, req.context).then((success) => {
         return res.json(success)
     }).catch((err) => {
         return next(err)

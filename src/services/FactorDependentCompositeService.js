@@ -128,7 +128,7 @@ class FactorDependentCompositeService {
         })
     }
 
-    persistAllVariables(experimentVariables) {
+    persistAllVariables(experimentVariables, context) {
         return db.tx('persistAllVariables', (tx) => {
 
             const experimentId = experimentVariables.experimentId
@@ -152,27 +152,27 @@ class FactorDependentCompositeService {
                 this._factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
                     return Promise.all(
                         [
-                            this._factorService.batchCreateFactors(independentVariables, tx).then((ids) => {
+                            this._factorService.batchCreateFactors(independentVariables, context, tx).then((ids) => {
                                 return Promise.all(_.map(independentVariables, (factor, factorIndex) => {
                                     const levels = FactorDependentCompositeService._mapLevelDTO2DbEntity(
                                         factor.levels,
                                         ids[factorIndex].id)
-                                    return this._factorLevelService.batchCreateFactorLevels(levels, tx)
+                                    return this._factorLevelService.batchCreateFactorLevels(levels, context, tx)
                                 }))
                             }),
-                            this._factorService.batchCreateFactors(exogenousVariables, tx).then((ids) => {
+                            this._factorService.batchCreateFactors(exogenousVariables, context, tx).then((ids) => {
                                 return Promise.all(_.map(exogenousVariables, (factor, factorIndex) => {
                                     const levels = FactorDependentCompositeService._mapLevelDTO2DbEntity(
                                         factor.levels,
                                         ids[factorIndex].id)
-                                    return this._factorLevelService.batchCreateFactorLevels(levels, tx)
+                                    return this._factorLevelService.batchCreateFactorLevels(levels, context, tx)
                                 }))
                             })
                         ]
                     )
                 }),
                 this._dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx).then(() => {
-                    return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, tx)
+                    return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, context, tx)
                 })
             ]).then(() => { return "success" })
         })

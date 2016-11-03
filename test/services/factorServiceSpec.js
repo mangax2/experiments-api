@@ -12,6 +12,7 @@ describe('FactorService', () => {
     const testData = {}
     const testPostResponse = {}
     const testError = {}
+    const testContext = {}
     const tx = {tx: {}}
 
     let getExperimentByIdStub
@@ -96,7 +97,7 @@ describe('FactorService', () => {
             validateStub.resolves()
             batchCreateStub.rejects(testError)
 
-            return target.batchCreateFactors(testFactors, tx).should.be.rejected.then((err) => {
+            return target.batchCreateFactors(testFactors, testContext, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
@@ -104,6 +105,7 @@ describe('FactorService', () => {
                     sinon.match.same(tx))
                 sinon.assert.calledWith(batchCreateStub,
                     sinon.match.same(testFactors),
+                    sinon.match.same(testContext),
                     sinon.match.same(tx))
                 sinon.assert.notCalled(createPostResponseStub)
             })
@@ -246,7 +248,7 @@ describe('FactorService', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
 
-            return target.batchUpdateFactors(testFactors, tx).should.be.rejected.then((err) => {
+            return target.batchUpdateFactors(testFactors, testContext, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
@@ -261,7 +263,7 @@ describe('FactorService', () => {
             validateStub.resolves()
             batchUpdateStub.rejects(testError)
 
-            return target.batchUpdateFactors(testFactors, tx).should.be.rejected.then((err) => {
+            return target.batchUpdateFactors(testFactors, testContext, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
@@ -269,6 +271,7 @@ describe('FactorService', () => {
                     sinon.match.same(tx))
                 sinon.assert.calledWith(batchUpdateStub,
                     sinon.match.same(testFactors),
+                    sinon.match.same(testContext),
                     sinon.match.same(tx))
                 sinon.assert.notCalled(createPutResponseStub)
             })
@@ -279,7 +282,7 @@ describe('FactorService', () => {
             batchUpdateStub.resolves(testData)
             createPutResponseStub.returns(testPostResponse)
 
-            return target.batchUpdateFactors(testFactors, tx).then((r) => {
+            return target.batchUpdateFactors(testFactors, testContext, tx).then((r) => {
                 r.should.equal(testPostResponse)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactors),
@@ -287,6 +290,7 @@ describe('FactorService', () => {
                     sinon.match.same(tx))
                 sinon.assert.calledWith(batchUpdateStub,
                     sinon.match.same(testFactors),
+                    sinon.match.same(testContext),
                     sinon.match.same(tx))
                 sinon.assert.calledWith(createPutResponseStub,
                     sinon.match.same(testData))

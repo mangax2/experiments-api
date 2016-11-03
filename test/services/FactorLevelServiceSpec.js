@@ -85,11 +85,12 @@ describe('FactorLevelService', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
 
-            return target.batchCreateFactorLevels(testFactorLevels).should.be.rejected.then((err) => {
+            return target.batchCreateFactorLevels(testFactorLevels, testContext, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(validateStub,
                     sinon.match.same(testFactorLevels),
-                    'POST')
+                    'POST',
+                    sinon.match.same(tx))
                 sinon.assert.notCalled(batchCreateStub)
                 sinon.assert.notCalled(createPostResponseStub)
             })

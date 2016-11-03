@@ -6,7 +6,7 @@ const db = require('../../src/db/DbManager')
 const testPayload = {}
 const testResponse = {}
 const testError = {}
-const tx = {}
+const tx = {tx:{}}
 const context ={
     userId:"akuma11"
 

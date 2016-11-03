@@ -10,6 +10,7 @@ describe('DependentVariableService', () => {
     const testResponse = {}
     const testError = {}
     const tx = {tx: {}}
+    const testContext = {}
 
     let createStub
     let expFindStub
@@ -164,7 +165,7 @@ describe('DependentVariableService', () => {
             expFindStub.resolves({id: 2})
             validateStub.resolves()
 
-            return dependentVariableService.batchCreateDependentVariables(dvsObj).then((result) => {
+            return dependentVariableService.batchCreateDependentVariables(dvsObj, testContext, tx).then((result) => {
                 result.should.eql(expectedResult)
                 sinon.assert.calledOnce(validateStub)
                 sinon.assert.calledOnce(createStub)
@@ -192,7 +193,7 @@ describe('DependentVariableService', () => {
             createStub.resolves([{id: 1},{id: 2}])
             validateStub.resolves()
 
-            return dependentVariableService.batchCreateDependentVariables(dvsObj).then((result) => {
+            return dependentVariableService.batchCreateDependentVariables(dvsObj, testContext, tx).then((result) => {
                 result.should.eql(expectedResult)
                 createStub.calledOnce.should.equal(true)
             })
@@ -202,7 +203,7 @@ describe('DependentVariableService', () => {
             createStub.rejects(testError)
             validateStub.resolves()
 
-            return dependentVariableService.batchCreateDependentVariables(dvsObj).should.be.rejected.then((err) => {
+            return dependentVariableService.batchCreateDependentVariables(dvsObj, testContext, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
             })
         })
@@ -326,7 +327,7 @@ describe('DependentVariableService', () => {
         it('returns rejected promise when getExperimentById fails', () => {
             getExperimentByIdStub.rejects(testError)
 
-            return dependentVariableService.deleteDependentVariablesForExperimentId(7).should.be.rejected.then((err) => {
+            return dependentVariableService.deleteDependentVariablesForExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWith(getExperimentByIdStub, 7)
                 sinon.assert.notCalled(removeByExperimentIdStub)

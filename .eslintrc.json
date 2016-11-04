@@ -8,6 +8,7 @@
     "parserOptions": {
         "sourceType": "module"
     },
+    "parser": "babel-eslint",
     "rules": {
         "indent": [
             "warn",
@@ -17,11 +18,11 @@
             "error",
             "unix"
         ],
-//        "quotes": [
-//            "error",
-//            "single",
-//            {"allowTemplateLiterals": true}
-//        ],
+        //        "quotes": [
+        //            "error",
+        //            "single",
+        //            {"allowTemplateLiterals": true}
+        //        ],
         "semi": [
             "error",
             "never"

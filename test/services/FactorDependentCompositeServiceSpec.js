@@ -2,20 +2,25 @@ const sinon = require('sinon')
 const chai = require('chai')
 const FDCS = require('../../src/services/FactorDependentCompositeService')
 
-const testPayload = {}
-const testResponse = {}
-const testError = {}
-
-let getfactorStub
-let getfactorLevelStub
-let getdependentVariableStub
-let getfactorTypeStub
-
-let factorService, factorLevelService, dependentVariableService, factorTypeService
-
-let fdcs
-
 describe('FactorDependentCompositeService', () => {
+    const testPayload = {}
+    const testResponse = {}
+    const testError = {}
+
+    let getfactorStub
+    let getfactorLevelStub
+    let getdependentVariableStub
+    let getfactorTypeStub
+
+    let deleteFactorsForExperimentIdStub
+    let deleteDependentVariablesForExperimentIdStub
+    let batchCreateFactorsStub
+    let batchCreateLevelsStub
+
+    let factorService, factorLevelService, dependentVariableService, factorTypeService
+
+    let fdcs
+
     before(() => {
         fdcs = new FDCS()
 

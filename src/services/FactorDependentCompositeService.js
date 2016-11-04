@@ -54,18 +54,18 @@ class FactorDependentCompositeService {
                 dependent: []
             }
 
-            const variables = _.map(value[0].factors, (variable)=>{
-                const levels = _.filter(value[0].levels, (level) => { return level.factor_id == variable.id})
+            const factors = _.map(value[0].factors, (factor)=>{
+                const levels = _.filter(value[0].levels, (level) => { return level.factor_id == factor.id})
                 const levelValues = _.map(levels, (level) => { return level.value})
 
-                const type = _.find(value[1], {id: variable.ref_factor_type_id}).type.toLowerCase()
-                return {name: variable.name, type: type, levels: levelValues}
+                const type = _.find(value[1], {id: factor.ref_factor_type_id}).type.toLowerCase()
+                return {name: factor.name, type: type, levels: levelValues}
             })
 
-            _.each(variables, (variable) => {
-                const type = variable.type
-                delete variable['type']
-                variablesObject[type].push(variable)
+            _.each(factors, (factor) => {
+                const type = factor.type
+                delete factor['type']
+                variablesObject[type].push(factor)
             })
 
             variablesObject.dependent = _.map(value[2], (dependentVariable) => {

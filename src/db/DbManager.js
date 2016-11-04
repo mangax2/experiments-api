@@ -25,6 +25,11 @@ const options = {
     }
 }
 
+// Without this option, mocking parts of pg-promise in tests is not possible
+if (process.env.NODE_ENV == 'UNITTEST') {
+    options.noLocking = true
+}
+
 // Database connection parameters:
 const config = cfServices.experimentsDataSource
 logger.debug('loaded db connection config')

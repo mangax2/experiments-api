@@ -137,15 +137,25 @@ class FactorDependentCompositeService {
         return _.concat(independentVariableEntities, exogenousVariableEntities)
     }
 
+    static _mapVariablesDTO2LevelsEntity(variables, ids) {
+        // This produces an array of arrays where each sub array represents levels of a variable
+        const factorLevels = _.map(variables, (factor, factorIndex) => {
+                return FactorDependentCompositeService._mapLevelDTO2DbEntity(
+                    factor.levels,
+                    ids[factorIndex].id)
+            }
+        )
+        // This returns an array of levels removing the sub array.
+        return _.flatten(factorLevels)
+    }
+
     _persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx) {
         return this._factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
             return this._factorService.batchCreateFactors(independentAndExogenousVariables, context, tx).then((ids) => {
-                return Promise.all(_.map(independentAndExogenousVariables, (factor, factorIndex) => {
-                    const levels = FactorDependentCompositeService._mapLevelDTO2DbEntity(
-                        factor.levels,
-                        ids[factorIndex].id)
-                    return this._factorLevelService.batchCreateFactorLevels(levels, context, tx)
-                }))
+                return this._factorLevelService.batchCreateFactorLevels(
+                    FactorDependentCompositeService._mapVariablesDTO2LevelsEntity(independentAndExogenousVariables, ids),
+                    context,
+                    tx)
             })
         })
     }

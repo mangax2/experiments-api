@@ -631,6 +631,58 @@
                 }
             }
         },
+        "/experiments/{id}/variables": {
+            "get": {
+                "summary": "get all variables for given experiment id.",
+                "description": "This endpoint returns information about the variable entities associated with one Experiment.\n",
+                "tags": [
+                    "Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Variables",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariablesResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/hypotheses": {
             "get": {
                 "summary": "get all hypotheses entities",
@@ -1012,7 +1064,6 @@
                     }
                 }
             },
-
             "put": {
                 "summary": "put one or more dependent variable entities",
                 "description": "Update Dependent Variables in Experiments System.\n",
@@ -1065,7 +1116,6 @@
                     }
                 }
             }
-
         },
         "/factors/{id}": {
             "get": {
@@ -1262,7 +1312,6 @@
                     }
                 }
             },
-
             "put": {
                 "summary": "put one or more factor entities",
                 "description": "Update factor in Experiments System.\n",
@@ -1315,9 +1364,7 @@
                     }
                 }
             }
-
         },
-
         "/factor-levels/{id}": {
             "get": {
                 "summary": "get one factor level entity",
@@ -1461,7 +1508,6 @@
                     }
                 }
             },
-
             "put": {
                 "summary": "put one or more factor level entities",
                 "description": "Update factor level in Experiments System.\n",
@@ -1514,9 +1560,7 @@
                     }
                 }
             }
-
         },
-
         "/factor-types": {
             "get": {
                 "summary": "Get all factor types",
@@ -1729,6 +1773,50 @@
                     },
                     "404": {
                         "description": "Factor Type Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/variables": {
+            "post": {
+                "summary": "Add variables",
+                "description": "Creates a new variables, clears existing variables when new variables are provided",
+                "tags": [
+                    "Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "Variables",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/VariablesRquestPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -1954,6 +2042,87 @@
                     "description": "modified user id for audit tracking."
                 }
             }
+        },
+        "VariablesResponse": {
+            "type": "object",
+            "properties": {
+                "independent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "exogenous": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "dependent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DependentVariable"
+                    }
+                }
+            }
+        },
+        "VariablesRquestPayload": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "experimentId"
+                },
+                "independent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "exogenous": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "dependent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DependentVariable"
+                    }
+                }
+            }
+        },
+        "Variable": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of variable"
+                },
+                "levels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Levels"
+                    }
+                }
+            }
+        },
+        "DependentVariable": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of variable"
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "required or optional boolean value"
+                }
+            }
+        },
+        "Levels": {
+            "type": "string"
         },
         "CreateResponse": {
             "type": "object",

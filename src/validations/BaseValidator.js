@@ -86,9 +86,8 @@ class BaseValidator {
             this.messages = []
             return Promise.reject(
                 _.map(copyMessages, function (x) {
-                        return AppError.badRequest(x)
-                    }
-                )
+                    return AppError.badRequest(x)
+                })
             )
         } else {
             return Promise.resolve()

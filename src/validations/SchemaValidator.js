@@ -18,6 +18,32 @@ export class SchemaValidator extends BaseValidator {
         )
     }
 
+    //FOR PARTIAL UPDATE SUPPORT:
+    //
+    // schemaCheck(targetObject, schema, optionalTransaction) {
+    //     const requiredFields = _.map(_.filter(schema, (schemaElement) => {
+    //         return _.keys(schemaElement).indexOf('required') > -1
+    //     }), (value) => { return value.paramName})
+    //
+    //     const missingFields = _.difference(requiredFields, _.keys(targetObject))
+    //     if(missingFields.length > 0){
+    //         return Promise.reject("Missing Required Fields: " + missingFields.toString())
+    //     }
+    //
+    //     return Promise.all(
+    //         _.map(_.keys(targetObject), (param)=>{
+    //             const schemaElement = _.find(schema, (schemaEle) => { return schemaEle.paramName == param})
+    //
+    //             if(schemaElement){
+    //                 return this.schemaElementCheck(targetObject[param], schemaElement, targetObject, optionalTransaction)
+    //             }
+    //             else{
+    //                 delete targetObject[param]
+    //             }
+    //         })
+    //     )
+    // }
+
     schemaElementCheck(elementValue, elementSchema, targetObject, optionalTransaction) {
         return new Promise((resolve, reject) => {
             if (elementSchema.required) {
@@ -42,6 +68,8 @@ export class SchemaValidator extends BaseValidator {
                 if(!this.hasErrors() && elementSchema.type == 'refData'){
                     return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName, optionalTransaction).then(() => {
                         resolve()
+                    }, (err)=>{
+                        reject(err)
                     })
                 }
                 else{
@@ -53,8 +81,10 @@ export class SchemaValidator extends BaseValidator {
                     return targetObject[key]
                 })
 
-                this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys, optionalTransaction).then(() => {
+                return this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys, optionalTransaction).then(() => {
                     resolve()
+                }, (err)=> {
+                    reject(err)
                 })
             }
             else{

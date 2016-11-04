@@ -1,3 +1,28 @@
+//FOR PARTIAL UPDATE SUPPORT:
+//
+// import * as _ from 'lodash'
+// import pgp from 'pg-promise'
+//
+// function columnMap(key){
+//     switch(key.toLowerCase()){
+//         case 'subjecttype':
+//             return 'subject_type'
+//         case 'refexperimentdesignid':
+//             return 'ref_experiment_design_id'
+//         default:
+//             return key.toLowerCase()
+//     }
+// }
+//
+// function updateQuery(table, values, id, userId){
+//     const keys = Object.keys(values)
+//     return pgp.as.format(`UPDATE $1~ SET ($2^,modified_date,modified_user_id) = ($3^,CURRENT_TIMESTAMP, '${userId}') WHERE id=${id} RETURNING *`, [
+//         table,
+//         keys.map(k => pgp.as.name(columnMap(k))).join(', '),
+//         keys.map(k => '${' + k + '}').join(', ')
+//     ])
+// }
+
 module.exports = (rep) => {
     return {
         repository: () => {
@@ -21,6 +46,20 @@ module.exports = (rep) => {
             return rep.oneOrNone("UPDATE experiment SET (name, subject_type, ref_experiment_design_id,status,"+
                 "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id="+id+" RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, context.userId])
         },
+
+        //FOR PARTIAL UPDATE SUPPORT:
+        //
+        // update: (id, experimentObj, context) => {
+        //     const experimentId = experimentObj.experimentId
+        //     const data = _.omit(experimentObj, ['experimentId'])
+        //
+        //     if(_.keys(data).length == 0){
+        //         return Promise.reject("No Data Provided To Update")
+        //     }
+        //
+        //     const query = updateQuery('experiment', data, id, context.userId)
+        //     return rep.oneOrNone(query, data)
+        // },
 
         remove: (id) => {
             return rep.oneOrNone("delete from experiment where id=" + id + " RETURNING id")

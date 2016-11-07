@@ -7,6 +7,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     }
     const header = req.headers['oauth_resourceownerinfo']
     if (!header) {
+        console.log(req.headers)
         throw AppError.badRequest('oauth_resourceownerinfo header not found.')
     }
     const tokens = header.split(',')

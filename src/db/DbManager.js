@@ -7,9 +7,9 @@ import factorType from '../repos/factorType'
 import hypothesis from '../repos/hypothesis'
 import dependentVariable from '../repos/dependentVariable'
 import pgPromise from 'pg-promise'
-import cfServices from '../services/utility/ServiceConfig'
 import log4js from 'log4js'
 const logger = log4js.getLogger('DbManager')
+import config from '../../config'
 
 // pg-promise initialization options:
 const options = {
@@ -26,17 +26,26 @@ const options = {
 }
 
 // Without this option, mocking parts of pg-promise in tests is not possible
-if (process.env.NODE_ENV == 'UNITTEST') {
+if (config.node_env== 'UNITTEST') {
     options.noLocking = true
 }
 
 // Database connection parameters:
-const config = cfServices.experimentsDataSource
-logger.debug('loaded db connection config')
+
+let dbConfig = {}
+
+// Setup database config if not running unit tests
+if(config.node_env !== 'UNITTEST'){
+    const cfServices = require('../services/utility/ServiceConfig')
+    dbConfig = cfServices.experimentsDataSource
+    logger.debug('loaded db connection config')
+}
+// const config = cfServices.experimentsDataSource
+// logger.debug('loaded db connection config')
 
 const pgp = pgPromise(options)
 
 // Create the database instance with extensions:
-const db = pgp(config)
+const db = pgp(dbConfig)
 
 module.exports = db

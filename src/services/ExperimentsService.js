@@ -25,6 +25,20 @@ class ExperimentsService {
         })
     }
 
+    //FOR PARTIAL UPDATE SUPPORT:
+    //
+    // createExperiment(experiments, context) {
+    //     return this._validator.validate(experiments,'POST').then(() => {
+    //         return db.experiments.repository().tx('tx1', (t) => {
+    //             return Promise.all(experiments.map(ex =>
+    //                 db.experiments.create(t, ex, context)
+    //             )).then(data => {
+    //                 return AppUtil.createPostResponse(data)
+    //             })
+    //         })
+    //     })
+    // }
+
     getAllExperiments() {
         return db.experiments.all()
     }
@@ -55,6 +69,21 @@ class ExperimentsService {
         })
     }
 
+    //FOR PARTIAL UPDATE SUPPORT:
+    //
+    // updateExperiment(id, experiment, context) {
+    //     return this._validator.validate([experiment], 'PUT').then(() => {
+    //         return db.experiments.update(id, experiment, context).then((data) => {
+    //             if (!data) {
+    //                 logger.error("Experiment Not Found to Update for id = " + id)
+    //                 throw AppError.notFound('Experiment Not Found to Update')
+    //             } else {
+    //                 return data
+    //             }
+    //         })
+    //     })
+    // }
+
     deleteExperiment(id) {
         return db.experiments.remove(id).then((data) => {
             if (!data) {
@@ -66,10 +95,6 @@ class ExperimentsService {
             }
         })
     }
-
-    // validator() {
-    //     return new ExperimentsValidator()
-    // }
 }
 
 module.exports = ExperimentsService

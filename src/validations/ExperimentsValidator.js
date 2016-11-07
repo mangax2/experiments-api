@@ -13,6 +13,30 @@ class ExperimentsValidator extends SchemaValidator {
         ]
     }
 
+    //FOR PARTIAL UPDATE SUPPORT:
+    //
+    // getSchema(operationName) {
+    //     switch(operationName){
+    //         case 'POST':
+    //             return [
+    //                 {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+    //                 {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 0, 'max': 100}},
+    //                 {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
+    //                 {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true}
+    //             ]
+    //         case 'PUT':
+    //             return [
+    //                 {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments, 'required': true},
+    //                 {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}},
+    //                 {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 0, 'max': 100}},
+    //                 {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
+    //                 {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE']}
+    //             ]
+    //         default:
+    //             throw `No Experiments Schema For Supplied Operation Type: ${operationName}`
+    //     }
+    // }
+
     performValidations(targetObject) {
         if (_.isArray(targetObject) && targetObject.length>0) {
             return Promise.all(
@@ -22,6 +46,18 @@ class ExperimentsValidator extends SchemaValidator {
             throw AppError.badRequest('Experiments request object needs to be an array')
         }
     }
+
+    //FOR PARTIAL UPDATE SUPPORT:
+    //
+    // performValidations(targetObject, operationName) {
+    //     if (_.isArray(targetObject) && targetObject.length>0) {
+    //         return Promise.all(
+    //             _.map(targetObject, experiment=> super.performValidations(experiment, operationName))
+    //         )
+    //     } else {
+    //         throw AppError.badRequest('Experiments request object needs to be an array')
+    //     }
+    // }
 }
 
 module.exports = ExperimentsValidator

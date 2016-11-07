@@ -11,6 +11,7 @@
     "test": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "_mocha --watch test",
     "eslint": "eslint src; exit 0",
+    "nyc": "nyc report --reporter=html",
     "check-coverage": "nyc check-coverage --lines 90 --statements 90 --branches 90 --functions 90"
   },
   "repository": {

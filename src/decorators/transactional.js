@@ -23,6 +23,7 @@ function transactional(transactionName) {
         descriptor.value = function() {
             const lastParameter = arguments.length > 0 ? arguments[arguments.length - 1] : undefined
             if (!lastParameter) {
+                // Fat arrow necessary to preserve this
                 return db.tx(transactionName, (tx) => {
                     return wrappedFunction.apply(this, [tx])
                 })
@@ -30,6 +31,7 @@ function transactional(transactionName) {
                 if (lastParameter.tx) {
                     return wrappedFunction.apply(this, arguments)
                 } else {
+                    // Fat arrow necessary to preserve this
                     return db.tx(transactionName, (tx) => {
                         const newArguments = []
                         for (let i = 0; i < arguments.length; i++) {

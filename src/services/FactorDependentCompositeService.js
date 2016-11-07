@@ -8,6 +8,7 @@ import FactorLevelService from "./FactorLevelService"
 import FactorService from "./factorService"
 import DependentVariableService from "./DependentVariableService"
 import FactorTypeService from './factorTypeService'
+import Transactional from '../decorators/transactional'
 
 import log4js from "log4js"
 
@@ -174,28 +175,28 @@ class FactorDependentCompositeService {
         return Promise.all([
             this._persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx),
             this._persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx)
-        ]).then(() => {
-            return AppUtil.createPostResponse([{id: experimentId}])
-        })
+        ])
     }
 
-    persistAllVariables(experimentVariables, context) {
-        return db.tx('persistAllVariables', (tx) => {
-            const experimentId = experimentVariables.experimentId
-            return this._persistVariables(
+    @Transactional('persistAllVariables')
+    persistAllVariables(experimentVariables, context, tx) {
+        const experimentId = experimentVariables.experimentId
+        return this._persistVariables(
+            experimentId,
+            FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
                 experimentId,
-                FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
-                    experimentId,
-                    experimentVariables.independentVariables,
-                    experimentVariables.exogenousVariables
-                ),
-                FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
-                    experimentVariables.dependentVariables,
-                    experimentId
-                ),
-                context,
-                tx)
-        })
+                experimentVariables.independentVariables,
+                experimentVariables.exogenousVariables
+            ),
+            FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
+                experimentVariables.dependentVariables,
+                experimentId
+            ),
+            context,
+            tx)
+            .then(() => {
+                return AppUtil.createPostResponse([{id: experimentId}])
+            })
     }
 }
 

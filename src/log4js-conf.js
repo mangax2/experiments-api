@@ -1,3 +1,7 @@
+/*eslint no-process-env: "warn"*/
+/*eslint no-undef: "warn"*/
+/*eslint no-console: "warn"*/
+
 const log4js = require('log4js')
 
 module.exports = () => {

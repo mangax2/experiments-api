@@ -22,7 +22,6 @@
     "@monsantoit/cloud-foundry": "~2.1.0",
     "@monsantoit/ping-page": "~2.0.3",
     "@monsantoit/profile-middleware": "~3.1.0",
-    "@monsantoit/prom-metrics": "~2.0.0",
     "bluebird": "~3.4.6",
     "body-parser": "~1.15.2",
     "compression": "~1.6.2",

@@ -1,16 +1,11 @@
-import db from "../db/DbManager"
 import AppUtil from "./utility/AppUtil"
-import AppError from "./utility/AppError"
 import * as _ from 'lodash'
-
 import ExperimentsService from './ExperimentsService'
 import FactorLevelService from "./FactorLevelService"
 import FactorService from "./factorService"
 import DependentVariableService from "./DependentVariableService"
 import FactorTypeService from './factorTypeService'
 import Transactional from '../decorators/transactional'
-
-import log4js from "log4js"
 
 class FactorDependentCompositeService {
 
@@ -137,11 +132,10 @@ class FactorDependentCompositeService {
     static _mapVariablesDTO2LevelsEntity(variables, ids) {
         // This produces an array of arrays where each sub array represents levels of a variable
         const factorLevels = _.map(variables, (factor, factorIndex) => {
-                return FactorDependentCompositeService._mapLevelDTO2DbEntity(
-                    factor.levels,
-                    ids[factorIndex].id)
-            }
-        )
+            return FactorDependentCompositeService._mapLevelDTO2DbEntity(
+                factor.levels,
+                ids[factorIndex].id)
+        })
         // This returns an array of levels removing the sub array.
         return _.flatten(factorLevels)
     }

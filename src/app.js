@@ -8,12 +8,10 @@ if (config.node_env !== 'production') {
 }
 const express = require('express')
 const _ = require('lodash')
-const createProfileMiddleware = require('@monsantoit/profile-middleware')
 const inflector = require('json-inflector')
 const bodyParser = require('body-parser')
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-// const localDevelopment = config.node_env !== 'production'
 const appBaseUrl = '/experiments-api'
 const app = express()
 
@@ -38,14 +36,6 @@ const compression = require('compression')
 app.use(compression())
 app.use(bodyParser.json())
 
-const localDevProfile = {
-    id: 'testuser'
-}
-
-// app.use(createProfileMiddleware({
-//     localDevProfile: localDevProfile
-// }))
-
 app.use(appBaseUrl, require('./routes/routes'))
 
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
@@ -53,7 +43,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 })
 
 
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
     if (err) {
         if (_.isArray(err)) {
             const errorArray = _.map(err, function (x) {

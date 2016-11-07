@@ -895,9 +895,9 @@ describe('FactorDependentCompositeService', () => {
     describe('persistAllVariables', () => {
         let testVariables = {
             experimentId: 42,
-            independentVariables: {},
-            exogenousVariables: {},
-            dependentVariables: {}
+            independent: {},
+            exogenous: {},
+            dependent: {}
         }
         let independentAndExogenousEntities = {}
         let dependentEntities = {}
@@ -938,12 +938,12 @@ describe('FactorDependentCompositeService', () => {
                 sinon.assert.calledWithExactly(
                     mapIndependentAndExogenousVariableDTO2EntityStub,
                     42,
-                    sinon.match.same(testVariables.independentVariables),
-                    sinon.match.same(testVariables.exogenousVariables)
+                    sinon.match.same(testVariables.independent),
+                    sinon.match.same(testVariables.exogenous)
                 )
                 sinon.assert.calledWithExactly(
                     mapDependentVariableDTO2DbEntityStub,
-                    sinon.match.same(testVariables.dependentVariables),
+                    sinon.match.same(testVariables.dependent),
                     42
                 )
                 sinon.assert.calledWithExactly(
@@ -968,12 +968,12 @@ describe('FactorDependentCompositeService', () => {
                 sinon.assert.calledWithExactly(
                     mapIndependentAndExogenousVariableDTO2EntityStub,
                     42,
-                    sinon.match.same(testVariables.independentVariables),
-                    sinon.match.same(testVariables.exogenousVariables)
+                    sinon.match.same(testVariables.independent),
+                    sinon.match.same(testVariables.exogenous)
                 )
                 sinon.assert.calledWithExactly(
                     mapDependentVariableDTO2DbEntityStub,
-                    sinon.match.same(testVariables.dependentVariables),
+                    sinon.match.same(testVariables.dependent),
                     42
                 )
                 sinon.assert.calledWithExactly(

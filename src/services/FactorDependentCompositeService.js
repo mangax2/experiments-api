@@ -185,11 +185,11 @@ class FactorDependentCompositeService {
             experimentId,
             FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
                 experimentId,
-                experimentVariables.independentVariables,
-                experimentVariables.exogenousVariables
+                experimentVariables.independent,
+                experimentVariables.exogenous
             ),
             FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
-                experimentVariables.dependentVariables,
+                experimentVariables.dependent,
                 experimentId
             ),
             context,

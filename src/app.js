@@ -1,4 +1,4 @@
-require('../log4js-conf')
+require('./log4js-conf')
 
 const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')

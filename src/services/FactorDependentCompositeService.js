@@ -49,9 +49,13 @@ class FactorDependentCompositeService {
                 dependent: []
             }
 
-            const factors = _.map(value[0].factors, (factor)=>{
-                const levels = _.filter(value[0].levels, (level) => { return level.factor_id == factor.id})
-                const levelValues = _.map(levels, (level) => { return level.value})
+            const factors = _.map(value[0].factors, (factor)=> {
+                const levels = _.filter(value[0].levels, (level) => {
+                    return level.factor_id == factor.id
+                })
+                const levelValues = _.map(levels, (level) => {
+                    return level.value
+                })
 
                 const type = _.find(value[1], {id: factor.ref_factor_type_id}).type.toLowerCase()
                 return {name: factor.name, type: type, levels: levelValues}
@@ -142,18 +146,25 @@ class FactorDependentCompositeService {
 
     _persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx) {
         return this._factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
-            return this._factorService.batchCreateFactors(independentAndExogenousVariables, context, tx).then((ids) => {
-                return this._factorLevelService.batchCreateFactorLevels(
-                    FactorDependentCompositeService._mapVariablesDTO2LevelsEntity(independentAndExogenousVariables, ids),
-                    context,
-                    tx)
-            })
+            if (independentAndExogenousVariables.length > 0) {
+                return this._factorService.batchCreateFactors(independentAndExogenousVariables, context, tx).then((ids) => {
+                    const levelEntities = FactorDependentCompositeService._mapVariablesDTO2LevelsEntity(independentAndExogenousVariables, ids)
+                    if (levelEntities.length > 0) {
+                        return this._factorLevelService.batchCreateFactorLevels(
+                            levelEntities,
+                            context,
+                            tx)
+                    }
+                })
+            }
         })
     }
 
     _persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx) {
         return this._dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx).then(() => {
-            return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, context, tx)
+            if (dependentVariables.length > 0) {
+                return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, context, tx)
+            }
         })
     }
 

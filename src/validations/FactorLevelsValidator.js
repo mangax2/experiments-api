@@ -34,26 +34,20 @@ class FactorLevelsValidator extends SchemaValidator {
         }
     }
 
-    performValidations(factorLevelObj, operationName, optionalTransaction) {
-        if (_.isArray(factorLevelObj) && factorLevelObj.length > 0) {
-            return Promise.all(
-                _.map(factorLevelObj, (factorLevel) => super.performValidations(factorLevel, operationName, optionalTransaction))
-            ).then(() => {
-                this.checkBusinessKey(factorLevelObj)
-            })
-        } else {
-            return Promise.reject(
-                AppError.badRequest('Factor Level request object needs to be an array')
-            )
-        }
+    getBusinessKeyPropertyNames() {
+        return ['factorId', 'value']
     }
 
-    checkBusinessKey(ObjArray) {
-        const uniqArray = _.uniqWith(_.map(ObjArray, (obj) => {
-            return _.pick(obj, ['factorId', 'value'])
-        }), _.isEqual)
-        if (uniqArray.length != ObjArray.length) {
-            throw AppError.badRequest('Duplicate factor level value in request payload with same factor id')
+    getDuplicateBusinessKeyError() {
+        return 'Duplicate factor level value in request payload with same factor id'
+    }
+
+    preValidate(factorLevelObj) {
+        if (!_.isArray(factorLevelObj) || factorLevelObj.length == 0) {
+            return Promise.reject(
+                AppError.badRequest('Factor Level request object needs to be an array'))
+        } else {
+            return Promise.resolve()
         }
     }
 }

@@ -1,22 +1,28 @@
+const AppError = require('../../src/services/utility/AppError')
 const sinon = require('sinon')
 const chai = require('chai')
 const FactorTypesValidator = require('../../src/validations/FactorTypesValidator')
 import db from '../../src/db/DbManager'
-let findStub
 
 describe('FactorTypesValidator', () => {
-    const factorTypesValidator = new FactorTypesValidator()
+    const target = new FactorTypesValidator()
+    const testError = new Error('Test Error')
+
+    let badRequestStub
+
     before(() => {
-        findStub = sinon.stub(factorTypesValidator.referentialIntegrityService, 'getByBusinessKey')
+        badRequestStub = sinon.stub(AppError, 'badRequest', () => {
+            return testError
+        })
+    })
 
-    })
-    after(() => {
-        findStub.restore()
-    })
     afterEach(() => {
-        findStub.reset()
+        badRequestStub.reset()
     })
 
+    after(() => {
+        badRequestStub.restore()
+    })
 
     const schemaArray = [
         {'paramName': 'type', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
@@ -26,28 +32,42 @@ describe('FactorTypesValidator', () => {
 
     describe('getSchema ', () => {
         it('returns schema array', () => {
-            return factorTypesValidator.getSchema().should.eql(schemaArray)
+            return target.getSchema().should.eql(schemaArray)
         })
     })
 
-    describe('performValidations ', () => {
-        it('returns resolved promise when good value passed for schema validation', () => {
-            findStub.resolves({'id': 1})
-
-            const targetObj = [{
-                "type": "testDesign",
-            }]
-            return factorTypesValidator.performValidations(targetObj).should.be.fulfilled
+    describe('preValidate', () => {
+        it('returns rejected promise when input is not an array.' , () => {
+            return target.preValidate({}).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    badRequestStub,
+                    'Factor Types request object needs to be an array')
+            })
         })
 
-        it('returns rejected promise when targetObject is not an array', () => {
-            (()=> {
-                factorTypesValidator.performValidations({})
-            }).should.throw("Factor Types request object needs to be an array")
-
+        it('returns rejected promise when input is empty array.' , () => {
+            return target.preValidate([]).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    badRequestStub,
+                    'Factor Types request object needs to be an array')
+            })
         })
 
+        it('returns resolved promise when input is non-empty array.' , () => {
+            return target.preValidate([{}]).then(() => {
+                sinon.assert.notCalled(badRequestStub)
+            })
+        })
+    })
 
+    describe('postValidate ', () => {
+        it('returns resolved promise', () => {
+            const r = target.postValidate({})
+            r.should.be.instanceof(Promise)
+            return r
+        })
     })
 })
 

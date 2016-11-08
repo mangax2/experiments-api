@@ -15,24 +15,20 @@ class HypothesisValidator extends SchemaValidator {
         ]
     }
 
-    performValidations(hypothesisObj){
-        if (_.isArray(hypothesisObj) && hypothesisObj.length>0) {
-            return Promise.all(
-                _.map(hypothesisObj, (hypothesis) => super.performValidations(hypothesis))
-            ).then(()=>{
-                this.checkBusinessKey(hypothesisObj)
-            })
-        } else {
-            throw AppError.badRequest('Hypothesis request object needs to be an array')
-        }
+    getBusinessKeyPropertyNames() {
+        return ['description','experimentId','isNull']
     }
 
-    checkBusinessKey(hypothesisObj){
-        const uniqArray = _.uniqWith(_.map(hypothesisObj,(hypothesis)=>{
-            return _.pick(hypothesis,['description','experimentId','isNull'])
-        }), _.isEqual)
-        if(uniqArray.length!=hypothesisObj.length){
-            throw AppError.badRequest('duplicate hypotheses in request payload with same experiment id')
+    getDuplicateBusinessKeyError() {
+        return 'duplicate hypotheses in request payload with same experiment id'
+    }
+
+    preValidate(factorLevelObj) {
+        if (!_.isArray(factorLevelObj) || factorLevelObj.length == 0) {
+            return Promise.reject(
+                AppError.badRequest('Hypothesis request object needs to be an array'))
+        } else {
+            return Promise.resolve()
         }
     }
 }

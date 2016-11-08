@@ -25,24 +25,20 @@ class DependentVariablesValidator extends SchemaValidator {
 
     }
 
-    performValidations(targetObject, operationName, optionalTransaction) {
-        if (_.isArray(targetObject)) {
-            return Promise.all(
-                _.map(targetObject, dv=> super.performValidations(dv, operationName, optionalTransaction))
-            ).then(()=> {
-                this.checkBusinessKey(targetObject)
-            })
-        } else {
-            throw AppError.badRequest('Dependent Variables request object needs to be an array')
-        }
+    getBusinessKeyPropertyNames() {
+        return ['experimentId', 'name']
     }
 
-    checkBusinessKey(ObjArray) {
-        const uniqArray = _.uniqWith(_.map(ObjArray, (obj)=> {
-            return _.pick(obj, ['experimentId', 'name'])
-        }), _.isEqual)
-        if (uniqArray.length != ObjArray.length) {
-            throw AppError.badRequest('duplicate dependent variable name in request payload with same experiment id')
+    getDuplicateBusinessKeyError() {
+        return 'duplicate dependent variable name in request payload with same experiment id'
+    }
+
+    preValidate(factorObj) {
+        if (!_.isArray(factorObj) || factorObj.length == 0) {
+            return Promise.reject(
+                AppError.badRequest('Dependent Variables request object needs to be an array'))
+        } else {
+            return Promise.resolve()
         }
     }
 }

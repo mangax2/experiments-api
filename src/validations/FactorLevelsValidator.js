@@ -35,7 +35,7 @@ class FactorLevelsValidator extends SchemaValidator {
     }
 
     performValidations(factorLevelObj, operationName, optionalTransaction) {
-        if (_.isArray(factorLevelObj) && factorLevelObj.length > 0) {
+        if (_.isArray(factorLevelObj)) {
             return Promise.all(
                 _.map(factorLevelObj, (factorLevel) => super.performValidations(factorLevel, operationName, optionalTransaction))
             ).then(() => {

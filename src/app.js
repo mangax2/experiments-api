@@ -1,4 +1,4 @@
-require('../log4js-conf')
+require('../log4js-conf')()
 
 const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
@@ -8,12 +8,10 @@ if (config.node_env !== 'production') {
 }
 const express = require('express')
 const _ = require('lodash')
-const createProfileMiddleware = require('@monsantoit/profile-middleware')
 const inflector = require('json-inflector')
 const bodyParser = require('body-parser')
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-// const localDevelopment = config.node_env !== 'production'
 const appBaseUrl = '/experiments-api'
 const app = express()
 
@@ -37,14 +35,6 @@ const pingFunc = (function () {
 const compression = require('compression')
 app.use(compression())
 app.use(bodyParser.json())
-
-const localDevProfile = {
-    id: 'testuser'
-}
-
-// app.use(createProfileMiddleware({
-//     localDevProfile: localDevProfile
-// }))
 
 app.use(appBaseUrl, require('./routes/routes'))
 

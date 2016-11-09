@@ -277,3 +277,17 @@ CREATE TABLE unit
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 
+ALTER TABLE public.hypothesis DROP CONSTRAINT "Hypotheses_Experiment";
+ALTER TABLE public.hypothesis
+ADD CONSTRAINT "Hypotheses_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+ALTER TABLE public.factor DROP CONSTRAINT "Factor_Experiment";
+ALTER TABLE public.factor
+ADD CONSTRAINT "Factor_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+ALTER TABLE public.dependent_variable DROP CONSTRAINT "Dependent_Variable_Experiment";
+ALTER TABLE public.dependent_variable
+ADD CONSTRAINT "Dependent_Variable_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;

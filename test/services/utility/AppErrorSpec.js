@@ -6,6 +6,11 @@ const chai = require('chai')
 const AppError = require('../../../src/services/utility/AppError')
 const internals = {};
 
+describe('create', () => {
+    it('returns "Unknown" code when status code is not a known value', () => {
+        AppError.create(999, 'test message', {}).code.should.equal('Unknown')
+    })
+})
 
 describe("BadRequest", ()=> {
 

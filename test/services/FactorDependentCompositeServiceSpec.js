@@ -645,6 +645,48 @@ describe('FactorDependentCompositeService', () => {
             mapVariablesDTO2LevelsEntityStub.restore()
         })
 
+        it('does not call batch create factors when there are none to create', () => {
+            deleteFactorsForExperimentIdStub.resolves()
+
+            return fdcs._persistVariablesWithLevels(42, [], testContext, testTx).then(() => {
+                sinon.assert.calledWithExactly(
+                    deleteFactorsForExperimentIdStub,
+                    42,
+                    sinon.match.same(testTx)
+                )
+                sinon.assert.notCalled(batchCreateFactorsStub)
+                sinon.assert.notCalled(batchCreateLevelsStub)
+                sinon.assert.notCalled(mapVariablesDTO2LevelsEntityStub)
+            })
+        })
+
+        it('does not call batch create levels when there are none to create', () => {
+            const factors = [{}]
+            const ids = []
+            deleteFactorsForExperimentIdStub.resolves()
+            batchCreateFactorsStub.resolves(ids)
+            const levelEntities = []
+            mapVariablesDTO2LevelsEntityStub.returns(levelEntities)
+
+            return fdcs._persistVariablesWithLevels(42, factors, testContext, testTx).then(() => {
+                sinon.assert.calledWithExactly(
+                    deleteFactorsForExperimentIdStub,
+                    42,
+                    sinon.match.same(testTx)
+                )
+                sinon.assert.calledWithExactly(
+                    batchCreateFactorsStub,
+                    sinon.match.same(factors),
+                    sinon.match.same(testContext),
+                    sinon.match.same(testTx))
+                sinon.assert.calledWithExactly(
+                    mapVariablesDTO2LevelsEntityStub,
+                    sinon.match.same(factors),
+                    sinon.match.same(ids))
+                sinon.assert.notCalled(batchCreateLevelsStub)
+            })
+        })
+
         it('returns rejected promise when call to deleteFactorsForExperimentId fails', () => {
             deleteFactorsForExperimentIdStub.rejects(testError)
 
@@ -661,7 +703,7 @@ describe('FactorDependentCompositeService', () => {
         })
 
         it('returns rejected promise when call to batchCreateFactors fails', () => {
-            const testVariables = {}
+            const testVariables = [{}]
             deleteFactorsForExperimentIdStub.resolves()
             batchCreateFactorsStub.rejects(testError)
 
@@ -682,9 +724,9 @@ describe('FactorDependentCompositeService', () => {
         })
 
         it('returns rejected promise when call to batchCreateFactorLevels fails', () => {
-            const testVariables = {}
-            const newFactorIds = {}
-            const levelEntities = {}
+            const testVariables = [{}]
+            const newFactorIds = [{}]
+            const levelEntities = [{}]
             deleteFactorsForExperimentIdStub.resolves()
             batchCreateFactorsStub.resolves(newFactorIds)
             batchCreateLevelsStub.rejects(testError)
@@ -714,9 +756,9 @@ describe('FactorDependentCompositeService', () => {
         })
 
         it('returns resolved promise when call to all calls succeed', () => {
-            const testVariables = {}
+            const testVariables = [{}]
             const newFactorIds = {}
-            const levelEntities = {}
+            const levelEntities = [{}]
             deleteFactorsForExperimentIdStub.resolves()
             batchCreateFactorsStub.resolves(newFactorIds)
             batchCreateLevelsStub.resolves(testResponse)
@@ -747,8 +789,22 @@ describe('FactorDependentCompositeService', () => {
     })
 
     describe('_persistVariablesWithoutLevels', () => {
+        it('resolves and does not call batchCreateDependentVariables when there are none to create.', () => {
+            const testVariables = []
+            deleteDependentVariablesForExperimentIdStub.resolves()
+
+            return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).then((r) => {
+                sinon.assert.calledWithExactly(
+                    deleteDependentVariablesForExperimentIdStub,
+                    42,
+                    sinon.match.same(testTx)
+                )
+                sinon.assert.notCalled(batchCreateDependentVariablesStub)
+            })
+        })
+
         it('returns rejected promise when deleteDependentVariablesForExperimentId fails', () => {
-            const testVariables = {}
+            const testVariables = [{}]
             deleteDependentVariablesForExperimentIdStub.rejects(testError)
 
             return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
@@ -763,7 +819,7 @@ describe('FactorDependentCompositeService', () => {
         })
 
         it('returns rejected promise when batchCreateDependentVariables fails', () => {
-            const testVariables = {}
+            const testVariables = [{}]
             deleteDependentVariablesForExperimentIdStub.resolves()
             batchCreateDependentVariablesStub.rejects(testError)
 
@@ -783,7 +839,7 @@ describe('FactorDependentCompositeService', () => {
         })
 
         it('returns resolved promise when all calls succeed', () => {
-            const testVariables = {}
+            const testVariables = [{}]
             deleteDependentVariablesForExperimentIdStub.resolves()
             batchCreateDependentVariablesStub.resolves(testResponse)
 

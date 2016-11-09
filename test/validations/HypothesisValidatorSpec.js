@@ -8,19 +8,26 @@ const ReferentialIntegrityService = require('../../src/services/ReferentialInteg
 const  AppError  = require('../../src/services/utility/AppError')
 import db from '../../src/db/DbManager'
 
-let baseValidatorStub
-let getByBusinessKeyStub
 describe('HypothesisValidator', () => {
-    const testObject = new HypothesisValidator()
+    const target = new HypothesisValidator()
+    const testError = new Error('Test Error')
+
+    let badRequestStub
 
     before(() => {
-        baseValidatorStub = sinon.stub(testObject, 'checkReferentialIntegrityById')
-        getByBusinessKeyStub= sinon.stub(testObject.referentialIntegrityService, 'getByBusinessKey')
+        badRequestStub = sinon.stub(AppError, 'badRequest', () => {
+            return testError
+        })
     })
+
+    afterEach(() => {
+        badRequestStub.reset()
+    })
+
     after(() => {
-        baseValidatorStub.restore()
-        getByBusinessKeyStub.restore()
+        badRequestStub.restore()
     })
+
     const schemaArray = [
         {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 0, 'max': 1000}, 'required': false},
         {'paramName': 'isNull', 'type': 'boolean', 'required': true},
@@ -28,67 +35,51 @@ describe('HypothesisValidator', () => {
         {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
         {'paramName': 'experimentId', 'type': 'refData', 'required': true, 'entity': db.experiments},
         {'paramName': 'Hypothesis', 'type': 'businessKey', 'keys': ['experimentId', 'description', 'isNull'], 'entity': db.hypothesis}
-
-
     ]
 
     describe('getSchema ', () => {
         it('returns schema array', () => {
-            testObject.getSchema().should.eql(schemaArray)
+            target.getSchema().should.eql(schemaArray)
         })
     })
 
-    describe('performValidations ', () => {
-        const targetObj = [{
-            "description": "Independent variables have affect on Depenedent Variables",
-            "isNull": true,
-            "status": "ACTIVE",
-            "experimentId": 17,
-            "userId": "kprat1"
-
-        }]
-        const targetOb=[{
-
-            "description": "abc",
-            "isNull": false,
-            "status": "ACTIVE",
-            "experimentId":3,
-            "userId": "kprat1"
-
-        },
-            {
-
-                "description": "abc",
-                "isNull": false,
-                "status": "ACTIVE",
-                "experimentId": 3,
-                "userId": "kprat1"
-
-            }
-        ]
-        it('returns resolved promise when good value passed for schema validation', () => {
-            baseValidatorStub.resolves()
-            getByBusinessKeyStub.resolves(undefined)
-            return testObject.performValidations(targetObj).should.be.fulfilled
-
-        })
-
-        it('returns rejected promise when targetObject is not an array', () => {
-            (()=>{
-                testObject.performValidations({})
-            }).should.throw("Hypothesis request object needs to be an array")
-
-        })
-
-
-        it('returns rejected promise when targetObject has same hypothesis', () => {
-            (function () {
-                testObject.checkBusinessKey(targetOb)
-            }).should.throw('duplicate hypotheses in request payload with same experiment id')
-
+    describe('getBusinessKeyPropertyNames', () => {
+        it('returns array of property names for the business key', () => {
+            target.getBusinessKeyPropertyNames().should.eql(['description','experimentId','isNull'])
         })
     })
 
+    describe('getDuplicateBusinessKeyError', () => {
+        it('returns duplicate error message string', () => {
+            target.getDuplicateBusinessKeyError().should.eql(
+                'duplicate hypotheses in request payload with same experiment id')
+        })
+    })
 
+    describe('preValidate', () => {
+        it('returns rejected promise when input is not an array.' , () => {
+            return target.preValidate({}).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    badRequestStub,
+                    'Hypothesis request object needs to be an array')
+            })
+        })
+
+        it('returns rejected promise when input is empty array.' , () => {
+            return target.preValidate([]).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    badRequestStub,
+                    'Hypothesis request object needs to be an array')
+            })
+        })
+
+        it('returns resolved promise when input is array.' , () => {
+            return target.preValidate([{}]).then(() => {
+                sinon.assert.notCalled(badRequestStub)
+            })
+        })
+    })
 })
 

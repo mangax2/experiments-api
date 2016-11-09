@@ -1,5 +1,6 @@
 import BaseValidator from './BaseValidator'
 import * as _ from 'lodash'
+import AppError from '../services/utility/AppError'
 import log4js from 'log4js'
 
 const logger = log4js.getLogger('SchemaValidator')
@@ -53,7 +54,7 @@ export class SchemaValidator extends BaseValidator {
             if (elementValue != undefined && elementValue != null) {
                 if (elementSchema.type == 'numeric') {
                     this.checkNumeric(elementValue, elementSchema.paramName)
-                    if(elementSchema.numericRange) {
+                    if (elementSchema.numericRange) {
                         this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
                     }
                 } else if (elementSchema.type == 'text') {
@@ -65,18 +66,18 @@ export class SchemaValidator extends BaseValidator {
                     this.checkBoolean(elementValue, elementSchema.paramName)
                 }
 
-                if(!this.hasErrors() && elementSchema.type == 'refData'){
+                if (!this.hasErrors() && elementSchema.type == 'refData') {
                     return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName, optionalTransaction).then(() => {
                         resolve()
-                    }, (err)=>{
+                    }, (err)=> {
                         reject(err)
                     })
                 }
-                else{
+                else {
                     resolve()
                 }
             }
-            else if(!this.hasErrors() && elementSchema.type == 'businessKey'){
+            else if (!this.hasErrors() && elementSchema.type == 'businessKey') {
                 const vals = _.map(elementSchema.keys, (key) => {
                     return targetObject[key]
                 })
@@ -87,19 +88,46 @@ export class SchemaValidator extends BaseValidator {
                     reject(err)
                 })
             }
-            else{
+            else {
                 resolve()
             }
         })
     }
 
-    performValidations(targetObject, operationName, optionalTransaction) {
+    validateEntity(targetObject, operationName, optionalTransaction) {
         return this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
+    }
+
+    postValidate(targetObject) {
+        if (!this.hasErrors()) {
+            // Check the business key
+            const uniqArray = _.uniqWith(_.map(targetObject, (obj) => {
+                return _.pick(obj, this.getBusinessKeyPropertyNames())
+            }), _.isEqual)
+
+            if (uniqArray.length != targetObject.length) {
+                return Promise.reject(
+                    AppError.badRequest(this.getDuplicateBusinessKeyError())
+                )
+            }
+        }
+
+        return Promise.resolve()
     }
 
     getSchema(operationName) {
         logger.error('getSchema not implemented')
         throw 'getSchema not implemented'
+    }
+
+    getBusinessKeyPropertyNames() {
+        logger.error('getBusinessKeyPropertyNames not implemented')
+        throw 'getBusinessKeyPropertyNames not implemented'
+    }
+
+    getDuplicateBusinessKeyError() {
+        logger.error('getDuplicateBusinessKeyError not implemented')
+        throw 'getDuplicateBusinessKeyError not implemented'
     }
 }
 

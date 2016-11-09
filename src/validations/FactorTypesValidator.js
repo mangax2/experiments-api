@@ -12,14 +12,18 @@ class FactorTypesValidator extends SchemaValidator {
         ]
     }
 
-    performValidations(targetObject) {
-        if (_.isArray(targetObject) && targetObject.length > 0) {
-            return Promise.all(
-                _.map(targetObject, factorType=> super.performValidations(factorType))
-            )
+    preValidate(factorObj) {
+        if (!_.isArray(factorObj) || factorObj.length == 0) {
+            return Promise.reject(
+                AppError.badRequest('Factor Types request object needs to be an array'))
         } else {
-            throw AppError.badRequest('Factor Types request object needs to be an array')
+            return Promise.resolve()
         }
+    }
+
+    postValidate(targetObject) {
+        // No business key to validate
+        return Promise.resolve()
     }
 }
 

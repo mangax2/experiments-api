@@ -36,28 +36,20 @@ class FactorsValidator extends SchemaValidator {
         }
     }
 
-    performValidations(factorObj, operationName, optionalTransaction) {
-        if (_.isArray(factorObj)) {
-            return Promise.all(
-                _.map(factorObj, (factor) => super.performValidations(factor, operationName, optionalTransaction))
-            ).then(() => {
-                if (!this.hasErrors()) {
-                    this.checkBusinessKey(factorObj)
-                }
-            })
-        } else {
-            return Promise.reject(
-                AppError.badRequest('Factor request object needs to be an array')
-            )
-        }
+    getBusinessKeyPropertyNames() {
+        return ['experimentId', 'name']
     }
 
-    checkBusinessKey(ObjArray) {
-        const uniqArray = _.uniqWith(_.map(ObjArray, (obj) => {
-            return _.pick(obj, ['experimentId', 'name'])
-        }), _.isEqual)
-        if (uniqArray.length != ObjArray.length) {
-            throw AppError.badRequest('Duplicate factor name in request payload with same experiment id')
+    getDuplicateBusinessKeyError() {
+        return 'Duplicate factor name in request payload with same experiment id'
+    }
+
+    preValidate(factorObj) {
+        if (!_.isArray(factorObj) || factorObj.length == 0) {
+            return Promise.reject(
+                AppError.badRequest('Factor request object needs to be an array'))
+        } else {
+            return Promise.resolve()
         }
     }
 }

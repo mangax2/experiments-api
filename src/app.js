@@ -43,7 +43,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 })
 
 
-app.use(function (err, req, res) {
+app.use(function (err, req, res, next) {
     if (err) {
         if (_.isArray(err)) {
             const errorArray = _.map(err, function (x) {

@@ -16,17 +16,44 @@ class BaseValidator {
         return this.messages.length > 0
     }
 
+    _validateArray(objectArray, operationName, optionalTransaction) {
+        return Promise.all(
+            _.map(objectArray, (element) => {
+                return this.validateEntity(element, operationName, optionalTransaction)
+            })
+        )
+    }
+
+    _validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
+        return _.isArray(targetObject)
+            ? this._validateArray(targetObject, operationName, optionalTransaction)
+            : this.validateEntity(targetObject, operationName, optionalTransaction)
+    }
+
     validate(targetObject, operationName, optionalTransaction) {
-        return this.performValidations(targetObject, operationName, optionalTransaction).then(()=> {
-            return this.check()
+        return this.preValidate(targetObject).then(() => {
+            return this._validateArrayOrSingleEntity(
+                targetObject, operationName, optionalTransaction
+            ).then(() => {
+                return this.postValidate(targetObject)
+            }).then(() => {
+                return this.check()
+            })
         })
     }
 
-    performValidations(targetObject, operationName, optionalTransaction) {
-        logger.error("performValidations validation method not implemented to validate" + targetObject)
-        return Promise.reject("Server error, please contact support")
+    preValidate(targetObject) {
+        return Promise.resolve()
     }
 
+    postValidate(targetObject) {
+        return Promise.resolve()
+    }
+
+    validateEntity(targetObject, operationName, optionalTransaction) {
+        logger.error("validateEntity validation method not implemented to validate" + targetObject)
+        return Promise.reject("Server error, please contact support")
+    }
 
     checkLength(value, lengthRange, name) {
         if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {

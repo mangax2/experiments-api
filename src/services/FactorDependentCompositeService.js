@@ -6,6 +6,7 @@ import FactorService from "./factorService"
 import DependentVariableService from "./DependentVariableService"
 import FactorTypeService from './factorTypeService'
 import Transactional from '../decorators/transactional'
+import VariablesValidator from '../validations/VariablesValidator'
 
 class FactorDependentCompositeService {
 
@@ -15,6 +16,8 @@ class FactorDependentCompositeService {
         this._factorService = new FactorService()
         this._dependentVariableService = new DependentVariableService()
         this._factorTypeService = new FactorTypeService()
+
+        this._variablesValidator = new VariablesValidator()
     }
 
     _getFactorsWithLevels(experimentId) {
@@ -181,23 +184,25 @@ class FactorDependentCompositeService {
 
     @Transactional('persistAllVariables')
     persistAllVariables(experimentVariables, context, tx) {
-        const experimentId = experimentVariables.experimentId
-        return this._persistVariables(
-            experimentId,
-            FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
+        return this._variablesValidator.validate(experimentVariables, 'POST', tx).then(() => {
+            const experimentId = experimentVariables.experimentId
+            return this._persistVariables(
                 experimentId,
-                experimentVariables.independent,
-                experimentVariables.exogenous
-            ),
-            FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
-                experimentVariables.dependent,
-                experimentId
-            ),
-            context,
-            tx)
-            .then(() => {
-                return AppUtil.createPostResponse([{id: experimentId}])
-            })
+                FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
+                    experimentId,
+                    experimentVariables.independent,
+                    experimentVariables.exogenous
+                ),
+                FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
+                    experimentVariables.dependent,
+                    experimentId
+                ),
+                context,
+                tx)
+                .then(() => {
+                    return AppUtil.createPostResponse([{id: experimentId}])
+                })
+        })
     }
 }
 

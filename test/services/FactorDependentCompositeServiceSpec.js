@@ -4,7 +4,6 @@ const FDCS = require('../../src/services/FactorDependentCompositeService')
 const AppUtil = require('../../src/services/utility/AppUtil')
 
 describe('FactorDependentCompositeService', () => {
-    const testPayload = {}
     const testResponse = {}
     const testError = {}
     const testContext = {}
@@ -961,12 +960,14 @@ describe('FactorDependentCompositeService', () => {
         let mapIndependentAndExogenousVariableDTO2EntityStub
         let mapDependentVariableDTO2DbEntityStub
         let createPostResponseStub
+        let validateStub
 
         before(() => {
             persistVariablesStub = sinon.stub(fdcs, '_persistVariables')
             mapIndependentAndExogenousVariableDTO2EntityStub = sinon.stub(FDCS, '_mapIndependentAndExogenousVariableDTO2Entity')
             mapDependentVariableDTO2DbEntityStub = sinon.stub(FDCS, '_mapDependentVariableDTO2DbEntity')
             createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
+            validateStub = sinon.stub(fdcs._variablesValidator, 'validate')
 
             mapIndependentAndExogenousVariableDTO2EntityStub.returns(independentAndExogenousEntities)
             mapDependentVariableDTO2DbEntityStub.returns(dependentEntities)
@@ -977,6 +978,7 @@ describe('FactorDependentCompositeService', () => {
             mapIndependentAndExogenousVariableDTO2EntityStub.reset()
             mapDependentVariableDTO2DbEntityStub.reset()
             createPostResponseStub.reset()
+            validateStub.reset()
         })
 
         after(() => {
@@ -984,13 +986,39 @@ describe('FactorDependentCompositeService', () => {
             mapIndependentAndExogenousVariableDTO2EntityStub.restore()
             mapDependentVariableDTO2DbEntityStub.restore()
             createPostResponseStub.restore()
+            validateStub.restore()
+        })
+
+        it('returns rejected promise when validate fails', () => {
+            const testVariables = {experimentId: 42}
+            validateStub.rejects(testError)
+            return fdcs.persistAllVariables(testVariables, testContext, testTx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    validateStub,
+                    sinon.match.same(testVariables),
+                    'POST',
+                    sinon.match.same(testTx)
+                )
+                sinon.assert.notCalled(mapIndependentAndExogenousVariableDTO2EntityStub)
+                sinon.assert.notCalled(mapDependentVariableDTO2DbEntityStub)
+                sinon.assert.notCalled(persistVariablesStub)
+                sinon.assert.notCalled(createPostResponseStub)
+            })
         })
 
         it('returns rejected promise when persistVariables fails', () => {
             const testVariables = {experimentId: 42}
+            validateStub.resolves()
             persistVariablesStub.rejects(testError)
             return fdcs.persistAllVariables(testVariables, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
+                sinon.assert.calledWithExactly(
+                    validateStub,
+                    sinon.match.same(testVariables),
+                    'POST',
+                    sinon.match.same(testTx)
+                )
                 sinon.assert.calledWithExactly(
                     mapIndependentAndExogenousVariableDTO2EntityStub,
                     42,
@@ -1016,11 +1044,18 @@ describe('FactorDependentCompositeService', () => {
 
         it('returns post response when call succeeds', () => {
             const testVariables = {experimentId: 42}
+            validateStub.resolves()
             persistVariablesStub.resolves()
             createPostResponseStub.returns(testResponse)
 
             return fdcs.persistAllVariables(testVariables, testContext, testTx).then((r) => {
                 r.should.equal(testResponse)
+                sinon.assert.calledWithExactly(
+                    validateStub,
+                    sinon.match.same(testVariables),
+                    'POST',
+                    sinon.match.same(testTx)
+                )
                 sinon.assert.calledWithExactly(
                     mapIndependentAndExogenousVariableDTO2EntityStub,
                     42,

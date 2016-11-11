@@ -22,7 +22,7 @@ router.get('/ping', (req, res) => {
 router.post('/experiment-designs', (req, res, next) => {
     const design = req.body
     return new ExperimentDesignService().createExperimentDesign(design, req.context).then((id) => {
-        return res.json(id)
+        return res.status(201).json(id)
     }).catch((err) => {
         return next(err)
     })
@@ -111,7 +111,7 @@ router.delete('/experiments/:id', (req, res, next) => {
 router.post('/factor-types', (req, res, next) => {
     const factorType = req.body
     return new FactorTypeService().createFactorType(factorType, req.context).then((id) => {
-        return res.json(id)
+        return res.status(201).json(id)
     }).catch((err) => {
         return next(err)
     })

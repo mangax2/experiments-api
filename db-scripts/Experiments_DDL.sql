@@ -79,23 +79,6 @@ CREATE TABLE blocking_factor
 );
 
 
-CREATE TABLE controlled_factor
-(
-  id serial NOT NULL,
-  name character varying NOT NULL,
-  value character varying NOT NULL,
-  experiment_id integer NOT NULL,
-  created_user_id character varying NOT NULL,
-  created_date timestamp with time zone NOT NULL,
-  modified_user_id character varying NOT NULL,
-  modified_date timestamp with time zone NOT NULL,
-  CONSTRAINT controlled_factor_pk PRIMARY KEY (id),
-  CONSTRAINT "Control_Factor_Experiment" FOREIGN KEY (experiment_id)
-      REFERENCES experiment (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-
 CREATE TABLE dependent_variable
 (
   id serial NOT NULL,

@@ -310,3 +310,12 @@ ALTER TABLE public.work_instruction DROP CONSTRAINT "Work_Instruction_Experiment
 ALTER TABLE public.work_instruction
 ADD CONSTRAINT "Work_Instruction_Experiment"
 FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.combination_element DROP CONSTRAINT "combination_element_combination";
+ALTER TABLE public.combination_element DROP COLUMN "combination_id";
+ALTER TABLE public.combination_element ADD COLUMN treatment_id integer NOT NULL;
+ALTER TABLE public.combination_element
+ADD CONSTRAINT "combination_element_treatment"
+FOREIGN KEY (treatment_id) REFERENCES treatment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+DROP TABLE public.combination;

@@ -291,3 +291,39 @@ ALTER TABLE public.dependent_variable DROP CONSTRAINT "Dependent_Variable_Experi
 ALTER TABLE public.dependent_variable
 ADD CONSTRAINT "Dependent_Variable_Experiment"
 FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.blocking_factor DROP CONSTRAINT "Blocking_Factor_Experiment";
+ALTER TABLE public.blocking_factor
+ADD CONSTRAINT "Blocking_Factor_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.controlled_factor DROP CONSTRAINT "Control_Factor_Experiment";
+ALTER TABLE public.controlled_factor
+ADD CONSTRAINT "Control_Factor_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.group DROP CONSTRAINT "group_experiment";
+ALTER TABLE public.group
+ADD CONSTRAINT "group_experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.tag DROP CONSTRAINT "Tag_Experiment";
+ALTER TABLE public.tag
+ADD CONSTRAINT "Tag_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.treatment DROP CONSTRAINT "treatment_experiment";
+ALTER TABLE public.treatment
+ADD CONSTRAINT "treatment_experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+
+ALTER TABLE public.work_instruction DROP CONSTRAINT "Work_Instruction_Experiment";
+ALTER TABLE public.work_instruction
+ADD CONSTRAINT "Work_Instruction_Experiment"
+FOREIGN KEY (experiment_id) REFERENCES experiment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;

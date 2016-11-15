@@ -319,3 +319,6 @@ ALTER TABLE public.combination_element
 ADD CONSTRAINT "combination_element_treatment"
 FOREIGN KEY (treatment_id) REFERENCES treatment (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
 DROP TABLE public.combination;
+
+ALTER TABLE public.treatment RENAME COLUMN alias TO name;
+ALTER TABLE public.treatment ALTER COLUMN notes DROP NOT NULL;

@@ -8,6 +8,8 @@ import FactorTypeService from '../services/factorTypeService'
 import HypothesisService from '../services/HypothesisService'
 import DependentVariableService from '../services/DependentVariableService'
 import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
+import TreatmentService from '../services/TreatmentService'
+
 
 
 const logger = log4js.getLogger('Router')
@@ -381,6 +383,50 @@ router.delete('/factor-levels/:id', (req, res, next) => {
         return next(err)
     })
 })
+
+
+
+
+router.post('/treatments', (req, res, next) => {
+    return new TreatmentService().batchCreateTreatments(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+router.put('/treatments', (req, res, next) => {
+    return new TreatmentService().batchUpdateTreatments(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.get('/experiments/:id/treatments', (req, res, next)=> {
+    return new TreatmentService().getTreatmentsByExperimentId(req.params.id).then((treatments)=> {
+        return res.json(treatments)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/treatments/:id', (req, res, next) => {
+    return new TreatmentService().getTreatmentById(req.params.id).then((treatment) => {
+        return res.json(treatment)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.delete('/treatments/:id', (req, res, next) => {
+    return new TreatmentService().deleteTreatment(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
 
 
 module.exports = router

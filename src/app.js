@@ -44,22 +44,23 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 
 
 app.use(function (err, req, res, next) {
+    const errorLogMessage = _.keys(req.route.methods)[0].toUpperCase() + " " + req.route.path + " - "
     if (err) {
         if (_.isArray(err)) {
-            logger.error(JSON.stringify(err))
+            logger.error(errorLogMessage + JSON.stringify(err))
             return res.status(400).json(err)
         } else {
             if (err.status) {
-                logger.error(err)
+                logger.error(errorLogMessage + err)
                 return res.status(err.status).json(err)
             } else {
-                logger.error(err)
+                logger.error(errorLogMessage + err)
                 return res.status(500).json(err)
             }
         }
     }
     else {
-        logger.error(err)
+        logger.error(errorLogMessage + err)
         return res.status(500).json(err)
     }
 })

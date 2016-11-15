@@ -49,16 +49,20 @@ app.use(function (err, req, res, next) {
             const errorArray = _.map(err, function (x) {
                 return (x)
             })
+            logger.error(errorArray)
             return res.status(400).json(errorArray)
         } else {
             if (err.status) {
+                logger.error(err)
                 return res.status(err.status).json(err)
             } else {
+                logger.error(err)
                 return res.status(500).json(err)
             }
         }
     }
     else {
+        logger.error(err)
         return res.status(500).json(err)
     }
 })

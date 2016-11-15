@@ -44,7 +44,7 @@ class TreatmentService {
         })
     }
 
-    @Transactional('batchUpdateFactors')
+    @Transactional('batchUpdateTreatments')
     batchUpdateTreatments(factors, context, tx) {
         return this._validator.validate(factors, 'PUT', tx).then(() => {
             return db.treatment.batchUpdate(factors, context, tx).then(data => {
@@ -53,7 +53,7 @@ class TreatmentService {
         })
     }
 
-    @Transactional('deleteFactor')
+    @Transactional('deleteTreatment')
     deleteTreatment(id, tx) {
         return db.treatment.remove(id, tx).then((data) => {
             if (!data) {
@@ -65,7 +65,7 @@ class TreatmentService {
         })
     }
 
-    @Transactional('deleteTreatmentForExperimentId')
+    @Transactional('deleteTreatmentsForExperimentId')
     deleteTreatmentsForExperimentId(id, tx) {
         return this._experimentService.getExperimentById(id, tx).then(() => {
             return db.treatment.removeByExperimentId(id, tx)

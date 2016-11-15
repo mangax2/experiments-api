@@ -1,9 +1,9 @@
 const AppError = require('../../src/services/utility/AppError')
 const sinon = require('sinon')
-const FactorsValidator = require('../../src/validations/FactorsValidator')
+const TreatmentValidator = require('../../src/validations/TreatmentValidator')
 
-describe('FactorsValidator', () => {
-    const target = new FactorsValidator()
+describe('TreatmentValidator', () => {
+    const target = new TreatmentValidator()
     const testError = new Error('Test Error')
 
     let badRequestStub
@@ -25,13 +25,13 @@ describe('FactorsValidator', () => {
     describe('getSchema', () => {
         it('returns post schema when operation name is POST', () => {
             target.getSchema('POST').should.deep.equal(
-                FactorsValidator.POST_VALIDATION_SCHEMA)
+                TreatmentValidator.POST_VALIDATION_SCHEMA)
         })
 
         it('returns put schema when operation name is PUT', () => {
             target.getSchema('PUT').should.deep.equal(
-                FactorsValidator.POST_VALIDATION_SCHEMA
-                    .concat(FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
+                TreatmentValidator.POST_VALIDATION_SCHEMA
+                    .concat(TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
         })
     })
 
@@ -44,7 +44,7 @@ describe('FactorsValidator', () => {
     describe('getDuplicateBusinessKeyError', () => {
         it('returns duplicate error message string', () => {
             target.getDuplicateBusinessKeyError().should.eql(
-                'Duplicate factor name in request payload with same experiment id')
+                'Duplicate treatment name in request payload with same experiment id')
         })
     })
 
@@ -54,7 +54,7 @@ describe('FactorsValidator', () => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     badRequestStub,
-                    'Factor request object needs to be an array')
+                    'Treatment request object needs to be an array')
             })
         })
 
@@ -63,7 +63,7 @@ describe('FactorsValidator', () => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     badRequestStub,
-                    'Factor request object needs to be an array')
+                    'Treatment request object needs to be an array')
             })
         })
 

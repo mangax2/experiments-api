@@ -40,7 +40,7 @@ class CombinationElementValidator extends SchemaValidator {
     }
 
     getDuplicateBusinessKeyError() {
-        return 'Duplicate name in request payload with same combinationElement id'
+        return 'Duplicate name in request payload with same treatmentId'
     }
 
     preValidate(combinationElementObj) {

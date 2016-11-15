@@ -258,7 +258,7 @@ CREATE TABLE unit
   CONSTRAINT unit_treatment FOREIGN KEY (treatment_id)
       REFERENCES treatment (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
-)
+);
 
 ALTER TABLE public.hypothesis DROP CONSTRAINT "Hypotheses_Experiment";
 ALTER TABLE public.hypothesis
@@ -325,3 +325,18 @@ ALTER TABLE public.treatment ALTER COLUMN notes DROP NOT NULL;
 
 ALTER TABLE public.combination_element DROP CONSTRAINT "combination_element_ref_factor_type";
 ALTER TABLE public.combination_element DROP COLUMN "ref_factor_type_id";
+
+
+ALTER TABLE public.blocking_factor ADD CONSTRAINT "blocking_factor_ak_1" UNIQUE(factor_id, experiment_id);
+ALTER TABLE public.combination_element ADD CONSTRAINT "combination_element_ak_1" UNIQUE(name, treatment_id);
+ALTER TABLE public.dependent_variable ADD CONSTRAINT "dependent_variable_ak_1" UNIQUE(name, experiment_id);
+ALTER TABLE public.factor ADD CONSTRAINT "factor_ak_1" UNIQUE(name, experiment_id);
+ALTER TABLE public.factor_level ADD CONSTRAINT "factor_level_ak_1" UNIQUE(value, factor_id);
+ALTER TABLE public.group ADD CONSTRAINT "group_ak_1" UNIQUE(variable_name, variable_value, experiment_id);
+ALTER TABLE public.ref_experiment_design ADD CONSTRAINT "ref_experiment_design_ak_1" UNIQUE(name);
+ALTER TABLE public.ref_factor_type ADD CONSTRAINT "ref_factor_type_ak_1" UNIQUE(type);
+ALTER TABLE public.tag ADD CONSTRAINT "tag_ak_1" UNIQUE(code, experiment_id);
+ALTER TABLE public.treatment ADD CONSTRAINT "treatment_ak_1" UNIQUE(name, experiment_id);
+ALTER TABLE public.work_instruction ADD CONSTRAINT "work_instruction_ak_1" UNIQUE(instruction, experiment_id);
+
+-- ALTER TABLE public.unit ADD CONSTRAINT "unit_ak_1" UNIQUE(treatment_id, rep);

@@ -9,6 +9,7 @@ import HypothesisService from '../services/HypothesisService'
 import DependentVariableService from '../services/DependentVariableService'
 import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 import TreatmentService from '../services/TreatmentService'
+import CombinationElementService from '../services/CombinationElementService'
 
 
 
@@ -426,6 +427,51 @@ router.delete('/treatments/:id', (req, res, next) => {
         return next(err)
     })
 })
+
+
+
+router.post('/combination-elements', (req, res, next) => {
+    return new CombinationElementService().batchCreateCombinationElements(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/combination-elements', (req, res, next) => {
+    return new CombinationElementService().batchUpdateCombinationElements(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.get('/treatments/:id/combination-elements', (req, res, next)=> {
+    return new CombinationElementService().getCombinationElementsByTreatmentId(req.params.id).then((combinationElements)=> {
+        return res.json(combinationElements)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/combination-elements/:id', (req, res, next) => {
+    return new CombinationElementService().getCombinationElementById(req.params.id).then((combinationElements) => {
+        return res.json(combinationElements)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.delete('/combination-elements/:id', (req, res, next) => {
+    return new CombinationElementService().deleteCombinationElement(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
 
 
 

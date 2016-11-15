@@ -8,7 +8,7 @@ module.exports = (rep) => {
             return tx.oneOrNone("SELECT * FROM treatment WHERE id = $1", id)
         },
 
-        findByExperimentId: (experimentId, tx = rep) => {
+        findAllByExperimentId: (experimentId, tx = rep) => {
             return tx.any("SELECT * FROM treatment WHERE experiment_id=$1", experimentId)
         },
 

@@ -322,3 +322,6 @@ DROP TABLE public.combination;
 
 ALTER TABLE public.treatment RENAME COLUMN alias TO name;
 ALTER TABLE public.treatment ALTER COLUMN notes DROP NOT NULL;
+
+ALTER TABLE public.combination_element DROP CONSTRAINT "combination_element_ref_factor_type";
+ALTER TABLE public.combination_element DROP COLUMN "ref_factor_type_id";

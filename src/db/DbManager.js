@@ -7,6 +7,7 @@ import factorType from '../repos/factorType'
 import hypothesis from '../repos/hypothesis'
 import treatment from '../repos/treatment'
 import dependentVariable from '../repos/dependentVariable'
+import combinationElement from '../repos/combinationElement'
 import pgPromise from 'pg-promise'
 import log4js from 'log4js'
 const logger = log4js.getLogger('DbManager')
@@ -24,6 +25,7 @@ const options = {
         obj.hypothesis = new (hypothesis)(obj, pgp)
         obj.dependentVariable = new (dependentVariable)(obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
+        obj.combinationElement = new (combinationElement)(obj, pgp)
 
     }
 }

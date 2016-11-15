@@ -28,7 +28,7 @@ class TreatmentService {
     @Transactional('getTreatmentsByExperimentId')
     getTreatmentsByExperimentId(id, tx) {
         return this._experimentService.getExperimentById(id, tx).then(()=> {
-            return db.treatment.findByExperimentId(id, tx)
+            return db.treatment.findAllByExperimentId(id, tx)
         })
     }
 

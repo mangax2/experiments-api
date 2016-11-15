@@ -46,11 +46,8 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 app.use(function (err, req, res, next) {
     if (err) {
         if (_.isArray(err)) {
-            const errorArray = _.map(err, function (x) {
-                return (x)
-            })
-            logger.error(errorArray)
-            return res.status(400).json(errorArray)
+            logger.error(err)
+            return res.status(400).json(err)
         } else {
             if (err.status) {
                 logger.error(err)

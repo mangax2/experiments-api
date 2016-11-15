@@ -11,8 +11,6 @@ import FactorDependentCompositeService from '../services/FactorDependentComposit
 import TreatmentService from '../services/TreatmentService'
 import CombinationElementService from '../services/CombinationElementService'
 
-
-
 const logger = log4js.getLogger('Router')
 const router = express.Router()
 
@@ -20,7 +18,6 @@ router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
 })
-
 
 router.post('/experiment-designs', (req, res, next) => {
     const design = req.body

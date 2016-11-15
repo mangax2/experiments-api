@@ -44,7 +44,8 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 
 
 app.use(function (err, req, res, next) {
-    const errorLogMessage = _.keys(req.route.methods)[0].toUpperCase() + " " + req.route.path + " - "
+   // const errorLogMessage = _.keys(req.route.methods)[0].toUpperCase() + " " + req.route.path + " - "
+    const errorLogMessage=""
     if (err) {
         if (_.isArray(err)) {
             logger.error(errorLogMessage + JSON.stringify(err))

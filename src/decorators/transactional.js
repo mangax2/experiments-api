@@ -47,4 +47,4 @@ function transactional(transactionName) {
     }
 }
 
-module.exports = transactional
+export default transactional

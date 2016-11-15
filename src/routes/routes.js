@@ -10,6 +10,7 @@ import DependentVariableService from '../services/DependentVariableService'
 import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 import TreatmentService from '../services/TreatmentService'
 import CombinationElementService from '../services/CombinationElementService'
+import TreatmentDetailsService from '../services/TreatmentDetailsService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -463,6 +464,22 @@ router.get('/combination-elements/:id', (req, res, next) => {
 
 router.delete('/combination-elements/:id', (req, res, next) => {
     return new CombinationElementService().deleteCombinationElement(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/treatment-details', (req, res, next) => {
+    return new TreatmentDetailsService().getAllTreatmentDetails(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/treatment-details', (req, res, next) => {
+    return new TreatmentDetailsService().manageAllTreatmentDetails(req.body,req.context).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return next(err)

@@ -73,4 +73,4 @@ class TreatmentService {
     }
 }
 
-module.exports = TreatmentService
+export default TreatmentService

@@ -351,7 +351,7 @@ describe('TreatmentService', () => {
             })
         })
 
-        it('returns rejected promise when getByExperimentId fails', () => {
+        it('returns rejected promise when removeByExperimentId fails', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.rejects(testError)
 
@@ -368,7 +368,7 @@ describe('TreatmentService', () => {
             })
         })
 
-        it('returns resolved promise from getByExperimentId method upon success', () => {
+        it('returns resolved promise from removeByExperimentId method upon success', () => {
             getExperimentByIdStub.resolves()
             removeByExperimentIdStub.resolves(testData)
 

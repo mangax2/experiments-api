@@ -67,7 +67,7 @@ describe('TreatmentValidator', () => {
             })
         })
 
-        it('returns resolved promise when input is array.' , () => {
+        it('returns resolved promise when input is a populated array.' , () => {
             return target.preValidate([{}]).then(() => {
                 sinon.assert.notCalled(badRequestStub)
             })

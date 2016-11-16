@@ -66,4 +66,4 @@ class CombinationElementService {
     }
 }
 
-export default CombinationElementService
+module.exports = CombinationElementService

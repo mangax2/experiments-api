@@ -685,7 +685,7 @@
         },
         "/experiments/{id}/treatments": {
             "get": {
-                "summary": "get all treatments for a give experiment id",
+                "summary": "get all treatments for a given experiment id",
                 "description": "This endpoint returns information about the treatment entities associated with an Experiment",
                 "tags": [
                     "Treatments"
@@ -737,7 +737,7 @@
         },
         "/experiments/{id}/composites/treatments": {
             "get": {
-                "summary": "get all treatments and combination elements for a give experiment id",
+                "summary": "get all treatments and combination elements for a given experiment id",
                 "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
                 "tags": [
                     "Composites"
@@ -2380,7 +2380,7 @@
         "/composites/treatments": {
             "post": {
                 "summary": "post one or more treatments and combination elements entities",
-                "description": "Creates/updates treatment and combination elements in Experiments System.\n",
+                "description": "Creates/updates treatments and combination elements in Experiments System.\n",
                 "tags": [
                     "Composites"
                 ],

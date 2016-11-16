@@ -735,6 +735,58 @@
                 }
             }
         },
+        "/experiments/{id}/composites/treatments": {
+            "get": {
+                "summary": "get all treatments and combination elements for a give experiment id",
+                "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
+                "tags": [
+                    "Composites"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Treatments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CompositeTreatmentsResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/hypotheses": {
             "get": {
                 "summary": "get all hypotheses entities",
@@ -2075,7 +2127,305 @@
                     }
                 }
             }
+        },
+        "/treatments/{id}/combination-elements": {
+            "get": {
+                "summary": "get all combination elements  for given treatment id.",
+                "description": "This endpoint returns information about the combination-elements entities associated with one treatment.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CombinationElements",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CombinationElementResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Treatment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/combination-elements/{id}": {
+            "get": {
+                "summary": "get one combination-element entity",
+                "description": "The combination-elements endpoint returns information about the combination elements entity in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "combination-element entity",
+                        "schema": {
+                            "$ref": "#/definitions/CombinationElementResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Combination Element Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one combination element Response entity",
+                "description": "delete combination element entity in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Combination Element Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Combination Element Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/combination-elements": {
+            "post": {
+                "summary": "post one or more combination element entities",
+                "description": "Creates new combination element entities in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "Combination Elements",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CombinationElementPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Combination Element Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one or more combination element entities",
+                "description": "Update combination element in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "Combination Elements",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CombinationElementPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+
+        "/composites/treatments": {
+            "post": {
+                "summary": "post one or more treatments and combination elements entities",
+                "description": "Creates/updates treatment and combination elements in Experiments System.\n",
+                "tags": [
+                    "Composites"
+                ],
+                "parameters": [
+                    {
+                        "name": "Composites Treatments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CompositeTreatmentsPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Composite-Treatments operation SUCCESS"
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
+
     },
     "definitions": {
         "ExperimentDesign": {
@@ -2265,7 +2615,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "description": "name of the factor level."
+                    "description": "value of the factor level."
                 },
                 "factorId": {
                     "type": "integer",
@@ -2309,6 +2659,91 @@
                     "items": {
                         "$ref": "#/definitions/DependentVariable"
                     }
+                }
+            }
+        },
+        "CompositeTreatmentsResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "isControl":{
+                    "type": "boolean",
+                    "description": "isControll boolean value to mark a treatment as control"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the treatment."
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment - optinal field."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experimentId entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                },
+                "combinationElements":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CombinationElementResponse"
+                    }
+                }
+            }
+        },
+
+        "CombinationElementResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the combination element."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the combination element."
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         },
@@ -2642,6 +3077,149 @@
                 "notes": {
                     "type": "string",
                     "description": "Used to specify control treatment information"
+                }
+            }
+        },
+        "CompositeTreatmentsPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "adds":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsPayloadAdd"
+                    }
+                },
+                "deletes":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ids"
+                    }
+                },
+                "updates":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsPayloadUpdate"
+                    }
+                }
+
+
+            }
+        },
+        "ids": {
+            "type": "integer"
+        },
+        "CompositeTreatmentsPayloadAdd":{
+            "type": "object",
+            "properties": {
+                "isControl": {
+                    "type": "string",
+                    "description": "boolean value isControl to mark treatment as control."
+                },
+              "name": {
+                    "type": "string",
+                    "description": "name of the treatment."
+                },
+               "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "combinationElements":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+                    }
+                }
+            }
+
+        },
+        "CompositeTreatmentsPayloadUpdate":{
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of treatment id to update."
+                },
+                "isControl": {
+                    "type": "string",
+                    "description": "boolean value isControl to mark treatment as control."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the treatment."
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "combinationElements":{
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+                    }
+                }
+            }
+
+        },
+        "CompositeTreatmentsCombinationElement": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of combination element if updating existing else empty."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the combinationElement."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the combinationElement."
+                }
+            }
+        },
+        "CombinationElementPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of the combinationElement."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the combinationElement."
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of combinationElement entity."
+                }
+            }
+        },
+        "CombinationElementPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of combinationElement to update."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the combinationElement."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the combinationElement."
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of combinationElement entity."
                 }
             }
         },

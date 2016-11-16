@@ -13,7 +13,7 @@ class TreatmentDetailsService {
     getAllTreatmentDetails(experimentId) {
         return this._treatmentService.getTreatmentsByExperimentId(experimentId).then((treatments)=> {
             return Promise.all(this._getCombinationElementsPromises(treatments)).then((dataArray)=> {
-                return _.map(treatments, (treatment,index)=> {
+                return _.map(treatments, (treatment, index)=> {
                     treatment.combinationElements = dataArray[index]
                     return treatment
                 })
@@ -38,24 +38,26 @@ class TreatmentDetailsService {
         })
     }
 
-    _createTreatments(treatmentAdds, context, tx){
-        if(treatmentAdds.length == 0){
+    _createTreatments(treatmentAdds, context, tx) {
+        if (_.isUndefined(treatmentAdds) || treatmentAdds.length == 0) {
             return Promise.resolve()
         }
 
         return this._treatmentService.batchCreateTreatments(treatmentAdds, context, tx).then((treatmentRespObjs)=> {
-            const combinationElements = _.map(treatmentAdds, (treatment, index)=> {
-                _.forEach(treatment.combinationElements, (element) => {
-                    element.treatmentId = treatmentRespObjs[index].id
-                })
-                return treatment.combinationElements
-            })
-            return this._combinationElementService.batchCreateCombinationElements(_.flatten(combinationElements), context, tx)
+            const combinationElements =
+                _.filter(
+                    _.flatMap(treatmentAdds, (treatment, index)=> {
+                        _.forEach(treatment.combinationElements, (element) => {
+                            element.treatmentId = treatmentRespObjs[index].id
+                        })
+                        return treatment.combinationElements
+                    }), (element) =>  !_.isUndefined(element))
+            return this._combinationElementService.batchCreateCombinationElements(combinationElements, context, tx)
         })
     }
 
-    _updateTreatments(treatmentUpdates, context, tx){
-        if(treatmentUpdates.length == 0){
+    _updateTreatments(treatmentUpdates, context, tx) {
+        if (_.isUndefined(treatmentUpdates) || treatmentUpdates.length == 0) {
             return Promise.resolve()
         }
         return this._treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx).then((treatmentRespObjs)=> {
@@ -86,7 +88,9 @@ class TreatmentDetailsService {
         return Promise.all(_.map(treatmentRespObjs, (treatmentRespObj, index)=> {
             return this._combinationElementService.getCombinationElementsByTreatmentId(treatmentRespObj.id, tx).then((objs) => {
                 const combinationElementsIdsFromDB = _.map(objs, (obj) => obj.id)
-                const combinationElementsIdsFromUI = _.map(treatmentUpdatesFromUI[index].combinationElements, (obj)=> {return obj.id})
+                const combinationElementsIdsFromUI = _.map(treatmentUpdatesFromUI[index].combinationElements, (obj)=> {
+                    return obj.id
+                })
 
                 return Promise.all(_.map(_.difference(combinationElementsIdsFromDB, combinationElementsIdsFromUI), (id)=> {
                     return this._combinationElementService.deleteCombinationElement(id, tx)
@@ -111,4 +115,4 @@ class TreatmentDetailsService {
     }
 }
 
-export default TreatmentDetailsService
+module.exports = TreatmentDetailsService

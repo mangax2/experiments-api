@@ -45,9 +45,9 @@ class TreatmentService {
     }
 
     @Transactional('batchUpdateTreatments')
-    batchUpdateTreatments(factors, context, tx) {
-        return this._validator.validate(factors, 'PUT', tx).then(() => {
-            return db.treatment.batchUpdate(factors, context, tx).then(data => {
+    batchUpdateTreatments(treatments, context, tx) {
+        return this._validator.validate(treatments, 'PUT', tx).then(() => {
+            return db.treatment.batchUpdate(treatments, context, tx).then(data => {
                 return AppUtil.createPutResponse(data)
             })
         })

@@ -470,7 +470,7 @@ router.delete('/combination-elements/:id', (req, res, next) => {
     })
 })
 
-router.get('/experiments/:id/treatment-details', (req, res, next) => {
+router.get('/experiments/:id/composites/treatments', (req, res, next) => {
     return new TreatmentDetailsService().getAllTreatmentDetails(req.params.id).then((value) => {
         return res.json(value)
     }).catch((err) => {
@@ -478,7 +478,7 @@ router.get('/experiments/:id/treatment-details', (req, res, next) => {
     })
 })
 
-router.post('/treatment-details', (req, res, next) => {
+router.post('/composites/treatments', (req, res, next) => {
     return new TreatmentDetailsService().manageAllTreatmentDetails(req.body,req.context).then((value) => {
         return res.json(value)
     }).catch((err) => {

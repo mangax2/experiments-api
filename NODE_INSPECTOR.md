@@ -13,7 +13,7 @@ npm install -g node-inspector
  
 Run you application on debug mode 
    1. open a terminal  
-   2. node --debug ./bin/wwww
+   2. node --debug ./app.js
 Run you node inspector in another terminal 
    1.node-inspector 
    

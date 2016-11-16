@@ -4,7 +4,126 @@ const TreatmentDetailsService = require('../../src/services/TreatmentDetailsServ
 const AppUtil = require('../../src/services/utility/AppUtil')
 
 describe('TreatmentDetailsService', () => {
-    // Get after this line
+    describe("getTreatmentWithDetails", ()=> {
+        let target
+
+        let treatmentServiceGetStub
+        let combinationElementServiceStub
+
+        before(() => {
+            target = new TreatmentDetailsService()
+            combinationElementServiceStub = sinon.stub(target._combinationElementService, 'getCombinationElementsByTreatmentId')
+            treatmentServiceGetStub = sinon.stub(target._treatmentService, 'getTreatmentsByExperimentId')
+        })
+        afterEach(() => {
+            combinationElementServiceStub.reset()
+            treatmentServiceGetStub.reset()
+        })
+        after(() => {
+            combinationElementServiceStub.restore()
+            treatmentServiceGetStub.restore()
+        })
+
+        describe('getAllTreatmentDetails', () => {
+            let getCombinationElementsPromisesStub
+
+            before(() => {
+                getCombinationElementsPromisesStub = sinon.stub(target, '_getCombinationElementsPromises')
+            })
+            afterEach(() => {
+                getCombinationElementsPromisesStub.reset()
+            })
+            after(() => {
+                getCombinationElementsPromisesStub.restore()
+            })
+
+            it('rejects when treatment service fails to get treatments', () => {
+                treatmentServiceGetStub.rejects()
+
+                return target.getAllTreatmentDetails(1).should.be.rejected
+            })
+
+            it('passes treatments to _getCombinationElementsPromises, which fails', () => {
+                getCombinationElementsPromisesStub.rejects()
+
+                return target.getAllTreatmentDetails(1).should.be.rejected
+            })
+
+            it('passes treatments to _getCombinationElementPromises which returns empty', () => {
+                treatmentServiceGetStub.resolves([{id: 1}])
+                getCombinationElementsPromisesStub.returns([Promise.resolve([])])
+
+                return target.getAllTreatmentDetails(1).then((r) => {
+                    r.should.deep.equal([{id: 1, combinationElements: []}])
+                })
+            })
+
+            it('passes treatments to _getCombinationElementPromises which returns some elements', () => {
+                treatmentServiceGetStub.resolves([{id: 1}])
+                getCombinationElementsPromisesStub.returns([Promise.resolve([{id: 1, name: 'TestN', value: 'TestV'}])])
+
+                return target.getAllTreatmentDetails(1).then((r) => {
+                    r.length.should.equal(1)
+                    r[0].id.should.equal(1)
+                    r[0].combinationElements.length.should.equal(1)
+                    r[0].combinationElements[0].id.should.equal(1)
+                    r[0].combinationElements[0].name.should.equal('TestN')
+                    r[0].combinationElements[0].value.should.equal('TestV')
+
+                })
+            })
+
+            it('passes treatments to _getCombinationElementPromises which returns some elements and some empty', () => {
+                treatmentServiceGetStub.resolves([{id: 1}, {id: 2}])
+                getCombinationElementsPromisesStub.returns([Promise.resolve([{id: 1, name: 'TestN', value: 'TestV'}]), Promise.resolve([])])
+
+                return target.getAllTreatmentDetails(1).then((r) => {
+                    r.length.should.equal(2)
+                    r[0].id.should.equal(1)
+                    r[0].combinationElements.length.should.equal(1)
+                    r[0].combinationElements[0].id.should.equal(1)
+                    r[0].combinationElements[0].name.should.equal('TestN')
+                    r[0].combinationElements[0].value.should.equal('TestV')
+
+                    r[1].id.should.equal(2)
+                    r[1].combinationElements.length.should.equal(0)
+                })
+            })
+        })
+
+        describe('_getCombinationElementsPromises', () => {
+            it('returns an empty array if treatments are empty', () => {
+
+                const promises = target._getCombinationElementsPromises([])
+
+                promises.length.should.equal(0)
+            })
+
+            it('returns an empty array if treatments are undefined', () => {
+
+                const promises = target._getCombinationElementsPromises(undefined)
+
+                promises.length.should.equal(0)
+            })
+            it('returns an empty array if treatments are null', () => {
+
+                const promises = target._getCombinationElementsPromises(null)
+
+                promises.length.should.equal(0)
+            })
+            it('calls combinationElementService for each treatment', () => {
+                const treatments = [{},{}]
+
+                combinationElementServiceStub.returns(new Promise((resolve, reject) => {}))
+
+                const promises = target._getCombinationElementsPromises(treatments)
+
+                combinationElementServiceStub.calledTwice.should.equal(true)
+
+                promises.length.should.equal(2)
+            })
+        })
+    })
 
 
 

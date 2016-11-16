@@ -11,7 +11,7 @@ Install Node inspector
 
 npm install -g node-inspector
  
-Run you application on debug mode 
+Run your application on debug mode 
    1. open a terminal  
    2. node --debug /src/app.js(give the exact path for app.js)
 Run you node inspector in another terminal 

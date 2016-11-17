@@ -176,6 +176,58 @@ describe('TreatmentDetailsService', () => {
         })
 
         describe('manageAllTreatmentDetailsEnd2End', () => {
+            it('handles add without combination elements in isolation', () => {
+                const request = {
+                    adds: [{}]
+                }
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
+                    sinon.assert.notCalled(deleteTreatmentStub)
+                    sinon.assert.notCalled(deleteCombinationElementStub)
+                    sinon.assert.calledOnce(batchCreateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateTreatmentsStub,
+                        request.adds,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.notCalled(batchCreateCombinationElementsStub)
+                    sinon.assert.notCalled(batchUpdateTreatmentsStub)
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
+                    sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                })
+            })
+
+            it('handles update without combination elements in isolation', () => {
+                const request = {
+                    updates: [{id:1}]
+                }
+                batchUpdateTreatmentsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.resolves([])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
+                    sinon.assert.notCalled(deleteTreatmentStub)
+                    sinon.assert.notCalled(deleteCombinationElementStub)
+                    sinon.assert.notCalled(batchCreateTreatmentsStub)
+                    sinon.assert.notCalled(batchCreateCombinationElementsStub)
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
+                    sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
+                })
+            })
+
             it('handles adds in isolation', () => {
                 const request = {
                     adds: [
@@ -337,7 +389,7 @@ describe('TreatmentDetailsService', () => {
                             combinationElements: [
                                 {
                                     id: 9,
-                                    testData: '6_1'
+                                    testData: '8_1'
                                 }
                             ]
                         },
@@ -346,11 +398,11 @@ describe('TreatmentDetailsService', () => {
                             combinationElements: [
                                 {
                                     id: 11,
-                                    testData: '7_1'
+                                    testData: '10_1'
                                 },
                                 {
                                     id: 12,
-                                    testData: '7_2'
+                                    testData: '10_2'
                                 }
                             ]
                         },
@@ -425,6 +477,12 @@ describe('TreatmentDetailsService', () => {
                                 expectedData
                             )
                             intersection.length.should.equal(expectedData.length)
+
+                            _.find(value,(x) => x.testData == '6_1').treatmentId.should.equal(6)
+                            _.find(value,(x) => x.testData == '7_1').treatmentId.should.equal(7)
+                            _.find(value,(x) => x.testData == '7_2').treatmentId.should.equal(7)
+                            _.find(value,(x) => x.testData == '13_2').treatmentId.should.equal(13)
+
                             return true
                         }),
                         sinon.match.same(testContext),
@@ -465,6 +523,12 @@ describe('TreatmentDetailsService', () => {
                                 expectedData
                             )
                             intersection.length.should.equal(expectedData.length)
+
+                            _.find(value,(x) => x.testData == '8_1').treatmentId.should.equal(8)
+                            _.find(value,(x) => x.testData == '10_1').treatmentId.should.equal(10)
+                            _.find(value,(x) => x.testData == '10_2').treatmentId.should.equal(10)
+                            _.find(value,(x) => x.testData == '13_1').treatmentId.should.equal(13)
+
                             return true
                         }),
                         sinon.match.same(testContext),
@@ -510,8 +574,94 @@ describe('TreatmentDetailsService', () => {
                 })
             })
 
-            it('handles all operations', () => {
+            it('handles all operations simultaneously', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
 
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.resolves()
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(deleteCombinationElementStub)
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        4,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchCreateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateTreatmentsStub,
+                        request.adds,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledTwice(batchCreateCombinationElementsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateCombinationElementsStub,
+                        [{treatmentId: 1}],
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        batchCreateCombinationElementsStub,
+                        [{treatmentId: 3, testData: '3_2'}],
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateCombinationElementsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateCombinationElementsStub,
+                        [{id: 5, testData: '3_1', treatmentId: 3}],
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        3,
+                        sinon.match.same(testTx)
+                    )
+                })
             })
         })
     })

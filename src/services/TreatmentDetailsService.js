@@ -53,6 +53,9 @@ class TreatmentDetailsService {
                         })
                         return treatment.combinationElements
                     }), (element) =>  !_.isUndefined(element))
+            if (combinationElements.length == 0) {
+                return Promise.resolve()
+            }
             return this._combinationElementService.batchCreateCombinationElements(combinationElements, context, tx)
         })
     }
@@ -104,7 +107,7 @@ class TreatmentDetailsService {
     }
 
     _updateCombinationElements(treatmentUpdatesFromUI, context, tx) {
-        const combinationElementsWithIdsFromUI = _.map(treatmentUpdatesFromUI, (treatmentFromUI)=> {
+        const combinationElementsWithIdsFromUI = _.flatten(_.map(treatmentUpdatesFromUI, (treatmentFromUI)=> {
             const existingElements = _.filter(treatmentFromUI.combinationElements, (combObj)=> {
                 return !_.isUndefined(combObj.id)
             })
@@ -114,8 +117,12 @@ class TreatmentDetailsService {
             })
 
             return existingElements
-        })
-        return this._combinationElementService.batchUpdateCombinationElements(_.flatten(combinationElementsWithIdsFromUI), context, tx)
+        }))
+
+        if (combinationElementsWithIdsFromUI.length == 0) {
+            return Promise.resolve()
+        }
+        return this._combinationElementService.batchUpdateCombinationElements(combinationElementsWithIdsFromUI, context, tx)
     }
 }
 

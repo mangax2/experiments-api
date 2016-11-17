@@ -61,8 +61,8 @@ class TreatmentDetailsService {
         if (_.isUndefined(treatmentUpdates) || treatmentUpdates.length == 0) {
             return Promise.resolve()
         }
-        return this._treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx).then((treatmentRespObjs)=> {
-            return this._deleteCombinationElements(treatmentRespObjs, treatmentUpdates, tx).then(()=> {
+        return this._treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx).then(() => {
+            return this._deleteCombinationElements(treatmentUpdates, tx).then(()=> {
                 return Promise.all([this.createCombinationElements(treatmentUpdates, context, tx),
                     this._updateCombinationElements(treatmentUpdates, context, tx)])
             })
@@ -88,11 +88,11 @@ class TreatmentDetailsService {
         return this._combinationElementService.batchCreateCombinationElements(combinationElementsArray, context, tx)
     }
 
-    _deleteCombinationElements(treatmentRespObjs, treatmentUpdatesFromUI, tx) {
-        return Promise.all(_.map(treatmentRespObjs, (treatmentRespObj, index)=> {
-            return this._combinationElementService.getCombinationElementsByTreatmentId(treatmentRespObj.id, tx).then((objs) => {
+    _deleteCombinationElements(treatmentUpdates, tx) {
+        return Promise.all(_.map(treatmentUpdates, (treatmentUpdate, index)=> {
+            return this._combinationElementService.getCombinationElementsByTreatmentId(treatmentUpdate.id, tx).then((objs) => {
                 const combinationElementsIdsFromDB = _.map(objs, (obj) => obj.id)
-                const combinationElementsIdsFromUI = _.map(treatmentUpdatesFromUI[index].combinationElements, (obj)=> {
+                const combinationElementsIdsFromUI = _.map(treatmentUpdates[index].combinationElements, (obj)=> {
                     return obj.id
                 })
 

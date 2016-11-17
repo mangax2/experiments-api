@@ -1,5 +1,6 @@
 const sinon = require('sinon')
 const chai = require('chai')
+const _ = require('lodash')
 const TreatmentDetailsService = require('../../src/services/TreatmentDetailsService')
 const AppUtil = require('../../src/services/utility/AppUtil')
 
@@ -273,8 +274,240 @@ describe('TreatmentDetailsService', () => {
                 })
             })
 
-            it('handles updates in isolation', () => {
+            it('ignores empty updates array', () => {
+                const request = {
+                    updates: []
+                }
 
+                return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
+                    sinon.assert.notCalled(deleteTreatmentStub)
+                    sinon.assert.notCalled(deleteCombinationElementStub)
+                    sinon.assert.notCalled(batchCreateTreatmentsStub)
+                    sinon.assert.notCalled(batchCreateCombinationElementsStub)
+                    sinon.assert.notCalled(batchUpdateTreatmentsStub)
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
+                    sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                })
+            })
+
+            it('handles updates in isolation', () => {
+                const request = {
+                    /**
+                     * 1. Update treatment which has a combination element that is deleted.
+                     * 2. Update treatment which has multiple combination elements that are deleted.
+                     * 3. Update treatment which has a combination element that is added.
+                     * 4. Update treatment which has multiple combination elements that are added.
+                     * 5. Update treatment which has a combination element to update.
+                     * 6. Update treatment which has multiple combination elements to update.
+                     * 7. Update treatment which has the following:
+                     *      a. delete combination element
+                     *      b. update combination element
+                     *      c. add combination element
+                     */
+                    updates: [
+                        {
+                            id: 1,
+                            combinationElements: []         // Loses combination element with ID 2
+                        },
+                        {
+                            id: 3,
+                            combinationElements: []         // Loses combination elements with IDs 4 and 5
+                        },
+                        {
+                            id: 6,
+                            combinationElements: [
+                                {
+                                    testData: '6_1'
+                                }
+                            ]
+                        },
+                        {
+                            id: 7,
+                            combinationElements: [
+                                {
+                                    testData: '7_1'
+                                },
+                                {
+                                    testData: '7_2'
+                                }
+                            ]
+                        },
+                        {
+                            id: 8,
+                            combinationElements: [
+                                {
+                                    id: 9,
+                                    testData: '6_1'
+                                }
+                            ]
+                        },
+                        {
+                            id: 10,
+                            combinationElements: [
+                                {
+                                    id: 11,
+                                    testData: '7_1'
+                                },
+                                {
+                                    id: 12,
+                                    testData: '7_2'
+                                }
+                            ]
+                        },
+                        {
+                            id: 13,
+                            combinationElements: [  // loses combination element with ID 14
+                                {
+                                    id: 15,
+                                    testData: '13_1'
+                                },
+                                {
+                                    testData: '13_2'
+                                }
+                            ]
+                        }
+                    ]
+                }
+
+                deleteCombinationElementStub.resolves()
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+
+                getCombinationElementsByTreatmentIdStub.withArgs(1).resolves([{id: 2}])
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id:5}])
+                getCombinationElementsByTreatmentIdStub.withArgs(6).resolves([])
+                getCombinationElementsByTreatmentIdStub.withArgs(7).resolves([])
+                getCombinationElementsByTreatmentIdStub.withArgs(8).resolves([{id: 9}])
+                getCombinationElementsByTreatmentIdStub.withArgs(10).resolves([{id: 11},{id: 12}])
+                getCombinationElementsByTreatmentIdStub.withArgs(13).resolves([{id: 14},{id: 15}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
+                    sinon.assert.notCalled(deleteTreatmentStub)
+
+                    deleteCombinationElementStub.callCount.should.equal(4)
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        2,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        4,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        5,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        14,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.notCalled(batchCreateTreatmentsStub)
+
+                    sinon.assert.calledOnce(batchCreateCombinationElementsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateCombinationElementsStub,
+                        sinon.match((value) => {
+                            const expectedData = [
+                                '6_1',
+                                '7_1',
+                                '7_2',
+                                '13_2'
+                            ]
+                            const createdData = _.map(value, (element) => element.testData)
+                            createdData.length.should.equal(expectedData.length)
+                            const intersection = _.intersection(
+                                createdData,
+                                expectedData
+                            )
+                            intersection.length.should.equal(expectedData.length)
+                            return true
+                        }),
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        sinon.match((value) => {
+                            const expectedData = [
+                                1, 3, 6, 7, 8, 10, 13
+                            ]
+                            const updatedData = _.map(value, (element) => element.id)
+                            updatedData.length.should.equal(expectedData.length)
+                            const intersection = _.intersection(
+                                updatedData,
+                                expectedData
+                            )
+                            intersection.length.should.equal(expectedData.length)
+                            return true
+                        }),
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateCombinationElementsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateCombinationElementsStub,
+                        sinon.match((value) => {
+                            const expectedData = [
+                                9, 11, 12, 15
+                            ]
+                            const updatedData = _.map(value, (element) => element.id)
+                            updatedData.length.should.equal(expectedData.length)
+                            const intersection = _.intersection(
+                                updatedData,
+                                expectedData
+                            )
+                            intersection.length.should.equal(expectedData.length)
+                            return true
+                        }),
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    getCombinationElementsByTreatmentIdStub.callCount.should.equal(7)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        3,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        7,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        8,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        10,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        13,
+                        sinon.match.same(testTx)
+                    )
+                })
             })
 
             it('handles all operations', () => {

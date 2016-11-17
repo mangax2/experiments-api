@@ -1,5 +1,6 @@
 import TreatmentService from './TreatmentService'
 import CombinationElementService from './CombinationElementService'
+import AppUtil from './utility/AppUtil'
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
 
@@ -33,7 +34,7 @@ class TreatmentDetailsService {
             return this._treatmentService.deleteTreatment(id, tx)
         })).then(()=> {
             return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(()=> {
-                return this._updateTreatments(treatmentDetailsObj.updates, context, tx)
+                return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(()=> AppUtil.createCompositePostResponse())
             })
         })
     }
@@ -80,8 +81,11 @@ class TreatmentDetailsService {
 
             return newElements
         })
-
-        return this._combinationElementService.batchCreateCombinationElements(_.flatten(combinationElements), context, tx)
+        const combinationElementsArray= _.flatten(combinationElements)
+         if(combinationElementsArray.length==0){
+            return Promise.resolve()
+         }
+        return this._combinationElementService.batchCreateCombinationElements(combinationElementsArray, context, tx)
     }
 
     _deleteCombinationElements(treatmentRespObjs, treatmentUpdatesFromUI, tx) {

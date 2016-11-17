@@ -6,7 +6,6 @@ class AppUtil {
     static createPutResponse(data) {
         return data.map(d=> this.createResponseElements(d.id,200,'Resource updated'))
     }
-
     static createResponseElements(id,code,message) {
         return {
             'status': code,
@@ -14,6 +13,13 @@ class AppUtil {
             'id': id
         }
     }
+    static createCompositePostResponse() {
+        return {
+            'status': 200,
+            'message' : 'SUCCESS',
+        }
+    }
+
 }
 
 module.exports = AppUtil

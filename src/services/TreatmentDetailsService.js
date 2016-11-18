@@ -31,10 +31,11 @@ class TreatmentDetailsService {
     @Transactional("manageAllTreatmentDetails")
     manageAllTreatmentDetails(treatmentDetailsObj, context, tx) {
         return this._deleteTreatments(treatmentDetailsObj.deletes, tx).then(()=> {
-            return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(()=> {
-                return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(() => {
-                    return AppUtil.createCompositePostResponse()
-                })
+            return Promise.all([
+                this._createTreatments(treatmentDetailsObj.adds, context, tx),
+                this._updateTreatments(treatmentDetailsObj.updates, context, tx)
+            ]).then(() => {
+                return AppUtil.createCompositePostResponse()
             })
         })
     }
@@ -96,7 +97,7 @@ class TreatmentDetailsService {
 
     _deleteCombinationElements(treatmentUpdates, tx) {
         return this._identifyCombinationElementIdsForDelete(treatmentUpdates, tx).then((idsForDeletion) => {
-            return _.map(idsForDeletion, (id) => this._combinationElementService.deleteCombinationElement(id, tx))
+            return Promise.all(_.map(idsForDeletion, (id) => this._combinationElementService.deleteCombinationElement(id, tx)))
         })
     }
 

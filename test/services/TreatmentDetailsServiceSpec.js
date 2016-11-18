@@ -132,6 +132,7 @@ describe('TreatmentDetailsService', () => {
     describe('allPostStuff', () => {
         let target
 
+        const testError = {}
         const testContext = {}
         const testTx = {tx:{}}
 
@@ -654,6 +655,380 @@ describe('TreatmentDetailsService', () => {
                         sinon.match.same(testContext),
                         sinon.match.same(testTx)
                     )
+
+                    sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        3,
+                        sinon.match.same(testTx)
+                    )
+                })
+            })
+
+            it('returns rejected promise when add treatment fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.rejects(testError)
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchCreateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateTreatmentsStub,
+                        request.adds,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.notCalled(batchCreateCombinationElementsStub)
+                })
+            })
+
+            it('returns rejected promise when add combination element fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.rejects(testError)
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchCreateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchCreateTreatmentsStub,
+                        request.adds,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.called(batchCreateCombinationElementsStub)
+                })
+            })
+
+            it('returns rejected promise when update treatments fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.resolves()
+                batchUpdateTreatmentsStub.rejects(testError)
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.notCalled(deleteCombinationElementStub)
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
+                    sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                })
+            })
+
+            it('returns rejected promise when update combination elements fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.resolves()
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.rejects(testError)
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateCombinationElementsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateCombinationElementsStub,
+                        [{id: 5, testData: '3_1', treatmentId: 3}],
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        3,
+                        sinon.match.same(testTx)
+                    )
+                })
+            })
+
+            it('returns rejected promise when getting combination elements for treatment fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.resolves()
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.resolves()
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).rejects(testError)
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                    sinon.assert.calledWithExactly(
+                        getCombinationElementsByTreatmentIdStub,
+                        3,
+                        sinon.match.same(testTx)
+                    )
+                })
+            })
+
+            it('returns rejected promise when delete treatment fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.rejects(testError)
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.notCalled(deleteCombinationElementStub)
+                    sinon.assert.notCalled(batchCreateTreatmentsStub)
+                    sinon.assert.notCalled(batchCreateCombinationElementsStub)
+                    sinon.assert.notCalled(batchUpdateTreatmentsStub)
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
+                    sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                })
+            })
+
+            it('returns rejected promise when deleting combination elements fails', () => {
+                const request = {
+                    adds: [{combinationElements: [{}]}],
+                    updates: [
+                        {
+                            id: 3,
+                            combinationElements: [  // loses combination element with ID 4
+                                {
+                                    id: 5,
+                                    testData: '3_1'
+                                },
+                                {
+                                    testData: '3_2'
+                                }
+                            ]
+                        }
+                    ],
+                    deletes: [6]
+                }
+
+                deleteTreatmentStub.resolves()
+                deleteCombinationElementStub.rejects(testError)
+                batchCreateTreatmentsStub.resolves([{id: 1}])
+                batchCreateCombinationElementsStub.resolves()
+                batchUpdateTreatmentsStub.resolves()
+                batchUpdateCombinationElementsStub.resolves()
+                getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+
+                return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+
+                    sinon.assert.calledOnce(deleteTreatmentStub)
+                    sinon.assert.calledWithExactly(
+                        deleteTreatmentStub,
+                        6,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(deleteCombinationElementStub)
+                    sinon.assert.calledWithExactly(
+                        deleteCombinationElementStub,
+                        4,
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.calledOnce(batchUpdateTreatmentsStub)
+                    sinon.assert.calledWithExactly(
+                        batchUpdateTreatmentsStub,
+                        request.updates,
+                        sinon.match.same(testContext),
+                        sinon.match.same(testTx)
+                    )
+
+                    sinon.assert.notCalled(batchUpdateCombinationElementsStub)
 
                     sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
                     sinon.assert.calledWithExactly(

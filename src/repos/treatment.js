@@ -8,6 +8,14 @@ module.exports = (rep) => {
             return tx.oneOrNone("SELECT * FROM treatment WHERE id = $1", id)
         },
 
+        batchFind: (ids, tx = rep) => {
+            return tx.batch(
+                ids.map(
+                    id => tx.oneOrNone("SELECT * FROM treatment WHERE id = $1", id)
+                )
+            )
+        },
+
         findAllByExperimentId: (experimentId, tx = rep) => {
             return tx.any("SELECT * FROM treatment WHERE experiment_id=$1", experimentId)
         },

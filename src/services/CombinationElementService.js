@@ -32,6 +32,13 @@ class CombinationElementService {
         })
     }
 
+    @Transactional('batchGetCombinationElementsByTreatmentIds')
+    batchGetCombinationElementsByTreatmentIds(ids, tx) {
+        return this._treatmentService.batchGetTreatmentByIds(ids, tx).then(() => {
+            return db.combinationElement.batchFindAllByTreatmentIds(ids, tx)
+        })
+    }
+
     @Transactional('getCombinationElementById')
     getCombinationElementById(id, tx) {
         return db.combinationElement.find(id, tx).then((data) => {

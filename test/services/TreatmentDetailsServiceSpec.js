@@ -140,7 +140,7 @@ describe('TreatmentDetailsService', () => {
         let batchCreateCombinationElementsStub
         let batchUpdateTreatmentsStub
         let batchUpdateCombinationElementsStub
-        let getCombinationElementsByTreatmentIdStub
+        let batchGetCombinationElementsByTreatmentIdStub
 
         before(() => {
             batchDeleteTreatmentsStub = sinon.stub(target._treatmentService, 'batchDeleteTreatments')
@@ -149,7 +149,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchCreateCombinationElements')
             batchUpdateTreatmentsStub = sinon.stub(target._treatmentService, 'batchUpdateTreatments')
             batchUpdateCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchUpdateCombinationElements')
-            getCombinationElementsByTreatmentIdStub = sinon.stub(target._combinationElementService, 'getCombinationElementsByTreatmentId')
+            batchGetCombinationElementsByTreatmentIdStub = sinon.stub(target._combinationElementService, 'batchGetCombinationElementsByTreatmentIds')
         })
 
         afterEach(() => {
@@ -159,7 +159,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.reset()
             batchUpdateTreatmentsStub.reset()
             batchUpdateCombinationElementsStub.reset()
-            getCombinationElementsByTreatmentIdStub.reset()
+            batchGetCombinationElementsByTreatmentIdStub.reset()
         })
 
         after(() => {
@@ -169,7 +169,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.restore()
             batchUpdateTreatmentsStub.restore()
             batchUpdateCombinationElementsStub.restore()
-            getCombinationElementsByTreatmentIdStub.restore()
+            batchGetCombinationElementsByTreatmentIdStub.restore()
         })
 
         it('handles add without combination elements in isolation', () => {
@@ -191,7 +191,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -200,7 +200,7 @@ describe('TreatmentDetailsService', () => {
                 updates: [{id:1}]
             }
             batchUpdateTreatmentsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.resolves([])
+            batchGetCombinationElementsByTreatmentIdStub.resolves([[]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
                 sinon.assert.notCalled(batchDeleteTreatmentsStub)
@@ -215,10 +215,10 @@ describe('TreatmentDetailsService', () => {
                     sinon.match.same(testTx)
                 )
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    1,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [1],
                     sinon.match.same(testTx)
                 )
             })
@@ -255,7 +255,7 @@ describe('TreatmentDetailsService', () => {
                 )
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -271,7 +271,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -294,7 +294,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -317,7 +317,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -333,7 +333,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -420,13 +420,15 @@ describe('TreatmentDetailsService', () => {
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
 
-            getCombinationElementsByTreatmentIdStub.withArgs(1).resolves([{id: 2}])
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id:5}])
-            getCombinationElementsByTreatmentIdStub.withArgs(6).resolves([])
-            getCombinationElementsByTreatmentIdStub.withArgs(7).resolves([])
-            getCombinationElementsByTreatmentIdStub.withArgs(8).resolves([{id: 9}])
-            getCombinationElementsByTreatmentIdStub.withArgs(10).resolves([{id: 11},{id: 12}])
-            getCombinationElementsByTreatmentIdStub.withArgs(13).resolves([{id: 14},{id: 15}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([1,3,6,7,8,10,13]).resolves([
+                [{id: 2}],
+                [{id: 4},{id:5}],
+                [],
+                [],
+                [{id: 9}],
+                [{id: 11},{id: 12}],
+                [{id: 14},{id: 15}]
+            ])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
                 sinon.assert.notCalled(batchDeleteTreatmentsStub)
@@ -515,40 +517,10 @@ describe('TreatmentDetailsService', () => {
                     sinon.match.same(testTx)
                 )
 
-                getCombinationElementsByTreatmentIdStub.callCount.should.equal(7)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    1,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    3,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    6,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    7,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    8,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    10,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    13,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [1,3,6,7,8,10,13],
                     sinon.match.same(testTx)
                 )
             })
@@ -580,7 +552,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
                 sinon.assert.calledOnce(batchDeleteTreatmentsStub)
@@ -635,10 +607,10 @@ describe('TreatmentDetailsService', () => {
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    3,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [3],
                     sinon.match.same(testTx)
                 )
             })
@@ -669,7 +641,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateTreatmentsStub.rejects(testError)
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -719,7 +691,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.rejects(testError)
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -769,7 +741,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.rejects(testError)
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -792,7 +764,7 @@ describe('TreatmentDetailsService', () => {
                 )
 
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -822,7 +794,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.rejects(testError)
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -850,10 +822,10 @@ describe('TreatmentDetailsService', () => {
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    3,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [3],
                     sinon.match.same(testTx)
                 )
             })
@@ -885,7 +857,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).rejects(testError)
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).rejects(testError)
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -905,10 +877,10 @@ describe('TreatmentDetailsService', () => {
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    3,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [3],
                     sinon.match.same(testTx)
                 )
             })
@@ -950,7 +922,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
-                sinon.assert.notCalled(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.notCalled(batchGetCombinationElementsByTreatmentIdStub)
             })
         })
 
@@ -980,7 +952,7 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
-            getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
+            batchGetCombinationElementsByTreatmentIdStub.withArgs([3]).resolves([[{id: 4},{id: 5}]])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -1009,10 +981,10 @@ describe('TreatmentDetailsService', () => {
 
                 sinon.assert.notCalled(batchUpdateCombinationElementsStub)
 
-                sinon.assert.calledOnce(getCombinationElementsByTreatmentIdStub)
+                sinon.assert.calledOnce(batchGetCombinationElementsByTreatmentIdStub)
                 sinon.assert.calledWithExactly(
-                    getCombinationElementsByTreatmentIdStub,
-                    3,
+                    batchGetCombinationElementsByTreatmentIdStub,
+                    [3],
                     sinon.match.same(testTx)
                 )
             })

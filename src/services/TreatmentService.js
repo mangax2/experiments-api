@@ -4,6 +4,7 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import TreatmentValidator from '../validations/TreatmentValidator'
 import log4js from 'log4js'
+import _ from 'lodash'
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('TreatmentService')
@@ -44,6 +45,18 @@ class TreatmentService {
         })
     }
 
+    @Transactional('getTreatmentById')
+    batchGetTreatmentByIds(ids, tx) {
+        return db.treatment.batchFind(ids, tx).then((data) => {
+            if (_.filter(data, (element) => element != null).length != ids.length) {
+                logger.error('Treatment not found for all requested ids.')
+                throw AppError.notFound('Treatment not found for all requested ids.')
+            } else {
+                return data
+            }
+        })
+    }
+
     @Transactional('batchUpdateTreatments')
     batchUpdateTreatments(treatments, context, tx) {
         return this._validator.validate(treatments, 'PUT', tx).then(() => {
@@ -68,7 +81,7 @@ class TreatmentService {
     @Transactional('batchDeleteTreatments')
     batchDeleteTreatments(ids, tx) {
         return db.treatment.batchRemove(ids, tx).then((data) => {
-            if (data.length != ids.length) {
+            if (_.filter(data, (element) => element != null).length != ids.length) {
                 logger.error('Not all treatments requested for delete were found')
                 throw AppError.notFound('Not all treatments requested for delete were found')
             } else {

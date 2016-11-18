@@ -12,6 +12,14 @@ module.exports = (rep) => {
             return tx.any("SELECT * FROM combination_element WHERE treatment_id = $1", treatmentId)
         },
 
+        batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
+            return tx.batch(
+                treatmentIds.map(
+                    id => tx.any("SELECT * FROM combination_element WHERE treatment_id = $1", id)
+                )
+            )
+        },
+
         batchCreate: (combinationElements, context, tx = rep) => {
             return tx.batch(
                 combinationElements.map(

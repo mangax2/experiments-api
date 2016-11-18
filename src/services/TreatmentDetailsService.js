@@ -105,13 +105,14 @@ class TreatmentDetailsService {
     }
 
     _identifyCombinationElementIdsForDelete(treatments, tx) {
-        return Promise.all(_.map(treatments, (treatment, index)=> {
-            return this._combinationElementService.getCombinationElementsByTreatmentId(treatment.id, tx).then((curCombinationElements) => {
+        const treatmentIds = _.map(treatments, (treatment) => treatment.id)
+        return this._combinationElementService.batchGetCombinationElementsByTreatmentIds(treatmentIds, tx).then((currentCombinationElementsByTreatment) => {
+            return _.flatMap(currentCombinationElementsByTreatment, (curCombinationElements, index) => {
                 const currentCombinationElements = _.map(curCombinationElements, (curCombinationElement) => curCombinationElement.id)
-                const newCombinationElements = _.map(treatments[index].combinationElements, (combinationElement)=> combinationElement.id)
+                const newCombinationElements = _.map(treatments[index].combinationElements, (combinationElement) => combinationElement.id)
                 return _.difference(currentCombinationElements, newCombinationElements)
             })
-        })).then((combinationElementDeletionsByTreatment) => _.flatten(combinationElementDeletionsByTreatment))
+        })
     }
 
     _createAndUpdateCombinationElements(treatmentUpdates, context, tx) {

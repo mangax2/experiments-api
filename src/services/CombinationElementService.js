@@ -64,6 +64,18 @@ class CombinationElementService {
             }
         })
     }
+
+    @Transactional('batchDeleteCombinationElements')
+    batchDeleteCombinationElements(ids, tx) {
+        return db.combinationElement.batchRemove(ids, tx).then((data) => {
+            if (data.length != ids.length) {
+                logger.error('Not all combination elements requested for delete were found')
+                throw AppError.notFound('Not all combination elements requested for delete were found')
+            } else {
+                return data
+            }
+        })
+    }
 }
 
 module.exports = CombinationElementService

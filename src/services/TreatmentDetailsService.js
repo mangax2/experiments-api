@@ -40,9 +40,10 @@ class TreatmentDetailsService {
     }
 
     _deleteTreatments(treatmentIdsToDelete, tx) {
-        return Promise.all(
-            _.map(treatmentIdsToDelete, (id) => this._treatmentService.deleteTreatment(id, tx))
-        )
+        if (_.isUndefined(treatmentIdsToDelete) || treatmentIdsToDelete.length == 0) {
+            return Promise.resolve()
+        }
+        return this._treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx)
     }
 
     _createTreatments(treatmentAdds, context, tx) {
@@ -96,7 +97,10 @@ class TreatmentDetailsService {
 
     _deleteCombinationElements(treatmentUpdates, tx) {
         return this._identifyCombinationElementIdsForDelete(treatmentUpdates, tx).then((idsForDeletion) => {
-            return Promise.all(_.map(idsForDeletion, (id) => this._combinationElementService.deleteCombinationElement(id, tx)))
+            if (idsForDeletion.length == 0) {
+                return Promise.resolve()
+            }
+            return this._combinationElementService.batchDeleteCombinationElements(idsForDeletion, tx)
         })
     }
 
@@ -111,16 +115,15 @@ class TreatmentDetailsService {
     }
 
     _createAndUpdateCombinationElements(treatmentUpdates, context, tx) {
-        return Promise.all([
-            this._createCombinationElements(
-                this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
-                context,
-                tx),
-            this._updateCombinationElements(
+        return this._createCombinationElements(
+            this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
+            context,
+            tx).then(() => {
+            return this._updateCombinationElements(
                 this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
                 context,
                 tx)
-        ])
+        })
     }
 
     _assembleBatchCreateCombinationElementsRequestFromUpdates(treatments) {

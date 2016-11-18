@@ -40,6 +40,14 @@ module.exports = (rep) => {
             return tx.oneOrNone("DELETE FROM treatment WHERE id=$1 RETURNING id", id)
         },
 
+        batchRemove: (ids, tx = rep) => {
+            return tx.batch(
+                ids.map(
+                    id => tx.oneOrNone("DELETE FROM treatment WHERE id=$1 RETURNING id", id)
+                )
+            )
+        },
+
         removeByExperimentId: (experimentId, tx = rep) => {
             return tx.any("DELETE FROM treatment WHERE experiment_id = $1 RETURNING id", experimentId)
         },

@@ -65,6 +65,18 @@ class TreatmentService {
         })
     }
 
+    @Transactional('batchDeleteTreatments')
+    batchDeleteTreatments(ids, tx) {
+        return db.treatment.batchRemove(ids, tx).then((data) => {
+            if (data.length != ids.length) {
+                logger.error('Not all treatments requested for delete were found')
+                throw AppError.notFound('Not all treatments requested for delete were found')
+            } else {
+                return data
+            }
+        })
+    }
+
     @Transactional('deleteTreatmentsForExperimentId')
     deleteTreatmentsForExperimentId(id, tx) {
         return this._experimentService.getExperimentById(id, tx).then(() => {

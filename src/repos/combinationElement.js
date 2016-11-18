@@ -40,6 +40,14 @@ module.exports = (rep) => {
             return tx.oneOrNone("DELETE FROM combination_element WHERE id = $1 RETURNING id", id)
         },
 
+        batchRemove: (ids, tx = rep) => {
+            return tx.batch(
+                ids.map(
+                    id => tx.oneOrNone("DELETE FROM combination_element WHERE id = $1 RETURNING id", id)
+                )
+            )
+        },
+
         findByBusinessKey: (keys, tx= rep) => {
             return tx.oneOrNone("SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2", keys)
         }

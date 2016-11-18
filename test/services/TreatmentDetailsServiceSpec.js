@@ -134,8 +134,8 @@ describe('TreatmentDetailsService', () => {
         const testContext = {}
         const testTx = {tx:{}}
 
-        let deleteTreatmentStub
-        let deleteCombinationElementStub
+        let batchDeleteTreatmentsStub
+        let batchDeleteCombinationElementsStub
         let batchCreateTreatmentsStub
         let batchCreateCombinationElementsStub
         let batchUpdateTreatmentsStub
@@ -143,8 +143,8 @@ describe('TreatmentDetailsService', () => {
         let getCombinationElementsByTreatmentIdStub
 
         before(() => {
-            deleteTreatmentStub = sinon.stub(target._treatmentService, 'deleteTreatment')
-            deleteCombinationElementStub = sinon.stub(target._combinationElementService, 'deleteCombinationElement')
+            batchDeleteTreatmentsStub = sinon.stub(target._treatmentService, 'batchDeleteTreatments')
+            batchDeleteCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchDeleteCombinationElements')
             batchCreateTreatmentsStub = sinon.stub(target._treatmentService, 'batchCreateTreatments')
             batchCreateCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchCreateCombinationElements')
             batchUpdateTreatmentsStub = sinon.stub(target._treatmentService, 'batchUpdateTreatments')
@@ -153,8 +153,8 @@ describe('TreatmentDetailsService', () => {
         })
 
         afterEach(() => {
-            deleteTreatmentStub.reset()
-            deleteCombinationElementStub.reset()
+            batchDeleteTreatmentsStub.reset()
+            batchDeleteCombinationElementsStub.reset()
             batchCreateTreatmentsStub.reset()
             batchCreateCombinationElementsStub.reset()
             batchUpdateTreatmentsStub.reset()
@@ -163,8 +163,8 @@ describe('TreatmentDetailsService', () => {
         })
 
         after(() => {
-            deleteTreatmentStub.restore()
-            deleteCombinationElementStub.restore()
+            batchDeleteTreatmentsStub.restore()
+            batchDeleteCombinationElementsStub.restore()
             batchCreateTreatmentsStub.restore()
             batchCreateCombinationElementsStub.restore()
             batchUpdateTreatmentsStub.restore()
@@ -179,8 +179,8 @@ describe('TreatmentDetailsService', () => {
             batchCreateTreatmentsStub.resolves([{id: 1}])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.calledOnce(batchCreateTreatmentsStub)
                 sinon.assert.calledWithExactly(
                     batchCreateTreatmentsStub,
@@ -203,8 +203,8 @@ describe('TreatmentDetailsService', () => {
             getCombinationElementsByTreatmentIdStub.resolves([])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.calledOnce(batchUpdateTreatmentsStub)
@@ -237,8 +237,8 @@ describe('TreatmentDetailsService', () => {
             batchCreateCombinationElementsStub.resolves()
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.calledOnce(batchCreateTreatmentsStub)
                 sinon.assert.calledWithExactly(
                     batchCreateTreatmentsStub,
@@ -265,8 +265,8 @@ describe('TreatmentDetailsService', () => {
             }
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
@@ -280,14 +280,16 @@ describe('TreatmentDetailsService', () => {
                 deletes: [1]
             }
 
+            batchDeleteTreatmentsStub.resolves()
+
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    1,
+                    batchDeleteTreatmentsStub,
+                    [1],
                     sinon.match.same(testTx)
                 )
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
@@ -301,19 +303,16 @@ describe('TreatmentDetailsService', () => {
                 deletes: [1, 2]
             }
 
+            batchDeleteTreatmentsStub.resolves()
+
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.calledTwice(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    1,
+                    batchDeleteTreatmentsStub,
+                    [1, 2],
                     sinon.match.same(testTx)
                 )
-                sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    2,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
@@ -328,8 +327,8 @@ describe('TreatmentDetailsService', () => {
             }
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
@@ -417,7 +416,7 @@ describe('TreatmentDetailsService', () => {
                 ]
             }
 
-            deleteCombinationElementStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
 
@@ -430,27 +429,12 @@ describe('TreatmentDetailsService', () => {
             getCombinationElementsByTreatmentIdStub.withArgs(13).resolves([{id: 14},{id: 15}])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.notCalled(deleteTreatmentStub)
+                sinon.assert.notCalled(batchDeleteTreatmentsStub)
 
-                deleteCombinationElementStub.callCount.should.equal(4)
+                sinon.assert.calledOnce(batchDeleteCombinationElementsStub)
                 sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    2,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    4,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    5,
-                    sinon.match.same(testTx)
-                )
-                sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    14,
+                    batchDeleteCombinationElementsStub,
+                    [2,4,5,14],
                     sinon.match.same(testTx)
                 )
 
@@ -590,8 +574,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
@@ -599,17 +583,17 @@ describe('TreatmentDetailsService', () => {
             getCombinationElementsByTreatmentIdStub.withArgs(3).resolves([{id: 4},{id: 5}])
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).then(() => {
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.calledOnce(deleteCombinationElementStub)
+                sinon.assert.calledOnce(batchDeleteCombinationElementsStub)
                 sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    4,
+                    batchDeleteCombinationElementsStub,
+                    [4],
                     sinon.match.same(testTx)
                 )
 
@@ -680,8 +664,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.rejects(testError)
             batchUpdateTreatmentsStub.resolves()
             batchUpdateCombinationElementsStub.resolves()
@@ -690,10 +674,10 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
@@ -729,8 +713,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.rejects(testError)
             batchUpdateTreatmentsStub.resolves()
@@ -740,10 +724,10 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
@@ -779,8 +763,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.rejects(testError)
@@ -790,14 +774,14 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
 
                 sinon.assert.calledOnce(batchUpdateTreatmentsStub)
                 sinon.assert.calledWithExactly(
@@ -832,8 +816,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
@@ -843,10 +827,10 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
@@ -895,8 +879,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.resolves()
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.resolves()
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
@@ -906,10 +890,10 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
@@ -950,18 +934,18 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.rejects(testError)
+            batchDeleteTreatmentsStub.rejects(testError)
 
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
-                sinon.assert.notCalled(deleteCombinationElementStub)
+                sinon.assert.notCalled(batchDeleteCombinationElementsStub)
                 sinon.assert.notCalled(batchCreateTreatmentsStub)
                 sinon.assert.notCalled(batchCreateCombinationElementsStub)
                 sinon.assert.notCalled(batchUpdateTreatmentsStub)
@@ -990,8 +974,8 @@ describe('TreatmentDetailsService', () => {
                 deletes: [6]
             }
 
-            deleteTreatmentStub.resolves()
-            deleteCombinationElementStub.rejects(testError)
+            batchDeleteTreatmentsStub.resolves()
+            batchDeleteCombinationElementsStub.rejects(testError)
             batchCreateTreatmentsStub.resolves([{id: 1}])
             batchCreateCombinationElementsStub.resolves()
             batchUpdateTreatmentsStub.resolves()
@@ -1001,17 +985,17 @@ describe('TreatmentDetailsService', () => {
             return target.manageAllTreatmentDetails(request, testContext, testTx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
 
-                sinon.assert.calledOnce(deleteTreatmentStub)
+                sinon.assert.calledOnce(batchDeleteTreatmentsStub)
                 sinon.assert.calledWithExactly(
-                    deleteTreatmentStub,
-                    6,
+                    batchDeleteTreatmentsStub,
+                    [6],
                     sinon.match.same(testTx)
                 )
 
-                sinon.assert.calledOnce(deleteCombinationElementStub)
+                sinon.assert.calledOnce(batchDeleteCombinationElementsStub)
                 sinon.assert.calledWithExactly(
-                    deleteCombinationElementStub,
-                    4,
+                    batchDeleteCombinationElementsStub,
+                    [4],
                     sinon.match.same(testTx)
                 )
 

@@ -43,6 +43,12 @@ describe('HypothesisValidator', () => {
         })
     })
 
+    describe('entityName', () => {
+        it('returns name of the entity', () => {
+            target.entityName.should.equal('Hypothesis')
+        })
+    })
+
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
             target.getBusinessKeyPropertyNames().should.eql(['description','experimentId','isNull'])

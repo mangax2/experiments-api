@@ -37,6 +37,12 @@ describe('ExperimentDesignsValidator', () => {
         })
     })
 
+    describe('entityName', () => {
+        it('returns name of the entity', () => {
+            target.entityName.should.equal('ExperimentDesign')
+        })
+    })
+
     describe('preValidate', () => {
         it('returns rejected promise when input is not an array.' , () => {
             return target.preValidate({}).should.be.rejected.then((err) => {

@@ -26,6 +26,10 @@ class CombinationElementValidator extends SchemaValidator {
         ]
     }
 
+    get entityName(){
+        return 'CombinationElement'
+    }
+
     getSchema(operationName) {
         switch(operationName) {
             case 'POST': return CombinationElementValidator.POST_VALIDATION_SCHEMA

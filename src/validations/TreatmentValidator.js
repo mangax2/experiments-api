@@ -8,7 +8,7 @@ class TreatmentValidator extends SchemaValidator {
         return [
             {'paramName': 'isControl', 'type': 'boolean', 'required': true},
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
-            {'paramName': 'notes', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': false},
+            {'paramName': 'notes', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
             {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments},
             {
@@ -25,6 +25,10 @@ class TreatmentValidator extends SchemaValidator {
             {'paramName': 'id', 'type': 'numeric', 'required': true},
             {'paramName': 'id', 'type': 'refData', 'entity': db.treatment}
         ]
+    }
+
+    get entityName(){
+        return 'Treatment'
     }
 
     getSchema(operationName) {
@@ -52,6 +56,7 @@ class TreatmentValidator extends SchemaValidator {
             return Promise.resolve()
         }
     }
+
 }
 
 module.exports = TreatmentValidator

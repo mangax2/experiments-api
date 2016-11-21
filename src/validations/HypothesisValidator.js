@@ -15,6 +15,10 @@ class HypothesisValidator extends SchemaValidator {
         ]
     }
 
+    get entityName(){
+        return 'Hypothesis'
+    }
+
     getBusinessKeyPropertyNames() {
         return ['description','experimentId','isNull']
     }

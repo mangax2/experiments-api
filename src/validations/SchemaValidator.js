@@ -67,7 +67,7 @@ export class SchemaValidator extends BaseValidator {
                 }
 
                 if (!this.hasErrors() && elementSchema.type == 'refData') {
-                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, elementSchema.paramName, optionalTransaction).then(() => {
+                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, optionalTransaction).then(() => {
                         resolve()
                     }, (err)=> {
                         reject(err)
@@ -82,7 +82,7 @@ export class SchemaValidator extends BaseValidator {
                     return targetObject[key]
                 })
 
-                return this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.paramName, elementSchema.keys, optionalTransaction).then(() => {
+                return this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.keys, optionalTransaction).then(() => {
                     resolve()
                 }, (err)=> {
                     reject(err)

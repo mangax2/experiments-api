@@ -12,6 +12,10 @@ class FactorTypesValidator extends SchemaValidator {
         ]
     }
 
+    get entityName(){
+        return 'FactorType'
+    }
+
     preValidate(factorObj) {
         if (!_.isArray(factorObj) || factorObj.length == 0) {
             return Promise.reject(

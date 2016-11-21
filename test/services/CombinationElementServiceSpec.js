@@ -15,6 +15,7 @@ describe('CombinationElementService', () => {
     const tx = {tx: {}}
 
     let getTreatmentByIdStub
+    let batchGetTreatmentByIdsStub
     let createPostResponseStub
     let createPutResponseStub
     let notFoundStub
@@ -22,15 +23,18 @@ describe('CombinationElementService', () => {
     let repositoryStub
     let findStub
     let findAllByTreatmentIdStub
+    let batchFindAllByTreatmentIdsStub
     let batchCreateStub
     let batchUpdateStub
     let removeStub
+    let batchRemoveStub
     let findByBusinessKeyStub
 
     before(() => {
         target = new CombinationElementService()
 
         getTreatmentByIdStub = sinon.stub(target._treatmentService, 'getTreatmentById')
+        batchGetTreatmentByIdsStub = sinon.stub(target._treatmentService, 'batchGetTreatmentByIds')
         createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
@@ -44,14 +48,17 @@ describe('CombinationElementService', () => {
         })
         findStub = sinon.stub(db.combinationElement, 'find')
         findAllByTreatmentIdStub = sinon.stub(db.combinationElement, 'findAllByTreatmentId')
+        batchFindAllByTreatmentIdsStub = sinon.stub(db.combinationElement, 'batchFindAllByTreatmentIds')
         batchCreateStub = sinon.stub(db.combinationElement, 'batchCreate')
         batchUpdateStub = sinon.stub(db.combinationElement, 'batchUpdate')
         removeStub = sinon.stub(db.combinationElement, 'remove')
+        batchRemoveStub = sinon.stub(db.combinationElement, 'batchRemove')
         findByBusinessKeyStub = sinon.stub(db.combinationElement, 'findByBusinessKey')
     })
 
     afterEach(() => {
         getTreatmentByIdStub.reset()
+        batchGetTreatmentByIdsStub.reset()
         createPostResponseStub.reset()
         createPutResponseStub.reset()
         notFoundStub.reset()
@@ -59,14 +66,17 @@ describe('CombinationElementService', () => {
         repositoryStub.reset()
         findStub.reset()
         findAllByTreatmentIdStub.reset()
+        batchFindAllByTreatmentIdsStub.reset()
         batchCreateStub.reset()
         batchUpdateStub.reset()
         removeStub.reset()
+        batchRemoveStub.reset()
         findByBusinessKeyStub.reset()
     })
 
     after(() => {
         getTreatmentByIdStub.restore()
+        batchGetTreatmentByIdsStub.restore()
         createPostResponseStub.restore()
         createPutResponseStub.restore()
         notFoundStub.restore()
@@ -74,9 +84,11 @@ describe('CombinationElementService', () => {
         repositoryStub.restore()
         findStub.restore()
         findAllByTreatmentIdStub.restore()
+        batchFindAllByTreatmentIdsStub.restore()
         batchCreateStub.restore()
         batchUpdateStub.restore()
         removeStub.restore()
+        batchRemoveStub.restore()
         findByBusinessKeyStub.restore()
     })
 
@@ -134,6 +146,64 @@ describe('CombinationElementService', () => {
         })
     })
 
+    describe('batchGetCombinationElementsByTreatmentIds', () => {
+        it('returns rejected promise when batchGetTreatmentByIds fails', () => {
+            batchGetTreatmentByIdsStub.rejects(testError)
+
+            return target.batchGetCombinationElementsByTreatmentIds([1], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchGetTreatmentByIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchGetTreatmentByIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+                sinon.assert.notCalled(batchFindAllByTreatmentIdsStub)
+            })
+        })
+
+        it('returns rejected promise when batchFindAllByTreatmentIds fails', () => {
+            batchGetTreatmentByIdsStub.resolves()
+            batchFindAllByTreatmentIdsStub.rejects(testError)
+
+            return target.batchGetCombinationElementsByTreatmentIds([1], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchGetTreatmentByIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchGetTreatmentByIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+                sinon.assert.calledOnce(batchFindAllByTreatmentIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchFindAllByTreatmentIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+
+        it('returns resolved promise when calls succeed', () => {
+            batchGetTreatmentByIdsStub.resolves()
+            batchFindAllByTreatmentIdsStub.resolves(testData)
+
+            return target.batchGetCombinationElementsByTreatmentIds([1], tx).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledOnce(batchGetTreatmentByIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchGetTreatmentByIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+                sinon.assert.calledOnce(batchFindAllByTreatmentIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchFindAllByTreatmentIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+    })
 
     describe('getCombinationElementsByTreatmentId', () => {
         it('returns rejected promise when getByTreatmentId fails', () => {
@@ -303,6 +373,59 @@ describe('CombinationElementService', () => {
             return target.deleteCombinationElement(7, tx).then((r) => {
                 r.should.equal(testData)
                 sinon.assert.calledWith(removeStub, 7)
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+    })
+
+    describe('batchDeleteCombinationElements', () => {
+        it('returns rejected promise when batchRemove fails', () => {
+            batchRemoveStub.rejects(testError)
+
+            return target.batchDeleteCombinationElements([1], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+
+        it('returns rejected promise when found count not equal to id count', () => {
+            batchRemoveStub.resolves([{}, null, {}])
+            notFoundStub.returns(testError)
+
+            return target.batchDeleteCombinationElements([1,2,3], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1,2,3],
+                    sinon.match.same(tx)
+                )
+                sinon.assert.calledOnce(notFoundStub)
+                sinon.assert.calledWithExactly(
+                    notFoundStub,
+                    'Not all combination elements requested for delete were found'
+                )
+            })
+        })
+
+        it('returns resolved promise when an element is found for each id', () => {
+            const removalResult = [{}, {}, {}]
+            batchRemoveStub.resolves(removalResult)
+            notFoundStub.returns(testError)
+
+            return target.batchDeleteCombinationElements([1,2,3], tx).then((data) => {
+                data.should.equal(removalResult)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1,2,3],
+                    sinon.match.same(tx)
+                )
                 sinon.assert.notCalled(notFoundStub)
             })
         })

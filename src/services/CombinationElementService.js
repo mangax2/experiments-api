@@ -4,6 +4,7 @@ import AppError from './utility/AppError'
 import CombinationElementValidator from '../validations/CombinationElementValidator'
 import TreatmentService from './TreatmentService'
 import log4js from 'log4js'
+import _ from 'lodash'
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('CombinationElementService')
@@ -75,7 +76,7 @@ class CombinationElementService {
     @Transactional('batchDeleteCombinationElements')
     batchDeleteCombinationElements(ids, tx) {
         return db.combinationElement.batchRemove(ids, tx).then((data) => {
-            if (data.length != ids.length) {
+            if (_.filter(data, (element) => element != null).length != ids.length) {
                 logger.error('Not all combination elements requested for delete were found')
                 throw AppError.notFound('Not all combination elements requested for delete were found')
             } else {

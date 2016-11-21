@@ -35,6 +35,12 @@ describe('TreatmentValidator', () => {
         })
     })
 
+    describe('entityName', () => {
+        it('returns name of the entity', () => {
+            target.entityName.should.equal('Treatment')
+        })
+    })
+
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
             target.getBusinessKeyPropertyNames().should.eql(['experimentId', 'name'])

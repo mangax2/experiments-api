@@ -25,6 +25,10 @@ class FactorLevelsValidator extends SchemaValidator {
         ]
     }
 
+    get entityName(){
+        return 'FactorLevel'
+    }
+
     getSchema(operationName) {
         switch(operationName) {
             case 'POST': return FactorLevelsValidator.POST_VALIDATION_SCHEMA

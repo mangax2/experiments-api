@@ -138,7 +138,6 @@ describe('SchemaValidator', () => {
                         checkReferentialIntegrityByIdStub,
                         'value',
                         sinon.match.same(testEntity),
-                        'pName',
                         sinon.match.same(testTransaction))
                 })
         })
@@ -160,7 +159,6 @@ describe('SchemaValidator', () => {
                         checkReferentialIntegrityByIdStub,
                         'value',
                         sinon.match.same(testEntity),
-                        'pName',
                         sinon.match.same(testTransaction))
                 })
         })
@@ -186,7 +184,6 @@ describe('SchemaValidator', () => {
                         42,
                         ['testValue'],
                         sinon.match.same(testEntity),
-                        'pName',
                         sinon.match.same(testKeys),
                         sinon.match.same(testTransaction))
                 })
@@ -212,7 +209,6 @@ describe('SchemaValidator', () => {
                         42,
                         ['testValue'],
                         sinon.match.same(testEntity),
-                        'pName',
                         sinon.match.same(testKeys),
                         sinon.match.same(testTransaction))
                 })

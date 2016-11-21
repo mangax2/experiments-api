@@ -13,6 +13,10 @@ class ExperimentsValidator extends SchemaValidator {
         ]
     }
 
+    get entityName(){
+        return 'Experiment'
+    }
+
     //FOR PARTIAL UPDATE SUPPORT:
     //
     // getSchema(operationName) {

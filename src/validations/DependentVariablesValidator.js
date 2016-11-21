@@ -25,6 +25,10 @@ class DependentVariablesValidator extends SchemaValidator {
 
     }
 
+    get entityName(){
+        return 'DependentVariable'
+    }
+
     getBusinessKeyPropertyNames() {
         return ['experimentId', 'name']
     }

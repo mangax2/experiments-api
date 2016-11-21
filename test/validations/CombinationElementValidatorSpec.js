@@ -36,6 +36,13 @@ describe('CombinationElementValidator', () => {
         })
     })
 
+
+    describe('entityName', () => {
+        it('returns name of the entity', () => {
+            target.entityName.should.equal('CombinationElement')
+        })
+    })
+
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
             target.getBusinessKeyPropertyNames().should.eql(['treatmentId', 'name'])

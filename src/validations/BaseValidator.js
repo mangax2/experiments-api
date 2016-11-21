@@ -91,20 +91,24 @@ class BaseValidator {
         }
     }
 
-    checkReferentialIntegrityById(id, entity, entityName, optionalTransaction) {
+    checkReferentialIntegrityById(id, entity, optionalTransaction) {
         return this.referentialIntegrityService.getById(id, entity, optionalTransaction).then((data) => {
             if (!data) {
-                this.messages.push(`No ${entityName} found with id ${id}`)
+                this.messages.push(`${this.entityName} not found for id ${id}`)
             }
         })
     }
 
-    checkRIBusiness(entityId, vals, entity, entityName, keys, optionalTransaction) {
+    checkRIBusiness(entityId, vals, entity, keys, optionalTransaction) {
         return this.referentialIntegrityService.getByBusinessKey(vals, entity, optionalTransaction).then((data) => {
             if (data && data['id'] != entityId) {
-                this.messages.push(`${entityName} already exists for given business keys: ${keys}`)
+                this.messages.push(`${this.entityName} already exists for given business keys: ${keys}`)
             }
         })
+    }
+
+    get entityName(){
+        throw 'entityName not implemented'
     }
 
     check() {

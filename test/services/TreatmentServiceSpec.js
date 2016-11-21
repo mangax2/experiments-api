@@ -21,10 +21,12 @@ describe('TreatmentService', () => {
     let notFoundStub
     let validateStub
     let findStub
+    let batchFindStub
     let findAllByExperimentIdStub
     let batchCreateStub
     let batchUpdateStub
     let removeStub
+    let batchRemoveStub
     let removeByExperimentIdStub
 
     before(() => {
@@ -36,10 +38,12 @@ describe('TreatmentService', () => {
         notFoundStub = sinon.stub(AppError, 'notFound')
         validateStub = sinon.stub(target._validator, 'validate')
         findStub = sinon.stub(db.treatment, 'find')
+        batchFindStub = sinon.stub(db.treatment, 'batchFind')
         findAllByExperimentIdStub = sinon.stub(db.treatment, 'findAllByExperimentId')
         batchCreateStub = sinon.stub(db.treatment, 'batchCreate')
         batchUpdateStub = sinon.stub(db.treatment, 'batchUpdate')
         removeStub = sinon.stub(db.treatment, 'remove')
+        batchRemoveStub = sinon.stub(db.treatment, 'batchRemove')
         removeByExperimentIdStub = sinon.stub(db.treatment, 'removeByExperimentId')
     })
 
@@ -50,10 +54,12 @@ describe('TreatmentService', () => {
         notFoundStub.reset()
         validateStub.reset()
         findStub.reset()
+        batchFindStub.reset()
         findAllByExperimentIdStub.reset()
         batchCreateStub.reset()
         batchUpdateStub.reset()
         removeStub.reset()
+        batchRemoveStub.reset()
         removeByExperimentIdStub.reset()
     })
 
@@ -64,10 +70,12 @@ describe('TreatmentService', () => {
         notFoundStub.restore()
         validateStub.restore()
         findStub.restore()
+        batchFindStub.restore()
         findAllByExperimentIdStub.restore()
         batchCreateStub.restore()
         batchUpdateStub.restore()
         removeStub.restore()
+        batchRemoveStub.restore()
         removeByExperimentIdStub.restore()
     })
 
@@ -227,6 +235,49 @@ describe('TreatmentService', () => {
         })
     })
 
+    describe('batchGetTreatmentByIds', () => {
+        it('returns rejected promise when batchFind fails', () => {
+            batchFindStub.rejects(testError)
+
+            return target.batchGetTreatmentByIds([7], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [7],
+                    sinon.match.same(tx))
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+
+        it('returns rejected promise when data count does not match id count', () => {
+            batchFindStub.resolves({}, null, {})
+            notFoundStub.returns(testError)
+
+            return target.batchGetTreatmentByIds([1,2,3], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [1,2,3],
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(notFoundStub, 'Treatment not found for all requested ids.')
+            })
+        })
+
+        it('returns resolved promise when data found for all ids', () => {
+            const findResult = [{}, {}, {}]
+            batchFindStub.resolves(findResult)
+
+            return target.batchGetTreatmentByIds([1,2,3], tx).then((r) => {
+                r.should.equal(findResult)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [1,2,3],
+                    sinon.match.same(tx))
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+    })
+
     describe('batchUpdateTreatments', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
@@ -332,6 +383,59 @@ describe('TreatmentService', () => {
                     removeStub,
                     7,
                     sinon.match.same(tx))
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+    })
+
+    describe('batchDeleteTreatments', () => {
+        it('returns rejected promise when batchRemove fails', () => {
+            batchRemoveStub.rejects(testError)
+
+            return target.batchDeleteTreatments([1], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+
+        it('returns rejected promise when found count not equal to id count', () => {
+            batchRemoveStub.resolves([{}, null, {}])
+            notFoundStub.returns(testError)
+
+            return target.batchDeleteTreatments([1,2,3], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1,2,3],
+                    sinon.match.same(tx)
+                )
+                sinon.assert.calledOnce(notFoundStub)
+                sinon.assert.calledWithExactly(
+                    notFoundStub,
+                    'Not all treatments requested for delete were found'
+                )
+            })
+        })
+
+        it('returns resolved promise when an element is found for each id', () => {
+            const removalResult = [{}, {}, {}]
+            batchRemoveStub.resolves(removalResult)
+            notFoundStub.returns(testError)
+
+            return target.batchDeleteTreatments([1,2,3], tx).then((data) => {
+                data.should.equal(removalResult)
+                sinon.assert.calledOnce(batchRemoveStub)
+                sinon.assert.calledWithExactly(
+                    batchRemoveStub,
+                    [1,2,3],
+                    sinon.match.same(tx)
+                )
                 sinon.assert.notCalled(notFoundStub)
             })
         })

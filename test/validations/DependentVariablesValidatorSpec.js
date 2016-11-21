@@ -55,7 +55,7 @@ describe('DependentVariablesValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('DependentVariable')
+            target.getEntityName().should.equal('DependentVariable')
         })
     })
 

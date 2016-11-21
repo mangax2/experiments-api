@@ -11,7 +11,7 @@ class ExperimentDesignsValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'ExperimentDesign'
     }
 

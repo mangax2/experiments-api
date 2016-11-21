@@ -25,7 +25,7 @@ class DependentVariablesValidator extends SchemaValidator {
 
     }
 
-    get entityName(){
+    getEntityName(){
         return 'DependentVariable'
     }
 

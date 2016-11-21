@@ -12,7 +12,7 @@ class FactorTypesValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'FactorType'
     }
 

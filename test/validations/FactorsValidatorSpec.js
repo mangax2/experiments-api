@@ -38,7 +38,7 @@ describe('FactorsValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('Factor')
+            target.getEntityName().should.equal('Factor')
         })
     })
 

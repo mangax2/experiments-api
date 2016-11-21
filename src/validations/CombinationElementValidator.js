@@ -26,7 +26,7 @@ class CombinationElementValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'CombinationElement'
     }
 

@@ -15,7 +15,7 @@ class HypothesisValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'Hypothesis'
     }
 

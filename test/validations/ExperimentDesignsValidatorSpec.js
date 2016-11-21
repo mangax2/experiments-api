@@ -39,7 +39,7 @@ describe('ExperimentDesignsValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('ExperimentDesign')
+            target.getEntityName().should.equal('ExperimentDesign')
         })
     })
 

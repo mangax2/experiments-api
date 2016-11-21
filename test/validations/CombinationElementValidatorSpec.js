@@ -39,7 +39,7 @@ describe('CombinationElementValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('CombinationElement')
+            target.getEntityName().should.equal('CombinationElement')
         })
     })
 

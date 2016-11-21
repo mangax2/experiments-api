@@ -27,7 +27,7 @@ class TreatmentValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'Treatment'
     }
 

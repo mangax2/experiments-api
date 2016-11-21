@@ -45,7 +45,7 @@ describe('HypothesisValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('Hypothesis')
+            target.getEntityName().should.equal('Hypothesis')
         })
     })
 

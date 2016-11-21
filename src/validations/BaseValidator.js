@@ -94,7 +94,7 @@ class BaseValidator {
     checkReferentialIntegrityById(id, entity, optionalTransaction) {
         return this.referentialIntegrityService.getById(id, entity, optionalTransaction).then((data) => {
             if (!data) {
-                this.messages.push(`${this.entityName} not found for id ${id}`)
+                this.messages.push(`${this.getEntityName()} not found for id ${id}`)
             }
         })
     }
@@ -102,12 +102,12 @@ class BaseValidator {
     checkRIBusiness(entityId, vals, entity, keys, optionalTransaction) {
         return this.referentialIntegrityService.getByBusinessKey(vals, entity, optionalTransaction).then((data) => {
             if (data && data['id'] != entityId) {
-                this.messages.push(`${this.entityName} already exists for given business keys: ${keys}`)
+                this.messages.push(`${this.getEntityName()} already exists for given business keys: ${keys}`)
             }
         })
     }
 
-    get entityName(){
+    getEntityName() {
         throw 'entityName not implemented'
     }
 

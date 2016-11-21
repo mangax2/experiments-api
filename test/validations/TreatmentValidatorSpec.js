@@ -37,7 +37,7 @@ describe('TreatmentValidator', () => {
 
     describe('entityName', () => {
         it('returns name of the entity', () => {
-            target.entityName.should.equal('Treatment')
+            target.getEntityName().should.equal('Treatment')
         })
     })
 

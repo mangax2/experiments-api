@@ -35,7 +35,7 @@ swagger=$(curl -H "oauth_resourceownerinfo: user_id=testUser" $SWAGGER_URL | tr 
 }]
 EndOfMessage
 )
-echo $payload
+#echo $payload
 
 payloadFilename="registeration-temp-`date +"%s"`.json"
 $(echo ${payload} > ${payloadFilename})

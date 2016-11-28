@@ -2380,7 +2380,7 @@
         "/composites/treatments": {
             "post": {
                 "summary": "post one or more treatments and combination elements entities",
-                "description": "Creates/updates treatments and combination elements in Experiments System.\n",
+                "description": "Creates/updates treatments and combination elements in Experiments System.\n Request json has add , delete and update sections for treatments. API does action on a section with values and empty sections are ignored. So if add and delete sections are empty and update has treatments then only update action will happen. Combination elements within treatments needs to be complete. New combination element without id will be added and combination element with id will be updated, any combination element not included within treatment will be deleted.",
                 "tags": [
                     "Composites"
                 ],

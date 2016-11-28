@@ -25,7 +25,7 @@ class FactorLevelsValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'FactorLevel'
     }
 

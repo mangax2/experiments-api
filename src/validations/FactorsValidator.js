@@ -27,7 +27,7 @@ class FactorsValidator extends SchemaValidator {
         ]
     }
 
-    get entityName(){
+    getEntityName(){
         return 'Factor'
     }
 

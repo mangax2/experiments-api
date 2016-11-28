@@ -413,13 +413,25 @@ describe('BaseValidator', () => {
 
     describe('checkReferentialIntegrityById', () => {
         let getEntityNameStub
+
+        before(() => {
+            getEntityNameStub = sinon.stub(target, 'getEntityName')
+        })
+
+        afterEach(() => {
+            getEntityNameStub.reset()
+        })
+
+        after(() => {
+            getEntityNameStub.restore()
+        })
+
         it('returns error message when id not found', () => {
             riFindStub.resolves(undefined)
-            sinon.stub(target, 'entityName', { get: function () { return 'entity' }})
+            getEntityNameStub.returns('entity')
             return target.checkReferentialIntegrityById(1, {}, 'entity').then(()=> {
                 target.messages.length.should.equal(1)
                 target.messages[0].should.equal("entity not found for id 1")
-
             })
         })
 
@@ -427,15 +439,29 @@ describe('BaseValidator', () => {
             riFindStub.resolves({id: 1})
             return target.checkReferentialIntegrityById(1, {}, 'entity').then(()=> {
                 target.messages.length.should.equal(0)
+                sinon.assert.notCalled(getEntityNameStub)
             })
         })
-
-
     })
 
     describe('checkRIBusiness', () => {
+        let getEntityNameStub
+
+        before(() => {
+            getEntityNameStub = sinon.stub(target, 'getEntityName')
+        })
+
+        afterEach(() => {
+            getEntityNameStub.reset()
+        })
+
+        after(() => {
+            getEntityNameStub.restore()
+        })
+
         it('returns error message when dup record found by busness key', () => {
             riFindByBusnessKeyStub.resolves({id: 2})
+            getEntityNameStub.returns('entity')
             return target.checkRIBusiness(1, [{}], 'entity', ['k1', 'k2']).then(()=> {
                 target.messages.length.should.equal(1)
                 target.messages[0].should.equal("entity already exists for given business keys: k1,k2")
@@ -447,6 +473,7 @@ describe('BaseValidator', () => {
             riFindByBusnessKeyStub.resolves(undefined)
             return target.checkRIBusiness(1, {}, 'entity', ['k1', 'k2']).then(()=> {
                 target.messages.length.should.equal(0)
+                sinon.assert.notCalled(getEntityNameStub)
             })
         })
 
@@ -487,13 +514,13 @@ describe('BaseValidator', () => {
     })
 
 
-    // describe('entityName', () => {
-    //     it('throws error in default implementation', () => {
-    //         (() => {
-    //             return target.entityName
-    //         }).should.throw('entityName not implemented')
-    //     })
-    // })
+     describe('entityName', () => {
+         it('throws error in default implementation', () => {
+             (() => {
+                 return target.getEntityName()
+             }).should.throw('entityName not implemented')
+         })
+     })
 
 })
 

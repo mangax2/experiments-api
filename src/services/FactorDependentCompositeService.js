@@ -176,10 +176,10 @@ class FactorDependentCompositeService {
                       dependentVariables,
                       context,
                       tx) {
-        return Promise.all([
-            this._persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx),
-            this._persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx)
-        ])
+
+        return this._persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx).then(() => {
+            return this._persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx)
+        })
     }
 
     @Transactional('persistAllVariables')

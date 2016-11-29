@@ -31,8 +31,8 @@ class TreatmentDetailsService {
     @Transactional("manageAllTreatmentDetails")
     manageAllTreatmentDetails(treatmentDetailsObj, context, tx) {
         return this._deleteTreatments(treatmentDetailsObj.deletes, tx).then(() => {
-            return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(() => {
-                return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(() => {
+            return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(() => {
+                return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(() => {
                     return AppUtil.createCompositePostResponse()
                 })
             })

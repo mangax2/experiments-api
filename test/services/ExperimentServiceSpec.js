@@ -3,28 +3,27 @@ const chai = require('chai')
 const ExperimentsService = require('../../src/services/ExperimentsService')
 const db = require('../../src/db/DbManager')
 
-const testPayload = {}
-const testResponse = {}
-const testError = {}
-const tx = {tx:{}}
-const context ={
-    userId:"akuma11"
-
-}
-
-let createStub
-let expDesignFindStub
-let experimentsService
-let findStub
-let getStub
-let removeStub
-let transactionStub
-let updateStub
-let validateStub
-
 describe('ExperimentsService', () => {
+    const testPayload = {}
+    const testResponse = {}
+    const testError = {}
+    const tx = {tx:{}}
+    const context ={
+        userId:"akuma11"
+    }
+
+    let batchCreateStub
+    let expDesignFindStub
+    let experimentsService
+    let findStub
+    let getStub
+    let removeStub
+    let transactionStub
+    let updateStub
+    let validateStub
+
     before(() => {
-        createStub = sinon.stub(db.experiments, 'create')
+        batchCreateStub = sinon.stub(db.experiments, 'batchCreate')
         expDesignFindStub = sinon.stub(db.experimentDesign, 'find')
         experimentsService = new ExperimentsService()
         findStub = sinon.stub(db.experiments, 'find')
@@ -38,7 +37,7 @@ describe('ExperimentsService', () => {
     })
 
     after(() => {
-        createStub.restore()
+        batchCreateStub.restore()
         expDesignFindStub.restore()
         findStub.restore()
         getStub.restore()
@@ -50,7 +49,7 @@ describe('ExperimentsService', () => {
     })
 
     afterEach(() => {
-        createStub.reset()
+        batchCreateStub.reset()
         expDesignFindStub.reset()
         findStub.reset()
         getStub.reset()
@@ -138,18 +137,18 @@ describe('ExperimentsService', () => {
         ]
 
         it('succeeds and returns newly created experiment id with status and message for one experiment create request', () => {
-            createStub.resolves({id: 1})
+            batchCreateStub.resolves([{id: 1}])
             expDesignFindStub.resolves({id: 2})
             validateStub.resolves()
 
-            return experimentsService.createExperiment(experimentsObj, context).then((result) => {
+            return experimentsService.batchCreateExperiments(experimentsObj, context, tx).then((result) => {
                 result.should.eql(expectedResult)
-                createStub.calledOnce.should.equal(true)
+                batchCreateStub.calledOnce.should.equal(true)
                 sinon.assert.calledWithExactly(
-                    createStub,
-                    sinon.match.same(tx),
-                    sinon.match.same(experimentsObj[0]),
-                    context)
+                    batchCreateStub,
+                    sinon.match.same(experimentsObj),
+                    sinon.match.same(context),
+                    sinon.match.same(tx))
             })
         })
 
@@ -168,25 +167,25 @@ describe('ExperimentsService', () => {
                 {
                     'status': 201,
                     'message': 'Resource created',
-                    'id': 1
+                    'id': 2
                 }
             )
 
-            createStub.resolves({id: 1})
+            batchCreateStub.resolves([{id: 1},{id:2}])
             expDesignFindStub.resolves({id: 2})
             validateStub.resolves()
 
-            return experimentsService.createExperiment(experimentsObj).then((result) => {
+            return experimentsService.batchCreateExperiments(experimentsObj, context, tx).then((result) => {
                 result.should.eql(expectedResult)
-                createStub.calledTwice.should.equal(true)
+                batchCreateStub.calledOnce.should.equal(true)
             })
         })
 
         it('fails', () => {
-            createStub.rejects(testError)
+            batchCreateStub.rejects(testError)
             validateStub.resolves()
 
-            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
+            return experimentsService.batchCreateExperiments(experimentsObj, context, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
             })
         })
@@ -194,8 +193,8 @@ describe('ExperimentsService', () => {
         it('fails due to validation error', () => {
             validateStub.rejects("Validation Failure")
 
-            return experimentsService.createExperiment(experimentsObj).should.be.rejected.then((err) => {
-                createStub.called.should.equal(false)
+            return experimentsService.batchCreateExperiments(experimentsObj, context, tx).should.be.rejected.then((err) => {
+                batchCreateStub.called.should.equal(false)
             })
         })
     })

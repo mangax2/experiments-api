@@ -37,9 +37,16 @@ module.exports = (rep) => {
             return rep.any("SELECT * FROM experiment")
         },
 
-        create: (t, experimentObj, context) => {
-            return t.one("insert into experiment(name, subject_type, ref_experiment_design_id, status,created_user_id, created_date," +
-                "modified_user_id, modified_date) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id",[experimentObj.name, experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, context.userId])
+        batchCreate: (experiments, context, tx = rep) => {
+            return tx.batch(
+                experiments.map(
+                    experiment => tx.one(
+                        "insert into experiment(name, subject_type, ref_experiment_design_id, status,created_user_id, created_date," +
+                        "modified_user_id, modified_date) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id",
+                        [experiment.name, experiment.subjectType, experiment.refExperimentDesignId, experiment.status, context.userId]
+                    )
+                )
+            )
         },
 
         update: (id, experimentObj, context) => {

@@ -7,7 +7,8 @@
     "clean": "rm -rf build && mkdir build",
     "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
-    "start": "NODE_ENV=production node ./build/app",
+    "start": "NODE_ENV=production node ./src/app.js",
+    "startOld": "NODE_ENV=production node ./build/app",
     "test": "node_modules/.bin/_mocha --compilers js:babel-core/register test",
     "testCoverage": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "_mocha --watch test",
@@ -65,8 +66,8 @@
     "validate.js": "~0.10.0"
   },
   "engines": {
-    "node": "~4.4.4",
-    "npm": "2.15.x"
+    "node": "~6.9.0",
+    "npm": "3.10.x"
   },
   "license": "ISC"
 }

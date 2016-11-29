@@ -16,6 +16,7 @@ class ExperimentsService {
     createExperiment(experiments, context) {
         return this._validator.validate(experiments).then(() => {
             return db.experiments.repository().tx('tx1', (t) => {
+                // This could be a problem when we start to pass multiple experiments
                 return Promise.all(experiments.map(ex =>
                     db.experiments.create(t, ex, context)
                 )).then(data => {

@@ -172,7 +172,7 @@ describe('TreatmentDetailsService', () => {
             batchGetCombinationElementsByTreatmentIdStub.restore()
         })
 
-        it('performs modifications in the following order: delete, update, then create', () => {
+        it('performs treatment modifications in the following order: delete, update, then create', () => {
             let callIndex = 0
             let deleteCallIndex = -1
             let updateCallIndex = -1
@@ -195,6 +195,38 @@ describe('TreatmentDetailsService', () => {
             })
 
             return service.manageAllTreatmentDetails({}, testContext, testTx).then(() => {
+                deleteCallIndex.should.equal(0)
+                updateCallIndex.should.equal(1)
+                createCallIndex.should.equal(2)
+            })
+        })
+
+        it('performs combination element modifications in the following order: delete, update, then create', () => {
+            let callIndex = 0
+            let deleteCallIndex = -1
+            let updateCallIndex = -1
+            let createCallIndex = -1
+            const service = new TreatmentDetailsService()
+            sinon.stub(service, '_assembleBatchCreateCombinationElementsRequestFromUpdates').returns([])
+            sinon.stub(service, '_assembleBatchUpdateCombinationElementsRequestFromUpdates').returns([])
+            sinon.stub(service._treatmentService, 'batchUpdateTreatments').returns(Promise.resolve())
+            sinon.stub(service, '_deleteCombinationElements', () => {
+                deleteCallIndex = callIndex
+                callIndex++
+                return Promise.resolve()
+            })
+            sinon.stub(service, '_updateCombinationElements', () => {
+                updateCallIndex = callIndex
+                callIndex++
+                return Promise.resolve()
+            })
+            sinon.stub(service, '_createCombinationElements', () => {
+                createCallIndex = callIndex
+                callIndex++
+                return Promise.resolve()
+            })
+
+            return service._updateTreatments(["this makes length more than zero"], testContext, testTx).then(() => {
                 deleteCallIndex.should.equal(0)
                 updateCallIndex.should.equal(1)
                 createCallIndex.should.equal(2)
@@ -716,7 +748,7 @@ describe('TreatmentDetailsService', () => {
             })
         })
 
-        it.skip('returns rejected promise when add combination element fails', () => {
+        it('returns rejected promise when add combination element fails', () => {
             const request = {
                 adds: [{combinationElements: [{}]}],
                 updates: [
@@ -773,7 +805,7 @@ describe('TreatmentDetailsService', () => {
                 sinon.assert.calledOnce(batchCreateCombinationElementsStub)
                 sinon.assert.calledWithExactly(
                     batchCreateCombinationElementsStub,
-                    [{treatmentId: 1}],
+                    [{testData: '3_2', treatmentId: 3}],
                     sinon.match.same(testContext),
                     sinon.match.same(testTx)
                 )

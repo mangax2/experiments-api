@@ -116,12 +116,12 @@ class TreatmentDetailsService {
     }
 
     _createAndUpdateCombinationElements(treatmentUpdates, context, tx) {
-        return this._createCombinationElements(
-            this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
+        return this._updateCombinationElements(
+            this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
             context,
             tx).then(() => {
-            return this._updateCombinationElements(
-                this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
+            return this._createCombinationElements(
+                this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
                 context,
                 tx)
         })

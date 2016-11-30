@@ -11,6 +11,8 @@ import FactorDependentCompositeService from '../services/FactorDependentComposit
 import TreatmentService from '../services/TreatmentService'
 import CombinationElementService from '../services/CombinationElementService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
+import ExperimentalUnitService from '../services/ExperimentalUnitService'
+
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -486,7 +488,54 @@ router.post('/composites/treatments', (req, res, next) => {
     })
 })
 
+router.post('/experimental-units', (req, res, next) => {
+    return new ExperimentalUnitService().batchCreateExperimentalUnits(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/experimental-units', (req, res, next) => {
+    return new ExperimentalUnitService().batchUpdateExperimentalUnits(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
 
 
+router.get('/experiments/:id/experimental-units', (req, res, next)=> {
+    return new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id).then((experimentalUnits)=> {
+        return res.json(experimentalUnits)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/treatments/:id/experimental-units', (req, res, next)=> {
+    return new ExperimentalUnitService().getExperimentalUnitsByTreatmentId(req.params.id).then((experimentalUnits)=> {
+        return res.json(experimentalUnits)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/experimental-units/:id', (req, res, next) => {
+    return new ExperimentalUnitService().getExperimentalUnitById(req.params.id).then((experimentalUnit) => {
+        return res.json(experimentalUnit)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.delete('/experimental-units/:id', (req, res, next) => {
+    return new ExperimentalUnitService().deleteExperimentalUnit(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
 
 module.exports = router

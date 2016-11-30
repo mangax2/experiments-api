@@ -65,8 +65,8 @@ router.delete('/experiment-designs/:id', (req, res, next) => {
 })
 
 router.post('/experiments', (req, res, next) => {
-    const experiment = req.body
-    return new ExperimentsService().createExperiment(experiment, req.context).then((id) => {
+    const experiments = req.body
+    return new ExperimentsService().batchCreateExperiments(experiments, req.context).then((id) => {
         return res.json(id)
     }).catch((err) => {
         return next(err)

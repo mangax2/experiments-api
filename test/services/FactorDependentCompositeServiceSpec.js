@@ -882,7 +882,6 @@ describe('FactorDependentCompositeService', () => {
 
         it('returns rejected promise when _persistVariablesWithLevels fails', () => {
             _persistVariablesWithLevelsStub.rejects()
-            _persistVariablesWithoutLevelsStub.resolves()
 
             return fdcs._persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(
@@ -892,13 +891,7 @@ describe('FactorDependentCompositeService', () => {
                     sinon.match.same(testContext),
                     sinon.match.same(testTx)
                 )
-                sinon.assert.calledWithExactly(
-                    _persistVariablesWithoutLevelsStub,
-                    42,
-                    sinon.match.same(testDependentVariables),
-                    sinon.match.same(testContext),
-                    sinon.match.same(testTx)
-                )
+                sinon.assert.notCalled(_persistVariablesWithoutLevelsStub)
             })
         })
 

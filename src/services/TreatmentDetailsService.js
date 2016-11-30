@@ -31,8 +31,8 @@ class TreatmentDetailsService {
     @Transactional("manageAllTreatmentDetails")
     manageAllTreatmentDetails(treatmentDetailsObj, context, tx) {
         return this._deleteTreatments(treatmentDetailsObj.deletes, tx).then(() => {
-            return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(() => {
-                return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(() => {
+            return this._updateTreatments(treatmentDetailsObj.updates, context, tx).then(() => {
+                return this._createTreatments(treatmentDetailsObj.adds, context, tx).then(() => {
                     return AppUtil.createCompositePostResponse()
                 })
             })
@@ -116,12 +116,12 @@ class TreatmentDetailsService {
     }
 
     _createAndUpdateCombinationElements(treatmentUpdates, context, tx) {
-        return this._createCombinationElements(
-            this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
+        return this._updateCombinationElements(
+            this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
             context,
             tx).then(() => {
-            return this._updateCombinationElements(
-                this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
+            return this._createCombinationElements(
+                this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
                 context,
                 tx)
         })

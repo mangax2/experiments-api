@@ -13,14 +13,11 @@ class ExperimentsService {
         this._validator = new ExperimentsValidator()
     }
 
-    createExperiment(experiments, context) {
-        return this._validator.validate(experiments).then(() => {
-            return db.experiments.repository().tx('tx1', (t) => {
-                return Promise.all(experiments.map(ex =>
-                    db.experiments.create(t, ex, context)
-                )).then(data => {
-                    return AppUtil.createPostResponse(data)
-                })
+    @Transactional('batchCreateExperiments')
+    batchCreateExperiments(experiments, context, tx) {
+        return this._validator.validate(experiments, 'POST', tx).then(() => {
+            return db.experiments.batchCreate(experiments, context, tx).then((data) => {
+                return AppUtil.createPostResponse(data)
             })
         })
     }

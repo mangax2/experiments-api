@@ -34,7 +34,7 @@ const pingFunc = (function () {
 
 const compression = require('compression')
 app.use(compression())
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit:1024*1024*20}))
 
 app.use(appBaseUrl, require('./routes/routes'))
 

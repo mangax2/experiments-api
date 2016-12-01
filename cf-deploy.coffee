@@ -3,9 +3,9 @@ module.exports = (cfDeploy) ->
 
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
-  diskLimit: "256M"
+  diskLimit: "512M"
   instances: 2
-  memoryLimit: "256M"
+  memoryLimit: "512M"
 #  smokeTest: 'nonProd'
   environment:
     DB_PASSWORD: "#{postgresPassword}"

@@ -74,7 +74,7 @@ class ExperimentalUnitService {
         return db.unit.remove(id, tx).then((data) => {
             if (!data) {
                 logger.error('Experimental Unit Not Found for requested id = ' + id)
-                throw AppError.notFound('Experimental Unit  Not Found for requested id')
+                throw AppError.notFound('Experimental Unit Not Found for requested id')
             } else {
                 return data
             }

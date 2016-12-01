@@ -10,13 +10,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
             {'paramName': 'groupId', 'type': 'numeric', 'required': true},
             {'paramName': 'groupId', 'type': 'refData', 'entity': db.group},
             {'paramName': 'treatmentId', 'type': 'numeric', 'required': true},
-            {'paramName': 'treatmentId', 'type': 'refData', 'entity': db.treatment},
-            {
-                'paramName': 'Unit',
-                'type': 'businessKey',
-                'keys': ['treatmentId', 'rep'],
-                'entity': db.unit
-            }
+            {'paramName': 'treatmentId', 'type': 'refData', 'entity': db.treatment}
         ]
     }
 
@@ -28,7 +22,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
     }
 
     getEntityName() {
-        return 'Unit'
+        return 'ExperimentalUnit'
     }
 
     getSchema(operationName) {
@@ -42,21 +36,19 @@ class ExperimentalUnitValidator extends SchemaValidator {
         }
     }
 
-    getBusinessKeyPropertyNames() {
-        return ['treatmentId', 'rep']
-    }
-
-    getDuplicateBusinessKeyError() {
-        return 'Duplicate rep in request payload with same treatmentId'
-    }
 
     preValidate(combinationElementObj) {
         if (!_.isArray(combinationElementObj) || combinationElementObj.length == 0) {
             return Promise.reject(
-                AppError.badRequest('Unit request object needs to be an array'))
+                AppError.badRequest('ExperimentalUnit request object needs to be an array'))
         } else {
             return Promise.resolve()
         }
+    }
+
+    postValidate(targetObject) {
+        // No business key to validate
+        return Promise.resolve()
     }
 }
 

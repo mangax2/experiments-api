@@ -339,4 +339,7 @@ ALTER TABLE public.ref_factor_type ADD CONSTRAINT "ref_factor_type_ak_1" UNIQUE(
 ALTER TABLE public.tag ADD CONSTRAINT "tag_ak_1" UNIQUE(code, experiment_id);
 ALTER TABLE public.treatment ADD CONSTRAINT "treatment_ak_1" UNIQUE(name, experiment_id);
 ALTER TABLE public.work_instruction ADD CONSTRAINT "work_instruction_ak_1" UNIQUE(instruction, experiment_id);
-ALTER TABLE public.unit ADD CONSTRAINT "unit_ak_1" UNIQUE(treatment_id, rep);
+-- ALTER TABLE public.unit ADD CONSTRAINT "unit_ak_1" UNIQUE(treatment_id, rep);
+
+ALTER TABLE public.group DROP CONSTRAINT "group_ak_1";
+ALTER TABLE public.group ADD CONSTRAINT "group_ak_1" UNIQUE(variable_name, variable_value, experiment_id, parent_id);

@@ -343,3 +343,18 @@ ALTER TABLE public.work_instruction ADD CONSTRAINT "work_instruction_ak_1" UNIQU
 
 ALTER TABLE public.group DROP CONSTRAINT "group_ak_1";
 ALTER TABLE public.group ADD CONSTRAINT "group_ak_1" UNIQUE(variable_name, variable_value, experiment_id, parent_id);
+
+ALTER TABLE public.group DROP CONSTRAINT "group_group";
+ALTER TABLE public.group
+ADD CONSTRAINT "group_group"
+FOREIGN KEY (parent_id) REFERENCES public.group(id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+ALTER TABLE public.unit DROP CONSTRAINT "unit_group";
+ALTER TABLE public.unit
+ADD CONSTRAINT "unit_group"
+FOREIGN KEY (group_id) REFERENCES public.group(id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
+
+ALTER TABLE public.unit DROP CONSTRAINT "unit_treatment";
+ALTER TABLE public.unit
+ADD CONSTRAINT "unit_treatment"
+FOREIGN KEY (treatment_id) REFERENCES public.treatment(id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;

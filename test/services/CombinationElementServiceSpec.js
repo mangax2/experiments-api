@@ -205,6 +205,36 @@ describe('CombinationElementService', () => {
         })
     })
 
+    describe('batchGetCombinationElementsByTreatmentIdsNoValidate', () => {
+        it('returns rejected promise when batchFindAllByTreatmentIds fails', () => {
+            batchFindAllByTreatmentIdsStub.rejects(testError)
+
+            return target.batchGetCombinationElementsByTreatmentIdsNoValidate([1], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(batchFindAllByTreatmentIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchFindAllByTreatmentIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+
+        it('returns resolved promise when calls succeed', () => {
+            batchFindAllByTreatmentIdsStub.resolves(testData)
+
+            return target.batchGetCombinationElementsByTreatmentIdsNoValidate([1], tx).then((data) => {
+                data.should.equal(testData)
+                sinon.assert.calledOnce(batchFindAllByTreatmentIdsStub)
+                sinon.assert.calledWithExactly(
+                    batchFindAllByTreatmentIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+    })
+
     describe('getCombinationElementsByTreatmentId', () => {
         it('returns rejected promise when getByTreatmentId fails', () => {
             getTreatmentByIdStub.rejects(testError)

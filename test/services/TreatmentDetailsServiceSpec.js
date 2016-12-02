@@ -3,9 +3,14 @@ const chai = require('chai')
 const _ = require('lodash')
 const TreatmentDetailsService = require('../../src/services/TreatmentDetailsService')
 const AppUtil = require('../../src/services/utility/AppUtil')
+const expect = require('chai').expect
 
 describe('TreatmentDetailsService', () => {
     let target
+    const testTx = {
+        tx:{}
+    }
+    const testError = {}
 
     before(() => {
         target = new TreatmentDetailsService()
@@ -13,118 +18,95 @@ describe('TreatmentDetailsService', () => {
 
     describe("getTreatmentWithDetails", ()=> {
         let treatmentServiceGetStub
-        let combinationElementServiceStub
+        let batchGetCombinationElementsByTreatmentIdsNoValidateStub
 
         before(() => {
-            combinationElementServiceStub = sinon.stub(target._combinationElementService, 'getCombinationElementsByTreatmentId')
+            batchGetCombinationElementsByTreatmentIdsNoValidateStub =
+                sinon.stub(target._combinationElementService, 'batchGetCombinationElementsByTreatmentIdsNoValidate')
             treatmentServiceGetStub = sinon.stub(target._treatmentService, 'getTreatmentsByExperimentId')
         })
         afterEach(() => {
-            combinationElementServiceStub.reset()
+            batchGetCombinationElementsByTreatmentIdsNoValidateStub.reset()
             treatmentServiceGetStub.reset()
         })
         after(() => {
-            combinationElementServiceStub.restore()
+            batchGetCombinationElementsByTreatmentIdsNoValidateStub.restore()
             treatmentServiceGetStub.restore()
         })
 
         describe('getAllTreatmentDetails', () => {
-            let getCombinationElementsPromisesStub
-
-            before(() => {
-                getCombinationElementsPromisesStub = sinon.stub(target, '_getCombinationElementsPromises')
-            })
-            afterEach(() => {
-                getCombinationElementsPromisesStub.reset()
-            })
-            after(() => {
-                getCombinationElementsPromisesStub.restore()
-            })
-
             it('rejects when treatment service fails to get treatments', () => {
-                treatmentServiceGetStub.rejects()
+                treatmentServiceGetStub.rejects(testError)
 
-                return target.getAllTreatmentDetails(1).should.be.rejected
-            })
-
-            it('passes treatments to _getCombinationElementsPromises, which fails', () => {
-                getCombinationElementsPromisesStub.rejects()
-
-                return target.getAllTreatmentDetails(1).should.be.rejected
-            })
-
-            it('passes treatments to _getCombinationElementPromises which returns empty', () => {
-                treatmentServiceGetStub.resolves([{id: 1}])
-                getCombinationElementsPromisesStub.returns([Promise.resolve([])])
-
-                return target.getAllTreatmentDetails(1).then((r) => {
-                    r.should.deep.equal([{id: 1, combinationElements: []}])
+                return target.getAllTreatmentDetails(1, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+                    sinon.assert.calledWithExactly(
+                        treatmentServiceGetStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
                 })
             })
 
-            it('passes treatments to _getCombinationElementPromises which returns some elements', () => {
-                treatmentServiceGetStub.resolves([{id: 1}])
-                getCombinationElementsPromisesStub.returns([Promise.resolve([{id: 1, name: 'TestN', value: 'TestV'}])])
+            it('rejects when batchGetCombinationElementsByTreatmentIdsNoValidate fails', () => {
+                treatmentServiceGetStub.resolves([{id:7}])
+                batchGetCombinationElementsByTreatmentIdsNoValidateStub.rejects(testError)
 
-                return target.getAllTreatmentDetails(1).then((r) => {
-                    r.length.should.equal(1)
-                    r[0].id.should.equal(1)
-                    r[0].combinationElements.length.should.equal(1)
-                    r[0].combinationElements[0].id.should.equal(1)
-                    r[0].combinationElements[0].name.should.equal('TestN')
-                    r[0].combinationElements[0].value.should.equal('TestV')
-
+                return target.getAllTreatmentDetails(1, testTx).should.be.rejected.then((err) => {
+                    err.should.equal(testError)
+                    sinon.assert.calledWithExactly(
+                        treatmentServiceGetStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        batchGetCombinationElementsByTreatmentIdsNoValidateStub,
+                        [7],
+                        sinon.match.same(testTx)
+                    )
                 })
             })
 
-            it('passes treatments to _getCombinationElementPromises which returns some elements and some empty', () => {
-                treatmentServiceGetStub.resolves([{id: 1}, {id: 2}])
-                getCombinationElementsPromisesStub.returns([Promise.resolve([{id: 1, name: 'TestN', value: 'TestV'}]), Promise.resolve([])])
+            it('succeeds when all calls are successful and there are no combination elements', () => {
+                treatmentServiceGetStub.resolves([{id:7},{id:11}])
+                batchGetCombinationElementsByTreatmentIdsNoValidateStub.resolves([[],[]])
 
-                return target.getAllTreatmentDetails(1).then((r) => {
-                    r.length.should.equal(2)
-                    r[0].id.should.equal(1)
-                    r[0].combinationElements.length.should.equal(1)
-                    r[0].combinationElements[0].id.should.equal(1)
-                    r[0].combinationElements[0].name.should.equal('TestN')
-                    r[0].combinationElements[0].value.should.equal('TestV')
-
-                    r[1].id.should.equal(2)
-                    r[1].combinationElements.length.should.equal(0)
+                return target.getAllTreatmentDetails(1, testTx).then((data) => {
+                    expect(data.length).to.equal(2)
+                    expect(data[0].combinationElements).to.eql([])
+                    expect(data[1].combinationElements).to.eql([])
+                    sinon.assert.calledWithExactly(
+                        treatmentServiceGetStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        batchGetCombinationElementsByTreatmentIdsNoValidateStub,
+                        [7, 11],
+                        sinon.match.same(testTx)
+                    )
                 })
             })
-        })
 
-        describe('_getCombinationElementsPromises', () => {
-            it('returns an empty array if treatments are empty', () => {
+            it('succeeds when all calls are successful and there are combination elements', () => {
+                treatmentServiceGetStub.resolves([{id:7},{id:11}])
+                batchGetCombinationElementsByTreatmentIdsNoValidateStub.resolves([[1],[2,3]])
 
-                const promises = target._getCombinationElementsPromises([])
-
-                promises.length.should.equal(0)
-            })
-
-            it('returns an empty array if treatments are undefined', () => {
-
-                const promises = target._getCombinationElementsPromises(undefined)
-
-                promises.length.should.equal(0)
-            })
-            it('returns an empty array if treatments are null', () => {
-
-                const promises = target._getCombinationElementsPromises(null)
-
-                promises.length.should.equal(0)
-            })
-            it('calls combinationElementService for each treatment', () => {
-                const treatments = [{},{}]
-
-                combinationElementServiceStub.returns(new Promise((resolve, reject) => {}))
-
-                const promises = target._getCombinationElementsPromises(treatments)
-
-                combinationElementServiceStub.calledTwice.should.equal(true)
-
-                promises.length.should.equal(2)
+                return target.getAllTreatmentDetails(1, testTx).then((data) => {
+                    expect(data.length).to.equal(2)
+                    expect(data[0].combinationElements).to.eql([1])
+                    expect(data[1].combinationElements).to.eql([2,3])
+                    sinon.assert.calledWithExactly(
+                        treatmentServiceGetStub,
+                        1,
+                        sinon.match.same(testTx)
+                    )
+                    sinon.assert.calledWithExactly(
+                        batchGetCombinationElementsByTreatmentIdsNoValidateStub,
+                        [7, 11],
+                        sinon.match.same(testTx)
+                    )
+                })
             })
         })
     })

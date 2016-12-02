@@ -33,11 +33,6 @@ class TreatmentService {
         })
     }
 
-    @Transactional('getTreatmentsByExperimentIdNoValidate')
-    getTreatmentsByExperimentIdNoValidate(id, tx) {
-        return db.treatment.findAllByExperimentId(id, tx)
-    }
-
     @Transactional('getTreatmentById')
     getTreatmentById(id, tx) {
         return db.treatment.find(id, tx).then((data) => {

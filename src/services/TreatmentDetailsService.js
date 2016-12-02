@@ -13,7 +13,7 @@ class TreatmentDetailsService {
 
     @Transactional("getAllTreatmentDetails")
     getAllTreatmentDetails(experimentId, tx) {
-        return this._treatmentService.getTreatmentsByExperimentIdNoValidate(experimentId, tx).then((treatments)=> {
+        return this._treatmentService.getTreatmentsByExperimentId(experimentId, tx).then((treatments)=> {
             const treatmentIds = _.map(treatments, (t) => t.id)
             return this._combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate(treatmentIds, tx).then((treatmentCombinationElements) => {
                 return _.map(treatments, (treatment, treatmentIndex) => {

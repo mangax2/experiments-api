@@ -11,20 +11,16 @@ class TreatmentDetailsService {
         this._combinationElementService = new CombinationElementService()
     }
 
-    getAllTreatmentDetails(experimentId) {
-        return this._treatmentService.getTreatmentsByExperimentId(experimentId).then((treatments)=> {
-            return Promise.all(this._getCombinationElementsPromises(treatments)).then((dataArray)=> {
-                return _.map(treatments, (treatment, index)=> {
-                    treatment.combinationElements = dataArray[index]
+    @Transactional("getAllTreatmentDetails")
+    getAllTreatmentDetails(experimentId, tx) {
+        return this._treatmentService.getTreatmentsByExperimentIdNoValidate(experimentId, tx).then((treatments)=> {
+            const treatmentIds = _.map(treatments, (t) => t.id)
+            return this._combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate(treatmentIds, tx).then((treatmentCombinationElements) => {
+                return _.map(treatments, (treatment, treatmentIndex) => {
+                    treatment.combinationElements = treatmentCombinationElements[treatmentIndex]
                     return treatment
                 })
             })
-        })
-    }
-
-    _getCombinationElementsPromises(treatments) {
-        return _.map(treatments, (treatment)=> {
-            return this._combinationElementService.getCombinationElementsByTreatmentId(treatment.id)
         })
     }
 

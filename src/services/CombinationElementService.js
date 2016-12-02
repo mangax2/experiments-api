@@ -40,6 +40,11 @@ class CombinationElementService {
         })
     }
 
+    @Transactional('batchGetCombinationElementsByTreatmentIdsNoValidate')
+    batchGetCombinationElementsByTreatmentIdsNoValidate(ids, tx) {
+        return db.combinationElement.batchFindAllByTreatmentIds(ids, tx)
+    }
+
     @Transactional('getCombinationElementById')
     getCombinationElementById(id, tx) {
         return db.combinationElement.find(id, tx).then((data) => {

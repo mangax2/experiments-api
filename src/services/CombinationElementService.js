@@ -60,9 +60,9 @@ class CombinationElementService {
     @Transactional('batchUpdateCombinationElements')
     batchUpdateCombinationElements(combinationElements, context, tx) {
         return this._validator.validate(combinationElements, 'PUT', tx).then(() => {
-                return db.combinationElement.batchUpdate(combinationElements, context, tx).then(data => {
-                    return AppUtil.createPutResponse(data)
-                })
+            return db.combinationElement.batchUpdate(combinationElements, context, tx).then(data => {
+                return AppUtil.createPutResponse(data)
+            })
         })
     }
 

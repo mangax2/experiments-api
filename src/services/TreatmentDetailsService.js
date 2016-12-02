@@ -115,7 +115,8 @@ class TreatmentDetailsService {
         return this._updateCombinationElements(
             this._assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
             context,
-            tx).then(() => {
+            tx
+        ).then(() => {
             return this._createCombinationElements(
                 this._assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
                 context,

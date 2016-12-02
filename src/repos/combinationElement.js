@@ -15,10 +15,14 @@ module.exports = (rep) => {
         },
 
         batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
-            return tx.any("SELECT * FROM combination_element WHERE treatment_id IN ($1:csv)", [treatmentIds]).then((data) => {
-                const groups = _.groupBy(data, (d) => d.treatment_id)
-                return _.map(treatmentIds, (treatmentId) => groups[treatmentId])
-            })
+            if (treatmentIds == null || treatmentIds == undefined || treatmentIds.length == 0) {
+                return Promise.resolve([])
+            } else {
+                return tx.any("SELECT * FROM combination_element WHERE treatment_id IN ($1:csv)", [treatmentIds]).then((data) => {
+                    const groups = _.groupBy(data, (d) => d.treatment_id)
+                    return _.map(treatmentIds, (treatmentId) => groups[treatmentId])
+                })
+            }
         },
 
         batchCreate: (combinationElements, context, tx = rep) => {

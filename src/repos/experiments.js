@@ -33,6 +33,10 @@ module.exports = (rep) => {
             return tx.oneOrNone("SELECT * FROM experiment WHERE id = $1", id)
         },
 
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM experiment WHERE id IN ($1:csv)", [ids])
+        },
+
         all: () => {
             return rep.any("SELECT * FROM experiment")
         },

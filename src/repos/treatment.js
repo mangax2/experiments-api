@@ -9,11 +9,7 @@ module.exports = (rep, pgp) => {
         },
 
         batchFind: (ids, tx = rep) => {
-            return tx.batch(
-                ids.map(
-                    id => tx.oneOrNone("SELECT * FROM treatment WHERE id = $1", id)
-                )
-            )
+            return tx.any("SELECT * FROM treatment WHERE id IN ($1:csv)", [ids])
         },
 
         findAllByExperimentId: (experimentId, tx = rep) => {
@@ -81,6 +77,25 @@ module.exports = (rep, pgp) => {
 
         findByBusinessKey: (keys, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM treatment WHERE experiment_id=$1 and name=$2", keys)
+        },
+
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            return tx.any(
+                pgp.helpers.concat(
+                    batchKeys.map((obj)=>{
+                           return {
+                                query:"SELECT experiment_id,name FROM treatment WHERE experiment_id=$1 and name=$2 and id!=$3",
+                                values: obj.keys.concat(obj.updateId)
+
+                            }
+
+                    }
+
+                    )
+                )
+            )
         }
+
+
     }
 }

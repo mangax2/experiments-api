@@ -21,7 +21,9 @@ class BaseValidator {
             _.map(objectArray, (element) => {
                 return this.validateEntity(element, operationName, optionalTransaction)
             })
-        )
+        ).then(()=>{
+           return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+        })
     }
 
     _validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
@@ -105,6 +107,51 @@ class BaseValidator {
                 this.messages.push(`${this.getEntityName()} already exists for given business keys: ${keys}`)
             }
         })
+    }
+
+    checkRIBatch(riBatchOfGroups, optionalTransaction){
+        return Promise.all(
+            _.map(riBatchOfGroups, (groupSet)=>{
+                const entity = groupSet[0].entity
+                const ids = _.chain(groupSet).map((g)=>{
+                    if (g.id) {
+                        return g.id
+                    }
+                }).filter((e=>e!=undefined)).uniq().value()
+
+                if(ids.length>0){
+                    return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction).then((data) =>{
+                        if(data.length!=ids.length){
+                            this.messages.push(`${this.getEntityName()} not found for ${groupSet[0].paramName}(s): `+ this._getIdDifference(ids,data))
+                        }
+                    })
+
+                }else {
+                    //business key case
+                    const businessKeyObjects=_.chain(groupSet).map((r)=>{
+                            return {keys:r.keys, updateId:r.updateId}
+                    }).filter(d=>d!=undefined).uniq().value()
+
+                    return this.referentialIntegrityService.getEntitiesByKeys(businessKeyObjects, entity, optionalTransaction).then((data) =>{
+                        const dataFromDb=_.flatten(data)
+                        if(dataFromDb && dataFromDb.length>0){
+                            this.messages.push(`${this.getEntityName()} already exists for business keys${this._getBusinessKeyDifference(dataFromDb)}`)
+                        }
+                    })
+
+                }
+            })
+        )
+    }
+
+    _getIdDifference(ids,data){
+       const idsFromDb=_.map(data,(d)=>d.id)
+       return _.difference(ids, idsFromDb)
+    }
+
+    _getBusinessKeyDifference(dataFromDb){
+        const str= _.map(dataFromDb, (d)=>JSON.stringify(d).replace(/\"([^(\")"]+)\":/g,"$1:"))
+        return str
     }
 
     getEntityName() {

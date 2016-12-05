@@ -10,6 +10,10 @@ module.exports = (rep, pgp) => {
             return tx.oneOrNone("SELECT * FROM combination_element WHERE id = $1", id)
         },
 
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM combination_element WHERE id IN ($1:csv)", [ids])
+        },
+
         findAllByTreatmentId: (treatmentId, tx = rep) => {
             return tx.any("SELECT * FROM combination_element WHERE treatment_id = $1", treatmentId)
         },
@@ -80,6 +84,14 @@ module.exports = (rep, pgp) => {
 
         findByBusinessKey: (keys, tx= rep) => {
             return tx.oneOrNone("SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2", keys)
+        },
+
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            return tx.batch(
+                batchKeys.map(
+                    obj => tx.any("SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2 and id!="+obj.updateId, obj.keys)
+                )
+            )
         }
     }
 }

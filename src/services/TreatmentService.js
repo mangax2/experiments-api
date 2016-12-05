@@ -5,6 +5,7 @@ import ExperimentsService from './ExperimentsService'
 import TreatmentValidator from '../validations/TreatmentValidator'
 import log4js from 'log4js'
 import _ from 'lodash'
+import ctimestamp from 'console-timestamp'
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('TreatmentService')

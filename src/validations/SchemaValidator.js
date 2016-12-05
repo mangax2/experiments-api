@@ -65,37 +65,59 @@ export class SchemaValidator extends BaseValidator {
                 else if (elementSchema.type == 'boolean') {
                     this.checkBoolean(elementValue, elementSchema.paramName)
                 }
-
-                if (!this.hasErrors() && elementSchema.type == 'refData') {
-                    return this.checkReferentialIntegrityById(elementValue, elementSchema.entity, optionalTransaction).then(() => {
-                        resolve()
-                    }, (err)=> {
-                        reject(err)
-                    })
-                }
-                else {
-                    resolve()
-                }
             }
-            else if (!this.hasErrors() && elementSchema.type == 'businessKey') {
-                const vals = _.map(elementSchema.keys, (key) => {
-                    return targetObject[key]
-                })
-
-                return this.checkRIBusiness(targetObject['id'], vals, elementSchema.entity, elementSchema.keys, optionalTransaction).then(() => {
-                    resolve()
-                }, (err)=> {
-                    reject(err)
-                })
-            }
-            else {
                 resolve()
-            }
+
         })
     }
 
     validateEntity(targetObject, operationName, optionalTransaction) {
         return this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
+    }
+
+
+    validateBatchForRI(batchPayload, operationName, optionalTransaction) {
+
+        return new Promise((resolve, reject) =>{
+
+            const riSchema= _.filter(this.getSchema(operationName), (schema)=>{
+                return schema.type=='refData' || schema.type=='businessKey'
+            })
+            const riCheckArray=[]
+            _.map(riSchema, (schema)=>{
+                _.forEach(batchPayload,(p)=>{
+                    const riCheckObj={}
+                    const key = _.keys(p).find(x=>x == schema.paramName)
+                    riCheckObj.entity=schema.entity
+                    riCheckObj.updateId=p['id']
+                    if(schema.type=='businessKey'){
+                        const vals = _.map(schema.keys, (key) => {
+                            return p[key]
+                        })
+                        riCheckObj.keys= vals
+                    }else{
+                        riCheckObj.id=p[key]
+                    }
+                    riCheckObj.paramName=schema.paramName
+                    riCheckArray.push(riCheckObj)
+                })
+            })
+
+            if(riCheckArray.length==0){
+                resolve()
+
+            }else{
+                const riCheckGroupByEntity= _.values(_.groupBy(riCheckArray, 'paramName'))
+                return  this.checkRIBatch(riCheckGroupByEntity, optionalTransaction).then(()=>{
+                    resolve()
+                }, (err)=> {
+                    reject(err)
+                })
+            }
+
+        })
+
+
     }
 
     postValidate(targetObject) {

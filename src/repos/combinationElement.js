@@ -57,7 +57,7 @@ module.exports = (rep, pgp) => {
                     name: ce.name,
                     value: ce.value,
                     treatment_id: ce.treatmentId,
-                    modified_user_id: ce.userId,
+                    modified_user_id: context.userId,
                     modified_date: 'CURRENT_TIMESTAMP'
                 }
             })

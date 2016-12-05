@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -26,27 +26,44 @@ module.exports = (rep) => {
         },
 
         batchCreate: (combinationElements, context, tx = rep) => {
-            return tx.batch(
-                combinationElements.map(
-                    combinationElement => tx.one(
-                        "INSERT INTO combination_element(name, value, treatment_id, created_user_id, created_date, modified_user_id, modified_date) " +
-                        "VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP) RETURNING id",
-                        [combinationElement.name, combinationElement.value, combinationElement.treatmentId, context.userId]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['name', 'value', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                {table: 'combination_element'}
             )
+            const values = combinationElements.map((ce) => {
+                return{
+                    name: ce.name,
+                    value: ce.value,
+                    treatment_id: ce.treatmentId,
+                    created_user_id: context.userId,
+                    created_date: 'CURRENT_TIMESTAMP',
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+            const query = pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' RETURNING id'
+
+            return tx.any(query)
         },
 
         batchUpdate: (combinationElements, context, tx = rep) => {
-            return tx.batch(
-                combinationElements.map(
-                    combinationElement => tx.oneOrNone(
-                        "UPDATE combination_element SET (name, value, treatment_id, modified_user_id, modified_date) = " +
-                        "($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $5 RETURNING *",
-                        [combinationElement.name, combinationElement.value, combinationElement.treatmentId, context.userId, combinationElement.id]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['?id', 'name', 'value', 'treatment_id', 'modified_user_id', 'modified_date'],
+                {table: 'combination_element'}
             )
+            const data = combinationElements.map((ce) => {
+                return {
+                    id: ce.id,
+                    name: ce.name,
+                    value: ce.value,
+                    treatment_id: ce.treatmentId,
+                    modified_user_id: ce.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+            const query = pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' WHERE v.id = t.id RETURNING *'
+
+            return tx.any(query)
         },
 
         remove: (id, tx= rep) => {
@@ -54,11 +71,11 @@ module.exports = (rep) => {
         },
 
         batchRemove: (ids, tx = rep) => {
-            return tx.batch(
-                ids.map(
-                    id => tx.oneOrNone("DELETE FROM combination_element WHERE id = $1 RETURNING id", id)
-                )
-            )
+            if (ids == null || ids == undefined || ids.length == 0) {
+                return Promise.resolve([])
+            } else {
+                return tx.any("DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id", [ids])
+            }
         },
 
         findByBusinessKey: (keys, tx= rep) => {

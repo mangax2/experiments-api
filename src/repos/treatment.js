@@ -1,4 +1,4 @@
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -21,27 +21,46 @@ module.exports = (rep) => {
         },
 
         batchCreate: (treatments, context, tx = rep) => {
-            return tx.batch(
-                treatments.map(
-                    treatment => tx.one(
-                        "INSERT INTO treatment(is_control, name, notes ,experiment_id, created_user_id, created_date, modified_user_id, modified_date) " +
-                        "VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP) RETURNING id",
-                        [treatment.isControl, treatment.name, treatment.notes, treatment.experimentId, context.userId]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['is_control', 'name', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                {table: 'treatment'}
             )
+            const values = treatments.map((t) => {
+                return{
+                    is_control: t.isControl,
+                    name: t.name,
+                    notes: t.notes,
+                    experiment_id: t.experimentId,
+                    created_user_id: context.userId,
+                    created_date: 'CURRENT_TIMESTAMP',
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+            const query = pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' RETURNING id'
+
+            return tx.any(query)
         },
 
         batchUpdate: (treatments, context, tx = rep) => {
-            return tx.batch(
-                treatments.map(
-                    treatment => tx.oneOrNone(
-                        "UPDATE treatment SET (is_control, name, notes, experiment_id, modified_user_id, modified_date) = " +
-                        "($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *",
-                        [treatment.isControl, treatment.name,treatment.notes, treatment.experimentId, context.userId, treatment.id]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['?id', 'is_control', 'name', 'notes', 'experiment_id', 'modified_user_id', 'modified_date'],
+                {table: 'treatment'}
             )
+            const data = treatments.map((t) => {
+                return {
+                    id: t.id,
+                    is_control: t.isControl,
+                    name: t.name,
+                    notes: t.notes,
+                    experiment_id: t.experimentId,
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+            const query = pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' WHERE v.id = t.id RETURNING *'
+
+            return tx.any(query)
         },
 
         remove: (id, tx = rep) => {
@@ -49,11 +68,11 @@ module.exports = (rep) => {
         },
 
         batchRemove: (ids, tx = rep) => {
-            return tx.batch(
-                ids.map(
-                    id => tx.oneOrNone("DELETE FROM treatment WHERE id=$1 RETURNING id", id)
-                )
-            )
+            if (ids == null || ids == undefined || ids.length == 0) {
+                return Promise.resolve([])
+            } else {
+                return tx.any("DELETE FROM treatment WHERE id IN ($1:csv) RETURNING id", [ids])
+            }
         },
 
         removeByExperimentId: (experimentId, tx = rep) => {

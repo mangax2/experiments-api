@@ -42,17 +42,21 @@ describe('BaseValidator', () => {
 
     describe('_validateArray', () => {
         let validateEntityStub
+        let validateBatchForRIStub
 
         before(() => {
             validateEntityStub = sinon.stub(target, 'validateEntity')
+            validateBatchForRIStub = sinon.stub(target, 'validateBatchForRI')
         })
 
         afterEach(() => {
             validateEntityStub.reset()
+            validateBatchForRIStub.reset()
         })
 
         after(() => {
             validateEntityStub.restore()
+            validateBatchForRIStub.restore()
         })
 
         it('returns rejected promise when one validation returns rejected promise', () => {
@@ -100,6 +104,7 @@ describe('BaseValidator', () => {
             const element2 = {}
             validateEntityStub.onFirstCall().resolves()
             validateEntityStub.onSecondCall().resolves()
+            validateBatchForRIStub.onFirstCall().resolves()
 
             return target._validateArray([element1, element2], 'opName', testTransaction).then(() => {
                 validateEntityStub.callCount.should.eql(2)
@@ -521,6 +526,55 @@ describe('BaseValidator', () => {
              }).should.throw('entityName not implemented')
          })
      })
+
+    describe('_getIdDifference', () => {
+        it('returns empty when both arguments have same ids', () => {
+           const diff= target._getIdDifference([2,4,5],[{id:2},{id:4},{id:5}])
+            diff.length.should.equal(0)
+        })
+        it('returns diff array when first argument has more ids', () => {
+            const diff= target._getIdDifference([2,4,5, 6, 7],[{id:2},{id:4},{id:5}])
+            diff.should.eql([6,7])
+
+        })
+        it('returns diff array when second argument is empty array', () => {
+            const diff= target._getIdDifference([2,4,5, 6, 7],[])
+            diff.should.eql([2,4,5, 6, 7])
+
+        })
+    })
+
+
+    describe('_getBusinessKeyDifference', () => {
+        it('returns empty stringify object without double quotes in string when input is empty object', () => {
+            const businessKeyObj= target._getBusinessKeyDifference([{}])
+            console.log(businessKeyObj)
+            businessKeyObj.should.eql('{}' )
+        })
+
+        it('returns empty stringify object without double quotes in string from input object', () => {
+            const businessKeyObj= target._getBusinessKeyDifference([{"a":"1"}])
+            console.log(businessKeyObj)
+            businessKeyObj.should.eql('{a:1}' )
+        })
+
+        it('returns empty stringify objects without double quotes in string from list of objects', () => {
+            const businessKeyObj= target._getBusinessKeyDifference([{"a":"1"},{"b":"2"}])
+            console.log(businessKeyObj)
+            businessKeyObj.should.eql('{a:1},{b:2}')
+        })
+
+        it('returns diff array when first argument has more ids', () => {
+            const diff= target._getIdDifference([2,4,5, 6, 7],[{id:2},{id:4},{id:5}])
+            diff.should.eql([6,7])
+
+        })
+        it('returns diff array when second argument is empty array', () => {
+            const diff= target._getIdDifference([2,4,5, 6, 7],[])
+            diff.should.eql([2,4,5, 6, 7])
+
+        })
+    })
 
 })
 

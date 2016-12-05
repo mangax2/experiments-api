@@ -17,6 +17,7 @@ describe('SchemaValidator', () => {
         before(() => {
             hasErrorsStub = sinon.stub(target, 'hasErrors')
             checkReferentialIntegrityByIdStub = sinon.stub(target, 'checkReferentialIntegrityById')
+
             checkRIBusinessStub = sinon.stub(target, 'checkRIBusiness')
         })
 
@@ -119,100 +120,101 @@ describe('SchemaValidator', () => {
                 err[0].errorMessage.should.equal('bool must be boolean')
             })
         })
+        //TODO replace below with new spec
 
-        it('returns rejected promise when checkReferentialIntegrityById fails', () => {
-            hasErrorsStub.returns(false)
-            checkReferentialIntegrityByIdStub.rejects(testError)
+        // it('returns rejected promise when checkReferentialIntegrityById fails', () => {
+        //     hasErrorsStub.returns(false)
+        //     checkReferentialIntegrityByIdStub.rejects(testError)
+        //
+        //     return target.schemaElementCheck('value',
+        //         {
+        //             type: 'refData',
+        //             entity: testEntity,
+        //             paramName: 'pName'
+        //         },
+        //         {},
+        //         testTransaction).should.be.rejected
+        //         .then((err) => {
+        //             err.should.equal(testError)
+        //             sinon.assert.calledWithExactly(
+        //                 checkReferentialIntegrityByIdStub,
+        //                 'value',
+        //                 sinon.match.same(testEntity),
+        //                 sinon.match.same(testTransaction))
+        //         })
+        // })
 
-            return target.schemaElementCheck('value',
-                {
-                    type: 'refData',
-                    entity: testEntity,
-                    paramName: 'pName'
-                },
-                {},
-                testTransaction).should.be.rejected
-                .then((err) => {
-                    err.should.equal(testError)
-                    sinon.assert.calledWithExactly(
-                        checkReferentialIntegrityByIdStub,
-                        'value',
-                        sinon.match.same(testEntity),
-                        sinon.match.same(testTransaction))
-                })
-        })
+        // it('returns resolved promise when checkReferentialIntegrityById succeeds', () => {
+        //     hasErrorsStub.returns(false)
+        //     checkReferentialIntegrityByIdStub.resolves()
+        //
+        //     return target.schemaElementCheck('value',
+        //         {
+        //             type: 'refData',
+        //             entity: testEntity,
+        //             paramName: 'pName'
+        //         },
+        //         {},
+        //         testTransaction)
+        //         .then(() => {
+        //             sinon.assert.calledWithExactly(
+        //                 checkReferentialIntegrityByIdStub,
+        //                 'value',
+        //                 sinon.match.same(testEntity),
+        //                 sinon.match.same(testTransaction))
+        //         })
+        // })
 
-        it('returns resolved promise when checkReferentialIntegrityById succeeds', () => {
-            hasErrorsStub.returns(false)
-            checkReferentialIntegrityByIdStub.resolves()
+        // it('returns rejected promise when checkRIBusiness fails', () => {
+        //     const testKeys = ['value']
+        //     hasErrorsStub.returns(false)
+        //     checkRIBusinessStub.rejects(testError)
+        //
+        //     return target.schemaElementCheck(null,
+        //         {
+        //             type: 'businessKey',
+        //             entity: testEntity,
+        //             keys: testKeys,
+        //             paramName: 'pName'
+        //         },
+        //         {id: 42, value: 'testValue'},
+        //         testTransaction).should.be.rejected
+        //         .then((err) => {
+        //             err.should.equal(testError)
+        //             sinon.assert.calledWithExactly(
+        //                 checkRIBusinessStub,
+        //                 42,
+        //                 ['testValue'],
+        //                 sinon.match.same(testEntity),
+        //                 sinon.match.same(testKeys),
+        //                 sinon.match.same(testTransaction))
+        //         })
+        // })
 
-            return target.schemaElementCheck('value',
-                {
-                    type: 'refData',
-                    entity: testEntity,
-                    paramName: 'pName'
-                },
-                {},
-                testTransaction)
-                .then(() => {
-                    sinon.assert.calledWithExactly(
-                        checkReferentialIntegrityByIdStub,
-                        'value',
-                        sinon.match.same(testEntity),
-                        sinon.match.same(testTransaction))
-                })
-        })
-
-        it('returns rejected promise when checkRIBusiness fails', () => {
-            const testKeys = ['value']
-            hasErrorsStub.returns(false)
-            checkRIBusinessStub.rejects(testError)
-
-            return target.schemaElementCheck(null,
-                {
-                    type: 'businessKey',
-                    entity: testEntity,
-                    keys: testKeys,
-                    paramName: 'pName'
-                },
-                {id: 42, value: 'testValue'},
-                testTransaction).should.be.rejected
-                .then((err) => {
-                    err.should.equal(testError)
-                    sinon.assert.calledWithExactly(
-                        checkRIBusinessStub,
-                        42,
-                        ['testValue'],
-                        sinon.match.same(testEntity),
-                        sinon.match.same(testKeys),
-                        sinon.match.same(testTransaction))
-                })
-        })
-
-        it('returns resolved promise when checkRIBusiness succeeds', () => {
-            const testKeys = ['value']
-            hasErrorsStub.returns(false)
-            checkRIBusinessStub.resolves()
-
-            return target.schemaElementCheck(null,
-                {
-                    type: 'businessKey',
-                    entity: testEntity,
-                    keys: testKeys,
-                    paramName: 'pName'
-                },
-                {id: 42, value: 'testValue'},
-                testTransaction)
-                .then(() => {
-                    sinon.assert.calledWithExactly(
-                        checkRIBusinessStub,
-                        42,
-                        ['testValue'],
-                        sinon.match.same(testEntity),
-                        sinon.match.same(testKeys),
-                        sinon.match.same(testTransaction))
-                })
-        })
+        // it('returns resolved promise when checkRIBusiness succeeds', () => {
+        //     const testKeys = ['value']
+        //     hasErrorsStub.returns(false)
+        //     checkRIBusinessStub.resolves()
+        //
+        //     return target.schemaElementCheck(null,
+        //         {
+        //             type: 'businessKey',
+        //             entity: testEntity,
+        //             keys: testKeys,
+        //             paramName: 'pName'
+        //         },
+        //         {id: 42, value: 'testValue'},
+        //         testTransaction)
+        //         .then(() => {
+        //             sinon.assert.calledWithExactly(
+        //                 checkRIBusinessStub,
+        //                 42,
+        //                 ['testValue'],
+        //                 sinon.match.same(testEntity),
+        //                 sinon.match.same(testKeys),
+        //                 sinon.match.same(testTransaction))
+        //         })
+        // })
 
         it('returns error when getSchema is not implemented by subclass ', () => {
             (function () {

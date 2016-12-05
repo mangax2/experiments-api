@@ -57,6 +57,12 @@ class BaseValidator {
         return Promise.reject("Server error, please contact support")
     }
 
+
+    validateBatchForRI(batchPayload, operationName, optionalTransaction) {
+        logger.error("validateBatchForRI validation method not implemented to validate")
+        return Promise.reject("Server error, please contact support")
+    }
+
     checkLength(value, lengthRange, name) {
         if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {
             this.messages.push(name + ' length is out of range(min=' + lengthRange.min + ' max=' + lengthRange.max + ')')
@@ -150,8 +156,8 @@ class BaseValidator {
     }
 
     _getBusinessKeyDifference(dataFromDb){
-        const str= _.map(dataFromDb, (d)=>JSON.stringify(d).replace(/\"([^(\")"]+)\":/g,"$1:"))
-        return str
+        const result= _.map(dataFromDb, (d)=>JSON.stringify(d).replace(/\"/g, ""))
+        return result.join()
     }
 
     getEntityName() {

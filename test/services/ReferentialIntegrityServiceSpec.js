@@ -13,7 +13,17 @@ describe('ReferentialIntegrityService', () => {
             return new Promise((resolve) => {
                 resolve(2)
             })
-        }
+        },
+        batchFindByBusinessKey(keys){
+            return new Promise((resolve) => {
+                resolve(3)
+            })},
+
+        batchFind(keys){
+        return new Promise((resolve) => {
+            resolve(4)
+        })}
+
     }
     it('resolves a value when getById is called', () => {
         return RIService.getById(1, entity).then((data) => {
@@ -26,4 +36,17 @@ describe('ReferentialIntegrityService', () => {
             data.should.equal(2)
         })
     })
+
+    it('resolves a value when batchFindByBusinessKey is called', () => {
+        return RIService.getEntitiesByKeys([], entity).then((data) => {
+            data.should.equal(3)
+        })
+    })
+
+    it('resolves a value when batchFind is called', () => {
+        return RIService.getEntitiesByIds([], entity).then((data) => {
+            data.should.equal(4)
+        })
+    })
+
 })

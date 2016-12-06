@@ -55,6 +55,29 @@ class CombinationElementValidator extends SchemaValidator {
             return Promise.resolve()
         }
     }
+
+
+    postValidate(targetObject) {
+        if (!this.hasErrors()) {
+            const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
+            const businessKeyArray = _.map(targetObject, (obj)=> {
+                return _.pick(obj, businessKeyPropertyNames)
+            })
+            const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.treatmentId))
+            _.forEach(groupByObject, innerArray=> {
+                const names = _.map(innerArray, e=> {
+                    return _.pick(e, businessKeyPropertyNames[1])
+
+                })
+                if (_.uniq(names).length != names.length) {
+                    return Promise.reject(
+                        AppError.badRequest(this.getDuplicateBusinessKeyError())
+                    )
+                }
+            })
+        }
+        return Promise.resolve()
+    }
 }
 
 module.exports = CombinationElementValidator

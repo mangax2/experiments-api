@@ -3,7 +3,6 @@ import AppError from '../services/utility/AppError'
 import * as _ from 'lodash'
 import log4js from 'log4js'
 import ReferentialIntegrityService from '../services/ReferentialIntegrityService'
-
 const logger = log4js.getLogger('BaseValidator')
 
 class BaseValidator {

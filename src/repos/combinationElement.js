@@ -87,11 +87,12 @@ module.exports = (rep, pgp) => {
         },
 
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
-            return tx.batch(
-                batchKeys.map(
-                    obj => tx.any("SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2 and id!="+obj.updateId, obj.keys)
-                )
-            )
+            const  query ='SELECT treatment_id,name FROM combination_element WHERE '
+            const conditionsArray= batchKeys.map((obj)=>{
+                return `(treatment_id=${obj.keys[0]} and name='${obj.keys[1]}' and id!=${obj.updateId})`
+            })
+            const whereCondition=conditionsArray.join(' or ')
+            return tx.any(query+whereCondition)
         }
     }
 }

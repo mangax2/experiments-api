@@ -1,4 +1,4 @@
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -62,6 +62,18 @@ module.exports = (rep) => {
 
         findByBusinessKey: (keys, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM unit WHERE treatment_id = $1 and rep = $2", keys)
+        },
+
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            const values = batchKeys.map((obj) => {
+                return {
+                    treatment_id: obj.keys[0],
+                    rep: obj.keys[1],
+                    id: obj.updateId
+                }
+            })
+            const query = 'WITH d(treatment_id, rep, id) AS (VALUES ' + pgp.helpers.values(values, ['treatment_id', 'rep', 'id']) + ') select entity.treatment_id, entity.rep from public.unit entity inner join d on entity.treatment_id = d.treatment_id and entity.rep = d.rep and (d.id is null or entity.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
     }
 }

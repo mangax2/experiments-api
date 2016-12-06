@@ -1,4 +1,4 @@
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -46,6 +46,18 @@ module.exports = (rep) => {
 
         findByBusinessKey: (keys, tx) => {
             return tx.oneOrNone("SELECT * FROM factor_level WHERE factor_id = $1 and value = $2", keys)
+        },
+
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            const values = batchKeys.map((obj) => {
+                return {
+                    factor_id: obj.keys[0],
+                    value: obj.keys[1],
+                    id: obj.updateId
+                }
+            })
+            const query = 'WITH d(factor_id, value, id) AS (VALUES ' + pgp.helpers.values(values, ['factor_id', 'value', 'id']) + ') select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = d.factor_id and entity.value = d.value and (d.id is null or entity.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
     }
 }

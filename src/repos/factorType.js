@@ -1,4 +1,4 @@
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -27,8 +27,17 @@ module.exports = (rep) => {
         findByBusinessKey: (keys) => {
             return rep.oneOrNone("SELECT * FROM ref_factor_type where type = $1", keys)
 
+        },
+
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            const values = batchKeys.map((obj) => {
+                return {
+                    type: obj.keys[0],
+                    id: obj.updateId
+                }
+            })
+            const query = 'WITH d(type, id) AS (VALUES ' + pgp.helpers.values(values, ['type', 'id']) + ') select entity.type from public.ref_factor_type entity inner join d on entity.type = d.type and (d.id is null or entity.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
-
-
     }
 }

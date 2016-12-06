@@ -1,4 +1,4 @@
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep
@@ -38,7 +38,18 @@ module.exports = (rep) => {
 
         findByBusinessKey: (keys, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM dependent_variable where experiment_id=$1 and name= $2", keys)
+        },
 
+        batchFindByBusinessKey: (batchKeys, tx= rep) => {
+            const values = batchKeys.map((obj) => {
+                return {
+                    experiment_id: obj.keys[0],
+                    name: obj.keys[1],
+                    id: obj.updateId
+                }
+            })
+            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select entity.experiment_id, entity.name from public.dependent_variable entity inner join d on entity.experiment_id = d.experiment_id and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
     }
 }

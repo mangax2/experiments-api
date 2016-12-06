@@ -87,12 +87,15 @@ module.exports = (rep, pgp) => {
         },
 
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
-            const  query ='SELECT treatment_id,name FROM combination_element WHERE '
-            const conditionsArray= batchKeys.map((obj)=>{
-                return `(treatment_id=${obj.keys[0]} and name='${obj.keys[1]}' and id!=${obj.updateId})`
+            const values = batchKeys.map((obj) => {
+                return {
+                    treatment_id: obj.keys[0],
+                    name: obj.keys[1],
+                    id: obj.updateId
+                }
             })
-            const whereCondition=conditionsArray.join(' or ')
-            return tx.any(query+whereCondition)
+            const query = 'WITH d(treatment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['treatment_id', 'name', 'id']) + ') select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = d.treatment_id and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
     }
 }

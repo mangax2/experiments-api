@@ -80,16 +80,15 @@ module.exports = (rep, pgp) => {
         },
 
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
-           const  query ='SELECT experiment_id,name FROM treatment WHERE '
-           const conditionsArray= batchKeys.map((obj)=>{
-                return `(experiment_id=${obj.keys[0]} and name='${obj.keys[1]}' and id!=${obj.updateId})`
+            const values = batchKeys.map((obj) => {
+                return {
+                    experiment_id: obj.keys[0],
+                    name: obj.keys[1],
+                    id: obj.updateId
+                }
             })
-            const whereCondition=conditionsArray.join(' or ')
-            return tx.any(
-                query+whereCondition
-            )
+            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select t.experiment_id, t.name from public.treatment t inner join d on t.experiment_id = d.experiment_id and t.name = d.name and (d.id is null or t.id != CAST(d.id as integer))'
+            return tx.any(query)
         }
-
-
     }
 }

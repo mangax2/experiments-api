@@ -23,7 +23,7 @@
 //     ])
 // }
 
-module.exports = (rep) => {
+module.exports = (rep, pgp) => {
     return {
         repository: () => {
             return rep

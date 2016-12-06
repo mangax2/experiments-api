@@ -167,7 +167,7 @@ router.post('/hypotheses', (req, res, next) => {
 })
 
 router.put('/hypotheses/:id', (req, res, next) => {
-    const id= parseInt(req.params.id)
+    const id= req.params.id
     const hypothesis = req.body
     return new HypothesisService().updateHypothesis(id,hypothesis, req.context).then((id) => {
         return res.json(id)

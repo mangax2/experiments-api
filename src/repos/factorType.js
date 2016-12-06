@@ -8,6 +8,10 @@ module.exports = (rep, pgp) => {
             return tx.oneOrNone("SELECT * FROM ref_factor_type WHERE id = $1", id)
         },
 
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM ref_factor_type WHERE id IN ($1:csv)", [ids])
+        },
+
         all: () => {
             return rep.any("SELECT * FROM ref_factor_type")
         },

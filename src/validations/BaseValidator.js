@@ -21,7 +21,9 @@ class BaseValidator {
                 return this.validateEntity(element, operationName, optionalTransaction)
             })
         ).then(()=>{
-           return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+            if (!this.hasErrors()) {
+                return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+            }
         })
     }
 

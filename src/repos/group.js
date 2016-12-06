@@ -9,7 +9,11 @@ module.exports = (rep, pgp) => {
         },
 
         findByExperimentId: (experimentId, tx = rep) => {
-            return tx.any("SELECT * FROM group WHERE experiment_id=$1", experimentId)
+            return tx.any('SELECT * FROM "group" WHERE experiment_id=$1', experimentId)
+        },
+
+        batchFind: (ids, tx = rep) => {
+            return tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids])
         }
 
     }

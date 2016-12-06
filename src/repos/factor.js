@@ -62,6 +62,10 @@ module.exports = (rep, pgp) => {
             })
             const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = d.experiment_id and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))'
             return tx.any(query)
+        },
+
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM factor WHERE id IN ($1:csv)", [ids])
         }
     }
 }

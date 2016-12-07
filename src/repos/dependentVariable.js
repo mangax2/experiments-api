@@ -48,7 +48,7 @@ module.exports = (rep, pgp) => {
                     id: obj.updateId
                 }
             })
-            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select entity.experiment_id, entity.name from public.dependent_variable entity inner join d on entity.experiment_id = d.experiment_id and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))'
+            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select entity.experiment_id, entity.name from public.dependent_variable entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))'
             return tx.any(query)
         }
     }

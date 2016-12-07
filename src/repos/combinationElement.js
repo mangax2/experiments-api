@@ -94,7 +94,7 @@ module.exports = (rep, pgp) => {
                     id: obj.updateId
                 }
             })
-            const query = 'WITH d(treatment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['treatment_id', 'name', 'id']) + ') select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = d.treatment_id and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))'
+            const query = 'WITH d(treatment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['treatment_id', 'name', 'id']) + ') select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))'
             return tx.any(query)
         }
     }

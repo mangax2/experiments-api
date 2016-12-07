@@ -87,7 +87,7 @@ module.exports = (rep, pgp) => {
                     id: obj.updateId
                 }
             })
-            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select t.experiment_id, t.name from public.treatment t inner join d on t.experiment_id = d.experiment_id and t.name = d.name and (d.id is null or t.id != CAST(d.id as integer))'
+            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select t.experiment_id, t.name from public.treatment t inner join d on t.experiment_id = CAST(d.experiment_id as integer) and t.name = d.name and (d.id is null or t.id != CAST(d.id as integer))'
             return tx.any(query)
         }
     }

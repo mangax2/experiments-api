@@ -99,7 +99,9 @@ export class SchemaValidator extends BaseValidator {
                         riCheckObj.id=p[key]
                     }
                     riCheckObj.paramName=schema.paramName
-                    riCheckArray.push(riCheckObj)
+                    if(riCheckObj.key || riCheckObj.id){
+                        riCheckArray.push(riCheckObj)
+                    }
                 })
             })
 

@@ -20,7 +20,7 @@ class HypothesisValidator extends SchemaValidator {
     }
 
     getBusinessKeyPropertyNames() {
-        return ['description','experimentId','isNull']
+        return ['experimentId', 'description', 'isNull']
     }
 
     getDuplicateBusinessKeyError() {
@@ -34,6 +34,28 @@ class HypothesisValidator extends SchemaValidator {
         } else {
             return Promise.resolve()
         }
+    }
+
+
+    postValidate(targetObject) {
+        if (!this.hasErrors()) {
+            const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
+            const businessKeyArray = _.map(targetObject, (obj)=> {
+                return _.pick(obj, businessKeyPropertyNames)
+            })
+            const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.experimentId))
+            _.forEach(groupByObject, innerArray=> {
+                const names = _.map(innerArray, e=> {
+                    return `${e[businessKeyPropertyNames[1]]}|${e[businessKeyPropertyNames[2]]}`
+                })
+                if (_.uniq(names).length != names.length) {
+                    this.messages.push(this.getDuplicateBusinessKeyError())
+                    return false
+                }
+
+            })
+        }
+        return Promise.resolve()
     }
 }
 

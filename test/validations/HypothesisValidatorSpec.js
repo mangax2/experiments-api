@@ -51,7 +51,7 @@ describe('HypothesisValidator', () => {
 
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
-            target.getBusinessKeyPropertyNames().should.eql(['description','experimentId','isNull'])
+            target.getBusinessKeyPropertyNames().should.eql(['experimentId','description','isNull'])
         })
     })
 

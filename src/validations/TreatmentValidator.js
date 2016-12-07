@@ -69,9 +69,8 @@ class TreatmentValidator extends SchemaValidator {
                     return e[businessKeyPropertyNames[1]]
                 })
                 if (_.uniq(names).length != names.length) {
-                    return Promise.reject(
-                        AppError.badRequest(this.getDuplicateBusinessKeyError())
-                    )
+                    this.messages.push(this.getDuplicateBusinessKeyError())
+                    return false
                 }
 
             })

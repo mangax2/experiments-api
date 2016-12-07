@@ -54,6 +54,28 @@ class FactorLevelsValidator extends SchemaValidator {
             return Promise.resolve()
         }
     }
+
+    postValidate(targetObject) {
+        if (!this.hasErrors()) {
+            const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
+            const businessKeyArray = _.map(targetObject, (obj)=> {
+                return _.pick(obj, businessKeyPropertyNames)
+            })
+            const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.factorId))
+            _.forEach(groupByObject, innerArray=> {
+                const value = _.map(innerArray, e=> {
+                    return e[businessKeyPropertyNames[1]]
+                })
+                if (_.uniq(value).length != value.length) {
+                    this.messages.push(this.getDuplicateBusinessKeyError())
+                    return false
+
+                }
+
+            })
+        }
+        return Promise.resolve()
+    }
 }
 
 module.exports = FactorLevelsValidator

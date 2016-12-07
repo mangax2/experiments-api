@@ -70,9 +70,8 @@ class CombinationElementValidator extends SchemaValidator {
 
                 })
                 if (_.uniq(names).length != names.length) {
-                    return Promise.reject(
-                        AppError.badRequest(this.getDuplicateBusinessKeyError())
-                    )
+                    this.messages.push(this.getDuplicateBusinessKeyError())
+                    return false
                 }
             })
         }

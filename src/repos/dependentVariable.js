@@ -7,6 +7,9 @@ module.exports = (rep, pgp) => {
         find: (id, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM dependent_variable WHERE id = $1", id)
         },
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM dependent_variable WHERE id IN ($1:csv)", [ids])
+        },
 
         all: () => {
             return rep.any("SELECT * FROM dependent_variable")
@@ -24,12 +27,12 @@ module.exports = (rep, pgp) => {
 
         batchUpdate: (t, dependentVariables, context) => {
             return t.batch(dependentVariables.map(dependentVariable=>t.oneOrNone("UPDATE dependent_variable SET (required, name, experiment_id,"+
-                "modified_user_id, modified_date) = ($1,$2,$3,$4,CURRENT_TIMESTAMP) WHERE id="+dependentVariable.id+" RETURNING *",[dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId])
+                "modified_user_id, modified_date) = ($1,$2,$3,$4,CURRENT_TIMESTAMP) WHERE id=$5 RETURNING *",[dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.id])
             ))
         },
 
         remove: (id) => {
-            return rep.oneOrNone("delete from dependent_variable where id=" + id + " RETURNING id")
+            return rep.oneOrNone("delete from dependent_variable where id=$1 RETURNING id", id)
         },
 
         removeByExperimentId: (tx, experimentId) => {

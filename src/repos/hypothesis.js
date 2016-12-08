@@ -27,11 +27,11 @@ module.exports = (rep, pgp) => {
 
         update: (id, hypothesisObj, context) => {
             return rep.oneOrNone("UPDATE hypothesis SET (description, is_null, status, experiment_id," +
-                "modified_user_id, modified_date) = ($1 , $2 , $3, $4, $5, CURRENT_TIMESTAMP) WHERE id=" + id + " RETURNING *", [hypothesisObj.description, hypothesisObj.isNull, hypothesisObj.status, hypothesisObj.experimentId, context.userId])
+                "modified_user_id, modified_date) = ($1 , $2 , $3, $4, $5, CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *", [hypothesisObj.description, hypothesisObj.isNull, hypothesisObj.status, hypothesisObj.experimentId, context.userId, id])
         },
 
         remove: (id) => {
-            return rep.oneOrNone("delete from hypothesis where id=" + id + " RETURNING id")
+            return rep.oneOrNone("delete from hypothesis where id=$1 RETURNING id", id)
         },
 
         getHypothesisByExperimentAndDescriptionAndType:(experimentId,description,isNull) => {

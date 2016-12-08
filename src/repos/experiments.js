@@ -55,7 +55,7 @@ module.exports = (rep, pgp) => {
 
         update: (id, experimentObj, context) => {
             return rep.oneOrNone("UPDATE experiment SET (name, subject_type, ref_experiment_design_id,status,"+
-                "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id="+id+" RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, context.userId])
+                "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, context.userId, id])
         },
 
         //FOR PARTIAL UPDATE SUPPORT:
@@ -73,7 +73,7 @@ module.exports = (rep, pgp) => {
         // },
 
         remove: (id) => {
-            return rep.oneOrNone("delete from experiment where id=" + id + " RETURNING id")
+            return rep.oneOrNone("delete from experiment where id=$1 RETURNING id", id)
         }
     }
 }

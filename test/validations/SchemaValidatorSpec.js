@@ -12,25 +12,20 @@ describe('SchemaValidator', () => {
 
         let hasErrorsStub
         let checkReferentialIntegrityByIdStub
-        let checkRIBusinessStub
 
         before(() => {
             hasErrorsStub = sinon.stub(target, 'hasErrors')
             checkReferentialIntegrityByIdStub = sinon.stub(target, 'checkReferentialIntegrityById')
-
-            checkRIBusinessStub = sinon.stub(target, 'checkRIBusiness')
         })
 
         afterEach(() => {
             hasErrorsStub.reset()
             checkReferentialIntegrityByIdStub.reset()
-            checkRIBusinessStub.reset()
         })
 
         after(() => {
             hasErrorsStub.restore()
             checkReferentialIntegrityByIdStub.restore()
-            checkRIBusinessStub.restore()
         })
 
         it('returns error message when value is required', () => {

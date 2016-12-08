@@ -457,6 +457,25 @@ describe('BaseValidator', () => {
 
     })
 
+    describe('checkBoolean', () => {
+        it('pushes message when not boolean', () => {
+            target.checkBoolean(42, 'testVar')
+            target.hasErrors().should.equal(true)
+            target.messages.length.should.equal(1)
+            target.messages[0].should.equal('testVar must be boolean')
+        })
+
+        it('does not push message when value is true', () => {
+            target.checkBoolean(true, 'testVar')
+            target.hasErrors().should.equal(false)
+        })
+
+        it('does not push message when value is false', () => {
+            target.checkBoolean(false, 'testVar')
+            target.hasErrors().should.equal(false)
+        })
+    })
+
     describe('checkReferentialIntegrityById', () => {
         let getEntityNameStub
 
@@ -490,39 +509,469 @@ describe('BaseValidator', () => {
         })
     })
 
-    describe('checkRIBusiness', () => {
-        let getEntityNameStub
+    describe('checkRIBatch', () => {
+        let getPromiseForRIorBusinessKeyCheckStub
 
         before(() => {
-            getEntityNameStub = sinon.stub(target, 'getEntityName')
+            getPromiseForRIorBusinessKeyCheckStub = sinon.stub(target, '_getPromiseForRIorBusinessKeyCheck')
         })
 
         afterEach(() => {
-            getEntityNameStub.reset()
+            getPromiseForRIorBusinessKeyCheckStub.reset()
         })
 
         after(() => {
+            getPromiseForRIorBusinessKeyCheckStub.restore()
+        })
+
+        it('resolves to  empty array when passed emtpy array', () => {
+            return target.checkRIBatch([], testTransaction).then((data) => {
+                data.length.should.equal(0)
+                sinon.assert.notCalled(getPromiseForRIorBusinessKeyCheckStub)
+            })
+        })
+
+        it('resolve single result for single input', () => {
+            const groupSet1 = {}
+            const expectedResult1 = {}
+            getPromiseForRIorBusinessKeyCheckStub.resolves(expectedResult1)
+
+            return target.checkRIBatch([groupSet1], testTransaction).then((data) => {
+                data.length.should.equal(1)
+                data[0].should.equal(expectedResult1)
+                sinon.assert.calledOnce(getPromiseForRIorBusinessKeyCheckStub)
+                sinon.assert.calledWithExactly(
+                    getPromiseForRIorBusinessKeyCheckStub,
+                    sinon.match.same(groupSet1),
+                    sinon.match.same(testTransaction)
+                )
+            })
+        })
+
+        it('resolve multiple results for multiple inputs', () => {
+            const groupSet1 = {}
+            const groupSet2 = {}
+            const expectedResult1 = {}
+            const expectedResult2 = {}
+            getPromiseForRIorBusinessKeyCheckStub.onFirstCall().resolves(expectedResult1)
+            getPromiseForRIorBusinessKeyCheckStub.onSecondCall().resolves(expectedResult2)
+
+            return target.checkRIBatch([groupSet1, groupSet2], testTransaction).then((data) => {
+                data.length.should.equal(2)
+                data[0].should.equal(expectedResult1)
+                data[1].should.equal(expectedResult2)
+                sinon.assert.calledTwice(getPromiseForRIorBusinessKeyCheckStub)
+                sinon.assert.calledWithExactly(
+                    getPromiseForRIorBusinessKeyCheckStub,
+                    sinon.match.same(groupSet1),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledWithExactly(
+                    getPromiseForRIorBusinessKeyCheckStub,
+                    sinon.match.same(groupSet2),
+                    sinon.match.same(testTransaction)
+                )
+            })
+        })
+
+        it('rejects when any ri or business key promise is rejected', () => {
+            const groupSet1 = {}
+            const groupSet2 = {}
+            const expectedResult1 = {}
+            getPromiseForRIorBusinessKeyCheckStub.onFirstCall().resolves(expectedResult1)
+            getPromiseForRIorBusinessKeyCheckStub.onSecondCall().rejects(testError)
+
+            return target.checkRIBatch([groupSet1, groupSet2], testTransaction).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledTwice(getPromiseForRIorBusinessKeyCheckStub)
+                sinon.assert.calledWithExactly(
+                    getPromiseForRIorBusinessKeyCheckStub,
+                    sinon.match.same(groupSet1),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledWithExactly(
+                    getPromiseForRIorBusinessKeyCheckStub,
+                    sinon.match.same(groupSet2),
+                    sinon.match.same(testTransaction)
+                )
+            })
+        })
+    })
+
+    describe('_getPromiseForRIorBusinessKeyCheck', () => {
+        let getDistinctIdsStub
+        let verifyIdsExistStub
+        let verifyBusinessKeysAreUniqueStub
+        let testEntity
+        let testGroupSet = [{entity: testEntity}]
+
+        before(() => {
+            getDistinctIdsStub = sinon.stub(target, '_getDistinctIds')
+            verifyIdsExistStub = sinon.stub(target, '_verifyIdsExist')
+            verifyBusinessKeysAreUniqueStub = sinon.stub(target, '_verifyBusinessKeysAreUnique')
+        })
+
+        afterEach(() => {
+            getDistinctIdsStub.reset()
+            verifyIdsExistStub.reset()
+            verifyBusinessKeysAreUniqueStub.reset()
+        })
+
+        after(() => {
+            getDistinctIdsStub.restore()
+            verifyIdsExistStub.restore()
+            verifyBusinessKeysAreUniqueStub.restore()
+        })
+
+        it('resolves immediately when groupSet is empty array', () => {
+            return target._getPromiseForRIorBusinessKeyCheck([], testTransaction).then(() => {
+                sinon.assert.notCalled(getDistinctIdsStub)
+                sinon.assert.notCalled(verifyIdsExistStub)
+                sinon.assert.notCalled(verifyBusinessKeysAreUniqueStub)
+            })
+        })
+
+        it('verifies ids exist when ids are found in the the group set', () => {
+            getDistinctIdsStub.returns([1])
+            verifyIdsExistStub.resolves()
+
+            return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
+                sinon.assert.calledOnce(getDistinctIdsStub)
+                sinon.assert.calledWithExactly(
+                    getDistinctIdsStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(verifyIdsExistStub)
+                sinon.assert.calledWithExactly(
+                    verifyIdsExistStub,
+                    [1],
+                    sinon.match.same(testGroupSet),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(verifyBusinessKeysAreUniqueStub)
+            })
+        })
+
+        it('verifies business keys are unique when ids are not found in the the group set', () => {
+            getDistinctIdsStub.returns([])
+            verifyBusinessKeysAreUniqueStub.resolves()
+
+            return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
+                sinon.assert.calledOnce(getDistinctIdsStub)
+                sinon.assert.calledWithExactly(
+                    getDistinctIdsStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(verifyBusinessKeysAreUniqueStub)
+                sinon.assert.calledWithExactly(
+                    verifyBusinessKeysAreUniqueStub,
+                    sinon.match.same(testGroupSet),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(verifyIdsExistStub)
+            })
+        })
+
+        it('rejects when verifying ids is rejected', () => {
+            getDistinctIdsStub.returns([1])
+            verifyIdsExistStub.rejects(testError)
+
+            return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(getDistinctIdsStub)
+                sinon.assert.calledWithExactly(
+                    getDistinctIdsStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(verifyIdsExistStub)
+                sinon.assert.calledWithExactly(
+                    verifyIdsExistStub,
+                    [1],
+                    sinon.match.same(testGroupSet),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(verifyBusinessKeysAreUniqueStub)
+            })
+        })
+
+        it('rejects when business keys unique check is rejected', () => {
+            getDistinctIdsStub.returns([])
+            verifyBusinessKeysAreUniqueStub.rejects(testError)
+
+            return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(getDistinctIdsStub)
+                sinon.assert.calledWithExactly(
+                    getDistinctIdsStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(verifyBusinessKeysAreUniqueStub)
+                sinon.assert.calledWithExactly(
+                    verifyBusinessKeysAreUniqueStub,
+                    sinon.match.same(testGroupSet),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(verifyIdsExistStub)
+            })
+        })
+    })
+
+    describe('_getDistinctIds', () => {
+        it('filters out undefined and null values', () => {
+            const r = target._getDistinctIds([{}, {id: 1}, {id: null}])
+            r.length.should.equal(1)
+            r[0].should.equal(1)
+        })
+
+        it('filters out duplicates', () => {
+            const r = target._getDistinctIds([{id: 1}, {id: 2}, {id: 1}, {id: 3}, {id: 2}, {id: 1}])
+            r.should.eql([1,2,3])
+        })
+    })
+
+    describe('verifyIdsExist', () => {
+        let getEntitiesByIdsStub
+        let getEntityNameStub
+        let getIdDifferenceStub
+
+        let testEntity = {}
+        let testGroupSet = {}
+
+        before(() => {
+            getEntitiesByIdsStub = sinon.stub(target.referentialIntegrityService, 'getEntitiesByIds')
+            getEntityNameStub = sinon.stub(target, 'getEntityName')
+            getIdDifferenceStub = sinon.stub(target, '_getIdDifference')
+        })
+
+        afterEach(() => {
+            getEntitiesByIdsStub.reset()
+            getEntityNameStub.reset()
+            getIdDifferenceStub.reset()
+        })
+
+        after(() => {
+            getEntitiesByIdsStub.restore()
             getEntityNameStub.restore()
+            getIdDifferenceStub.restore()
         })
 
-        it('returns error message when dup record found by busness key', () => {
-            riFindByBusnessKeyStub.resolves({id: 2})
-            getEntityNameStub.returns('entity')
-            return target.checkRIBusiness(1, [{}], 'entity', ['k1', 'k2']).then(()=> {
-                target.messages.length.should.equal(1)
-                target.messages[0].should.equal("entity already exists for given business keys: k1,k2")
+        it('rejects when getEntitiesByIds is rejected', () => {
+            getEntitiesByIdsStub.rejects(testError)
 
+            return target._verifyIdsExist([1], testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(getEntitiesByIdsStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByIdsStub,
+                    [1],
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
             })
         })
 
-        it('returns no error message when dup record not found by busness key', () => {
-            riFindByBusnessKeyStub.resolves(undefined)
-            return target.checkRIBusiness(1, {}, 'entity', ['k1', 'k2']).then(()=> {
-                target.messages.length.should.equal(0)
+        it('adds message with entity name and results of id difference when count of found ids in not equal to count of requested ids', () => {
+            getEntitiesByIdsStub.resolves([2,3])
+            getEntityNameStub.returns('TestEntity')
+            getIdDifferenceStub.returns([1])
+
+            return target._verifyIdsExist([1,2,3], [{paramName: 'testId'}], testEntity, testTransaction).then(() => {
+                target.messages.should.eql(['TestEntity not found for testId(s): 1'])
+                sinon.assert.calledOnce(getEntitiesByIdsStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByIdsStub,
+                    [1,2,3],
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledOnce(getEntityNameStub)
+                sinon.assert.calledOnce(getIdDifferenceStub)
+                sinon.assert.calledWithExactly(
+                    getIdDifferenceStub,
+                    [1,2,3],
+                    [2,3]
+                )
+            })
+        })
+
+        it('does not add message when count of found ids equals count of requested ids', () => {
+            getEntitiesByIdsStub.resolves([1,2,3])
+
+            return target._verifyIdsExist([1,2,3], testGroupSet, testEntity, testTransaction).then(() => {
+                target.messages.should.eql([])
+                sinon.assert.calledOnce(getEntitiesByIdsStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByIdsStub,
+                    [1,2,3],
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
                 sinon.assert.notCalled(getEntityNameStub)
+                sinon.assert.notCalled(getIdDifferenceStub)
+            })
+        })
+    })
+
+    describe('_extractBusinessKeys', () => {
+        it('creates new objects with only the necessary information', () => {
+            target._extractBusinessKeys([
+                {
+                    keys: [1, 'name1'],
+                    updateId: 9,
+                    extraData: {}
+                },
+                {
+                    keys: [2, 'name2'],
+                    updateId: 8,
+                    extraData: {}
+                },
+                {
+                    keys: [3, 'name3'],
+                    updateId: 7,
+                    extraData: {}
+                }
+            ]).should.eql([
+                {
+                    keys: [1, 'name1'],
+                    updateId: 9
+                },
+                {
+                    keys: [2, 'name2'],
+                    updateId: 8
+                },
+                {
+                    keys: [3, 'name3'],
+                    updateId: 7
+                }
+            ])
+        })
+    })
+
+    describe('_verifyBusinessKeysAreUnique', () => {
+        let extractBusinessKeysStub
+        let getEntitiesByKeysStub
+        let getEntityNameStub
+        let formatBusinessKeyStub
+
+        let testGroupSet = {}
+        let expectedBusinessKeys = {}
+        let testEntity = {}
+
+        before(() => {
+            extractBusinessKeysStub = sinon.stub(target, '_extractBusinessKeys')
+            getEntitiesByKeysStub = sinon.stub(target.referentialIntegrityService, 'getEntitiesByKeys')
+            getEntityNameStub = sinon.stub(target, 'getEntityName')
+            formatBusinessKeyStub = sinon.stub(target, '_formatBusinessKey')
+        })
+
+        afterEach(() => {
+            extractBusinessKeysStub.reset()
+            getEntitiesByKeysStub.reset()
+            getEntityNameStub.reset()
+            formatBusinessKeyStub.reset()
+        })
+
+        after(() => {
+            extractBusinessKeysStub.restore()
+            getEntitiesByKeysStub.restore()
+            getEntityNameStub.restore()
+            formatBusinessKeyStub.restore()
+        })
+
+        it('rejects when getEntitiesByKeys rejects', () => {
+            extractBusinessKeysStub.returns(expectedBusinessKeys)
+            getEntitiesByKeysStub.rejects(testError)
+
+            return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledOnce(extractBusinessKeysStub)
+                sinon.assert.calledWithExactly(
+                    extractBusinessKeysStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(getEntitiesByKeysStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByKeysStub,
+                    sinon.match.same(expectedBusinessKeys),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(getEntityNameStub)
+                sinon.assert.notCalled(formatBusinessKeyStub)
             })
         })
 
+        it('adds message to messages when matching business key exists in database', () => {
+            const expectedData = [1]
+
+            extractBusinessKeysStub.returns(expectedBusinessKeys)
+            getEntitiesByKeysStub.resolves(expectedData)
+            getEntityNameStub.returns("Entity name")
+            formatBusinessKeyStub.returns(" formatted key")
+
+            return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
+                target.messages.should.eql(['Entity name already exists for business keys formatted key'])
+
+                sinon.assert.calledOnce(extractBusinessKeysStub)
+                sinon.assert.calledWithExactly(
+                    extractBusinessKeysStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(getEntitiesByKeysStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByKeysStub,
+                    sinon.match.same(expectedBusinessKeys),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledOnce(getEntityNameStub)
+                sinon.assert.calledOnce(formatBusinessKeyStub)
+                sinon.assert.calledWithExactly(
+                    formatBusinessKeyStub,
+                    sinon.match.same(expectedData)
+                )
+            })
+        })
+
+        it('does not add message to messages when no matching business key exists in database', () => {
+            const expectedData = []
+
+            extractBusinessKeysStub.returns(expectedBusinessKeys)
+            getEntitiesByKeysStub.resolves(expectedData)
+
+            return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
+                target.messages.should.eql([])
+
+                sinon.assert.calledOnce(extractBusinessKeysStub)
+                sinon.assert.calledWithExactly(
+                    extractBusinessKeysStub,
+                    sinon.match.same(testGroupSet)
+                )
+                sinon.assert.calledOnce(getEntitiesByKeysStub)
+                sinon.assert.calledWithExactly(
+                    getEntitiesByKeysStub,
+                    sinon.match.same(expectedBusinessKeys),
+                    sinon.match.same(testEntity),
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.notCalled(getEntityNameStub)
+                sinon.assert.notCalled(formatBusinessKeyStub)
+            })
+        })
+    })
+
+    describe('_getIdDifference', () => {
+        it('returns empty array when inputs are the same', () => {
+            target._getIdDifference([1,2,3], [{id:1},{id:2},{id:3}]).should.eql([])
+        })
+
+        it('returns difference when arrays are not the same', () => {
+            target._getIdDifference([1,2,3], [{id:1},{id:2}]).should.eql([3])
+        })
     })
 
     describe('check', () => {
@@ -586,21 +1035,21 @@ describe('BaseValidator', () => {
     })
 
 
-    describe('_getBusinessKeyDifference', () => {
+    describe('_formatBusinessKey', () => {
         it('returns empty stringify object without double quotes in string when input is empty object', () => {
-            const businessKeyObj= target._getBusinessKeyDifference([{}])
+            const businessKeyObj= target._formatBusinessKey([{}])
             console.log(businessKeyObj)
             businessKeyObj.should.eql('{}' )
         })
 
         it('returns empty stringify object without double quotes in string from input object', () => {
-            const businessKeyObj= target._getBusinessKeyDifference([{"a":"1"}])
+            const businessKeyObj= target._formatBusinessKey([{"a":"1"}])
             console.log(businessKeyObj)
             businessKeyObj.should.eql('{a:1}' )
         })
 
         it('returns empty stringify objects without double quotes in string from list of objects', () => {
-            const businessKeyObj= target._getBusinessKeyDifference([{"a":"1"},{"b":"2"}])
+            const businessKeyObj= target._formatBusinessKey([{"a":"1"},{"b":"2"}])
             console.log(businessKeyObj)
             businessKeyObj.should.eql('{a:1},{b:2}')
         })

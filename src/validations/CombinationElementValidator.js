@@ -66,7 +66,7 @@ class CombinationElementValidator extends SchemaValidator {
             const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.treatmentId))
             _.forEach(groupByObject, innerArray=> {
                 const names = _.map(innerArray, e=> {
-                    return _.pick(e, businessKeyPropertyNames[1])
+                    return e[businessKeyPropertyNames[1]]
 
                 })
                 if (_.uniq(names).length != names.length) {

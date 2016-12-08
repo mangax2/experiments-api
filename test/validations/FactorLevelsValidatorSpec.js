@@ -81,4 +81,118 @@ describe('FactorLevelsValidator', () => {
             })
         })
     })
+
+
+    describe('postValidate', () => {
+        let hasErrorsStub
+        let getBusinessKeyPropertyNamesStub
+        let getDuplicateBusinessKeyErrorStub
+
+        before(() => {
+            hasErrorsStub = sinon.stub(target, 'hasErrors')
+            getBusinessKeyPropertyNamesStub = sinon.stub(target, 'getBusinessKeyPropertyNames')
+            getDuplicateBusinessKeyErrorStub = sinon.stub(target, 'getDuplicateBusinessKeyError')
+            getBusinessKeyPropertyNamesStub.returns(['factorId','vale'])
+            // badRequestStub = sinon.stub(AppError, 'badRequest')
+        })
+
+        afterEach(() => {
+            hasErrorsStub.reset()
+            getBusinessKeyPropertyNamesStub.reset()
+            getDuplicateBusinessKeyErrorStub.reset()
+        })
+
+        after(() => {
+            hasErrorsStub.restore()
+            getBusinessKeyPropertyNamesStub.restore()
+            getDuplicateBusinessKeyErrorStub.restore()
+        })
+
+        it('does nothing and returns resolved promise when there are errors', () => {
+            hasErrorsStub.returns(true)
+            const r = target.postValidate({})
+            r.should.be.instanceof(Promise)
+            return r.then(() => {
+                sinon.assert.notCalled(getBusinessKeyPropertyNamesStub)
+                sinon.assert.notCalled(getDuplicateBusinessKeyErrorStub)
+                sinon.assert.notCalled(badRequestStub)
+            })
+        })
+
+        it('returns resolved promise when there are no duplicate keys', () => {
+            hasErrorsStub.returns(false)
+
+
+            const r = target.postValidate(
+                [
+                    {
+                        value: 'A',
+                        factorId:2
+
+                    },
+                    {
+                        value: 'B',
+                        factorId:3
+                    }
+                ]
+            )
+
+            r.should.be.instanceof(Promise)
+            return r.then(() => {
+                sinon.assert.calledOnce(getBusinessKeyPropertyNamesStub)
+                sinon.assert.notCalled(getDuplicateBusinessKeyErrorStub)
+                sinon.assert.notCalled(badRequestStub)
+            })
+        })
+
+        it('returns resolved promise when there are no duplicate keys', () => {
+            hasErrorsStub.returns(false)
+            const r = target.postValidate(
+                [
+                    {
+                        value: 'A',
+                        factorId:2
+
+                    },
+                    {
+                        value: 'B',
+                        factorId:3
+                    }
+                ]
+            )
+
+            r.should.be.instanceof(Promise)
+            return r.then(() => {
+                sinon.assert.calledOnce(getBusinessKeyPropertyNamesStub)
+                sinon.assert.notCalled(getDuplicateBusinessKeyErrorStub)
+                sinon.assert.notCalled(badRequestStub)
+            })
+        })
+
+        it('returns error message when there are duplicate keys', () => {
+            hasErrorsStub.returns(false)
+            getDuplicateBusinessKeyErrorStub.returns('Error message')
+
+            const r = target.postValidate(
+                [
+                    {
+                        value: 'A',
+                        factorId:2
+                    },
+                    {
+                        value: 'A',
+                        factorId:2
+                    }
+                ]
+            )
+
+            r.should.be.instanceof(Promise)
+            return r.then(() => {
+                sinon.assert.calledOnce(getBusinessKeyPropertyNamesStub)
+                sinon.assert.calledOnce(getDuplicateBusinessKeyErrorStub)
+                target.messages.should.eql(['Error message'])
+
+            })
+        })
+    })
 })

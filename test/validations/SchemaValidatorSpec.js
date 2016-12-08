@@ -5,7 +5,7 @@ const AppError = require('../../src/services/utility/AppError')
 describe('SchemaValidator', () => {
     const target = new SchemaValidator()
 
-    describe('schemaElementCheck ', () => {
+    describe('schemaCheck ', () => {
         const testEntity = {}
         const testTransaction = {}
         const testError = {}
@@ -13,265 +13,378 @@ describe('SchemaValidator', () => {
         let hasErrorsStub
         let checkReferentialIntegrityByIdStub
         let checkRIBusinessStub
+        let checkRIBatchStub
 
         before(() => {
             hasErrorsStub = sinon.stub(target, 'hasErrors')
             checkReferentialIntegrityByIdStub = sinon.stub(target, 'checkReferentialIntegrityById')
 
             checkRIBusinessStub = sinon.stub(target, 'checkRIBusiness')
+            checkRIBatchStub = sinon.stub(target, 'checkRIBatch')
         })
 
         afterEach(() => {
             hasErrorsStub.reset()
             checkReferentialIntegrityByIdStub.reset()
             checkRIBusinessStub.reset()
+            checkRIBatchStub.reset()
+
         })
 
         after(() => {
             hasErrorsStub.restore()
             checkReferentialIntegrityByIdStub.restore()
             checkRIBusinessStub.restore()
+            checkRIBatchStub.restore()
         })
 
-        it('returns error message when value is required', () => {
-            return target.schemaElementCheck(null, {
-                'paramName': 'name',
-                'type': 'text',
-                'lengthRange': {'min': 1, 'max': 50},
-                'required': true
-            }).then(() => {
-                return target.check().should.be.rejected.then((err) => {
+
+        describe('schemaElementCheck ', () => {
+
+            it('returns error message when value is required', () => {
+                return target.schemaElementCheck(null, {
+                    'paramName': 'name',
+                    'type': 'text',
+                    'lengthRange': {'min': 1, 'max': 50},
+                    'required': true
+                }).then(() => {
+                    return target.check().should.be.rejected.then((err) => {
+                        err.length.should.equal(1)
+                        err[0].errorMessage.should.equal('name is required')
+                    })
+                })
+            })
+
+            it('checks valid numeric', () => {
+                return target.schemaElementCheck(1, {
+                    'paramName': 'number',
+                    'type': 'numeric'
+                }).then(() => {
+                    return target.check()
+                })
+            })
+
+            it('checks invalid numeric', () => {
+                return target.schemaElementCheck("a", {
+                    'paramName': 'number',
+                    'type': 'numeric'
+                }).then(() => {
+                    return target.check()
+                }).should.be.rejected.then((err) => {
                     err.length.should.equal(1)
-                    err[0].errorMessage.should.equal('name is required')
+                    err[0].errorMessage.should.equal('number must be numeric')
+                })
+            })
+
+            it('checks valid numeric range', () => {
+                return target.schemaElementCheck(3, {
+                    'paramName': 'number',
+                    'type': 'numeric',
+                    'numericRange': {'min': 0, 'max': 50}
+                }).then(() => {
+                    return target.check()
+                })
+            })
+
+            it('checks invalid numeric range', () => {
+                return target.schemaElementCheck(200, {
+                    'paramName': 'number',
+                    'type': 'numeric',
+                    'numericRange': {'min': 0, 'max': 50}
+                }).then(() => {
+                    return target.check()
+                }).should.be.rejected.then((err) => {
+                    err.length.should.equal(1)
+                    err[0].errorMessage.should.equal('number value is out of numeric range(min=0 max=50)')
+                })
+            })
+
+            it('checks valid boolean true', () => {
+                return target.schemaElementCheck(true, {
+                    'paramName': 'bool',
+                    'type': 'boolean'
+                }).then(() => {
+                    return target.check()
+                })
+            })
+
+            it('checks valid boolean false', () => {
+                return target.schemaElementCheck(false, {
+                    'paramName': 'bool',
+                    'type': 'boolean'
+                }).then(() => {
+                    return target.check()
+                })
+            })
+
+            it('checks invalid boolean', () => {
+                return target.schemaElementCheck(200, {
+                    'paramName': 'bool',
+                    'type': 'boolean',
+                }).then(() => {
+                    return target.check()
+                }).should.be.rejected.then((err) => {
+                    err.length.should.equal(1)
+                    err[0].errorMessage.should.equal('bool must be boolean')
+                })
+            })
+
+            it('returns error when getSchema is not implemented by subclass ', () => {
+                (function () {
+                    target.getSchema()
+                }).should.throw('getSchema not implemented')
+            })
+        })
+
+
+        describe('validateBatchForRI', () => {
+
+            let getSchemaStub
+            let schemaCheckStub
+            const testSchema = [{'paramName': 'experimentId', 'type': 'refData', 'entity': {}}]
+            before(() => {
+                getSchemaStub = sinon.stub(target, 'getSchema')
+                schemaCheckStub = sinon.stub(target, 'schemaCheck')
+            })
+
+            afterEach(() => {
+                getSchemaStub.reset()
+                schemaCheckStub.reset()
+            })
+
+            after(() => {
+                getSchemaStub.restore()
+                schemaCheckStub.restore()
+            })
+
+            it('returns rejected promise when checkRIBatch fails ', ()=> {
+                getSchemaStub.returns(testSchema)
+                const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
+                checkRIBatchStub.rejects(testError)
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.be.rejected
+                sinon.assert.calledOnce(checkRIBatchStub)
+            })
+            it('returns fulfilled promise when checkRIBatch returns fullfiled  ', ()=> {
+                getSchemaStub.returns(testSchema)
+                const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
+
+                checkRIBatchStub.resolves()
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.calledOnce(checkRIBatchStub)
+                })
+            })
+
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate ref id', ()=> {
+                getSchemaStub.returns(testSchema)
+                const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
+                const riCheckGroupByEntity = [[{
+                    entity: {},
+                    updateId: undefined,
+                    id: 1,
+                    paramName: 'experimentId'
+                },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        id: 2,
+                        paramName: 'experimentId'
+                    }]]
+                checkRIBatchStub.resolves()
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.calledOnce(checkRIBatchStub)
+                    sinon.assert.calledWithExactly(checkRIBatchStub, riCheckGroupByEntity, testTransaction)
+
+                })
+
+
+            })
+
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys', ()=> {
+                getSchemaStub.returns([{
+                    'paramName': 'Treatment',
+                    'type': 'businessKey',
+                    'keys': ['experimentId', 'name'],
+                    'entity': {}
+                }])
+                const batchPayLoad = [{experimentId: 1, name: 'A'}, {experimentId: 2, name: 'B'}]
+
+                const riCheckGroupByEntity = [[{
+                    entity: {},
+                    updateId: undefined,
+                    keys: [1, 'A'],
+                    paramName: 'Treatment'
+                },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        keys: [2, 'B'],
+                        paramName: 'Treatment'
+                    }]]
+
+                checkRIBatchStub.resolves()
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.calledOnce(checkRIBatchStub)
+                    sinon.assert.calledWithExactly(checkRIBatchStub, riCheckGroupByEntity, testTransaction)
+
+                })
+
+
+            })
+
+
+
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys and refIds', ()=> {
+
+                getSchemaStub.returns(testSchema.concat([{
+                    'paramName': 'Treatment',
+                    'type': 'businessKey',
+                    'keys': ['experimentId', 'name'],
+                    'entity': {}
+                }]))
+                const batchPayLoad = [{experimentId: 1, name: 'A'}, {experimentId: 2, name: 'B'}]
+
+                const riCheckGroupByEntity = [
+                    [{
+                    entity: {},
+                    updateId: undefined,
+                    id: 1,
+                    paramName: 'experimentId'
+                    },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        id: 2,
+                        paramName: 'experimentId'
+                    }],
+
+                    [{
+                    entity: {},
+                    updateId: undefined,
+                    keys: [1, 'A'],
+                    paramName: 'Treatment'
+                    },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        keys: [2, 'B'],
+                        paramName: 'Treatment'
+                    }]]
+
+                checkRIBatchStub.resolves()
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.calledOnce(checkRIBatchStub)
+                    sinon.assert.calledWithExactly(checkRIBatchStub, riCheckGroupByEntity, testTransaction)
+
+                })
+
+
+            })
+
+            it('Does not call checkRIBatch when no ref id and business key to validate and does not reject promise', ()=> {
+                getSchemaStub.returns([{}])
+                const batchPayLoad = [{experimentId: 1, name: 'A'}, {experimentId: 2, name: 'B'}]
+
+                const riCheckGroupByEntity = [[{
+                    entity: {},
+                    updateId: undefined,
+                    keys: [1, 'A'],
+                    paramName: 'Treatment'
+                },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        keys: [2, 'B'],
+                        paramName: 'Treatment'
+                    }]]
+
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.notCalled(checkRIBatchStub)
+
+                })
+
+
+            })
+
+            it('Does not call checkRIBatch when no optional ref id is missing in payload and does not reject promise', ()=> {
+                getSchemaStub.returns([{'paramName': 'experimentId', 'type': 'refData', 'entity': {}}])
+                const batchPayLoad = [{}]
+                const riCheckGroupByEntity = [[{
+                    entity: {},
+                    updateId: undefined,
+                    keys: [1, 'A'],
+                    paramName: 'Treatment'
+                },
+                    {
+                        entity: {},
+                        updateId: undefined,
+                        keys: [2, 'B'],
+                        paramName: 'Treatment'
+                    }]]
+
+                return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
+                    sinon.assert.notCalled(checkRIBatchStub)
+
+                })
+
+
+            })
+
+
+        })
+
+        describe('schemaCheck ', () => {
+            const targetObj = {
+                "subjectType": "plant",
+                "userId": "akuma11",
+                "refExperimentDesignId": 2,
+                "status": "ACTIVE"
+            }
+
+            const schemaArray = [
+                {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+                {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}},
+                {'paramName': 'refExperimentDesignId', 'type': 'refData'},
+                {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
+                {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
+                {'paramName': 'isNull', 'type': 'boolean', 'required': true},
+                {'paramName': 'number', 'type': 'numeric'},
+                {'paramName': 'number', 'type': 'numeric', 'numericRange': {'min': 0, 'max': 100}}
+            ]
+
+            it('returns error message when value is required', () => {
+                return target.schemaCheck(targetObj, schemaArray).then(() => {
+                    return target.check().should.be.rejected.then((err) => {
+                        err.length.should.equal(2)
+                        err[0].errorMessage.should.equal('name is required')
+                        err[1].errorMessage.should.equal('isNull is required')
+                    })
+                })
+            })
+
+            it('returns error message when targetObj is empty object', () => {
+                return target.schemaCheck({}, schemaArray).then(() => {
+                    return target.check().should.be.rejected.then((err) => {
+                        err.length.should.equal(4)
+                        err[0].errorMessage.should.equal('name is required')
+                        err[1].errorMessage.should.equal('status is required')
+                        err[2].errorMessage.should.equal('userId is required')
+                        err[3].errorMessage.should.equal('isNull is required')
+                    })
                 })
             })
         })
 
-        it('checks valid numeric', () => {
-            return target.schemaElementCheck(1, {
-                'paramName': 'number',
-                'type': 'numeric'
-            }).then(() => {
-                return target.check()
+        describe('getSchema ', () => {
+            it('returns error message when getSchema is called directly', () => {
+                (function () {
+                    target.getSchema()
+                }).should.throw('getSchema not implemented')
             })
         })
 
-        it('checks invalid numeric', () => {
-            return target.schemaElementCheck("a", {
-                'paramName': 'number',
-                'type': 'numeric'
-            }).then(() => {
-                return target.check()
-            }).should.be.rejected.then((err) => {
-                err.length.should.equal(1)
-                err[0].errorMessage.should.equal('number must be numeric')
-            })
-        })
 
-        it('checks valid numeric range', () => {
-            return target.schemaElementCheck(3, {
-                'paramName': 'number',
-                'type': 'numeric',
-                'numericRange': {'min': 0, 'max': 50}
-            }).then(() => {
-                return target.check()
-            })
-        })
-
-        it('checks invalid numeric range', () => {
-            return target.schemaElementCheck(200, {
-                'paramName': 'number',
-                'type': 'numeric',
-                'numericRange': {'min': 0, 'max': 50}
-            }).then(() => {
-                return target.check()
-            }).should.be.rejected.then((err) => {
-                err.length.should.equal(1)
-                err[0].errorMessage.should.equal('number value is out of numeric range(min=0 max=50)')
-            })
-        })
-
-        it('checks valid boolean true', () => {
-            return target.schemaElementCheck(true, {
-                'paramName': 'bool',
-                'type': 'boolean'
-            }).then(() => {
-                return target.check()
-            })
-        })
-
-        it('checks valid boolean false', () => {
-            return target.schemaElementCheck(false, {
-                'paramName': 'bool',
-                'type': 'boolean'
-            }).then(() => {
-                return target.check()
-            })
-        })
-
-        it('checks invalid boolean', () => {
-            return target.schemaElementCheck(200, {
-                'paramName': 'bool',
-                'type': 'boolean',
-            }).then(() => {
-                return target.check()
-            }).should.be.rejected.then((err) => {
-                err.length.should.equal(1)
-                err[0].errorMessage.should.equal('bool must be boolean')
-            })
-        })
-        //TODO replace below with new spec
-
-        // it('returns rejected promise when checkReferentialIntegrityById fails', () => {
-        //     hasErrorsStub.returns(false)
-        //     checkReferentialIntegrityByIdStub.rejects(testError)
-        //
-        //     return target.schemaElementCheck('value',
-        //         {
-        //             type: 'refData',
-        //             entity: testEntity,
-        //             paramName: 'pName'
-        //         },
-        //         {},
-        //         testTransaction).should.be.rejected
-        //         .then((err) => {
-        //             err.should.equal(testError)
-        //             sinon.assert.calledWithExactly(
-        //                 checkReferentialIntegrityByIdStub,
-        //                 'value',
-        //                 sinon.match.same(testEntity),
-        //                 sinon.match.same(testTransaction))
-        //         })
-        // })
-
-        // it('returns resolved promise when checkReferentialIntegrityById succeeds', () => {
-        //     hasErrorsStub.returns(false)
-        //     checkReferentialIntegrityByIdStub.resolves()
-        //
-        //     return target.schemaElementCheck('value',
-        //         {
-        //             type: 'refData',
-        //             entity: testEntity,
-        //             paramName: 'pName'
-        //         },
-        //         {},
-        //         testTransaction)
-        //         .then(() => {
-        //             sinon.assert.calledWithExactly(
-        //                 checkReferentialIntegrityByIdStub,
-        //                 'value',
-        //                 sinon.match.same(testEntity),
-        //                 sinon.match.same(testTransaction))
-        //         })
-        // })
-
-        // it('returns rejected promise when checkRIBusiness fails', () => {
-        //     const testKeys = ['value']
-        //     hasErrorsStub.returns(false)
-        //     checkRIBusinessStub.rejects(testError)
-        //
-        //     return target.schemaElementCheck(null,
-        //         {
-        //             type: 'businessKey',
-        //             entity: testEntity,
-        //             keys: testKeys,
-        //             paramName: 'pName'
-        //         },
-        //         {id: 42, value: 'testValue'},
-        //         testTransaction).should.be.rejected
-        //         .then((err) => {
-        //             err.should.equal(testError)
-        //             sinon.assert.calledWithExactly(
-        //                 checkRIBusinessStub,
-        //                 42,
-        //                 ['testValue'],
-        //                 sinon.match.same(testEntity),
-        //                 sinon.match.same(testKeys),
-        //                 sinon.match.same(testTransaction))
-        //         })
-        // })
-
-        // it('returns resolved promise when checkRIBusiness succeeds', () => {
-        //     const testKeys = ['value']
-        //     hasErrorsStub.returns(false)
-        //     checkRIBusinessStub.resolves()
-        //
-        //     return target.schemaElementCheck(null,
-        //         {
-        //             type: 'businessKey',
-        //             entity: testEntity,
-        //             keys: testKeys,
-        //             paramName: 'pName'
-        //         },
-        //         {id: 42, value: 'testValue'},
-        //         testTransaction)
-        //         .then(() => {
-        //             sinon.assert.calledWithExactly(
-        //                 checkRIBusinessStub,
-        //                 42,
-        //                 ['testValue'],
-        //                 sinon.match.same(testEntity),
-        //                 sinon.match.same(testKeys),
-        //                 sinon.match.same(testTransaction))
-        //         })
-        // })
-
-        it('returns error when getSchema is not implemented by subclass ', () => {
-            (function () {
-                target.getSchema()
-            }).should.throw('getSchema not implemented')
-        })
     })
 
-    describe('schemaCheck ', () => {
-        const targetObj = {
-            "subjectType": "plant",
-            "userId": "akuma11",
-            "refExperimentDesignId": 2,
-            "status": "ACTIVE"
-        }
-
-        const schemaArray = [
-            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}},
-            {'paramName': 'refExperimentDesignId', 'type': 'refData'},
-            {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
-            {'paramName': 'userId', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'isNull', 'type': 'boolean', 'required': true},
-            {'paramName': 'number', 'type': 'numeric'},
-            {'paramName': 'number', 'type': 'numeric', 'numericRange': {'min': 0, 'max': 100}}
-        ]
-
-        it('returns error message when value is required', () => {
-            return target.schemaCheck(targetObj, schemaArray).then(() => {
-                return target.check().should.be.rejected.then((err) => {
-                    err.length.should.equal(2)
-                    err[0].errorMessage.should.equal('name is required')
-                    err[1].errorMessage.should.equal('isNull is required')
-                })
-            })
-        })
-
-        it('returns error message when targetObj is empty object', () => {
-            return target.schemaCheck({}, schemaArray).then(() => {
-                return target.check().should.be.rejected.then((err) => {
-                    err.length.should.equal(4)
-                    err[0].errorMessage.should.equal('name is required')
-                    err[1].errorMessage.should.equal('status is required')
-                    err[2].errorMessage.should.equal('userId is required')
-                    err[3].errorMessage.should.equal('isNull is required')
-                })
-            })
-        })
-    })
-
-    describe('getSchema ', () => {
-        it('returns error message when getSchema is called directly', () => {
-            (function () {
-                target.getSchema()
-            }).should.throw('getSchema not implemented')
-        })
-    })
 
     describe('validateEntity', () => {
         let getSchemaStub

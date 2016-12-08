@@ -43,20 +43,24 @@ describe('BaseValidator', () => {
     describe('_validateArray', () => {
         let validateEntityStub
         let validateBatchForRIStub
+        let hasErrorsStub
 
         before(() => {
             validateEntityStub = sinon.stub(target, 'validateEntity')
             validateBatchForRIStub = sinon.stub(target, 'validateBatchForRI')
+            hasErrorsStub = sinon.stub(target, 'hasErrors')
         })
 
         afterEach(() => {
             validateEntityStub.reset()
             validateBatchForRIStub.reset()
+            hasErrorsStub.reset()
         })
 
         after(() => {
             validateEntityStub.restore()
             validateBatchForRIStub.restore()
+            hasErrorsStub.restore()
         })
 
         it('returns rejected promise when one validation returns rejected promise', () => {
@@ -72,14 +76,16 @@ describe('BaseValidator', () => {
                     'opName',
                     sinon.match.same(testTransaction)
                 )
+                sinon.assert.notCalled(hasErrorsStub)
+                sinon.assert.notCalled(validateBatchForRIStub)
             })
         })
 
         it('returns rejected promise when one validation of many returns rejected promise', () => {
             const element1 = {}
             const element2 = {}
-            validateEntityStub.onFirstCall().rejects(testError)
-            validateEntityStub.onSecondCall().resolves()
+            validateEntityStub.onFirstCall().resolves()
+            validateEntityStub.onSecondCall().rejects(testError)
 
             return target._validateArray([element1, element2], 'opName', testTransaction).should.be.rejected.then((err) => {
                 err.should.equal(testError)
@@ -96,17 +102,39 @@ describe('BaseValidator', () => {
                     'opName',
                     sinon.match.same(testTransaction)
                 )
+                sinon.assert.notCalled(hasErrorsStub)
+                sinon.assert.notCalled(validateBatchForRIStub)
             })
         })
 
-        it('returns resolved promise when all pass', () => {
+        it('returns resolved when validateEntity passes but validateBatchForRI is not called when there are errors', () => {
+            const element1 = {}
+            validateEntityStub.resolves()
+            hasErrorsStub.returns(true)
+
+            return target._validateArray([element1], 'opName', testTransaction).then(() => {
+                validateEntityStub.callCount.should.eql(1)
+                sinon.assert.calledWithExactly(
+                    validateEntityStub,
+                    sinon.match.same(element1),
+                    'opName',
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledOnce(hasErrorsStub)
+                sinon.assert.notCalled(validateBatchForRIStub)
+            })
+        })
+
+        it('returns resolved promise when all pass and validateBatchForRI is called when there are no errors', () => {
             const element1 = {}
             const element2 = {}
+            const objectArray = [element1, element2]
             validateEntityStub.onFirstCall().resolves()
             validateEntityStub.onSecondCall().resolves()
+            hasErrorsStub.returns(false)
             validateBatchForRIStub.onFirstCall().resolves()
 
-            return target._validateArray([element1, element2], 'opName', testTransaction).then(() => {
+            return target._validateArray(objectArray, 'opName', testTransaction).then(() => {
                 validateEntityStub.callCount.should.eql(2)
                 sinon.assert.calledWithExactly(
                     validateEntityStub,
@@ -117,6 +145,13 @@ describe('BaseValidator', () => {
                 sinon.assert.calledWithExactly(
                     validateEntityStub,
                     sinon.match.same(element2),
+                    'opName',
+                    sinon.match.same(testTransaction)
+                )
+                sinon.assert.calledOnce(hasErrorsStub)
+                sinon.assert.calledWithExactly(
+                    validateBatchForRIStub,
+                    sinon.match.same(objectArray),
                     'opName',
                     sinon.match.same(testTransaction)
                 )
@@ -321,6 +356,12 @@ describe('BaseValidator', () => {
     describe('validateEntity', () => {
         it('returns rejected promise', () => {
             return target.validateEntity({}, 'opName', testTransaction).should.be.rejected
+        })
+    })
+
+    describe('validateBatchForRI', () => {
+        it('returns rejected promise', () => {
+            return target.validateBatchForRI({}, 'opName', testTransaction).should.be.rejected
         })
     })
 

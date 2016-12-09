@@ -974,6 +974,25 @@ describe('BaseValidator', () => {
         })
     })
 
+    describe('_formatBusinessKey', () => {
+        it('converts single object to string and removes double quotes', () => {
+            target._formatBusinessKey([{key:'k1', value:'v1'}]).should.equal('{key:k1,value:v1}')
+        })
+
+        it('converts multiple objects to string and removes double quotes', () => {
+            target._formatBusinessKey([{key:'k1', value:'v1'},{key:'k2', value:'v2'}])
+                .should.equal('{key:k1,value:v1},{key:k2,value:v2}')
+        })
+    })
+
+    describe('getEntityName', () => {
+        it('throws exception', () => {
+            (() => {
+                target.getEntityName()
+            }).should.throw('entityName not implemented')
+        })
+    })
+
     describe('check', () => {
         let badRequestStub
 

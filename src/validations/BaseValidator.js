@@ -20,7 +20,7 @@ class BaseValidator {
             _.map(objectArray, (element) => {
                 return this.validateEntity(element, operationName, optionalTransaction)
             })
-        ).then(()=>{
+        ).then(()=> {
             if (!this.hasErrors()) {
                 return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
             }
@@ -108,9 +108,9 @@ class BaseValidator {
         })
     }
 
-    checkRIBatch(riBatchOfGroups, optionalTransaction){
+    checkRIBatch(riBatchOfGroups, optionalTransaction) {
         return Promise.all(
-            _.map(riBatchOfGroups, (groupSet)=>{
+            _.map(riBatchOfGroups, (groupSet)=> {
                 // Note: It is assumed that all elements in the group set are either referential integrity
                 // checks, or business key uniqueness checks
                 return this._getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)
@@ -125,10 +125,10 @@ class BaseValidator {
 
         const entity = groupSet[0].entity
         const ids = this._getDistinctIds(groupSet)
-        if(ids.length>0){
+        if (ids.length > 0) {
             // Note: ids list is assumed to have no duplicates before calling this function
             return this._verifyIdsExist(ids, groupSet, entity, optionalTransaction)
-        }else {
+        } else {
             return this._verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction)
         }
     }
@@ -139,35 +139,35 @@ class BaseValidator {
 
     _verifyIdsExist(ids, groupSet, entity, optionalTransaction) {
         // Note: ids list is assumed to have no duplicates before calling this function
-        return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction).then((data) =>{
-            if(data.length != ids.length){
-                this.messages.push(`${this.getEntityName()} not found for ${groupSet[0].paramName}(s): `+ this._getIdDifference(ids,data))
+        return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction).then((data) => {
+            if (data.length != ids.length) {
+                this.messages.push(`${this.getEntityName()} not found for ${groupSet[0].paramName}(s): ` + this._getIdDifference(ids, data))
             }
         })
     }
 
     _extractBusinessKeys(groupSet) {
-        return _.map(groupSet, (r)=>{
-            return {keys:r.keys, updateId:r.updateId}
+        return _.map(groupSet, (r)=> {
+            return {keys: r.keys, updateId: r.updateId}
         })
     }
 
     _verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction) {
         const businessKeyObjects = this._extractBusinessKeys(groupSet)
-        return this.referentialIntegrityService.getEntitiesByKeys(businessKeyObjects, entity, optionalTransaction).then((data) =>{
-            if(data && data.length > 0){
+        return this.referentialIntegrityService.getEntitiesByKeys(businessKeyObjects, entity, optionalTransaction).then((data) => {
+            if (data && data.length > 0) {
                 this.messages.push(`${this.getEntityName()} already exists for business keys${this._formatBusinessKey(data)}`)
             }
         })
     }
 
-    _getIdDifference(ids,data){
-       const idsFromDb=_.map(data,(d)=>d.id)
-       return _.difference(ids, idsFromDb)
+    _getIdDifference(ids, data) {
+        const idsFromDb = _.map(data, (d)=>d.id)
+        return _.difference(ids, idsFromDb)
     }
 
-    _formatBusinessKey(dataFromDb){
-        const result= _.map(dataFromDb, (d)=>JSON.stringify(d).replace(/\"/g, ""))
+    _formatBusinessKey(dataFromDb) {
+        const result = _.map(dataFromDb, (d)=>JSON.stringify(d).replace(/\"/g, ""))
         return result.join()
     }
 

@@ -362,3 +362,14 @@ FOREIGN KEY (treatment_id) REFERENCES public.treatment(id) MATCH SIMPLE ON UPDAT
 
 CREATE INDEX "treatment_experiment_id" ON public.treatment(experiment_id);
 CREATE INDEX "combination_element_treatment_id" ON public.combination_element(treatment_id);
+
+-- Treatment Table: Change name to treatment_number
+ALTER TABLE Treatment DROP CONSTRAINT "treatment_ak_1";
+ALTER TABLE Treatment RENAME COLUMN name To treatment_number;
+ALTER TABLE Treatment ALTER COLUMN treatment_number DROP NOT NULL;
+UPDATE Treatment SET treatment_number = null;
+ALTER TABLE Treatment ALTER COLUMN treatment_number TYPE integer USING (treatment_number::integer);
+WITH updateTable as (SELECT id, experiment_id, rank() OVER (PARTITION BY experiment_id ORDER BY id ASC) as treatment_number FROM Treatment)
+UPDATE Treatment SET treatment_number = updateTable.treatment_number FROM updateTable WHERE Treatment.id = updateTable.id;
+ALTER TABLE Treatment ALTER COLUMN treatment_number SET NOT NULL;
+ALTER TABLE Treatment ADD CONSTRAINT "treatment_ak_1" UNIQUE(experiment_id, treatment_number);

@@ -7,14 +7,14 @@ class TreatmentValidator extends SchemaValidator {
     static get POST_VALIDATION_SCHEMA() {
         return [
             {'paramName': 'isControl', 'type': 'boolean', 'required': true},
-            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
+            {'paramName': 'treatmentNumber', 'type': 'numeric', 'required': true},
             {'paramName': 'notes', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
             {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments},
             {
                 'paramName': 'Treatment',
                 'type': 'businessKey',
-                'keys': ['experimentId', 'name'],
+                'keys': ['experimentId', 'treatmentNumber'],
                 'entity': db.treatment
             }
         ]
@@ -41,7 +41,7 @@ class TreatmentValidator extends SchemaValidator {
     }
 
     getBusinessKeyPropertyNames() {
-        return ['experimentId', 'name']
+        return ['experimentId', 'treatmentNumber']
     }
 
     getDuplicateBusinessKeyError() {

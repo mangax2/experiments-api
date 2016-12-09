@@ -43,7 +43,7 @@ describe('TreatmentValidator', () => {
 
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
-            target.getBusinessKeyPropertyNames().should.eql(['experimentId', 'name'])
+            target.getBusinessKeyPropertyNames().should.eql(['experimentId', 'treatmentNumber'])
         })
     })
 
@@ -124,12 +124,12 @@ describe('TreatmentValidator', () => {
             const r = target.postValidate(
                 [
                     {
-                        name: 'A',
+                        treatmentNumber: 1,
                         experimentId:2
 
                     },
                     {
-                        name: 'B',
+                        treatmentNumber: 1,
                         experimentId:3
                     }
                 ]
@@ -149,12 +149,12 @@ describe('TreatmentValidator', () => {
             const r = target.postValidate(
                 [
                     {
-                        name: 'A',
+                        treatmentNumber: 1,
                         experimentId:2
 
                     },
                     {
-                        name: 'B',
+                        treatmentNumber: 1,
                         experimentId:3
                     }
                 ]
@@ -175,11 +175,11 @@ describe('TreatmentValidator', () => {
             const r = target.postValidate(
                 [
                     {
-                        name: 'A',
+                        treatmentNumber: 1,
                         experimentId:2
                     },
                     {
-                        name: 'A',
+                        treatmentNumber: 1,
                         experimentId:2
                     }
                 ]

@@ -18,13 +18,13 @@ module.exports = (rep, pgp) => {
 
         batchCreate: (treatments, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['is_control', 'name', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                ['is_control', 'treatment_number', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
                 {table: 'treatment'}
             )
             const values = treatments.map((t) => {
                 return{
                     is_control: t.isControl,
-                    name: t.name,
+                    treatment_number: t.treatmentNumber,
                     notes: t.notes,
                     experiment_id: t.experimentId,
                     created_user_id: context.userId,
@@ -40,14 +40,14 @@ module.exports = (rep, pgp) => {
 
         batchUpdate: (treatments, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['?id', 'is_control', 'name', 'notes', 'experiment_id', 'modified_user_id', 'modified_date'],
+                ['?id', 'is_control', 'treatment_number', 'notes', 'experiment_id', 'modified_user_id', 'modified_date'],
                 {table: 'treatment'}
             )
             const data = treatments.map((t) => {
                 return {
                     id: t.id,
                     is_control: t.isControl,
-                    name: t.name,
+                    treatment_number: t.treatmentNumber,
                     notes: t.notes,
                     experiment_id: t.experimentId,
                     modified_user_id: context.userId,
@@ -76,18 +76,18 @@ module.exports = (rep, pgp) => {
         },
 
         findByBusinessKey: (keys, tx = rep) => {
-            return tx.oneOrNone("SELECT * FROM treatment WHERE experiment_id=$1 and name=$2", keys)
+            return tx.oneOrNone("SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2", keys)
         },
 
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
             const values = batchKeys.map((obj) => {
                 return {
                     experiment_id: obj.keys[0],
-                    name: obj.keys[1],
+                    treatment_number: obj.keys[1],
                     id: obj.updateId
                 }
             })
-            const query = 'WITH d(experiment_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'name', 'id']) + ') select t.experiment_id, t.name from public.treatment t inner join d on t.experiment_id = CAST(d.experiment_id as integer) and t.name = d.name and (d.id is null or t.id != CAST(d.id as integer))'
+            const query = 'WITH d(experiment_id, treatment_number, id) AS (VALUES ' + pgp.helpers.values(values, ['experiment_id', 'treatment_number', 'id']) + ') select t.experiment_id, t.treatment_number from public.treatment t inner join d on t.experiment_id = CAST(d.experiment_id as integer) and t.treatment_number = d.treatment_number and (d.id is null or t.id != CAST(d.id as integer))'
             return tx.any(query)
         }
     }

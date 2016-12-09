@@ -2480,7 +2480,6 @@
                 }
             }
         },
-
         "/experimental-units/{id}": {
             "get": {
                 "summary": "get one experimental unit entity",
@@ -2571,7 +2570,6 @@
                 }
             }
         },
-
         "/experimental-units": {
             "post": {
                 "summary": "post one or more experimental unit entities",
@@ -2678,7 +2676,6 @@
                 }
             }
         },
-
         "/composites/treatments": {
             "post": {
                 "summary": "post one or more treatments and combination elements entities",
@@ -2727,7 +2724,6 @@
                 }
             }
         }
-
     },
     "definitions": {
         "ExperimentDesign": {
@@ -2971,13 +2967,13 @@
                     "type": "integer",
                     "description": "unique id for  entity"
                 },
-                "isControl":{
+                "isControl": {
                     "type": "boolean",
-                    "description": "isControll boolean value to mark a treatment as control"
+                    "description": "isControl boolean value to mark a treatment as control"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "name of the treatment."
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "number of the treatment."
                 },
                 "notes": {
                     "type": "string",
@@ -3003,7 +2999,7 @@
                     "type": "string",
                     "description": "modified user id for audit tracking."
                 },
-                "combinationElements":{
+                "combinationElements": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CombinationElementResponse"
@@ -3011,7 +3007,6 @@
                 }
             }
         },
-
         "CombinationElementResponse": {
             "type": "object",
             "properties": {
@@ -3359,9 +3354,9 @@
                     "type": "integer",
                     "description": "Experiment Id of the treatment"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Name of the treatment"
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "Number of the treatment"
                 },
                 "isControl": {
                     "type": "boolean",
@@ -3380,9 +3375,9 @@
                     "type": "integer",
                     "description": "Experiment Id that treatment lives on"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Name of the treatment"
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "Number of the treatment"
                 },
                 "isControl": {
                     "type": "boolean",
@@ -3405,9 +3400,9 @@
                     "type": "integer",
                     "description": "Experiment Id that treatment lives on"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Name of the treatment"
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "Number of the treatment"
                 },
                 "isControl": {
                     "type": "boolean",
@@ -3422,43 +3417,41 @@
         "CompositeTreatmentsPayloadForPOST": {
             "type": "object",
             "properties": {
-                "adds":{
+                "adds": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CompositeTreatmentsPayloadAdd"
                     }
                 },
-                "deletes":{
+                "deletes": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ids"
                     }
                 },
-                "updates":{
+                "updates": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CompositeTreatmentsPayloadUpdate"
                     }
                 }
-
-
             }
         },
         "ids": {
             "type": "integer"
         },
-        "CompositeTreatmentsPayloadAdd":{
+        "CompositeTreatmentsPayloadAdd": {
             "type": "object",
             "properties": {
                 "isControl": {
                     "type": "string",
                     "description": "boolean value isControl to mark treatment as control."
                 },
-              "name": {
-                    "type": "string",
-                    "description": "name of the treatment."
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "number of the treatment."
                 },
-               "notes": {
+                "notes": {
                     "type": "string",
                     "description": "notes related to treatment."
                 },
@@ -3466,16 +3459,15 @@
                     "type": "integer",
                     "description": "id of experiment entity."
                 },
-                "combinationElements":{
+                "combinationElements": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
                     }
                 }
             }
-
         },
-        "CompositeTreatmentsPayloadUpdate":{
+        "CompositeTreatmentsPayloadUpdate": {
             "type": "object",
             "properties": {
                 "id": {
@@ -3486,9 +3478,9 @@
                     "type": "string",
                     "description": "boolean value isControl to mark treatment as control."
                 },
-                "name": {
-                    "type": "string",
-                    "description": "name of the treatment."
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "number of the treatment."
                 },
                 "notes": {
                     "type": "string",
@@ -3498,14 +3490,13 @@
                     "type": "integer",
                     "description": "id of experiment entity."
                 },
-                "combinationElements":{
+                "combinationElements": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
                     }
                 }
             }
-
         },
         "CompositeTreatmentsCombinationElement": {
             "type": "object",

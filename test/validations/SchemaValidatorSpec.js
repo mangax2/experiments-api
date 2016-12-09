@@ -12,21 +12,18 @@ describe('SchemaValidator', () => {
 
         let hasErrorsStub
         let checkReferentialIntegrityByIdStub
-        let checkRIBusinessStub
         let checkRIBatchStub
 
         before(() => {
             hasErrorsStub = sinon.stub(target, 'hasErrors')
             checkReferentialIntegrityByIdStub = sinon.stub(target, 'checkReferentialIntegrityById')
 
-            checkRIBusinessStub = sinon.stub(target, 'checkRIBusiness')
             checkRIBatchStub = sinon.stub(target, 'checkRIBatch')
         })
 
         afterEach(() => {
             hasErrorsStub.reset()
             checkReferentialIntegrityByIdStub.reset()
-            checkRIBusinessStub.reset()
             checkRIBatchStub.reset()
 
         })
@@ -34,7 +31,6 @@ describe('SchemaValidator', () => {
         after(() => {
             hasErrorsStub.restore()
             checkReferentialIntegrityByIdStub.restore()
-            checkRIBusinessStub.restore()
             checkRIBatchStub.restore()
         })
 

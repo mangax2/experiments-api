@@ -1057,19 +1057,16 @@ describe('BaseValidator', () => {
     describe('_formatBusinessKey', () => {
         it('returns empty stringify object without double quotes in string when input is empty object', () => {
             const businessKeyObj= target._formatBusinessKey([{}])
-            console.log(businessKeyObj)
             businessKeyObj.should.eql('{}' )
         })
 
         it('returns empty stringify object without double quotes in string from input object', () => {
             const businessKeyObj= target._formatBusinessKey([{"a":"1"}])
-            console.log(businessKeyObj)
             businessKeyObj.should.eql('{a:1}' )
         })
 
         it('returns empty stringify objects without double quotes in string from list of objects', () => {
             const businessKeyObj= target._formatBusinessKey([{"a":"1"},{"b":"2"}])
-            console.log(businessKeyObj)
             businessKeyObj.should.eql('{a:1},{b:2}')
         })
 

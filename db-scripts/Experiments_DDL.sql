@@ -373,3 +373,36 @@ WITH updateTable as (SELECT id, experiment_id, rank() OVER (PARTITION BY experim
 UPDATE Treatment SET treatment_number = updateTable.treatment_number FROM updateTable WHERE Treatment.id = updateTable.id;
 ALTER TABLE Treatment ALTER COLUMN treatment_number SET NOT NULL;
 ALTER TABLE Treatment ADD CONSTRAINT "treatment_ak_1" UNIQUE(experiment_id, treatment_number);
+
+--Group table changes
+
+ALTER TABLE "group" DROP CONSTRAINT "group_treatment";
+ALTER TABLE "group" RENAME COLUMN treatment_id To randomize;
+UPDATE "group"  SET randomize = null;
+ALTER TABLE "group" ALTER COLUMN randomize TYPE boolean using randomize::boolean;
+UPDATE "group" SET randomize = false;
+ALTER TABLE "group" ALTER COLUMN randomize SET NOT NULL;
+ALTER TABLE "group" DROP CONSTRAINT "group_ak_1";
+ALTER TABLE "group" DROP COLUMN "variable_name";
+ALTER TABLE "group" DROP COLUMN "variable_value";
+
+
+--group_value table
+CREATE TABLE group_value
+(
+  id serial NOT NULL,
+  factor_name character varying NOT NULL,
+  factor_level character varying NOT NULL,
+  group_id integer NOT NULL,
+  created_user_id character varying NOT NULL,
+  created_date timestamp with time zone NOT NULL,
+  modified_user_id character varying NOT NULL,
+  modified_date timestamp with time zone NOT NULL,
+  CONSTRAINT group_value_pk PRIMARY KEY (id),
+  CONSTRAINT "Group_Value_Group" FOREIGN KEY (group_id)
+      REFERENCES "group" (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT group_value_ak_1 UNIQUE (factor_name, factor_level, group_id)
+)
+
+

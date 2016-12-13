@@ -406,3 +406,10 @@ CREATE TABLE group_value
 )
 
 
+
+-- Drop Hypothesis Table
+--Alter Subject Type Column to Descriptiuon in Experiment Table
+ALTER TABLE IF EXISTS ONLY experiment
+RENAME COLUMN subject_type to description
+
+DROP TABLE IF EXISTS  hypothesis CASCADE

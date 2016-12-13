@@ -13,7 +13,7 @@ module.exports = (rep, pgp) => {
         },
 
         findAllByExperimentId: (experimentId, tx = rep) => {
-            return tx.any("SELECT * FROM treatment WHERE experiment_id=$1", experimentId)
+            return tx.any("SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY treatment_number ASC", experimentId)
         },
 
         batchCreate: (treatments, context, tx = rep) => {

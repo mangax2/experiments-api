@@ -7,7 +7,7 @@ class ExperimentsValidator extends SchemaValidator {
     getSchema() {
         return [
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 50}, 'required': true},
-            {'paramName': 'subjectType', 'type': 'text', 'lengthRange': {'min': 0, 'max': 100}},
+            {'paramName': 'description', 'type': 'text','lengthRange': {'min': 0, 'max': 5000}, 'required': false},
             {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
             {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
         ]

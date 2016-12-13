@@ -45,17 +45,17 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 experiments.map(
                     experiment => tx.one(
-                        "insert into experiment(name, subject_type, ref_experiment_design_id, status,created_user_id, created_date," +
+                        "insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date," +
                         "modified_user_id, modified_date) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id",
-                        [experiment.name, experiment.subjectType, experiment.refExperimentDesignId, experiment.status, context.userId]
+                        [experiment.name, experiment.description, experiment.refExperimentDesignId, experiment.status, context.userId]
                     )
                 )
             )
         },
 
         update: (id, experimentObj, context) => {
-            return rep.oneOrNone("UPDATE experiment SET (name, subject_type, ref_experiment_design_id,status,"+
-                "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *",[experimentObj.name,experimentObj.subjectType, experimentObj.refExperimentDesignId, experimentObj.status, context.userId, id])
+            return rep.oneOrNone("UPDATE experiment SET (name, description, ref_experiment_design_id,status,"+
+                "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *",[experimentObj.name,experimentObj.description, experimentObj.refExperimentDesignId, experimentObj.status, context.userId,id])
         },
 
         //FOR PARTIAL UPDATE SUPPORT:

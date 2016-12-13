@@ -373,3 +373,10 @@ WITH updateTable as (SELECT id, experiment_id, rank() OVER (PARTITION BY experim
 UPDATE Treatment SET treatment_number = updateTable.treatment_number FROM updateTable WHERE Treatment.id = updateTable.id;
 ALTER TABLE Treatment ALTER COLUMN treatment_number SET NOT NULL;
 ALTER TABLE Treatment ADD CONSTRAINT "treatment_ak_1" UNIQUE(experiment_id, treatment_number);
+
+-- Drop Hypothesis Table
+--Alter Subject Type Column to Descriptiuon in Experiment Table
+ALTER TABLE IF EXISTS ONLY experiment
+RENAME COLUMN subject_type to description
+
+DROP TABLE IF EXISTS  hypothesis CASCADE

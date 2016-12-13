@@ -5,7 +5,6 @@ import ExperimentDesignService from '../services/ExperimentDesignService'
 import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/factorService'
 import FactorTypeService from '../services/factorTypeService'
-import HypothesisService from '../services/HypothesisService'
 import DependentVariableService from '../services/DependentVariableService'
 import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 import TreatmentService from '../services/TreatmentService'
@@ -157,41 +156,6 @@ router.delete('/factor-types/:id', (req, res, next) => {
     })
 })
 
-router.post('/hypotheses', (req, res, next) => {
-    const hypotheses = req.body
-    return new HypothesisService().createHypothesis(hypotheses, req.context).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.put('/hypotheses/:id', (req, res, next) => {
-    const id= req.params.id
-    const hypothesis = req.body
-    return new HypothesisService().updateHypothesis(id,hypothesis, req.context).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.get('/hypotheses', (req, res, next)=> {
-    return new HypothesisService().getAllHypothesis().then((hypotheses)=> {
-        return res.json(hypotheses)
-    }).catch((err)=> {
-        return next(err)
-    })
-})
-
-router.get('/experiments/:id/hypotheses', (req, res, next)=> {
-    const id = req.params.id
-    return new HypothesisService().getHypothesesByExperimentId(id).then((hypotheses)=> {
-        return res.json(hypotheses)
-    }).catch((err)=> {
-        return next(err)
-    })
-})
 
 router.get('/experiments/:id/dependent-variables', (req, res, next)=> {
     const id = req.params.id
@@ -201,26 +165,6 @@ router.get('/experiments/:id/dependent-variables', (req, res, next)=> {
         return next(err)
     })
 })
-
-router.get('/hypotheses/:id', (req, res, next)=> {
-    const id = req.params.id
-    return new HypothesisService().getHypothesisById(id).then((hypothesis)=> {
-        return res.json(hypothesis)
-    }).catch((err)=> {
-        return next(err)
-    })
-})
-
-router.delete('/hypotheses/:id', (req, res, next)=> {
-    const id = req.params.id
-    return new HypothesisService().deleteHypothesis(id).then((hypothesis)=> {
-        return res.json(hypothesis)
-    }).catch((err)=> {
-        return next(err)
-    })
-
-})
-
 
 router.post('/dependent-variables', (req, res, next) => {
     const dependentVariables = req.body

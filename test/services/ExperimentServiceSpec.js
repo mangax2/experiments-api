@@ -122,7 +122,7 @@ describe('ExperimentsService', () => {
 
         const experimentsObj = [{
             'name': 'exp1002',
-            'subjectType': 'plant',
+            'description': 'Experiment Description',
             'refExperimentDesignId': 2,
             'userId': 'akuma11',
             'status': 'ACTIVE'
@@ -156,7 +156,7 @@ describe('ExperimentsService', () => {
             experimentsObj.push(
                 {
                     'name': 'exp1003',
-                    'subjectType': 'plant',
+                    'description': 'Experiment Description',
                     'refExperimentDesignId': 2,
                     'createdDate': '2016-10-05T15:19:12.026Z',
                     'userId': 'akuma11',
@@ -205,14 +205,14 @@ describe('ExperimentsService', () => {
             const experimentResObj = {
                 'id': 30,
                 'name': 'exp1002',
-                'subjectType': 'plant',
+                'description': 'Experiment Description',
                 'refExperimentDesignId': 2,
                 'userId': 'akuma11',
                 'status': 'ACTIVE'
             }
             const experimentReqObj = {
                 'name': 'exp1002',
-                'subjectType': 'plant',
+                'description': 'Experiment Description',
                 'refExperimentDesignId': 2,
                 'userId': 'akuma11',
                 'status': 'ACTIVE'
@@ -238,7 +238,7 @@ describe('ExperimentsService', () => {
         it('fails', () => {
             const experimentReqObj = {
                 'name': 'exp1002',
-                'subjectType': 'plant',
+                'description': 'Experiment Description',
                 'refExperimentDesignId': 2,
                 'createdDate': '2016-10-05T15:19:12.026Z',
                 'createdUserId': 'akuma11',
@@ -265,7 +265,7 @@ describe('ExperimentsService', () => {
             validateStub.resolves()
             const experimentReqObj = {
                 'name': 'exp1002',
-                'subjectType': 'plant',
+                'description': 'Experiment Description',
                 'refExperimentDesignId': 2,
                 'createdDate': '2016-10-05T15:19:12.026Z',
                 'userId': 'akuma11',

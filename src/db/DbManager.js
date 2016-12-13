@@ -4,7 +4,6 @@ import experimentDesign from '../repos/experimentDesign'
 import factor from '../repos/factor'
 import factorLevel from '../repos/factorLevel'
 import factorType from '../repos/factorType'
-import hypothesis from '../repos/hypothesis'
 import treatment from '../repos/treatment'
 import dependentVariable from '../repos/dependentVariable'
 import combinationElement from '../repos/combinationElement'
@@ -24,7 +23,6 @@ const options = {
         obj.factor = new (factor)(obj, pgp)
         obj.factorLevel = new (factorLevel)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
-        obj.hypothesis = new (hypothesis)(obj, pgp)
         obj.dependentVariable = new (dependentVariable)(obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
         obj.combinationElement = new (combinationElement)(obj, pgp)

@@ -2863,27 +2863,6 @@
                 }
             }
         },
-        "HypothesisPayload": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "description": "description of the hypothesis entity."
-                },
-                "isNull": {
-                    "type": "boolean",
-                    "description": "hypothesis type."
-                },
-                "status": {
-                    "type": "string",
-                    "description": "Hypotheses status - ACTIVE, INACTIVE."
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "experimentId of experiment entity."
-                }
-            }
-        },
         "FactorType": {
             "type": "object",
             "properties": {

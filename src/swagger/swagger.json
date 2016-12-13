@@ -2849,9 +2849,9 @@
                     "type": "string",
                     "description": "name of the experiment entity."
                 },
-                "subjectType": {
+                "description": {
                     "type": "string",
-                    "description": "Subject of the Experiment."
+                    "description": "Description of the Experiment."
                 },
                 "experimentDesign": {
                     "type": "string",

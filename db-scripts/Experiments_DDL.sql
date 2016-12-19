@@ -359,6 +359,8 @@ ALTER TABLE public.unit
 ADD CONSTRAINT "unit_treatment"
 FOREIGN KEY (treatment_id) REFERENCES public.treatment(id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE CASCADE;
 
+ALTER TABLE public.unit ALTER COLUMN group_id DROP NOT NULL;
+
 
 CREATE INDEX "treatment_experiment_id" ON public.treatment(experiment_id);
 CREATE INDEX "combination_element_treatment_id" ON public.combination_element(treatment_id);

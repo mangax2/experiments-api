@@ -1,6 +1,7 @@
 import promise from 'bluebird'
 import experiments from '../repos/experiments'
 import experimentDesign from '../repos/experimentDesign'
+import experimentSummary from '../repos/experimentSummary'
 import factor from '../repos/factor'
 import factorLevel from '../repos/factorLevel'
 import factorType from '../repos/factorType'
@@ -20,6 +21,7 @@ const options = {
     extend: (obj) => {
         obj.experiments = new (experiments)(obj, pgp)
         obj.experimentDesign = new (experimentDesign)(obj, pgp)
+        obj.experimentSummary = new (experimentSummary) (obj, pgp)
         obj.factor = new (factor)(obj, pgp)
         obj.factorLevel = new (factorLevel)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)

@@ -2,6 +2,7 @@ import express from 'express'
 import log4js from 'log4js'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
+import ExperimentSummaryService from '../services/ExperimentSummaryService'
 import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/factorService'
 import FactorTypeService from '../services/factorTypeService'
@@ -477,6 +478,14 @@ router.get('/experimental-units/:id', (req, res, next) => {
 router.delete('/experimental-units/:id', (req, res, next) => {
     return new ExperimentalUnitService().deleteExperimentalUnit(req.params.id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/summary', (req, res, next) => {
+    return new ExperimentSummaryService().getExperimentSummaryById(req.params.id).then((summary) => {
+        return res.json(summary)
     }).catch((err) => {
         return next(err)
     })

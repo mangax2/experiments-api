@@ -12,6 +12,7 @@ import TreatmentService from '../services/TreatmentService'
 import CombinationElementService from '../services/CombinationElementService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
+import RandomizationStrategyService from '../services/RandomizationStrategyService'
 
 
 const logger = log4js.getLogger('Router')
@@ -486,6 +487,22 @@ router.delete('/experimental-units/:id', (req, res, next) => {
 router.get('/experiments/:id/summary', (req, res, next) => {
     return new ExperimentSummaryService().getExperimentSummaryById(req.params.id).then((summary) => {
         return res.json(summary)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy/:id', (req, res, next) => {
+    return new RandomizationStrategyService().getRandomizationStrategyById(req.params.id).then((strategy) => {
+        return res.json(strategy)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy', (req, res, next) => {
+    return new RandomizationStrategyService().getAllRandomizationStrategies().then((strategies) => {
+        return res.json(strategies)
     }).catch((err) => {
         return next(err)
     })

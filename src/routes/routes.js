@@ -12,6 +12,8 @@ import TreatmentService from '../services/TreatmentService'
 import CombinationElementService from '../services/CombinationElementService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
+import GroupService from '../services/GroupService'
+
 
 
 const logger = log4js.getLogger('Router')
@@ -486,6 +488,47 @@ router.delete('/experimental-units/:id', (req, res, next) => {
 router.get('/experiments/:id/summary', (req, res, next) => {
     return new ExperimentSummaryService().getExperimentSummaryById(req.params.id).then((summary) => {
         return res.json(summary)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/groups', (req, res, next) => {
+    return new GroupService().batchCreateGroups(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/groups', (req, res, next) => {
+    return new GroupService().batchUpdateGroups(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/groups', (req, res, next)=> {
+    return new GroupService().getGroupsByExperimentId(req.params.id).then((factors)=> {
+        return res.json(factors)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/groups/:id', (req, res, next) => {
+    return new GroupService().getGroupById(req.params.id).then((factors) => {
+        return res.json(factors)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.delete('/groups/:id', (req, res, next) => {
+    return new GroupService().deleteGroup(req.params.id).then((value) => {
+        return res.json(value)
     }).catch((err) => {
         return next(err)
     })

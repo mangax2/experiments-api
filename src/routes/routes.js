@@ -13,7 +13,7 @@ import CombinationElementService from '../services/CombinationElementService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import GroupService from '../services/GroupService'
-
+import RandomizationStrategyService from '../services/RandomizationStrategyService'
 
 
 const logger = log4js.getLogger('Router')
@@ -529,6 +529,22 @@ router.get('/groups/:id', (req, res, next) => {
 router.delete('/groups/:id', (req, res, next) => {
     return new GroupService().deleteGroup(req.params.id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy/:id', (req, res, next) => {
+    return new RandomizationStrategyService().getRandomizationStrategyById(req.params.id).then((strategy) => {
+        return res.json(strategy)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy', (req, res, next) => {
+    return new RandomizationStrategyService().getAllRandomizationStrategies().then((strategies) => {
+        return res.json(strategies)
     }).catch((err) => {
         return next(err)
     })

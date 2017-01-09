@@ -10,6 +10,7 @@ import dependentVariable from '../repos/dependentVariable'
 import combinationElement from '../repos/combinationElement'
 import unit from '../repos/unit'
 import group from '../repos/group'
+import randomizationStrategy from '../repos/randomizationStrategy'
 import pgPromise from 'pg-promise'
 import log4js from 'log4js'
 const logger = log4js.getLogger('DbManager')
@@ -30,7 +31,7 @@ const options = {
         obj.combinationElement = new (combinationElement)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
         obj.group = new (group) (obj, pgp)
-
+        obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
     }
 }
 

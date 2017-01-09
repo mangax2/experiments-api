@@ -1,18 +1,19 @@
 import express from 'express'
 import log4js from 'log4js'
+
+import CombinationElementService from '../services/CombinationElementService'
+import DependentVariableService from '../services/DependentVariableService'
+import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
 import ExperimentSummaryService from '../services/ExperimentSummaryService'
+import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/factorService'
 import FactorTypeService from '../services/factorTypeService'
-import DependentVariableService from '../services/DependentVariableService'
-import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
+import GroupValueService from '../services/GroupValueService'
 import TreatmentService from '../services/TreatmentService'
-import CombinationElementService from '../services/CombinationElementService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
-import ExperimentalUnitService from '../services/ExperimentalUnitService'
-
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -487,6 +488,38 @@ router.get('/experiments/:id/summary', (req, res, next) => {
     return new ExperimentSummaryService().getExperimentSummaryById(req.params.id).then((summary) => {
         return res.json(summary)
     }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/group-values/:id', (req, res, next)=>{
+    return new GroupValueService().getGroupValueById(req.params.id).then((groupValue)=>{
+        return res.json(groupValue)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.post('/group-values', (req, res, next)=>{
+    return new GroupValueService().batchCreateGroupValues(req.body, req.context).then((id)=>{
+        return res.json(id)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.put('/group-values', (req, res, next)=>{
+    return new GroupValueService().batchUpdateGroupValues(req.body, req.context).then((groupValues)=>{
+        return res.json(groupValues)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.delete('/group-values/:id', (req, res, next)=>{
+    return new GroupValueService().deleteGroupValue(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
         return next(err)
     })
 })

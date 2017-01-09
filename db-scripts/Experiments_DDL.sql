@@ -454,15 +454,9 @@ FROM public.experiment e
 
 
 -- Database changes to support RCB vs CRD
-CREATE SEQUENCE public.ref_randomization_strategy_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 9223372036854775807
-    CACHE 1;
 CREATE TABLE public.ref_randomization_strategy
 (
-    id integer NOT NULL DEFAULT nextval('ref_randomization_strategy_id_seq'::regclass),
+    id serial NOT NULL,
     name character varying COLLATE pg_catalog."default",
     created_user_id character varying COLLATE pg_catalog."default" NOT NULL,
     created_date timestamp with time zone NOT NULL,

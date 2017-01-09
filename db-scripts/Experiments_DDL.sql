@@ -451,3 +451,40 @@ FROM public.experiment e
 	LEFT OUTER JOIN dependent_variable_numbers dv ON dv.experiment_id = e.id
 	LEFT OUTER JOIN factor_numbers f ON f.experiment_id = e.id
 	LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id
+
+
+-- Database changes to support RCB vs CRD
+CREATE SEQUENCE public.ref_randomization_strategy_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+CREATE TABLE public.ref_randomization_strategy
+(
+    id integer NOT NULL DEFAULT nextval('ref_randomization_strategy_id_seq'::regclass),
+    name character varying COLLATE pg_catalog."default",
+    created_user_id character varying COLLATE pg_catalog."default" NOT NULL,
+    created_date timestamp with time zone NOT NULL,
+    modified_user_id character varying COLLATE pg_catalog."default" NOT NULL,
+    modified_date timestamp with time zone NOT NULL,
+    CONSTRAINT ref_randomization_strategy_pk PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Randomized', 'jgord1', current_timestamp, 'jgord1', current_timestamp);
+INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Custom Randomization', 'jgord1', current_timestamp, 'jgord1', current_timestamp);
+ALTER TABLE public.group
+  ADD ref_randomization_strategy_id INT,
+  ADD CONSTRAINT treatment_ref_randomization_strategy_fk FOREIGN KEY (ref_randomization_strategy_id)
+        REFERENCES public.ref_randomization_strategy (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE;
+ALTER TABLE public.group_value
+  ADD rep_number INT,
+  ALTER COLUMN factor_name DROP NOT NULL,
+  ALTER COLUMN factor_level DROP NOT NULL;

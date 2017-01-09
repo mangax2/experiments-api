@@ -16,6 +16,12 @@ import group from '../repos/group'
 import groupValue from '../repos/groupValue'
 import treatment from '../repos/treatment'
 import unit from '../repos/unit'
+import group from '../repos/group'
+import randomizationStrategy from '../repos/randomizationStrategy'
+import pgPromise from 'pg-promise'
+import log4js from 'log4js'
+const logger = log4js.getLogger('DbManager')
+import config from '../../config'
 
 // pg-promise initialization options:
 const options = {
@@ -33,6 +39,8 @@ const options = {
         obj.groupValue = new (groupValue)(obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
+        obj.group = new (group) (obj, pgp)
+        obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
     }
 }
 

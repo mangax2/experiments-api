@@ -14,6 +14,10 @@ import FactorTypeService from '../services/factorTypeService'
 import GroupValueService from '../services/GroupValueService'
 import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
+import ExperimentalUnitService from '../services/ExperimentalUnitService'
+import GroupService from '../services/GroupService'
+import RandomizationStrategyService from '../services/RandomizationStrategyService'
+
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -520,6 +524,63 @@ router.delete('/group-values/:id', (req, res, next)=>{
     return new GroupValueService().deleteGroupValue(req.params.id).then((value)=>{
         return res.json(value)
     }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.post('/groups', (req, res, next) => {
+    return new GroupService().batchCreateGroups(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/groups', (req, res, next) => {
+    return new GroupService().batchUpdateGroups(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/groups', (req, res, next)=> {
+    return new GroupService().getGroupsByExperimentId(req.params.id).then((factors)=> {
+        return res.json(factors)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/groups/:id', (req, res, next) => {
+    return new GroupService().getGroupById(req.params.id).then((factors) => {
+        return res.json(factors)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.delete('/groups/:id', (req, res, next) => {
+    return new GroupService().deleteGroup(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy/:id', (req, res, next) => {
+    return new RandomizationStrategyService().getRandomizationStrategyById(req.params.id).then((strategy) => {
+        return res.json(strategy)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/randomizationStrategy', (req, res, next) => {
+    return new RandomizationStrategyService().getAllRandomizationStrategies().then((strategies) => {
+        return res.json(strategies)
+    }).catch((err) => {
         return next(err)
     })
 })

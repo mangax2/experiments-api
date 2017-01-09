@@ -4,6 +4,8 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import GroupValidator from '../validations/GroupValidator'
 import log4js from 'log4js'
+import _ from 'lodash'
+
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('GroupService')
@@ -33,7 +35,7 @@ class GroupService {
     }
 
     @Transactional('getGroupsByIds')
-    batchGetTreatmentByIds(ids, tx) {
+    batchGetGroupstByIds(ids, tx) {
         return db.group.batchFind(ids, tx).then((data) => {
             if (_.filter(data, (element) => element != null).length != ids.length) {
                 logger.error('Group not found for all requested ids.')

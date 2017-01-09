@@ -488,3 +488,7 @@ ALTER TABLE public.group_value
   ADD rep_number INT,
   ALTER COLUMN factor_name DROP NOT NULL,
   ALTER COLUMN factor_level DROP NOT NULL;
+UPDATE public.group
+  SET ref_randomization_strategy_id = 1;
+ALTER TABLE public.group
+  ALTER COLUMN ref_randomization_strategy_id SET NOT NULL;

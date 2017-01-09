@@ -53,7 +53,7 @@ class GroupService {
         })
     }
 
-    @Transactional('deleteGRoup')
+    @Transactional('deleteGroup')
     deleteGroup(id, tx) {
         return db.group.remove(id, tx).then((data) => {
             if (!data) {
@@ -66,7 +66,7 @@ class GroupService {
     }
 
     @Transactional('deleteGroupsForExperimentId')
-    deleteGroupForExperimentId(id, tx) {
+    deleteGroupsForExperimentId(id, tx) {
         return this._experimentService.getExperimentById(id, tx).then(() => {
             return db.group.removeByExperimentId(id, tx)
         })

@@ -2482,6 +2482,87 @@
                     }
                 }
             }
+        },
+        "/randomizationStrategy": {
+            "get": {
+                "summary": "Get all randomization strategies",
+                "description": "Returns all randomization strategies that can be used\n",
+                "tags": [
+                    "Randomization Strategy"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of randomization strategies",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RandomizationStrategy"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/randomizationStrategy/{id}": {
+            "get": {
+                "summary": "Get one randomization strategy entity",
+                "description": "Returns a single randomization strategy entity\n",
+                "tags": [
+                    "Randomization Strategy"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Single Randomization Strategy Entity",
+                        "schema": {
+                            "$ref": "#/definitions/RandomizationStrategy"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Factor Type Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3310,6 +3391,35 @@
                 "numberOfExperimentalUnits": {
                     "type": "integer",
                     "description": "the number of experimental units associated with the experiment."
+                }
+            }
+        },
+        "RandomizationStrategy": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of the randomization strategy."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "nome of the randomization strategy."
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         },

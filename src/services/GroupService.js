@@ -4,6 +4,8 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import GroupValidator from '../validations/GroupValidator'
 import log4js from 'log4js'
+import _ from 'lodash'
+
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('GroupService')
@@ -32,6 +34,18 @@ class GroupService {
         })
     }
 
+    @Transactional('getGroupsByIds')
+    batchGetGroupstByIds(ids, tx) {
+        return db.group.batchFind(ids, tx).then((data) => {
+            if (_.filter(data, (element) => element != null).length != ids.length) {
+                logger.error('Group not found for all requested ids.')
+                throw AppError.notFound('Group not found for all requested ids.')
+            } else {
+                return data
+            }
+        })
+    }
+
     @Transactional('getGroupsById')
     getGroupById(id, tx) {
         return db.group.find(id, tx).then((data) => {
@@ -53,7 +67,7 @@ class GroupService {
         })
     }
 
-    @Transactional('deleteGRoup')
+    @Transactional('deleteGroup')
     deleteGroup(id, tx) {
         return db.group.remove(id, tx).then((data) => {
             if (!data) {
@@ -66,7 +80,7 @@ class GroupService {
     }
 
     @Transactional('deleteGroupsForExperimentId')
-    deleteGroupForExperimentId(id, tx) {
+    deleteGroupsForExperimentId(id, tx) {
         return this._experimentService.getExperimentById(id, tx).then(() => {
             return db.group.removeByExperimentId(id, tx)
         })

@@ -473,8 +473,10 @@ INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_da
 INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)
   VALUES ('Custom Randomization', 'jgord1', current_timestamp, 'jgord1', current_timestamp);
 ALTER TABLE public.group
-  ADD ref_randomization_strategy_id INT,
-  ADD CONSTRAINT treatment_ref_randomization_strategy_fk FOREIGN KEY (ref_randomization_strategy_id)
+  RENAME COLUMN randomize TO ref_randomization_strategy_id;
+ALTER TABLE public.group
+  ALTER COLUMN ref_randomization_strategy_id TYPE int USING(1),
+  ADD CONSTRAINT group_ref_randomization_strategy_fk FOREIGN KEY (ref_randomization_strategy_id)
         REFERENCES public.ref_randomization_strategy (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE;

@@ -26,6 +26,7 @@ describe('GroupService', () => {
     let batchUpdateStub
     let removeStub
     let removeByExperimentIdStub
+    let batchFindStub
 
     before(() => {
         target = new GroupService()
@@ -41,6 +42,9 @@ describe('GroupService', () => {
         batchUpdateStub = sinon.stub(db.group, 'batchUpdate')
         removeStub = sinon.stub(db.group, 'remove')
         removeByExperimentIdStub = sinon.stub(db.group, 'removeByExperimentId')
+        batchFindStub = sinon.stub(db.group, 'batchFind')
+
+
     })
 
     afterEach(() => {
@@ -55,6 +59,9 @@ describe('GroupService', () => {
         batchUpdateStub.reset()
         removeStub.reset()
         removeByExperimentIdStub.reset()
+        batchFindStub.reset()
+
+
     })
 
     after(() => {
@@ -69,6 +76,7 @@ describe('GroupService', () => {
         batchUpdateStub.restore()
         removeStub.restore()
         removeByExperimentIdStub.restore()
+        batchFindStub.restore()
     })
 
     describe('batchCreateFactors', () => {
@@ -227,7 +235,50 @@ describe('GroupService', () => {
         })
     })
 
-    describe('batchUpdateFactors', () => {
+    describe('batchGetGroupsByIds', () => {
+        it('returns rejected promise when batchFind fails', () => {
+            batchFindStub.rejects(testError)
+
+            return target.batchGetGroupsByIds([7], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [7],
+                    sinon.match.same(tx))
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+
+        it('returns rejected promise when data count does not match id count', () => {
+            batchFindStub.resolves({}, null, {})
+            notFoundStub.returns(testError)
+
+            return target.batchGetGroupsByIds([1,2,3], tx).should.be.rejected.then((err) => {
+                err.should.equal(testError)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [1,2,3],
+                    sinon.match.same(tx))
+                sinon.assert.calledWith(notFoundStub, 'Group not found for all requested ids.')
+            })
+        })
+
+        it('returns resolved promise when data found for all ids', () => {
+            const findResult = [{}, {}, {}]
+            batchFindStub.resolves(findResult)
+
+            return target.batchGetGroupsByIds([1,2,3], tx).then((r) => {
+                r.should.equal(findResult)
+                sinon.assert.calledWith(
+                    batchFindStub,
+                    [1,2,3],
+                    sinon.match.same(tx))
+                sinon.assert.notCalled(notFoundStub)
+            })
+        })
+    })
+
+    describe('batchUpdateGroups', () => {
         it('returns rejected promise when validate fails', () => {
             validateStub.rejects(testError)
 

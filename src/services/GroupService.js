@@ -35,7 +35,7 @@ class GroupService {
     }
 
     @Transactional('getGroupsByIds')
-    batchGetGroupstByIds(ids, tx) {
+    batchGetGroupsByIds(ids, tx) {
         return db.group.batchFind(ids, tx).then((data) => {
             if (_.filter(data, (element) => element != null).length != ids.length) {
                 logger.error('Group not found for all requested ids.')

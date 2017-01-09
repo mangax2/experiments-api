@@ -2,11 +2,10 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import GroupValueValidator from '../validations/GroupValueValidator'
-// import GroupService from './GroupService'
+import GroupService from './GroupService'
 import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
-// import ctimestamp from 'console-timestamp'
 
 const logger = log4js.getLogger('GroupValueService')
 
@@ -14,9 +13,9 @@ class CombinationElementService {
 
     constructor() {
         this._validator = new GroupValueValidator()
-        // this._groupService = new GroupService()
+        this._groupService = new GroupService()
     }
-    //
+
     @Transactional('createGroupValueTx')
     batchCreateGroupValues(groupValues, context, tx) {
         return this._validator.validate(groupValues, 'POST', tx).then(() => {
@@ -26,19 +25,18 @@ class CombinationElementService {
         })
     }
 
-
     @Transactional('getGroupValuesByGroupId')
     getGroupValuesByGroupId(id, tx) {
-        // return this._groupService.getGroupById(id, tx).then(()=>{
+        return this._groupService.getGroupById(id, tx).then(()=>{
             return db.groupValue.findAllByGroupId(id, tx)
-        // })
+        })
     }
 
     @Transactional('batchGetGroupValuesByGroupIds')
     batchGetGroupValuesByGroupIds(ids, tx) {
-    //     return this._groupService.batchGetGroupByIds(ids, tx).then(()=>{
+        return this._groupService.batchGetGroupByIds(ids, tx).then(()=>{
             return db.groupValue.batchFindAllByGroupIds(ids, tx)
-    //     })
+        })
     }
 
     @Transactional('batchGetGroupValuesByGroupIdsNoValidate')

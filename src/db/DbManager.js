@@ -1,34 +1,38 @@
+import config from '../../config'
+import log4js from 'log4js'
+const logger = log4js.getLogger('DbManager')
 import promise from 'bluebird'
+import pgPromise from 'pg-promise'
+
+import combinationElement from '../repos/combinationElement'
+import dependentVariable from '../repos/dependentVariable'
 import experiments from '../repos/experiments'
 import experimentDesign from '../repos/experimentDesign'
 import experimentSummary from '../repos/experimentSummary'
 import factor from '../repos/factor'
 import factorLevel from '../repos/factorLevel'
 import factorType from '../repos/factorType'
-import treatment from '../repos/treatment'
-import dependentVariable from '../repos/dependentVariable'
-import combinationElement from '../repos/combinationElement'
-import unit from '../repos/unit'
 import group from '../repos/group'
+import groupValue from '../repos/groupValue'
+import treatment from '../repos/treatment'
+import unit from '../repos/unit'
 import randomizationStrategy from '../repos/randomizationStrategy'
-import pgPromise from 'pg-promise'
-import log4js from 'log4js'
-const logger = log4js.getLogger('DbManager')
-import config from '../../config'
 
 // pg-promise initialization options:
 const options = {
     promiseLib: promise,
     extend: (obj) => {
+        obj.combinationElement = new (combinationElement)(obj, pgp)
+        obj.dependentVariable = new (dependentVariable)(obj, pgp)
         obj.experiments = new (experiments)(obj, pgp)
         obj.experimentDesign = new (experimentDesign)(obj, pgp)
         obj.experimentSummary = new (experimentSummary) (obj, pgp)
         obj.factor = new (factor)(obj, pgp)
         obj.factorLevel = new (factorLevel)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
-        obj.dependentVariable = new (dependentVariable)(obj, pgp)
+        obj.group = new (group) (obj, pgp)
+        obj.groupValue = new (groupValue)(obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
-        obj.combinationElement = new (combinationElement)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
         obj.group = new (group) (obj, pgp)
         obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)

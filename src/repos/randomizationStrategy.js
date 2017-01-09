@@ -10,6 +10,10 @@ module.exports = (rep, pgp) => {
 
         all: () => {
             return rep.any("SELECT * FROM ref_randomization_strategy")
+        },
+
+        batchFind: (ids, tx = rep) => {
+            return tx.any("SELECT * FROM ref_randomization_strategy WHERE id IN ($1:csv)", [ids])
         }
     }
 }

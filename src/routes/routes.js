@@ -14,7 +14,6 @@ import FactorTypeService from '../services/factorTypeService'
 import GroupValueService from '../services/GroupValueService'
 import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
-import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import GroupService from '../services/GroupService'
 import RandomizationStrategyService from '../services/RandomizationStrategyService'
 

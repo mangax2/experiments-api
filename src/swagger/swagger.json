@@ -2652,8 +2652,108 @@
                     }
                 }
             }
+        },
+        "/groups/{id}/group-values": {
+            "get": {
+                "summary": "Get all group values for a particular group",
+                "description": "Returns all group values for a single group\n",
+                "tags": [
+                    "Group Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group Values",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupValue"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/group-values/{id}": {
+            "get": {
+                "summary": "Get on group value entity",
+                "description": "Returns a single group entity\n",
+                "tags": [
+                    "Group Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group Value Entity",
+                        "schema": {
+                            "$ref": "#/definitions/GroupValue"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Value Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
-
     },
     "definitions": {
         "ExperimentDesign": {
@@ -3513,7 +3613,6 @@
                 }
             }
         },
-
         "Group": {
             "type": "object",
             "properties": {
@@ -3551,7 +3650,47 @@
                 }
             }
         },
-
+        "GroupValue": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Group Value Id"
+                },
+                "factorName": {
+                    "type": "string",
+                    "description": "Name of the factor the group is associated to"
+                },
+                "factorLevel": {
+                    "type": "string",
+                    "description": "Value of the factor associated to the group"
+                },
+                "groupId": {
+                    "type": "integer",
+                    "description": "Group Id"
+                },
+                "repNumber": {
+                    "type": "integer",
+                    "description": "Rep Number"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
         "Error": {
             "type": "object",
             "properties": {

@@ -2483,12 +2483,12 @@
                 }
             }
         },
-        "/randomizationStrategy": {
+        "/randomizationStrategies": {
             "get": {
                 "summary": "Get all randomization strategies",
                 "description": "Returns all randomization strategies that can be used\n",
                 "tags": [
-                    "Randomization Strategy"
+                    "Randomization Strategies"
                 ],
                 "responses": {
                     "200": {
@@ -2515,12 +2515,12 @@
                 }
             }
         },
-        "/randomizationStrategy/{id}": {
+        "/randomizationStrategies/{id}": {
             "get": {
                 "summary": "Get one randomization strategy entity",
                 "description": "Returns a single randomization strategy entity\n",
                 "tags": [
-                    "Randomization Strategy"
+                    "Randomization Strategies"
                 ],
                 "parameters": [
                     {
@@ -2550,7 +2550,96 @@
                         }
                     },
                     "404": {
-                        "description": "Factor Type Does Not Exist",
+                        "description": "Randomization Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/groups": {
+            "get": {
+                "summary": "Get all groups by experiment id",
+                "description": "Returns all groups for experiment\n",
+                "tags": [
+                    "Groups"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of groups",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Group"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{id}": {
+            "get": {
+                "summary": "Get one group entity",
+                "description": "Returns a single group entity\n",
+                "tags": [
+                    "Groups"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group Entity",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2564,6 +2653,7 @@
                 }
             }
         }
+
     },
     "definitions": {
         "ExperimentDesign": {
@@ -3423,6 +3513,45 @@
                 }
             }
         },
+
+        "Group": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Group Id"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "Experiment Id"
+                },
+                "parentId ": {
+                    "type": "integer",
+                    "description": "parent group id of the group (optional)"
+                },
+                "refRandomizationStrategyId": {
+                    "type": "integer",
+                    "description": "Id of RandomizationStrategy "
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+
         "Error": {
             "type": "object",
             "properties": {

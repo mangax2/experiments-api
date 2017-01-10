@@ -568,7 +568,7 @@ router.delete('/groups/:id', (req, res, next) => {
     })
 })
 
-router.get('/randomizationStrategy/:id', (req, res, next) => {
+router.get('/randomizationStrategies/:id', (req, res, next) => {
     return new RandomizationStrategyService().getRandomizationStrategyById(req.params.id).then((strategy) => {
         return res.json(strategy)
     }).catch((err) => {
@@ -576,7 +576,7 @@ router.get('/randomizationStrategy/:id', (req, res, next) => {
     })
 })
 
-router.get('/randomizationStrategy', (req, res, next) => {
+router.get('/randomizationStrategies', (req, res, next) => {
     return new RandomizationStrategyService().getAllRandomizationStrategies().then((strategies) => {
         return res.json(strategies)
     }).catch((err) => {

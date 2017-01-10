@@ -23,7 +23,7 @@ module.exports = (rep, pgp) => {
                 return Promise.resolve([])
             } else {
                 return tx.any("SELECT * FROM group_value WHERE group_id IN ($1:csv)", [groupIds]).then((data) => {
-                    const groupValues = _.groupBy(data, (d) => d.treatment_id)
+                    const groupValues = _.groupBy(data, (d) => d.group_id)
                     return _.map(groupIds, (groupId) => groupValues[groupId])
                 })
             }

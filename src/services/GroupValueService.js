@@ -34,7 +34,7 @@ class CombinationElementService {
 
     @Transactional('batchGetGroupValuesByGroupIds')
     batchGetGroupValuesByGroupIds(ids, tx) {
-        return this._groupService.batchGetGroupByIds(ids, tx).then(()=>{
+        return this._groupService.batchGetGroupsByIds(ids, tx).then(()=>{
             return db.groupValue.batchFindAllByGroupIds(ids, tx)
         })
     }

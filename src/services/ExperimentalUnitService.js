@@ -4,6 +4,7 @@ import AppError from './utility/AppError'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
+import GroupService from './GroupService'
 import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
@@ -16,6 +17,7 @@ class ExperimentalUnitService {
         this._validator = new ExperimentalUnitValidator()
         this._treatmentService = new TreatmentService()
         this._experimentService = new ExperimentsService()
+        this._groupService = new GroupService()
     }
 
     @Transactional('createExperimentalUnitsTx')
@@ -40,6 +42,15 @@ class ExperimentalUnitService {
             return db.unit.batchFindAllByTreatmentIds(ids, tx)
         })
     }
+
+    @Transactional('batchGetExperimentalUnitByGroupIds')
+    batchGetExperimentalUnitsByGroupIds(ids, tx) {
+        return this._groupService.batchGetGroupsByIds(ids, tx).then(() => {
+            return db.unit.batchFindAllByGroupIds(ids, tx)
+        })
+    }
+
+
 
     @Transactional('getExperimentalUnitById')
     getExperimentalUnitById(id, tx) {

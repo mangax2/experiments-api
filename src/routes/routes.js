@@ -16,6 +16,7 @@ import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import RandomizationStrategyService from '../services/RandomizationStrategyService'
+import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 
 
 const logger = log4js.getLogger('Router')
@@ -579,6 +580,23 @@ router.get('/randomization-strategies/:id', (req, res, next) => {
 router.get('/randomization-strategies', (req, res, next) => {
     return new RandomizationStrategyService().getAllRandomizationStrategies().then((strategies) => {
         return res.json(strategies)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.post('/composites/group-experimental-units', (req, res, next) => {
+    return new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+
+})
+
+router.get('/experiments/:id/composites/group-experimental-units', (req, res, next) => {
+    return new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id).then((value) => {
+        return res.json(value)
     }).catch((err) => {
         return next(err)
     })

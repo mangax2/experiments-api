@@ -17,13 +17,11 @@ module.exports = (rep, pgp) => {
         },
 
         batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
-            return tx.batch(
-                treatmentIds.map(
-                    id => tx.any("SELECT * FROM unit WHERE treatment_id = $1", id)
-                )
-            )
+            return tx.any("SELECT * FROM unit WHERE treatment_id IN ($1:csv)", [treatmentIds])
         },
-
+        batchFindAllByGroupIds: (groupIds, tx = rep) => {
+            return tx.any("SELECT * FROM unit WHERE group_id IN ($1:csv)", [groupIds])
+        },
         batchCreate: (units, context, tx = rep) => {
             return tx.batch(
                 units.map(

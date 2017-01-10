@@ -4,7 +4,7 @@ const logger = log4js.getLogger('app')
 var config = {}
 
 config.env = process.env.ENV || 'local'
-config.port = process.env.PORT || 3000
+config.port = process.env.PORT || 3001
 config.node_env = process.env.NODE_ENV || 'local'
 config.postgres_password = process.env.POSTGRES_PASSWORD
 config.db_password = process.env.DB_PASSWORD

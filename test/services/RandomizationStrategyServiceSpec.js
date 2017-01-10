@@ -30,7 +30,7 @@ describe('RandomizationStrategyService', () => {
             }
             findStub.resolves(testResponse)
 
-            new RandomizationStrategyService().getRandomizationStrategyById(30).then((summary) => {
+            return new RandomizationStrategyService().getRandomizationStrategyById(30).then((summary) => {
                 summary.should.equal(testResponse)
                 sinon.assert.calledWithExactly(
                     findStub,
@@ -41,9 +41,9 @@ describe('RandomizationStrategyService', () => {
         it('fails and returns error when no strategy found', () => {
             findStub.resolves(null)
 
-            new RandomizationStrategyService().getRandomizationStrategyById(30).then((err) => {
+            return new RandomizationStrategyService().getRandomizationStrategyById(30).should.be.rejected.then((err) => {
                 err.status.should.equal(404)
-                err.message.should.equal('Experiment Summary Not Found for requested experimentId')
+                err.message.should.equal('Randomization Strategy Not Found for requested id')
                 sinon.assert.calledWithExactly(
                     findStub,
                     30)
@@ -57,7 +57,7 @@ describe('RandomizationStrategyService', () => {
             }
             findStub.rejects(testError)
 
-            new RandomizationStrategyService().getRandomizationStrategyById(30).then((err) => {
+            return new RandomizationStrategyService().getRandomizationStrategyById(30).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
                     findStub,

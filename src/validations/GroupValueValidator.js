@@ -13,7 +13,7 @@ class GroupValueValidator extends SchemaValidator {
             {
                 'paramName': 'GroupValue',
                 'type': 'businessKey',
-                'keys': ['factorName', 'groupId'],
+                'keys': ['groupId', 'factorName'],
                 'entity': db.groupValue
             },
             {'paramName': 'repNumber', 'type': 'numeric', required: false}

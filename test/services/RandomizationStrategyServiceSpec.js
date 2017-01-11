@@ -73,7 +73,7 @@ describe('RandomizationStrategyService', () => {
             }
             allStub.resolves(testResponse)
 
-            new RandomizationStrategyService().getAllRandomizationStrategies().then((summary) => {
+            return new RandomizationStrategyService().getAllRandomizationStrategies().then((summary) => {
                 summary.should.equal(testResponse)
                 sinon.assert.called(
                     allStub)
@@ -87,7 +87,7 @@ describe('RandomizationStrategyService', () => {
             }
             allStub.rejects(testError)
 
-            new RandomizationStrategyService().getAllRandomizationStrategies().then((err) => {
+            return new RandomizationStrategyService().getAllRandomizationStrategies().should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.called(
                     allStub)

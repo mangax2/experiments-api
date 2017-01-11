@@ -9,7 +9,7 @@ import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('GroupValueService')
 
-class CombinationElementService {
+class GroupValueService {
 
     constructor() {
         this._validator = new GroupValueValidator()
@@ -90,4 +90,4 @@ class CombinationElementService {
     }
 }
 
-module.exports = CombinationElementService
+module.exports = GroupValueService

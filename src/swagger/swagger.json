@@ -3107,6 +3107,10 @@
                     "type": "integer",
                     "description": "reference to parent Group"
                 },
+                "refRandomizationStrategyId":{
+                    "type":"integer",
+                    "description": "reference to RandomizationStrategy Table"
+                },
                 "experimentId": {
                     "type": "integer",
                     "description": "id of experimentId entity"
@@ -3147,6 +3151,10 @@
                 "parentId": {
                     "type": "integer",
                     "description": "reference to parent Group"
+                },
+                "refRandomizationStrategyId":{
+                    "type":"integer",
+                    "description": "reference to RandomizationStrategy Table"
                 },
                 "experimentId": {
                     "type": "integer",

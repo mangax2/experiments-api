@@ -30,10 +30,12 @@ class GroupExperimentalUnitCompositeService {
         return this._groupService.deleteGroupsForExperimentId(experimentId, tx).then(()=> {
             return this._groupService.batchCreateGroups(groups, context, tx).then((groupResp)=> {
                 const _retVal=this._getUnitsAndGroupValues(groupResp, groupAndUnitDetails)
-                return Promise.all([
-                    this._groupValueService.batchCreateGroupValues(_retVal.groupValues, context, tx),
-                    this._createExperimentalUnits(_retVal.units, context, experimentId, tx)])
-
+                const promises = []
+                if (_retVal.groupValues.length > 0){
+                    promises.push(this._groupValueService.batchCreateGroupValues(_retVal.groupValues, context, tx))
+                }
+                promises.push(this._createExperimentalUnits(_retVal.units, context, experimentId, tx))
+                return Promise.all(promises)
             })
         })
 

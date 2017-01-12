@@ -73,18 +73,22 @@ class GroupExperimentalUnitCompositeService {
     getGroupAndUnitDetails(experimentId, tx) {
         return this._groupService.getGroupsByExperimentId(experimentId, tx).then((groups)=> {
             const groupIds = _.map(groups, "id")
-            return Promise.all([
-                this._groupValueService.batchGetGroupValuesByGroupIds(groupIds, tx),
-                this._experimentalUnitService.batchGetExperimentalUnitsByGroupIds(groupIds, tx)]
-            ).then((groupValuesAndUnits)=> {
-                const groupValues = _.compact(_.flatMap(groupValuesAndUnits[0]))
-                const units = _.compact(_.flatMap(groupValuesAndUnits[1]))
-                return _.map(groups, (group) => {
-                    group["groupValues"] = _.filter(groupValues, (g)=>g["group_id"] == group.id)
-                    group["units"] = _.filter(units, (u)=>u["group_id"] == group.id)
-                    return group
+            if(groupIds.length > 0) {
+                return Promise.all([
+                    this._groupValueService.batchGetGroupValuesByGroupIds(groupIds, tx),
+                    this._experimentalUnitService.batchGetExperimentalUnitsByGroupIds(groupIds, tx)]
+                ).then((groupValuesAndUnits) => {
+                    const groupValues = _.compact(_.flatMap(groupValuesAndUnits[0]))
+                    const units = _.compact(_.flatMap(groupValuesAndUnits[1]))
+                    return _.map(groups, (group) => {
+                        group["groupValues"] = _.filter(groupValues, (g) => g["group_id"] == group.id)
+                        group["units"] = _.filter(units, (u) => u["group_id"] == group.id)
+                        return group
+                    })
                 })
-            })
+            } else {
+                return Promise.resolve(() => {return []})
+            }
         })
     }
 

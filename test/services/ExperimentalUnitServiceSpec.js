@@ -30,6 +30,8 @@ describe('ExperimentalUnitService', () => {
     let batchUpdateStub
     let removeStub
     let batchRemoveStub
+    let batchGetGroupsByIdsStub
+    let batchFindAllByGroupIdsStub
 
     before(() => {
         target = new ExperimentalUnitService()
@@ -41,6 +43,8 @@ describe('ExperimentalUnitService', () => {
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
         validateStub = sinon.stub(target._validator, 'validate')
+        batchGetGroupsByIdsStub = sinon.stub(target._groupService,'batchGetGroupsByIds')
+        batchFindAllByGroupIdsStub = sinon.stub(db.unit,'batchFindAllByGroupIds')
         repositoryStub = sinon.stub(db.unit, 'repository', () => {
             return {
                 tx: function (transactionName, callback) {
@@ -60,6 +64,8 @@ describe('ExperimentalUnitService', () => {
 
     afterEach(() => {
         getTreatmentByIdStub.reset()
+        batchGetGroupsByIdsStub.reset()
+        batchFindAllByGroupIdsStub.reset()
         getExperimentByIdStub.reset()
         batchGetTreatmentByIdsStub.reset()
         createPostResponseStub.reset()
@@ -92,6 +98,8 @@ describe('ExperimentalUnitService', () => {
         batchUpdateStub.restore()
         removeStub.restore()
         batchRemoveStub.restore()
+        batchGetGroupsByIdsStub.restore()
+        batchFindAllByGroupIdsStub.restore()
     })
 
     describe('batchCreateExperimentalUnits', () => {
@@ -464,4 +472,23 @@ describe('ExperimentalUnitService', () => {
             })
         })
     })
+
+    describe("batchGetExperimentalUnitsByGroupIds Specs",()=>{
+
+        it("batchGetExperimentalUnitsByGroupIds:Success",()=>{
+            batchGetGroupsByIdsStub.resolves([])
+            batchFindAllByGroupIdsStub.resolves()
+            const groupIds=[1]
+            return target.batchGetExperimentalUnitsByGroupIds(groupIds,tx).then(()=>{
+               sinon.assert.calledWithExactly(
+                   batchFindAllByGroupIdsStub,
+                   [1],
+                   sinon.match.same(tx)
+               )
+           })
+        })
+
+    })
+
+
 })

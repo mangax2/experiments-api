@@ -29,7 +29,7 @@ class GroupExperimentalUnitCompositeService {
 
         return this._groupService.deleteGroupsForExperimentId(experimentId, tx).then(()=> {
             return this._groupService.batchCreateGroups(groups, context, tx).then((groupResp)=> {
-                const _retVal=this._getUnitsAndGroupValues(groupResp, groupAndUnitDetails);
+                const _retVal=this._getUnitsAndGroupValues(groupResp, groupAndUnitDetails)
                 return Promise.all([
                     this._groupValueService.batchCreateGroupValues(_retVal.groupValues, context, tx),
                     this._createExperimentalUnits(_retVal.units, context, experimentId, tx)])
@@ -44,7 +44,7 @@ class GroupExperimentalUnitCompositeService {
         const updatedGroupAndUnitDetails = this.assignGroupIdToGroupValuesAndUnits(groupAndUnitDetails, groupIds)
         const units = _.flatMap(updatedGroupAndUnitDetails, "units")
         const groupValues = _.flatMap(updatedGroupAndUnitDetails, "groupValues")
-        return {units: units, groupValues: groupValues};
+        return {units: units, groupValues: groupValues}
     }
 
     _createExperimentalUnits(units, context, experimentId, tx) {

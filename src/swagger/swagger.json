@@ -854,14 +854,14 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/CompositeGroupsAndUnitsResponse"
+                                "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
                             }
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Composite-Treatments operation SUCCESS"
+                        "description": "composite group-experimental-units operation SUCCESS"
                     },
                     "400": {
                         "description": "Invalid/Problematic Input",
@@ -2583,7 +2583,7 @@
                 }
             }
         },
-        "/randomizationStrategies": {
+        "/randomization-strategies": {
             "get": {
                 "summary": "Get all randomization strategies",
                 "description": "Returns all randomization strategies that can be used\n",
@@ -2615,7 +2615,7 @@
                 }
             }
         },
-        "/randomizationStrategies/{id}": {
+        "/randomization-strategies/{id}": {
             "get": {
                 "summary": "Get one randomization strategy entity",
                 "description": "Returns a single randomization strategy entity\n",
@@ -3101,11 +3101,15 @@
             "properties": {
                 "id": {
                     "type": "integer",
-                    "description": "unique id for  entity"
+                    "description": "unique id for group entity"
                 },
                 "parentId": {
                     "type": "integer",
                     "description": "reference to parent Group"
+                },
+                "refRandomizationStrategyId":{
+                    "type":"integer",
+                    "description": "reference to RandomizationStrategy Table"
                 },
                 "experimentId": {
                     "type": "integer",
@@ -3137,6 +3141,35 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ExperimentalUnitResponse"
+                    }
+                }
+            }
+        },
+        "CompositeGroupsAndUnitsPOST": {
+            "type": "object",
+            "properties": {
+                "parentId": {
+                    "type": "integer",
+                    "description": "reference to parent Group"
+                },
+                "refRandomizationStrategyId":{
+                    "type":"integer",
+                    "description": "reference to RandomizationStrategy Table"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experimentId entity"
+                },
+                "groupValues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GroupValueCompositeOperation"
+                    }
+                },
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
                     }
                 }
             }
@@ -3704,6 +3737,19 @@
                 }
             }
         },
+        "ExperimentalUnitCompositeOperation": {
+            "type": "object",
+            "properties": {
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatmentId entity."
+                },
+                "rep": {
+                    "type": "integer",
+                    "description": "rep number of experimental unit."
+                }
+            }
+        },
         "ExperimentSummary": {
             "type": "object",
             "properties": {
@@ -3833,6 +3879,23 @@
                 "modifiedUserId": {
                     "type": "string",
                     "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "GroupValueCompositeOperation": {
+            "type": "object",
+            "properties": {
+                "factorName": {
+                    "type": "string",
+                    "description": "Name of the factor the group is associated to"
+                },
+                "factorLevel": {
+                    "type": "string",
+                    "description": "Value of the factor associated to the group"
+                },
+                "repNumber": {
+                    "type": "integer",
+                    "description": "Rep Number"
                 }
             }
         },

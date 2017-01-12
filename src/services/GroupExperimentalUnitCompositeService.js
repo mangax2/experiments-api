@@ -31,10 +31,12 @@ class GroupExperimentalUnitCompositeService {
             return this._groupService.batchCreateGroups(groups, context, tx).then((groupResp)=> {
                 const _retVal=this._getUnitsAndGroupValues(groupResp, groupAndUnitDetails)
                 const promises = []
-                if (_retVal.groupValues.length > 0){
+                if (_retVal.groupValues.length > 0) {
                     promises.push(this._groupValueService.batchCreateGroupValues(_retVal.groupValues, context, tx))
                 }
-                promises.push(this._createExperimentalUnits(_retVal.units, context, experimentId, tx))
+                if (_retVal.units.length > 0) {
+                    promises.push(this._createExperimentalUnits(_retVal.units, context, experimentId, tx))
+                }
                 return Promise.all(promises)
             })
         })

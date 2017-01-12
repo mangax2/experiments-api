@@ -3144,10 +3144,6 @@
         "CompositeGroupsAndUnitsPOST": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "unique id for group entity"
-                },
                 "parentId": {
                     "type": "integer",
                     "description": "reference to parent Group"
@@ -3159,13 +3155,13 @@
                 "groupValues": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/GroupValueOperation"
+                        "$ref": "#/definitions/GroupValueCompositeOperation"
                     }
                 },
                 "units": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ExperimentalUnitOperation"
+                        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
                     }
                 }
             }
@@ -3733,17 +3729,9 @@
                 }
             }
         },
-        "ExperimentalUnitOperation": {
+        "ExperimentalUnitCompositeOperation": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of experimental unit to update."
-                },
-                "groupId": {
-                    "type": "integer",
-                    "description": "experimental unit's group id"
-                },
                 "treatmentId": {
                     "type": "integer",
                     "description": "id of treatmentId entity."
@@ -3886,13 +3874,9 @@
                 }
             }
         },
-        "GroupValueOperation": {
+        "GroupValueCompositeOperation": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "Group Value Id"
-                },
                 "factorName": {
                     "type": "string",
                     "description": "Name of the factor the group is associated to"
@@ -3900,10 +3884,6 @@
                 "factorLevel": {
                     "type": "string",
                     "description": "Value of the factor associated to the group"
-                },
-                "groupId": {
-                    "type": "integer",
-                    "description": "Group Id"
                 },
                 "repNumber": {
                     "type": "integer",

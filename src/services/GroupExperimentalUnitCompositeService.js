@@ -4,6 +4,7 @@ import GroupValueService from "./GroupValueService"
 import ExperimentalUnitService from "./ExperimentalUnitService"
 import _ from "lodash"
 import db from "../db/DbManager"
+import AppUtil from './utility/AppUtil'
 
 class GroupExperimentalUnitCompositeService {
 
@@ -35,7 +36,9 @@ class GroupExperimentalUnitCompositeService {
                     promises.push(this._groupValueService.batchCreateGroupValues(_retVal.groupValues, context, tx))
                 }
                 promises.push(this._createExperimentalUnits(_retVal.units, context, experimentId, tx))
-                return Promise.all(promises)
+                return Promise.all(promises).then(()=>{
+                    return AppUtil.createCompositePostResponse()
+                })
             })
         })
 

@@ -93,8 +93,8 @@ module.exports = (rep, pgp) => {
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
             const values = batchKeys.map((obj) => {
                 return {
-                    factor_name: obj.keys[0],
-                    group_id: obj.keys[1],
+                    factor_name: obj.keys[1],
+                    group_id: obj.keys[0],
                     id: obj.updateId
                 }
             })

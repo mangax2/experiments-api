@@ -49,8 +49,8 @@ class GroupExperimentalUnitCompositeService {
     _getUnitsAndGroupValues(groupResp, groupAndUnitDetails) {
         const groupIds = _.map(groupResp, "id")
         const updatedGroupAndUnitDetails = this.assignGroupIdToGroupValuesAndUnits(groupAndUnitDetails, groupIds)
-        const units = _.flatMap(updatedGroupAndUnitDetails, "units")
-        const groupValues = _.flatMap(updatedGroupAndUnitDetails, "groupValues")
+        const units = _.compact(_.flatMap(updatedGroupAndUnitDetails, "units"))
+        const groupValues = _.compact(_.flatMap(updatedGroupAndUnitDetails, "groupValues"))
         return {units: units, groupValues: groupValues}
     }
 
@@ -94,7 +94,7 @@ class GroupExperimentalUnitCompositeService {
                     })
                 })
             } else {
-                return Promise.resolve(() => {return []})
+                return []
             }
         })
     }

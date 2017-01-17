@@ -54,6 +54,20 @@ describe("GroupExperimentalUnits Specs", ()=> {
             })
         })
 
+        it("IntialLoad:getGroupsAndUnitDetails", ()=> {
+            getGroupsByExperimentIdStub.resolves([])
+            return target.getGroupAndUnitDetails(2, testTx).then((data)=> {
+                data.length.should.equal(0)
+                sinon.assert.notCalled(
+                    batchGetGroupValuesByGroupIdsStub
+                )
+                sinon.assert.notCalled(
+                    batchGetExperimentalUnitsByGroupIdsStub
+
+                )
+            })
+        })
+
         it("Failure:getGroupsAndUnitDetails When getGroupsByExperimentId Fails", ()=> {
             getGroupsByExperimentIdStub.rejects(testError)
             const experimentId = 1
@@ -190,6 +204,82 @@ describe("GroupExperimentalUnits Specs", ()=> {
             })
 
         })
+
+        it("Success:saveGroupAndUnitDetails with out passing Units ", ()=> {
+            const requestpayLoad=[
+                {
+                    "experimentId": 1,
+                    "refRandomizationStrategyId": 1,
+                    "groupValues": [{"repNumber":1}]
+
+                },
+                {
+                    "experimentId": 1,
+                    "refRandomizationStrategyId": 1,
+                    "groupValues": [{"repNumber":2}],
+                    "units":[
+                        {
+                            "treatmentId": 150,
+                            "rep": 2
+                        }
+                    ]
+                }
+
+            ]
+            deleteGroupsForExperimentIdStub.resolves([])
+            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
+            batchCreateExperimentalUnitsStub.resolves([])
+            batchCreateGroupValuesStub.resolves([])
+            getDistinctExperimentIdsStub.resolves([{'experiment_id':1}])
+            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).then(()=>{
+                sinon.assert.called(
+                    batchCreateGroupValuesStub
+
+                )
+                sinon.assert.called(
+                    batchCreateExperimentalUnitsStub
+                )
+                sinon.assert.calledWithExactly(getDistinctExperimentIdsStub,[150],testTx)
+
+            })
+
+        })
+        it("Success:saveGroupAndUnitDetails with out passing groupValues & Units ", ()=> {
+            const requestpayLoad=[
+                {
+                    "experimentId": 1,
+                    "refRandomizationStrategyId": 1
+
+                },
+                {
+                    "experimentId": 1,
+                    "refRandomizationStrategyId": 1
+
+                }
+
+            ]
+            deleteGroupsForExperimentIdStub.resolves([])
+            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
+            batchCreateExperimentalUnitsStub.resolves([])
+            batchCreateGroupValuesStub.resolves([])
+            getDistinctExperimentIdsStub.resolves([{'experiment_id':1}])
+            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).then(()=>{
+                sinon.assert.notCalled(
+                    batchCreateGroupValuesStub
+
+                )
+                sinon.assert.notCalled(
+                    batchCreateExperimentalUnitsStub
+                )
+                sinon.assert.notCalled(
+                    getDistinctExperimentIdsStub
+                )
+
+
+            })
+
+        })
+
 
         it("Failure:saveGroupAndUnitDetails when deleteGroupsForExperimentIdStub fails", ()=> {
         const requestpayLoad=[

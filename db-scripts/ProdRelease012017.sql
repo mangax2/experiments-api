@@ -291,3 +291,15 @@ WITH (
 );
 ALTER TABLE public.unit
   OWNER TO experiments_user_s;
+
+
+INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Randomized', 'KMCCL', current_timestamp, 'KMCCL', current_timestamp);
+INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Custom Randomization', 'KMCCL', current_timestamp, 'KMCCL', current_timestamp);
+
+INSERT INTO public.ref_factor_type (type, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Independent', 'KMCCL', current_timestamp, 'KMCCL', current_timestamp);
+
+INSERT INTO public.ref_factor_type (type, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES ('Exogenous', 'KMCCL', current_timestamp, 'KMCCL', current_timestamp);

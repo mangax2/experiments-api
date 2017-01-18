@@ -14,6 +14,5 @@ module.exports = (cfDeploy) ->
   startupCommand: 'npm start'
   services: [
     'experimentsDataSource',
-    'syslog',
     'expSys'
   ]

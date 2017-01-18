@@ -17,7 +17,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.ref_experiment_design
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 -- #2 ref_factor_type table
 CREATE TABLE public.ref_factor_type
@@ -35,7 +35,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.ref_factor_type
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 --#3 ref_randomization_strategy
 CREATE TABLE public.ref_randomization_strategy
@@ -52,7 +52,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.ref_randomization_strategy
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 --#4 experiment table
 CREATE TABLE public.experiment
@@ -75,7 +75,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.experiment
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 --#5 treatment
@@ -100,7 +100,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.treatment
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 CREATE INDEX treatment_experiment_id
@@ -130,7 +130,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.combination_element
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 CREATE INDEX combination_element_treatment_id
@@ -161,7 +161,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.dependent_variable
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 
@@ -189,7 +189,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.factor
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 --#9 factor_level
 CREATE TABLE public.factor_level
@@ -211,7 +211,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.factor_level
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 --#10 group
@@ -240,7 +240,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public."group"
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 --#11 group_value
@@ -265,7 +265,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.group_value
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 --#12 Unit
 CREATE TABLE public.unit
@@ -290,7 +290,7 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.unit
-  OWNER TO experiments_user_s;
+  OWNER TO experiments_secure_user;
 
 
 INSERT INTO public.ref_randomization_strategy (name, created_user_id, created_date, modified_user_id, modified_date)

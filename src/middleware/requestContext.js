@@ -2,8 +2,6 @@ import AppError from '../services/utility/AppError'
 import _ from 'lodash'
 
 function requestContextMiddlewareFunction(req, res, next) {
-    console.log('uri')
-    console.log(req.url)
     if(req.url==='/experiments-api/api-docs'){
         next()
     }else{

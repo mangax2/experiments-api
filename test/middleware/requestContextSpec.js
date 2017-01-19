@@ -24,6 +24,15 @@ describe('requestContextMiddlewareFunction', () => {
         badRequestStub.restore()
     })
 
+
+
+    it('No error when request is for swagger doc.', () => {
+        const req = {url:'/experiments-api/api-docs'}
+        target(req, null, nextStub)
+        sinon.assert.calledOnce(nextStub)
+        sinon.assert.notCalled(badRequestStub)
+    })
+
     it('throws error when header is null.', () => {
         (() => {
             target({}, null, nextStub)

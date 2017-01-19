@@ -15,7 +15,6 @@ if (localEnv) {
     } else {
         console.info('environment is aws cf')
         services = require('@monsantoit/cloud-foundry').services
-        console.info(config)
         services['experimentsDataSource'].password = config.db_password
         cfServices = services
     }

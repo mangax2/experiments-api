@@ -28,8 +28,8 @@ In this project we use PostgreSQL for storing experiment, factor, and attribute 
 
 ### Details
 
-* Host:
-* Port
+* Host: velocity-experiments-prod-db.cn8fbnlhx4nv.us-east-1.rds.amazonaws.com
+* Port: 5432
 
 ### Connecting To The Database
 

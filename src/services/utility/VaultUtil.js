@@ -10,7 +10,7 @@ class VaultUtil {
 
     static configureDbCredentials(env, role_id, secret_id) {
         if (env === 'local') {
-           return Promise.resolve()
+            return Promise.resolve()
         } else {
             const vaultEnv=env==='prod'?'prod':'np'
             const body = {}
@@ -21,13 +21,11 @@ class VaultUtil {
                 .send(JSON.stringify(body))
                 .then((result) => {
                     const vaultToken = result.body.auth.client_token
-                    request.get(`https://vault.agro.services/v1/secret/cosmos/experiments-api/${vaultEnv}/db`)
+                    return request.get(`https://vault.agro.services/v1/secret/cosmos/experiments-api/${vaultEnv}/db`)
                         .set('X-Vault-Token', `${vaultToken}`)
                         .then((vaultObj) => {
                             this.dbAppUser = vaultObj.body.data.appUser
                             this.dbAppPassword = vaultObj.body.data.appUserPassword
-                            console.info(this.dbAppUser)
-                            console.info(this.dbAppPassword)
                         })
 
 

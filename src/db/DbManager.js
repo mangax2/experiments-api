@@ -64,6 +64,7 @@ const pgp = pgPromise(options)
 // monitor.setTheme('matrix')
 
 // Create the database instance with extensions:
+console.info("dbConfig:")
 console.info(dbConfig)
 const db = pgp(dbConfig)
 

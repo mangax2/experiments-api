@@ -65,7 +65,6 @@ const pgp = pgPromise(options)
 
 // Create the database instance with extensions:
 console.info("dbConfig:")
-console.info(dbConfig)
 const db = pgp(dbConfig)
 
 module.exports = db

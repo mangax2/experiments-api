@@ -27,6 +27,7 @@ class VaultUtil {
                             this.dbAppUser = vaultObj.body.data.appUser
                             this.dbAppPassword = vaultObj.body.data.appUserPassword
                             console.info(this.dbAppUser)
+                            console.info(this.dbAppPassword)
                         })
 
 

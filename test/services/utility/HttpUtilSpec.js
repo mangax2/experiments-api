@@ -58,7 +58,6 @@ describe('HttpUtil', () => {
     })
 
     it('setHeaders', () => {
-        console.log('setHeaders')
         setHeadersStub.restore()
 
         const httpCall = {
@@ -72,7 +71,6 @@ describe('HttpUtil', () => {
     })
 
     it('setHeaders with mutiple values', () => {
-        console.log('setHeaders')
         setHeadersStub.restore()
 
         const httpCall = {

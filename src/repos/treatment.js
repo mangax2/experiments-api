@@ -59,7 +59,7 @@ module.exports = (rep, pgp) => {
             return tx.any(query)
         },
         getDistinctExperimentIds:(ids,tx=rep) =>{
-           return  tx.any("SELECT DISTINCT(experiment_id) FROM treatment WHERE id IN ($1:csv)", [ids])
+            return  tx.any("SELECT DISTINCT(experiment_id) FROM treatment WHERE id IN ($1:csv)", [ids])
         },
 
         remove: (id, tx = rep) => {

@@ -66,7 +66,7 @@ export class SchemaValidator extends BaseValidator {
                     this.checkBoolean(elementValue, elementSchema.paramName)
                 }
             }
-                resolve()
+            resolve()
 
         })
     }

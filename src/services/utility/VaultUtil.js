@@ -1,5 +1,4 @@
-var request = require('superagent')
-
+const HttpUtil = require('./HttpUtil')
 class VaultUtil {
 
     constructor() {
@@ -10,24 +9,19 @@ class VaultUtil {
 
     static configureDbCredentials(env, role_id, secret_id) {
         if (env === 'local') {
-           return Promise.resolve()
+            return Promise.resolve()
         } else {
             const vaultEnv=env==='prod'?'prod':'np'
             const body = {}
             body.role_id=role_id
             body.secret_id=secret_id
-            return request.post('https://vault.agro.services/v1/auth/approle/login')
-                .set('Accept', 'application/json')
-                .send(JSON.stringify(body))
+            return  HttpUtil.post('https://vault.agro.services/v1/auth/approle/login',[{headerName:'Accept', headerValue:'application/json'}], JSON.stringify(body))
                 .then((result) => {
                     const vaultToken = result.body.auth.client_token
-                    request.get(`https://vault.agro.services/v1/secret/cosmos/experiments-api/${vaultEnv}/db`)
-                        .set('X-Vault-Token', `${vaultToken}`)
+                    return HttpUtil.get(`https://vault.agro.services/v1/secret/cosmos/experiments-api/${vaultEnv}/db`,[{headerName:'X-Vault-Token', headerValue:`${vaultToken}`}])
                         .then((vaultObj) => {
                             this.dbAppUser = vaultObj.body.data.appUser
                             this.dbAppPassword = vaultObj.body.data.appUserPassword
-                            console.info(this.dbAppUser)
-                            console.info(this.dbAppPassword)
                         })
 
 

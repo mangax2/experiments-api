@@ -24,7 +24,7 @@ swagger=$(curl -H "oauth_resourceownerinfo: user_id=testUser" $SWAGGER_URL | tr 
       "deployment-zone": "${DEPLOYMENT_ZONE}",
       "root-path": "experiments-api"
     },
-    "api-admin-emails": ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","paul.n.watt@monsanto.com"],
+    "api-admin-emails": ["ajay.2.kumar@monsanto.com","kyle.mcclendon@monsanto.com","kamaraju.prathi@monsanto.com","jonathan.g.gorday@monsanto.com"],
     "groups": ["Monsanto"],
     "requires-approval": true,
     "platform-tag": "api",

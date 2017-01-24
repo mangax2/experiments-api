@@ -10,7 +10,7 @@ config.postgres_password = process.env.POSTGRES_PASSWORD
 config.db_password = process.env.DB_PASSWORD
 config.role_id= process.env.ROLE_ID
 config.secret_id= process.env.SECRET_ID
-if(config.env!='local'){
+if(config.env!='local' && config.node_env !='UNITTEST'){
     const cfServices = require('@monsantoit/cloud-foundry').services
     const vaultCfService= cfServices['experimentsVault']
     config.vaultConfig.baseUrl = vaultCfService.baseUrl

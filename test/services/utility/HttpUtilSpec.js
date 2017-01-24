@@ -1,6 +1,3 @@
-/**
- * Created by kprat1 on 11/10/16.
- */
 const sinon = require('sinon')
 const request = require('superagent')
 const chai = require('chai')
@@ -70,7 +67,7 @@ describe('HttpUtil', () => {
 
     })
 
-    it('setHeaders with mutiple values', () => {
+    it('setHeaders with multiple values', () => {
         setHeadersStub.restore()
 
         const httpCall = {

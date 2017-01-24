@@ -4,7 +4,7 @@ const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
 const swaggerTools = require('swagger-tools')
 const vaultUtil = require('./services/utility/VaultUtil')
-vaultUtil.configureDbCredentials(config.env, config.role_id, config.secret_id).then(()=>{
+vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(()=>{
     if (config.node_env !== 'production') {
         require('babel-register')
     }

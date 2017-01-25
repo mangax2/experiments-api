@@ -11,7 +11,7 @@ class VaultUtil {
         if (env === 'local') {
             return Promise.resolve()
         } else {
-            const vaultEnv=env==='prod'?'prod':'np'
+            const vaultEnv= env === 'prod' ? 'prod' : 'np'
             const body = {}
             body.role_id= vaultConfig.roleId
             body.secret_id = vaultConfig.secretId

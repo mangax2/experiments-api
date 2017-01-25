@@ -17,6 +17,7 @@ if (localEnv) {
         services = require('@monsantoit/cloud-foundry').services
         services['experimentsDataSource'].user = VaultUtil.dbAppUser
         services['experimentsDataSource'].password = VaultUtil.dbAppPassword
+        services['experimentsDataSource'].ssl= true
         cfServices = services
     }
 }

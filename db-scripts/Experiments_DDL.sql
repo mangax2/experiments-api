@@ -488,3 +488,12 @@ UPDATE public.group
   SET ref_randomization_strategy_id = 1;
 ALTER TABLE public.group
   ALTER COLUMN ref_randomization_strategy_id SET NOT NULL;
+
+
+ALTER TABLE public.factor
+   ADD tier numeric CHECK(tier > 0)
+
+
+
+
+

@@ -1,4 +1,5 @@
-var agent = require('superagent')
+'use strict'
+const agent = require('superagent')
 const _ = require('lodash')
 
 class HttpUtil {

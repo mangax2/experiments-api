@@ -24,9 +24,9 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 factors.map(
                     factor => tx.one(
-                        "INSERT INTO factor(name, ref_factor_type_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date) " +
-                        "VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP) RETURNING id",
-                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId]
+                        "INSERT INTO factor(name, ref_factor_type_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date,tier) " +
+                        "VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP,$5) RETURNING id",
+                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId,factor.tier]
                     )
                 )
             )
@@ -36,9 +36,9 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 factors.map(
                     factor => tx.oneOrNone(
-                        "UPDATE factor SET (name, ref_factor_type_id, experiment_id, modified_user_id, modified_date) = " +
+                        "UPDATE factor SET (name, ref_factor_type_id, experiment_id, modified_user_id, modified_date,tier) = " +
                         "($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id=$5 RETURNING *",
-                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId, factor.id]
+                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId, factor.id,factor.tier]
                     )
                 )
             )

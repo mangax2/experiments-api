@@ -7,6 +7,7 @@ class FactorsValidator extends SchemaValidator {
     static get POST_VALIDATION_SCHEMA() {
         return [
             {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': true},
+            {'paramName': 'tier', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 10}},
             {'paramName': 'refFactorTypeId', 'type': 'numeric', 'required': true},
             {'paramName': 'refFactorTypeId', 'type': 'refData', 'entity': db.factorType},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},

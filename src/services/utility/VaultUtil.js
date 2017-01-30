@@ -1,3 +1,4 @@
+'use strict'
 const HttpUtil = require('./HttpUtil')
 class VaultUtil {
 

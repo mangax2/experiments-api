@@ -2990,6 +2990,10 @@
                 "modifiedUserId": {
                     "type": "string",
                     "description": "modified user id for audit tracking."
+                },
+                "tier": {
+                    "type": "integer",
+                    "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10"
                 }
             }
         },
@@ -3435,6 +3439,10 @@
                 "experimentId": {
                     "type": "integer",
                     "description": "id of experiment entity."
+                },
+                "tier": {
+                    "type": "integer",
+                    "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10)"
                 }
             }
         },

@@ -405,16 +405,16 @@ CREATE TABLE group_value
       REFERENCES "group" (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT group_value_ak_1 UNIQUE (factor_name, factor_level, group_id)
-)
+);
 
 
 
 -- Drop Hypothesis Table
 --Alter Subject Type Column to Descriptiuon in Experiment Table
 ALTER TABLE IF EXISTS ONLY experiment
-RENAME COLUMN subject_type to description
+RENAME COLUMN subject_type to description;
 
-DROP TABLE IF EXISTS  hypothesis CASCADE
+DROP TABLE IF EXISTS  hypothesis CASCADE;
 
 
 -- Create experiment_summary view
@@ -450,7 +450,7 @@ FROM public.experiment e
 	LEFT OUTER JOIN treatment_numbers t ON t.experiment_id = e.id
 	LEFT OUTER JOIN dependent_variable_numbers dv ON dv.experiment_id = e.id
 	LEFT OUTER JOIN factor_numbers f ON f.experiment_id = e.id
-	LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id
+	LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id;
 
 
 -- Database changes to support RCB vs CRD

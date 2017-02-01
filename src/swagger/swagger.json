@@ -837,9 +837,7 @@
                         }
                     }
                 }
-            }
-        },
-        "/composites/group-experimental-units": {
+            },
             "post": {
                 "summary": "post one or more groups,groupvalues and experimental Units entities",
                 "description": "This Service would delete the existing groups groupValues and ExperimentalUnits for the experimentId and then recreates them based on request Payload",
@@ -847,6 +845,12 @@
                     "Composites"
                 ],
                 "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
                     {
                         "name": "Composites Groups And Units",
                         "in": "body",
@@ -3152,17 +3156,9 @@
         "CompositeGroupsAndUnitsPOST": {
             "type": "object",
             "properties": {
-                "parentId": {
-                    "type": "integer",
-                    "description": "reference to parent Group"
-                },
                 "refRandomizationStrategyId":{
                     "type":"integer",
                     "description": "reference to RandomizationStrategy Table"
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "id of experimentId entity"
                 },
                 "groupValues": {
                     "type": "array",
@@ -3174,6 +3170,12 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
+                    }
+                },
+                "childGroups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
                     }
                 }
             }

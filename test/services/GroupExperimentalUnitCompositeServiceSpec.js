@@ -134,10 +134,12 @@ describe("GroupExperimentalUnits Specs", ()=> {
     describe(("Save Groups and Units"),()=>{
 
         let deleteGroupsForExperimentIdStub
+        let validateGroupsStub
         let batchCreateGroupsStub
         let batchCreateExperimentalUnitsStub
         let batchCreateGroupValuesStub
         let getDistinctExperimentIdsStub
+        let recursiveBatchCreateStub
 
         before(() => {
             deleteGroupsForExperimentIdStub = sinon.stub(target._groupService, 'deleteGroupsForExperimentId')
@@ -145,6 +147,8 @@ describe("GroupExperimentalUnits Specs", ()=> {
             batchCreateGroupValuesStub = sinon.stub(target._groupValueService, 'batchCreateGroupValues')
             batchCreateExperimentalUnitsStub = sinon.stub(target._experimentalUnitService, 'batchCreateExperimentalUnits')
             getDistinctExperimentIdsStub = sinon.stub(db.treatment,'getDistinctExperimentIds')
+            validateGroupsStub = sinon.stub(target, '_validateGroups')
+            recursiveBatchCreateStub = sinon.stub(target, '_recursiveBatchCreate')
         })
         afterEach(() => {
             deleteGroupsForExperimentIdStub.reset()
@@ -152,6 +156,8 @@ describe("GroupExperimentalUnits Specs", ()=> {
             batchCreateGroupValuesStub.reset()
             batchCreateExperimentalUnitsStub.reset()
             getDistinctExperimentIdsStub.reset()
+            validateGroupsStub.reset()
+            recursiveBatchCreateStub.reset()
         })
         after(() => {
             deleteGroupsForExperimentIdStub.restore()
@@ -159,289 +165,123 @@ describe("GroupExperimentalUnits Specs", ()=> {
             batchCreateGroupValuesStub.restore()
             batchCreateExperimentalUnitsStub.restore()
             getDistinctExperimentIdsStub.restore()
+            validateGroupsStub.restore()
+            recursiveBatchCreateStub.restore()
         })
+
         it("Success:saveGroupAndUnitDetails", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":1}],
-                    "units":[
-                        {
-                            "treatmentId": 5,
-                            "rep": 1
-                        }
-                    ]
-                },
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":2}],
-                    "units":[
-                        {
-                            "treatmentId": 150,
-                            "rep": 2
-                        }
-                    ]
-                }
-
-            ]
             deleteGroupsForExperimentIdStub.resolves([])
-            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
-            batchCreateExperimentalUnitsStub.resolves([])
-            batchCreateGroupValuesStub.resolves([])
-            getDistinctExperimentIdsStub.resolves([{'experiment_id':1}])
-            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).then(()=>{
-                sinon.assert.called(
-                    batchCreateGroupValuesStub
+            recursiveBatchCreateStub.resolves()
 
-                )
-                sinon.assert.called(
-                    batchCreateExperimentalUnitsStub
-                )
-                sinon.assert.calledWithExactly(getDistinctExperimentIdsStub,[5,150],testTx)
-
+            return target.saveGroupAndUnitDetails(1,{},testContext,testTx).then((result)=>{
+                sinon.assert.called(deleteGroupsForExperimentIdStub)
+                sinon.assert.called(recursiveBatchCreateStub)
+                result.should.deep.equal({status: 200, message: 'SUCCESS'})
             })
-
         })
 
-        it("Success:saveGroupAndUnitDetails with out passing Units ", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":1}]
+        it("Failure:saveGroupAndUnitDetails when validateGroups fails", ()=> {
+            validateGroupsStub.returns('testError')
 
-                },
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":2}],
-                    "units":[
-                        {
-                            "treatmentId": 150,
-                            "rep": 2
-                        }
-                    ]
-                }
-
-            ]
-            deleteGroupsForExperimentIdStub.resolves([])
-            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
-            batchCreateExperimentalUnitsStub.resolves([])
-            batchCreateGroupValuesStub.resolves([])
-            getDistinctExperimentIdsStub.resolves([{'experiment_id':1}])
-            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).then(()=>{
-                sinon.assert.called(
-                    batchCreateGroupValuesStub
-
-                )
-                sinon.assert.called(
-                    batchCreateExperimentalUnitsStub
-                )
-                sinon.assert.calledWithExactly(getDistinctExperimentIdsStub,[150],testTx)
-
+            return target.saveGroupAndUnitDetails([],testContext,testTx).should.be.rejected.then((err)=>{
+                err.should.equal('testError')
+                sinon.assert.notCalled(recursiveBatchCreateStub)
+                sinon.assert.notCalled(deleteGroupsForExperimentIdStub)
             })
-
         })
-        it("Success:saveGroupAndUnitDetails with out passing groupValues & Units ", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1
-
-                },
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1
-
-                }
-
-            ]
-            deleteGroupsForExperimentIdStub.resolves([])
-            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
-            batchCreateExperimentalUnitsStub.resolves([])
-            batchCreateGroupValuesStub.resolves([])
-            getDistinctExperimentIdsStub.resolves([{'experiment_id':1}])
-            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).then(()=>{
-                sinon.assert.notCalled(
-                    batchCreateGroupValuesStub
-
-                )
-                sinon.assert.notCalled(
-                    batchCreateExperimentalUnitsStub
-                )
-                sinon.assert.notCalled(
-                    getDistinctExperimentIdsStub
-                )
-
-
-            })
-
-        })
-
 
         it("Failure:saveGroupAndUnitDetails when deleteGroupsForExperimentIdStub fails", ()=> {
-        const requestpayLoad=[
-            {
-                "experimentId": 1,
-                "refRandomizationStrategyId": 1,
-                "groupValues": [{"repNumber":1}],
-                "units":[
-                    {
-                        "treatmentId": 5,
-                        "rep": 1
-                    }
-                ]
-            },
-            {
-                "experimentId": 1,
-                "refRandomizationStrategyId": 1,
-                "groupValues": [{"repNumber":2}],
-                "units":[
-                    {
-                        "treatmentId": 150,
-                        "rep": 2
-                    }
-                ]
-            }
-
-        ]
-        deleteGroupsForExperimentIdStub.rejects(testError)
-        return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
-            testError.should.equal(err)
-            sinon.assert.notCalled(
-                batchCreateGroupsStub
-            )
-            sinon.assert.notCalled(
-                batchCreateExperimentalUnitsStub
-            )
-            sinon.assert.notCalled(
-                batchCreateGroupValuesStub
-            )
-            sinon.assert.notCalled(
-                getDistinctExperimentIdsStub
-            )
+            validateGroupsStub.returns(undefined)
+            deleteGroupsForExperimentIdStub.rejects(testError)
+            return target.saveGroupAndUnitDetails([],testContext,testTx).should.be.rejected.then((err)=>{
+                sinon.assert.notCalled(recursiveBatchCreateStub)
+                err.should.equal(testError)
+            })
         })
-
-    })
-        it("Failure:saveGroupAndUnitDetails when batchCreateGroupsStub fails", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":1}],
-                    "units":[
-                        {
-                            "treatmentId": 5,
-                            "rep": 1
-                        }
-                    ]
-                },
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":2}],
-                    "units":[
-                        {
-                            "treatmentId": 150,
-                            "rep": 2
-                        }
-                    ]
-                }
-
-            ]
+        it("Failure:saveGroupAndUnitDetails when recursiveBatchCreate fails", ()=> {
+            validateGroupsStub.returns(undefined)
             deleteGroupsForExperimentIdStub.resolves([])
-            batchCreateGroupsStub.rejects(testError)
-            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
+            recursiveBatchCreateStub.rejects(testError)
+            return target.saveGroupAndUnitDetails([],testContext,testTx).should.be.rejected.then((err)=> {
                 testError.should.equal(err)
-                sinon.assert.notCalled(
-                    batchCreateExperimentalUnitsStub
-                )
-                sinon.assert.notCalled(
-                    batchCreateGroupValuesStub
-                )
-                sinon.assert.notCalled(
-                    getDistinctExperimentIdsStub
-                )
             })
         })
 
-        it("Failure:saveGroupAndUnitDetails when getDistinctExperimentIdsStub fails as it return different experimentIds", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":1}],
-                    "units":[
-                        {
-                            "treatmentId": 5,
-                            "rep": 1
-                        }
-                    ]
-                },
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":2}],
-                    "units":[
-                        {
-                            "treatmentId": 150,
-                            "rep": 2
-                        }
-                    ]
-                }
-
-            ]
-            deleteGroupsForExperimentIdStub.resolves([])
-            batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
-            batchCreateGroupValuesStub.resolves([])
-            getDistinctExperimentIdsStub.resolves([{'experiment_id':1},{'experiment_id':2}])
-           return  target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
-                err.should.equal("Treatments not associated with same experiment")
-                sinon.assert.notCalled(
-                    batchCreateExperimentalUnitsStub
-                )
-
-
-            })
-        })
-
-        it("Failure:saveGroupAndUnitDetails when payload has multiple  experimentIds", ()=> {
-            const requestpayLoad=[
-                {
-                    "experimentId": 1,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":1}],
-                    "units":[
-                        {
-                            "treatmentId": 5,
-                            "rep": 1
-                        }
-                    ]
-                },
-                {
-                    "experimentId": 2,
-                    "refRandomizationStrategyId": 1,
-                    "groupValues": [{"repNumber":2}],
-                    "units":[
-                        {
-                            "treatmentId": 150,
-                            "rep": 2
-                        }
-                    ]
-                }
-
-            ]
-            return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
-                err.should.equal("Multiple ExperimentIds in the payload")
-                sinon.assert.notCalled(
-                    deleteGroupsForExperimentIdStub
-                )
-
-
-            })
-        })
+        // it("Failure:saveGroupAndUnitDetails when getDistinctExperimentIdsStub fails as it return different experimentIds", ()=> {
+        //     const requestpayLoad=[
+        //         {
+        //             "experimentId": 1,
+        //             "refRandomizationStrategyId": 1,
+        //             "groupValues": [{"repNumber":1}],
+        //             "units":[
+        //                 {
+        //                     "treatmentId": 5,
+        //                     "rep": 1
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             "experimentId": 1,
+        //             "refRandomizationStrategyId": 1,
+        //             "groupValues": [{"repNumber":2}],
+        //             "units":[
+        //                 {
+        //                     "treatmentId": 150,
+        //                     "rep": 2
+        //                 }
+        //             ]
+        //         }
+        //
+        //     ]
+        //     deleteGroupsForExperimentIdStub.resolves([])
+        //     batchCreateGroupsStub.resolves([{'id':1},{'id':2}])
+        //     batchCreateGroupValuesStub.resolves([])
+        //     getDistinctExperimentIdsStub.resolves([{'experiment_id':1},{'experiment_id':2}])
+        //    return  target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
+        //         err.should.equal("Treatments not associated with same experiment")
+        //         sinon.assert.notCalled(
+        //             batchCreateExperimentalUnitsStub
+        //         )
+        //
+        //
+        //     })
+        // })
+        //
+        // it("Failure:saveGroupAndUnitDetails when payload has multiple  experimentIds", ()=> {
+        //     const requestpayLoad=[
+        //         {
+        //             "experimentId": 1,
+        //             "refRandomizationStrategyId": 1,
+        //             "groupValues": [{"repNumber":1}],
+        //             "units":[
+        //                 {
+        //                     "treatmentId": 5,
+        //                     "rep": 1
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             "experimentId": 2,
+        //             "refRandomizationStrategyId": 1,
+        //             "groupValues": [{"repNumber":2}],
+        //             "units":[
+        //                 {
+        //                     "treatmentId": 150,
+        //                     "rep": 2
+        //                 }
+        //             ]
+        //         }
+        //
+        //     ]
+        //     return target.saveGroupAndUnitDetails(requestpayLoad,testContext,testTx).should.be.rejected.then((err)=> {
+        //         err.should.equal("Multiple ExperimentIds in the payload")
+        //         sinon.assert.notCalled(
+        //             deleteGroupsForExperimentIdStub
+        //         )
+        //
+        //
+        //     })
+        // })
 
 
 
@@ -455,6 +295,14 @@ describe("GroupExperimentalUnits Specs", ()=> {
             const groupIds=[1]
             const result = target.assignGroupIdToGroupValuesAndUnits(groupUnits,groupIds)
             result[0].groupValues[0].groupId.should.equal(1)
+        })
+
+        it("assignGroupIdToGroupValuesAndUnits and sets parentId to child groups",()=>{
+            const groupUnits=[{'experiment_id':1,groupValues:[{"id":1}],"units":[{"id":1}],"childGroups":[{}]}]
+            const groupIds=[1]
+            const result = target.assignGroupIdToGroupValuesAndUnits(groupUnits,groupIds)
+            result[0].groupValues[0].groupId.should.equal(1)
+            result[0].childGroups[0].parentId.should.equal(1)
         })
     })
 
@@ -553,4 +401,210 @@ describe("GroupExperimentalUnits Specs", ()=> {
         })
     })
 
+    describe("validateGroups",()=>{
+
+        let validateGroupStub
+        before(()=>{
+            validateGroupStub = sinon.stub(target, '_validateGroup')
+        })
+
+        afterEach(()=>{
+            validateGroupStub.reset()
+        })
+
+        after(()=>{
+            validateGroupStub.restore()
+        })
+
+        it('returns undefined for errors when the structure is validated',()=>{
+            validateGroupStub.returns(undefined)
+            const groupStructure = [{
+                    id:1,
+                    childGroups:[
+                        {
+                            id:2,
+                            units:[{}]
+                        }
+                    ],
+                    units:[]
+                }
+            ]
+
+            _.isUndefined(target._validateGroups(groupStructure)).should.equal(true)
+        })
+
+        it('fails due to having units and child groups in one tier', ()=>{
+            validateGroupStub.returns('testError')
+            const groupStructure = [
+                {
+                    id:1,
+                    childGroups:[
+                        {
+                            id:2,
+                            units:[{}]
+                        }
+                    ],
+                    units:[{}]
+                },
+                {
+                    id:3,
+                    childGroups:[],
+                    units:[]
+                }
+            ]
+
+            target._validateGroups(groupStructure).should.equal("testError")
+            sinon.assert.calledOnce(validateGroupStub)
+        })
+    })
+
+    describe("validateGroup",()=>{
+        let validateGroupsStub
+
+        before(()=>{
+            validateGroupsStub = sinon.stub(target, '_validateGroups')
+        })
+
+        afterEach(()=>{
+            validateGroupsStub.reset()
+        })
+
+        after(()=>{
+            validateGroupsStub.restore()
+        })
+
+        it('returns an error when a group has both child groups and units', ()=>{
+            const group = {units:[{}],childGroups:[{}]}
+
+            target._validateGroup(group).should.equal("Only leaf childGroups should have units")
+        })
+
+        it('returns an error when a group has no child groups and no units', ()=>{
+            const group = {units:[],childGroups:[]}
+
+            target._validateGroup(group).should.equal("Each group should have at least one Unit or at least one ChildGroup")
+        })
+
+        it('calls validateGroups when group is valid and has child groups', ()=>{
+            const group = {childGroups:[{}]}
+            validateGroupsStub.returns('stubResponse')
+
+            target._validateGroup(group).should.equal('stubResponse')
+            sinon.assert.calledOnce(validateGroupsStub)
+        })
+
+        it('returns undefined when the group has no child groups and some units', ()=>{
+            const group = {units:[{}]}
+
+            _.isUndefined(target._validateGroup(group)).should.equal(true)
+        })
+    })
+
+    describe("recursiveBatchCreate",()=>{
+        let batchCreateGroupsStub
+        let createGroupValuesUnitsAndChildGroupsStub
+
+        before(()=>{
+            batchCreateGroupsStub = sinon.stub(target._groupService, 'batchCreateGroups')
+            createGroupValuesUnitsAndChildGroupsStub = sinon.stub(target, '_createGroupValuesUnitsAndChildGroups')
+        })
+        afterEach(()=>{
+            batchCreateGroupsStub.reset()
+            createGroupValuesUnitsAndChildGroupsStub.reset()
+        })
+        after(()=>{
+            batchCreateGroupsStub.restore()
+            createGroupValuesUnitsAndChildGroupsStub.restore()
+        })
+
+        it('successfully creates groups and calls createGroupValuesUnitsAndChildGroups', ()=>{
+            batchCreateGroupsStub.resolves([])
+            createGroupValuesUnitsAndChildGroupsStub.resolves({status: 200, message: "SUCCESS"})
+
+            const groupPayload = [{
+                units: [{}],
+                childGroups: [{}],
+                refRandomizationStrategyId: 1,
+                groupValues: [{
+                    repNumber: 1
+                }]
+            }]
+
+            const expectedGroupOutput = [
+                {
+                    experimentId: 1,
+                    refRandomizationStrategyId: 1
+                }
+            ]
+
+            return target._recursiveBatchCreate(1,groupPayload,testContext,testTx).then((result)=>{
+                result.should.deep.equal({status: 200, message: 'SUCCESS'})
+                sinon.assert.calledWithExactly(batchCreateGroupsStub, expectedGroupOutput, testContext, testTx)
+            })
+        })
+    })
+
+    describe('createGroupValuesUnitsAndChildGroups',()=>{
+        let batchCreateGroupValuesStub
+        let createExperimentalUnitsStub
+        let getUnitsAndGroupValues
+        let recursiveBatchCreateStub
+
+        before(()=>{
+            batchCreateGroupValuesStub = sinon.stub(target._groupValueService, 'batchCreateGroupValues')
+            createExperimentalUnitsStub = sinon.stub(target, '_createExperimentalUnits')
+            getUnitsAndGroupValues = sinon.stub(target, '_getUnitsAndGroupValues')
+            recursiveBatchCreateStub = sinon.stub(target, '_recursiveBatchCreate')
+        })
+
+        afterEach(()=>{
+            batchCreateGroupValuesStub.reset()
+            createExperimentalUnitsStub.reset()
+            getUnitsAndGroupValues.reset()
+            recursiveBatchCreateStub.reset()
+        })
+        after(()=>{
+            batchCreateGroupValuesStub.restore()
+            createExperimentalUnitsStub.restore()
+            getUnitsAndGroupValues.restore()
+            recursiveBatchCreateStub.restore()
+        })
+
+        it('sucessfully resolves after calling batchCreateGroupValues and recursiveBatchCreate',()=>{
+            batchCreateGroupValuesStub.resolves()
+            createExperimentalUnitsStub.resolves()
+            getUnitsAndGroupValues.returns({groupValues: [{repNumber: 1}], units: [], childGroups:[{},{}]})
+            recursiveBatchCreateStub.resolves()
+
+            return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(()=>{
+                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{repNumber: 1}], testContext, testTx)
+                sinon.assert.calledWithExactly(recursiveBatchCreateStub, 1, [{},{}], testContext, testTx)
+            })
+        })
+
+        it('sucessfully resolves after calling batchCreateGroupValues and createExperimentalUnits',()=> {
+            batchCreateGroupValuesStub.resolves()
+            createExperimentalUnitsStub.resolves()
+            getUnitsAndGroupValues.returns({groupValues: [{repNumber: 1}], units: [{}, {}], childGroups: []})
+            recursiveBatchCreateStub.resolves()
+
+            return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
+                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{repNumber: 1}], testContext, testTx)
+                sinon.assert.calledWithExactly(createExperimentalUnitsStub, 1, [{}, {}], testContext, testTx)
+            })
+        })
+
+        it('returns an empty promise after not calling any of the methods', ()=>{
+            batchCreateGroupValuesStub.resolves()
+            createExperimentalUnitsStub.resolves()
+            getUnitsAndGroupValues.returns({groupValues: [], units: [], childGroups: []})
+            recursiveBatchCreateStub.resolves()
+
+            return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
+                sinon.assert.notCalled(batchCreateGroupValuesStub)
+                sinon.assert.notCalled(createExperimentalUnitsStub)
+                sinon.assert.notCalled(recursiveBatchCreateStub)
+            })
+        })
+    })
 })

@@ -585,8 +585,8 @@ router.get('/randomization-strategies', (req, res, next) => {
     })
 })
 
-router.post('/composites/group-experimental-units', (req, res, next) => {
-    return new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.body, req.context).then((value) => {
+router.post('/experiments/:id/composites/group-experimental-units', (req, res, next) => {
+    return new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.params.id,req.body, req.context).then((value) => {
         return res.json(value)
     }).catch((err) => {
         return next(err)

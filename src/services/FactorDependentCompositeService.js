@@ -61,7 +61,7 @@ class FactorDependentCompositeService {
                 })
 
                 const type = _.find(value[1], {id: factor.ref_factor_type_id}).type.toLowerCase()
-                return {name: factor.name, type: type, levels: levelValues}
+                return {name: factor.name, type: type, levels: levelValues,tier:factor.tier}
             })
 
             _.each(factors, (factor) => {

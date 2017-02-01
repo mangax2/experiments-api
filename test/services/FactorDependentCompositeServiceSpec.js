@@ -96,8 +96,8 @@ describe('FactorDependentCompositeService', () => {
         it('successfully gets independent factors with levels', function () {
             const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
                 factors: [
-                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor'},
-                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2'}
+                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor',tier:1},
+                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2',tier:2}
                 ],
                 levels: [
                     {id: 1, factor_id: 1, value: "value1"},
@@ -112,11 +112,11 @@ describe('FactorDependentCompositeService', () => {
                 data.should.deep.equal({
                     independent: [
                         {
-                            name: 'TestFactor',
+                            name: 'TestFactor',tier:1,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',
+                            name: 'TestFactor2',tier:2,
                             levels: ['value3']
                         }
                     ],
@@ -151,11 +151,11 @@ describe('FactorDependentCompositeService', () => {
                     independent: [],
                     exogenous: [
                         {
-                            name: 'TestFactor',
+                            name: 'TestFactor',tier:undefined,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',
+                            name: 'TestFactor2',tier:undefined,
                             levels: ['value3']
                         }
                     ],
@@ -240,17 +240,17 @@ describe('FactorDependentCompositeService', () => {
                 data.should.deep.equal({
                     independent: [
                         {
-                            name: 'TestFactor',
+                            name: 'TestFactor',tier:undefined,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',
+                            name: 'TestFactor2',tier:undefined,
                             levels: ['value3']
                         }
                     ],
                     exogenous: [
                         {
-                            name: 'TestExogenous',
+                            name: 'TestExogenous',tier:undefined,
                             levels: ['exo1', 'exo2']
                         }
                     ],

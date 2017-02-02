@@ -5,6 +5,7 @@ import ExperimentalUnitService from "./ExperimentalUnitService"
 import _ from "lodash"
 import db from "../db/DbManager"
 import AppUtil from "./utility/AppUtil"
+import AppError from "../services/utility/AppError"
 
 class GroupExperimentalUnitCompositeService {
 
@@ -18,7 +19,7 @@ class GroupExperimentalUnitCompositeService {
     saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx) {
         const error = this._validateGroups(groupAndUnitDetails)
         if(error){
-            return  Promise.reject(error)
+            throw  AppError.badRequest(error)
         }
         return this._groupService.deleteGroupsForExperimentId(experimentId, tx).then(()=> {
             return this._recursiveBatchCreate(experimentId,groupAndUnitDetails, context,tx).then(()=>{
@@ -62,17 +63,15 @@ class GroupExperimentalUnitCompositeService {
         return {units: units, groupValues: groupValues, childGroups: childGroups}
     }
 
-    _createExperimentalUnits(units, context, experimentId, tx) {
+    _createExperimentalUnits(experimentId,units, context , tx) {
         const treatmentIds = _.uniq(_.map(units, "treatmentId"))
         return db.treatment.getDistinctExperimentIds(treatmentIds, tx).then((experimentIdsResp)=> {
             const experimentIds = _.compact(_.map(experimentIdsResp, "experiment_id"))
-
             if (experimentIds.length > 1 || experimentIds[0] != experimentId) {
-                return Promise.reject("Treatments not associated with same experiment")
+                throw AppError.badRequest("Treatments not associated with same experiment")
             } else {
                 return this._experimentalUnitService.batchCreateExperimentalUnits(units, context, tx)
             }
-
         })
     }
 

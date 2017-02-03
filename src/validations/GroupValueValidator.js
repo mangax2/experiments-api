@@ -41,7 +41,7 @@ class GroupValueValidator extends SchemaValidator {
     }
 
     getBusinessKeyPropertyNames() {
-        return ['factorName', 'groupId']
+        return ['groupId', 'factorName']
     }
 
     getDuplicateBusinessKeyError() {
@@ -84,7 +84,6 @@ class GroupValueValidator extends SchemaValidator {
             _.forEach(groupByObject, innerArray=> {
                 const names = _.map(innerArray, e=> {
                     return e[businessKeyPropertyNames[1]]
-
                 })
                 if (_.uniq(names).length != names.length) {
                     this.messages.push(this.getDuplicateBusinessKeyError())

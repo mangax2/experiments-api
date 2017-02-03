@@ -17,15 +17,26 @@ module.exports = (rep, pgp) => {
         },
 
         batchCreate: (groups, context, tx = rep) => {
-            return tx.batch(
-                groups.map(
-                    g => tx.one(
-                        'INSERT INTO "group"(experiment_id, parent_id, ref_randomization_strategy_id, created_user_id, created_date, modified_user_id, modified_date) ' +
-                        'VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP) RETURNING id',
-                        [g.experimentId, g.parentId, g.refRandomizationStrategyId, context.userId]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                {table: 'group'}
             )
+
+            const values = groups.map((group)=>{
+                return {
+                    experiment_id: group.experimentId,
+                    parent_id: group.parentId,
+                    ref_randomization_strategy_id: group.refRandomizationStrategyId,
+                    created_user_id: context.userId,
+                    created_date: 'CURRENT_TIMESTAMP',
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+
+            const query = pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' RETURNING id'
+
+            return tx.any(query)
         },
 
 

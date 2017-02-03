@@ -23,15 +23,26 @@ module.exports = (rep, pgp) => {
             return tx.any("SELECT * FROM unit WHERE group_id IN ($1:csv)", [groupIds])
         },
         batchCreate: (units, context, tx = rep) => {
-            return tx.batch(
-                units.map(
-                    u => tx.one(
-                        "INSERT INTO unit(group_id, treatment_id, rep, created_user_id, created_date, modified_user_id, modified_date) " +
-                        "VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP) RETURNING id",
-                        [u.groupId, u.treatmentId, u.rep, context.userId]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['group_id', 'treatment_id','rep', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                {table: 'unit'}
             )
+
+            const values = units.map((u)=>{
+                return {
+                    group_id: u.groupId,
+                    treatment_id: u.treatmentId,
+                    rep: u.rep,
+                    created_user_id: context.userId,
+                    created_date: 'CURRENT_TIMESTAMP',
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+
+            const query = pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' RETURNING id'
+
+            return tx.any(query)
         },
 
         batchUpdate: (units, context, tx = rep) => {

@@ -59,7 +59,7 @@ describe('GroupValueValidator', () => {
 
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
-            target.getBusinessKeyPropertyNames().should.eql(['factorName', 'groupId'])
+            target.getBusinessKeyPropertyNames().should.eql(['groupId', 'factorName'])
         })
     })
 

@@ -6,7 +6,6 @@ import TreatmentService from './TreatmentService'
 import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
-import ctimestamp from 'console-timestamp'
 
 const logger = log4js.getLogger('CombinationElementService')
 

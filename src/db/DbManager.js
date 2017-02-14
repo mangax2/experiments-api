@@ -13,10 +13,11 @@ import factor from '../repos/factor'
 import factorLevel from '../repos/factorLevel'
 import factorType from '../repos/factorType'
 import group from '../repos/group'
+import groupType from '../repos/groupType'
 import groupValue from '../repos/groupValue'
+import randomizationStrategy from '../repos/randomizationStrategy'
 import treatment from '../repos/treatment'
 import unit from '../repos/unit'
-import randomizationStrategy from '../repos/randomizationStrategy'
 
 // pg-promise initialization options:
 const options = {
@@ -31,11 +32,11 @@ const options = {
         obj.factorLevel = new (factorLevel)(obj, pgp)
         obj.factorType = new (factorType)(obj, pgp)
         obj.group = new (group) (obj, pgp)
+        obj.groupType = new (groupType) (obj, pgp)
         obj.groupValue = new (groupValue)(obj, pgp)
+        obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
-        obj.group = new (group) (obj, pgp)
-        obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
     }
 }
 

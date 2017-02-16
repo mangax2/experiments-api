@@ -31,20 +31,19 @@ module.exports = (rep, pgp) => {
 
         batchCreate: (groupValues, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['factor_name','factor_level','group_id','created_user_id','created_date','modified_user_id','modified_date','rep_number'],
+                ['name','value','group_id','created_user_id','created_date','modified_user_id','modified_date','rep_number'],
                 {table: 'group_value'}
             )
 
             const values = groupValues.map((gv) => {
                 return{
-                    factor_name: gv.factorName,
-                    factor_level: gv.factorLevel,
+                    name: gv.name,
+                    value: gv.value,
                     group_id: gv.groupId,
                     created_user_id: context.userId,
                     created_date: 'CURRENT_TIMESTAMP',
                     modified_user_id: context.userId,
                     modified_date: 'CURRENT_TIMESTAMP',
-                    rep_number: gv.repNumber
                 }
             })
             const query = pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' RETURNING id'
@@ -54,19 +53,18 @@ module.exports = (rep, pgp) => {
 
         batchUpdate: (groupValues, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['?id', 'factor_name', 'factor_level', 'group_id', 'modified_user_id', 'modified_date', 'rep_number'],
+                ['?id', 'name', 'value', 'group_id', 'modified_user_id', 'modified_date', 'rep_number'],
                 {table: 'group_value'}
             )
 
             const data = groupValues.map((gv) => {
                 return {
                     id: gv.id,
-                    factor_name: gv.factorName,
-                    factor_level: gv.factorLevel,
+                    name: gv.name,
+                    value: gv.value,
                     group_id: gv.groupId,
                     modified_user_id: context.userId,
                     modified_date: 'CURRENT_TIMESTAMP',
-                    rep_number: gv.repNumber
                 }
             })
             const query = pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' WHERE v.id = t.id RETURNING *'
@@ -87,18 +85,18 @@ module.exports = (rep, pgp) => {
         },
 
         findByBusinessKey: (keys, tx= rep) => {
-            return tx.oneOrNone("SELECT * FROM group_value WHERE group_id = $1 and factor_name = $2 and factor_name = $3", keys)
+            return tx.oneOrNone("SELECT * FROM group_value WHERE group_id = $1 and name = $2", keys)
         },
 
         batchFindByBusinessKey: (batchKeys, tx= rep) => {
             const values = batchKeys.map((obj) => {
                 return {
-                    factor_name: obj.keys[1],
+                    name: obj.keys[1],
                     group_id: obj.keys[0],
                     id: obj.updateId
                 }
             })
-            const query = 'WITH d(group_id, factor_name, id) AS (VALUES ' + pgp.helpers.values(values, ['group_id', 'factor_name', 'id']) + ') select gv.group_id, gv.factor_name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.factor_name = d.factor_name and (d.id is null or gv.id != CAST(d.id as integer))'
+            const query = 'WITH d(group_id, name, id) AS (VALUES ' + pgp.helpers.values(values, ['group_id', 'name', 'id']) + ') select gv.group_id, gv.name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))'
             return tx.any(query)
         }
     }

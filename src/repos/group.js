@@ -18,7 +18,7 @@ module.exports = (rep, pgp) => {
 
         batchCreate: (groups, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+                ['experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'ref_group_type_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
                 {table: 'group'}
             )
 
@@ -27,6 +27,7 @@ module.exports = (rep, pgp) => {
                     experiment_id: group.experimentId,
                     parent_id: group.parentId,
                     ref_randomization_strategy_id: group.refRandomizationStrategyId,
+                    ref_group_type_id: group.refGroupTypeId,
                     created_user_id: context.userId,
                     created_date: 'CURRENT_TIMESTAMP',
                     modified_user_id: context.userId,
@@ -44,9 +45,9 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 groups.map(
                     g => tx.oneOrNone(
-                        'UPDATE "group" SET (experiment_id, parent_id, ref_randomization_strategy_id, modified_user_id, modified_date) = ' +
-                        '($1, $2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $5 RETURNING *',
-                        [g.experimentId, g.parentId, g.refRandomizationStrategyId, context.userId, g.id]
+                        'UPDATE "group" SET (experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, modified_user_id, modified_date) = ' +
+                        '($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) WHERE id = $6 RETURNING *',
+                        [g.experimentId, g.parentId, g.refRandomizationStrategyId, g.refGroupTypeId, context.userId, g.id]
                     )
                 )
             )

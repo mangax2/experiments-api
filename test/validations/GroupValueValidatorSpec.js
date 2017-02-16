@@ -26,17 +26,16 @@ describe('GroupValueValidator', () => {
     })
 
     const schemaArrayForPostOperation = [
-        {'paramName': 'factorName', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': false},
-        {'paramName': 'factorLevel', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
+        {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': false},
+        {'paramName': 'value', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
         {'paramName': 'groupId', 'type': 'numeric', 'required': true},
         {'paramName': 'groupId', 'type': 'refData', 'entity': db.group},
         {
             'paramName': 'GroupValue',
             'type': 'businessKey',
-            'keys': ['groupId', 'factorName'],
+            'keys': ['groupId', 'name'],
             'entity': db.groupValue
-        },
-        {'paramName': 'repNumber', 'type': 'numeric', required: false}
+        }
     ]
 
     const schemaArrayForPutOperation=schemaArrayForPostOperation.concat([{'paramName': 'id', 'type': 'numeric', 'required': true},
@@ -59,14 +58,14 @@ describe('GroupValueValidator', () => {
 
     describe('getBusinessKeyPropertyNames', () => {
         it('returns array of property names for the business key', () => {
-            target.getBusinessKeyPropertyNames().should.eql(['groupId', 'factorName'])
+            target.getBusinessKeyPropertyNames().should.eql(['groupId', 'name'])
         })
     })
 
     describe('getDuplicateBusinessKeyError', () => {
         it('returns duplicate error message string', () => {
             target.getDuplicateBusinessKeyError().should.eql(
-                'Duplicate factor name and level in request payload with same groupId')
+                'Duplicate name and value in request payload with same groupId')
         })
     })
 
@@ -89,38 +88,38 @@ describe('GroupValueValidator', () => {
             })
         })
 
-        it('returns rejected promise when factor name, level, and rep number are all filled out', ()=>{
-            return target.preValidate([{factorName: 'test', factorLevel: 'test', repNumber: 1}]).should.be.rejected
+        // it('returns rejected promise when factor name, level, and rep number are all filled out', ()=>{
+        //     return target.preValidate([{name: 'test', value: 'test', repNumber: 1}]).should.be.rejected
+        // })
+        //
+        // it('returns rejected promise when factor name and rep number are all filled out', ()=>{
+        //     return target.preValidate([{name: 'test', repNumber: 1}]).should.be.rejected
+        // })
+        //
+        // it('returns rejected promise when factor level and rep number are all filled out', ()=>{
+        //     return target.preValidate([{factorLevel: 'test', repNumber: 1}]).should.be.rejected
+        // })
+        //
+        it('returns rejected promise when name is present without a value', ()=>{
+            return target.preValidate([{name: 'test'}]).should.be.rejected
         })
 
-        it('returns rejected promise when factor name and rep number are all filled out', ()=>{
-            return target.preValidate([{factorName: 'test', repNumber: 1}]).should.be.rejected
-        })
-
-        it('returns rejected promise when factor level and rep number are all filled out', ()=>{
-            return target.preValidate([{factorLevel: 'test', repNumber: 1}]).should.be.rejected
-        })
-
-        it('returns rejected promise when factor name is present without a factor level', ()=>{
-            return target.preValidate([{factorName: 'test'}]).should.be.rejected
-        })
-
-        it('returns rejected promise when factor level is present without a factor name', ()=>{
-            return target.preValidate([{factorLevel: 'test'}]).should.be.rejected
+        it('returns rejected promise when value is present without a name', ()=>{
+            return target.preValidate([{value: 'test'}]).should.be.rejected
         })
 
         it('returns a rejected promise when everything is missing', ()=>{
             return target.preValidate([{}]).should.be.rejected
         })
 
-        it('returns a resolved promise when just factor name and level are filled out', ()=>{
-            return target.preValidate([{factorName: 'test', factorLevel: 'test'}]).then(()=>{
+        it('returns a resolved promise when just name and value are filled out', ()=>{
+            return target.preValidate([{name: 'test', value: 'test'}]).then(()=>{
                 sinon.assert.notCalled(badRequestStub)
             })
         })
 
         it('returns a resolved promise when just rep number is filled out', ()=>{
-            return target.preValidate([{repNumber: 1}]).then(()=>{
+            return target.preValidate([{name: "repNumber", value: "1"}]).then(()=>{
                 sinon.assert.notCalled(badRequestStub)
             })
         })
@@ -158,7 +157,7 @@ describe('GroupValueValidator', () => {
             hasErrorsStub = sinon.stub(target, 'hasErrors')
             getBusinessKeyPropertyNamesStub = sinon.stub(target, 'getBusinessKeyPropertyNames')
             getDuplicateBusinessKeyErrorStub = sinon.stub(target, 'getDuplicateBusinessKeyError')
-            getBusinessKeyPropertyNamesStub.returns(['groupId','factorName'])
+            getBusinessKeyPropertyNamesStub.returns(['groupId','name'])
 
             // badRequestStub = sinon.stub(AppError, 'badRequest')
         })
@@ -191,12 +190,12 @@ describe('GroupValueValidator', () => {
             const r = target.postValidate(
                 [
                     {
-                        factorName: 'A',
+                        name: 'A',
                         groupId:1
 
                     },
                     {
-                        factorName: 'B',
+                        name: 'B',
                         groupId:1
                     }
                 ]
@@ -217,11 +216,11 @@ describe('GroupValueValidator', () => {
             const r = target.postValidate(
                 [
                     {
-                        factorName: 'A',
+                        name: 'A',
                         groupId:2
                     },
                     {
-                        factorName: 'A',
+                        name: 'A',
                         groupId:2
                     }
                 ]

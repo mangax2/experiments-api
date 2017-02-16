@@ -570,7 +570,7 @@ router.delete('/groups/:id', (req, res, next) => {
     })
 })
 
-router.get('/group-type', (req, res, next) => {
+router.get('/group-types', (req, res, next) => {
     return new GroupTypeService().getAllGroupTypes().then((groupTypes) => {
         return res.json(groupTypes)
     }).catch((err) => {
@@ -578,7 +578,7 @@ router.get('/group-type', (req, res, next) => {
     })
 })
 
-router.get('/group-type/:id', (req, res, next) => {
+router.get('/group-types/:id', (req, res, next) => {
     return new GroupTypeService().getGroupTypeById(req.params.id).then((groupType) => {
         return res.json(groupType)
     }).catch((err) => {

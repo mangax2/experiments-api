@@ -31,7 +31,7 @@ module.exports = (rep, pgp) => {
 
         batchCreate: (groupValues, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['name','value','group_id','created_user_id','created_date','modified_user_id','modified_date','rep_number'],
+                ['name','value','group_id','created_user_id','created_date','modified_user_id','modified_date'],
                 {table: 'group_value'}
             )
 
@@ -53,7 +53,7 @@ module.exports = (rep, pgp) => {
 
         batchUpdate: (groupValues, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
-                ['?id', 'name', 'value', 'group_id', 'modified_user_id', 'modified_date', 'rep_number'],
+                ['?id', 'name', 'value', 'group_id', 'modified_user_id', 'modified_date'],
                 {table: 'group_value'}
             )
 

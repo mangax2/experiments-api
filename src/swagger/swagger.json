@@ -1805,6 +1805,87 @@
                 }
             }
         },
+        "/group-type":{
+            "get": {
+                "summary": "Get all group types",
+                "description": "Returns all group types that can be used\n",
+                "tags": [
+                    "Group Types"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of group types",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupType"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/group-type/{id}":{
+            "get": {
+                "summary": "Get one group type entity",
+                "description": "Returns a single group type entity\n",
+                "tags": [
+                    "Group Types"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Single Group Type Entity",
+                        "schema": {
+                            "$ref": "#/definitions/GroupType"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Type Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/variables": {
             "post": {
                 "summary": "Add variables",
@@ -3160,6 +3241,10 @@
                     "type":"integer",
                     "description": "reference to RandomizationStrategy Table"
                 },
+                "refGroupTypeId":{
+                    "type" : "integer",
+                    "description" : "reference to GroupType Table"
+                },
                 "groupValues": {
                     "type": "array",
                     "items": {
@@ -3386,6 +3471,19 @@
                 "type": {
                     "type": "string",
                     "description": "name of the factor type"
+                }
+            }
+        },
+        "GroupType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for group type"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "name of the group type"
                 }
             }
         },
@@ -3832,6 +3930,10 @@
                 "refRandomizationStrategyId": {
                     "type": "integer",
                     "description": "Id of RandomizationStrategy "
+                },
+                "refGroupTypeId":{
+                    "type": "integer",
+                    "description": "Id of GroupType"
                 },
                 "createdDate": {
                     "type": "string",

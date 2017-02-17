@@ -1805,7 +1805,7 @@
                 }
             }
         },
-        "/group-type":{
+        "/group-types":{
             "get": {
                 "summary": "Get all group types",
                 "description": "Returns all group types that can be used\n",
@@ -1837,7 +1837,7 @@
                 }
             }
         },
-        "/group-type/{id}":{
+        "/group-types/{id}":{
             "get": {
                 "summary": "Get one group type entity",
                 "description": "Returns a single group type entity\n",

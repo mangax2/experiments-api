@@ -15,6 +15,7 @@ import GroupValueService from '../services/GroupValueService'
 import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
+import GroupTypeService from '../services/GroupTypeService'
 import RandomizationStrategyService from '../services/RandomizationStrategyService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 
@@ -564,6 +565,22 @@ router.get('/groups/:id', (req, res, next) => {
 router.delete('/groups/:id', (req, res, next) => {
     return new GroupService().deleteGroup(req.params.id).then((value) => {
         return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/group-type', (req, res, next) => {
+    return new GroupTypeService().getAllGroupTypes().then((groupTypes) => {
+        return res.json(groupTypes)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/group-type/:id', (req, res, next) => {
+    return new GroupTypeService().getGroupTypeById(req.params.id).then((groupType) => {
+        return res.json(groupType)
     }).catch((err) => {
         return next(err)
     })

@@ -88,18 +88,6 @@ describe('GroupValueValidator', () => {
             })
         })
 
-        // it('returns rejected promise when factor name, level, and rep number are all filled out', ()=>{
-        //     return target.preValidate([{name: 'test', value: 'test', repNumber: 1}]).should.be.rejected
-        // })
-        //
-        // it('returns rejected promise when factor name and rep number are all filled out', ()=>{
-        //     return target.preValidate([{name: 'test', repNumber: 1}]).should.be.rejected
-        // })
-        //
-        // it('returns rejected promise when factor level and rep number are all filled out', ()=>{
-        //     return target.preValidate([{factorLevel: 'test', repNumber: 1}]).should.be.rejected
-        // })
-        //
         it('returns rejected promise when name is present without a value', ()=>{
             return target.preValidate([{name: 'test'}]).should.be.rejected
         })
@@ -126,29 +114,6 @@ describe('GroupValueValidator', () => {
     })
 
     describe('postValidate', () => {
-        /*
-         postValidate(targetObject) {
-         if (!this.hasErrors()) {
-         const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
-         const businessKeyArray = _.map(targetObject, (obj)=> {
-         return _.pick(obj, businessKeyPropertyNames)
-         })
-         const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.groupId))
-         _.forEach(groupByObject, innerArray=> {
-         const names = _.map(innerArray, e=> {
-         return e[businessKeyPropertyNames[1]]
-
-         })
-         if (_.uniq(names).length != names.length) {
-         this.messages.push(this.getDuplicateBusinessKeyError())
-         return false
-         }
-         })
-         }
-         return Promise.resolve()
-         */
-
-
         let hasErrorsStub
         let getBusinessKeyPropertyNamesStub
         let getDuplicateBusinessKeyErrorStub
@@ -158,8 +123,6 @@ describe('GroupValueValidator', () => {
             getBusinessKeyPropertyNamesStub = sinon.stub(target, 'getBusinessKeyPropertyNames')
             getDuplicateBusinessKeyErrorStub = sinon.stub(target, 'getDuplicateBusinessKeyError')
             getBusinessKeyPropertyNamesStub.returns(['groupId','name'])
-
-            // badRequestStub = sinon.stub(AppError, 'badRequest')
         })
 
         afterEach(() => {

@@ -92,7 +92,7 @@ describe('GroupValueService', () => {
             validateStub.resolves()
             createStub.resolves([{id: 1}])
 
-            const groupValues = [{factorName: 'testFactor', factorLevel: 'testLevel', repNumber: null, groupId: 1}]
+            const groupValues = [{name: 'testFactor', value: 'testLevel', groupId: 1}]
             return groupValueService.batchCreateGroupValues(groupValues, testContext, tx).then((result)=>{
                 sinon.assert.calledWith(validateStub, groupValues)
             })
@@ -109,7 +109,7 @@ describe('GroupValueService', () => {
 
     describe('getGroupValuesByGroupId', ()=>{
         it('returns group values for a particular group', ()=>{
-            let expectedResponse = [{id: 1, factorName: 'testFactor', factorLevel: 'testLevel', repNumber: null, groupId: 1}]
+            let expectedResponse = [{id: 1, name: 'testFactor', value: 'testLevel', groupId: 1}]
 
             groupFindStub.resolves({id: 1})
             findAllByGroupIdStub.resolves(expectedResponse)
@@ -140,7 +140,7 @@ describe('GroupValueService', () => {
 
     describe('batchGetGroupValuesByGroupIds', ()=>{
         it('returns group values for all groups provided', ()=>{
-            const response = [[{groupId: 1, repNumber: 1},{groupId: 1, repNumber: 2}],[{groupId: 2, factorName: 'testFactor', factorLevel: 'testLevel'}, {groupId: 2, factorName: 'testFactor2', factorLevel: 'testLevel2'}]]
+            const response = [[{groupId: 1, name: "repNumber", value: "1"},{groupId: 1, name: "repNumber", value: "2"}],[{groupId: 2, name: 'testFactor', value: 'testLevel'}, {groupId: 2, name: 'testFactor2', value: 'testLevel2'}]]
             groupFindBatchStub.resolves([{id: 1}, {id:2}])
             findAllByGroupIdsStub.resolves(response)
 
@@ -169,7 +169,7 @@ describe('GroupValueService', () => {
 
     describe('batchGetGroupValuesByGroupIdsNoValidate', ()=>{
         it('returns group values',()=>{
-            let response = [[{groupId:1,repNumber:1},{groupId:1,repNumber:2}]]
+            let response = [[{groupId:1,name: "repNumber", value:"1"},{groupId:1,name: "repNumber", value: "2"}]]
             findAllByGroupIdsStub.resolves(response)
             return groupValueService.batchGetGroupValuesByGroupIdsNoValidate([1,2],tx).then((value)=>{
                 value.should.equal(response)
@@ -184,12 +184,12 @@ describe('GroupValueService', () => {
 
     describe('getGroupValueById',()=>{
         it('finds a group value by id', ()=>{
-            findStub.resolves({id: 1, factorName: 'testFactor', factorLevel: 'testLevel', groupId: 1})
+            findStub.resolves({id: 1, name: 'testFactor', value: 'testLevel', groupId: 1})
 
             return groupValueService.getGroupValueById(1,tx).then((value)=>{
                 value.id.should.equal(1)
-                value.factorName.should.equal('testFactor')
-                value.factorLevel.should.equal('testLevel')
+                value.name.should.equal('testFactor')
+                value.value.should.equal('testLevel')
                 value.groupId.should.equal(1)
             })
         })
@@ -211,9 +211,9 @@ describe('GroupValueService', () => {
         it('updates group values',()=>{
             let response = [{id:1, message: 'Resource updated', status: 200},{id:2, message:'Resource updated', status:200}]
             validateStub.resolves()
-            updateStub.resolves([{id: 1, factorName: 'factor1', factorLevel: 'testLevel', groupId: 1},{id:2,factorName:'factor2',factorLevel:'level2', groupId:1}])
+            updateStub.resolves([{id: 1, name: 'factor1', value: 'testLevel', groupId: 1},{id:2,name:'factor2',value:'level2', groupId:1}])
 
-            return groupValueService.batchUpdateGroupValues([{id:1,factorName:'factor1',factorLevel:'testLevel', groupId: 1},{id:2, factorName:'factor2',factorLevel:'level2', groupId:1}],testContext,tx).then((value)=>{
+            return groupValueService.batchUpdateGroupValues([{id:1,name:'factor1',value:'testLevel', groupId: 1},{id:2, name:'factor2',value:'level2', groupId:1}],testContext,tx).then((value)=>{
                 value.should.deep.equal(response)
             })
         })

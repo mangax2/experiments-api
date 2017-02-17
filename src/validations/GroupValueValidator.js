@@ -6,17 +6,16 @@ import db from '../db/DbManager'
 class GroupValueValidator extends SchemaValidator {
     static get POST_VALIDATION_SCHEMA() {
         return [
-            {'paramName': 'factorName', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': false},
-            {'paramName': 'factorLevel', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
+            {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 500}, 'required': false},
+            {'paramName': 'value', 'type': 'text', 'lengthRange': {'min': 0, 'max': 500}, 'required': false},
             {'paramName': 'groupId', 'type': 'numeric', 'required': true},
             {'paramName': 'groupId', 'type': 'refData', 'entity': db.group},
             {
                 'paramName': 'GroupValue',
                 'type': 'businessKey',
-                'keys': ['groupId', 'factorName'],
+                'keys': ['groupId', 'name'],
                 'entity': db.groupValue
-            },
-            {'paramName': 'repNumber', 'type': 'numeric', required: false}
+            }
         ]
     }
 
@@ -41,11 +40,11 @@ class GroupValueValidator extends SchemaValidator {
     }
 
     getBusinessKeyPropertyNames() {
-        return ['groupId', 'factorName']
+        return ['groupId', 'name']
     }
 
     getDuplicateBusinessKeyError() {
-        return 'Duplicate factor name and level in request payload with same groupId'
+        return 'Duplicate name and value in request payload with same groupId'
     }
 
     preValidate(groupValueObj) {
@@ -54,18 +53,12 @@ class GroupValueValidator extends SchemaValidator {
                 AppError.badRequest('Group Value request object needs to be an array'))
         } else {
             if(_.filter(groupValueObj, (gv)=>{
-                if(gv.factorName && gv.factorLevel && gv.repNumber){
-                    return gv
-                }
-                else if((gv.factorName || gv.factorLevel) && gv.repNumber){
-                    return gv
-                }
-                else if((!gv.factorName || !gv.factorLevel) && !gv.repNumber){
+                if(!gv.name || !gv.value){
                     return gv
                 }
             }).length > 0){
                 return Promise.reject(
-                    AppError.badRequest('Group Values must have either factor name with a level, or rep number')
+                    AppError.badRequest('Group Values must have a name and a value')
                 )
             }
 

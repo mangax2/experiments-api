@@ -3960,21 +3960,17 @@
                     "type": "integer",
                     "description": "Group Value Id"
                 },
-                "factorName": {
+                "name": {
                     "type": "string",
-                    "description": "Name of the factor the group is associated to"
+                    "description": "Name of the entity the group is associated to"
                 },
-                "factorLevel": {
+                "value": {
                     "type": "string",
-                    "description": "Value of the factor associated to the group"
+                    "description": "Value of the entity associated to the group"
                 },
                 "groupId": {
                     "type": "integer",
                     "description": "Group Id"
-                },
-                "repNumber": {
-                    "type": "integer",
-                    "description": "Rep Number"
                 },
                 "createdDate": {
                     "type": "string",
@@ -3997,17 +3993,13 @@
         "GroupValueCompositeOperation": {
             "type": "object",
             "properties": {
-                "factorName": {
+                "name": {
                     "type": "string",
-                    "description": "Name of the factor the group is associated to"
+                    "description": "Name of the entity the group is associated to"
                 },
-                "factorLevel": {
+                "value": {
                     "type": "string",
-                    "description": "Value of the factor associated to the group"
-                },
-                "repNumber": {
-                    "type": "integer",
-                    "description": "Rep Number"
+                    "description": "Value of the entity associated to the group"
                 }
             }
         },

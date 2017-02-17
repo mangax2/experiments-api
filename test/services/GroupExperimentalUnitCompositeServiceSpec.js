@@ -394,7 +394,7 @@ describe("GroupExperimentalUnits Specs", ()=> {
     describe("getUnitsandGroupValues Specs",()=>{
         it("getUnitsandGroupValues",()=>{
             const groupResp=[{id:1}]
-            const groupAndUnitDetails=[{'experimentId':1,'groupValues':[{repNumber:'1'}],'units':[{'treatmentId':1}]}]
+            const groupAndUnitDetails=[{'experimentId':1,'groupValues':[{name: "repNumber", value:"1"}],'units':[{'treatmentId':1}]}]
             const result = target._getUnitsAndGroupValues(groupResp,groupAndUnitDetails)
             result.units[0].groupId.should.equal(1)
             result.groupValues[0].groupId.should.equal(1)
@@ -526,7 +526,8 @@ describe("GroupExperimentalUnits Specs", ()=> {
                 childGroups: [{}],
                 refRandomizationStrategyId: 1,
                 groupValues: [{
-                    repNumber: 1
+                    name: "repNumber",
+                    value: 1
                 }]
             }]
 
@@ -573,11 +574,11 @@ describe("GroupExperimentalUnits Specs", ()=> {
         it('sucessfully resolves after calling batchCreateGroupValues and recursiveBatchCreate',()=>{
             batchCreateGroupValuesStub.resolves()
             createExperimentalUnitsStub.resolves()
-            getUnitsAndGroupValues.returns({groupValues: [{repNumber: 1}], units: [], childGroups:[{},{}]})
+            getUnitsAndGroupValues.returns({groupValues: [{name: "repNumber", value: "1"}], units: [], childGroups:[{},{}]})
             recursiveBatchCreateStub.resolves()
 
             return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(()=>{
-                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{repNumber: 1}], testContext, testTx)
+                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{name: "repNumber", value: "1"}], testContext, testTx)
                 sinon.assert.calledWithExactly(recursiveBatchCreateStub, 1, [{},{}], testContext, testTx)
             })
         })
@@ -585,11 +586,11 @@ describe("GroupExperimentalUnits Specs", ()=> {
         it('sucessfully resolves after calling batchCreateGroupValues and createExperimentalUnits',()=> {
             batchCreateGroupValuesStub.resolves()
             createExperimentalUnitsStub.resolves()
-            getUnitsAndGroupValues.returns({groupValues: [{repNumber: 1}], units: [{}, {}], childGroups: []})
+            getUnitsAndGroupValues.returns({groupValues: [{name: "repNumber", value: "1"}], units: [{}, {}], childGroups: []})
             recursiveBatchCreateStub.resolves()
 
             return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
-                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{repNumber: 1}], testContext, testTx)
+                sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{name: "repNumber", value: "1"}], testContext, testTx)
                 sinon.assert.calledWithExactly(createExperimentalUnitsStub, 1, [{}, {}], testContext, testTx)
             })
         })

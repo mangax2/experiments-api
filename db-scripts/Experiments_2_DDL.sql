@@ -18,6 +18,10 @@ ALTER TABLE public.group ADD CONSTRAINT "Group_Ref_Group_Type"
   FOREIGN KEY (ref_group_type_id) REFERENCES public.ref_group_type (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+ALTER TABLE public.group_value RENAME COLUMN factor_name TO name;
+ALTER TABLE public.group_value RENAME COLUMN factor_level TO value;
+ALTER TABLE public.group_value DROP COLUMN rep_number;
+
 INSERT INTO public.ref_group_type (type, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Location', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
 INSERT INTO public.ref_group_type (type, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Block', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
 INSERT INTO public.ref_group_type (type, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Rep', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);

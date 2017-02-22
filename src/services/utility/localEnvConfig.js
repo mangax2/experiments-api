@@ -2,10 +2,10 @@
 const cfServices = {
     experimentsDataSource: {
         alias: 'experimentsDataSource',
-        host: 'dockers02.monsanto.com',
-        port: '49100',
-        user: 'admin',
-        password: 'admin',
+        host: 'localhost',
+        port: '9000',
+        user: process.env.EXPERIMENTS_DB_LOCAL_USER,
+        password: process.env.EXPERIMENTS_DB_LOCAL_PASSWORD,
         database: 'draft',
         type: 'conn',
         min: 10,

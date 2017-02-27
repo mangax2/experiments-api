@@ -91,3 +91,13 @@ CREATE TABLE unit_spec_detail
 INSERT INTO public.ref_unit_type (name, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Plot', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
 INSERT INTO public.ref_unit_type (name, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Container', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
 INSERT INTO public.ref_unit_type (name, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Other', 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
+
+
+
+
+INSERT INTO public.ref_unit_spec (name, uom_type, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Length', 'Length', 1, 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
+INSERT INTO public.ref_unit_spec (name, uom_type, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Width', 'Length', 1, 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
+INSERT INTO public.ref_unit_spec (name, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Tolerance %', 1, 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
+
+INSERT INTO public.ref_unit_spec (name, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Type', 2, 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);
+INSERT INTO public.ref_unit_spec (name, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ('Comment', 3, 'KMCCL', CURRENT_TIMESTAMP, 'KMCCL', CURRENT_TIMESTAMP);

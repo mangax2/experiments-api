@@ -64,37 +64,6 @@ class UnitSpecificationDetailService {
             })
         })
     }
-
-    // @Transactional('deleteTreatment')
-    // deleteTreatment(id, tx) {
-    //     return db.treatment.remove(id, tx).then((data) => {
-    //         if (!data) {
-    //             logger.error('Treatment Not Found for requested id = ' + id)
-    //             throw AppError.notFound('Treatment Not Found for requested id')
-    //         } else {
-    //             return data
-    //         }
-    //     })
-    // }
-    //
-    // @Transactional('batchDeleteTreatments')
-    // batchDeleteTreatments(ids, tx) {
-    //     return db.treatment.batchRemove(ids, tx).then((data) => {
-    //         if (_.filter(data, (element) => element != null).length != ids.length) {
-    //             logger.error('Not all treatments requested for delete were found')
-    //             throw AppError.notFound('Not all treatments requested for delete were found')
-    //         } else {
-    //             return data
-    //         }
-    //     })
-    // }
-    //
-    // @Transactional('deleteTreatmentsForExperimentId')
-    // deleteTreatmentsForExperimentId(id, tx) {
-    //     return this._experimentService.getExperimentById(id, tx).then(() => {
-    //         return db.treatment.removeByExperimentId(id, tx)
-    //     })
-    // }
 }
 
 module.exports = UnitSpecificationDetailService

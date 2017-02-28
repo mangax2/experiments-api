@@ -20,6 +20,7 @@ import RandomizationStrategyService from '../services/RandomizationStrategyServi
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
+import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -646,6 +647,38 @@ router.get('/unit-specifications', (req, res, next)=>{
 
 router.get('/unit-specifications/:id', (req, res, next)=>{
     return new UnitSpecificationService().getUnitSpecificationById(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/unit-specification-details/:id', (req, res, next)=>{
+    return new UnitSpecificationDetailService().getUnitSpecificationDetailById(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/unit-specification-details/', (req, res, next) =>{
+    return new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id).then((values)=>{
+        return res.json(values)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.post('/experiments/:id/unit-specification-details/', (req, res, next)=>{
+    return new UnitSpecificationDetailService().batchCreateUnitSpecificationDetails(req.body, req.context).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.put('/experiments/:id/unit-specification-details/', (req, res, next)=>{
+    return new UnitSpecificationDetailService().batchUpdateUnitSpecificationDetails(req.body, req.context).then((value)=>{
         return res.json(value)
     }).catch((err)=>{
         return next(err)

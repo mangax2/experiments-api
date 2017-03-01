@@ -18,7 +18,9 @@ import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
 import RandomizationStrategyService from '../services/RandomizationStrategyService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
-
+import UnitTypeService from '../services/UnitTypeService'
+import UnitSpecificationService from '../services/UnitSpecificationService'
+import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -615,6 +617,70 @@ router.get('/experiments/:id/composites/group-experimental-units', (req, res, ne
     return new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id).then((value) => {
         return res.json(value)
     }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/unit-types', (req, res, next) =>{
+    return new UnitTypeService().getAllUnitTypes().then((values)=>{
+        return res.json(values)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/unit-types/:id', (req, res, next)=>{
+    return new UnitTypeService().getUnitTypeById(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/unit-specifications', (req, res, next)=>{
+    return new UnitSpecificationService().getAllUnitSpecifications().then((values)=>{
+        return res.json(values)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/unit-specifications/:id', (req, res, next)=>{
+    return new UnitSpecificationService().getUnitSpecificationById(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/unit-specification-details/:id', (req, res, next)=>{
+    return new UnitSpecificationDetailService().getUnitSpecificationDetailById(req.params.id).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.get('/experiments/:id/unit-specification-details/', (req, res, next) =>{
+    return new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id).then((values)=>{
+        return res.json(values)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.post('/experiments/:id/unit-specification-details/', (req, res, next)=>{
+    return new UnitSpecificationDetailService().batchCreateUnitSpecificationDetails(req.body, req.context).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
+        return next(err)
+    })
+})
+
+router.put('/experiments/:id/unit-specification-details/', (req, res, next)=>{
+    return new UnitSpecificationDetailService().batchUpdateUnitSpecificationDetails(req.body, req.context).then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
         return next(err)
     })
 })

@@ -1,14 +1,10 @@
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
-import ExperimentsService from './ExperimentsService'
 import log4js from 'log4js'
 
 const logger = log4js.getLogger('UnitTypeService')
 
 class UnitTypeService {
-    constructor() {
-        this._experimentService = new ExperimentsService()
-    }
 
     getUnitTypeById(id) {
         return db.unitType.find(id).then((data) => {

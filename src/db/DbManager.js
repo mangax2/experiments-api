@@ -18,9 +18,9 @@ import groupValue from '../repos/groupValue'
 import randomizationStrategy from '../repos/randomizationStrategy'
 import treatment from '../repos/treatment'
 import unit from '../repos/unit'
-import unitType from '../repos/unitType'
 import unitSpecification from '../repos/unitSpecification'
 import unitSpecificationDetail from '../repos/unitSpecificationDetail'
+import unitType from '../repos/unitType'
 
 // pg-promise initialization options:
 const options = {
@@ -40,9 +40,9 @@ const options = {
         obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
-        obj.unitType = new (unitType) (obj, pgp)
         obj.unitSpecification = new (unitSpecification) (obj, pgp)
         obj.unitSpecificationDetail = new (unitSpecificationDetail) (obj, pgp)
+        obj.unitType = new (unitType) (obj, pgp)
     }
 }
 

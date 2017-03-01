@@ -42,15 +42,26 @@ module.exports = (rep, pgp) => {
 
 
         batchUpdate: (unitSpecificationDetails, context, tx = rep) => {
-            return tx.batch(
-                unitSpecificationDetails.map(
-                    detail => tx.oneOrNone(
-                        'UPDATE unit_spec_detail SET (value, uom_id, ref_unit_spec_id, experiment_id, modified_user_id, modified_date) = ' +
-                        '($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) WHERE id = $6 RETURNING *',
-                        [detail.value, detail.parentId, detail.refUnitSpecId, detail.experimentId, context.userId, detail.id]
-                    )
-                )
+            const columnSet = new pgp.helpers.ColumnSet(
+                ['id', 'value', '?uom_id', 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
+                {table: 'unit_spec_detail'}
             )
+
+            const data = unitSpecificationDetails.map((usd)=>{
+                return {
+                    id: usd.id,
+                    value: usd.value,
+                    uom_id: usd.uomId,
+                    ref_unit_spec_id: usd.refUnitSpecId,
+                    experiment_id: usd.experimentId,
+                    modified_user_id: context.userId,
+                    modified_date: 'CURRENT_TIMESTAMP'
+                }
+            })
+
+            const query = pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP') + ' WHERE v.id = t.id RETURNING *'
+
+            return tx.any(query)
         },
 
         remove: (id, tx = rep) => {

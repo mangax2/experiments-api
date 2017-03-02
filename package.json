@@ -1,6 +1,6 @@
 {
   "name": "experiments-api",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {
@@ -55,7 +55,7 @@
     "chai-as-promised": "~6.0.0",
     "cross-env": "~3.1.4",
     "eslint": "~3.15.0",
-    "husky":"~0.13.1",
+    "husky": "~0.13.1",
     "istanbul": "~0.4.5",
     "mocha": "~3.2.0",
     "nodemon": "~1.11.0",

@@ -14,6 +14,682 @@
         "application/json"
     ],
     "paths": {
+        "/combination-elements": {
+            "post": {
+                "summary": "post one or more combination element entities",
+                "description": "Creates new combination element entities in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "Combination Elements",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CombinationElementPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Combination Element Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one or more combination element entities",
+                "description": "Update combination element in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "Combination Elements",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CombinationElementPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/combination-elements/{id}": {
+            "get": {
+                "summary": "get one combination-element entity",
+                "description": "The combination-elements endpoint returns information about the combination elements entity in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "combination-element entity",
+                        "schema": {
+                            "$ref": "#/definitions/CombinationElementResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Combination Element Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one combination element Response entity",
+                "description": "delete combination element entity in Experiments System.\n",
+                "tags": [
+                    "Combination Elements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Combination Element Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Combination Element Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/composites/treatments": {
+            "post": {
+                "summary": "post one or more treatments and combination elements entities",
+                "description": "Creates/updates treatments and combination elements in Experiments System.\n Request json has add , delete and update sections for treatments. API does action on a section with values and empty sections are ignored. So if add and delete sections are empty and update has treatments then only update action will happen. Combination elements within treatments needs to be complete. New combination element without id will be added and combination element with id will be updated, any combination element not included within treatment will be deleted.",
+                "tags": [
+                    "Composites"
+                ],
+                "parameters": [
+                    {
+                        "name": "Composites Treatments",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CompositeTreatmentsPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Composite-Treatments operation SUCCESS"
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dependent-variables/{id}": {
+            "get": {
+                "summary": "get one dependent variable entity",
+                "description": "The dependent variables endpoint returns information about the dependent variable entities in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "dependent Variable entity",
+                        "schema": {
+                            "$ref": "#/definitions/DependentVariableResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Dependent Variable Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one Dependent Variable entity",
+                "description": "delete Dependent Variable entity in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Dependent Variable Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Dependent Variable Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dependent-variables": {
+            "post": {
+                "summary": "post one or more dependent variable entities",
+                "description": "Creates new Dependent Variables in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "DependentVariables ",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariablePayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Dependent Variable Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one or more dependent variable entities",
+                "description": "Update Dependent Variables in Experiments System.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "DependentVariables",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariablePayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experimental-units": {
+            "post": {
+                "summary": "post one or more experimental unit entities",
+                "description": "Creates new experimental unit entities in Experiments System.\n",
+                "tags": [
+                    "Experimental Units"
+                ],
+                "parameters": [
+                    {
+                        "name": "Experimental Units",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentalUnitPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Experimental Unit Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CreateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "put one or more Experimental Unit entities",
+                "description": "Update Experimental Unit in Experiments System.\n",
+                "tags": [
+                    "Experimental Units"
+                ],
+                "parameters": [
+                    {
+                        "name": "Experimental Units",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentalUnitPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UpdateResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experimental-units/{id}": {
+            "get": {
+                "summary": "get one experimental unit entity",
+                "description": "The experimental-units endpoint returns information about the experimental unit entity in Experiments System.\n",
+                "tags": [
+                    "Experimental Units"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Experimental Unit entity",
+                        "schema": {
+                            "$ref": "#/definitions/ExperimentalUnitResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experimental Unit Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "delete one experimental unit entity",
+                "description": "delete experimental unit entity in Experiments System.\n",
+                "tags": [
+                    "Experimental Units"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Experimental Unit Deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experimental Unit Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/groups": {
+            "get": {
+                "summary": "Get all groups by experiment id",
+                "description": "Returns all groups for experiment\n",
+                "tags": [
+                    "Groups"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of groups",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Group"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/experiment-designs": {
             "get": {
                 "summary": "Get all experiment designs",
@@ -475,266 +1151,6 @@
                 }
             }
         },
-        "/experiments/{id}/dependent-variables": {
-            "get": {
-                "summary": "get all dependent variables for given experiment id.",
-                "description": "This endpoint returns information about the dependent variable entities associated with one Experiment.\n",
-                "tags": [
-                    "Dependent Variables"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Dependent Variables",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/DependentVariableResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experiment Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/{id}/factors": {
-            "get": {
-                "summary": "get all factors  for given experiment id.",
-                "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
-                "tags": [
-                    "Factors"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Factors",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/FactorResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experiment Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/{id}/variables": {
-            "get": {
-                "summary": "get all variables for given experiment id.",
-                "description": "This endpoint returns information about the variable entities associated with one Experiment.\n",
-                "tags": [
-                    "Variables"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Variables",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/VariablesResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experiment Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/{id}/treatments": {
-            "get": {
-                "summary": "get all treatments for a given experiment id",
-                "description": "This endpoint returns information about the treatment entities associated with an Experiment",
-                "tags": [
-                    "Treatments"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Treatments",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Treatment"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experiment Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/{id}/experimental-units": {
-            "get": {
-                "summary": "get all experimental units for a given experiment id",
-                "description": "This endpoint returns information about the experimental units entities associated with an Experiment",
-                "tags": [
-                    "Experimental Units"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ExperimentalUnits",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ExperimentalUnitResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experiment Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
         "/experiments/{id}/composites/treatments": {
             "get": {
                 "summary": "get all treatments and combination elements for a given experiment id",
@@ -891,6 +1307,162 @@
                 }
             }
         },
+        "/experiments/{id}/dependent-variables": {
+            "get": {
+                "summary": "get all dependent variables for given experiment id.",
+                "description": "This endpoint returns information about the dependent variable entities associated with one Experiment.\n",
+                "tags": [
+                    "Dependent Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dependent Variables",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DependentVariableResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/experimental-units": {
+            "get": {
+                "summary": "get all experimental units for a given experiment id",
+                "description": "This endpoint returns information about the experimental units entities associated with an Experiment",
+                "tags": [
+                    "Experimental Units"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ExperimentalUnits",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ExperimentalUnitResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/factors": {
+            "get": {
+                "summary": "get all factors  for given experiment id.",
+                "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
+                "tags": [
+                    "Factors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Factors",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/FactorResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/experiments/{id}/summary": {
             "get": {
                 "summary": "get the experiment summary for given experiment id.",
@@ -940,12 +1512,12 @@
                 }
             }
         },
-        "/dependent-variables/{id}": {
+        "/experiments/{id}/treatments": {
             "get": {
-                "summary": "get one dependent variable entity",
-                "description": "The dependent variables endpoint returns information about the dependent variable entities in Experiments System.\n",
+                "summary": "get all treatments for a given experiment id",
+                "description": "This endpoint returns information about the treatment entities associated with an Experiment",
                 "tags": [
-                    "Dependent Variables"
+                    "Treatments"
                 ],
                 "parameters": [
                     {
@@ -957,9 +1529,12 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "dependent Variable entity",
+                        "description": "Treatments",
                         "schema": {
-                            "$ref": "#/definitions/DependentVariableResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Treatment"
+                            }
                         }
                     },
                     "400": {
@@ -975,48 +1550,7 @@
                         }
                     },
                     "404": {
-                        "description": "No Dependent Variable Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "delete one Dependent Variable entity",
-                "description": "delete Dependent Variable entity in Experiments System.\n",
-                "tags": [
-                    "Dependent Variables"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "string",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Dependent Variable Deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Dependent Variable Found For ID",
+                        "description": "No Experiment Found For ID",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -1030,35 +1564,79 @@
                 }
             }
         },
-        "/dependent-variables": {
-            "post": {
-                "summary": "post one or more dependent variable entities",
-                "description": "Creates new Dependent Variables in Experiments System.\n",
+        "/experiments/{id}/unit-specification-details/": {
+            "get": {
+                "summary": "Get all unit specification details for an experiment",
+                "description": "Returns all unit specification details for an experiment\n",
                 "tags": [
-                    "Dependent Variables"
+                    "Unit Specification Detail"
                 ],
                 "parameters": [
                     {
-                        "name": "DependentVariables ",
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Detail Entities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitSpecificationDetail"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "post one or more unit specification detail entities",
+                "description": "Creates/updates unit specification details for an experiment",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
+                    {
+                        "name": "Unit Specification Details",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/DependentVariablePayloadForPOST"
+                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPOST"
                             }
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Dependent Variable Created",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CreateResponse"
-                            }
-                        }
+                    "200": {
+                        "description": "Unit Specification Detail operation SUCCESS"
                     },
                     "400": {
                         "description": "Invalid/Problematic Input",
@@ -1084,33 +1662,33 @@
                 }
             },
             "put": {
-                "summary": "put one or more dependent variable entities",
-                "description": "Update Dependent Variables in Experiments System.\n",
+                "summary": "updates one or more unit specification detail entities",
+                "description": "Creates/updates unit specification details for an experiment",
                 "tags": [
-                    "Dependent Variables"
+                    "Unit Specification Detail"
                 ],
                 "parameters": [
                     {
-                        "name": "DependentVariables",
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
+                    {
+                        "name": "Unit Specification Details",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/DependentVariablePayloadForPUT"
+                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPUT"
                             }
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Updated",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UpdateResponse"
-                            }
-                        }
+                        "description": "Unit Specification Detail operation SUCCESS"
                     },
                     "400": {
                         "description": "Invalid/Problematic Input",
@@ -1123,6 +1701,64 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Some Unit Specification Details Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/variables": {
+            "get": {
+                "summary": "get all variables for given experiment id.",
+                "description": "This endpoint returns information about the variable entities associated with one Experiment.\n",
+                "tags": [
+                    "Variables"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Variables",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/VariablesResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "No Experiment Found For ID",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -1805,6 +2441,107 @@
                 }
             }
         },
+        "/groups/{id}": {
+            "get": {
+                "summary": "Get one group entity",
+                "description": "Returns a single group entity\n",
+                "tags": [
+                    "Groups"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group Entity",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{id}/group-values": {
+            "get": {
+                "summary": "Get all group values for a particular group",
+                "description": "Returns all group values for a single group\n",
+                "tags": [
+                    "Group Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group Values",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GroupValue"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/group-types": {
             "get": {
                 "summary": "Get all group types",
@@ -1886,37 +2623,123 @@
                 }
             }
         },
-        "/variables": {
-            "post": {
-                "summary": "Add variables",
-                "description": "Creates a new variables, clears existing variables when new variables are provided",
+        "/group-values/{id}": {
+            "get": {
+                "summary": "Get on group value entity",
+                "description": "Returns a single group entity\n",
                 "tags": [
-                    "Variables"
+                    "Group Value"
                 ],
                 "parameters": [
                     {
-                        "name": "Variables",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/VariablesRquestPayload"
-                        }
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "Group Value Entity",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/GroupValue"
                         }
                     },
                     "400": {
-                        "description": "Invalid body",
+                        "description": "Invalid Request",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Group Value Does Not Exist",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/randomization-strategies": {
+            "get": {
+                "summary": "Get all randomization strategies",
+                "description": "Returns all randomization strategies that can be used\n",
+                "tags": [
+                    "Randomization Strategies"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of randomization strategies",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RandomizationStrategy"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/randomization-strategies/{id}": {
+            "get": {
+                "summary": "Get one randomization strategy entity",
+                "description": "Returns a single randomization strategy entity\n",
+                "tags": [
+                    "Randomization Strategies"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Single Randomization Strategy Entity",
+                        "schema": {
+                            "$ref": "#/definitions/RandomizationStrategy"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Randomization Does Not Exist",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -2228,804 +3051,6 @@
                 }
             }
         },
-        "/combination-elements/{id}": {
-            "get": {
-                "summary": "get one combination-element entity",
-                "description": "The combination-elements endpoint returns information about the combination elements entity in Experiments System.\n",
-                "tags": [
-                    "Combination Elements"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "combination-element entity",
-                        "schema": {
-                            "$ref": "#/definitions/CombinationElementResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Combination Element Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "delete one combination element Response entity",
-                "description": "delete combination element entity in Experiments System.\n",
-                "tags": [
-                    "Combination Elements"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "string",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Combination Element Deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Combination Element Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/combination-elements": {
-            "post": {
-                "summary": "post one or more combination element entities",
-                "description": "Creates new combination element entities in Experiments System.\n",
-                "tags": [
-                    "Combination Elements"
-                ],
-                "parameters": [
-                    {
-                        "name": "Combination Elements",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CombinationElementPayloadForPOST"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Combination Element Created",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CreateResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "put one or more combination element entities",
-                "description": "Update combination element in Experiments System.\n",
-                "tags": [
-                    "Combination Elements"
-                ],
-                "parameters": [
-                    {
-                        "name": "Combination Elements",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CombinationElementPayloadForPUT"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Updated",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UpdateResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experimental-units/{id}": {
-            "get": {
-                "summary": "get one experimental unit entity",
-                "description": "The experimental-units endpoint returns information about the experimental unit entity in Experiments System.\n",
-                "tags": [
-                    "Experimental Units"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Experimental Unit entity",
-                        "schema": {
-                            "$ref": "#/definitions/ExperimentalUnitResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experimental Unit Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "delete one experimental unit entity",
-                "description": "delete experimental unit entity in Experiments System.\n",
-                "tags": [
-                    "Experimental Units"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "string",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Experimental Unit Deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "No Experimental Unit Found For ID",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experimental-units": {
-            "post": {
-                "summary": "post one or more experimental unit entities",
-                "description": "Creates new experimental unit entities in Experiments System.\n",
-                "tags": [
-                    "Experimental Units"
-                ],
-                "parameters": [
-                    {
-                        "name": "Experimental Units",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ExperimentalUnitPayloadForPOST"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Experimental Unit Created",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CreateResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "put one or more Experimental Unit entities",
-                "description": "Update Experimental Unit in Experiments System.\n",
-                "tags": [
-                    "Experimental Units"
-                ],
-                "parameters": [
-                    {
-                        "name": "Experimental Units",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ExperimentalUnitPayloadForPUT"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Updated",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UpdateResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/composites/treatments": {
-            "post": {
-                "summary": "post one or more treatments and combination elements entities",
-                "description": "Creates/updates treatments and combination elements in Experiments System.\n Request json has add , delete and update sections for treatments. API does action on a section with values and empty sections are ignored. So if add and delete sections are empty and update has treatments then only update action will happen. Combination elements within treatments needs to be complete. New combination element without id will be added and combination element with id will be updated, any combination element not included within treatment will be deleted.",
-                "tags": [
-                    "Composites"
-                ],
-                "parameters": [
-                    {
-                        "name": "Composites Treatments",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/CompositeTreatmentsPayloadForPOST"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Composite-Treatments operation SUCCESS"
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/randomization-strategies": {
-            "get": {
-                "summary": "Get all randomization strategies",
-                "description": "Returns all randomization strategies that can be used\n",
-                "tags": [
-                    "Randomization Strategies"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Array of randomization strategies",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/RandomizationStrategy"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/randomization-strategies/{id}": {
-            "get": {
-                "summary": "Get one randomization strategy entity",
-                "description": "Returns a single randomization strategy entity\n",
-                "tags": [
-                    "Randomization Strategies"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "string",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Single Randomization Strategy Entity",
-                        "schema": {
-                            "$ref": "#/definitions/RandomizationStrategy"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Randomization Does Not Exist",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/{id}/groups": {
-            "get": {
-                "summary": "Get all groups by experiment id",
-                "description": "Returns all groups for experiment\n",
-                "tags": [
-                    "Groups"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Array of groups",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Group"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/groups/{id}": {
-            "get": {
-                "summary": "Get one group entity",
-                "description": "Returns a single group entity\n",
-                "tags": [
-                    "Groups"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Group Entity",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Group Does Not Exist",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/groups/{id}/group-values": {
-            "get": {
-                "summary": "Get all group values for a particular group",
-                "description": "Returns all group values for a single group\n",
-                "tags": [
-                    "Group Value"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Group Values",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/GroupValue"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Group Does Not Exist",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/group-values/{id}": {
-            "get": {
-                "summary": "Get on group value entity",
-                "description": "Returns a single group entity\n",
-                "tags": [
-                    "Group Value"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Group Value Entity",
-                        "schema": {
-                            "$ref": "#/definitions/GroupValue"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Group Value Does Not Exist",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/unit-types/": {
-            "get": {
-                "summary": "Get all unit type entities",
-                "description": "Returns all unit types\n",
-                "tags": [
-                    "Unit Type"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Unit Type Entities",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UnitType"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/unit-types/{id}": {
-            "get": {
-                "summary": "Get a unit type entity",
-                "description": "Returns a unit type\n",
-                "tags": [
-                    "Unit Type"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Unit Type Entity",
-                        "schema": {
-                            "$ref": "#/definitions/UnitType"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Unit Type Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
         "/unit-specifications/": {
             "get": {
                 "summary": "Get all unit specification entities",
@@ -3162,28 +3187,20 @@
                 }
             }
         },
-        "/experiments/{id}/unit-specification-details/": {
+        "/unit-types/": {
             "get": {
-                "summary": "Get all unit specification details for an experiment",
-                "description": "Returns all unit specification details for an experiment\n",
+                "summary": "Get all unit type entities",
+                "description": "Returns all unit types\n",
                 "tags": [
-                    "Unit Specification Detail"
-                ],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    }
+                    "Unit Type"
                 ],
                 "responses": {
                     "200": {
-                        "description": "Unit Specification Detail Entities",
+                        "description": "Unit Type Entities",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/UnitSpecificationDetail"
+                                "$ref": "#/definitions/UnitType"
                             }
                         }
                     },
@@ -3206,12 +3223,14 @@
                         }
                     }
                 }
-            },
-            "post": {
-                "summary": "post one or more unit specification detail entities",
-                "description": "Creates/updates unit specification details for an experiment",
+            }
+        },
+        "/unit-types/{id}": {
+            "get": {
+                "summary": "Get a unit type entity",
+                "description": "Returns a unit type\n",
                 "tags": [
-                    "Unit Specification Detail"
+                    "Unit Type"
                 ],
                 "parameters": [
                     {
@@ -3219,34 +3238,29 @@
                         "in": "path",
                         "type": "integer",
                         "required": true
-                    },
-                    {
-                        "name": "Unit Specification Details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPOST"
-                            }
-                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Unit Specification Detail operation SUCCESS"
+                        "description": "Unit Type Entity",
+                        "schema": {
+                            "$ref": "#/definitions/UnitType"
+                        }
                     },
                     "400": {
-                        "description": "Invalid/Problematic Input",
+                        "description": "Invalid Request",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
+                            "$ref": "#/definitions/Error"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Unit Type Not Found",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -3258,53 +3272,39 @@
                         }
                     }
                 }
-            },
-            "put": {
-                "summary": "updates one or more unit specification detail entities",
-                "description": "Creates/updates unit specification details for an experiment",
+            }
+        },
+        "/variables": {
+            "post": {
+                "summary": "Add variables",
+                "description": "Creates a new variables, clears existing variables when new variables are provided",
                 "tags": [
-                    "Unit Specification Detail"
+                    "Variables"
                 ],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "type": "integer",
-                        "required": true
-                    },
-                    {
-                        "name": "Unit Specification Details",
+                        "name": "Variables",
                         "in": "body",
-                        "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPUT"
-                            }
+                            "$ref": "#/definitions/VariablesRequestPayload"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Unit Specification Detail operation SUCCESS"
-                    },
-                    "400": {
-                        "description": "Invalid/Problematic Input",
+                        "description": "Success",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Error"
-                            }
+                            "type": "string"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "400": {
+                        "description": "Invalid body",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
                     },
-                    "404": {
-                        "description": "Some Unit Specification Details Not Found",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -3320,225 +3320,62 @@
         }
     },
     "definitions": {
-        "ExperimentDesign": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "unique id for experiment design entity"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of experiment design"
-                }
-            }
-        },
-        "ExperimentDesignPayload": {
+        "CombinationElementPayloadForPOST": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "name of experiment design"
-                }
-            }
-        },
-        "ExperimentResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "unique id for experiment entity"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of the experiment entity."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "description of the Experiment."
-                },
-                "ExperimentDesign": {
-                    "type": "string",
-                    "description": "Experiment Design Type"
-                },
-                "status": {
-                    "type": "string",
-                    "description": "status of the experiment entity."
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                }
-            }
-        },
-        "DependentVariableResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "unique id for  entity"
-                },
-                "required": {
-                    "type": "boolean",
-                    "description": "boolean vaule to specify dependent variable is required or not."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of dependent variable."
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "ExperimentId of experiment entity"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                }
-            }
-        },
-        "FactorResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "unique id for  entity"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of the factor."
-                },
-                "refFactorTypeId": {
-                    "type": "integer",
-                    "description": "id of FactorType entity"
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "id of experiment entity"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                },
-                "tier": {
-                    "type": "integer",
-                    "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10"
-                }
-            }
-        },
-        "FactorLevelResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "unique id for  entity"
+                    "description": "name of the combinationElement."
                 },
                 "value": {
                     "type": "string",
-                    "description": "value of the factor level."
+                    "description": "value of the combinationElement."
                 },
-                "factorId": {
+                "treatmentId": {
                     "type": "integer",
-                    "description": "id of Factor entity"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
+                    "description": "id of treatment entity."
                 }
             }
         },
-        "VariablesResponse": {
+        "CombinationElementPayloadForPUT": {
             "type": "object",
             "properties": {
-                "independent": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Variable"
-                    }
+                "id": {
+                    "type": "integer",
+                    "description": "id of combinationElement to update."
                 },
-                "exogenous": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Variable"
-                    }
+                "name": {
+                    "type": "string",
+                    "description": "name of the combinationElement."
                 },
-                "dependent": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DependentVariable"
-                    }
+                "value": {
+                    "type": "string",
+                    "description": "value of the combinationElement."
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatment entity."
                 }
             }
         },
-        "CompositeTreatmentsResponse": {
+        "CombinationElementResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer",
                     "description": "unique id for  entity"
                 },
-                "isControl": {
-                    "type": "boolean",
-                    "description": "isControl boolean value to mark a treatment as control"
-                },
-                "treatmentNumber": {
-                    "type": "integer",
-                    "description": "number of the treatment."
-                },
-                "notes": {
+                "name": {
                     "type": "string",
-                    "description": "notes related to treatment - optinal field."
+                    "description": "name of the combination element."
                 },
-                "experimentId": {
+                "value": {
+                    "type": "string",
+                    "description": "value of the combination element."
+                },
+                "treatmentId": {
                     "type": "integer",
-                    "description": "id of experimentId entity"
+                    "description": "id of treatment entity"
                 },
                 "createdDate": {
                     "type": "string",
@@ -3555,11 +3392,36 @@
                 "modifiedUserId": {
                     "type": "string",
                     "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "CompositeGroupsAndUnitsPOST": {
+            "type": "object",
+            "properties": {
+                "refRandomizationStrategyId": {
+                    "type": "integer",
+                    "description": "reference to RandomizationStrategy Table"
                 },
-                "combinationElements": {
+                "refGroupTypeId": {
+                    "type": "integer",
+                    "description": "reference to GroupType Table"
+                },
+                "groupValues": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CombinationElementResponse"
+                        "$ref": "#/definitions/GroupValueCompositeOperation"
+                    }
+                },
+                "units": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
+                    }
+                },
+                "childGroups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
                     }
                 }
             }
@@ -3613,55 +3475,126 @@
                 }
             }
         },
-        "CompositeGroupsAndUnitsPOST": {
+        "CompositeTreatmentsCombinationElement": {
             "type": "object",
             "properties": {
-                "refRandomizationStrategyId": {
+                "id": {
                     "type": "integer",
-                    "description": "reference to RandomizationStrategy Table"
+                    "description": "id of combination element if updating existing else empty."
                 },
-                "refGroupTypeId": {
+                "name": {
+                    "type": "string",
+                    "description": "name of the combinationElement."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the combinationElement."
+                }
+            }
+        },
+        "CompositeTreatmentsPayloadAdd": {
+            "type": "object",
+            "properties": {
+                "isControl": {
+                    "type": "string",
+                    "description": "boolean value isControl to mark treatment as control."
+                },
+                "treatmentNumber": {
                     "type": "integer",
-                    "description": "reference to GroupType Table"
+                    "description": "number of the treatment."
                 },
-                "groupValues": {
+                "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "combinationElements": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/GroupValueCompositeOperation"
-                    }
-                },
-                "units": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
-                    }
-                },
-                "childGroups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
+                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
                     }
                 }
             }
         },
-        "CombinationElementResponse": {
+        "CompositeTreatmentsPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "adds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsPayloadAdd"
+                    }
+                },
+                "deletes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ids"
+                    }
+                },
+                "updates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsPayloadUpdate"
+                    }
+                }
+            }
+        },
+        "CompositeTreatmentsPayloadUpdate": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of treatment id to update."
+                },
+                "isControl": {
+                    "type": "string",
+                    "description": "boolean value isControl to mark treatment as control."
+                },
+                "treatmentNumber": {
+                    "type": "integer",
+                    "description": "number of the treatment."
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity."
+                },
+                "combinationElements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+                    }
+                }
+            }
+        },
+        "CompositeTreatmentsResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer",
                     "description": "unique id for  entity"
                 },
-                "name": {
-                    "type": "string",
-                    "description": "name of the combination element."
+                "isControl": {
+                    "type": "boolean",
+                    "description": "isControl boolean value to mark a treatment as control"
                 },
-                "value": {
-                    "type": "string",
-                    "description": "value of the combination element."
-                },
-                "treatmentId": {
+                "treatmentNumber": {
                     "type": "integer",
-                    "description": "id of treatment entity"
+                    "description": "number of the treatment."
+                },
+                "notes": {
+                    "type": "string",
+                    "description": "notes related to treatment - optinal field."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experimentId entity"
                 },
                 "createdDate": {
                     "type": "string",
@@ -3678,6 +3611,183 @@
                 "modifiedUserId": {
                     "type": "string",
                     "description": "modified user id for audit tracking."
+                },
+                "combinationElements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CombinationElementResponse"
+                    }
+                }
+            }
+        },
+        "CreateResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "description": "http status code, 201 for success and 4.x.x for errors."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Resource created or error description in case of error."
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "id of newely created resource or black in case of error."
+                }
+            }
+        },
+        "DependentVariable": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of variable"
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "required or optional boolean value"
+                }
+            }
+        },
+        "DependentVariablePayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "required": {
+                    "type": "boolean",
+                    "description": "is rquired boolean value."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "experimentId of experiment entity."
+                }
+            }
+        },
+        "DependentVariablePayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of dependent varable to update."
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "is rquired boolean value."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "experimentId of experiment entity."
+                }
+            }
+        },
+        "DependentVariableResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "boolean vaule to specify dependent variable is required or not."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of dependent variable."
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "ExperimentId of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "errorMessage": {
+                    "type": "string"
+                }
+            }
+        },
+        "ExperimentalUnitCompositeOperation": {
+            "type": "object",
+            "properties": {
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatmentId entity."
+                },
+                "rep": {
+                    "type": "integer",
+                    "description": "rep number of experimental unit."
+                }
+            }
+        },
+        "ExperimentalUnitPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "type": "integer",
+                    "description": "experimental unit's group id"
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatmentId entity."
+                },
+                "rep": {
+                    "type": "integer",
+                    "description": "rep number of experimental unit."
+                }
+            }
+        },
+        "ExperimentalUnitPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of experimental unit to update."
+                },
+                "groupId": {
+                    "type": "integer",
+                    "description": "experimental unit's group id"
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatmentId entity."
+                },
+                "rep": {
+                    "type": "integer",
+                    "description": "rep number of experimental unit."
                 }
             }
         },
@@ -3718,95 +3828,25 @@
                 }
             }
         },
-        "VariablesRquestPayload": {
+        "ExperimentDesign": {
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer",
-                    "description": "experimentId"
+                    "type": "string",
+                    "description": "unique id for experiment design entity"
                 },
-                "independent": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Variable"
-                    }
-                },
-                "exogenous": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Variable"
-                    }
-                },
-                "dependent": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DependentVariable"
-                    }
+                "name": {
+                    "type": "string",
+                    "description": "name of experiment design"
                 }
             }
         },
-        "Variable": {
+        "ExperimentDesignPayload": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "name of variable"
-                },
-                "levels": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Levels"
-                    }
-                }
-            }
-        },
-        "DependentVariable": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "name of variable"
-                },
-                "required": {
-                    "type": "boolean",
-                    "description": "required or optional boolean value"
-                }
-            }
-        },
-        "Levels": {
-            "type": "string"
-        },
-        "CreateResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "integer",
-                    "description": "http status code, 201 for success and 4.x.x for errors."
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Resource created or error description in case of error."
-                },
-                "id": {
-                    "type": "integer",
-                    "description": "id of newely created resource or black in case of error."
-                }
-            }
-        },
-        "UpdateResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "integer",
-                    "description": "http status code, 200 for success and 4.x.x for errors."
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Resource updated or error description in case of error."
-                },
-                "id": {
-                    "type": "integer",
-                    "description": "id of updated resource or black in case of error."
+                    "description": "name of experiment design"
                 }
             }
         },
@@ -3831,76 +3871,132 @@
                 }
             }
         },
-        "FactorType": {
+        "ExperimentResponse": {
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "string",
-                    "description": "unique id for factor type"
-                },
-                "type": {
-                    "type": "string",
-                    "description": "name of the factor type"
-                }
-            }
-        },
-        "FactorTypePayload": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "description": "name of the factor type"
-                }
-            }
-        },
-        "GroupType": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "unique id for group type"
-                },
-                "type": {
-                    "type": "string",
-                    "description": "name of the group type"
-                }
-            }
-        },
-        "DependentVariablePayloadForPOST": {
-            "type": "object",
-            "properties": {
-                "required": {
-                    "type": "boolean",
-                    "description": "is rquired boolean value."
+                    "type": "integer",
+                    "description": "unique id for experiment entity"
                 },
                 "name": {
                     "type": "string",
-                    "description": "name of dependent variable."
+                    "description": "name of the experiment entity."
                 },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "experimentId of experiment entity."
+                "description": {
+                    "type": "string",
+                    "description": "description of the Experiment."
+                },
+                "ExperimentDesign": {
+                    "type": "string",
+                    "description": "Experiment Design Type"
+                },
+                "status": {
+                    "type": "string",
+                    "description": "status of the experiment entity."
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         },
-        "DependentVariablePayloadForPUT": {
+        "ExperimentSummary": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer",
-                    "description": "id of dependent varable to update."
-                },
-                "required": {
-                    "type": "boolean",
-                    "description": "is rquired boolean value."
+                    "description": "id of the experiment."
                 },
                 "name": {
                     "type": "string",
-                    "description": "name of dependent variable."
+                    "description": "name of the experiment."
                 },
-                "experimentId": {
+                "numberOfVariables": {
                     "type": "integer",
-                    "description": "experimentId of experiment entity."
+                    "description": "the number of variables associated with the experiment."
+                },
+                "numberOfTreatments": {
+                    "type": "integer",
+                    "description": "the number of treatments associated with the experiment."
+                },
+                "numberOfExperimentalUnits": {
+                    "type": "integer",
+                    "description": "the number of experimental units associated with the experiment."
+                }
+            }
+        },
+        "FactorLevelPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "value of the factor."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity."
+                }
+            }
+        },
+        "FactorLevelPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of factorLevel to update."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the factor."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity."
+                }
+            }
+        },
+        "FactorLevelResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "value of the factor level."
+                },
+                "factorId": {
+                    "type": "integer",
+                    "description": "id of Factor entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         },
@@ -3946,33 +4042,205 @@
                 }
             }
         },
-        "FactorLevelPayloadForPOST": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string",
-                    "description": "value of the factor."
-                },
-                "factorId": {
-                    "type": "integer",
-                    "description": "id of Factor entity."
-                }
-            }
-        },
-        "FactorLevelPayloadForPUT": {
+        "FactorResponse": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer",
-                    "description": "id of factorLevel to update."
+                    "description": "unique id for  entity"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name of the factor."
+                },
+                "refFactorTypeId": {
+                    "type": "integer",
+                    "description": "id of FactorType entity"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "id of experiment entity"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                },
+                "tier": {
+                    "type": "integer",
+                    "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10"
+                }
+            }
+        },
+        "FactorType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for factor type"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "name of the factor type"
+                }
+            }
+        },
+        "FactorTypePayload": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "name of the factor type"
+                }
+            }
+        },
+        "Group": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Group Id"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "Experiment Id"
+                },
+                "parentId ": {
+                    "type": "integer",
+                    "description": "parent group id of the group (optional)"
+                },
+                "refRandomizationStrategyId": {
+                    "type": "integer",
+                    "description": "Id of RandomizationStrategy "
+                },
+                "refGroupTypeId": {
+                    "type": "integer",
+                    "description": "Id of GroupType"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "GroupType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique id for group type"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "name of the group type"
+                }
+            }
+        },
+        "GroupValue": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Group Value Id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
                 },
                 "value": {
                     "type": "string",
-                    "description": "value of the factor."
+                    "description": "Value of the entity associated to the group"
                 },
-                "factorId": {
+                "groupId": {
                     "type": "integer",
-                    "description": "id of Factor entity."
+                    "description": "Group Id"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "GroupValueCompositeOperation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value of the entity associated to the group"
+                }
+            }
+        },
+        "ids": {
+            "type": "integer"
+        },
+        "Levels": {
+            "type": "string"
+        },
+        "RandomizationStrategy": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "id of the randomization strategy."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "nome of the randomization strategy."
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         },
@@ -4047,367 +4315,85 @@
                 }
             }
         },
-        "CompositeTreatmentsPayloadForPOST": {
+        "Variable": {
             "type": "object",
             "properties": {
-                "adds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CompositeTreatmentsPayloadAdd"
-                    }
+                "name": {
+                    "type": "string",
+                    "description": "name of variable"
                 },
-                "deletes": {
+                "levels": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ids"
-                    }
-                },
-                "updates": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CompositeTreatmentsPayloadUpdate"
+                        "$ref": "#/definitions/Levels"
                     }
                 }
             }
         },
-        "ids": {
-            "type": "integer"
-        },
-        "CompositeTreatmentsPayloadAdd": {
+        "VariablesRequestPayload": {
             "type": "object",
             "properties": {
-                "isControl": {
-                    "type": "string",
-                    "description": "boolean value isControl to mark treatment as control."
-                },
-                "treatmentNumber": {
+                "id": {
                     "type": "integer",
-                    "description": "number of the treatment."
+                    "description": "experimentId"
                 },
-                "notes": {
-                    "type": "string",
-                    "description": "notes related to treatment."
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "id of experiment entity."
-                },
-                "combinationElements": {
+                "independent": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "exogenous": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "dependent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DependentVariable"
                     }
                 }
             }
         },
-        "CompositeTreatmentsPayloadUpdate": {
+        "VariablesResponse": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of treatment id to update."
-                },
-                "isControl": {
-                    "type": "string",
-                    "description": "boolean value isControl to mark treatment as control."
-                },
-                "treatmentNumber": {
-                    "type": "integer",
-                    "description": "number of the treatment."
-                },
-                "notes": {
-                    "type": "string",
-                    "description": "notes related to treatment."
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "id of experiment entity."
-                },
-                "combinationElements": {
+                "independent": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "exogenous": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Variable"
+                    }
+                },
+                "dependent": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DependentVariable"
                     }
                 }
             }
         },
-        "CompositeTreatmentsCombinationElement": {
+        "UpdateResponse": {
             "type": "object",
             "properties": {
+                "status": {
+                    "type": "integer",
+                    "description": "http status code, 200 for success and 4.x.x for errors."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Resource updated or error description in case of error."
+                },
                 "id": {
                     "type": "integer",
-                    "description": "id of combination element if updating existing else empty."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of the combinationElement."
-                },
-                "value": {
-                    "type": "string",
-                    "description": "value of the combinationElement."
-                }
-            }
-        },
-        "CombinationElementPayloadForPOST": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "name of the combinationElement."
-                },
-                "value": {
-                    "type": "string",
-                    "description": "value of the combinationElement."
-                },
-                "treatmentId": {
-                    "type": "integer",
-                    "description": "id of treatment entity."
-                }
-            }
-        },
-        "CombinationElementPayloadForPUT": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of combinationElement to update."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of the combinationElement."
-                },
-                "value": {
-                    "type": "string",
-                    "description": "value of the combinationElement."
-                },
-                "treatmentId": {
-                    "type": "integer",
-                    "description": "id of treatment entity."
-                }
-            }
-        },
-        "ExperimentalUnitPayloadForPOST": {
-            "type": "object",
-            "properties": {
-                "groupId": {
-                    "type": "integer",
-                    "description": "experimental unit's group id"
-                },
-                "treatmentId": {
-                    "type": "integer",
-                    "description": "id of treatmentId entity."
-                },
-                "rep": {
-                    "type": "integer",
-                    "description": "rep number of experimental unit."
-                }
-            }
-        },
-        "ExperimentalUnitPayloadForPUT": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of experimental unit to update."
-                },
-                "groupId": {
-                    "type": "integer",
-                    "description": "experimental unit's group id"
-                },
-                "treatmentId": {
-                    "type": "integer",
-                    "description": "id of treatmentId entity."
-                },
-                "rep": {
-                    "type": "integer",
-                    "description": "rep number of experimental unit."
-                }
-            }
-        },
-        "ExperimentalUnitCompositeOperation": {
-            "type": "object",
-            "properties": {
-                "treatmentId": {
-                    "type": "integer",
-                    "description": "id of treatmentId entity."
-                },
-                "rep": {
-                    "type": "integer",
-                    "description": "rep number of experimental unit."
-                }
-            }
-        },
-        "ExperimentSummary": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of the experiment."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name of the experiment."
-                },
-                "numberOfVariables": {
-                    "type": "integer",
-                    "description": "the number of variables associated with the experiment."
-                },
-                "numberOfTreatments": {
-                    "type": "integer",
-                    "description": "the number of treatments associated with the experiment."
-                },
-                "numberOfExperimentalUnits": {
-                    "type": "integer",
-                    "description": "the number of experimental units associated with the experiment."
-                }
-            }
-        },
-        "RandomizationStrategy": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "id of the randomization strategy."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "nome of the randomization strategy."
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                }
-            }
-        },
-        "Group": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "Group Id"
-                },
-                "experimentId": {
-                    "type": "integer",
-                    "description": "Experiment Id"
-                },
-                "parentId ": {
-                    "type": "integer",
-                    "description": "parent group id of the group (optional)"
-                },
-                "refRandomizationStrategyId": {
-                    "type": "integer",
-                    "description": "Id of RandomizationStrategy "
-                },
-                "refGroupTypeId": {
-                    "type": "integer",
-                    "description": "Id of GroupType"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                }
-            }
-        },
-        "GroupValue": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "Group Value Id"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "Name of the entity the group is associated to"
-                },
-                "value": {
-                    "type": "string",
-                    "description": "Value of the entity associated to the group"
-                },
-                "groupId": {
-                    "type": "integer",
-                    "description": "Group Id"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                }
-            }
-        },
-        "GroupValueCompositeOperation": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name of the entity the group is associated to"
-                },
-                "value": {
-                    "type": "string",
-                    "description": "Value of the entity associated to the group"
-                }
-            }
-        },
-        "UnitType": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "Unit Type Id"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "Name of the entity the group is associated to"
-                },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
+                    "description": "id of updated resource or black in case of error."
                 }
             }
         },
@@ -4535,20 +4521,35 @@
                 }
             }
         },
-        "Error": {
+        "UnitType": {
             "type": "object",
             "properties": {
-                "status": {
+                "id": {
                     "type": "integer",
-                    "format": "int32"
+                    "description": "Unit Type Id"
                 },
-                "code": {
-                    "type": "string"
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
                 },
-                "errorMessage": {
-                    "type": "string"
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
                 }
             }
         }
+
     }
 }

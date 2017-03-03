@@ -1805,7 +1805,7 @@
                 }
             }
         },
-        "/group-types":{
+        "/group-types": {
             "get": {
                 "summary": "Get all group types",
                 "description": "Returns all group types that can be used\n",
@@ -1837,7 +1837,7 @@
                 }
             }
         },
-        "/group-types/{id}":{
+        "/group-types/{id}": {
             "get": {
                 "summary": "Get one group type entity",
                 "description": "Returns a single group type entity\n",
@@ -2938,6 +2938,385 @@
                     }
                 }
             }
+        },
+        "/unit-types/": {
+            "get": {
+                "summary": "Get all unit type entities",
+                "description": "Returns all unit types\n",
+                "tags": [
+                    "Unit Type"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Type Entities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitType"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/unit-types/{id}": {
+            "get": {
+                "summary": "Get a unit type entity",
+                "description": "Returns a unit type\n",
+                "tags": [
+                    "Unit Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Type Entity",
+                        "schema": {
+                            "$ref": "#/definitions/UnitType"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Unit Type Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/unit-specifications/": {
+            "get": {
+                "summary": "Get all unit specification entities",
+                "description": "Returns all unit specifications\n",
+                "tags": [
+                    "Unit Specification"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Entities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitSpecification"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/unit-specifications/{id}": {
+            "get": {
+                "summary": "Get a unit specification entity",
+                "description": "Returns a unit specification\n",
+                "tags": [
+                    "Unit Specification"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Entity",
+                        "schema": {
+                            "$ref": "#/definitions/UnitSpecification"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Unit Specification Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/unit-specification-details/{id}": {
+            "get": {
+                "summary": "Get a unit specification detail entity",
+                "description": "Returns a unit specification detail\n",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Detail Entity",
+                        "schema": {
+                            "$ref": "#/definitions/UnitSpecificationDetail"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Unit Specification Detail Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/experiments/{id}/unit-specification-details/": {
+            "get": {
+                "summary": "Get all unit specification details for an experiment",
+                "description": "Returns all unit specification details for an experiment\n",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Detail Entities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitSpecificationDetail"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "post one or more unit specification detail entities",
+                "description": "Creates/updates unit specification details for an experiment",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
+                    {
+                        "name": "Unit Specification Details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Detail operation SUCCESS"
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "updates one or more unit specification detail entities",
+                "description": "Creates/updates unit specification details for an experiment",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "type": "integer",
+                        "required": true
+                    },
+                    {
+                        "name": "Unit Specification Details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UnitSpecificationDetailPayloadForPUT"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unit Specification Detail operation SUCCESS"
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Some Unit Specification Details Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3196,8 +3575,8 @@
                     "type": "integer",
                     "description": "reference to parent Group"
                 },
-                "refRandomizationStrategyId":{
-                    "type":"integer",
+                "refRandomizationStrategyId": {
+                    "type": "integer",
                     "description": "reference to RandomizationStrategy Table"
                 },
                 "experimentId": {
@@ -3237,13 +3616,13 @@
         "CompositeGroupsAndUnitsPOST": {
             "type": "object",
             "properties": {
-                "refRandomizationStrategyId":{
-                    "type":"integer",
+                "refRandomizationStrategyId": {
+                    "type": "integer",
                     "description": "reference to RandomizationStrategy Table"
                 },
-                "refGroupTypeId":{
-                    "type" : "integer",
-                    "description" : "reference to GroupType Table"
+                "refGroupTypeId": {
+                    "type": "integer",
+                    "description": "reference to GroupType Table"
                 },
                 "groupValues": {
                     "type": "array",
@@ -3931,7 +4310,7 @@
                     "type": "integer",
                     "description": "Id of RandomizationStrategy "
                 },
-                "refGroupTypeId":{
+                "refGroupTypeId": {
                     "type": "integer",
                     "description": "Id of GroupType"
                 },
@@ -4000,6 +4379,159 @@
                 "value": {
                     "type": "string",
                     "description": "Value of the entity associated to the group"
+                }
+            }
+        },
+        "UnitType": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Unit Type Id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "UnitSpecification": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Unit Type Id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
+                },
+                "uomType": {
+                    "type": "string",
+                    "description": "Type of the unit of measure this specification uses"
+                },
+                "refUnitTypeId": {
+                    "type": "integer",
+                    "description": "Reference to Unit Type"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "UnitSpecificationDetail": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Unit Type Id"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value of the unit specification detail"
+                },
+                "uomId": {
+                    "type": "integer",
+                    "description": "Id of the Unit of Measure reference"
+                },
+                "refUnitSpecId": {
+                    "type": "integer",
+                    "description": "Reference to Unit Specification"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "Reference to Experiment"
+                },
+                "createdDate": {
+                    "type": "string",
+                    "description": "created timestamp in UTC."
+                },
+                "createdUserId": {
+                    "type": "string",
+                    "description": "created user id for audit tracking."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "description": "Modified timestamp in UTC."
+                },
+                "modifiedUserId": {
+                    "type": "string",
+                    "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "UnitSpecificationDetailPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "Value of the unit specification detail"
+                },
+                "uomId": {
+                    "type": "integer",
+                    "description": "Reference to Unit of Measure"
+                },
+                "refUnitSpecId": {
+                    "type": "integer",
+                    "description": "Reference to Unit Specification"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "Reference to Experiment"
+                }
+            }
+        },
+        "UnitSpecificationDetailPayloadForPUT": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Id of the Unit Specification Detail to update"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value of the unit specification detail"
+                },
+                "uomId": {
+                    "type": "integer",
+                    "description": "Reference to Unit of Measure"
+                },
+                "refUnitSpecId": {
+                    "type": "integer",
+                    "description": "Reference to Unit Specification"
+                },
+                "experimentId": {
+                    "type": "integer",
+                    "description": "Reference to Experiment"
                 }
             }
         },

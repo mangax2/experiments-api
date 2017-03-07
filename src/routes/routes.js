@@ -685,4 +685,12 @@ router.put('/experiments/:id/unit-specification-details/', (req, res, next)=>{
     })
 })
 
+router.post('/composites/unit-specification-details', (req, res, next) => {
+    return new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.body,req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
 module.exports = router

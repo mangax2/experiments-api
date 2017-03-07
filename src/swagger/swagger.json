@@ -258,6 +258,54 @@
                 }
             }
         },
+        "/composites/unit-specification-details": {
+            "post": {
+                "summary": "post one or more unit specification detail entities",
+                "description": "Creates/updates/deletes unit specification detail entities put into a JSON body",
+                "tags": [
+                    "Unit Specification Detail"
+                ],
+                "parameters": [
+                    {
+                        "name": "Composites Unit Specification Details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Composite-Unit Specification Details operation SUCCESS"
+                    },
+                    "400": {
+                        "description": "Invalid/Problematic Input",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Error"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/dependent-variables/{id}": {
             "get": {
                 "summary": "get one dependent variable entity",
@@ -3616,6 +3664,29 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CombinationElementResponse"
+                    }
+                }
+            }
+        },
+        "CompositeUnitSpecificationDetailPayloadForPOST": {
+            "type": "object",
+            "properties": {
+                "adds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/UnitSpecificationDetailPayloadForPOST"
+                    }
+                },
+                "deletes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ids"
+                    }
+                },
+                "updates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/UnitSpecificationDetailPayloadForPUT"
                     }
                 }
             }

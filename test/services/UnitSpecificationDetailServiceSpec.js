@@ -331,4 +331,160 @@ describe('UnitSpecificationDetailService', () => {
             })
         })
     })
+
+    describe('manageAllUnitSpecificationDetails', ()=>{
+        let deleteUnitSpecificationDetailsStub
+        let _updateUnitSpecificationDetailsStub
+        let _createUnitSpecificationDetailsStub
+
+        before(()=>{
+            deleteUnitSpecificationDetailsStub = sinon.stub(target, 'deleteUnitSpecificationDetails')
+            _updateUnitSpecificationDetailsStub = sinon.stub(target, '_updateUnitSpecificationDetails')
+            _createUnitSpecificationDetailsStub = sinon.stub(target, '_createUnitSpecificationDetails')
+        })
+
+        afterEach(() => {
+            deleteUnitSpecificationDetailsStub.reset()
+            _updateUnitSpecificationDetailsStub.reset()
+            _createUnitSpecificationDetailsStub.reset()
+        })
+
+        after(() => {
+            deleteUnitSpecificationDetailsStub.restore()
+            _updateUnitSpecificationDetailsStub.restore()
+            _createUnitSpecificationDetailsStub.restore()
+        })
+
+        it('returns a composite post response when all unit specification detail actions are successful', ()=>{
+            deleteUnitSpecificationDetailsStub.resolves({})
+            _updateUnitSpecificationDetailsStub.resolves({})
+            _createUnitSpecificationDetailsStub.resolves({})
+
+            return target.manageAllUnitSpecificationDetails({},testContext,tx).then((result)=>{
+                result.status.should.equal(200)
+                result.message.should.equal("SUCCESS")
+            })
+        })
+
+        it('throws an error when _createUnitSpecificationDetails fails', ()=>{
+            deleteUnitSpecificationDetailsStub.resolves({})
+            _updateUnitSpecificationDetailsStub.resolves({})
+            _createUnitSpecificationDetailsStub.rejects('testError')
+
+            return target.manageAllUnitSpecificationDetails({},testContext,tx).should.be.rejected.then((result)=>{
+                result.message.should.equal('testError')
+            })
+        })
+
+        it('throws an error when _updateUnitSpecificationDetails fails', ()=>{
+            deleteUnitSpecificationDetailsStub.resolves({})
+            _updateUnitSpecificationDetailsStub.rejects('testError')
+
+            return target.manageAllUnitSpecificationDetails({},testContext,tx).should.be.rejected.then((result)=>{
+                result.message.should.equal('testError')
+            })
+        })
+
+        it('throws an error when deleteUnitSpecificationDetails fails', ()=>{
+            deleteUnitSpecificationDetailsStub.rejects('testError')
+
+            return target.manageAllUnitSpecificationDetails({},testContext,tx).should.be.rejected.then((result)=>{
+                result.message.should.equal('testError')
+            })
+        })
+    })
+
+    describe("deleteUnitSpecificationDetails", ()=>{
+        it('returns an empty resolved promise if id list is undefined', ()=>{
+            return target.deleteUnitSpecificationDetails(undefined, tx).should.be.fulfilled
+        })
+
+        it('returns an empty resolved promise if id list is empty', ()=>{
+            return target.deleteUnitSpecificationDetails([], tx).should.be.fulfilled
+        })
+
+        it('throws an error when the database call fails',()=>{
+            batchRemoveStub.rejects('testError')
+
+            return target.deleteUnitSpecificationDetails([1],tx).should.be.rejected.then((error)=>{
+                error.message.should.equal("testError")
+            })
+        })
+
+        it('throws an error when the returned ids do not match the ids passed in', ()=>{
+            batchRemoveStub.resolves([1,2])
+
+            return target.deleteUnitSpecificationDetails([1,2,3],tx).should.be.rejected
+        })
+
+        it('resolves, returning the ids passed in that were deleted', ()=>{
+            batchRemoveStub.resolves([1,2])
+
+            return target.deleteUnitSpecificationDetails([1,2],tx).then((result)=>{
+                result.should.deep.equal([1,2])
+            })
+        })
+    })
+
+    describe("_updateUnitSpecificationDetails", ()=>{
+        let batchUpdateUnitSpecificationDetailsStub
+
+        before(()=>{
+            batchUpdateUnitSpecificationDetailsStub = sinon.stub(target, 'batchUpdateUnitSpecificationDetails')
+        })
+
+        afterEach(() => {
+            batchUpdateUnitSpecificationDetailsStub.reset()
+        })
+
+        after(() => {
+            batchUpdateUnitSpecificationDetailsStub.restore()
+        })
+
+        it('returns an empty resolved promise if the unit specification details is undefined',()=>{
+            return target._updateUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
+        })
+
+        it('returns an empty resolved promise if the unit specification details is an empty list',()=>{
+            return target._updateUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
+        })
+
+        it('calls batchUpdateUnitSpecificationDetails with the details object', ()=>{
+            batchUpdateUnitSpecificationDetailsStub.resolves()
+            return target._updateUnitSpecificationDetails([{}], testContext, tx).then(()=>{
+                sinon.assert.calledWith(batchUpdateUnitSpecificationDetailsStub, [{}])
+            })
+        })
+    })
+
+    describe("_createUnitSpecificationDetails", ()=>{
+        let batchCreateUnitSpecificationDetailsStub
+
+        before(()=>{
+            batchCreateUnitSpecificationDetailsStub = sinon.stub(target, 'batchCreateUnitSpecificationDetails')
+        })
+
+        afterEach(() => {
+            batchCreateUnitSpecificationDetailsStub.reset()
+        })
+
+        after(() => {
+            batchCreateUnitSpecificationDetailsStub.restore()
+        })
+
+        it('returns an empty resolved promise if the unit specification details is undefined',()=>{
+            return target._createUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
+        })
+
+        it('returns an empty resolved promise if the unit specification details is an empty list',()=>{
+            return target._createUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
+        })
+
+        it('calls batchUpdateUnitSpecificationDetails with the details object', ()=>{
+            batchCreateUnitSpecificationDetailsStub.resolves()
+            return target._createUnitSpecificationDetails([{}], testContext, tx).then(()=>{
+                sinon.assert.calledWith(batchCreateUnitSpecificationDetailsStub, [{}])
+            })
+        })
+    })
 })

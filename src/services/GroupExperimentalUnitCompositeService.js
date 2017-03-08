@@ -114,14 +114,14 @@ class GroupExperimentalUnitCompositeService {
             const groupIds = _.map(groups, "id")
             if (groupIds.length > 0) {
                 return Promise.all([
-                    this._groupValueService.batchGetGroupValuesByGroupIds(groupIds, tx),
-                    this._experimentalUnitService.batchGetExperimentalUnitsByGroupIds(groupIds, tx)]
+                    this._groupValueService.batchGetGroupValuesByGroupIdsNoValidate(groupIds, tx),
+                    this._experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate(groupIds, tx)]
                 ).then((groupValuesAndUnits) => {
-                    const groupValues = _.compact(_.flatMap(groupValuesAndUnits[0]))
-                    const units = _.compact(_.flatMap(groupValuesAndUnits[1]))
+                    const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[0], (d) => d.group_id)
+                    const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[1], (u) => u.group_id)
                     return _.map(groups, (group) => {
-                        group["groupValues"] = _.filter(groupValues, (g) => g["group_id"] == group.id)
-                        group["units"] = _.filter(units, (u) => u["group_id"] == group.id)
+                        group['groupValues'] = groupValuesGroupByGroupId[group.id]
+                        group['units'] =  unitsGroupByGroupId[group.id]
                         return group
                     })
                 })

@@ -36,7 +36,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(()=>{
 
     const compression = require('compression')
     app.use(compression())
-    app.use(bodyParser.json({limit:1024*1024*20}))
+    app.use(bodyParser.json({limit:1024*1024*40}))
 
     app.use(appBaseUrl, require('./routes/routes'))
 
@@ -77,8 +77,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(()=>{
         return logger.info('Listening at ' + url)
     })
 
-    module.exports = app
+    server.timeout = 300000
 
+    module.exports = app
 
 }).catch((err)=>{
     console.error(err)

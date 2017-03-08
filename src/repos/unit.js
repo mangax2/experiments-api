@@ -20,7 +20,7 @@ module.exports = (rep, pgp) => {
             return tx.any("SELECT * FROM unit WHERE treatment_id IN ($1:csv)", [treatmentIds])
         },
         batchFindAllByGroupIds: (groupIds, tx = rep) => {
-            return tx.any("SELECT * FROM unit WHERE group_id IN ($1:csv)", [groupIds])
+            return tx.any("SELECT id, group_id, treatment_id, rep FROM unit WHERE group_id IN ($1:csv)", [groupIds])
         },
         batchCreate: (units, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
@@ -62,11 +62,11 @@ module.exports = (rep, pgp) => {
         },
 
         batchRemove: (ids, tx = rep) => {
-            return tx.batch(
-                ids.map(
-                    id => tx.oneOrNone("DELETE FROM unit WHERE id = $1 RETURNING id", id)
-                )
-            )
+            if (ids == null || ids == undefined || ids.length == 0) {
+                return Promise.resolve([])
+            } else {
+                return tx.any("DELETE FROM unit WHERE id IN ($1:csv) RETURNING id", [ids])
+            }
         },
 
         batchFind: (ids, tx = rep) => {

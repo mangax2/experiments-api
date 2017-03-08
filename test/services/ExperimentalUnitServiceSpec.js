@@ -490,5 +490,21 @@ describe('ExperimentalUnitService', () => {
 
     })
 
+    describe("batchGetExperimentalUnitsByGroupIdsNoValidate Specs", () => {
+
+        it("batchGetExperimentalUnitsByGroupIdsNoValidate:Success", () => {
+            batchFindAllByGroupIdsStub.resolves()
+            const groupIds = [1]
+            return target.batchGetExperimentalUnitsByGroupIdsNoValidate(groupIds, tx).then(() => {
+                sinon.assert.calledWithExactly(
+                    batchFindAllByGroupIdsStub,
+                    [1],
+                    sinon.match.same(tx)
+                )
+            })
+        })
+
+    })
+
 
 })

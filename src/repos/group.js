@@ -66,7 +66,7 @@ module.exports = (rep, pgp) => {
         },
 
         removeByExperimentId: (experimentId, tx = rep) => {
-            //Delete only top most groups and DELETE CASCAD on parent_id will delete all child groups.
+            //Delete only top most groups and DELETE CASCADE on parent_id will delete all child groups.
             return tx.any('DELETE FROM "group" WHERE experiment_id = $1 and parent_id IS NULL RETURNING id', experimentId)
         }
 

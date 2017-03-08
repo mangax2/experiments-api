@@ -64,6 +64,46 @@ class UnitSpecificationDetailService {
             })
         })
     }
+
+    @Transactional("manageAllUnitSpecificationDetails")
+    manageAllUnitSpecificationDetails(unitSpecificationDetailsObj, context, tx) {
+        return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, tx).then(() => {
+            return this._updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx).then(() => {
+                return this._createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx).then(() => {
+                    return AppUtil.createCompositePostResponse()
+                })
+            })
+        })
+    }
+
+    @Transactional("deleteUnitSpecificationDetails")
+    deleteUnitSpecificationDetails(unitSpecificationDetailIdsToDelete, tx) {
+        if (_.isUndefined(unitSpecificationDetailIdsToDelete) || unitSpecificationDetailIdsToDelete.length == 0) {
+            return Promise.resolve()
+        }
+        return db.unitSpecificationDetail.batchRemove(unitSpecificationDetailIdsToDelete, tx).then((data) => {
+            if (_.filter(data, (element) => element != null).length != unitSpecificationDetailIdsToDelete.length) {
+                logger.error('Not all unit specification detail ids requested for delete were found')
+                throw AppError.notFound('Not all unit specification detail ids requested for delete were found')
+            } else {
+                return data
+            }
+        })
+    }
+
+    _updateUnitSpecificationDetails(unitSpecificationDetails, tx){
+        if(_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length == 0){
+            return Promise.resolve()
+        }
+        return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, tx)
+    }
+
+    _createUnitSpecificationDetails(unitSpecificationDetails, tx){
+        if(_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length == 0){
+            return Promise.resolve()
+        }
+        return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, tx)
+    }
 }
 
 module.exports = UnitSpecificationDetailService

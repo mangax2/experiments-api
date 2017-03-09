@@ -2,8 +2,7 @@ import AppError from "../services/utility/AppError"
 import _ from "lodash"
 
 function requestContextMiddlewareFunction(req, res, next) {
-    const whitelistedUrls = ["/experiments-api/api-docs", "/experiments-api/metrics"]
-    console.info(req)
+    const whitelistedUrls = ["/experiments-api/api-docs", "/metrics"]
     if (whitelistedUrls.includes(req.url)) {
         next()
     } else {

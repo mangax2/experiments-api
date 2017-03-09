@@ -51,6 +51,11 @@ class ExperimentalUnitService {
     }
 
 
+    @Transactional('batchGetExperimentalUnitByGroupIdsNoValidate')
+    batchGetExperimentalUnitsByGroupIdsNoValidate(ids, tx) {
+        return db.unit.batchFindAllByGroupIds(ids, tx)
+    }
+
 
     @Transactional('getExperimentalUnitById')
     getExperimentalUnitById(id, tx) {

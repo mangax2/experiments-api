@@ -3493,32 +3493,16 @@
                     "type": "integer",
                     "description": "id of experimentId entity"
                 },
-                "createdDate": {
-                    "type": "string",
-                    "description": "created timestamp in UTC."
-                },
-                "createdUserId": {
-                    "type": "string",
-                    "description": "created user id for audit tracking."
-                },
-                "modifiedDate": {
-                    "type": "string",
-                    "description": "Modified timestamp in UTC."
-                },
-                "modifiedUserId": {
-                    "type": "string",
-                    "description": "modified user id for audit tracking."
-                },
                 "groupValues": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/GroupValue"
+                        "$ref": "#/definitions/GroupValueResponseWithoutAuditKeys"
                     }
                 },
                 "units": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ExperimentalUnitResponse"
+                        "$ref": "#/definitions/ExperimentalUnitResponseWithoutAuditKeys"
                     }
                 }
             }
@@ -3899,6 +3883,27 @@
                 }
             }
         },
+        "ExperimentalUnitResponseWithoutAuditKeys": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "unique id for  entity"
+                },
+                "groupId": {
+                    "type": "integer",
+                    "description": "experimental unit's group id."
+                },
+                "treatmentId": {
+                    "type": "integer",
+                    "description": "id of treatment entity"
+                },
+                "rep": {
+                    "type": "integer",
+                    "description": "rep number of experimental unit"
+                }
+            }
+        },
         "ExperimentDesign": {
             "type": "object",
             "properties": {
@@ -4005,6 +4010,14 @@
                 "numberOfExperimentalUnits": {
                     "type": "integer",
                     "description": "the number of experimental units associated with the experiment."
+                },
+                "numberOfUnitSpecs": {
+                    "type": "integer",
+                    "description": "the number of unit specs associated with the experiment."
+                },
+                "nameOfUnitType": {
+                    "type": "string",
+                    "description": "Name of experimental unit associated with the experiment."
                 }
             }
         },
@@ -4264,6 +4277,27 @@
                 "modifiedUserId": {
                     "type": "string",
                     "description": "modified user id for audit tracking."
+                }
+            }
+        },
+        "GroupValueResponseWithoutAuditKeys": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Group Value Id"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the entity the group is associated to"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value of the entity associated to the group"
+                },
+                "groupId": {
+                    "type": "integer",
+                    "description": "Group Id"
                 }
             }
         },

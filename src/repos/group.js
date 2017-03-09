@@ -13,7 +13,7 @@ module.exports = (rep, pgp) => {
         },
 
         findAllByExperimentId: (experimentId, tx = rep) => {
-            return tx.any('SELECT * FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
+            return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
         },
 
         batchCreate: (groups, context, tx = rep) => {
@@ -66,7 +66,8 @@ module.exports = (rep, pgp) => {
         },
 
         removeByExperimentId: (experimentId, tx = rep) => {
-            return tx.any('DELETE FROM "group" WHERE experiment_id = $1 RETURNING id', experimentId)
+            //Delete only top most groups and DELETE CASCADE on parent_id will delete all child groups.
+            return tx.any('DELETE FROM "group" WHERE experiment_id = $1 and parent_id IS NULL RETURNING id', experimentId)
         }
 
     }

@@ -3,6 +3,7 @@ import _ from "lodash"
 
 function requestContextMiddlewareFunction(req, res, next) {
     const whitelistedUrls = ["/experiments-api/api-docs", "/experiments-api/metrics"]
+    console.info(req)
     if (whitelistedUrls.includes(req.url)) {
         next()
     } else {

@@ -1,9 +1,9 @@
 module.exports = (cfDeploy) ->
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
-  diskLimit: "512M"
+  diskLimit: "1G"
   instances: 2
-  memoryLimit: "512M"
+  memoryLimit: "1G"
 #  smokeTest: 'nonProd'
   environment:
     ENV: process.env.ENV

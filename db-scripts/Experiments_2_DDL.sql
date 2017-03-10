@@ -163,7 +163,7 @@ CREATE OR REPLACE VIEW public.experiment_summary AS
      LEFT JOIN unit_type_name utn ON utn.experiment_id = e.id;
 
 
-CREATE INDEX "group_experiment_id" ON public.unit(experiment_id);
+CREATE INDEX "group_experiment_id" ON public.group(experiment_id);
 CREATE INDEX "unit_group_id" ON public.unit(group_id);
 
 

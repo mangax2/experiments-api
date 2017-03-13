@@ -167,3 +167,9 @@ CREATE INDEX "group_experiment_id" ON public.group(experiment_id);
 CREATE INDEX "unit_group_id" ON public.unit(group_id);
 
 
+
+--db user grants
+
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO <APP_USER>;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO <APP_USER>;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO <RO_USER>;

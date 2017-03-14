@@ -45,6 +45,7 @@ class BaseValidator {
         })
     }
 
+
     preValidate(targetObject) {
         return Promise.resolve()
     }

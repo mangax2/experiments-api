@@ -21,6 +21,7 @@ import unit from '../repos/unit'
 import unitSpecification from '../repos/unitSpecification'
 import unitSpecificationDetail from '../repos/unitSpecificationDetail'
 import unitType from '../repos/unitType'
+import tag from '../repos/tag'
 
 // pg-promise initialization options:
 const options = {
@@ -43,6 +44,7 @@ const options = {
         obj.unitSpecification = new (unitSpecification) (obj, pgp)
         obj.unitSpecificationDetail = new (unitSpecificationDetail) (obj, pgp)
         obj.unitType = new (unitType) (obj, pgp)
+        obj.tag = new (tag) (obj, pgp)
     }
 }
 

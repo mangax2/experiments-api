@@ -21,6 +21,7 @@ import GroupExperimentalUnitCompositeService from '../services/GroupExperimental
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
+import TagService from '../services/TagService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -381,6 +382,48 @@ router.delete('/treatments/:id', (req, res, next) => {
     })
 })
 
+
+
+router.post('/tags', (req, res, next) => {
+    return new TagService().batchCreateTags(req.body, req.context).then((id) => {
+        return res.json(id)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.put('/tags', (req, res, next) => {
+    return new TagService().batchUpdateTags(req.body, req.context).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+
+router.get('/experiments/:id/tags', (req, res, next)=> {
+    return new TagService().getTagsByExperimentId(req.params.id).then((treatments)=> {
+        return res.json(treatments)
+    }).catch((err)=> {
+        return next(err)
+    })
+})
+
+router.get('/tags/:id', (req, res, next) => {
+    return new TagService().getTagById(req.params.id).then((treatment) => {
+        return res.json(treatment)
+    }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.delete('/tags/:id', (req, res, next) => {
+    return new TagService().deleteTag(req.params.id).then((value) => {
+        return res.json(value)
+    }).catch((err) => {
+        return next(err)
+    })
+})
 
 
 router.post('/combination-elements', (req, res, next) => {

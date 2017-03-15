@@ -18,8 +18,10 @@ module.exports = (rep, pgp) => {
         findByExperimentId: (experimentId) => {
             return rep.any("SELECT * FROM tag where experiment_id=$1", experimentId)
         },
-        findExperimentIdsByTag:(tag,tx=rep) =>{
-            return tx.any("SELECT experiment_id from tag where name=$1 and value = $2",[tag.name,tag.value])
+        findExperimentIdsByTag:(tag) =>{
+            const tagName = tag.tagName?tag.tagName.toLowerCase():tag.tagName
+            const tagValue = tag.tagValue?tag.tagValue.toLowerCase():tag.tagValue
+            return rep.any("SELECT experiment_id from tag where lower(name)=$1 and lower(value) = $2",[tagName,tagValue])
         },
 
         batchCreate: (tags, context, t = rep) => {

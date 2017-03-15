@@ -32,12 +32,6 @@ class TagService {
         })
     }
 
-    @Transactional('getExperimentIdsByTag')
-    getExperimentIdsByTag(tag,tx) {
-            return db.tag.findExperimentIdsByTag(tag,tx)
-
-    }
-
 
     @Transactional('getTagById')
     getTagById(id, tx) {
@@ -51,16 +45,9 @@ class TagService {
         })
     }
 
-    @Transactional('getTagById')
+    @Transactional('batchGetTagByIds')
     batchGetTagByIds(ids, tx) {
-        return db.tag.batchFind(ids, tx).then((data) => {
-            if (_.filter(data, (element) => element != null).length != ids.length) {
-                logger.error('Tag not found for all requested ids.')
-                throw AppError.notFound('Tag not found for all requested ids.')
-            } else {
-                return data
-            }
-        })
+        return db.tag.batchFind(ids, tx)
     }
 
     @Transactional('batchUpdateTags')
@@ -86,14 +73,7 @@ class TagService {
 
     @Transactional('batchDeleteTags')
     batchDeleteTags(ids, tx) {
-        return db.tag.batchRemove(ids, tx).then((data) => {
-            if (_.filter(data, (element) => element != null).length != ids.length) {
-                logger.error('Not all tags requested for delete were found')
-                throw AppError.notFound('Not all tags requested for delete were found')
-            } else {
-                return data
-            }
-        })
+        return db.tag.batchRemove(ids, tx)
     }
 
     @Transactional('deleteTagsForExperimentId')

@@ -249,20 +249,6 @@ describe('TagService Specs', () => {
             })
         })
 
-        it('returns rejected promise when data count does not match id count', () => {
-            batchFindStub.resolves({}, null, {})
-            notFoundStub.returns(testError)
-
-            return target.batchGetTagByIds([1,2,3], tx).should.be.rejected.then((err) => {
-                err.should.equal(testError)
-                sinon.assert.calledWith(
-                    batchFindStub,
-                    [1,2,3],
-                    sinon.match.same(tx))
-                sinon.assert.calledWith(notFoundStub, 'Tag not found for all requested ids.')
-            })
-        })
-
         it('returns resolved promise when data found for all ids', () => {
             const findResult = [{}, {}, {}]
             batchFindStub.resolves(findResult)
@@ -399,26 +385,6 @@ describe('TagService Specs', () => {
                     batchRemoveStub,
                     [1],
                     sinon.match.same(tx)
-                )
-            })
-        })
-
-        it('returns rejected promise when found count not equal to id count', () => {
-            batchRemoveStub.resolves([{}, null, {}])
-            notFoundStub.returns(testError)
-
-            return target.batchDeleteTags([1,2,3], tx).should.be.rejected.then((err) => {
-                err.should.equal(testError)
-                sinon.assert.calledOnce(batchRemoveStub)
-                sinon.assert.calledWithExactly(
-                    batchRemoveStub,
-                    [1,2,3],
-                    sinon.match.same(tx)
-                )
-                sinon.assert.calledOnce(notFoundStub)
-                sinon.assert.calledWithExactly(
-                    notFoundStub,
-                    'Not all tags requested for delete were found'
                 )
             })
         })

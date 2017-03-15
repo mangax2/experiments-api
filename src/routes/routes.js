@@ -402,16 +402,16 @@ router.put('/tags', (req, res, next) => {
 
 
 router.get('/experiments/:id/tags', (req, res, next)=> {
-    return new TagService().getTagsByExperimentId(req.params.id).then((treatments)=> {
-        return res.json(treatments)
+    return new TagService().getTagsByExperimentId(req.params.id).then((tags)=> {
+        return res.json(tags)
     }).catch((err)=> {
         return next(err)
     })
 })
 
 router.get('/tags/:id', (req, res, next) => {
-    return new TagService().getTagById(req.params.id).then((treatment) => {
-        return res.json(treatment)
+    return new TagService().getTagById(req.params.id).then((tag) => {
+        return res.json(tag)
     }).catch((err) => {
         return next(err)
     })

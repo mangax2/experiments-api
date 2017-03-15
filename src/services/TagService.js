@@ -32,6 +32,13 @@ class TagService {
         })
     }
 
+    @Transactional('getExperimentIdsByTag')
+    getExperimentIdsByTag(tag,tx) {
+            return db.tag.findExperimentIdsByTag(tag,tx)
+
+    }
+
+
     @Transactional('getTagById')
     getTagById(id, tx) {
         return db.tag.find(id, tx).then((data) => {

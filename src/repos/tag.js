@@ -18,6 +18,9 @@ module.exports = (rep, pgp) => {
         findByExperimentId: (experimentId) => {
             return rep.any("SELECT * FROM tag where experiment_id=$1", experimentId)
         },
+        findExperimentIdsByTag:(tag,tx=rep) =>{
+            return tx.any("SELECT experiment_id from tag where name=$1 and value = $2",[tag.name,tag.value])
+        },
 
         batchCreate: (tags, context, t = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
@@ -43,7 +46,7 @@ module.exports = (rep, pgp) => {
             if (ids == null || ids == undefined || ids.length == 0) {
                 return Promise.resolve([])
             } else {
-                return tx.any("DELETE FROM treatment WHERE id IN ($1:csv) RETURNING id", [ids])
+                return tx.any("DELETE FROM tag WHERE id IN ($1:csv) RETURNING id", [ids])
             }
         },
         batchUpdate: (tags, context, tx = rep) => {

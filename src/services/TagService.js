@@ -1,18 +1,15 @@
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
-import ExperimentsService from './ExperimentsService'
 import TagValidator from '../validations/TagValidator'
 import Transactional from '../decorators/transactional'
 import log4js from "log4js"
-import _ from 'lodash'
 
 const logger = log4js.getLogger('TagService')
 class TagService {
 
     constructor() {
         this._validator = new TagValidator()
-        this._experimentService = new ExperimentsService()
     }
 
     @Transactional('batchCreateTags')
@@ -27,9 +24,7 @@ class TagService {
 
     @Transactional('getTagsByExperimentId')
     getTagsByExperimentId(id, tx) {
-        return this._experimentService.getExperimentById(id, tx).then(()=> {
-            return db.tag.findByExperimentId(id, tx)
-        })
+        return db.tag.findByExperimentId(id, tx)
     }
 
 
@@ -78,9 +73,7 @@ class TagService {
 
     @Transactional('deleteTagsForExperimentId')
     deleteTagsForExperimentId(id, tx) {
-        return this._experimentService.getExperimentById(id, tx).then(() => {
-            return db.tag.removeByExperimentId(id, tx)
-        })
+        return db.tag.removeByExperimentId(id, tx)
     }
 
 }

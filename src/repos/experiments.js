@@ -39,8 +39,8 @@ module.exports = (rep, pgp) => {
             )
         },
 
-        update: (id, experimentObj, context) => {
-            return rep.oneOrNone("UPDATE experiment SET (name, description, ref_experiment_design_id,status,"+
+        update: (id, experimentObj, context, tx = rep) => {
+            return tx.oneOrNone("UPDATE experiment SET (name, description, ref_experiment_design_id,status,"+
                 "modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id=$6 RETURNING *",[experimentObj.name,experimentObj.description, experimentObj.refExperimentDesignId, experimentObj.status, context.userId,id])
         },
 

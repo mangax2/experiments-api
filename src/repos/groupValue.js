@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 module.exports = (rep, pgp) => {
     return {
         repository: () => {

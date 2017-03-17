@@ -15,7 +15,6 @@ describe('TagService Specs', () => {
     const testContext = {}
     const tx = {tx: {}}
 
-    let getExperimentByIdStub
     let createPostResponseStub
     let createPutResponseStub
     let notFoundStub
@@ -32,7 +31,6 @@ describe('TagService Specs', () => {
     before(() => {
         target = new TagService()
 
-        getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
         createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
         createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
         notFoundStub = sinon.stub(AppError, 'notFound')
@@ -48,7 +46,6 @@ describe('TagService Specs', () => {
     })
 
     afterEach(() => {
-        getExperimentByIdStub.reset()
         createPostResponseStub.reset()
         createPutResponseStub.reset()
         notFoundStub.reset()
@@ -64,7 +61,6 @@ describe('TagService Specs', () => {
     })
 
     after(() => {
-        getExperimentByIdStub.restore()
         createPostResponseStub.restore()
         createPutResponseStub.restore()
         notFoundStub.restore()
@@ -131,29 +127,11 @@ describe('TagService Specs', () => {
     })
 
     describe('getTagsByExperimentId', () => {
-        it('returns rejected promise when getExperimentById fails', () => {
-            getExperimentByIdStub.rejects(testError)
-
-            return target.getTagsByExperimentId(7, tx).should.be.rejected.then((err) => {
-                err.should.equal(testError)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
-                sinon.assert.notCalled(findByExperimentIdStub)
-            })
-        })
-
         it('returns rejected promise when findByExperimentId fails', () => {
-            getExperimentByIdStub.resolves()
             findByExperimentIdStub.rejects(testError)
 
             return target.getTagsByExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
                 sinon.assert.calledWith(
                     findByExperimentIdStub,
                     7,
@@ -162,15 +140,10 @@ describe('TagService Specs', () => {
         })
 
         it('returns resolved promise from getByExperimentId method upon success', () => {
-            getExperimentByIdStub.resolves()
             findByExperimentIdStub.resolves(testData)
 
             return target.getTagsByExperimentId(7, tx).then((data) => {
                 data.should.equal(testData)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
                 sinon.assert.calledWith(
                     findByExperimentIdStub,
                     7,
@@ -408,29 +381,11 @@ describe('TagService Specs', () => {
     })
 
     describe('deleteTagsForExperimentId', () => {
-        it('returns rejected promise when getExperimentById fails', () => {
-            getExperimentByIdStub.rejects(testError)
-
-            return target.deleteTagsForExperimentId(7, tx).should.be.rejected.then((err) => {
-                err.should.equal(testError)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
-                sinon.assert.notCalled(removeByExperimentIdStub)
-            })
-        })
-
         it('returns rejected promise when removeByExperimentId fails', () => {
-            getExperimentByIdStub.resolves()
             removeByExperimentIdStub.rejects(testError)
 
             return target.deleteTagsForExperimentId(7, tx).should.be.rejected.then((err) => {
                 err.should.equal(testError)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
                 sinon.assert.calledWith(
                     removeByExperimentIdStub,
                     7,
@@ -439,15 +394,10 @@ describe('TagService Specs', () => {
         })
 
         it('returns resolved promise from removeByExperimentId method upon success', () => {
-            getExperimentByIdStub.resolves()
             removeByExperimentIdStub.resolves(testData)
 
             return target.deleteTagsForExperimentId(7, tx).then((data) => {
                 data.should.equal(testData)
-                sinon.assert.calledWith(
-                    getExperimentByIdStub,
-                    7,
-                    sinon.match.same(tx))
                 sinon.assert.calledWith(
                     removeByExperimentIdStub,
                     7,

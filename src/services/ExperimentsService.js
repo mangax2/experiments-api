@@ -4,8 +4,8 @@ import AppError from "./utility/AppError"
 import ExperimentsValidator from "../validations/ExperimentsValidator"
 import TagService from "./TagService"
 import log4js from "log4js"
+import _ from "lodash"
 import Transactional from '../decorators/transactional'
-import _ from 'lodash'
 
 const logger = log4js.getLogger('ExperimentsService')
 
@@ -22,8 +22,8 @@ class ExperimentsService {
             return db.experiments.batchCreate(experiments, context, tx).then((data) => {
                 const experimentIds = _.map(data, (d) => d.id)
                 const tags = this._assignExperimentIdToTags(experimentIds, experiments)
-                if (tags && tags.length > 0) {
-                    return this._tagService.batchCreateTags(tags, context, tx).then(() => {
+                if(tags && tags.length > 0){
+                    return this._tagService.batchCreateTags(tags, context, tx).then(()=>{
                         return AppUtil.createPostResponse(data)
                     })
                 }
@@ -106,9 +106,11 @@ class ExperimentsService {
     _assignExperimentIdToTags(experimentIds, experiments) {
         return _.compact(_.flatMap(experimentIds, (id, index) => {
             const tags = experiments[index].tags
-            if (tags && tags.length > 0) {
-                _.forEach(tags, function (tag) {
+            if(tags && tags.length > 0){
+                _.forEach(tags, function(tag) {
                     tag.experimentId = id
+                    tag.name = tag.name.toLowerCase()
+                    tag.value = tag.value.toLowerCase()
                 })
             }
             return experiments[index].tags

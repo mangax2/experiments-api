@@ -24,7 +24,7 @@ class ExperimentsValidator extends SchemaValidator {
 
     getSchema(operationName) {
         switch (operationName) {
-            case 'POST': return ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS
+            case 'POST':
             case 'PUT': return ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS
             case 'FILTER': return ExperimentsValidator.FILTER_SCHEMA_ELEMENTS
         }

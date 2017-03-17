@@ -99,6 +99,10 @@ class ExperimentsService {
         })
     }
 
+    _getAllExperiments() {
+        return db.experiments.all()
+    }
+
     _assignExperimentIdToTags(experimentIds, experiments) {
         return _.compact(_.flatMap(experimentIds, (id, index) => {
             const tags = experiments[index].tags
@@ -114,10 +118,6 @@ class ExperimentsService {
     _isFilterRequest(queryString) {
         const allowedFilters = ['tags.name', 'tags.value']
         return !_.isEmpty(queryString) && _.intersection(Object.keys(queryString), allowedFilters).length > 0
-    }
-
-    _getAllExperiments() {
-        return db.experiments.all()
     }
 
     _toLowerCaseArray(queryStringValue) {

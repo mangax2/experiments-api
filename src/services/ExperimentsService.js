@@ -91,7 +91,11 @@ class ExperimentsService {
         return _.compact(_.flatMap(experimentIds, (id, index)=>{
             const tags = experiments[index].tags
             if(tags && tags.length > 0){
-                _.forEach(tags, function(tag){tag.experimentId = id})
+                _.forEach(tags, function(tag) {
+                    tag.experimentId = id
+                    tag.name = tag.name.toLowerCase()
+                    tag.value = tag.value.toLowerCase()
+                })
             }
             return experiments[index].tags
         }))

@@ -245,8 +245,8 @@ describe('ExperimentsService', () => {
         })
 
         it("succeeds and creates tags for new experiments", ()=>{
-            const tagsExperimentsObj = [{tags: [{}]}]
-            const tagsObj = [{experimentId: 1}]
+            const tagsExperimentsObj = [{tags: [{name:"", value:""}]}]
+            const tagsObj = [{experimentId: 1,name:"",value:""}]
 
             batchCreateStub.resolves([{id: 1}])
             expDesignFindStub.resolves({id: 2})
@@ -267,8 +267,8 @@ describe('ExperimentsService', () => {
         })
 
         it("fails due to failure to create tags", ()=>{
-            const tagsExperimentsObj = [{tags: [{}]}]
-            const tagsObj = [{experimentId: 1}]
+            const tagsExperimentsObj = [{tags: [{name: "", value:""}]}]
+            const tagsObj = [{experimentId: 1, name:"", value:""}]
 
             batchCreateStub.resolves([{id: 1}])
             expDesignFindStub.resolves({id: 2})
@@ -397,8 +397,8 @@ describe('ExperimentsService', () => {
             updateStub.resolves({id:30})
             deleteTagsForExperimentIdStub.resolves()
             batchCreateTagsStub.rejects("error")
-            const experimentsObj = {tags:[{}]}
-            const tagsObj = [{experimentId: 30}]
+            const experimentsObj = {tags:[{name:"",value:""}]}
+            const tagsObj = [{experimentId: 30,name:"",value:""}]
 
             return experimentsService.updateExperiment(30, experimentsObj, context, tx).should.be.rejected.then((err)=>{
                 sinon.assert.calledWithExactly(deleteTagsForExperimentIdStub, 30, tx)
@@ -427,10 +427,10 @@ describe('ExperimentsService', () => {
                 'refExperimentDesignId': 2,
                 'userId': 'akuma11',
                 'status': 'ACTIVE',
-                "tags": [{}]
+                "tags": [{name:"TEST",value:"TEST"}]
             }
             const tagsObj = [
-                {experimentId: 30}
+                {experimentId: 30, name:"test", value:"test"}
             ]
             updateStub.resolves(
                 experimentResObj

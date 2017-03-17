@@ -22,7 +22,6 @@ import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 import TagService from '../services/TagService'
-import SearchService from '../services/SearchService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -30,14 +29,6 @@ const router = express.Router()
 router.get('/ping', (req, res) => {
     logger.debug('the user for /ping url is ' + req.userProfile.id)
     return res.json({message: 'Received Ping request: Experiments API !!!'})
-})
-
-router.get('/experiments/search', (req, res, next) =>{
-    return new SearchService().getExperimentIdsByTag(req.query).then((values)=>{
-        return res.json(values)
-    }).catch((err)=>{
-        return next(err)
-    })
 })
 
 
@@ -105,7 +96,7 @@ router.put('/experiments/:id', (req, res, next) => {
 })
 
 router.get('/experiments', (req, res, next) => {
-    new ExperimentsService().getAllExperiments().then((experiments)=> {
+    new ExperimentsService().getExperiments(req.query).then((experiments)=> {
         return res.json(experiments)
     }).catch((err) => {
         return next(err)

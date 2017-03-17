@@ -32,7 +32,7 @@ describe('ExperimentValidator', () => {
 
     describe('getSchema ', () => {
         it('returns schema array', () => {
-            target.getSchema().should.eql(schemaArray)
+            target.getSchema('POST').should.eql(schemaArray)
         })
     })
 

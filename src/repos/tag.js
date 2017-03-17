@@ -7,6 +7,7 @@ module.exports = (rep, pgp) => {
         find: (id, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM tag WHERE id = $1", id)
         },
+
         batchFind: (ids, tx = rep) => {
             return tx.any("SELECT * FROM tag WHERE id IN ($1:csv)", [ids])
         },
@@ -17,11 +18,6 @@ module.exports = (rep, pgp) => {
 
         findByExperimentId: (experimentId) => {
             return rep.any("SELECT * FROM tag where experiment_id=$1", experimentId)
-        },
-        findExperimentIdsByTag:(tag) =>{
-            const tagName = tag.tagName?tag.tagName.toLowerCase():tag.tagName
-            const tagValue = tag.tagValue?tag.tagValue.toLowerCase():tag.tagValue
-            return rep.any("SELECT experiment_id from tag where lower(name)=$1 and lower(value) = $2",[tagName,tagValue])
         },
 
         batchCreate: (tags, context, t = rep) => {
@@ -44,6 +40,7 @@ module.exports = (rep, pgp) => {
 
             return t.any(query)
         },
+
         batchRemove: (ids, tx = rep) => {
             if (ids == null || ids == undefined || ids.length == 0) {
                 return Promise.resolve([])
@@ -51,6 +48,7 @@ module.exports = (rep, pgp) => {
                 return tx.any("DELETE FROM tag WHERE id IN ($1:csv) RETURNING id", [ids])
             }
         },
+
         batchUpdate: (tags, context, tx = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
                 ['?id', 'name', 'value', 'experiment_id', 'modified_user_id', 'modified_date'],
@@ -70,9 +68,11 @@ module.exports = (rep, pgp) => {
 
             return tx.any(query)
         },
+
         remove: (id) => {
             return rep.oneOrNone("delete from tag where id=$1 RETURNING id", id)
         },
+
         removeByExperimentId: (tx, experimentId) => {
             return tx.any("DELETE FROM tag where experiment_id=$1 RETURNING id", experimentId)
         },

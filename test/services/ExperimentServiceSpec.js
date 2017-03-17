@@ -63,7 +63,7 @@ describe('ExperimentsService', () => {
         it('Success', ()=> {
             getStub.resolves(testResponse)
 
-            return experimentsService.getAllExperiments().then((experiments)=> {
+            return experimentsService._getAllExperiments().then((experiments)=> {
                 sinon.assert.calledOnce(getStub)
                 experiments.should.equal(testResponse)
             })
@@ -72,7 +72,7 @@ describe('ExperimentsService', () => {
         it('fails', () => {
             getStub.rejects(testError)
 
-            return experimentsService.getAllExperiments().should.be.rejected.then((err) => {
+            return experimentsService._getAllExperiments().should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(getStub)
                 err.should.equal(testError)
             })

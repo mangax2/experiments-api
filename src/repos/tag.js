@@ -71,7 +71,7 @@ module.exports = (rep, pgp) => {
         remove: (id) => {
             return rep.oneOrNone("delete from tag where id=$1 RETURNING id", id)
         },
-        removeByExperimentId: (tx, experimentId) => {
+        removeByExperimentId: (experimentId, tx) => {
             return tx.any("DELETE FROM tag where experiment_id=$1 RETURNING id", experimentId)
         },
 

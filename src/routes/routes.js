@@ -21,7 +21,6 @@ import GroupExperimentalUnitCompositeService from '../services/GroupExperimental
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
-import TagService from '../services/TagService'
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -102,7 +101,6 @@ router.get('/experiments', (req, res, next) => {
     })
 })
 
-
 router.get('/experiments/:id', (req, res, next) => {
     new ExperimentsService().getExperimentById(req.params.id).then((experiment)=> {
         return res.json(experiment)
@@ -147,7 +145,6 @@ router.get('/factor-types', (req, res, next) => {
     })
 })
 
-
 router.get('/factor-types/:id', (req, res, next) => {
     const id = req.params.id
     return new FactorTypeService().getFactorTypeById(id).then((r) => {
@@ -165,7 +162,6 @@ router.delete('/factor-types/:id', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.get('/experiments/:id/dependent-variables', (req, res, next)=> {
     const id = req.params.id
@@ -194,7 +190,6 @@ router.put('/dependent-variables', (req, res, next) => {
     })
 })
 
-
 router.get('/dependent-variables', (req, res, next) => {
     new DependentVariableService().getAllDependentVariables().then((dependentVariables)=> {
         return res.json(dependentVariables)
@@ -202,7 +197,6 @@ router.get('/dependent-variables', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.get('/dependent-variables/:id', (req, res, next) => {
     new DependentVariableService().getDependentVariableById(req.params.id).then((dependentVariable)=> {
@@ -236,7 +230,6 @@ router.get('/experiments/:id/variables', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.post('/factors', (req, res, next) => {
     return new FactorService().batchCreateFactors(req.body, req.context).then((id) => {
@@ -277,7 +270,6 @@ router.get('/factors/:id', (req, res, next) => {
     })
 })
 
-
 router.delete('/factors/:id', (req, res, next) => {
     return new FactorService().deleteFactor(req.params.id).then((value) => {
         return res.json(value)
@@ -285,7 +277,6 @@ router.delete('/factors/:id', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.post('/factor-levels', (req, res, next) => {
     return new FactorLevelService().batchCreateFactorLevels(req.body, req.context).then((id) => {
@@ -303,7 +294,6 @@ router.put('/factor-levels', (req, res, next) => {
     })
 })
 
-
 router.get('/factor-levels', (req, res, next) => {
     return new FactorLevelService().getAllFactorLevels().then((factorLevels) => {
         return res.json(factorLevels)
@@ -311,8 +301,6 @@ router.get('/factor-levels', (req, res, next) => {
         return next(err)
     })
 })
-
-
 
 router.get('/factors/:id/factor-levels', (req, res, next)=> {
     return new FactorLevelService().getFactorLevelsByFactorId(req.params.id).then((factorLevels)=> {
@@ -330,7 +318,6 @@ router.get('/factor-levels/:id', (req, res, next) => {
     })
 })
 
-
 router.delete('/factor-levels/:id', (req, res, next) => {
     return new FactorLevelService().deleteFactorLevel(req.params.id).then((value) => {
         return res.json(value)
@@ -338,9 +325,6 @@ router.delete('/factor-levels/:id', (req, res, next) => {
         return next(err)
     })
 })
-
-
-
 
 router.post('/treatments', (req, res, next) => {
     return new TreatmentService().batchCreateTreatments(req.body, req.context).then((id) => {
@@ -356,7 +340,6 @@ router.put('/treatments', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.get('/experiments/:id/treatments', (req, res, next)=> {
     return new TreatmentService().getTreatmentsByExperimentId(req.params.id).then((treatments)=> {
@@ -382,50 +365,6 @@ router.delete('/treatments/:id', (req, res, next) => {
     })
 })
 
-
-
-router.post('/tags', (req, res, next) => {
-    return new TagService().batchCreateTags(req.body, req.context).then((id) => {
-        return res.json(id)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.put('/tags', (req, res, next) => {
-    return new TagService().batchUpdateTags(req.body, req.context).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-
-router.get('/experiments/:id/tags', (req, res, next)=> {
-    return new TagService().getTagsByExperimentId(req.params.id).then((tags)=> {
-        return res.json(tags)
-    }).catch((err)=> {
-        return next(err)
-    })
-})
-
-router.get('/tags/:id', (req, res, next) => {
-    return new TagService().getTagById(req.params.id).then((tag) => {
-        return res.json(tag)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-router.delete('/tags/:id', (req, res, next) => {
-    return new TagService().deleteTag(req.params.id).then((value) => {
-        return res.json(value)
-    }).catch((err) => {
-        return next(err)
-    })
-})
-
-
 router.post('/combination-elements', (req, res, next) => {
     return new CombinationElementService().batchCreateCombinationElements(req.body, req.context).then((id) => {
         return res.json(id)
@@ -442,7 +381,6 @@ router.put('/combination-elements', (req, res, next) => {
     })
 })
 
-
 router.get('/treatments/:id/combination-elements', (req, res, next)=> {
     return new CombinationElementService().getCombinationElementsByTreatmentId(req.params.id).then((combinationElements)=> {
         return res.json(combinationElements)
@@ -458,7 +396,6 @@ router.get('/combination-elements/:id', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.delete('/combination-elements/:id', (req, res, next) => {
     return new CombinationElementService().deleteCombinationElement(req.params.id).then((value) => {
@@ -500,7 +437,6 @@ router.put('/experimental-units', (req, res, next) => {
     })
 })
 
-
 router.get('/experiments/:id/experimental-units', (req, res, next)=> {
     return new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id).then((experimentalUnits)=> {
         return res.json(experimentalUnits)
@@ -524,7 +460,6 @@ router.get('/experimental-units/:id', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.delete('/experimental-units/:id', (req, res, next) => {
     return new ExperimentalUnitService().deleteExperimentalUnit(req.params.id).then((value) => {
@@ -605,7 +540,6 @@ router.get('/groups/:id', (req, res, next) => {
         return next(err)
     })
 })
-
 
 router.delete('/groups/:id', (req, res, next) => {
     return new GroupService().deleteGroup(req.params.id).then((value) => {

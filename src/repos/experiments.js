@@ -16,14 +16,14 @@ module.exports = (rep, pgp) => {
             return rep.any("SELECT * FROM experiment")
         },
 
-        findExperimentsByTags:(lowerCaseTagNames, lowerCaseTagValues) =>{
+        findExperimentsByTags: (lowerCaseTagNames, lowerCaseTagValues) => {
             const query = "SELECT e.* from experiment e , tag t where t.experiment_id = e.id"
-            if(lowerCaseTagNames.length>0 && lowerCaseTagValues.length>0){
-                return rep.any(`${query} and lower(t.name) IN ($1:csv) and lower(t.value) IN ($2:csv)`,[lowerCaseTagNames, lowerCaseTagValues])
-            }else if(lowerCaseTagNames.length>0){
-                return rep.any(`${query} and lower(t.name) IN ($1:csv)`,[lowerCaseTagNames])
-            }else if(lowerCaseTagValues.length>0){
-                return rep.any(`${query} and lower(t.value) IN ($1:csv)`,[lowerCaseTagValues])
+            if (lowerCaseTagNames.length > 0 && lowerCaseTagValues.length > 0) {
+                return rep.any(`${query} and lower(t.name) IN ($1:csv) and lower(t.value) IN ($2:csv)`, [lowerCaseTagNames, lowerCaseTagValues])
+            } else if (lowerCaseTagNames.length > 0) {
+                return rep.any(`${query} and lower(t.name) IN ($1:csv)`, [lowerCaseTagNames])
+            } else if (lowerCaseTagValues.length > 0) {
+                return rep.any(`${query} and lower(t.value) IN ($1:csv)`, [lowerCaseTagValues])
             }
         },
 

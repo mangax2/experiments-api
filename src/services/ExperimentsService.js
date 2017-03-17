@@ -7,7 +7,6 @@ import log4js from "log4js"
 import Transactional from '../decorators/transactional'
 import _ from 'lodash'
 
-
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
@@ -23,8 +22,8 @@ class ExperimentsService {
             return db.experiments.batchCreate(experiments, context, tx).then((data) => {
                 const experimentIds = _.map(data, (d) => d.id)
                 const tags = this._assignExperimentIdToTags(experimentIds, experiments)
-                if(tags && tags.length > 0){
-                    return this._tagService.batchCreateTags(tags, context, tx).then(()=>{
+                if (tags && tags.length > 0) {
+                    return this._tagService.batchCreateTags(tags, context, tx).then(() => {
                         return AppUtil.createPostResponse(data)
                     })
                 }
@@ -33,10 +32,10 @@ class ExperimentsService {
         })
     }
 
-    getExperiments(query) {
-        if(this._isFilterRequest(query) === true){
-           return this._getExperimentsByFilters(query)
-        } else{
+    getExperiments(queryString) {
+        if (this._isFilterRequest(queryString) === true) {
+            return this._getExperimentsByFilters(queryString)
+        } else {
             return this._getAllExperiments()
         }
     }
@@ -49,7 +48,7 @@ class ExperimentsService {
                 throw AppError.notFound('Experiment Not Found for requested experimentId')
             }
             else {
-                return this._tagService.getTagsByExperimentId(id, tx).then((dbTags)=>{
+                return this._tagService.getTagsByExperimentId(id, tx).then((dbTags) => {
                     data["tags"] = dbTags
                     return data
                 })
@@ -59,16 +58,16 @@ class ExperimentsService {
 
     @Transactional('updateExperiment')
     updateExperiment(id, experiment, context, tx) {
-        return this._validator.validate([experiment],'PUT', tx).then(() => {
+        return this._validator.validate([experiment], 'PUT', tx).then(() => {
             return db.experiments.update(id, experiment, context, tx).then((data) => {
                 if (!data) {
                     logger.error("Experiment Not Found to Update for id = " + id)
                     throw AppError.notFound('Experiment Not Found to Update')
                 } else {
-                    return this._tagService.deleteTagsForExperimentId(id, tx).then(()=>{
+                    return this._tagService.deleteTagsForExperimentId(id, tx).then(() => {
                         const tags = this._assignExperimentIdToTags([id], [experiment])
-                        if(tags.length > 0){
-                            return this._tagService.batchCreateTags(tags, context, tx).then(()=>{
+                        if (tags.length > 0) {
+                            return this._tagService.batchCreateTags(tags, context, tx).then(() => {
                                 return data
                             })
                         }
@@ -92,34 +91,37 @@ class ExperimentsService {
         })
     }
 
-    _assignExperimentIdToTags(experimentIds, experiments){
-        return _.compact(_.flatMap(experimentIds, (id, index)=>{
+    _getExperimentsByFilters(queryString) {
+        return this._validator.validate([queryString], 'FILTER').then(() => {
+            const lowerCaseTagNames = this._toLowerCaseArray(queryString['tags.name'])
+            const lowerCaseTagValues = this._toLowerCaseArray(queryString['tags.value'])
+            return db.experiments.findExperimentsByTags(lowerCaseTagNames, lowerCaseTagValues)
+        })
+    }
+
+    _assignExperimentIdToTags(experimentIds, experiments) {
+        return _.compact(_.flatMap(experimentIds, (id, index) => {
             const tags = experiments[index].tags
-            if(tags && tags.length > 0){
-                _.forEach(tags, function(tag){tag.experimentId = id})
+            if (tags && tags.length > 0) {
+                _.forEach(tags, function (tag) {
+                    tag.experimentId = id
+                })
             }
             return experiments[index].tags
         }))
     }
 
-    _isFilterRequest(query) {
+    _isFilterRequest(queryString) {
         const allowedFilters = ['tags.name', 'tags.value']
-        return !_.isEmpty(query) && _.intersection(Object.keys(query), allowedFilters).length > 0
-    }
-    _getExperimentsByFilters(query){
-        return this._validator.validate([query], 'FILTER').then(()=> {
-            const lowerCaseTagNames =  this._toLowerCaseArray(query['tags.name'])
-            const lowerCaseTagValues = this._toLowerCaseArray(query['tags.value'])
-            return db.experiments.findExperimentsByTags(lowerCaseTagNames, lowerCaseTagValues)
-        })
+        return !_.isEmpty(queryString) && _.intersection(Object.keys(queryString), allowedFilters).length > 0
     }
 
-    _getAllExperiments(){
+    _getAllExperiments() {
         return db.experiments.all()
     }
 
-    _toLowerCaseArray(queryStringValue){
-        return queryStringValue? _.map(queryStringValue.split(','), _.toLower ): []
+    _toLowerCaseArray(queryStringValue) {
+        return queryStringValue ? _.map(queryStringValue.split(','), _.toLower) : []
     }
 }
 

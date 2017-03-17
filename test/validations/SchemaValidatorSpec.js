@@ -34,8 +34,19 @@ describe('SchemaValidator', () => {
             checkRIBatchStub.restore()
         })
 
-
         describe('schemaElementCheck ', () => {
+
+            it('returns error message when value is not literal', () => {
+                return target.schemaElementCheck([], {
+                    'paramName': 'param1',
+                    'type': 'numeric'
+                }).then(() => {
+                    return target.check()
+                }).should.be.rejected.then((err) => {
+                    err.length.should.equal(1)
+                    err[0].errorMessage.should.equal('param1 must be a literal value. Object and Arrays are not supported.')
+                })
+            })
 
             it('returns error message when value is required', () => {
                 return target.schemaElementCheck(null, {
@@ -132,7 +143,6 @@ describe('SchemaValidator', () => {
             })
         })
 
-
         describe('validateBatchForRI', () => {
 
             let getSchemaStub
@@ -153,14 +163,14 @@ describe('SchemaValidator', () => {
                 schemaCheckStub.restore()
             })
 
-            it('returns rejected promise when checkRIBatch fails ', ()=> {
+            it('returns rejected promise when checkRIBatch fails ', () => {
                 getSchemaStub.returns(testSchema)
                 const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
                 checkRIBatchStub.rejects(testError)
                 return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.be.rejected
                 sinon.assert.calledOnce(checkRIBatchStub)
             })
-            it('returns fulfilled promise when checkRIBatch returns fullfiled  ', ()=> {
+            it('returns fulfilled promise when checkRIBatch returns fullfiled  ', () => {
                 getSchemaStub.returns(testSchema)
                 const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
 
@@ -170,7 +180,7 @@ describe('SchemaValidator', () => {
                 })
             })
 
-            it('calls checkRIBatch with riCheckGroupByEntity object to validate ref id', ()=> {
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate ref id', () => {
                 getSchemaStub.returns(testSchema)
                 const batchPayLoad = [{experimentId: 1}, {experimentId: 2}]
                 const riCheckGroupByEntity = [[{
@@ -192,10 +202,9 @@ describe('SchemaValidator', () => {
 
                 })
 
-
             })
 
-            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys', ()=> {
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys', () => {
                 getSchemaStub.returns([{
                     'paramName': 'Treatment',
                     'type': 'businessKey',
@@ -224,12 +233,9 @@ describe('SchemaValidator', () => {
 
                 })
 
-
             })
 
-
-
-            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys and refIds', ()=> {
+            it('calls checkRIBatch with riCheckGroupByEntity object to validate business keys and refIds', () => {
 
                 getSchemaStub.returns(testSchema.concat([{
                     'paramName': 'Treatment',
@@ -241,30 +247,30 @@ describe('SchemaValidator', () => {
 
                 const riCheckGroupByEntity = [
                     [{
-                    entity: {},
-                    updateId: undefined,
-                    id: 1,
-                    paramName: 'experimentId'
-                    },
-                    {
                         entity: {},
                         updateId: undefined,
-                        id: 2,
+                        id: 1,
                         paramName: 'experimentId'
-                    }],
+                    },
+                        {
+                            entity: {},
+                            updateId: undefined,
+                            id: 2,
+                            paramName: 'experimentId'
+                        }],
 
                     [{
-                    entity: {},
-                    updateId: undefined,
-                    keys: [1, 'A'],
-                    paramName: 'Treatment'
-                    },
-                    {
                         entity: {},
                         updateId: undefined,
-                        keys: [2, 'B'],
+                        keys: [1, 'A'],
                         paramName: 'Treatment'
-                    }]]
+                    },
+                        {
+                            entity: {},
+                            updateId: undefined,
+                            keys: [2, 'B'],
+                            paramName: 'Treatment'
+                        }]]
 
                 checkRIBatchStub.resolves()
                 return target.validateBatchForRI(batchPayLoad, 'PUT', testTransaction).should.not.be.rejected.then(() => {
@@ -273,10 +279,9 @@ describe('SchemaValidator', () => {
 
                 })
 
-
             })
 
-            it('Does not call checkRIBatch when no ref id and business key to validate and does not reject promise', ()=> {
+            it('Does not call checkRIBatch when no ref id and business key to validate and does not reject promise', () => {
                 getSchemaStub.returns([{}])
                 const batchPayLoad = [{experimentId: 1, name: 'A'}, {experimentId: 2, name: 'B'}]
 
@@ -298,10 +303,9 @@ describe('SchemaValidator', () => {
 
                 })
 
-
             })
 
-            it('Does not call checkRIBatch when no optional ref id is missing in payload and does not reject promise', ()=> {
+            it('Does not call checkRIBatch when no optional ref id is missing in payload and does not reject promise', () => {
                 getSchemaStub.returns([{'paramName': 'experimentId', 'type': 'refData', 'entity': {}}])
                 const batchPayLoad = [{}]
                 const riCheckGroupByEntity = [[{
@@ -322,9 +326,7 @@ describe('SchemaValidator', () => {
 
                 })
 
-
             })
-
 
         })
 
@@ -378,9 +380,7 @@ describe('SchemaValidator', () => {
             })
         })
 
-
     })
-
 
     describe('validateEntity', () => {
         let getSchemaStub

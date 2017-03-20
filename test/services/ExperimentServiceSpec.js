@@ -7,9 +7,9 @@ describe('ExperimentsService', () => {
     const testPayload = {}
     const testResponse = {}
     const testError = {}
-    const tx = {tx:{}}
-    const context ={
-        userId:"akuma11"
+    const tx = {tx: {}}
+    const context = {
+        userId: "akuma11"
     }
 
     let batchCreateStub
@@ -25,6 +25,7 @@ describe('ExperimentsService', () => {
     let getTagsByExperimentIdStub
     let batchCreateTagsStub
     let deleteTagsForExperimentIdStub
+    let findExperimentsByTagsStub
 
     before(() => {
         batchCreateStub = sinon.stub(db.experiments, 'batchCreate')
@@ -32,9 +33,14 @@ describe('ExperimentsService', () => {
         experimentsService = new ExperimentsService()
         findStub = sinon.stub(db.experiments, 'find')
         getStub = sinon.stub(db.experiments, 'all')
+        findExperimentsByTagsStub = sinon.stub(db.experiments, 'findExperimentsByTags')
         removeStub = sinon.stub(db.experiments, 'remove')
         transactionStub = sinon.stub(db.experiments, 'repository', () => {
-            return { tx: function (transactionName, callback) {return callback(tx)} }
+            return {
+                tx: function (transactionName, callback) {
+                    return callback(tx)
+                }
+            }
         })
         updateStub = sinon.stub(db.experiments, 'update')
         validateStub = sinon.stub(experimentsService._validator, 'validate')
@@ -57,6 +63,7 @@ describe('ExperimentsService', () => {
         getTagsByExperimentIdStub.restore()
         batchCreateTagsStub.restore()
         deleteTagsForExperimentIdStub.restore()
+        findExperimentsByTagsStub.restore()
     })
 
     afterEach(() => {
@@ -72,13 +79,14 @@ describe('ExperimentsService', () => {
         getTagsByExperimentIdStub.reset()
         batchCreateTagsStub.reset()
         deleteTagsForExperimentIdStub.reset()
+        findExperimentsByTagsStub.reset()
     })
 
     describe('Get All Experiments:', () => {
-        it('Success', ()=> {
+        it('Success', () => {
             getStub.resolves(testResponse)
 
-            return experimentsService.getAllExperiments().then((experiments)=> {
+            return experimentsService._getAllExperiments().then((experiments) => {
                 sinon.assert.calledOnce(getStub)
                 experiments.should.equal(testResponse)
             })
@@ -87,7 +95,7 @@ describe('ExperimentsService', () => {
         it('fails', () => {
             getStub.rejects(testError)
 
-            return experimentsService.getAllExperiments().should.be.rejected.then((err) => {
+            return experimentsService._getAllExperiments().should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(getStub)
                 err.should.equal(testError)
             })
@@ -95,11 +103,11 @@ describe('ExperimentsService', () => {
     })
 
     describe('Get Experiment By Id:', () => {
-        it('Success and Return experiment with Id', ()=> {
+        it('Success and Return experiment with Id', () => {
             findStub.resolves(testResponse)
             getTagsByExperimentIdStub.resolves([])
 
-            return experimentsService.getExperimentById(30, tx).then((experiment)=> {
+            return experimentsService.getExperimentById(30, tx).then((experiment) => {
                 sinon.assert.calledWithExactly(
                     findStub,
                     30,
@@ -120,7 +128,7 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('fails When it returns no result', ()=> {
+        it('fails When it returns no result', () => {
             findStub.resolves(null)
 
             return experimentsService.getExperimentById(30, tx).should.be.rejected.then((err) => {
@@ -133,11 +141,11 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('fails when it cannot get tags', ()=>{
+        it('fails when it cannot get tags', () => {
             findStub.resolves(testResponse)
             getTagsByExperimentIdStub.rejects("error")
 
-            return experimentsService.getExperimentById(30, tx).should.be.rejected.then((err)=>{
+            return experimentsService.getExperimentById(30, tx).should.be.rejected.then((err) => {
                 err.message.should.equal("error")
                 sinon.assert.calledWithExactly(
                     findStub,
@@ -152,11 +160,11 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('gets experiment and tags', ()=>{
+        it('gets experiment and tags', () => {
             findStub.resolves({id: 30, name: "testExp", description: "testDesc"})
             getTagsByExperimentIdStub.resolves([{name: "test", value: "testValue"}])
 
-            return experimentsService.getExperimentById(30, tx).then((experiment)=>{
+            return experimentsService.getExperimentById(30, tx).then((experiment) => {
                 experiment.tags.length.should.equal(1)
                 experiment.tags[0].name.should.equal("test")
                 experiment.tags[0].value.should.equal("testValue")
@@ -217,7 +225,7 @@ describe('ExperimentsService', () => {
                 }
             )
 
-            batchCreateStub.resolves([{id: 1},{id:2}])
+            batchCreateStub.resolves([{id: 1}, {id: 2}])
             expDesignFindStub.resolves({id: 2})
             validateStub.resolves()
 
@@ -292,7 +300,7 @@ describe('ExperimentsService', () => {
 
     describe('Update Experiment:', () => {
 
-        it('Success and Return experiment', ()=> {
+        it('Success and Return experiment', () => {
             const experimentResObj = {
                 'id': 30,
                 'name': 'exp1002',
@@ -316,7 +324,7 @@ describe('ExperimentsService', () => {
             deleteTagsForExperimentIdStub.resolves()
             batchCreateTagsStub.resolves()
 
-            return experimentsService.updateExperiment(30, experimentReqObj, context, tx).then((experiment)=> {
+            return experimentsService.updateExperiment(30, experimentReqObj, context, tx).then((experiment) => {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
                 sinon.assert.calledWithExactly(
@@ -355,7 +363,7 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('fails When it returns no result', ()=> {
+        it('fails When it returns no result', () => {
             updateStub.resolves(null)
             validateStub.resolves()
             const experimentReqObj = {
@@ -386,7 +394,7 @@ describe('ExperimentsService', () => {
             updateStub.resolves({})
             deleteTagsForExperimentIdStub.rejects("error")
 
-            return experimentsService.updateExperiment(30, testPayload, context, tx).should.be.rejected.then((err)=>{
+            return experimentsService.updateExperiment(30, testPayload, context, tx).should.be.rejected.then((err) => {
                 batchCreateTagsStub.called.should.equal(false)
                 err.message.should.equal("error")
             })
@@ -394,13 +402,13 @@ describe('ExperimentsService', () => {
 
         it("fails due to tag create error", () => {
             validateStub.resolves()
-            updateStub.resolves({id:30})
+            updateStub.resolves({id: 30})
             deleteTagsForExperimentIdStub.resolves()
             batchCreateTagsStub.rejects("error")
             const experimentsObj = {tags:[{name:" ",value:" "}]}
             const tagsObj = [{experimentId: 30,name:" ",value:" "}]
 
-            return experimentsService.updateExperiment(30, experimentsObj, context, tx).should.be.rejected.then((err)=>{
+            return experimentsService.updateExperiment(30, experimentsObj, context, tx).should.be.rejected.then((err) => {
                 sinon.assert.calledWithExactly(deleteTagsForExperimentIdStub, 30, tx)
                 sinon.assert.calledWithExactly(
                     batchCreateTagsStub,
@@ -440,7 +448,7 @@ describe('ExperimentsService', () => {
             deleteTagsForExperimentIdStub.resolves()
             batchCreateTagsStub.resolves()
 
-            return experimentsService.updateExperiment(30, experimentReqObj, context, tx).then((experiment)=> {
+            return experimentsService.updateExperiment(30, experimentReqObj, context, tx).then((experiment) => {
                 experiment.id.should.equal(30)
                 experiment.name.should.equal('exp1002')
                 sinon.assert.calledWithExactly(
@@ -463,9 +471,9 @@ describe('ExperimentsService', () => {
 
     describe('Delete Experiment:', () => {
 
-        it('Success and Return experimentId', ()=> {
+        it('Success and Return experimentId', () => {
             removeStub.resolves(30)
-            return experimentsService.deleteExperiment(30).then((id)=> {
+            return experimentsService.deleteExperiment(30).then((id) => {
                 id.should.equal(30)
             })
         })
@@ -482,7 +490,7 @@ describe('ExperimentsService', () => {
             })
         })
 
-        it('fails When it returns no result', ()=> {
+        it('fails When it returns no result', () => {
             removeStub.resolves(null)
             return experimentsService.deleteExperiment(30).should.be.rejected.then((err) => {
                 err.status.should.equal(404)
@@ -491,4 +499,120 @@ describe('ExperimentsService', () => {
 
         })
     })
+
+    describe('getExperiments:', () => {
+        it('calls getStub when query string is empty object', () => {
+            getStub.resolves(testResponse)
+            return experimentsService.getExperiments({}).then((experiments) => {
+                sinon.assert.calledOnce(getStub)
+                experiments.should.equal(testResponse)
+            })
+        })
+
+        it('calls findExperimentsByTagsStub when query string is not an empty object', () => {
+            findExperimentsByTagsStub.resolves(testResponse)
+            return experimentsService.getExperiments({'tags.name': 'A'}).then((experiments) => {
+                sinon.assert.calledOnce(findExperimentsByTagsStub)
+                experiments.should.equal(testResponse)
+            })
+
+        })
+    })
+
+    describe('_isFilterRequest:', () => {
+
+        it('returns true if filter query has tags.name', () => {
+            const query = {'tags.name': 'tag1'}
+            const result = experimentsService._isFilterRequest(query)
+            result.should.be.true
+        })
+
+        it('returns true if query has tags.value', () => {
+            const query = {'tags.value':'tagValue1'}
+            const result = experimentsService._isFilterRequest(query)
+            result.should.be.true
+        })
+
+        it('returns true if query has both tags.name and tags.value', () => {
+            const query = {'tags.name':'tag1', 'tags.value':'tagValue1'}
+            const result = experimentsService._isFilterRequest(query)
+            result.should.be.true
+        })
+
+
+        it('returns false if query is undefined', () => {
+            const result = experimentsService._isFilterRequest(undefined)
+            result.should.be.false
+        })
+
+        it('returns false if query is empty object', () => {
+            const query = {}
+            const result = experimentsService._isFilterRequest({})
+            result.should.be.false
+        })
+    })
+
+    describe('_toLowerCaseArray:', () => {
+
+        it('returns array with lowercase elements when input is a string with comma separated values', () => {
+            const queryStringValue = 'tagName1,tagName2'
+            const result = experimentsService._toLowerCaseArray(queryStringValue)
+            result.should.be.eql(['tagname1', 'tagname2'])
+        })
+
+        it('returns array of length 1 with lowercase element when input is one string with no comma separated values', () => {
+            const queryStringValue = 'TAGNAME1'
+            const result = experimentsService._toLowerCaseArray(queryStringValue)
+            result.should.be.eql(['tagname1'])
+        })
+
+        it('returns empty array when input is undefined', () => {
+            const queryStringValue = undefined
+            const result = experimentsService._toLowerCaseArray(queryStringValue)
+            result.should.have.length(0)
+        })
+
+    })
+
+    describe('_getExperimentsByFilters:', () => {
+        it('calls findExperimentsByTagsStub when query has valid filter values', () => {
+
+            validateStub.resolves()
+            const expectedResult = [{id: 1}]
+            findExperimentsByTagsStub.resolves(expectedResult)
+            const query = {'tags.name': 'A,B', 'tags.value': 'X,Y'}
+
+            return experimentsService._getExperimentsByFilters(query).then((result) => {
+                result.should.eql(expectedResult)
+                findExperimentsByTagsStub.calledOnce.should.equal(true)
+                sinon.assert.calledWithExactly(
+                    findExperimentsByTagsStub,
+                    ['a', 'b'],
+                    ['x', 'y'])
+
+            })
+
+        })
+
+        it('fails when findExperimentsByTagsStub returns error', () => {
+            validateStub.resolves()
+            findExperimentsByTagsStub.rejects(testError)
+            const query = {'tags.name': '', 'tags.value': ''}
+            return experimentsService._getExperimentsByFilters(query).should.be.rejected.then((err) => {
+                sinon.assert.calledOnce(findExperimentsByTagsStub)
+                err.should.equal(testError)
+            })
+        })
+
+        it('fails when validateStub returns error', () => {
+            validateStub.rejects(testError)
+            return experimentsService._getExperimentsByFilters().should.be.rejected.then((err) => {
+                sinon.assert.notCalled(findExperimentsByTagsStub)
+                sinon.assert.calledOnce(validateStub)
+                err.should.equal(testError)
+            })
+        })
+
+    })
+
 })

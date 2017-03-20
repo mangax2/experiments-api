@@ -94,7 +94,7 @@ router.put('/experiments/:id', (req, res, next) => {
 })
 
 router.get('/experiments', (req, res, next) => {
-    new ExperimentsService().getAllExperiments().then((experiments)=> {
+    new ExperimentsService().getExperiments(req.query).then((experiments)=> {
         return res.json(experiments)
     }).catch((err) => {
         return next(err)
@@ -669,5 +669,6 @@ router.post('/composites/unit-specification-details', (req, res, next) => {
         return next(err)
     })
 })
+
 
 module.exports = router

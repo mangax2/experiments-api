@@ -66,11 +66,24 @@ class BaseValidator {
     }
 
     checkLength(value, lengthRange, name) {
-        if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {
-            this.messages.push(name + ' length is out of range(min=' + lengthRange.min + ' max=' + lengthRange.max + ')')
+        if(typeof value != "string"){
+            this.messages.push(name + " must be a string")
+        }
+        else {
+            if (!validator.isLength(value, lengthRange.min, lengthRange.max)) {
+                this.messages.push(name + ' length is out of range(min=' + lengthRange.min + ' max=' + lengthRange.max + ')')
+            }
         }
     }
 
+    literalCheck(value, name){
+        if(_.isObject(value)){
+            this.messages.push(name + ' must be a literal value. Object and Arrays are not supported.')
+            return false
+        }else{
+            return true
+        }
+    }
     checkRequired(value, name) {
         if (value == undefined || value == null || validator.isEmpty(value.toString())) {
             this.messages.push(name + ' is required')

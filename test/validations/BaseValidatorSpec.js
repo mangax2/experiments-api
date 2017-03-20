@@ -366,6 +366,11 @@ describe('BaseValidator', () => {
     })
 
     describe('checkLength ', () => {
+        it('updates error messages when input is not a string literal', () =>{
+            target.checkLength(0, {'min': 1, 'max': 100}, 'param1')
+            target.messages.length.should.equal(1)
+            target.messages[0].should.equal("param1 must be a string")
+        })
         it('returns no error message when value is within length range', () => {
             target.checkLength('testValue', {'min': 1, 'max': 100}, 'param1')
             target.messages.length.should.equal(0)
@@ -376,6 +381,29 @@ describe('BaseValidator', () => {
             target.messages[0].should.equal("param1 length is out of range(min=1 max=2)")
         })
 
+    })
+
+    describe('literalCheck ', () => {
+        it('returns false and updates error messages when input is an array', () =>{
+            const result = target.literalCheck([1,2,3], 'param1')
+            target.messages.length.should.equal(1)
+            target.messages[0].should.equal("param1 must be a literal value. Object and Arrays are not supported.")
+            result.should.equal(false)
+        })
+
+        it('returns false and updates messages with error when input is an Object', () => {
+            const result = target.literalCheck({'a':'b'}, 'param1')
+            target.messages.length.should.equal(1)
+            target.messages[0].should.equal("param1 must be a literal value. Object and Arrays are not supported.")
+            result.should.equal(false)
+
+        })
+
+        it('returns true when value is a literal', () => {
+            const result = target.literalCheck('aa', 'param1')
+            target.messages.length.should.equal(0)
+            result.should.equal(true)
+        })
     })
 
     describe('required check', () => {

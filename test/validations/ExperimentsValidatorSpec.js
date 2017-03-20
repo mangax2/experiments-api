@@ -23,16 +23,26 @@ describe('ExperimentValidator', () => {
         badRequestStub.restore()
     })
 
-    const schemaArray = [
+    const postAndPutSchema = [
         {'paramName': 'name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 100}, 'required': true},
-        {'paramName': 'description', 'type': 'text','lengthRange': {'min': 0, 'max': 5000}, 'required': false},
+        {'paramName': 'description', 'type': 'text', 'lengthRange': {'min': 0, 'max': 5000}, 'required': false},
         {'paramName': 'refExperimentDesignId', 'type': 'refData', 'entity': db.experimentDesign},
         {'paramName': 'status', 'type': 'constant', 'data': ['DRAFT', 'ACTIVE'], 'required': true},
     ]
+    const filterSchema = [
+        {'paramName': 'tags.name', 'type': 'text', 'lengthRange': {'min': 1, 'max': 1000}, 'required': false},
+        {'paramName': 'tags.value', 'type': 'text', 'lengthRange': {'min': 1, 'max': 1000}, 'required': false}
+    ]
 
     describe('getSchema ', () => {
-        it('returns schema array', () => {
-            target.getSchema().should.eql(schemaArray)
+        it('returns schema array for POST ', () => {
+            target.getSchema('POST').should.eql(postAndPutSchema)
+        })
+        it('returns schema array for PUT ', () => {
+            target.getSchema('PUT').should.eql(postAndPutSchema)
+        })
+        it('returns schema array for FILTER ', () => {
+            target.getSchema('FILTER').should.eql(filterSchema)
         })
     })
 
@@ -42,9 +52,8 @@ describe('ExperimentValidator', () => {
         })
     })
 
-
     describe('preValidate', () => {
-        it('returns rejected promise when input is not an array.' , () => {
+        it('returns rejected promise when input is not an array.', () => {
             return target.preValidate({}).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
@@ -53,7 +62,7 @@ describe('ExperimentValidator', () => {
             })
         })
 
-        it('returns rejected promise when input is empty array.' , () => {
+        it('returns rejected promise when input is empty array.', () => {
             return target.preValidate([]).should.be.rejected.then((err) => {
                 err.should.equal(testError)
                 sinon.assert.calledWithExactly(
@@ -62,7 +71,7 @@ describe('ExperimentValidator', () => {
             })
         })
 
-        it('returns resolved promise when input is non-empty array.' , () => {
+        it('returns resolved promise when input is non-empty array.', () => {
             return target.preValidate([{}]).then(() => {
                 sinon.assert.notCalled(badRequestStub)
             })

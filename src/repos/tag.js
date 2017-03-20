@@ -7,6 +7,7 @@ module.exports = (rep, pgp) => {
         find: (id, tx = rep) => {
             return tx.oneOrNone("SELECT * FROM tag WHERE id = $1", id)
         },
+
         batchFind: (ids, tx = rep) => {
             return tx.any("SELECT * FROM tag WHERE id IN ($1:csv)", [ids])
         },
@@ -18,10 +19,6 @@ module.exports = (rep, pgp) => {
         findByExperimentId: (experimentId) => {
             return rep.any("SELECT * FROM tag where experiment_id=$1", experimentId)
         },
-        findExperimentIdsByTag:(tag,tx=rep) =>{
-            return tx.any("SELECT experiment_id from tag where name=$1 and value = $2",[tag.name,tag.value])
-        },
-
         batchCreate: (tags, context, t = rep) => {
             const columnSet = new pgp.helpers.ColumnSet(
                 ['name', 'value', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],

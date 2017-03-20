@@ -9,16 +9,16 @@ CREATE TABLE tag
   modified_user_id character varying NOT NULL,
   modified_date timestamp with time zone NOT NULL,
   CONSTRAINT tag_pk PRIMARY KEY (id),
-    CONSTRAINT experiment_id FOREIGN KEY (experiment_id)
+  CONSTRAINT tag_experiment FOREIGN KEY (experiment_id)
       REFERENCES public.experiment (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT tag_ak_1 UNIQUE (name, value, experiment_id)
 )
 
 ------Run after the table Creation-----
-CREATE INDEX fki_experiment_id
-  ON public.tag
-  USING btree
-  (experiment_id);
+CREATE INDEX "tag_fki_experiment_id" ON public.tag(experiment_id);
+
+CREATE INDEX "group_fki_parent_id" ON public.group(parent_id);
+
 
 

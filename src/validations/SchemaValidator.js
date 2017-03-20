@@ -47,23 +47,25 @@ export class SchemaValidator extends BaseValidator {
 
     schemaElementCheck(elementValue, elementSchema, targetObject, optionalTransaction) {
         return new Promise((resolve, reject) => {
-            if (elementSchema.required) {
-                this.checkRequired(elementValue, elementSchema.paramName)
-            }
-
-            if (elementValue != undefined && elementValue != null) {
-                if (elementSchema.type == 'numeric') {
-                    this.checkNumeric(elementValue, elementSchema.paramName)
-                    if (elementSchema.numericRange) {
-                        this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
-                    }
-                } else if (elementSchema.type == 'text') {
-                    this.checkLength(elementValue, elementSchema.lengthRange, elementSchema.paramName)
-                } else if (elementSchema.type == 'constant') {
-                    this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
+            if(this.literalCheck(elementValue, elementSchema.paramName)){
+                if (elementSchema.required) {
+                    this.checkRequired(elementValue, elementSchema.paramName)
                 }
-                else if (elementSchema.type == 'boolean') {
-                    this.checkBoolean(elementValue, elementSchema.paramName)
+
+                if (elementValue != undefined && elementValue != null) {
+                    if (elementSchema.type == 'numeric') {
+                        this.checkNumeric(elementValue, elementSchema.paramName)
+                        if (elementSchema.numericRange) {
+                            this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
+                        }
+                    } else if (elementSchema.type == 'text') {
+                        this.checkLength(elementValue, elementSchema.lengthRange, elementSchema.paramName)
+                    } else if (elementSchema.type == 'constant') {
+                        this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
+                    }
+                    else if (elementSchema.type == 'boolean') {
+                        this.checkBoolean(elementValue, elementSchema.paramName)
+                    }
                 }
             }
             resolve()

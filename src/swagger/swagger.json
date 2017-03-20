@@ -974,7 +974,23 @@
         "tags": [
           "Experiments"
         ],
-        "responses": {
+        "parameters":[
+          {
+            "name":"tags.name",
+            "in":"query",
+            "description":"Tag names comma separated list",
+            "required":false,
+            "type":"string"
+          },
+          {
+            "name":"tags.value",
+            "in":"query",
+            "description":"Tag values comma separated list",
+            "required":false,
+            "type":"string"
+          }
+          ],
+          "responses": {
           "200": {
             "description": "An array of experiments",
             "schema": {
@@ -3409,27 +3425,6 @@
     "TagPayloadForPOST": {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of the combinationElement."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the combinationElement."
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "id of treatment entity."
-        }
-      }
-    },
-    "TagPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of combinationElement to update."
-        },
         "name": {
           "type": "string",
           "description": "name of the combinationElement."

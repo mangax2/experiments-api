@@ -17,7 +17,7 @@ module.exports = (rep, pgp) => {
         },
 
         findExperimentsByTags: (lowerCaseTagNames, lowerCaseTagValues) => {
-            const query = "SELECT e.* from experiment e , tag t where t.experiment_id = e.id"
+            const query = "SELECT DISTINCT e.* from experiment e , tag t where t.experiment_id = e.id"
             if (lowerCaseTagNames.length > 0 && lowerCaseTagValues.length > 0) {
                 return rep.any(`${query} and lower(t.name) IN ($1:csv) and lower(t.value) IN ($2:csv)`, [lowerCaseTagNames, lowerCaseTagValues])
             } else if (lowerCaseTagNames.length > 0) {

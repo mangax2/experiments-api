@@ -245,8 +245,8 @@ describe('ExperimentsService', () => {
         })
 
         it("succeeds and creates tags for new experiments", ()=>{
-            const tagsExperimentsObj = [{tags: [{name:"", value:""}]}]
-            const tagsObj = [{experimentId: 1,name:"",value:""}]
+            const tagsExperimentsObj = [{tags: [{name:" ", value:" "}]}]
+            const tagsObj = [{experimentId: 1,name:" ",value:" "}]
 
             batchCreateStub.resolves([{id: 1}])
             expDesignFindStub.resolves({id: 2})
@@ -267,8 +267,8 @@ describe('ExperimentsService', () => {
         })
 
         it("fails due to failure to create tags", ()=>{
-            const tagsExperimentsObj = [{tags: [{name: "", value:""}]}]
-            const tagsObj = [{experimentId: 1, name:"", value:""}]
+            const tagsExperimentsObj = [{tags: [{name: " ", value:" "}]}]
+            const tagsObj = [{experimentId: 1, name:" ", value:" "}]
 
             batchCreateStub.resolves([{id: 1}])
             expDesignFindStub.resolves({id: 2})
@@ -397,8 +397,8 @@ describe('ExperimentsService', () => {
             updateStub.resolves({id:30})
             deleteTagsForExperimentIdStub.resolves()
             batchCreateTagsStub.rejects("error")
-            const experimentsObj = {tags:[{name:"",value:""}]}
-            const tagsObj = [{experimentId: 30,name:"",value:""}]
+            const experimentsObj = {tags:[{name:" ",value:" "}]}
+            const tagsObj = [{experimentId: 30,name:" ",value:" "}]
 
             return experimentsService.updateExperiment(30, experimentsObj, context, tx).should.be.rejected.then((err)=>{
                 sinon.assert.calledWithExactly(deleteTagsForExperimentIdStub, 30, tx)

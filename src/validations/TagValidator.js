@@ -63,10 +63,10 @@ class TagValidator extends SchemaValidator {
             })
             const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj=>keyObj.experimentId))
             _.forEach(groupByObject, innerArray=> {
-                const names = _.map(innerArray, e=> {
-                    return e[businessKeyPropertyNames[0]]
+                const namesAndValues = _.map(innerArray, e=> {
+                    return {name: e[businessKeyPropertyNames[0]], value: e[businessKeyPropertyNames[1]]}
                 })
-                if (_.uniq(names).length != names.length) {
+                if (_.uniqWith(namesAndValues, _.isEqual).length != namesAndValues.length) {
                     this.messages.push(this.getDuplicateBusinessKeyError())
                     return false
                 }

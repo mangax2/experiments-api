@@ -109,8 +109,8 @@ class ExperimentsService {
             if(tags && tags.length > 0){
                 _.forEach(tags, function(tag) {
                     tag.experimentId = id
-                    tag.name = tag.name.toLowerCase()
-                    tag.value = tag.value.toLowerCase()
+                    tag.name = tag.name ? tag.name.toLowerCase() : undefined
+                    tag.value = tag.value ? tag.value.toLowerCase() : undefined
                 })
             }
             return experiments[index].tags

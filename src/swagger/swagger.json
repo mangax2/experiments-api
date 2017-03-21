@@ -974,22 +974,6 @@
         "tags": [
           "Experiments"
         ],
-        "parameters":[
-          {
-            "name":"tags.name",
-            "in":"query",
-            "description":"Tag names comma separated list",
-            "required":false,
-            "type":"string"
-          },
-          {
-            "name":"tags.value",
-            "in":"query",
-            "description":"Tag values comma separated list",
-            "required":false,
-            "type":"string"
-          }
-          ],
           "responses": {
           "200": {
             "description": "An array of experiments",

@@ -18,6 +18,7 @@
       "post": {
         "summary": "post one or more combination element entities",
         "description": "Creates new combination element entities in Experiments System.\n",
+        "operationId": "postCombination-elements",
         "tags": [
           "Combination Elements"
         ],
@@ -70,6 +71,7 @@
       "put": {
         "summary": "put one or more combination element entities",
         "description": "Update combination element in Experiments System.\n",
+        "operationId": "putCombination-elements",
         "tags": [
           "Combination Elements"
         ],
@@ -124,6 +126,7 @@
       "get": {
         "summary": "get one combination-element entity",
         "description": "The combination-elements endpoint returns information about the combination elements entity in Experiments System.\n",
+        "operationId": "getCombination-elementsById",
         "tags": [
           "Combination Elements"
         ],
@@ -171,6 +174,7 @@
       "delete": {
         "summary": "delete one combination element Response entity",
         "description": "delete combination element entity in Experiments System.\n",
+        "operationId": "deleteCombination-elementsById",
         "tags": [
           "Combination Elements"
         ],
@@ -214,6 +218,7 @@
       "post": {
         "summary": "post one or more treatments and combination elements entities",
         "description": "Creates/updates treatments and combination elements in Experiments System.\n Request json has add , delete and update sections for treatments. API does action on a section with values and empty sections are ignored. So if add and delete sections are empty and update has treatments then only update action will happen. Combination elements within treatments needs to be complete. New combination element without id will be added and combination element with id will be updated, any combination element not included within treatment will be deleted.",
+        "operationId": "postComposites_treatments",
         "tags": [
           "Composites"
         ],
@@ -262,6 +267,7 @@
       "post": {
         "summary": "post one or more unit specification detail entities",
         "description": "Creates/updates/deletes unit specification detail entities put into a JSON body",
+        "operationId": "postComposites_unit-specification-details",
         "tags": [
           "Unit Specification Detail"
         ],
@@ -310,6 +316,7 @@
       "get": {
         "summary": "get one dependent variable entity",
         "description": "The dependent variables endpoint returns information about the dependent variable entities in Experiments System.\n",
+        "operationId": "getDependent-variablesById",
         "tags": [
           "Dependent Variables"
         ],
@@ -357,6 +364,7 @@
       "delete": {
         "summary": "delete one Dependent Variable entity",
         "description": "delete Dependent Variable entity in Experiments System.\n",
+        "operationId": "deleteDependent-variablesById",
         "tags": [
           "Dependent Variables"
         ],
@@ -400,6 +408,7 @@
       "post": {
         "summary": "post one or more dependent variable entities",
         "description": "Creates new Dependent Variables in Experiments System.\n",
+        "operationId": "postDependent-variables",
         "tags": [
           "Dependent Variables"
         ],
@@ -452,6 +461,7 @@
       "put": {
         "summary": "put one or more dependent variable entities",
         "description": "Update Dependent Variables in Experiments System.\n",
+        "operationId": "putDependent-variables",
         "tags": [
           "Dependent Variables"
         ],
@@ -506,6 +516,7 @@
       "post": {
         "summary": "post one or more experimental unit entities",
         "description": "Creates new experimental unit entities in Experiments System.\n",
+        "operationId": "postExperimental-units",
         "tags": [
           "Experimental Units"
         ],
@@ -558,6 +569,7 @@
       "put": {
         "summary": "put one or more Experimental Unit entities",
         "description": "Update Experimental Unit in Experiments System.\n",
+        "operationId": "putExperimental-units",
         "tags": [
           "Experimental Units"
         ],
@@ -612,6 +624,7 @@
       "get": {
         "summary": "get one experimental unit entity",
         "description": "The experimental-units endpoint returns information about the experimental unit entity in Experiments System.\n",
+        "operationId": "getExperimental-unitsById",
         "tags": [
           "Experimental Units"
         ],
@@ -659,6 +672,7 @@
       "delete": {
         "summary": "delete one experimental unit entity",
         "description": "delete experimental unit entity in Experiments System.\n",
+        "operationId": "deleteExperimental-unitsById",
         "tags": [
           "Experimental Units"
         ],
@@ -702,6 +716,7 @@
       "get": {
         "summary": "Get all groups by experiment id",
         "description": "Returns all groups for experiment\n",
+        "operationId": "getGroupsByExperimentId",
         "tags": [
           "Groups"
         ],
@@ -742,6 +757,7 @@
       "get": {
         "summary": "Get all experiment designs",
         "description": "Returns all experiment designs that can be used\n",
+        "operationId": "getExperiment-designs",
         "tags": [
           "Experiment Designs"
         ],
@@ -772,6 +788,7 @@
       "post": {
         "summary": "Adds a new experiment design",
         "description": "Posts a new experiment design",
+        "operationId": "postExperiment-designs",
         "tags": [
           "Experiment Designs"
         ],
@@ -817,6 +834,7 @@
       "get": {
         "summary": "Get one experiment design entity",
         "description": "Returns a single experiment design entity\n",
+        "operationId": "getExperiment-designById",
         "tags": [
           "Experiment Designs"
         ],
@@ -867,6 +885,7 @@
       "put": {
         "summary": "Update one experiment design",
         "description": "Updates a single experiment design entity\n",
+        "operationId": "putExperiment-designById",
         "tags": [
           "Experiment Designs"
         ],
@@ -922,6 +941,7 @@
       "delete": {
         "summary": "Deletes one experiment design",
         "description": "Deletes a single experiment design entity\n",
+        "operationId": "deleteExperiment-designById",
         "tags": [
           "Experiment Designs"
         ],
@@ -971,9 +991,26 @@
       "get": {
         "summary": "get all experiment entities",
         "description": "This endpoint returns information about the experiments.\n",
+        "operationId": "getExperiments",
         "tags": [
           "Experiments"
         ],
+        "parameters":[
+          {
+            "name":"tags.name",
+            "in":"query",
+            "description":"Tag names comma separated list",
+            "required":false,
+            "type":"string"
+          },
+          {
+            "name":"tags.value",
+            "in":"query",
+            "description":"Tag values comma separated list",
+            "required":false,
+            "type":"string"
+          }
+          ],
           "responses": {
           "200": {
             "description": "An array of experiments",
@@ -1001,6 +1038,7 @@
       "post": {
         "summary": "post one or more experiment entities",
         "description": "Creates new experiments in Experiments System.\n",
+        "operationId": "postExperiments",
         "tags": [
           "Experiments"
         ],
@@ -1055,6 +1093,7 @@
       "get": {
         "summary": "get one experiment entity",
         "description": "The Experiments endpoint returns information about the experiment entities in Experiments System.\n",
+        "operationId": "getExperimentById",
         "tags": [
           "Experiments"
         ],
@@ -1102,6 +1141,7 @@
       "put": {
         "summary": "put one experiment entity",
         "description": "update experiment entity in Experiments System.\n",
+        "operationId": "putExperimentById",
         "tags": [
           "Experiments"
         ],
@@ -1160,6 +1200,7 @@
       "delete": {
         "summary": "delete one experiment entity",
         "description": "delete experiment entity in Experiments System.\n",
+        "operationId": "deleteExperimentById",
         "tags": [
           "Experiments"
         ],
@@ -1203,6 +1244,7 @@
       "get": {
         "summary": "get all treatments and combination elements for a given experiment id",
         "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
+        "operationId": "getComposites_TreatmentsByExperimentId",
         "tags": [
           "Composites"
         ],
@@ -1255,6 +1297,7 @@
       "get": {
         "summary": "get all groups , groupvalues and Units  for a given experiment id",
         "description": "This endpoint returns information about the group,groupValues and  experimental Units entities associated with an Experiment",
+        "operationId": "getComposites_Group-experimental-unitsByExperimentId",
         "tags": [
           "Composites"
         ],
@@ -1305,6 +1348,7 @@
       "post": {
         "summary": "post one or more groups,groupvalues and experimental Units entities",
         "description": "This Service would delete the existing groups groupValues and ExperimentalUnits for the experimentId and then recreates them based on request Payload",
+        "operationId": "postComposites_Group-experimental-unitsByExperimentId",
         "tags": [
           "Composites"
         ],
@@ -1359,6 +1403,7 @@
       "get": {
         "summary": "get all dependent variables for given experiment id.",
         "description": "This endpoint returns information about the dependent variable entities associated with one Experiment.\n",
+        "operationId": "getDependentVariablesByExperimentId",
         "tags": [
           "Dependent Variables"
         ],
@@ -1411,6 +1456,7 @@
       "get": {
         "summary": "get all experimental units for a given experiment id",
         "description": "This endpoint returns information about the experimental units entities associated with an Experiment",
+        "operationId": "getExperimentalUnitsByExperimentId",
         "tags": [
           "Experimental Units"
         ],
@@ -1463,6 +1509,7 @@
       "get": {
         "summary": "get all factors  for given experiment id.",
         "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
+        "operationId": "getFactorsByExperimentId",
         "tags": [
           "Factors"
         ],
@@ -1515,6 +1562,7 @@
       "get": {
         "summary": "get the experiment summary for given experiment id.",
         "description": "This endpoint returns summary information about the experiment, such as name, number of variables, etc.\n",
+        "operationId": "getSummaryByExperimentId",
         "tags": [
           "Experiment Summary"
         ],
@@ -1564,6 +1612,7 @@
       "get": {
         "summary": "get all treatments for a given experiment id",
         "description": "This endpoint returns information about the treatment entities associated with an Experiment",
+        "operationId": "getTreatmentsByExperimentId",
         "tags": [
           "Treatments"
         ],
@@ -1616,6 +1665,7 @@
       "get": {
         "summary": "Get all unit specification details for an experiment",
         "description": "Returns all unit specification details for an experiment\n",
+        "operationId": "getUnit-specification-detailsByExperimentId",
         "tags": [
           "Unit Specification Detail"
         ],
@@ -1660,6 +1710,7 @@
       "post": {
         "summary": "post one or more unit specification detail entities",
         "description": "Creates/updates unit specification details for an experiment",
+        "operationId": "postUnit-specification-detailsByExperimentId",
         "tags": [
           "Unit Specification Detail"
         ],
@@ -1712,6 +1763,7 @@
       "put": {
         "summary": "updates one or more unit specification detail entities",
         "description": "Creates/updates unit specification details for an experiment",
+        "operationId": "putUnit-specification-detailsByExperimentId",
         "tags": [
           "Unit Specification Detail"
         ],
@@ -1772,6 +1824,7 @@
       "get": {
         "summary": "get all variables for given experiment id.",
         "description": "This endpoint returns information about the variable entities associated with one Experiment.\n",
+        "operationId": "getVariablesByExperimentId",
         "tags": [
           "Variables"
         ],
@@ -1824,6 +1877,7 @@
       "get": {
         "summary": "get one factor entity",
         "description": "The factors endpoint returns information about the factor entities in Experiments System.\n",
+        "operationId": "getFactorsById",
         "tags": [
           "Factors"
         ],
@@ -1871,6 +1925,7 @@
       "delete": {
         "summary": "delete one factor entity",
         "description": "delete factor entity in Experiments System.\n",
+        "operationId": "deleteFactorsById",
         "tags": [
           "Factors"
         ],
@@ -1914,6 +1969,7 @@
       "get": {
         "summary": "get all factors  for given factor id.",
         "description": "This endpoint returns information about the factor entities associated with one Factor.\n",
+        "operationId": "getFactor-levelsByFactorId",
         "tags": [
           "Factor Levels"
         ],
@@ -1966,6 +2022,7 @@
       "post": {
         "summary": "post one or more factor entities",
         "description": "Creates new factor entity in Experiments System.\n",
+        "operationId": "postFactors",
         "tags": [
           "Factors"
         ],
@@ -2018,6 +2075,7 @@
       "put": {
         "summary": "put one or more factor entities",
         "description": "Update factor in Experiments System.\n",
+        "operationId": "putFactors",
         "tags": [
           "Factors"
         ],
@@ -2072,6 +2130,7 @@
       "get": {
         "summary": "get one factor level entity",
         "description": "The factor-levels endpoint returns information about the factor level entity in Experiments System.\n",
+        "operationId": "getFactor-levelById",
         "tags": [
           "Factor Levels"
         ],
@@ -2119,6 +2178,7 @@
       "delete": {
         "summary": "delete one factor level entity",
         "description": "delete factor level entity in Experiments System.\n",
+        "operationId": "deleteFactor-levelById",
         "tags": [
           "Factor Levels"
         ],
@@ -2162,6 +2222,7 @@
       "post": {
         "summary": "post one or more factor level entities",
         "description": "Creates new factor level entities in Experiments System.\n",
+        "operationId": "postFactor-levels",
         "tags": [
           "Factor Levels"
         ],
@@ -2214,6 +2275,7 @@
       "put": {
         "summary": "put one or more factor level entities",
         "description": "Update factor level in Experiments System.\n",
+        "operationId": "putFactor-levels",
         "tags": [
           "Factor Levels"
         ],
@@ -2268,6 +2330,7 @@
       "get": {
         "summary": "Get all factor types",
         "description": "Returns all factor types that can be used\n",
+        "operationId": "getFactorTypes",
         "tags": [
           "Factor Types"
         ],
@@ -2298,6 +2361,7 @@
       "post": {
         "summary": "Adds a new factor type",
         "description": "Creates a new factor type",
+        "operationId": "postFactorTypes",
         "tags": [
           "Factor Types"
         ],
@@ -2342,6 +2406,7 @@
       "get": {
         "summary": "Get one factor type entity",
         "description": "Returns a single factor type entity\n",
+        "operationId": "getFactorTypeById",
         "tags": [
           "Factor Types"
         ],
@@ -2389,6 +2454,7 @@
       "put": {
         "summary": "Update one factor type",
         "description": "Updates a single factor type entity\n",
+        "operationId": "putFactorTypeById",
         "tags": [
           "Factor Types"
         ],
@@ -2444,6 +2510,7 @@
       "delete": {
         "summary": "Deletes one factor type",
         "description": "Deletes a single factor type entity\n",
+        "operationId": "deleteFactorTypeById",
         "tags": [
           "Factor Types"
         ],
@@ -2493,6 +2560,7 @@
       "get": {
         "summary": "Get one group entity",
         "description": "Returns a single group entity\n",
+        "operationId": "getGroupById",
         "tags": [
           "Groups"
         ],
@@ -2542,6 +2610,7 @@
       "get": {
         "summary": "Get all group values for a particular group",
         "description": "Returns all group values for a single group\n",
+        "operationId": "getGroupValuesByGroupId",
         "tags": [
           "Group Value"
         ],
@@ -2594,6 +2663,7 @@
       "get": {
         "summary": "Get all group types",
         "description": "Returns all group types that can be used\n",
+        "operationId": "getGroupTypes",
         "tags": [
           "Group Types"
         ],
@@ -2626,6 +2696,7 @@
       "get": {
         "summary": "Get one group type entity",
         "description": "Returns a single group type entity\n",
+        "operationId": "getGroupTypeById",
         "tags": [
           "Group Types"
         ],
@@ -2675,6 +2746,7 @@
       "get": {
         "summary": "Get on group value entity",
         "description": "Returns a single group entity\n",
+        "operationId": "getGroup-ValueById",
         "tags": [
           "Group Value"
         ],
@@ -2724,6 +2796,7 @@
       "get": {
         "summary": "Get all randomization strategies",
         "description": "Returns all randomization strategies that can be used\n",
+        "operationId": "getRandomizationStrategies",
         "tags": [
           "Randomization Strategies"
         ],
@@ -2756,6 +2829,7 @@
       "get": {
         "summary": "Get one randomization strategy entity",
         "description": "Returns a single randomization strategy entity\n",
+        "operationId": "getRandomizationStrategyById",
         "tags": [
           "Randomization Strategies"
         ],
@@ -2805,6 +2879,7 @@
       "post": {
         "summary": "Add treatments",
         "description": "Creates new treatments",
+        "operationId": "postTreatments",
         "tags": [
           "Treatments"
         ],
@@ -2853,6 +2928,7 @@
       "put": {
         "summary": "Updates treatments",
         "description": "Updates existing treatments",
+        "operationId": "putTreatments",
         "tags": [
           "Treatments"
         ],
@@ -2903,6 +2979,7 @@
       "get": {
         "summary": "Get one treatment entity",
         "description": "Gets a treatment entity for the given treatment id",
+        "operationId": "getTreatmentById",
         "tags": [
           "Treatments"
         ],
@@ -2950,6 +3027,7 @@
       "delete": {
         "summary": "delete one treatment entity",
         "description": "Deletes a treatment entity for the given treatment id",
+        "operationId": "deleteTreatmentById",
         "tags": [
           "Treatments"
         ],
@@ -2999,6 +3077,7 @@
       "get": {
         "summary": "get all combination elements  for given treatment id.",
         "description": "This endpoint returns information about the combination-elements entities associated with one treatment.\n",
+        "operationId": "getCombination-elementsByTreatmentId",
         "tags": [
           "Combination Elements"
         ],
@@ -3051,6 +3130,7 @@
       "get": {
         "summary": "get all experimental units for given treatment id.",
         "description": "This endpoint returns information about the experimental units entities associated with one treatment.\n",
+        "operationId": "getExperimentalUnitsByTreatmentId",
         "tags": [
           "Experimental Units"
         ],
@@ -3103,6 +3183,7 @@
       "get": {
         "summary": "Get all unit specification entities",
         "description": "Returns all unit specifications\n",
+        "operationId": "getUnitSpecifications",
         "tags": [
           "Unit Specification"
         ],
@@ -3141,6 +3222,7 @@
       "get": {
         "summary": "Get a unit specification entity",
         "description": "Returns a unit specification\n",
+        "operationId": "getUnitSpecificationById",
         "tags": [
           "Unit Specification"
         ],
@@ -3190,6 +3272,7 @@
       "get": {
         "summary": "Get a unit specification detail entity",
         "description": "Returns a unit specification detail\n",
+        "operationId": "getUnitSpecificationDetailById",
         "tags": [
           "Unit Specification Detail"
         ],
@@ -3239,6 +3322,7 @@
       "get": {
         "summary": "Get all unit type entities",
         "description": "Returns all unit types\n",
+        "operationId": "getUnitTypes",
         "tags": [
           "Unit Type"
         ],
@@ -3277,6 +3361,7 @@
       "get": {
         "summary": "Get a unit type entity",
         "description": "Returns a unit type\n",
+        "operationId": "getUnitTypeById",
         "tags": [
           "Unit Type"
         ],
@@ -3326,6 +3411,7 @@
       "post": {
         "summary": "Add variables",
         "description": "Creates a new variables, clears existing variables when new variables are provided",
+        "operationId": "postVariables",
         "tags": [
           "Variables"
         ],

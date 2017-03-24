@@ -13,12 +13,17 @@ CREATE TABLE tag
       REFERENCES public.experiment (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT tag_ak_1 UNIQUE (name, value, experiment_id)
-)
+);
 
 ------Run after the table Creation-----
 CREATE INDEX "tag_fki_experiment_id" ON public.tag(experiment_id);
 
 CREATE INDEX "group_fki_parent_id" ON public.group(parent_id);
+
+--Prod grants
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_secure_app_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_secure_app_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_secure_ro_user;
 
 
 

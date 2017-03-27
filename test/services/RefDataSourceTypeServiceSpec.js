@@ -5,12 +5,12 @@ const db = require("../../src/db/DbManager")
 describe("RefDataSourceTypeService Specs", () => {
     let target
     let findStub
-    let getSourcesByTypeIdStub
+    let getSourcesStub
     let allStub
 
     before(() => {
         target = new RefDataSourceTypeService()
-        getSourcesByTypeIdStub = sinon.stub(target._refDataSourceService, 'getRefDataSourcesByRefDataSourceTypeId')
+        getSourcesStub = sinon.stub(target._refDataSourceService, 'getRefDataSources')
 
         allStub = sinon.stub(db.refDataSourceType, "all")
         findStub = sinon.stub(db.refDataSourceType, "find")
@@ -18,13 +18,13 @@ describe("RefDataSourceTypeService Specs", () => {
 
     afterEach(() => {
         findStub.reset()
-        getSourcesByTypeIdStub.reset()
+        getSourcesStub.reset()
         allStub.reset()
     })
 
     after(() => {
         findStub.restore()
-        getSourcesByTypeIdStub.restore()
+        getSourcesStub.restore()
         allStub.restore()
     })
 
@@ -76,12 +76,10 @@ describe("RefDataSourceTypeService Specs", () => {
     describe("getRefDataSourceTypesWithDataSources", ()=>{
         it("gets all sources with the types", ()=>{
             allStub.resolves([{id: 1}, {id: 2}])
-
-            getSourcesByTypeIdStub.onFirstCall().resolves([])
-            getSourcesByTypeIdStub.onSecondCall().resolves([{}])
+            getSourcesStub.resolves([{ref_data_source_type_id: 2}])
 
             return target.getRefDataSourceTypesWithDataSources().then((data)=>{
-                data.should.deep.equal([{id: 1, ref_data_sources: []},{id: 2, ref_data_sources: [{}]}])
+                data.should.deep.equal([{id: 1, ref_data_sources: []},{id: 2, ref_data_sources: [{ref_data_source_type_id: 2}]}])
             })
         })
 
@@ -90,19 +88,17 @@ describe("RefDataSourceTypeService Specs", () => {
 
             return target.getRefDataSourceTypesWithDataSources().should.be.rejected.then((err)=>{
                 err.message.should.equal("error")
-                sinon.assert.notCalled(getSourcesByTypeIdStub)
+                sinon.assert.notCalled(getSourcesStub)
             })
         })
 
         it("throws an error when one call to refDataSourceService fails", ()=>{
             allStub.resolves([{id: 1}, {id: 2}])
-
-            getSourcesByTypeIdStub.onFirstCall().resolves([])
-            getSourcesByTypeIdStub.onSecondCall().rejects("error")
+            getSourcesStub.rejects("error")
 
             return target.getRefDataSourceTypesWithDataSources().should.be.rejected.then((err)=>{
                 err.message.should.equal("error")
-                sinon.assert.calledTwice(getSourcesByTypeIdStub)
+                sinon.assert.calledOnce(getSourcesStub)
             })
         })
     })

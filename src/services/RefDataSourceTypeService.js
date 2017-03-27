@@ -29,11 +29,11 @@ class RefDataSourceTypeService {
 
     getRefDataSourceTypesWithDataSources(){
         return db.refDataSourceType.all().then((data) => {
-            return Promise.all(_.map(data, (d) => {
-                return this._refDataSourceService.getRefDataSourcesByRefDataSourceTypeId(d.id)
-            })).then((refDataSources) => {
-                return _.map(data, (d, index)=>{
-                    d["ref_data_sources"] = refDataSources[index]
+            return this._refDataSourceService.getRefDataSources().then((refDataSources)=>{
+                const dataSourcesGroupedByTypeId = _.groupBy(refDataSources, (rds) => { return rds.ref_data_source_type_id})
+
+                return _.map(data.slice(), (d) => {
+                    d["ref_data_sources"] = dataSourcesGroupedByTypeId[d.id] ? dataSourcesGroupedByTypeId[d.id] : []
                     return d
                 })
             })

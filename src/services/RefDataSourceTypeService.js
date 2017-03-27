@@ -33,7 +33,7 @@ class RefDataSourceTypeService {
                 const dataSourcesGroupedByTypeId = _.groupBy(refDataSources, (rds) => { return rds.ref_data_source_type_id})
 
                 return _.map(data.slice(), (d) => {
-                    d["ref_data_sources"] = dataSourcesGroupedByTypeId[d.id] ? dataSourcesGroupedByTypeId[d.id] : []
+                    d.ref_data_sources = dataSourcesGroupedByTypeId[d.id] ? dataSourcesGroupedByTypeId[d.id] : []
                     return d
                 })
             })

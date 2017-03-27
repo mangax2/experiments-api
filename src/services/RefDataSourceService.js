@@ -32,7 +32,7 @@ class RefDataSourceService {
                 throw AppError.notFound('Ref Data Source Not Found for requested id')
             } else {
                 return db.refDataSourceType.find(data.ref_data_source_type_id).then((refDataSourceType)=>{
-                    data["ref_data_source_type"] = refDataSourceType
+                    data.ref_data_source_type = refDataSourceType
                     return data
                 })
             }

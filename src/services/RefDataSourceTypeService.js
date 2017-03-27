@@ -1,10 +1,10 @@
-import db from "../db/DbManager"
-import AppError from "./utility/AppError"
-import log4js from "log4js"
-import _ from "lodash"
-import RefDataSourceService from "./RefDataSourceService"
+import db from '../db/DbManager'
+import AppError from './utility/AppError'
+import log4js from 'log4js'
+import _ from 'lodash'
+import RefDataSourceService from './RefDataSourceService'
 
-const logger = log4js.getLogger("RefDataSourceTypeService")
+const logger = log4js.getLogger('RefDataSourceTypeService')
 
 class RefDataSourceTypeService {
 
@@ -19,8 +19,8 @@ class RefDataSourceTypeService {
     getRefDataSourceTypeById(id){
         return db.refDataSourceType.find(id).then((data)=>{
             if(!data){
-                logger.error("Ref Data Source Type Not Found for requested id = " + id)
-                throw AppError.notFound("Ref Data Source Type Not Found for requested id")
+                logger.error('Ref Data Source Type Not Found for requested id = ' + id)
+                throw AppError.notFound('Ref Data Source Type Not Found for requested id')
             } else {
                 return data
             }

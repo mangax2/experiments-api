@@ -17,6 +17,7 @@ import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
 import RandomizationStrategyService from '../services/RandomizationStrategyService'
+import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
@@ -666,6 +667,14 @@ router.post('/composites/unit-specification-details', (req, res, next) => {
     return new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.body,req.context).then((value) => {
         return res.json(value)
     }).catch((err) => {
+        return next(err)
+    })
+})
+
+router.get('/ref-data-source-types', (req, res, next)=>{
+    return new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources().then((value)=>{
+        return res.json(value)
+    }).catch((err)=>{
         return next(err)
     })
 })

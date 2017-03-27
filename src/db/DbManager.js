@@ -16,12 +16,14 @@ import group from '../repos/group'
 import groupType from '../repos/groupType'
 import groupValue from '../repos/groupValue'
 import randomizationStrategy from '../repos/randomizationStrategy'
+import refDataSource from '../repos/refDataSource'
+import refDataSourceType from '../repos/refDataSourceType'
+import tag from '../repos/tag'
 import treatment from '../repos/treatment'
 import unit from '../repos/unit'
 import unitSpecification from '../repos/unitSpecification'
 import unitSpecificationDetail from '../repos/unitSpecificationDetail'
 import unitType from '../repos/unitType'
-import tag from '../repos/tag'
 
 // pg-promise initialization options:
 const options = {
@@ -39,17 +41,19 @@ const options = {
         obj.groupType = new (groupType) (obj, pgp)
         obj.groupValue = new (groupValue)(obj, pgp)
         obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
+        obj.refDataSource = new (refDataSource) (obj, pgp)
+        obj.refDataSourceType = new (refDataSourceType) (obj, pgp)
+        obj.tag = new (tag) (obj, pgp)
         obj.treatment = new (treatment)(obj, pgp)
         obj.unit = new (unit) (obj, pgp)
         obj.unitSpecification = new (unitSpecification) (obj, pgp)
         obj.unitSpecificationDetail = new (unitSpecificationDetail) (obj, pgp)
         obj.unitType = new (unitType) (obj, pgp)
-        obj.tag = new (tag) (obj, pgp)
     }
 }
 
 // Without this option, mocking parts of pg-promise in tests is not possible
-if (config.node_env== 'UNITTEST') {
+if (config.node_env === 'UNITTEST') {
     options.noLocking = true
 }
 

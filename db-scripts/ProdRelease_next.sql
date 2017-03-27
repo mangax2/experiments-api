@@ -10,6 +10,13 @@ CREATE TABLE ref_data_source_type
   CONSTRAINT ref_data_source_type_ak_1 UNIQUE (type)
 )
 
+INSERT INTO public.ref_data_source_type(
+             type, created_user_id, created_date, modified_user_id, modified_date)
+    VALUES ( 'Catalog', 'KPRAT1', CURRENT_TIMESTAMP, 'KPRAT1', CURRENT_TIMESTAMP);
+    INSERT INTO public.ref_data_source_type(
+             type, created_user_id, created_date, modified_user_id, modified_date)
+    VALUES ( 'None', 'KPRAT1', CURRENT_TIMESTAMP, 'KPRAT1', CURRENT_TIMESTAMP);
+
 CREATE TABLE ref_data_source
 (
   id serial NOT NULL,
@@ -25,6 +32,19 @@ CREATE TABLE ref_data_source
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT ref_data_source_ak_1 UNIQUE (name)
 )
+-----Update FK based on Primary Key------------------
+INSERT INTO public.ref_data_source(
+            name, ref_data_source_type_id, created_user_id, created_date,
+            modified_user_id, modified_date)
+    VALUES ( 'Formulation Catalog', 2, 'KPRAT1', CURRENT_TIMESTAMP,
+            'KPRAT1', CURRENT_TIMESTAMP);
+
+ INSERT INTO public.ref_data_source(
+            name, ref_data_source_type_id, created_user_id, created_date,
+            modified_user_id, modified_date)
+    VALUES ( 'Other', 3, 'KPRAT1', CURRENT_TIMESTAMP,
+            'KPRAT1', CURRENT_TIMESTAMP);
+
 
 ALTER TABLE public.factor ADD ref_data_source_id integer
 ALTER TABLE public.factor ADD CONSTRAINT factor_data_source_fk FOREIGN KEY (ref_data_source_id) REFERENCES public.ref_data_source(id) MATCH SIMPLE

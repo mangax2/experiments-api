@@ -2875,6 +2875,43 @@
         }
       }
     },
+    "/ref-data-source-types": {
+      "get": {
+        "summary": "Gets all Reference Data Source Types and all their defined Data Sources",
+        "description": "Returns an array of reference data source types and their data sources",
+        "operationId": "getRefDataSourceTypes",
+        "tags": ["Ref Data Sources"],
+        "responses": {
+          "200": {
+            "description": "All Reference Data Source Type Entities With Data Sources",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RefDataSourceTypeWithSources"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/treatments": {
       "post": {
         "summary": "Add treatments",
@@ -4211,6 +4248,10 @@
           "type": "integer",
           "description": "id of FactorType entity."
         },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
+        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity."
@@ -4236,6 +4277,10 @@
           "type": "integer",
           "description": "id of FactorType entity."
         },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
+        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity."
@@ -4256,6 +4301,10 @@
         "refFactorTypeId": {
           "type": "integer",
           "description": "id of FactorType entity"
+        },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
         },
         "experimentId": {
           "type": "integer",
@@ -4446,6 +4495,73 @@
         "name": {
           "type": "string",
           "description": "nome of the randomization strategy."
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "RefDataSource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id of the data source"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of the data source"
+        },
+        "refDataSourceTypeId": {
+          "type": "integer"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "RefDataSourceTypeWithSources": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "id of the data source type"
+        },
+        "type": {
+          "type": "string",
+          "description": "name of the data source type"
+        },
+        "refDataSources":{
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RefDataSource"
+          }
         },
         "createdDate": {
           "type": "string",

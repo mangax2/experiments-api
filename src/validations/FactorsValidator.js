@@ -10,6 +10,8 @@ class FactorsValidator extends SchemaValidator {
             {'paramName': 'tier', 'type': 'numeric', 'numericRange': {'min': 1, 'max': 10}},
             {'paramName': 'refFactorTypeId', 'type': 'numeric', 'required': true},
             {'paramName': 'refFactorTypeId', 'type': 'refData', 'entity': db.factorType},
+            {'paramName': 'refDataSourceId', 'type': 'numeric', 'required': true},
+            {'paramName': 'refDataSourceId', 'type': 'refData', 'entity': db.refDataSource},
             {'paramName': 'experimentId', 'type': 'numeric', 'required': true},
             {'paramName': 'experimentId', 'type': 'refData', 'entity': db.experiments},
             {
@@ -50,7 +52,7 @@ class FactorsValidator extends SchemaValidator {
     }
 
     preValidate(factorObj) {
-        if (!_.isArray(factorObj) || factorObj.length == 0) {
+        if (!_.isArray(factorObj) || factorObj.length === 0) {
             return Promise.reject(
                 AppError.badRequest('Factor request object needs to be an array'))
         } else {
@@ -70,7 +72,7 @@ class FactorsValidator extends SchemaValidator {
                 const names = _.map(innerArray, e=> {
                     return e[businessKeyPropertyNames[1]]
                 })
-                if (_.uniq(names).length != names.length) {
+                if (_.uniq(names).length !== names.length) {
                     this.messages.push(this.getDuplicateBusinessKeyError())
                     return false
                 }

@@ -4248,6 +4248,10 @@
           "type": "integer",
           "description": "id of FactorType entity."
         },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
+        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity."
@@ -4273,6 +4277,10 @@
           "type": "integer",
           "description": "id of FactorType entity."
         },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
+        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity."
@@ -4293,6 +4301,10 @@
         "refFactorTypeId": {
           "type": "integer",
           "description": "id of FactorType entity"
+        },
+        "refDataSourceId": {
+          "type": "integer",
+          "description": "id of the dataSource entity"
         },
         "experimentId": {
           "type": "integer",

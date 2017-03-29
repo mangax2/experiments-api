@@ -24,9 +24,9 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 factors.map(
                     factor => tx.one(
-                        "INSERT INTO factor(name, ref_factor_type_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) " +
-                        "VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP, $5) RETURNING id",
-                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId, factor.tier]
+                        "INSERT INTO factor(name, ref_factor_type_id, ref_data_source_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) " +
+                        "VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP, $6) RETURNING id",
+                        [factor.name, factor.refFactorTypeId, factor.refDataSourceId, factor.experimentId, context.userId, factor.tier]
                     )
                 )
             )
@@ -36,9 +36,16 @@ module.exports = (rep, pgp) => {
             return tx.batch(
                 factors.map(
                     factor => tx.oneOrNone(
-                        "UPDATE factor SET (name, ref_factor_type_id, experiment_id, modified_user_id, modified_date, tier) = " +
-                        "($1, $2, $3, $4, CURRENT_TIMESTAMP, $6) WHERE id=$5 RETURNING *",
-                        [factor.name, factor.refFactorTypeId, factor.experimentId, context.userId, factor.id, factor.tier]
+                        "UPDATE factor SET " +
+                        "(name, ref_factor_type_id, ref_data_source_id, experiment_id, modified_user_id, modified_date,     tier) = " +
+                        "($1,   $2,                 $3,                 $4,            $5,               CURRENT_TIMESTAMP, $7) WHERE id=$6 RETURNING *",
+                        [ factor.name,
+                            factor.refFactorTypeId,
+                            factor.refDataSourceId,
+                            factor.experimentId,
+                            context.userId,
+                            factor.id,
+                            factor.tier]
                     )
                 )
             )

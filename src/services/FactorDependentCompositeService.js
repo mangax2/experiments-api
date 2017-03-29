@@ -54,14 +54,14 @@ class FactorDependentCompositeService {
 
             const factors = _.map(value[0].factors, (factor)=> {
                 const levels = _.filter(value[0].levels, (level) => {
-                    return level.factor_id == factor.id
+                    return level.factor_id === factor.id
                 })
                 const levelValues = _.map(levels, (level) => {
                     return level.value
                 })
 
                 const type = _.find(value[1], {id: factor.ref_factor_type_id}).type.toLowerCase()
-                return {name: factor.name, type: type, levels: levelValues,tier:factor.tier}
+                return {name: factor.name, type: type, levels: levelValues,tier:factor.tier,refDataSourceId: factor.ref_data_source_id}
             })
 
             _.each(factors, (factor) => {

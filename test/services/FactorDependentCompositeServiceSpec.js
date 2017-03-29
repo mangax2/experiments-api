@@ -96,8 +96,8 @@ describe('FactorDependentCompositeService', () => {
         it('successfully gets independent factors with levels', function () {
             const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
                 factors: [
-                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor',tier:1},
-                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2',tier:2}
+                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor',tier:1,ref_data_source_id: 1},
+                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2',tier:2, ref_data_source_id: 1}
                 ],
                 levels: [
                     {id: 1, factor_id: 1, value: "value1"},
@@ -112,11 +112,11 @@ describe('FactorDependentCompositeService', () => {
                 data.should.deep.equal({
                     independent: [
                         {
-                            name: 'TestFactor',tier:1,
+                            name: 'TestFactor',tier:1,refDataSourceId: 1,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',tier:2,
+                            name: 'TestFactor2',tier:2,refDataSourceId: 1,
                             levels: ['value3']
                         }
                     ],
@@ -134,8 +134,8 @@ describe('FactorDependentCompositeService', () => {
         it('successfully gets exogenous factors with levels', function () {
             const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
                 factors: [
-                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor'},
-                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2'}
+                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor',ref_data_source_id:1},
+                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2',ref_data_source_id:1}
                 ],
                 levels: [
                     {id: 1, factor_id: 1, value: "value1"},
@@ -151,11 +151,11 @@ describe('FactorDependentCompositeService', () => {
                     independent: [],
                     exogenous: [
                         {
-                            name: 'TestFactor',tier:undefined,
+                            name: 'TestFactor',tier:undefined, refDataSourceId: 1,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',tier:undefined,
+                            name: 'TestFactor2',tier:undefined, refDataSourceId: 1,
                             levels: ['value3']
                         }
                     ],
@@ -212,9 +212,9 @@ describe('FactorDependentCompositeService', () => {
         it('successfully gets all factors with levels', function () {
             const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
                 factors: [
-                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor'},
-                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2'},
-                    {id: 3, ref_factor_type_id: 2, name: 'TestExogenous'}
+                    {id: 1, ref_factor_type_id: 1, name: 'TestFactor', ref_data_source_id: 1},
+                    {id: 2, ref_factor_type_id: 1, name: 'TestFactor2', ref_data_source_id: 1},
+                    {id: 3, ref_factor_type_id: 2, name: 'TestExogenous', ref_data_source_id: 2}
                 ],
                 levels: [
                     {id: 1, factor_id: 1, value: "value1"},
@@ -240,17 +240,17 @@ describe('FactorDependentCompositeService', () => {
                 data.should.deep.equal({
                     independent: [
                         {
-                            name: 'TestFactor',tier:undefined,
+                            name: 'TestFactor',tier:undefined, refDataSourceId: 1,
                             levels: ['value1', 'value2']
                         },
                         {
-                            name: 'TestFactor2',tier:undefined,
+                            name: 'TestFactor2',tier:undefined, refDataSourceId: 1,
                             levels: ['value3']
                         }
                     ],
                     exogenous: [
                         {
-                            name: 'TestExogenous',tier:undefined,
+                            name: 'TestExogenous',tier:undefined, refDataSourceId: 2,
                             levels: ['exo1', 'exo2']
                         }
                     ],

@@ -15,7 +15,7 @@ INSERT INTO public.ref_data_source_type(
     VALUES ( 'Catalog', 'KPRAT1', CURRENT_TIMESTAMP, 'KPRAT1', CURRENT_TIMESTAMP);
     INSERT INTO public.ref_data_source_type(
              type, created_user_id, created_date, modified_user_id, modified_date)
-    VALUES ( 'None', 'KPRAT1', CURRENT_TIMESTAMP, 'KPRAT1', CURRENT_TIMESTAMP);
+    VALUES ( 'I do not have a data source', 'KPRAT1', CURRENT_TIMESTAMP, 'KPRAT1', CURRENT_TIMESTAMP);
 
 CREATE TABLE ref_data_source
 (

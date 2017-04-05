@@ -55,3 +55,10 @@ ALTER TABLE public.factor ADD CONSTRAINT factor_data_source_fk FOREIGN KEY (ref_
 GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_secure_app_user;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_secure_app_user;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_secure_ro_user;
+
+
+------------------
+UPDATE public.ref_unit_spec
+SET name='Description'
+WHERE ref_unit_type_id = 2 AND name = 'Type'
+	OR ref_unit_type_id = 3 AND name = 'Comment';

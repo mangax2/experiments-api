@@ -1,9 +1,7 @@
-import config from '../../config'
-import log4js from 'log4js'
-const logger = log4js.getLogger('DbManager')
 import promise from 'bluebird'
 import pgPromise from 'pg-promise'
-
+import log4js from 'log4js'
+import config from '../../config'
 import combinationElement from '../repos/combinationElement'
 import dependentVariable from '../repos/dependentVariable'
 import experiments from '../repos/experiments'
@@ -25,36 +23,38 @@ import unitSpecification from '../repos/unitSpecification'
 import unitSpecificationDetail from '../repos/unitSpecificationDetail'
 import unitType from '../repos/unitType'
 
+const logger = log4js.getLogger('DbManager')
+
 // pg-promise initialization options:
 const options = {
-    promiseLib: promise,
-    extend: (obj) => {
-        obj.combinationElement = new (combinationElement)(obj, pgp)
-        obj.dependentVariable = new (dependentVariable)(obj, pgp)
-        obj.experiments = new (experiments)(obj, pgp)
-        obj.experimentDesign = new (experimentDesign)(obj, pgp)
-        obj.experimentSummary = new (experimentSummary) (obj, pgp)
-        obj.factor = new (factor)(obj, pgp)
-        obj.factorLevel = new (factorLevel)(obj, pgp)
-        obj.factorType = new (factorType)(obj, pgp)
-        obj.group = new (group) (obj, pgp)
-        obj.groupType = new (groupType) (obj, pgp)
-        obj.groupValue = new (groupValue)(obj, pgp)
-        obj.randomizationStrategy = new (randomizationStrategy) (obj, pgp)
-        obj.refDataSource = new (refDataSource) (obj, pgp)
-        obj.refDataSourceType = new (refDataSourceType) (obj, pgp)
-        obj.tag = new (tag) (obj, pgp)
-        obj.treatment = new (treatment)(obj, pgp)
-        obj.unit = new (unit) (obj, pgp)
-        obj.unitSpecification = new (unitSpecification) (obj, pgp)
-        obj.unitSpecificationDetail = new (unitSpecificationDetail) (obj, pgp)
-        obj.unitType = new (unitType) (obj, pgp)
-    }
+  promiseLib: promise,
+  extend: (obj) => {
+    obj.combinationElement = new (combinationElement)(obj, pgp)
+    obj.dependentVariable = new (dependentVariable)(obj, pgp)
+    obj.experiments = new (experiments)(obj, pgp)
+    obj.experimentDesign = new (experimentDesign)(obj, pgp)
+    obj.experimentSummary = new (experimentSummary)(obj, pgp)
+    obj.factor = new (factor)(obj, pgp)
+    obj.factorLevel = new (factorLevel)(obj, pgp)
+    obj.factorType = new (factorType)(obj, pgp)
+    obj.group = new (group)(obj, pgp)
+    obj.groupType = new (groupType)(obj, pgp)
+    obj.groupValue = new (groupValue)(obj, pgp)
+    obj.randomizationStrategy = new (randomizationStrategy)(obj, pgp)
+    obj.refDataSource = new (refDataSource)(obj, pgp)
+    obj.refDataSourceType = new (refDataSourceType)(obj, pgp)
+    obj.tag = new (tag)(obj, pgp)
+    obj.treatment = new (treatment)(obj, pgp)
+    obj.unit = new (unit)(obj, pgp)
+    obj.unitSpecification = new (unitSpecification)(obj, pgp)
+    obj.unitSpecificationDetail = new (unitSpecificationDetail)(obj, pgp)
+    obj.unitType = new (unitType)(obj, pgp)
+  },
 }
 
 // Without this option, mocking parts of pg-promise in tests is not possible
 if (config.node_env === 'UNITTEST') {
-    options.noLocking = true
+  options.noLocking = true
 }
 
 // Database connection parameters:
@@ -62,10 +62,11 @@ if (config.node_env === 'UNITTEST') {
 let dbConfig = {}
 
 // Setup database config if not running unit tests
-if(config.node_env !== 'UNITTEST'){
-    const cfServices = require('../services/utility/ServiceConfig')
-    dbConfig = cfServices.experimentsDataSource
-    logger.debug('loaded db connection config')
+if (config.node_env !== 'UNITTEST') {
+  // eslint-disable-next-line global-require
+  const cfServices = require('../services/utility/ServiceConfig')
+  dbConfig = cfServices.experimentsDataSource
+  logger.debug('loaded db connection config')
 }
 // const config = cfServices.experimentsDataSource
 // logger.debug('loaded db connection config')

@@ -1,24 +1,26 @@
 class AppUtil {
-    static createPostResponse(data) {
-        return data.map(d=> this.createResponseElements(d.id,201,'Resource created'))
-    }
+  static createPostResponse(data) {
+    return data.map(d => this.createResponseElements(d.id, 201, 'Resource created'))
+  }
 
-    static createPutResponse(data) {
-        return data.map(d=> this.createResponseElements(d.id,200,'Resource updated'))
+  static createPutResponse(data) {
+    return data.map(d => this.createResponseElements(d.id, 200, 'Resource updated'))
+  }
+
+  static createResponseElements(id, code, message) {
+    return {
+      status: code,
+      message,
+      id,
     }
-    static createResponseElements(id,code,message) {
-        return {
-            'status': code,
-            'message' : message,
-            'id': id
-        }
+  }
+
+  static createCompositePostResponse() {
+    return {
+      status: 200,
+      message: 'SUCCESS',
     }
-    static createCompositePostResponse() {
-        return {
-            'status': 200,
-            'message' : 'SUCCESS',
-        }
-    }
+  }
 
 }
 

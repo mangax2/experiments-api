@@ -6,8 +6,8 @@ const logger = log4js.getLogger('GroupTypeService')
 
 class GroupTypeService {
 
-  getGroupTypeById(id) {
-    return db.groupType.find(id).then((data) => {
+  getGroupTypeById = id => db.groupType.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Group Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Type Not Found for requested id')
@@ -15,11 +15,8 @@ class GroupTypeService {
         return data
       }
     })
-  }
 
-  getAllGroupTypes() {
-    return db.groupType.all()
-  }
+  getAllGroupTypes = () => db.groupType.all()
 }
 
 module.exports = GroupTypeService

@@ -27,10 +27,10 @@ describe('FactorDependentCompositeService', () => {
   before(() => {
     fdcs = new FDCS()
 
-    factorService = fdcs._factorService
-    factorLevelService = fdcs._factorLevelService
-    dependentVariableService = fdcs._dependentVariableService
-    factorTypeService = fdcs._factorTypeService
+    factorService = fdcs.factorService
+    factorLevelService = fdcs.factorLevelService
+    dependentVariableService = fdcs.dependentVariableService
+    factorTypeService = fdcs.factorTypeService
 
     getfactorStub = sinon.stub(factorService, 'getFactorsByExperimentId')
     getfactorLevelStub = sinon.stub(factorLevelService, 'getFactorLevelsByFactorId')
@@ -72,7 +72,7 @@ describe('FactorDependentCompositeService', () => {
 
   describe('getAllVariablesByExperimentId', function () {
     it('successfully gets no factors and no levels', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').resolves({
         factors: [],
         levels: [],
       })
@@ -94,7 +94,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('successfully gets independent factors with levels', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').resolves({
         factors: [
           { id: 1, ref_factor_type_id: 1, name: 'TestFactor', tier: 1, ref_data_source_id: 1 },
           { id: 2, ref_factor_type_id: 1, name: 'TestFactor2', tier: 2, ref_data_source_id: 1 },
@@ -132,7 +132,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('successfully gets exogenous factors with levels', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').resolves({
         factors: [
           { id: 1, ref_factor_type_id: 1, name: 'TestFactor', ref_data_source_id: 1 },
           { id: 2, ref_factor_type_id: 1, name: 'TestFactor2', ref_data_source_id: 1 },
@@ -170,7 +170,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('successfully gets dependent variables', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').resolves({
         factors: [],
         levels: [],
       })
@@ -210,7 +210,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('successfully gets all factors with levels', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').resolves({
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').resolves({
         factors: [
           { id: 1, ref_factor_type_id: 1, name: 'TestFactor', ref_data_source_id: 1 },
           { id: 2, ref_factor_type_id: 1, name: 'TestFactor2', ref_data_source_id: 1 },
@@ -274,7 +274,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('fails to retrieve factors', function () {
-      const getFactorWithLevelsStub = sinon.stub(fdcs, '_getFactorsWithLevels').rejects('Failure')
+      const getFactorWithLevelsStub = sinon.stub(fdcs, 'getFactorsWithLevels').rejects('Failure')
       getfactorTypeStub.resolves([])
       getdependentVariableStub.resolves([])
 
@@ -288,12 +288,12 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('_getFactorsWithLevels', function () {
+  describe('getFactorsWithLevels', function () {
     let getFactorStub, getFactorLevelStub
 
     before(() => {
-      getFactorStub = sinon.stub(fdcs, '_getFactors')
-      getFactorLevelStub = sinon.stub(fdcs, '_getFactorLevels')
+      getFactorStub = sinon.stub(fdcs, 'getFactors')
+      getFactorLevelStub = sinon.stub(fdcs, 'getFactorLevels')
     })
 
     after(() => {
@@ -310,7 +310,7 @@ describe('FactorDependentCompositeService', () => {
       getFactorStub.resolves([])
       getFactorLevelStub.resolves([])
 
-      return fdcs._getFactorsWithLevels(1).then((result) => {
+      return fdcs.getFactorsWithLevels(1).then((result) => {
         result.should.deep.equal({
           factors: [],
           levels: [],
@@ -322,7 +322,7 @@ describe('FactorDependentCompositeService', () => {
       getFactorStub.resolves([{ name: 'Factor1', id: 1 }])
       getFactorLevelStub.resolves([])
 
-      return fdcs._getFactorsWithLevels(1).then((result) => {
+      return fdcs.getFactorsWithLevels(1).then((result) => {
         result.should.deep.equal({
           factors: [{ name: 'Factor1', id: 1 }],
           levels: [],
@@ -337,7 +337,7 @@ describe('FactorDependentCompositeService', () => {
         factor_id: 1,
       }], [{ value: 'level3', factor_id: 2 }]])
 
-      return fdcs._getFactorsWithLevels(1).then((result) => {
+      return fdcs.getFactorsWithLevels(1).then((result) => {
         result.should.deep.equal({
           factors: [{ name: 'Factor1', id: 1 }, { name: 'Factor2', id: 2 }],
           levels: [{ value: 'level1', factor_id: 1 }, { value: 'level2', factor_id: 1 }, {
@@ -351,7 +351,7 @@ describe('FactorDependentCompositeService', () => {
     it('fails to get factors', function () {
       getFactorStub.rejects('Failed')
 
-      return fdcs._getFactorsWithLevels(1).should.be.rejected.then((err) => {
+      return fdcs.getFactorsWithLevels(1).should.be.rejected.then((err) => {
         err.message.should.equal('Failed')
         getFactorLevelStub.called.should.equal(false)
       })
@@ -361,17 +361,17 @@ describe('FactorDependentCompositeService', () => {
       getFactorStub.resolves([{ name: 'Factor1', id: 1 }])
       getFactorLevelStub.rejects('Failed')
 
-      return fdcs._getFactorsWithLevels(1).should.be.rejected.then((err) => {
+      return fdcs.getFactorsWithLevels(1).should.be.rejected.then((err) => {
         err.message.should.equal('Failed')
       })
     })
   })
 
-  describe('_getFactors', function () {
+  describe('getFactors', function () {
     it('calls factor service and returns no factors', function () {
       getfactorStub.resolves([])
 
-      return fdcs._getFactors(1).then((data) => {
+      return fdcs.getFactors(1).then((data) => {
         data.should.deep.equal([])
       })
     })
@@ -379,7 +379,7 @@ describe('FactorDependentCompositeService', () => {
     it('calls factor service and returns factors', function () {
       getfactorStub.resolves([{ name: 'Factor1', id: 1 }])
 
-      return fdcs._getFactors(1).then((data) => {
+      return fdcs.getFactors(1).then((data) => {
         data.should.deep.equal([{ name: 'Factor1', id: 1 }])
       })
     })
@@ -387,18 +387,18 @@ describe('FactorDependentCompositeService', () => {
     it('calls factor service and fails', function () {
       getfactorStub.rejects('Failed')
 
-      return fdcs._getFactors(1).should.be.rejected.then((err) => {
+      return fdcs.getFactors(1).should.be.rejected.then((err) => {
         err.message.should.equal('Failed')
       })
     })
   })
 
-  describe('_getFactorLevels', function () {
+  describe('getFactorLevels', function () {
     it('calls factor level service and returns no levels', function () {
       getfactorLevelStub.resolves([])
       const factors = [{ name: 'Test1', id: 1 }]
 
-      return fdcs._getFactorLevels(factors).then((data) => {
+      return fdcs.getFactorLevels(factors).then((data) => {
         data.should.deep.equal([[]])
         getfactorLevelStub.calledOnce.should.equal(true)
       })
@@ -408,7 +408,7 @@ describe('FactorDependentCompositeService', () => {
       getfactorLevelStub.onFirstCall().resolves([]).onSecondCall().resolves([])
       const factors = [{ name: 'Test1', id: 1 }, { name: 'Test2', id: 2 }]
 
-      return fdcs._getFactorLevels(factors).then((data) => {
+      return fdcs.getFactorLevels(factors).then((data) => {
         data.should.deep.equal([[], []])
         getfactorLevelStub.calledTwice.should.equal(true)
       })
@@ -418,7 +418,7 @@ describe('FactorDependentCompositeService', () => {
       getfactorLevelStub.onFirstCall().resolves([]).onSecondCall().rejects('Failed')
       const factors = [{ name: 'Test1', id: 1 }, { name: 'Test2', id: 2 }]
 
-      return fdcs._getFactorLevels(factors).should.be.rejected.then((err) => {
+      return fdcs.getFactorLevels(factors).should.be.rejected.then((err) => {
         err.message.should.equal('Failed')
         getfactorLevelStub.calledTwice.should.equal(true)
       })
@@ -439,19 +439,19 @@ describe('FactorDependentCompositeService', () => {
 
   describe('_mapVariableDTO2DbEntity', () => {
     it('returns empty array when passed empty array', () => {
-      const r = FDCS._mapVariableDTO2DbEntity([], 42, 7)
+      const r = FDCS.mapVariableDTO2DbEntity([], 42, 7)
       r.length.should.equal(0)
     })
 
     it('returns applies experimentId and variableTypeId to single element array', () => {
-      const r = FDCS._mapVariableDTO2DbEntity([{}], 42, 7)
+      const r = FDCS.mapVariableDTO2DbEntity([{}], 42, 7)
       r.length.should.equal(1)
       r[0].refFactorTypeId.should.equal(7)
       r[0].experimentId.should.equal(42)
     })
 
     it('returns applies experimentId and variableTypeId to multiple element array', () => {
-      const r = FDCS._mapVariableDTO2DbEntity([{}, {}], 42, 7)
+      const r = FDCS.mapVariableDTO2DbEntity([{}, {}], 42, 7)
       r.length.should.equal(2)
       r[0].refFactorTypeId.should.equal(7)
       r[0].experimentId.should.equal(42)
@@ -462,19 +462,19 @@ describe('FactorDependentCompositeService', () => {
 
   describe('_mapLevelDTO2DbEntity', () => {
     it('returns empty array when passed empty array', () => {
-      const r = FDCS._mapLevelDTO2DbEntity([], 42)
+      const r = FDCS.mapLevelDTO2DbEntity([], 42)
       r.length.should.equal(0)
     })
 
     it('creates object with level and factorId for single element array', () => {
-      const r = FDCS._mapLevelDTO2DbEntity(['value'], 42)
+      const r = FDCS.mapLevelDTO2DbEntity(['value'], 42)
       r.length.should.equal(1)
       r[0].value.should.equal('value')
       r[0].factorId.should.equal(42)
     })
 
     it('creates object with level and factorId for multiple element array', () => {
-      const r = FDCS._mapLevelDTO2DbEntity(['value1', 'value2'], 42)
+      const r = FDCS.mapLevelDTO2DbEntity(['value1', 'value2'], 42)
       r.length.should.equal(2)
       r[0].value.should.equal('value1')
       r[0].factorId.should.equal(42)
@@ -485,18 +485,18 @@ describe('FactorDependentCompositeService', () => {
 
   describe('_mapDependentVariableDTO2DbEntity', () => {
     it('returns empty array when passed empty array', () => {
-      const r = FDCS._mapDependentVariableDTO2DbEntity([], 42)
+      const r = FDCS.mapDependentVariableDTO2DbEntity([], 42)
       r.length.should.equal(0)
     })
 
     it('returns applies experimentId and variableTypeId to single element array', () => {
-      const r = FDCS._mapDependentVariableDTO2DbEntity([{}], 42)
+      const r = FDCS.mapDependentVariableDTO2DbEntity([{}], 42)
       r.length.should.equal(1)
       r[0].experimentId.should.equal(42)
     })
 
     it('returns applies experimentId and variableTypeId to multiple element array', () => {
-      const r = FDCS._mapDependentVariableDTO2DbEntity([{}, {}], 42)
+      const r = FDCS.mapDependentVariableDTO2DbEntity([{}, {}], 42)
       r.length.should.equal(2)
       r[0].experimentId.should.equal(42)
       r[1].experimentId.should.equal(42)
@@ -510,7 +510,7 @@ describe('FactorDependentCompositeService', () => {
 
     before(() => {
       mapVariableDTO2DbEntityStub =
-        sinon.stub(FDCS, '_mapVariableDTO2DbEntity')
+        sinon.stub(FDCS, 'mapVariableDTO2DbEntity')
     })
 
     after(() => {
@@ -521,7 +521,7 @@ describe('FactorDependentCompositeService', () => {
       mapVariableDTO2DbEntityStub.onFirstCall().returns([1, 2])
       mapVariableDTO2DbEntityStub.onSecondCall().returns([3, 4])
 
-      const r = FDCS._mapIndependentAndExogenousVariableDTO2Entity(
+      const r = FDCS.mapIndependentAndExogenousVariableDTO2Entity(
         42,
         testIndependentVariablesInput,
         testExogenousVariablesInput)
@@ -545,7 +545,7 @@ describe('FactorDependentCompositeService', () => {
     let mapLevelDTO2DbEntityStub
 
     before(() => {
-      mapLevelDTO2DbEntityStub = sinon.stub(FDCS, '_mapLevelDTO2DbEntity')
+      mapLevelDTO2DbEntityStub = sinon.stub(FDCS, 'mapLevelDTO2DbEntity')
     })
 
     beforeEach(() => {
@@ -557,7 +557,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('returns empty array when empty array is passed in.', () => {
-      const r = FDCS._mapVariablesDTO2LevelsEntity([], [])
+      const r = FDCS.mapVariablesDTO2LevelsEntity([], [])
 
       r.should.eql([])
       sinon.assert.notCalled(mapLevelDTO2DbEntityStub)
@@ -566,7 +566,7 @@ describe('FactorDependentCompositeService', () => {
     it('passes each factor and its id to _mapLevelDTO2DbEntity and flattens results when there are no levels', () => {
       mapLevelDTO2DbEntityStub.returns([])
 
-      const r = FDCS._mapVariablesDTO2LevelsEntity(
+      const r = FDCS.mapVariablesDTO2LevelsEntity(
         [{ levels: [] }],
         [{ id: 42 }],
       )
@@ -578,7 +578,7 @@ describe('FactorDependentCompositeService', () => {
       const levelEntity1 = {}
       mapLevelDTO2DbEntityStub.returns([levelEntity1])
 
-      const r = FDCS._mapVariablesDTO2LevelsEntity(
+      const r = FDCS.mapVariablesDTO2LevelsEntity(
         [{ levels: ['level1'] }],
         [{ id: 42 }],
       )
@@ -593,7 +593,7 @@ describe('FactorDependentCompositeService', () => {
       const levelEntity2 = {}
       mapLevelDTO2DbEntityStub.returns([levelEntity1, levelEntity2])
 
-      const r = FDCS._mapVariablesDTO2LevelsEntity(
+      const r = FDCS.mapVariablesDTO2LevelsEntity(
         [{ levels: ['level1', 'level2'] }],
         [{ id: 42 }],
       )
@@ -611,7 +611,7 @@ describe('FactorDependentCompositeService', () => {
       const levelEntity4 = {}
       mapLevelDTO2DbEntityStub.returns([levelEntity1, levelEntity2, levelEntity3, levelEntity4])
 
-      const r = FDCS._mapVariablesDTO2LevelsEntity(
+      const r = FDCS.mapVariablesDTO2LevelsEntity(
         [
           { levels: ['level1', 'level2'] },
           { levels: ['level3', 'level4'] },
@@ -633,7 +633,7 @@ describe('FactorDependentCompositeService', () => {
     let mapVariablesDTO2LevelsEntityStub
 
     before(() => {
-      mapVariablesDTO2LevelsEntityStub = sinon.stub(FDCS, '_mapVariablesDTO2LevelsEntity')
+      mapVariablesDTO2LevelsEntityStub = sinon.stub(FDCS, 'mapVariablesDTO2LevelsEntity')
     })
 
     beforeEach(() => {
@@ -647,7 +647,7 @@ describe('FactorDependentCompositeService', () => {
     it('does not call batch create factors when there are none to create', () => {
       deleteFactorsForExperimentIdStub.resolves()
 
-      return fdcs._persistVariablesWithLevels(42, [], testContext, testTx).then(() => {
+      return fdcs.persistVariablesWithLevels(42, [], testContext, testTx).then(() => {
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
           42,
@@ -667,7 +667,7 @@ describe('FactorDependentCompositeService', () => {
       const levelEntities = []
       mapVariablesDTO2LevelsEntityStub.returns(levelEntities)
 
-      return fdcs._persistVariablesWithLevels(42, factors, testContext, testTx).then(() => {
+      return fdcs.persistVariablesWithLevels(42, factors, testContext, testTx).then(() => {
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
           42,
@@ -689,7 +689,7 @@ describe('FactorDependentCompositeService', () => {
     it('returns rejected promise when call to deleteFactorsForExperimentId fails', () => {
       deleteFactorsForExperimentIdStub.rejects(testError)
 
-      return fdcs._persistVariablesWithLevels(42, [], testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariablesWithLevels(42, [], testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
@@ -706,7 +706,7 @@ describe('FactorDependentCompositeService', () => {
       deleteFactorsForExperimentIdStub.resolves()
       batchCreateFactorsStub.rejects(testError)
 
-      return fdcs._persistVariablesWithLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariablesWithLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
@@ -731,7 +731,7 @@ describe('FactorDependentCompositeService', () => {
       batchCreateLevelsStub.rejects(testError)
       mapVariablesDTO2LevelsEntityStub.returns(levelEntities)
 
-      return fdcs._persistVariablesWithLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariablesWithLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
@@ -763,7 +763,7 @@ describe('FactorDependentCompositeService', () => {
       batchCreateLevelsStub.resolves(testResponse)
       mapVariablesDTO2LevelsEntityStub.returns(levelEntities)
 
-      return fdcs._persistVariablesWithLevels(42, testVariables, testContext, testTx).then((r) => {
+      return fdcs.persistVariablesWithLevels(42, testVariables, testContext, testTx).then((r) => {
         r.should.equal(testResponse)
         sinon.assert.calledWithExactly(
           deleteFactorsForExperimentIdStub,
@@ -792,7 +792,7 @@ describe('FactorDependentCompositeService', () => {
       const testVariables = []
       deleteDependentVariablesForExperimentIdStub.resolves()
 
-      return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).then((r) => {
+      return fdcs.persistVariablesWithoutLevels(42, testVariables, testContext, testTx).then((r) => {
         sinon.assert.calledWithExactly(
           deleteDependentVariablesForExperimentIdStub,
           42,
@@ -806,7 +806,7 @@ describe('FactorDependentCompositeService', () => {
       const testVariables = [{}]
       deleteDependentVariablesForExperimentIdStub.rejects(testError)
 
-      return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariablesWithoutLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledWithExactly(
           deleteDependentVariablesForExperimentIdStub,
@@ -822,7 +822,7 @@ describe('FactorDependentCompositeService', () => {
       deleteDependentVariablesForExperimentIdStub.resolves()
       batchCreateDependentVariablesStub.rejects(testError)
 
-      return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariablesWithoutLevels(42, testVariables, testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledWithExactly(
           deleteDependentVariablesForExperimentIdStub,
@@ -842,7 +842,7 @@ describe('FactorDependentCompositeService', () => {
       deleteDependentVariablesForExperimentIdStub.resolves()
       batchCreateDependentVariablesStub.resolves(testResponse)
 
-      return fdcs._persistVariablesWithoutLevels(42, testVariables, testContext, testTx).then((r) => {
+      return fdcs.persistVariablesWithoutLevels(42, testVariables, testContext, testTx).then((r) => {
         r.should.equal(testResponse)
         sinon.assert.calledWithExactly(
           deleteDependentVariablesForExperimentIdStub,
@@ -866,8 +866,8 @@ describe('FactorDependentCompositeService', () => {
     let _persistVariablesWithoutLevelsStub
 
     before(() => {
-      _persistVariablesWithLevelsStub = sinon.stub(fdcs, '_persistVariablesWithLevels')
-      _persistVariablesWithoutLevelsStub = sinon.stub(fdcs, '_persistVariablesWithoutLevels')
+      _persistVariablesWithLevelsStub = sinon.stub(fdcs, 'persistVariablesWithLevels')
+      _persistVariablesWithoutLevelsStub = sinon.stub(fdcs, 'persistVariablesWithoutLevels')
     })
 
     beforeEach(() => {
@@ -883,7 +883,7 @@ describe('FactorDependentCompositeService', () => {
     it('returns rejected promise when _persistVariablesWithLevels fails', () => {
       _persistVariablesWithLevelsStub.rejects()
 
-      return fdcs._persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).should.be.rejected.then((err) => {
         sinon.assert.calledWithExactly(
           _persistVariablesWithLevelsStub,
           42,
@@ -899,7 +899,7 @@ describe('FactorDependentCompositeService', () => {
       _persistVariablesWithLevelsStub.resolves()
       _persistVariablesWithoutLevelsStub.rejects()
 
-      return fdcs._persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).should.be.rejected.then((err) => {
+      return fdcs.persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).should.be.rejected.then((err) => {
         sinon.assert.calledWithExactly(
           _persistVariablesWithLevelsStub,
           42,
@@ -921,7 +921,7 @@ describe('FactorDependentCompositeService', () => {
       _persistVariablesWithLevelsStub.resolves()
       _persistVariablesWithoutLevelsStub.resolves()
 
-      return fdcs._persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).then(() => {
+      return fdcs.persistVariables(42, testIndependentAndExogenousVariables, testDependentVariables, testContext, testTx).then(() => {
         sinon.assert.calledWithExactly(
           _persistVariablesWithLevelsStub,
           42,
@@ -956,11 +956,11 @@ describe('FactorDependentCompositeService', () => {
     let validateStub
 
     before(() => {
-      persistVariablesStub = sinon.stub(fdcs, '_persistVariables')
-      mapIndependentAndExogenousVariableDTO2EntityStub = sinon.stub(FDCS, '_mapIndependentAndExogenousVariableDTO2Entity')
-      mapDependentVariableDTO2DbEntityStub = sinon.stub(FDCS, '_mapDependentVariableDTO2DbEntity')
+      persistVariablesStub = sinon.stub(fdcs, 'persistVariables')
+      mapIndependentAndExogenousVariableDTO2EntityStub = sinon.stub(FDCS, 'mapIndependentAndExogenousVariableDTO2Entity')
+      mapDependentVariableDTO2DbEntityStub = sinon.stub(FDCS, 'mapDependentVariableDTO2DbEntity')
       createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
-      validateStub = sinon.stub(fdcs._variablesValidator, 'validate')
+      validateStub = sinon.stub(fdcs.variablesValidator, 'validate')
 
       mapIndependentAndExogenousVariableDTO2EntityStub.returns(independentAndExogenousEntities)
       mapDependentVariableDTO2DbEntityStub.returns(dependentEntities)

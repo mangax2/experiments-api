@@ -9,33 +9,42 @@ export class SchemaValidator extends BaseValidator {
   schemaCheck(targetObject, schema, optionalTransaction) {
     return Promise.all(
       _.map(schema, (elementSchema) => {
-        const key = _.keys(targetObject).find(x => x == elementSchema.paramName)
-        if (key == null || key == undefined) {
+        const key = _.keys(targetObject).find(x => x === elementSchema.paramName)
+        if (key === null || key === undefined) {
           return this.schemaElementCheck(null, elementSchema, targetObject, optionalTransaction)
         }
-        return this.schemaElementCheck(targetObject[key], elementSchema, targetObject, optionalTransaction)
+        return this.schemaElementCheck(
+          targetObject[key],
+          elementSchema,
+          targetObject,
+          optionalTransaction,
+        )
       }),
     )
   }
 
   schemaElementCheck(elementValue, elementSchema, targetObject, optionalTransaction) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (this.literalCheck(elementValue, elementSchema.paramName)) {
         if (elementSchema.required) {
           this.checkRequired(elementValue, elementSchema.paramName)
         }
 
-        if (elementValue != undefined && elementValue != null) {
-          if (elementSchema.type == 'numeric') {
+        if (elementValue !== undefined && elementValue !== null) {
+          if (elementSchema.type === 'numeric') {
             this.checkNumeric(elementValue, elementSchema.paramName)
             if (elementSchema.numericRange) {
-              this.checkNumericRange(elementValue, elementSchema.numericRange, elementSchema.paramName)
+              this.checkNumericRange(
+                elementValue,
+                elementSchema.numericRange,
+                elementSchema.paramName,
+              )
             }
-          } else if (elementSchema.type == 'text') {
+          } else if (elementSchema.type === 'text') {
             this.checkLength(elementValue, elementSchema.lengthRange, elementSchema.paramName)
-          } else if (elementSchema.type == 'constant') {
+          } else if (elementSchema.type === 'constant') {
             this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
-          } else if (elementSchema.type == 'boolean') {
+          } else if (elementSchema.type === 'boolean') {
             this.checkBoolean(elementValue, elementSchema.paramName)
           }
         }
@@ -50,17 +59,16 @@ export class SchemaValidator extends BaseValidator {
 
   validateBatchForRI(batchPayload, operationName, optionalTransaction) {
     return new Promise((resolve, reject) => {
-      const riSchema = _.filter(this.getSchema(operationName), schema => schema.type == 'refData' || schema.type == 'businessKey')
+      const riSchema = _.filter(this.getSchema(operationName), schema => schema.type === 'refData' || schema.type === 'businessKey')
       const riCheckArray = []
       _.map(riSchema, (schema) => {
         _.forEach(batchPayload, (p) => {
           const riCheckObj = {}
-          const key = _.keys(p).find(x => x == schema.paramName)
+          const key = _.keys(p).find(x => x === schema.paramName)
           riCheckObj.entity = schema.entity
           riCheckObj.updateId = p.id
-          if (schema.type == 'businessKey') {
-            const vals = _.map(schema.keys, key => p[key])
-            riCheckObj.keys = vals
+          if (schema.type === 'businessKey') {
+            riCheckObj.keys = _.map(schema.keys, k => p[k])
           } else {
             riCheckObj.id = p[key]
           }
@@ -71,7 +79,7 @@ export class SchemaValidator extends BaseValidator {
         })
       })
 
-      if (riCheckArray.length == 0) {
+      if (riCheckArray.length === 0) {
         resolve()
       } else {
         const riCheckGroupByEntity = _.values(_.groupBy(riCheckArray, 'paramName'))
@@ -87,9 +95,11 @@ export class SchemaValidator extends BaseValidator {
   postValidate(targetObject) {
     if (!this.hasErrors()) {
       // Check the business key
-      const uniqArray = _.uniqWith(_.map(targetObject, obj => _.pick(obj, this.getBusinessKeyPropertyNames())), _.isEqual)
+      const uniqArray = _.uniqWith(_.map(targetObject, obj =>
+        _.pick(obj, this.getBusinessKeyPropertyNames())), _.isEqual,
+      )
 
-      if (uniqArray.length != targetObject.length) {
+      if (uniqArray.length !== targetObject.length) {
         return Promise.reject(
           AppError.badRequest(this.getDuplicateBusinessKeyError()),
         )
@@ -101,17 +111,17 @@ export class SchemaValidator extends BaseValidator {
 
   getSchema(operationName) {
     logger.error('getSchema not implemented')
-    throw 'getSchema not implemented'
+    throw new Error('getSchema not implemented')
   }
 
   getBusinessKeyPropertyNames() {
     logger.error('getBusinessKeyPropertyNames not implemented')
-    throw 'getBusinessKeyPropertyNames not implemented'
+    throw new Error('getBusinessKeyPropertyNames not implemented')
   }
 
   getDuplicateBusinessKeyError() {
     logger.error('getDuplicateBusinessKeyError not implemented')
-    throw 'getDuplicateBusinessKeyError not implemented'
+    throw new Error('getDuplicateBusinessKeyError not implemented')
   }
 }
 

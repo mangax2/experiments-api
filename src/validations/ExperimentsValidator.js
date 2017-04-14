@@ -38,6 +38,8 @@ class ExperimentsValidator extends SchemaValidator {
         return ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS
       case 'FILTER':
         return ExperimentsValidator.FILTER_SCHEMA_ELEMENTS
+      default:
+        return ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS
     }
   }
 
@@ -46,7 +48,7 @@ class ExperimentsValidator extends SchemaValidator {
   }
 
   preValidate(factorObj) {
-    if (!_.isArray(factorObj) || factorObj.length == 0) {
+    if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Experiments request object needs to be an array'))
     }

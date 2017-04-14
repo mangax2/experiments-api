@@ -12,27 +12,28 @@ const logger = log4js.getLogger('ExperimentsService')
 class ExperimentsService {
 
   constructor() {
-    this._validator = new ExperimentsValidator()
-    this._tagService = new TagService()
+    this.validator = new ExperimentsValidator()
+    this.tagService = new TagService()
   }
 
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, tx) {
-    return this._validator.validate(experiments, 'POST', tx).then(() => db.experiments.batchCreate(experiments, context, tx).then((data) => {
+    return this.validator.validate(experiments, 'POST', tx).then(() => db.experiments.batchCreate(experiments, context, tx).then((data) => {
       const experimentIds = _.map(data, d => d.id)
-      const tags = this._assignExperimentIdToTags(experimentIds, experiments)
+      const tags = this.assignExperimentIdToTags(experimentIds, experiments)
       if (tags && tags.length > 0) {
-        return this._tagService.batchCreateTags(tags, context, tx).then(() => AppUtil.createPostResponse(data))
+        return this.tagService.batchCreateTags(tags, context, tx)
+          .then(() => AppUtil.createPostResponse(data))
       }
       return AppUtil.createPostResponse(data)
     }))
   }
 
   getExperiments(queryString) {
-    if (this._isFilterRequest(queryString) === true) {
-      return this._getExperimentsByFilters(queryString)
+    if (this.isFilterRequest(queryString) === true) {
+      return this.getExperimentsByFilters(queryString)
     }
-    return this._getAllExperiments()
+    return this.getAllExperiments()
   }
 
   @Transactional('getExperimentById')
@@ -42,7 +43,7 @@ class ExperimentsService {
         logger.error(`Experiment Not Found for requested experimentId = ${id}`)
         throw AppError.notFound('Experiment Not Found for requested experimentId')
       } else {
-        return this._tagService.getTagsByExperimentId(id, tx).then((dbTags) => {
+        return this.tagService.getTagsByExperimentId(id, tx).then((dbTags) => {
           data.tags = dbTags
           return data
         })
@@ -52,15 +53,15 @@ class ExperimentsService {
 
   @Transactional('updateExperiment')
   updateExperiment(id, experiment, context, tx) {
-    return this._validator.validate([experiment], 'PUT', tx).then(() => db.experiments.update(id, experiment, context, tx).then((data) => {
+    return this.validator.validate([experiment], 'PUT', tx).then(() => db.experiments.update(id, experiment, context, tx).then((data) => {
       if (!data) {
         logger.error(`Experiment Not Found to Update for id = ${id}`)
         throw AppError.notFound('Experiment Not Found to Update')
       } else {
-        return this._tagService.deleteTagsForExperimentId(id, tx).then(() => {
-          const tags = this._assignExperimentIdToTags([id], [experiment])
+        return this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
+          const tags = this.assignExperimentIdToTags([id], [experiment])
           if (tags.length > 0) {
-            return this._tagService.batchCreateTags(tags, context, tx).then(() => data)
+            return this.tagService.batchCreateTags(tags, context, tx).then(() => data)
           }
           return data
         })
@@ -68,8 +69,8 @@ class ExperimentsService {
     }))
   }
 
-  deleteExperiment(id) {
-    return db.experiments.remove(id).then((data) => {
+  deleteExperiment = id => db.experiments.remove(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Experiment Not Found for requested experimentId = ${id}`)
         throw AppError.notFound('Experiment Not Found for requested experimentId')
@@ -77,22 +78,19 @@ class ExperimentsService {
         return data
       }
     })
-  }
 
-  _getExperimentsByFilters(queryString) {
-    return this._validator.validate([queryString], 'FILTER').then(() => {
-      const lowerCaseTagNames = this._toLowerCaseArray(queryString['tags.name'])
-      const lowerCaseTagValues = this._toLowerCaseArray(queryString['tags.value'])
+  getExperimentsByFilters(queryString) {
+    return this.validator.validate([queryString], 'FILTER').then(() => {
+      const lowerCaseTagNames = this.toLowerCaseArray(queryString['tags.name'])
+      const lowerCaseTagValues = this.toLowerCaseArray(queryString['tags.value'])
       return db.experiments.findExperimentsByTags(lowerCaseTagNames, lowerCaseTagValues)
     })
   }
 
-  _getAllExperiments() {
-    return db.experiments.all()
-  }
+  getAllExperiments = () => db.experiments.all()
 
-  _assignExperimentIdToTags(experimentIds, experiments) {
-    return _.compact(_.flatMap(experimentIds, (id, index) => {
+  assignExperimentIdToTags = (experimentIds, experiments) => _.compact(
+    _.flatMap(experimentIds, (id, index) => {
       const tags = experiments[index].tags
       if (tags && tags.length > 0) {
         _.forEach(tags, (tag) => {
@@ -103,16 +101,16 @@ class ExperimentsService {
       }
       return experiments[index].tags
     }))
-  }
 
-  _isFilterRequest(queryString) {
+  isFilterRequest = (queryString) => {
     const allowedFilters = ['tags.name', 'tags.value']
-    return !_.isEmpty(queryString) && _.intersection(Object.keys(queryString), allowedFilters).length > 0
+    return !_.isEmpty(queryString)
+      && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
-  _toLowerCaseArray(queryStringValue) {
-    return queryStringValue ? _.map(queryStringValue.split(','), _.toLower) : []
-  }
+  toLowerCaseArray = queryStringValue => (
+    queryStringValue ? _.map(queryStringValue.split(','), _.toLower) : []
+  )
 }
 
 module.exports = ExperimentsService

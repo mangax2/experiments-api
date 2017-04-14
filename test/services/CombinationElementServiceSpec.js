@@ -33,12 +33,12 @@ describe('CombinationElementService', () => {
   before(() => {
     target = new CombinationElementService()
 
-    getTreatmentByIdStub = sinon.stub(target._treatmentService, 'getTreatmentById')
-    batchGetTreatmentByIdsStub = sinon.stub(target._treatmentService, 'batchGetTreatmentByIds')
+    getTreatmentByIdStub = sinon.stub(target.treatmentService, 'getTreatmentById')
+    batchGetTreatmentByIdsStub = sinon.stub(target.treatmentService, 'batchGetTreatmentByIds')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(target._validator, 'validate')
+    validateStub = sinon.stub(target.validator, 'validate')
     repositoryStub = sinon.stub(db.combinationElement, 'repository', () => {
       return {
         tx: function (transactionName, callback) {

@@ -21,7 +21,7 @@ class ExperimentDesignsValidator extends SchemaValidator {
   }
 
   preValidate(factorObj) {
-    if (!_.isArray(factorObj) || factorObj.length == 0) {
+    if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Experiment Designs request object needs to be an array'))
     }

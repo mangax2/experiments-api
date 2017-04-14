@@ -3,6 +3,7 @@ import log4js from 'log4js'
 import validator from 'validator'
 import AppError from '../services/utility/AppError'
 import ReferentialIntegrityService from '../services/ReferentialIntegrityService'
+
 const logger = log4js.getLogger('BaseValidator')
 
 class BaseValidator {
@@ -15,9 +16,10 @@ class BaseValidator {
     return this.messages.length > 0
   }
 
-  _validateArray(objectArray, operationName, optionalTransaction) {
+  validateArray(objectArray, operationName, optionalTransaction) {
     return Promise.all(
-      _.map(objectArray, element => this.validateEntity(element, operationName, optionalTransaction)),
+      _.map(objectArray, element =>
+        this.validateEntity(element, operationName, optionalTransaction)),
     ).then(() => {
       if (!this.hasErrors()) {
         return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
@@ -25,14 +27,14 @@ class BaseValidator {
     })
   }
 
-  _validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
+  validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
     return _.isArray(targetObject)
-      ? this._validateArray(targetObject, operationName, optionalTransaction)
+      ? this.validateArray(targetObject, operationName, optionalTransaction)
       : this.validateEntity(targetObject, operationName, optionalTransaction)
   }
 
   validate(targetObject, operationName, optionalTransaction) {
-    return this.preValidate(targetObject).then(() => this._validateArrayOrSingleEntity(
+    return this.preValidate(targetObject).then(() => this.validateArrayOrSingleEntity(
       targetObject, operationName, optionalTransaction,
     ).then(() => this.postValidate(targetObject)).then(() => this.check()))
   }
@@ -72,7 +74,7 @@ class BaseValidator {
   }
 
   checkRequired(value, name) {
-    if (value == undefined || value == null || validator.isEmpty(value.toString())) {
+    if (value === undefined || value === null || validator.isEmpty(value.toString())) {
       this.messages.push(`${name} is required`)
     }
   }
@@ -90,7 +92,7 @@ class BaseValidator {
   }
 
   checkConstants(value, data, name) {
-    if (data.indexOf(value) == -1) {
+    if (data.indexOf(value) === -1) {
       this.messages.push(`${name} requires a valid value`)
     }
   }
@@ -102,11 +104,12 @@ class BaseValidator {
   }
 
   checkReferentialIntegrityById(id, entity, optionalTransaction) {
-    return this.referentialIntegrityService.getById(id, entity, optionalTransaction).then((data) => {
-      if (!data) {
-        this.messages.push(`${this.getEntityName()} not found for id ${id}`)
-      }
-    })
+    return this.referentialIntegrityService.getById(id, entity, optionalTransaction)
+      .then((data) => {
+        if (!data) {
+          this.messages.push(`${this.getEntityName()} not found for id ${id}`)
+        }
+      })
   }
 
   checkRIBatch(riBatchOfGroups, optionalTransaction) {
@@ -114,62 +117,67 @@ class BaseValidator {
       _.map(riBatchOfGroups, groupSet =>
         // Note: It is assumed that all elements in the group set are either referential integrity
         // checks, or business key uniqueness checks
-        this._getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)),
+        this.getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)),
     )
   }
 
-  _getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction) {
-    if (groupSet.length == 0) {
+  getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction) {
+    if (groupSet.length === 0) {
       return Promise.resolve()
     }
 
     const entity = groupSet[0].entity
-    const ids = this._getDistinctIds(groupSet)
+    const ids = this.getDistinctIds(groupSet)
     if (ids.length > 0) {
       // Note: ids list is assumed to have no duplicates before calling this function
-      return this._verifyIdsExist(ids, groupSet, entity, optionalTransaction)
+      return this.verifyIdsExist(ids, groupSet, entity, optionalTransaction)
     }
-    return this._verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction)
+    return this.verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction)
   }
 
-  _getDistinctIds(groupSet) {
-    return _.chain(groupSet).map(g => g.id).filter((e => e != undefined)).uniq().value()
+  getDistinctIds(groupSet) {
+    return _.chain(groupSet).map(g => g.id).filter((e => e !== undefined)).uniq()
+      .value()
   }
 
-  _verifyIdsExist(ids, groupSet, entity, optionalTransaction) {
+  verifyIdsExist(ids, groupSet, entity, optionalTransaction) {
     // Note: ids list is assumed to have no duplicates before calling this function
-    return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction).then((data) => {
-      if (data.length != ids.length) {
-        this.messages.push(`${this.getEntityName()} not found for ${groupSet[0].paramName}(s): ${this._getIdDifference(ids, data)}`)
-      }
-    })
+    return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction)
+      .then((data) => {
+        if (data.length !== ids.length) {
+          this.messages.push(`${this.getEntityName()} not found for ${groupSet[0].paramName}(s): ${this.getIdDifference(ids, data)}`)
+        }
+      })
   }
 
-  _extractBusinessKeys(groupSet) {
+  extractBusinessKeys(groupSet) {
     return _.map(groupSet, r => ({ keys: r.keys, updateId: r.updateId }))
   }
 
-  _verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction) {
-    const businessKeyObjects = this._extractBusinessKeys(groupSet)
-    return this.referentialIntegrityService.getEntitiesByKeys(businessKeyObjects, entity, optionalTransaction).then((data) => {
-      if (data && data.length > 0) {
-        this.messages.push(`${this.getEntityName()} already exists for business keys${this._formatBusinessKey(data)}`)
-      }
-    })
+  verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction) {
+    const businessKeyObjects = this.extractBusinessKeys(groupSet)
+    return this.referentialIntegrityService.getEntitiesByKeys(
+      businessKeyObjects,
+      entity,
+      optionalTransaction).then((data) => {
+        if (data && data.length > 0) {
+          this.messages.push(`${this.getEntityName()} already exists for business keys${this.formatBusinessKey(data)}`)
+        }
+      })
   }
 
-  _getIdDifference(ids, data) {
+  getIdDifference(ids, data) {
     const idsFromDb = _.map(data, d => d.id)
     return _.difference(ids, idsFromDb)
   }
 
-  _formatBusinessKey(dataFromDb) {
-    const result = _.map(dataFromDb, d => JSON.stringify(d).replace(/\"/g, ''))
+  formatBusinessKey(dataFromDb) {
+    const result = _.map(dataFromDb, d => JSON.stringify(d).replace(/"/g, ''))
     return result.join()
   }
 
   getEntityName() {
-    throw 'entityName not implemented'
+    throw new Error('entityName not implemented')
   }
 
   check() {

@@ -11,36 +11,41 @@ import VariablesValidator from '../validations/VariablesValidator'
 class FactorDependentCompositeService {
 
   constructor() {
-    this._experimentService = new ExperimentsService()
-    this._factorLevelService = new FactorLevelService()
-    this._factorService = new FactorService()
-    this._dependentVariableService = new DependentVariableService()
-    this._factorTypeService = new FactorTypeService()
+    this.experimentService = new ExperimentsService()
+    this.factorLevelService = new FactorLevelService()
+    this.factorService = new FactorService()
+    this.dependentVariableService = new DependentVariableService()
+    this.factorTypeService = new FactorTypeService()
 
-    this._variablesValidator = new VariablesValidator()
+    this.variablesValidator = new VariablesValidator()
   }
 
-  _getFactorsWithLevels(experimentId) {
-    return this._getFactors(experimentId).then(factors => this._getFactorLevels(factors).then(levels => ({
-      factors: _.flatten(factors),
-      levels: _.flatten(levels),
-    })))
+  getFactorsWithLevels(experimentId) {
+    return this.getFactors(experimentId)
+      .then(factors => this.getFactorLevels(factors)
+        .then(levels => ({
+          factors: _.flatten(factors),
+          levels: _.flatten(levels),
+        })),
+      )
   }
 
-  _getFactors(experimentId) {
-    return this._factorService.getFactorsByExperimentId(experimentId)
+  getFactors(experimentId) {
+    return this.factorService.getFactorsByExperimentId(experimentId)
   }
 
-  _getFactorLevels(factors) {
-    return Promise.all(_.map(factors, factor => this._factorLevelService.getFactorLevelsByFactorId(factor.id)))
+  getFactorLevels(factors) {
+    return Promise.all(_.map(factors, factor =>
+      this.factorLevelService.getFactorLevelsByFactorId(factor.id)),
+    )
   }
 
   getAllVariablesByExperimentId(experimentId) {
     return Promise.all(
       [
-        this._getFactorsWithLevels(experimentId),
-        this._factorTypeService.getAllFactorTypes(),
-        this._dependentVariableService.getDependentVariablesByExperimentId(experimentId),
+        this.getFactorsWithLevels(experimentId),
+        this.factorTypeService.getAllFactorTypes(),
+        this.dependentVariableService.getDependentVariablesByExperimentId(experimentId),
       ],
     ).then((value) => {
       const variablesObject = {
@@ -92,7 +97,7 @@ class FactorDependentCompositeService {
     return 2
   }
 
-  static _mapVariableDTO2DbEntity(variables, experimentId, variableTypeId) {
+  static mapVariableDTO2DbEntity(variables, experimentId, variableTypeId) {
     return _.map(variables, (variable) => {
       variable.refFactorTypeId = variableTypeId
       variable.experimentId = experimentId
@@ -100,32 +105,32 @@ class FactorDependentCompositeService {
     })
   }
 
-  static _mapLevelDTO2DbEntity(levels, factorId) {
+  static mapLevelDTO2DbEntity(levels, factorId) {
     return _.map(levels, level => ({
       value: level,
       factorId,
     }))
   }
 
-  static _mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
+  static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
     return _.map(dependentVariables, (dependentVariable) => {
       dependentVariable.experimentId = experimentId
       return dependentVariable
     })
   }
 
-  static _mapIndependentAndExogenousVariableDTO2Entity(experimentId,
-                                                       independentVariables,
-                                                       exogenousVariables) {
+  static mapIndependentAndExogenousVariableDTO2Entity(experimentId,
+    independentVariables,
+    exogenousVariables) {
     const independentVariableEntities =
-      FactorDependentCompositeService._mapVariableDTO2DbEntity(
+      FactorDependentCompositeService.mapVariableDTO2DbEntity(
         independentVariables,
         experimentId,
         FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID,
       )
 
     const exogenousVariableEntities =
-      FactorDependentCompositeService._mapVariableDTO2DbEntity(
+      FactorDependentCompositeService.mapVariableDTO2DbEntity(
         exogenousVariables,
         experimentId,
         FactorDependentCompositeService.EXOGENOUS_VARIABLE_TYPE_ID,
@@ -134,59 +139,73 @@ class FactorDependentCompositeService {
     return _.concat(independentVariableEntities, exogenousVariableEntities)
   }
 
-  static _mapVariablesDTO2LevelsEntity(variables, ids) {
+  static mapVariablesDTO2LevelsEntity(variables, ids) {
     // This produces an array of arrays where each sub array represents levels of a variable
-    const factorLevels = _.map(variables, (factor, factorIndex) => FactorDependentCompositeService._mapLevelDTO2DbEntity(
-      factor.levels,
-      ids[factorIndex].id))
+    const factorLevels = _.map(variables, (factor, factorIndex) =>
+      FactorDependentCompositeService.mapLevelDTO2DbEntity(factor.levels, ids[factorIndex].id),
+    )
     // This returns an array of levels removing the sub array.
     return _.flatten(factorLevels)
   }
 
-  _persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx) {
-    return this._factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
+  persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx) {
+    return this.factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
       if (independentAndExogenousVariables.length > 0) {
-        return this._factorService.batchCreateFactors(independentAndExogenousVariables, context, tx).then((ids) => {
-          const levelEntities = FactorDependentCompositeService._mapVariablesDTO2LevelsEntity(independentAndExogenousVariables, ids)
-          if (levelEntities.length > 0) {
-            return this._factorLevelService.batchCreateFactorLevels(
+        return this.factorService.batchCreateFactors(independentAndExogenousVariables, context, tx)
+          .then((ids) => {
+            const levelEntities = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity(
+              independentAndExogenousVariables,
+              ids,
+            )
+            if (levelEntities.length > 0) {
+              return this.factorLevelService.batchCreateFactorLevels(
               levelEntities,
               context,
               tx)
-          }
-        })
+            }
+          })
       }
     })
   }
 
-  _persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx) {
-    return this._dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx).then(() => {
-      if (dependentVariables.length > 0) {
-        return this._dependentVariableService.batchCreateDependentVariables(dependentVariables, context, tx)
-      }
-    })
+  persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx) {
+    return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx)
+      .then(() => {
+        if (dependentVariables.length > 0) {
+          return this.dependentVariableService.batchCreateDependentVariables(
+            dependentVariables,
+            context,
+            tx,
+          )
+        }
+      })
   }
 
-  _persistVariables(experimentId,
-                    independentAndExogenousVariables,
-                    dependentVariables,
-                    context,
-                    tx) {
-    return this._persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx).then(() => this._persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx))
+  persistVariables(experimentId,
+    independentAndExogenousVariables,
+    dependentVariables,
+    context,
+    tx) {
+    return this.persistVariablesWithLevels(
+      experimentId,
+      independentAndExogenousVariables,
+      context,
+      tx,
+    ).then(() => this.persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx))
   }
 
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, context, tx) {
-    return this._variablesValidator.validate(experimentVariables, 'POST', tx).then(() => {
+    return this.variablesValidator.validate(experimentVariables, 'POST', tx).then(() => {
       const experimentId = experimentVariables.experimentId
-      return this._persistVariables(
+      return this.persistVariables(
         experimentId,
-        FactorDependentCompositeService._mapIndependentAndExogenousVariableDTO2Entity(
+        FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(
           experimentId,
           experimentVariables.independent,
           experimentVariables.exogenous,
         ),
-        FactorDependentCompositeService._mapDependentVariableDTO2DbEntity(
+        FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
           experimentVariables.dependent,
           experimentId,
         ),

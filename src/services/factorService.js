@@ -11,45 +11,44 @@ const logger = log4js.getLogger('FactorService')
 class FactorService {
 
   constructor() {
-    this._validator = new FactorsValidator()
-    this._experimentService = new ExperimentsService()
+    this.validator = new FactorsValidator()
+    this.experimentService = new ExperimentsService()
   }
 
   @Transactional('batchCreateFactors')
   batchCreateFactors(factors, context, tx) {
-    return this._validator.validate(factors, 'POST', tx).then(() => db.factor.batchCreate(factors, context, tx).then(data => AppUtil.createPostResponse(data)))
+    return this.validator.validate(factors, 'POST', tx).then(() => db.factor.batchCreate(factors, context, tx).then(data => AppUtil.createPostResponse(data)))
   }
 
   @Transactional('getAllFactors')
-  getAllFactors(tx) {
-    return db.factor.all(tx)
-  }
+  getAllFactors = tx => db.factor.all(tx)
 
   @Transactional('getFactorsByExperimentId')
   getFactorsByExperimentId(id, tx) {
-    return this._experimentService.getExperimentById(id, tx).then(() => db.factor.findByExperimentId(id, tx))
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.factor.findByExperimentId(id, tx))
   }
 
   @Transactional('getFactorById')
-  getFactorById(id, tx) {
-    return db.factor.find(id, tx).then((data) => {
-      if (!data) {
-        logger.error(`Factor Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-  }
+  getFactorById = (id, tx) => db.factor.find(id, tx).then((data) => {
+    if (!data) {
+      logger.error(`Factor Not Found for requested id = ${id}`)
+      throw AppError.notFound('Factor Not Found for requested id')
+    } else {
+      return data
+    }
+  })
 
   @Transactional('batchUpdateFactors')
   batchUpdateFactors(factors, context, tx) {
-    return this._validator.validate(factors, 'PUT', tx).then(() => db.factor.batchUpdate(factors, context, tx).then(data => AppUtil.createPutResponse(data)))
+    return this.validator.validate(factors, 'PUT', tx)
+      .then(() => db.factor.batchUpdate(factors, context, tx)
+        .then(data => AppUtil.createPutResponse(data)))
   }
 
   @Transactional('deleteFactor')
-  deleteFactor(id, tx) {
-    return db.factor.remove(id, tx).then((data) => {
+  deleteFactor = (id, tx) => db.factor.remove(id, tx)
+    .then((data) => {
       if (!data) {
         logger.error(`Factor Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Not Found for requested id')
@@ -57,11 +56,11 @@ class FactorService {
         return data
       }
     })
-  }
 
   @Transactional('deleteFactorsForExperimentId')
   deleteFactorsForExperimentId(id, tx) {
-    return this._experimentService.getExperimentById(id, tx).then(() => db.factor.removeByExperimentId(id, tx))
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.factor.removeByExperimentId(id, tx))
   }
 }
 

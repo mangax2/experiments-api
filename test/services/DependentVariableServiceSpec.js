@@ -38,8 +38,8 @@ describe('DependentVariableService', () => {
       return { tx: function (transactionName, callback) {return callback(tx)} }
     })
     updateStub = sinon.stub(db.dependentVariable, 'batchUpdate')
-    validateStub = sinon.stub(dependentVariableService._validator, 'validate')
-    getExperimentByIdStub = sinon.stub(dependentVariableService._experimentService, 'getExperimentById')
+    validateStub = sinon.stub(dependentVariableService.validator, 'validate')
+    getExperimentByIdStub = sinon.stub(dependentVariableService.experimentService, 'getExperimentById')
 
   })
 

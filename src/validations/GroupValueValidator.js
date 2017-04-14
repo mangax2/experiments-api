@@ -38,6 +38,10 @@ class GroupValueValidator extends SchemaValidator {
         return GroupValueValidator.POST_VALIDATION_SCHEMA.concat(
           GroupValueValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return GroupValueValidator.POST_VALIDATION_SCHEMA.concat(
+          GroupValueValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -50,7 +54,7 @@ class GroupValueValidator extends SchemaValidator {
   }
 
   preValidate(groupValueObj) {
-    if (!_.isArray(groupValueObj) || groupValueObj.length == 0) {
+    if (!_.isArray(groupValueObj) || groupValueObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Group Value request object needs to be an array'))
     }
@@ -74,10 +78,11 @@ class GroupValueValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.groupId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length != names.length) {
+        if (_.uniq(names).length !== names.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

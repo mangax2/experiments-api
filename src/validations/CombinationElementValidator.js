@@ -38,6 +38,10 @@ class CombinationElementValidator extends SchemaValidator {
         return CombinationElementValidator.POST_VALIDATION_SCHEMA.concat(
           CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return CombinationElementValidator.POST_VALIDATION_SCHEMA.concat(
+          CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -50,7 +54,7 @@ class CombinationElementValidator extends SchemaValidator {
   }
 
   preValidate(combinationElementObj) {
-    if (!_.isArray(combinationElementObj) || combinationElementObj.length == 0) {
+    if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('CombinationElement request object needs to be an array'))
     }
@@ -64,10 +68,11 @@ class CombinationElementValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.treatmentId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length != names.length) {
+        if (_.uniq(names).length !== names.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

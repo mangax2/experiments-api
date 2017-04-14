@@ -5,8 +5,8 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('UnitSpecificationService')
 
 class UnitSpecificationService {
-  getUnitSpecificationById(id) {
-    return db.unitSpecification.find(id).then((data) => {
+  getUnitSpecificationById = id => db.unitSpecification.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Unit Specification Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Specification Not Found for requested id')
@@ -14,11 +14,8 @@ class UnitSpecificationService {
         return data
       }
     })
-  }
 
-  getAllUnitSpecifications() {
-    return db.unitSpecification.all()
-  }
+  getAllUnitSpecifications = () => db.unitSpecification.all()
 }
 
 module.exports = UnitSpecificationService

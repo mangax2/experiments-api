@@ -40,11 +40,15 @@ class GroupValidator extends SchemaValidator {
         return GroupValidator.POST_VALIDATION_SCHEMA.concat(
           GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return GroupValidator.POST_VALIDATION_SCHEMA.concat(
+          GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
   preValidate(groupObj) {
-    if (!_.isArray(groupObj) || groupObj.length == 0) {
+    if (!_.isArray(groupObj) || groupObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Group request object needs to be an array'))
     }

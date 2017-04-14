@@ -1,4 +1,4 @@
-module.exports = (rep, pgp) => ({
+module.exports = rep => ({
   repository: () => rep,
 
   find: id => rep.oneOrNone('SELECT * FROM ref_randomization_strategy WHERE id = $1', id),

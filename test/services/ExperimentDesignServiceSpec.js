@@ -28,7 +28,7 @@ describe('ExperimentDesignService', () => {
       return { tx: function (transactionName, callback) {return callback(tx)} }
     })
     updateStub = sinon.stub(db.experimentDesign, 'update')
-    validateStub = sinon.stub(experimentDesignService._validator, 'validate')
+    validateStub = sinon.stub(experimentDesignService.validator, 'validate')
 
   })
 

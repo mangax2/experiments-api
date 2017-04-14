@@ -23,6 +23,9 @@ class DependentVariablesValidator extends SchemaValidator {
       case 'PUT':
         return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
           { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
+      default:
+        return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
+          { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
     }
   }
 
@@ -39,7 +42,7 @@ class DependentVariablesValidator extends SchemaValidator {
   }
 
   preValidate(factorObj) {
-    if (!_.isArray(factorObj) || factorObj.length == 0) {
+    if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Dependent Variables request object needs to be an array'))
     }
@@ -53,10 +56,11 @@ class DependentVariablesValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length != names.length) {
+        if (_.uniq(names).length !== names.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

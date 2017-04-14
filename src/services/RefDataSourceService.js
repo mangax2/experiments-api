@@ -6,12 +6,10 @@ const logger = log4js.getLogger('RefDataSourceService')
 
 class RefDataSourceService {
 
-  getRefDataSources() {
-    return db.refDataSource.all()
-  }
+  getRefDataSources = () => db.refDataSource.all()
 
-  getRefDataSourceById(id) {
-    return db.refDataSource.find(id).then((data) => {
+  getRefDataSourceById = id => db.refDataSource.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Ref Data Source Not Found for requested id = ${id}`)
         throw AppError.notFound('Ref Data Source Not Found for requested id')
@@ -19,14 +17,11 @@ class RefDataSourceService {
         return data
       }
     })
-  }
 
-  getRefDataSourcesByRefDataSourceTypeId(id) {
-    return db.refDataSource.findByTypeId(id)
-  }
+  getRefDataSourcesByRefDataSourceTypeId = id => db.refDataSource.findByTypeId(id)
 
-  getCompleteRefDataSourceById(id) {
-    return db.refDataSource.find(id).then((data) => {
+  getCompleteRefDataSourceById = id => db.refDataSource.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Ref Data Source Not Found for requested id = ${id}`)
         throw AppError.notFound('Ref Data Source Not Found for requested id')
@@ -37,7 +32,6 @@ class RefDataSourceService {
         })
       }
     })
-  }
 }
 
 module.exports = RefDataSourceService

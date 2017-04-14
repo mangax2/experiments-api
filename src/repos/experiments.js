@@ -1,4 +1,4 @@
-module.exports = (rep, pgp) => ({
+module.exports = rep => ({
   repository: () => rep,
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1', id),

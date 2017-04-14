@@ -6,8 +6,8 @@ const logger = log4js.getLogger('RandomizationStrategyService')
 
 class RandomizationStrategyService {
 
-  getRandomizationStrategyById(id) {
-    return db.randomizationStrategy.find(id).then((data) => {
+  getRandomizationStrategyById = id => db.randomizationStrategy.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Randomization Strategy Not Found for requested id = ${id}`)
         throw AppError.notFound('Randomization Strategy Not Found for requested id')
@@ -15,11 +15,8 @@ class RandomizationStrategyService {
         return data
       }
     })
-  }
 
-  getAllRandomizationStrategies() {
-    return db.randomizationStrategy.all()
-  }
+  getAllRandomizationStrategies = () => db.randomizationStrategy.all()
 }
 
 module.exports = RandomizationStrategyService

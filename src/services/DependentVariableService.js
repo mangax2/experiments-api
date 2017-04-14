@@ -11,52 +11,56 @@ const logger = log4js.getLogger('DependentVariableService')
 class DependentVariableService {
 
   constructor() {
-    this._validator = new DependentVariablesValidator()
-    this._experimentService = new ExperimentsService()
+    this.validator = new DependentVariablesValidator()
+    this.experimentService = new ExperimentsService()
   }
 
   @Transactional('createDependentVariablesTx')
   batchCreateDependentVariables(dependentVariables, context, tx) {
-    return this._validator.validate(dependentVariables, 'POST', tx).then(() => db.dependentVariable.batchCreate(tx, dependentVariables, context).then(data => AppUtil.createPostResponse(data)))
+    return this.validator.validate(dependentVariables, 'POST', tx)
+      .then(() => db.dependentVariable.batchCreate(tx, dependentVariables, context)
+        .then(data => AppUtil.createPostResponse(data)))
   }
 
-  getAllDependentVariables() {
-    return db.dependentVariable.all()
-  }
+  getAllDependentVariables = () => db.dependentVariable.all()
 
   getDependentVariablesByExperimentId(experimentId) {
-    return this._experimentService.getExperimentById(experimentId).then(() => db.dependentVariable.findByExperimentId(experimentId))
+    return this.experimentService.getExperimentById(experimentId)
+      .then(() => db.dependentVariable.findByExperimentId(experimentId))
   }
 
-  getDependentVariableById(id) {
-    return db.dependentVariable.find(id).then((data) => {
-      if (!data) {
-        logger.error(`Dependent Variable Not Found for requested id = ${id}`)
-        throw AppError.notFound('Dependent Variable Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-  }
+  getDependentVariableById = id => db.dependentVariable.find(id)
+      .then((data) => {
+        if (!data) {
+          logger.error(`Dependent Variable Not Found for requested id = ${id}`)
+          throw AppError.notFound('Dependent Variable Not Found for requested id')
+        } else {
+          return data
+        }
+      })
 
   batchUpdateDependentVariables(dependentVariables, context) {
-    return this._validator.validate(dependentVariables, 'PUT').then(() => db.dependentVariable.repository().tx('updateDependentVariablesTx', t => db.dependentVariable.batchUpdate(t, dependentVariables, context).then(data => AppUtil.createPutResponse(data))))
+    return this.validator.validate(dependentVariables, 'PUT')
+      .then(() => db.dependentVariable.repository().tx('updateDependentVariablesTx', t => db.dependentVariable.batchUpdate(t, dependentVariables, context)
+        .then(data => AppUtil.createPutResponse(data))))
   }
 
   deleteDependentVariable(id) {
-    return db.dependentVariable.remove(id).then((data) => {
-      if (!data) {
-        logger.error(`Dependent Variable Not Found for requested id = ${id}`)
-        throw AppError.notFound('Dependent Variable Not Found for requested id')
-      } else {
-        return data
-      }
-    })
+    return db.dependentVariable.remove(id)
+      .then((data) => {
+        if (!data) {
+          logger.error(`Dependent Variable Not Found for requested id = ${id}`)
+          throw AppError.notFound('Dependent Variable Not Found for requested id')
+        } else {
+          return data
+        }
+      })
   }
 
   @Transactional('deleteDependentVariablesForExperimentId')
   deleteDependentVariablesForExperimentId(experimentId, tx) {
-    return this._experimentService.getExperimentById(experimentId, tx).then(() => db.dependentVariable.removeByExperimentId(tx, experimentId))
+    return this.experimentService.getExperimentById(experimentId, tx)
+      .then(() => db.dependentVariable.removeByExperimentId(tx, experimentId))
   }
 }
 

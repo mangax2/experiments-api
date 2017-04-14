@@ -12,18 +12,19 @@ const logger = log4js.getLogger('UnitSpecificationDetailService')
 class UnitSpecificationDetailService {
 
   constructor() {
-    this._validator = new UnitSpecificationDetailValidator()
-    this._experimentService = new ExperimentsService()
+    this.validator = new UnitSpecificationDetailValidator()
+    this.experimentService = new ExperimentsService()
   }
 
   @Transactional('getUnitSpecificationDetailsByExperimentId')
   getUnitSpecificationDetailsByExperimentId(id, tx) {
-    return this._experimentService.getExperimentById(id, tx).then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
   @Transactional('getUnitSpecificationDetailById')
-  getUnitSpecificationDetailById(id, tx) {
-    return db.unitSpecificationDetail.find(id, tx).then((data) => {
+  getUnitSpecificationDetailById = (id, tx) => db.unitSpecificationDetail.find(id, tx)
+    .then((data) => {
       if (!data) {
         logger.error(`Unit Specification Detail Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Specification Detail Not Found for requested id')
@@ -31,59 +32,68 @@ class UnitSpecificationDetailService {
         return data
       }
     })
-  }
 
   @Transactional('getUnitSpecificationDetailsByIds')
-  batchGetUnitSpecificationDetailsByIds(ids, tx) {
-    return db.unitSpecificationDetail.batchFind(ids, tx).then((data) => {
-      if (_.filter(data, element => element != null).length != ids.length) {
+  batchGetUnitSpecificationDetailsByIds = (ids, tx) => db.unitSpecificationDetail.batchFind(ids, tx)
+    .then((data) => {
+      if (_.filter(data, element => element !== null).length !== ids.length) {
         logger.error('Unit Specification Detail not found for all requested ids.')
         throw AppError.notFound('Unit Specification Detail not found for all requested ids.')
       } else {
         return data
       }
     })
-  }
 
   @Transactional('batchCreateUnitSpecificationDetails')
   batchCreateUnitSpecificationDetails(specificationDetails, context, tx) {
-    return this._validator.validate(specificationDetails, 'POST', tx).then(() => db.unitSpecificationDetail.batchCreate(specificationDetails, context, tx).then(data => AppUtil.createPostResponse(data)))
+    return this.validator.validate(specificationDetails, 'POST', tx)
+      .then(() => db.unitSpecificationDetail.batchCreate(specificationDetails, context, tx)
+        .then(data => AppUtil.createPostResponse(data)))
   }
 
   @Transactional('batchUpdateUnitSpecificationDetails')
   batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
-    return this._validator.validate(unitSpecificationDetails, 'PUT', tx).then(() => db.unitSpecificationDetail.batchUpdate(unitSpecificationDetails, context, tx).then(data => AppUtil.createPutResponse(data)))
+    return this.validator.validate(unitSpecificationDetails, 'PUT', tx)
+      .then(() => db.unitSpecificationDetail.batchUpdate(unitSpecificationDetails, context, tx)
+        .then(data => AppUtil.createPutResponse(data)))
   }
 
   @Transactional('manageAllUnitSpecificationDetails')
   manageAllUnitSpecificationDetails(unitSpecificationDetailsObj, context, tx) {
-    return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, tx).then(() => this._updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx).then(() => this._createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx).then(() => AppUtil.createCompositePostResponse())))
+    return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, tx)
+      .then(() =>
+        this.updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx)
+          .then(() =>
+            this.createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx)
+              .then(() => AppUtil.createCompositePostResponse())))
   }
 
   @Transactional('deleteUnitSpecificationDetails')
-  deleteUnitSpecificationDetails(unitSpecificationDetailIdsToDelete, tx) {
-    if (_.isUndefined(unitSpecificationDetailIdsToDelete) || unitSpecificationDetailIdsToDelete.length == 0) {
+  deleteUnitSpecificationDetails = (idsToDelete, tx) => {
+    if (_.isUndefined(idsToDelete)
+      || idsToDelete.length === 0) {
       return Promise.resolve()
     }
-    return db.unitSpecificationDetail.batchRemove(unitSpecificationDetailIdsToDelete, tx).then((data) => {
-      if (_.filter(data, element => element != null).length != unitSpecificationDetailIdsToDelete.length) {
-        logger.error('Not all unit specification detail ids requested for delete were found')
-        throw AppError.notFound('Not all unit specification detail ids requested for delete were found')
-      } else {
-        return data
-      }
-    })
+    return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
+      .then((data) => {
+        if (_.filter(data, element => element !== null).length !== idsToDelete.length) {
+          logger.error('Not all unit specification detail ids requested for delete were found')
+          throw AppError.notFound('Not all unit specification detail ids requested for delete were found')
+        } else {
+          return data
+        }
+      })
   }
 
-  _updateUnitSpecificationDetails(unitSpecificationDetails, tx) {
-    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length == 0) {
+  updateUnitSpecificationDetails(unitSpecificationDetails, tx) {
+    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length === 0) {
       return Promise.resolve()
     }
     return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, tx)
   }
 
-  _createUnitSpecificationDetails(unitSpecificationDetails, tx) {
-    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length == 0) {
+  createUnitSpecificationDetails(unitSpecificationDetails, tx) {
+    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length === 0) {
       return Promise.resolve()
     }
     return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, tx)

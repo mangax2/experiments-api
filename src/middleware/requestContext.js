@@ -3,6 +3,7 @@ import AppError from '../services/utility/AppError'
 
 function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics']
+
   if (whitelistedUrls.includes(req.url)) {
     next()
   } else {

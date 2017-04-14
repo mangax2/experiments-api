@@ -38,6 +38,10 @@ class TagValidator extends SchemaValidator {
         return TagValidator.POST_VALIDATION_SCHEMA.concat(
           TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return TagValidator.POST_VALIDATION_SCHEMA.concat(
+          TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -50,7 +54,7 @@ class TagValidator extends SchemaValidator {
   }
 
   preValidate(obj) {
-    if (!_.isArray(obj) || obj.length == 0) {
+    if (!_.isArray(obj) || obj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Tag request object needs to be an array'))
     }
@@ -67,10 +71,11 @@ class TagValidator extends SchemaValidator {
           name: e[businessKeyPropertyNames[0]],
           value: e[businessKeyPropertyNames[1]],
         }))
-        if (_.uniqWith(namesAndValues, _.isEqual).length != namesAndValues.length) {
+        if (_.uniqWith(namesAndValues, _.isEqual).length !== namesAndValues.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+
       })
     }
     return Promise.resolve()

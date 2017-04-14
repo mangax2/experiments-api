@@ -35,15 +35,15 @@ describe('ExperimentalUnitService', () => {
 
   before(() => {
     target = new ExperimentalUnitService()
-    getTreatmentByIdStub = sinon.stub(target._treatmentService, 'getTreatmentById')
-    getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
+    getTreatmentByIdStub = sinon.stub(target.treatmentService, 'getTreatmentById')
+    getExperimentByIdStub = sinon.stub(target.experimentService, 'getExperimentById')
 
-    batchGetTreatmentByIdsStub = sinon.stub(target._treatmentService, 'batchGetTreatmentByIds')
+    batchGetTreatmentByIdsStub = sinon.stub(target.treatmentService, 'batchGetTreatmentByIds')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(target._validator, 'validate')
-    batchGetGroupsByIdsStub = sinon.stub(target._groupService, 'batchGetGroupsByIds')
+    validateStub = sinon.stub(target.validator, 'validate')
+    batchGetGroupsByIdsStub = sinon.stub(target.groupService, 'batchGetGroupsByIds')
     batchFindAllByGroupIdsStub = sinon.stub(db.unit, 'batchFindAllByGroupIds')
     repositoryStub = sinon.stub(db.unit, 'repository', () => {
       return {

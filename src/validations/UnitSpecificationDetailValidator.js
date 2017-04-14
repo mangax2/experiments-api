@@ -40,6 +40,10 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
         return UnitSpecificationDetailValidator.POST_VALIDATION_SCHEMA.concat(
           UnitSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return UnitSpecificationDetailValidator.POST_VALIDATION_SCHEMA.concat(
+          UnitSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -52,7 +56,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
   }
 
   preValidate(unitSpecificationDetailObj) {
-    if (!_.isArray(unitSpecificationDetailObj) || unitSpecificationDetailObj.length == 0) {
+    if (!_.isArray(unitSpecificationDetailObj) || unitSpecificationDetailObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Unit specification detail request object needs to be an array'))
     }
@@ -66,7 +70,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length != names.length) {
+        if (_.uniq(names).length !== names.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

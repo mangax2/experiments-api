@@ -32,11 +32,15 @@ class ExperimentalUnitValidator extends SchemaValidator {
         return ExperimentalUnitValidator.POST_VALIDATION_SCHEMA.concat(
           ExperimentalUnitValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return ExperimentalUnitValidator.POST_VALIDATION_SCHEMA.concat(
+          ExperimentalUnitValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
   preValidate(combinationElementObj) {
-    if (!_.isArray(combinationElementObj) || combinationElementObj.length == 0) {
+    if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('ExperimentalUnit request object needs to be an array'))
     }

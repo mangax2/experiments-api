@@ -8,7 +8,6 @@ class FactorTypesValidator extends SchemaValidator {
     return [
       { paramName: 'type', type: 'text', lengthRange: { min: 1, max: 50 }, required: true },
       { paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: db.factorType },
-
     ]
   }
 
@@ -17,7 +16,7 @@ class FactorTypesValidator extends SchemaValidator {
   }
 
   preValidate(factorObj) {
-    if (!_.isArray(factorObj) || factorObj.length == 0) {
+    if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Factor Types request object needs to be an array'))
     }

@@ -1,4 +1,4 @@
-module.exports = (rep, pgp) => ({
+module.exports = rep => ({
   repository: () => rep,
 
   find: id => rep.oneOrNone('SELECT * FROM ref_data_source_type WHERE id = $1', id),

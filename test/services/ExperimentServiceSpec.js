@@ -43,11 +43,11 @@ describe('ExperimentsService', () => {
       }
     })
     updateStub = sinon.stub(db.experiments, 'update')
-    validateStub = sinon.stub(experimentsService._validator, 'validate')
+    validateStub = sinon.stub(experimentsService.validator, 'validate')
 
-    getTagsByExperimentIdStub = sinon.stub(experimentsService._tagService, 'getTagsByExperimentId')
-    batchCreateTagsStub = sinon.stub(experimentsService._tagService, 'batchCreateTags')
-    deleteTagsForExperimentIdStub = sinon.stub(experimentsService._tagService, 'deleteTagsForExperimentId')
+    getTagsByExperimentIdStub = sinon.stub(experimentsService.tagService, 'getTagsByExperimentId')
+    batchCreateTagsStub = sinon.stub(experimentsService.tagService, 'batchCreateTags')
+    deleteTagsForExperimentIdStub = sinon.stub(experimentsService.tagService, 'deleteTagsForExperimentId')
   })
 
   after(() => {
@@ -86,7 +86,7 @@ describe('ExperimentsService', () => {
     it('Success', () => {
       getStub.resolves(testResponse)
 
-      return experimentsService._getAllExperiments().then((experiments) => {
+      return experimentsService.getAllExperiments().then((experiments) => {
         sinon.assert.calledOnce(getStub)
         experiments.should.equal(testResponse)
       })
@@ -95,7 +95,7 @@ describe('ExperimentsService', () => {
     it('fails', () => {
       getStub.rejects(testError)
 
-      return experimentsService._getAllExperiments().should.be.rejected.then((err) => {
+      return experimentsService.getAllExperiments().should.be.rejected.then((err) => {
         sinon.assert.calledWithExactly(getStub)
         err.should.equal(testError)
       })
@@ -523,30 +523,30 @@ describe('ExperimentsService', () => {
 
     it('returns true if filter query has tags.name', () => {
       const query = { 'tags.name': 'tag1' }
-      const result = experimentsService._isFilterRequest(query)
+      const result = experimentsService.isFilterRequest(query)
       result.should.be.true
     })
 
     it('returns true if query has tags.value', () => {
       const query = { 'tags.value': 'tagValue1' }
-      const result = experimentsService._isFilterRequest(query)
+      const result = experimentsService.isFilterRequest(query)
       result.should.be.true
     })
 
     it('returns true if query has both tags.name and tags.value', () => {
       const query = { 'tags.name': 'tag1', 'tags.value': 'tagValue1' }
-      const result = experimentsService._isFilterRequest(query)
+      const result = experimentsService.isFilterRequest(query)
       result.should.be.true
     })
 
     it('returns false if query is undefined', () => {
-      const result = experimentsService._isFilterRequest(undefined)
+      const result = experimentsService.isFilterRequest(undefined)
       result.should.be.false
     })
 
     it('returns false if query is empty object', () => {
       const query = {}
-      const result = experimentsService._isFilterRequest({})
+      const result = experimentsService.isFilterRequest({})
       result.should.be.false
     })
   })
@@ -555,19 +555,19 @@ describe('ExperimentsService', () => {
 
     it('returns array with lowercase elements when input is a string with comma separated values', () => {
       const queryStringValue = 'tagName1,tagName2'
-      const result = experimentsService._toLowerCaseArray(queryStringValue)
+      const result = experimentsService.toLowerCaseArray(queryStringValue)
       result.should.be.eql(['tagname1', 'tagname2'])
     })
 
     it('returns array of length 1 with lowercase element when input is one string with no comma separated values', () => {
       const queryStringValue = 'TAGNAME1'
-      const result = experimentsService._toLowerCaseArray(queryStringValue)
+      const result = experimentsService.toLowerCaseArray(queryStringValue)
       result.should.be.eql(['tagname1'])
     })
 
     it('returns empty array when input is undefined', () => {
       const queryStringValue = undefined
-      const result = experimentsService._toLowerCaseArray(queryStringValue)
+      const result = experimentsService.toLowerCaseArray(queryStringValue)
       result.should.have.length(0)
     })
 
@@ -581,7 +581,7 @@ describe('ExperimentsService', () => {
       findExperimentsByTagsStub.resolves(expectedResult)
       const query = { 'tags.name': 'A,B', 'tags.value': 'X,Y' }
 
-      return experimentsService._getExperimentsByFilters(query).then((result) => {
+      return experimentsService.getExperimentsByFilters(query).then((result) => {
         result.should.eql(expectedResult)
         findExperimentsByTagsStub.calledOnce.should.equal(true)
         sinon.assert.calledWithExactly(
@@ -597,7 +597,7 @@ describe('ExperimentsService', () => {
       validateStub.resolves()
       findExperimentsByTagsStub.rejects(testError)
       const query = { 'tags.name': '', 'tags.value': '' }
-      return experimentsService._getExperimentsByFilters(query).should.be.rejected.then((err) => {
+      return experimentsService.getExperimentsByFilters(query).should.be.rejected.then((err) => {
         sinon.assert.calledOnce(findExperimentsByTagsStub)
         err.should.equal(testError)
       })
@@ -605,7 +605,7 @@ describe('ExperimentsService', () => {
 
     it('fails when validateStub returns error', () => {
       validateStub.rejects(testError)
-      return experimentsService._getExperimentsByFilters().should.be.rejected.then((err) => {
+      return experimentsService.getExperimentsByFilters().should.be.rejected.then((err) => {
         sinon.assert.notCalled(findExperimentsByTagsStub)
         sinon.assert.calledOnce(validateStub)
         err.should.equal(testError)

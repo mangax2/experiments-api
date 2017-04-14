@@ -22,21 +22,21 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use(requestContext)
 
   app.use(inflector())
-  const pingFunc = (function () {
-    const createPingPage = require('@monsantoit/ping-page')
-    const pingPage = createPingPage(require('../package.json'))
-    const ref = ['/ping', `${appBaseUrl}/ping`]
-    const results = []
-    let i
-    let len
-    for (i = 0, len = ref.length; i < len; i += 1) {
-      const path = ref[i]
-      results.push(app.get(path, pingPage))
-    }
-    return results
-  }())
+  // const pingFunc = (function() {
+  //   const createPingPage = require('@monsantoit/ping-page')
+  //   const pingPage = createPingPage(require('../package.json'))
+  //   const ref = ['/ping', `${appBaseUrl}/ping`]
+  //   const results = []
+  //   let i
+  //   let len
+  //   for (i = 0, len = ref.length; i < len; i += 1) {
+  //     const path = ref[i]
+  //     results.push(app.get(path, pingPage))
+  //   }
+  //   return results
+  // }())
 
-  pingFunc()
+  // pingFunc()
 
   const compression = require('compression')
   app.use(compression())

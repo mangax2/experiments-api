@@ -6,8 +6,8 @@ const logger = log4js.getLogger('UnitTypeService')
 
 class UnitTypeService {
 
-  getUnitTypeById(id) {
-    return db.unitType.find(id).then((data) => {
+  getUnitTypeById = id => db.unitType.find(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Unit Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Type Not Found for requested id')
@@ -15,11 +15,8 @@ class UnitTypeService {
         return data
       }
     })
-  }
 
-  getAllUnitTypes() {
-    return db.unitType.all()
-  }
+  getAllUnitTypes = () => db.unitType.all()
 }
 
 module.exports = UnitTypeService

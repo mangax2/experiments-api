@@ -39,6 +39,10 @@ class TreatmentValidator extends SchemaValidator {
         return TreatmentValidator.POST_VALIDATION_SCHEMA.concat(
           TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return TreatmentValidator.POST_VALIDATION_SCHEMA.concat(
+          TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -51,7 +55,7 @@ class TreatmentValidator extends SchemaValidator {
   }
 
   preValidate(treatmentObj) {
-    if (!_.isArray(treatmentObj) || treatmentObj.length == 0) {
+    if (!_.isArray(treatmentObj) || treatmentObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array'))
     }
@@ -65,10 +69,11 @@ class TreatmentValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length != names.length) {
+        if (_.uniq(names).length !== names.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

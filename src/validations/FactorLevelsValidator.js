@@ -37,6 +37,10 @@ class FactorLevelsValidator extends SchemaValidator {
         return FactorLevelsValidator.POST_VALIDATION_SCHEMA.concat(
           FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return FactorLevelsValidator.POST_VALIDATION_SCHEMA.concat(
+          FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -49,7 +53,7 @@ class FactorLevelsValidator extends SchemaValidator {
   }
 
   preValidate(factorLevelObj) {
-    if (!_.isArray(factorLevelObj) || factorLevelObj.length == 0) {
+    if (!_.isArray(factorLevelObj) || factorLevelObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Factor Level request object needs to be an array'))
     }
@@ -63,7 +67,7 @@ class FactorLevelsValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.factorId))
       _.forEach(groupByObject, (innerArray) => {
         const value = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(value).length != value.length) {
+        if (_.uniq(value).length !== value.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

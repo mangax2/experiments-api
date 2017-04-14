@@ -10,7 +10,7 @@ describe('ExperimentSummaryService', () => {
   before(() => {
     findStub = sinon.stub(db.experimentSummary, 'find')
     target = new ExperimentSummaryService()
-    experimentFindStub = sinon.stub(target._experimentService, 'getExperimentById')
+    experimentFindStub = sinon.stub(target.experimentService, 'getExperimentById')
   })
 
   after(() => {

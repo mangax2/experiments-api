@@ -9,19 +9,22 @@ const logger = log4js.getLogger('ExperimentSummaryService')
 class ExperimentSummaryService {
 
   constructor() {
-    this._experimentService = new ExperimentsService()
+    this.experimentService = new ExperimentsService()
   }
 
   @Transactional('getExperimentSummaryById')
   getExperimentSummaryById(id, tx) {
-    return this._experimentService.getExperimentById(id, tx).then(() => db.experimentSummary.find(id, tx).then((data) => {
-      if (!data) {
-        logger.error(`Experiment Summary Not Found for requested experimentId = ${id}`)
-        throw AppError.notFound('Experiment Summary Not Found for requested experimentId')
-      } else {
-        return data
-      }
-    }))
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.experimentSummary.find(id, tx)
+        .then((data) => {
+          if (!data) {
+            logger.error(`Experiment Summary Not Found for requested experimentId = ${id}`)
+            throw AppError.notFound('Experiment Summary Not Found for requested experimentId')
+          } else {
+            return data
+          }
+        }),
+      )
   }
 
 }

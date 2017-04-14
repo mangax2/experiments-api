@@ -22,7 +22,9 @@
             "error",
             { "allow": ["warn", "error", "info"] }
         ],
+        "global-require": "off",
         "no-param-reassign": "off",
-        "global-require": "off"
+        "no-use-before-define": "off"
+
     }
 }

@@ -42,6 +42,10 @@ class FactorsValidator extends SchemaValidator {
         return FactorsValidator.POST_VALIDATION_SCHEMA.concat(
           FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      default:
+        return FactorsValidator.POST_VALIDATION_SCHEMA.concat(
+          FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
+        )
     }
   }
 
@@ -72,6 +76,7 @@ class FactorsValidator extends SchemaValidator {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

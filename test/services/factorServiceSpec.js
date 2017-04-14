@@ -32,11 +32,11 @@ describe('FactorService', () => {
   before(() => {
     target = new FactorService()
 
-    getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
+    getExperimentByIdStub = sinon.stub(target.experimentService, 'getExperimentById')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(target._validator, 'validate')
+    validateStub = sinon.stub(target.validator, 'validate')
     findStub = sinon.stub(db.factor, 'find')
     findByExperimentIdStub = sinon.stub(db.factor, 'findByExperimentId')
     allStub = sinon.stub(db.factor, 'all')

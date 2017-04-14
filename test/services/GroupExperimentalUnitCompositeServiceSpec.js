@@ -20,9 +20,9 @@ describe('GroupExperimentalUnits Specs', () => {
     let batchGetExperimentalUnitsByGroupIdsNoValidateStub
 
     before(() => {
-      getGroupsByExperimentIdStub = sinon.stub(target._groupService, 'getGroupsByExperimentId')
-      batchGetGroupValuesByGroupIdsNoValidateStub = sinon.stub(target._groupValueService, 'batchGetGroupValuesByGroupIdsNoValidate')
-      batchGetExperimentalUnitsByGroupIdsNoValidateStub = sinon.stub(target._experimentalUnitService, 'batchGetExperimentalUnitsByGroupIdsNoValidate')
+      getGroupsByExperimentIdStub = sinon.stub(target.groupService, 'getGroupsByExperimentId')
+      batchGetGroupValuesByGroupIdsNoValidateStub = sinon.stub(target.groupValueService, 'batchGetGroupValuesByGroupIdsNoValidate')
+      batchGetExperimentalUnitsByGroupIdsNoValidateStub = sinon.stub(target.experimentalUnitService, 'batchGetExperimentalUnitsByGroupIdsNoValidate')
     })
     afterEach(() => {
       getGroupsByExperimentIdStub.reset()
@@ -152,13 +152,13 @@ describe('GroupExperimentalUnits Specs', () => {
     let recursiveBatchCreateStub
 
     before(() => {
-      deleteGroupsForExperimentIdStub = sinon.stub(target._groupService, 'deleteGroupsForExperimentId')
-      batchCreateGroupsStub = sinon.stub(target._groupService, 'batchCreateGroups')
-      batchCreateGroupValuesStub = sinon.stub(target._groupValueService, 'batchCreateGroupValues')
-      batchCreateExperimentalUnitsStub = sinon.stub(target._experimentalUnitService, 'batchCreateExperimentalUnits')
+      deleteGroupsForExperimentIdStub = sinon.stub(target.groupService, 'deleteGroupsForExperimentId')
+      batchCreateGroupsStub = sinon.stub(target.groupService, 'batchCreateGroups')
+      batchCreateGroupValuesStub = sinon.stub(target.groupValueService, 'batchCreateGroupValues')
+      batchCreateExperimentalUnitsStub = sinon.stub(target.experimentalUnitService, 'batchCreateExperimentalUnits')
       getDistinctExperimentIdsStub = sinon.stub(db.treatment, 'getDistinctExperimentIds')
-      validateGroupsStub = sinon.stub(target, '_validateGroups')
-      recursiveBatchCreateStub = sinon.stub(target, '_recursiveBatchCreate')
+      validateGroupsStub = sinon.stub(target, 'validateGroups')
+      recursiveBatchCreateStub = sinon.stub(target, 'recursiveBatchCreate')
     })
     afterEach(() => {
       deleteGroupsForExperimentIdStub.reset()
@@ -252,7 +252,7 @@ describe('GroupExperimentalUnits Specs', () => {
     let getDistinctExperimentIdsStub
 
     before(() => {
-      batchCreateExperimentalUnitsStub = sinon.stub(target._experimentalUnitService, 'batchCreateExperimentalUnits')
+      batchCreateExperimentalUnitsStub = sinon.stub(target.experimentalUnitService, 'batchCreateExperimentalUnits')
       getDistinctExperimentIdsStub = sinon.stub(db.treatment, 'getDistinctExperimentIds')
     })
     afterEach(() => {
@@ -274,7 +274,7 @@ describe('GroupExperimentalUnits Specs', () => {
       }]
       const experimentId = 1
 
-      return target._createExperimentalUnits(experimentId, units, context, testTx).then(() => {
+      return target.createExperimentalUnits(experimentId, units, context, testTx).then(() => {
         sinon.assert.called(
           batchCreateExperimentalUnitsStub,
         )
@@ -293,7 +293,7 @@ describe('GroupExperimentalUnits Specs', () => {
       }]
       const experimentId = 1
 
-      return target._createExperimentalUnits(units, testContext, experimentId, testContext, testTx).should.be.rejected.then((err) => {
+      return target.createExperimentalUnits(units, testContext, experimentId, testContext, testTx).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.notCalled(
           batchCreateExperimentalUnitsStub,
@@ -312,7 +312,7 @@ describe('GroupExperimentalUnits Specs', () => {
         'rep': 2,
       }]
       const experimentId = 1
-      return target._createExperimentalUnits(units, testContext, experimentId, testTx).should.be.rejected.then((err) => {
+      return target.createExperimentalUnits(units, testContext, experimentId, testTx).should.be.rejected.then((err) => {
         err.errorMessage.should.equal('Treatments not associated with same experiment')
         sinon.assert.notCalled(
           batchCreateExperimentalUnitsStub,
@@ -330,7 +330,7 @@ describe('GroupExperimentalUnits Specs', () => {
         'groupValues': [{ name: 'repNumber', value: '1' }],
         'units': [{ 'treatmentId': 1 }],
       }]
-      const result = target._getUnitsAndGroupValues(groupResp, groupAndUnitDetails)
+      const result = target.getUnitsAndGroupValues(groupResp, groupAndUnitDetails)
       result.units[0].groupId.should.equal(1)
       result.groupValues[0].groupId.should.equal(1)
     })
@@ -340,7 +340,7 @@ describe('GroupExperimentalUnits Specs', () => {
 
     let validateGroupStub
     before(() => {
-      validateGroupStub = sinon.stub(target, '_validateGroup')
+      validateGroupStub = sinon.stub(target, 'validateGroup')
     })
 
     afterEach(() => {
@@ -365,7 +365,7 @@ describe('GroupExperimentalUnits Specs', () => {
       },
       ]
 
-      _.isUndefined(target._validateGroups(groupStructure)).should.equal(true)
+      _.isUndefined(target.validateGroups(groupStructure)).should.equal(true)
     })
 
     it('fails due to having units and child groups in one tier', () => {
@@ -388,7 +388,7 @@ describe('GroupExperimentalUnits Specs', () => {
         },
       ]
 
-      target._validateGroups(groupStructure).should.equal('testError')
+      target.validateGroups(groupStructure).should.equal('testError')
       sinon.assert.calledOnce(validateGroupStub)
     })
   })
@@ -397,7 +397,7 @@ describe('GroupExperimentalUnits Specs', () => {
     let validateGroupsStub
 
     before(() => {
-      validateGroupsStub = sinon.stub(target, '_validateGroups')
+      validateGroupsStub = sinon.stub(target, 'validateGroups')
     })
 
     afterEach(() => {
@@ -411,27 +411,27 @@ describe('GroupExperimentalUnits Specs', () => {
     it('returns an error when a group has both child groups and units', () => {
       const group = { units: [{}], childGroups: [{}] }
 
-      target._validateGroup(group).should.equal('Only leaf childGroups should have units')
+      target.validateGroup(group).should.equal('Only leaf childGroups should have units')
     })
 
     it('returns an error when a group has no child groups and no units', () => {
       const group = { units: [], childGroups: [] }
 
-      target._validateGroup(group).should.equal('Each group should have at least one Unit or at least one ChildGroup')
+      target.validateGroup(group).should.equal('Each group should have at least one Unit or at least one ChildGroup')
     })
 
     it('calls validateGroups when group is valid and has child groups', () => {
       const group = { childGroups: [{}] }
       validateGroupsStub.returns('stubResponse')
 
-      target._validateGroup(group).should.equal('stubResponse')
+      target.validateGroup(group).should.equal('stubResponse')
       sinon.assert.calledOnce(validateGroupsStub)
     })
 
     it('returns undefined when the group has no child groups and some units', () => {
       const group = { units: [{}] }
 
-      _.isUndefined(target._validateGroup(group)).should.equal(true)
+      _.isUndefined(target.validateGroup(group)).should.equal(true)
     })
   })
 
@@ -440,8 +440,8 @@ describe('GroupExperimentalUnits Specs', () => {
     let createGroupValuesUnitsAndChildGroupsStub
 
     before(() => {
-      batchCreateGroupsStub = sinon.stub(target._groupService, 'batchCreateGroups')
-      createGroupValuesUnitsAndChildGroupsStub = sinon.stub(target, '_createGroupValuesUnitsAndChildGroups')
+      batchCreateGroupsStub = sinon.stub(target.groupService, 'batchCreateGroups')
+      createGroupValuesUnitsAndChildGroupsStub = sinon.stub(target, 'createGroupValuesUnitsAndChildGroups')
     })
     afterEach(() => {
       batchCreateGroupsStub.reset()
@@ -473,7 +473,7 @@ describe('GroupExperimentalUnits Specs', () => {
         },
       ]
 
-      return target._recursiveBatchCreate(1, groupPayload, testContext, testTx).then((result) => {
+      return target.recursiveBatchCreate(1, groupPayload, testContext, testTx).then((result) => {
         result.should.deep.equal({ status: 200, message: 'SUCCESS' })
         sinon.assert.calledWithExactly(batchCreateGroupsStub, expectedGroupOutput, testContext, testTx)
       })
@@ -487,10 +487,10 @@ describe('GroupExperimentalUnits Specs', () => {
     let recursiveBatchCreateStub
 
     before(() => {
-      batchCreateGroupValuesStub = sinon.stub(target._groupValueService, 'batchCreateGroupValues')
-      createExperimentalUnitsStub = sinon.stub(target, '_createExperimentalUnits')
-      getUnitsAndGroupValues = sinon.stub(target, '_getUnitsAndGroupValues')
-      recursiveBatchCreateStub = sinon.stub(target, '_recursiveBatchCreate')
+      batchCreateGroupValuesStub = sinon.stub(target.groupValueService, 'batchCreateGroupValues')
+      createExperimentalUnitsStub = sinon.stub(target, 'createExperimentalUnits')
+      getUnitsAndGroupValues = sinon.stub(target, 'getUnitsAndGroupValues')
+      recursiveBatchCreateStub = sinon.stub(target, 'recursiveBatchCreate')
     })
 
     afterEach(() => {
@@ -516,7 +516,7 @@ describe('GroupExperimentalUnits Specs', () => {
       })
       recursiveBatchCreateStub.resolves()
 
-      return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
+      return target.createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
         sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{
           name: 'repNumber',
           value: '1',
@@ -535,7 +535,7 @@ describe('GroupExperimentalUnits Specs', () => {
       })
       recursiveBatchCreateStub.resolves()
 
-      return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
+      return target.createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
         sinon.assert.calledWithExactly(batchCreateGroupValuesStub, [{
           name: 'repNumber',
           value: '1',
@@ -550,7 +550,7 @@ describe('GroupExperimentalUnits Specs', () => {
       getUnitsAndGroupValues.returns({ groupValues: [], units: [], childGroups: [] })
       recursiveBatchCreateStub.resolves()
 
-      return target._createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
+      return target.createGroupValuesUnitsAndChildGroups(1, [], [], testContext, testTx).then(() => {
         sinon.assert.notCalled(batchCreateGroupValuesStub)
         sinon.assert.notCalled(createExperimentalUnitsStub)
         sinon.assert.notCalled(recursiveBatchCreateStub)

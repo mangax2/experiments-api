@@ -31,7 +31,7 @@ describe('GroupValueService', () => {
 
   before(() => {
     groupValueService = new GroupValueService()
-    groupService = groupValueService._groupService
+    groupService = groupValueService.groupService
 
     findAllByGroupIdStub = sinon.stub(db.groupValue, 'findAllByGroupId')
     findAllByGroupIdsStub = sinon.stub(db.groupValue, 'batchFindAllByGroupIds')
@@ -51,7 +51,7 @@ describe('GroupValueService', () => {
         },
       }
     })
-    validateStub = sinon.stub(groupValueService._validator, 'validate')
+    validateStub = sinon.stub(groupValueService.validator, 'validate')
 
   })
 

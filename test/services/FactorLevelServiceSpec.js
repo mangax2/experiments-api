@@ -32,11 +32,11 @@ describe('FactorLevelService', () => {
   before(() => {
     target = new FactorLevelService()
 
-    getFactorByIdStub = sinon.stub(targetgetFactorfactorService, 'getFactorById')
+    getFactorByIdStub = sinon.stub(target.factorService, 'getFactorById')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(targetgetFactorvalidator, 'validate')
+    validateStub = sinon.stub(target.validator, 'validate')
     repositoryStub = sinon.stub(db.factorLevel, 'repository', () => {
       return { tx: function (transactionName, callback) {return callback(tx)} }
     })

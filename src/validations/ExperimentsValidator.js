@@ -46,7 +46,6 @@ class ExperimentsValidator extends SchemaValidator {
   getEntityName = () => 'Experiment'
 
   preValidate = (factorObj) => {
-    console.log("experiment prevalidate")
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Experiments request object needs to be an array'))
@@ -54,10 +53,7 @@ class ExperimentsValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
-  postValidate = () => {
-    console.log("EV post")
-    return Promise.resolve()
-  }
+  postValidate = () => Promise.resolve()
 }
 
 module.exports = ExperimentsValidator

@@ -24,6 +24,7 @@ class BaseValidator {
         if (!this.hasErrors()) {
           return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
         }
+        return Promise.resolve()
       })
   }
 
@@ -132,7 +133,7 @@ class BaseValidator {
   }
 
   getDistinctIds = groupSet =>
-    _.chain(groupSet).map(g => g.id).filter((e => e !== undefined)).uniq()
+    _.chain(groupSet).map(g => g.id).filter((e => e !== undefined && e !== null)).uniq()
       .value()
 
   verifyIdsExist(ids, groupSet, entity, optionalTransaction) {

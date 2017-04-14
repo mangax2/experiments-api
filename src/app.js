@@ -48,7 +48,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(appBaseUrl, middleware.swaggerUi())
   })
 
-  app.use((err, req, res) => {
+  //eslint-disable-next-line
+  app.use((err, req, res, next) => {
     const errorLogMessage = ''
     if (err) {
       if (_.isArray(err)) {

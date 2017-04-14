@@ -26,7 +26,7 @@ before(() => {
     return { tx: function (transactionName, callback) {return callback(tx)} }
   })
   updateStub = sinon.stub(db.factorType, 'update')
-  validateStub = sinon.stub(factorTypesService._validator, 'validate')
+  validateStub = sinon.stub(factorTypesService.validator, 'validate')
 })
 
 afterEach(() => {

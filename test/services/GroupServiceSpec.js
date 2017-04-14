@@ -31,11 +31,11 @@ describe('GroupService', () => {
   before(() => {
     target = new GroupService()
 
-    getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
+    getExperimentByIdStub = sinon.stub(target.experimentService, 'getExperimentById')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(target._validator, 'validate')
+    validateStub = sinon.stub(target.validator, 'validate')
     findStub = sinon.stub(db.group, 'find')
     findAllByExperimentIdStub = sinon.stub(db.group, 'findAllByExperimentId')
     batchCreateStub = sinon.stub(db.group, 'batchCreate')

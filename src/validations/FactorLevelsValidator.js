@@ -54,7 +54,7 @@ class FactorLevelsValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
-  postValidate(targetObject) {
+  postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
       const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))

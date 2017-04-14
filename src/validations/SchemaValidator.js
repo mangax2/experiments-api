@@ -5,7 +5,7 @@ import AppError from '../services/utility/AppError'
 
 const logger = log4js.getLogger('SchemaValidator')
 
-export class SchemaValidator extends BaseValidator {
+class SchemaValidator extends BaseValidator {
   schemaCheck(targetObject, schema, optionalTransaction) {
     return Promise.all(
       _.map(schema, (elementSchema) => {
@@ -53,9 +53,8 @@ export class SchemaValidator extends BaseValidator {
     })
   }
 
-  validateEntity = (targetObject, operationName, optionalTransaction) => {
-    return this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
-  }
+  validateEntity = (targetObject, operationName, optionalTransaction) =>
+    this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
 
   validateBatchForRI = (batchPayload, operationName, optionalTransaction) =>
     new Promise((resolve, reject) => {
@@ -80,18 +79,18 @@ export class SchemaValidator extends BaseValidator {
       })
 
       if (riCheckArray.length === 0) {
-        resolve()
-      } else {
-        const riCheckGroupByEntity = _.values(_.groupBy(riCheckArray, 'paramName'))
-        return this.checkRIBatch(riCheckGroupByEntity, optionalTransaction).then(() => {
-          resolve()
-        }, (err) => {
-          reject(err)
-        })
+        return resolve()
       }
+
+      const riCheckGroupByEntity = _.values(_.groupBy(riCheckArray, 'paramName'))
+      return this.checkRIBatch(riCheckGroupByEntity, optionalTransaction).then(() => {
+        resolve()
+      }, (err) => {
+        reject(err)
+      })
     })
 
-  postValidate(targetObject) {
+  postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       // Check the business key
       const uniqArray = _.uniqWith(_.map(targetObject, obj =>

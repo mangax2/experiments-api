@@ -67,7 +67,7 @@ describe('BaseValidator', () => {
       const element1 = {}
       validateEntityStub.rejects(testError)
 
-      return target._validateArray([element1], 'opName', testTransaction).should.be.rejected.then((err) => {
+      return target.validateArray([element1], 'opName', testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         validateEntityStub.callCount.should.eql(1)
         sinon.assert.calledWithExactly(
@@ -87,7 +87,7 @@ describe('BaseValidator', () => {
       validateEntityStub.onFirstCall().resolves()
       validateEntityStub.onSecondCall().rejects(testError)
 
-      return target._validateArray([element1, element2], 'opName', testTransaction).should.be.rejected.then((err) => {
+      return target.validateArray([element1, element2], 'opName', testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         validateEntityStub.callCount.should.eql(2)
         sinon.assert.calledWithExactly(
@@ -112,7 +112,7 @@ describe('BaseValidator', () => {
       validateEntityStub.resolves()
       hasErrorsStub.returns(true)
 
-      return target._validateArray([element1], 'opName', testTransaction).then(() => {
+      return target.validateArray([element1], 'opName', testTransaction).then(() => {
         validateEntityStub.callCount.should.eql(1)
         sinon.assert.calledWithExactly(
           validateEntityStub,
@@ -134,7 +134,7 @@ describe('BaseValidator', () => {
       hasErrorsStub.returns(false)
       validateBatchForRIStub.onFirstCall().resolves()
 
-      return target._validateArray(objectArray, 'opName', testTransaction).then(() => {
+      return target.validateArray(objectArray, 'opName', testTransaction).then(() => {
         validateEntityStub.callCount.should.eql(2)
         sinon.assert.calledWithExactly(
           validateEntityStub,
@@ -164,7 +164,7 @@ describe('BaseValidator', () => {
     let validateEntityStub
 
     before(() => {
-      validateArrayStub = sinon.stub(target, '_validateArray')
+      validateArrayStub = sinon.stub(target, 'validateArray')
       validateEntityStub = sinon.stub(target, 'validateEntity')
     })
 
@@ -182,7 +182,7 @@ describe('BaseValidator', () => {
       const entities = []
       validateArrayStub.returns(testResponse)
 
-      const r = target._validateArrayOrSingleEntity(entities, 'opName', testTransaction)
+      const r = target.validateArrayOrSingleEntity(entities, 'opName', testTransaction)
 
       r.should.equal(testResponse)
       sinon.assert.calledWithExactly(
@@ -198,7 +198,7 @@ describe('BaseValidator', () => {
       const entity = {}
       validateEntityStub.returns(testResponse)
 
-      const r = target._validateArrayOrSingleEntity(entity, 'opName', testTransaction)
+      const r = target.validateArrayOrSingleEntity(entity, 'opName', testTransaction)
 
       r.should.equal(testResponse)
       sinon.assert.calledWithExactly(
@@ -220,7 +220,7 @@ describe('BaseValidator', () => {
 
     before(() => {
       preValidateStub = sinon.stub(target, 'preValidate')
-      validateArrayorSingleEntityStub = sinon.stub(target, '_validateArrayOrSingleEntity')
+      validateArrayorSingleEntityStub = sinon.stub(target, 'validateArrayOrSingleEntity')
       postValidateStub = sinon.stub(target, 'postValidate')
       checkStub = sinon.stub(target, 'check')
     })
@@ -540,7 +540,7 @@ describe('BaseValidator', () => {
     let getPromiseForRIorBusinessKeyCheckStub
 
     before(() => {
-      getPromiseForRIorBusinessKeyCheckStub = sinon.stub(target, '_getPromiseForRIorBusinessKeyCheck')
+      getPromiseForRIorBusinessKeyCheckStub = sinon.stub(target, 'getPromiseForRIorBusinessKeyCheck')
     })
 
     afterEach(() => {
@@ -625,7 +625,7 @@ describe('BaseValidator', () => {
     })
   })
 
-  describe('_getPromiseForRIorBusinessKeyCheck', () => {
+  describe('getPromiseForRIorBusinessKeyCheck', () => {
     let getDistinctIdsStub
     let verifyIdsExistStub
     let verifyBusinessKeysAreUniqueStub
@@ -633,9 +633,9 @@ describe('BaseValidator', () => {
     let testGroupSet = [{ entity: testEntity }]
 
     before(() => {
-      getDistinctIdsStub = sinon.stub(target, '_getDistinctIds')
-      verifyIdsExistStub = sinon.stub(target, '_verifyIdsExist')
-      verifyBusinessKeysAreUniqueStub = sinon.stub(target, '_verifyBusinessKeysAreUnique')
+      getDistinctIdsStub = sinon.stub(target, 'getDistinctIds')
+      verifyIdsExistStub = sinon.stub(target, 'verifyIdsExist')
+      verifyBusinessKeysAreUniqueStub = sinon.stub(target, 'verifyBusinessKeysAreUnique')
     })
 
     afterEach(() => {
@@ -651,7 +651,7 @@ describe('BaseValidator', () => {
     })
 
     it('resolves immediately when groupSet is empty array', () => {
-      return target._getPromiseForRIorBusinessKeyCheck([], testTransaction).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck([], testTransaction).then(() => {
         sinon.assert.notCalled(getDistinctIdsStub)
         sinon.assert.notCalled(verifyIdsExistStub)
         sinon.assert.notCalled(verifyBusinessKeysAreUniqueStub)
@@ -662,7 +662,7 @@ describe('BaseValidator', () => {
       getDistinctIdsStub.returns([1])
       verifyIdsExistStub.resolves()
 
-      return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
         sinon.assert.calledOnce(getDistinctIdsStub)
         sinon.assert.calledWithExactly(
           getDistinctIdsStub,
@@ -684,7 +684,7 @@ describe('BaseValidator', () => {
       getDistinctIdsStub.returns([])
       verifyBusinessKeysAreUniqueStub.resolves()
 
-      return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).then(() => {
         sinon.assert.calledOnce(getDistinctIdsStub)
         sinon.assert.calledWithExactly(
           getDistinctIdsStub,
@@ -705,7 +705,7 @@ describe('BaseValidator', () => {
       getDistinctIdsStub.returns([1])
       verifyIdsExistStub.rejects(testError)
 
-      return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
+      return target.getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledOnce(getDistinctIdsStub)
         sinon.assert.calledWithExactly(
@@ -728,7 +728,7 @@ describe('BaseValidator', () => {
       getDistinctIdsStub.returns([])
       verifyBusinessKeysAreUniqueStub.rejects(testError)
 
-      return target._getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
+      return target.getPromiseForRIorBusinessKeyCheck(testGroupSet, testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledOnce(getDistinctIdsStub)
         sinon.assert.calledWithExactly(
@@ -747,15 +747,15 @@ describe('BaseValidator', () => {
     })
   })
 
-  describe('_getDistinctIds', () => {
+  describe('getDistinctIds', () => {
     it('filters out undefined and null values', () => {
-      const r = target._getDistinctIds([{}, { id: 1 }, { id: null }])
+      const r = target.getDistinctIds([{}, { id: 1 }, { id: null }])
       r.length.should.equal(1)
       r[0].should.equal(1)
     })
 
     it('filters out duplicates', () => {
-      const r = target._getDistinctIds([{ id: 1 }, { id: 2 }, { id: 1 }, { id: 3 }, { id: 2 }, { id: 1 }])
+      const r = target.getDistinctIds([{ id: 1 }, { id: 2 }, { id: 1 }, { id: 3 }, { id: 2 }, { id: 1 }])
       r.should.eql([1, 2, 3])
     })
   })
@@ -771,7 +771,7 @@ describe('BaseValidator', () => {
     before(() => {
       getEntitiesByIdsStub = sinon.stub(target.referentialIntegrityService, 'getEntitiesByIds')
       getEntityNameStub = sinon.stub(target, 'getEntityName')
-      getIdDifferenceStub = sinon.stub(target, '_getIdDifference')
+      getIdDifferenceStub = sinon.stub(target, 'getIdDifference')
     })
 
     afterEach(() => {
@@ -789,7 +789,7 @@ describe('BaseValidator', () => {
     it('rejects when getEntitiesByIds is rejected', () => {
       getEntitiesByIdsStub.rejects(testError)
 
-      return target._verifyIdsExist([1], testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
+      return target.verifyIdsExist([1], testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledOnce(getEntitiesByIdsStub)
         sinon.assert.calledWithExactly(
@@ -806,7 +806,7 @@ describe('BaseValidator', () => {
       getEntityNameStub.returns('TestEntity')
       getIdDifferenceStub.returns([1])
 
-      return target._verifyIdsExist([1, 2, 3], [{ paramName: 'testId' }], testEntity, testTransaction).then(() => {
+      return target.verifyIdsExist([1, 2, 3], [{ paramName: 'testId' }], testEntity, testTransaction).then(() => {
         target.messages.should.eql(['TestEntity not found for testId(s): 1'])
         sinon.assert.calledOnce(getEntitiesByIdsStub)
         sinon.assert.calledWithExactly(
@@ -828,7 +828,7 @@ describe('BaseValidator', () => {
     it('does not add message when count of found ids equals count of requested ids', () => {
       getEntitiesByIdsStub.resolves([1, 2, 3])
 
-      return target._verifyIdsExist([1, 2, 3], testGroupSet, testEntity, testTransaction).then(() => {
+      return target.verifyIdsExist([1, 2, 3], testGroupSet, testEntity, testTransaction).then(() => {
         target.messages.should.eql([])
         sinon.assert.calledOnce(getEntitiesByIdsStub)
         sinon.assert.calledWithExactly(
@@ -845,7 +845,7 @@ describe('BaseValidator', () => {
 
   describe('_extractBusinessKeys', () => {
     it('creates new objects with only the necessary information', () => {
-      target._extractBusinessKeys([
+      target.extractBusinessKeys([
         {
           keys: [1, 'name1'],
           updateId: 9,
@@ -889,10 +889,10 @@ describe('BaseValidator', () => {
     let testEntity = {}
 
     before(() => {
-      extractBusinessKeysStub = sinon.stub(target, '_extractBusinessKeys')
+      extractBusinessKeysStub = sinon.stub(target, 'extractBusinessKeys')
       getEntitiesByKeysStub = sinon.stub(target.referentialIntegrityService, 'getEntitiesByKeys')
       getEntityNameStub = sinon.stub(target, 'getEntityName')
-      formatBusinessKeyStub = sinon.stub(target, '_formatBusinessKey')
+      formatBusinessKeyStub = sinon.stub(target, 'formatBusinessKey')
     })
 
     afterEach(() => {
@@ -913,7 +913,7 @@ describe('BaseValidator', () => {
       extractBusinessKeysStub.returns(expectedBusinessKeys)
       getEntitiesByKeysStub.rejects(testError)
 
-      return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
+      return target.verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).should.be.rejected.then((err) => {
         err.should.equal(testError)
         sinon.assert.calledOnce(extractBusinessKeysStub)
         sinon.assert.calledWithExactly(
@@ -940,7 +940,7 @@ describe('BaseValidator', () => {
       getEntityNameStub.returns('Entity name')
       formatBusinessKeyStub.returns(' formatted key')
 
-      return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
+      return target.verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
         target.messages.should.eql(['Entity name already exists for business keys formatted key'])
 
         sinon.assert.calledOnce(extractBusinessKeysStub)
@@ -970,7 +970,7 @@ describe('BaseValidator', () => {
       extractBusinessKeysStub.returns(expectedBusinessKeys)
       getEntitiesByKeysStub.resolves(expectedData)
 
-      return target._verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
+      return target.verifyBusinessKeysAreUnique(testGroupSet, testEntity, testTransaction).then(() => {
         target.messages.should.eql([])
 
         sinon.assert.calledOnce(extractBusinessKeysStub)
@@ -993,21 +993,21 @@ describe('BaseValidator', () => {
 
   describe('_getIdDifference', () => {
     it('returns empty array when inputs are the same', () => {
-      target._getIdDifference([1, 2, 3], [{ id: 1 }, { id: 2 }, { id: 3 }]).should.eql([])
+      target.getIdDifference([1, 2, 3], [{ id: 1 }, { id: 2 }, { id: 3 }]).should.eql([])
     })
 
     it('returns difference when arrays are not the same', () => {
-      target._getIdDifference([1, 2, 3], [{ id: 1 }, { id: 2 }]).should.eql([3])
+      target.getIdDifference([1, 2, 3], [{ id: 1 }, { id: 2 }]).should.eql([3])
     })
   })
 
   describe('_formatBusinessKey', () => {
     it('converts single object to string and removes double quotes', () => {
-      target._formatBusinessKey([{ key: 'k1', value: 'v1' }]).should.equal('{key:k1,value:v1}')
+      target.formatBusinessKey([{ key: 'k1', value: 'v1' }]).should.equal('{key:k1,value:v1}')
     })
 
     it('converts multiple objects to string and removes double quotes', () => {
-      target._formatBusinessKey([{ key: 'k1', value: 'v1' }, { key: 'k2', value: 'v2' }])
+      target.formatBusinessKey([{ key: 'k1', value: 'v1' }, { key: 'k2', value: 'v2' }])
         .should.equal('{key:k1,value:v1},{key:k2,value:v2}')
     })
   })
@@ -1064,16 +1064,16 @@ describe('BaseValidator', () => {
 
   describe('_getIdDifference', () => {
     it('returns empty when both arguments have same ids', () => {
-      const diff = target._getIdDifference([2, 4, 5], [{ id: 2 }, { id: 4 }, { id: 5 }])
+      const diff = target.getIdDifference([2, 4, 5], [{ id: 2 }, { id: 4 }, { id: 5 }])
       diff.length.should.equal(0)
     })
     it('returns diff array when first argument has more ids', () => {
-      const diff = target._getIdDifference([2, 4, 5, 6, 7], [{ id: 2 }, { id: 4 }, { id: 5 }])
+      const diff = target.getIdDifference([2, 4, 5, 6, 7], [{ id: 2 }, { id: 4 }, { id: 5 }])
       diff.should.eql([6, 7])
 
     })
     it('returns diff array when second argument is empty array', () => {
-      const diff = target._getIdDifference([2, 4, 5, 6, 7], [])
+      const diff = target.getIdDifference([2, 4, 5, 6, 7], [])
       diff.should.eql([2, 4, 5, 6, 7])
 
     })
@@ -1081,27 +1081,27 @@ describe('BaseValidator', () => {
 
   describe('_formatBusinessKey', () => {
     it('returns empty stringify object without double quotes in string when input is empty object', () => {
-      const businessKeyObj = target._formatBusinessKey([{}])
+      const businessKeyObj = target.formatBusinessKey([{}])
       businessKeyObj.should.eql('{}')
     })
 
     it('returns empty stringify object without double quotes in string from input object', () => {
-      const businessKeyObj = target._formatBusinessKey([{ 'a': '1' }])
+      const businessKeyObj = target.formatBusinessKey([{ 'a': '1' }])
       businessKeyObj.should.eql('{a:1}')
     })
 
     it('returns empty stringify objects without double quotes in string from list of objects', () => {
-      const businessKeyObj = target._formatBusinessKey([{ 'a': '1' }, { 'b': '2' }])
+      const businessKeyObj = target.formatBusinessKey([{ 'a': '1' }, { 'b': '2' }])
       businessKeyObj.should.eql('{a:1},{b:2}')
     })
 
     it('returns diff array when first argument has more ids', () => {
-      const diff = target._getIdDifference([2, 4, 5, 6, 7], [{ id: 2 }, { id: 4 }, { id: 5 }])
+      const diff = target.getIdDifference([2, 4, 5, 6, 7], [{ id: 2 }, { id: 4 }, { id: 5 }])
       diff.should.eql([6, 7])
 
     })
     it('returns diff array when second argument is empty array', () => {
-      const diff = target._getIdDifference([2, 4, 5, 6, 7], [])
+      const diff = target.getIdDifference([2, 4, 5, 6, 7], [])
       diff.should.eql([2, 4, 5, 6, 7])
 
     })

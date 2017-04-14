@@ -1,4 +1,4 @@
-export class ReferentialIntegrityService {
+class ReferentialIntegrityService {
   getById = (id, entity, tx) => entity.find(id, tx)
 
   getByBusinessKey = (keys, entity, tx) => entity.findByBusinessKey(keys, tx)

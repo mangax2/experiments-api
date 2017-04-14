@@ -35,7 +35,7 @@ function transactional(transactionName) {
       // Fat arrow necessary to preserve this
       return db.tx(transactionName, (tx) => {
         const newArguments = []
-        for (let i = 0; i < arguments.length; i++) {
+        for (let i = 0; i < arguments.length; i += 1) {
           newArguments.push(arguments[i])
         }
         newArguments.push(tx)

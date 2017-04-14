@@ -34,14 +34,14 @@ class TreatmentDetailsService {
           .then(() => AppUtil.createCompositePostResponse())))
   }
 
-  _deleteTreatments(treatmentIdsToDelete, tx) {
+  deleteTreatments(treatmentIdsToDelete, tx) {
     if (_.isUndefined(treatmentIdsToDelete) || treatmentIdsToDelete.length === 0) {
       return Promise.resolve()
     }
     return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx)
   }
 
-  _createTreatments(treatmentAdds, context, tx) {
+  createTreatments(treatmentAdds, context, tx) {
     if (_.isUndefined(treatmentAdds) || treatmentAdds.length === 0) {
       return Promise.resolve()
     }

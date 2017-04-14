@@ -3,7 +3,7 @@ const chai = require('chai')
 const AppError = require('../../src/services/utility/AppError')
 const target = require('../../src/middleware/requestContext')
 
-describe.only('requestContextMiddlewareFunction', () => {
+describe('requestContextMiddlewareFunction', () => {
   let testError = {}
   let badRequestStub
   let nextStub

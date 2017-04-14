@@ -10,7 +10,7 @@ describe('RefDataSourceTypeService Specs', () => {
 
   before(() => {
     target = new RefDataSourceTypeService()
-    getSourcesStub = sinon.stub(target._refDataSourceService, 'getRefDataSources')
+    getSourcesStub = sinon.stub(target.refDataSourceService, 'getRefDataSources')
 
     allStub = sinon.stub(db.refDataSourceType, 'all')
     findStub = sinon.stub(db.refDataSourceType, 'find')

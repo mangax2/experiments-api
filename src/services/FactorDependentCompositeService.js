@@ -163,8 +163,10 @@ class FactorDependentCompositeService {
               context,
               tx)
             }
+            return Promise.resolve()
           })
       }
+      return Promise.resolve()
     })
   }
 
@@ -178,6 +180,7 @@ class FactorDependentCompositeService {
             tx,
           )
         }
+        return Promise.resolve()
       })
   }
 

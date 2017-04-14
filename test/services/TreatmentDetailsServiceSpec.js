@@ -22,8 +22,8 @@ describe('TreatmentDetailsService', () => {
 
     before(() => {
       batchGetCombinationElementsByTreatmentIdsNoValidateStub =
-        sinon.stub(target._combinationElementService, 'batchGetCombinationElementsByTreatmentIdsNoValidate')
-      treatmentServiceGetStub = sinon.stub(target._treatmentService, 'getTreatmentsByExperimentId')
+        sinon.stub(target.combinationElementService, 'batchGetCombinationElementsByTreatmentIdsNoValidate')
+      treatmentServiceGetStub = sinon.stub(target.treatmentService, 'getTreatmentsByExperimentId')
     })
     afterEach(() => {
       batchGetCombinationElementsByTreatmentIdsNoValidateStub.reset()
@@ -125,13 +125,13 @@ describe('TreatmentDetailsService', () => {
     let batchGetCombinationElementsByTreatmentIdStub
 
     before(() => {
-      batchDeleteTreatmentsStub = sinon.stub(target._treatmentService, 'batchDeleteTreatments')
-      batchDeleteCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchDeleteCombinationElements')
-      batchCreateTreatmentsStub = sinon.stub(target._treatmentService, 'batchCreateTreatments')
-      batchCreateCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchCreateCombinationElements')
-      batchUpdateTreatmentsStub = sinon.stub(target._treatmentService, 'batchUpdateTreatments')
-      batchUpdateCombinationElementsStub = sinon.stub(target._combinationElementService, 'batchUpdateCombinationElements')
-      batchGetCombinationElementsByTreatmentIdStub = sinon.stub(target._combinationElementService, 'batchGetCombinationElementsByTreatmentIds')
+      batchDeleteTreatmentsStub = sinon.stub(target.treatmentService, 'batchDeleteTreatments')
+      batchDeleteCombinationElementsStub = sinon.stub(target.combinationElementService, 'batchDeleteCombinationElements')
+      batchCreateTreatmentsStub = sinon.stub(target.treatmentService, 'batchCreateTreatments')
+      batchCreateCombinationElementsStub = sinon.stub(target.combinationElementService, 'batchCreateCombinationElements')
+      batchUpdateTreatmentsStub = sinon.stub(target.treatmentService, 'batchUpdateTreatments')
+      batchUpdateCombinationElementsStub = sinon.stub(target.combinationElementService, 'batchUpdateCombinationElements')
+      batchGetCombinationElementsByTreatmentIdStub = sinon.stub(target.combinationElementService, 'batchGetCombinationElementsByTreatmentIds')
     })
 
     afterEach(() => {
@@ -160,17 +160,17 @@ describe('TreatmentDetailsService', () => {
       let updateCallIndex = -1
       let createCallIndex = -1
       const service = new TreatmentDetailsService()
-      sinon.stub(service, '_deleteTreatments', () => {
+      sinon.stub(service, 'deleteTreatments', () => {
         deleteCallIndex = callIndex
         callIndex++
         return Promise.resolve()
       })
-      sinon.stub(service, '_updateTreatments', () => {
+      sinon.stub(service, 'updateTreatments', () => {
         updateCallIndex = callIndex
         callIndex++
         return Promise.resolve()
       })
-      sinon.stub(service, '_createTreatments', () => {
+      sinon.stub(service, 'createTreatments', () => {
         createCallIndex = callIndex
         callIndex++
         return Promise.resolve()
@@ -189,26 +189,26 @@ describe('TreatmentDetailsService', () => {
       let updateCallIndex = -1
       let createCallIndex = -1
       const service = new TreatmentDetailsService()
-      sinon.stub(service, '_assembleBatchCreateCombinationElementsRequestFromUpdates').returns([])
-      sinon.stub(service, '_assembleBatchUpdateCombinationElementsRequestFromUpdates').returns([])
-      sinon.stub(service._treatmentService, 'batchUpdateTreatments').returns(Promise.resolve())
-      sinon.stub(service, '_deleteCombinationElements', () => {
+      sinon.stub(service, 'assembleBatchCreateCombinationElementsRequestFromUpdates').returns([])
+      sinon.stub(service, 'assembleBatchUpdateCombinationElementsRequestFromUpdates').returns([])
+      sinon.stub(service.treatmentService, 'batchUpdateTreatments').returns(Promise.resolve())
+      sinon.stub(service, 'deleteCombinationElements', () => {
         deleteCallIndex = callIndex
         callIndex++
         return Promise.resolve()
       })
-      sinon.stub(service, '_updateCombinationElements', () => {
+      sinon.stub(service, 'updateCombinationElements', () => {
         updateCallIndex = callIndex
         callIndex++
         return Promise.resolve()
       })
-      sinon.stub(service, '_createCombinationElements', () => {
+      sinon.stub(service, 'createCombinationElements', () => {
         createCallIndex = callIndex
         callIndex++
         return Promise.resolve()
       })
 
-      return service._updateTreatments(['this makes length more than zero'], testContext, testTx).then(() => {
+      return service.updateTreatments(['this makes length more than zero'], testContext, testTx).then(() => {
         deleteCallIndex.should.equal(0)
         updateCallIndex.should.equal(1)
         createCallIndex.should.equal(2)

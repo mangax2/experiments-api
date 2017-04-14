@@ -32,11 +32,11 @@ describe('UnitSpecificationDetailService', () => {
   before(() => {
     target = new UnitSpecificationDetailService()
 
-    getExperimentByIdStub = sinon.stub(target._experimentService, 'getExperimentById')
+    getExperimentByIdStub = sinon.stub(target.experimentService, 'getExperimentById')
     createPostResponseStub = sinon.stub(AppUtil, 'createPostResponse')
     createPutResponseStub = sinon.stub(AppUtil, 'createPutResponse')
     notFoundStub = sinon.stub(AppError, 'notFound')
-    validateStub = sinon.stub(target._validator, 'validate')
+    validateStub = sinon.stub(target.validator, 'validate')
     findStub = sinon.stub(db.unitSpecificationDetail, 'find')
     batchFindStub = sinon.stub(db.unitSpecificationDetail, 'batchFind')
     findAllByExperimentIdStub = sinon.stub(db.unitSpecificationDetail, 'findAllByExperimentId')
@@ -339,8 +339,8 @@ describe('UnitSpecificationDetailService', () => {
 
     before(() => {
       deleteUnitSpecificationDetailsStub = sinon.stub(target, 'deleteUnitSpecificationDetails')
-      _updateUnitSpecificationDetailsStub = sinon.stub(target, '_updateUnitSpecificationDetails')
-      _createUnitSpecificationDetailsStub = sinon.stub(target, '_createUnitSpecificationDetails')
+      _updateUnitSpecificationDetailsStub = sinon.stub(target, 'updateUnitSpecificationDetails')
+      _createUnitSpecificationDetailsStub = sinon.stub(target, 'createUnitSpecificationDetails')
     })
 
     afterEach(() => {
@@ -442,16 +442,16 @@ describe('UnitSpecificationDetailService', () => {
     })
 
     it('returns an empty resolved promise if the unit specification details is undefined', () => {
-      return target._updateUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
+      return target.updateUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
     })
 
     it('returns an empty resolved promise if the unit specification details is an empty list', () => {
-      return target._updateUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
+      return target.updateUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
     })
 
     it('calls batchUpdateUnitSpecificationDetails with the details object', () => {
       batchUpdateUnitSpecificationDetailsStub.resolves()
-      return target._updateUnitSpecificationDetails([{}], testContext, tx).then(() => {
+      return target.updateUnitSpecificationDetails([{}], testContext, tx).then(() => {
         sinon.assert.calledWith(batchUpdateUnitSpecificationDetailsStub, [{}])
       })
     })
@@ -473,16 +473,16 @@ describe('UnitSpecificationDetailService', () => {
     })
 
     it('returns an empty resolved promise if the unit specification details is undefined', () => {
-      return target._createUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
+      return target.createUnitSpecificationDetails(undefined, testContext, tx).should.be.fulfilled
     })
 
     it('returns an empty resolved promise if the unit specification details is an empty list', () => {
-      return target._createUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
+      return target.createUnitSpecificationDetails([], testContext, tx).should.be.fulfilled
     })
 
     it('calls batchUpdateUnitSpecificationDetails with the details object', () => {
       batchCreateUnitSpecificationDetailsStub.resolves()
-      return target._createUnitSpecificationDetails([{}], testContext, tx).then(() => {
+      return target.createUnitSpecificationDetails([{}], testContext, tx).then(() => {
         sinon.assert.calledWith(batchCreateUnitSpecificationDetailsStub, [{}])
       })
     })

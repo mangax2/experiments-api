@@ -82,7 +82,7 @@ router.get('/experiments', (req, res, next) => {
 router.get('/experiments/:id', (req, res, next) => {
   new ExperimentsService().getExperimentById(req.params.id)
     .then(experiment => res.json(experiment))
-    .catch(err => { console.log("here:"); console.log(err); return next(err)})
+    .catch(err => next(err))
 })
 router.delete('/experiments/:id', (req, res, next) => {
   const id = req.params.id

@@ -30,11 +30,9 @@ class FactorsValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'Factor'
-  }
+  getEntityName = () => 'Factor'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return FactorsValidator.POST_VALIDATION_SCHEMA
@@ -49,15 +47,12 @@ class FactorsValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['experimentId', 'name']
-  }
+  getBusinessKeyPropertyNames = () => ['experimentId', 'name']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate factor name in request payload with same experiment id'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate factor name in request payload with same' +
+  ' experiment id'
 
-  preValidate(factorObj) {
+  preValidate = (factorObj) => {
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Factor request object needs to be an array'))

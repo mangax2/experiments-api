@@ -31,7 +31,7 @@ class ExperimentsValidator extends SchemaValidator {
     ]
   }
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
       case 'PUT':
@@ -43,11 +43,10 @@ class ExperimentsValidator extends SchemaValidator {
     }
   }
 
-  getEntityName() {
-    return 'Experiment'
-  }
+  getEntityName = () => 'Experiment'
 
-  preValidate(factorObj) {
+  preValidate = (factorObj) => {
+    console.log("experiment prevalidate")
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Experiments request object needs to be an array'))
@@ -55,11 +54,10 @@ class ExperimentsValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
-  postValidate(targetObject) {
-    // No business key to validate
+  postValidate = () => {
+    console.log("EV post")
     return Promise.resolve()
   }
-
 }
 
 module.exports = ExperimentsValidator

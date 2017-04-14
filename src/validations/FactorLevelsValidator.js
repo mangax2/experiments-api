@@ -25,11 +25,9 @@ class FactorLevelsValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'FactorLevel'
-  }
+  getEntityName = () => 'FactorLevel'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return FactorLevelsValidator.POST_VALIDATION_SCHEMA
@@ -44,15 +42,11 @@ class FactorLevelsValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['factorId', 'value']
-  }
+  getBusinessKeyPropertyNames = () => ['factorId', 'value']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate factor level value in request payload with same factor id'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate factor level value in request payload with same factor id'
 
-  preValidate(factorLevelObj) {
+  preValidate = (factorLevelObj) => {
     if (!_.isArray(factorLevelObj) || factorLevelObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Factor Level request object needs to be an array'))
@@ -71,6 +65,7 @@ class FactorLevelsValidator extends SchemaValidator {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

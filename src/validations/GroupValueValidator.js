@@ -26,11 +26,9 @@ class GroupValueValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'GroupValue'
-  }
+  getEntityName = () => 'GroupValue'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return GroupValueValidator.POST_VALIDATION_SCHEMA
@@ -45,24 +43,20 @@ class GroupValueValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['groupId', 'name']
-  }
+  getBusinessKeyPropertyNames = () => ['groupId', 'name']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate name and value in request payload with same groupId'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate name and value in request payload with same groupId'
 
-  preValidate(groupValueObj) {
+  preValidate = (groupValueObj) => {
     if (!_.isArray(groupValueObj) || groupValueObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Group Value request object needs to be an array'))
     }
     if (_.filter(groupValueObj, (gv) => {
-        if (!gv.name || !gv.value) {
-          return gv
-        }
-      }).length > 0) {
+      if (!gv.name || !gv.value) {
+        return gv
+      }
+    }).length > 0) {
       return Promise.reject(
         AppError.badRequest('Group Values must have a name and a value'),
       )

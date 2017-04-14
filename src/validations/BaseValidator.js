@@ -19,12 +19,12 @@ class BaseValidator {
   validateArray(objectArray, operationName, optionalTransaction) {
     return Promise.all(
       _.map(objectArray, element =>
-        this.validateEntity(element, operationName, optionalTransaction)),
-    ).then(() => {
-      if (!this.hasErrors()) {
-        return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
-      }
-    })
+        this.validateEntity(element, operationName, optionalTransaction),
+      )).then(() => {
+        if (!this.hasErrors()) {
+          return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+        }
+      })
   }
 
   validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
@@ -39,20 +39,16 @@ class BaseValidator {
     ).then(() => this.postValidate(targetObject)).then(() => this.check()))
   }
 
-  preValidate(targetObject) {
-    return Promise.resolve()
-  }
+  preValidate = () => Promise.resolve()
 
-  postValidate(targetObject) {
-    return Promise.resolve()
-  }
+  postValidate = () => Promise.resolve()
 
-  validateEntity(targetObject, operationName, optionalTransaction) {
+  validateEntity = (targetObject) => {
     logger.error(`validateEntity validation method not implemented to validate${targetObject}`)
     return Promise.reject('Server error, please contact support')
   }
 
-  validateBatchForRI(batchPayload, operationName, optionalTransaction) {
+  validateBatchForRI = () => {
     logger.error('validateBatchForRI validation method not implemented to validate')
     return Promise.reject('Server error, please contact support')
   }
@@ -135,10 +131,9 @@ class BaseValidator {
     return this.verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction)
   }
 
-  getDistinctIds(groupSet) {
-    return _.chain(groupSet).map(g => g.id).filter((e => e !== undefined)).uniq()
+  getDistinctIds = groupSet =>
+    _.chain(groupSet).map(g => g.id).filter((e => e !== undefined)).uniq()
       .value()
-  }
 
   verifyIdsExist(ids, groupSet, entity, optionalTransaction) {
     // Note: ids list is assumed to have no duplicates before calling this function
@@ -150,9 +145,7 @@ class BaseValidator {
       })
   }
 
-  extractBusinessKeys(groupSet) {
-    return _.map(groupSet, r => ({ keys: r.keys, updateId: r.updateId }))
-  }
+  extractBusinessKeys = groupSet => _.map(groupSet, r => ({ keys: r.keys, updateId: r.updateId }))
 
   verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction) {
     const businessKeyObjects = this.extractBusinessKeys(groupSet)
@@ -166,17 +159,17 @@ class BaseValidator {
       })
   }
 
-  getIdDifference(ids, data) {
+  getIdDifference = (ids, data) => {
     const idsFromDb = _.map(data, d => d.id)
     return _.difference(ids, idsFromDb)
   }
 
-  formatBusinessKey(dataFromDb) {
+  formatBusinessKey = (dataFromDb) => {
     const result = _.map(dataFromDb, d => JSON.stringify(d).replace(/"/g, ''))
     return result.join()
   }
 
-  getEntityName() {
+  getEntityName = () => {
     throw new Error('entityName not implemented')
   }
 

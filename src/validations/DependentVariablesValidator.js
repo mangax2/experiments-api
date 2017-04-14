@@ -4,7 +4,7 @@ import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
 class DependentVariablesValidator extends SchemaValidator {
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     const schema = [
       { paramName: 'required', type: 'boolean', required: true },
       { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
@@ -29,19 +29,13 @@ class DependentVariablesValidator extends SchemaValidator {
     }
   }
 
-  getEntityName() {
-    return 'DependentVariable'
-  }
+  getEntityName = () => 'DependentVariable'
 
-  getBusinessKeyPropertyNames() {
-    return ['experimentId', 'name']
-  }
+  getBusinessKeyPropertyNames = () => ['experimentId', 'name']
 
-  getDuplicateBusinessKeyError() {
-    return 'duplicate dependent variable name in request payload with same experiment id'
-  }
+  getDuplicateBusinessKeyError = () => 'duplicate dependent variable name in request payload with same experiment id'
 
-  preValidate(factorObj) {
+  preValidate = (factorObj) => {
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Dependent Variables request object needs to be an array'))

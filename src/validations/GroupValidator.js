@@ -28,11 +28,9 @@ class GroupValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'Group'
-  }
+  getEntityName = () => 'Group'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return GroupValidator.POST_VALIDATION_SCHEMA
@@ -47,7 +45,7 @@ class GroupValidator extends SchemaValidator {
     }
   }
 
-  preValidate(groupObj) {
+  preValidate = (groupObj) => {
     if (!_.isArray(groupObj) || groupObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Group request object needs to be an array'))
@@ -55,10 +53,7 @@ class GroupValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
-  postValidate(targetObject) {
-    // No business key to validate
-    return Promise.resolve()
-  }
+  postValidate = () => Promise.resolve()
 }
 
 module.exports = GroupValidator

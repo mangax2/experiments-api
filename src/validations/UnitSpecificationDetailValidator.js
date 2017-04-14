@@ -28,11 +28,9 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'UnitSpecificationDetail'
-  }
+  getEntityName = () => 'UnitSpecificationDetail'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return UnitSpecificationDetailValidator.POST_VALIDATION_SCHEMA
@@ -47,15 +45,11 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['experimentId', 'refUnitSpecId']
-  }
+  getBusinessKeyPropertyNames = () => ['experimentId', 'refUnitSpecId']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate unit specification id in request payload with same experiment id'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate unit specification id in request payload with same experiment id'
 
-  preValidate(unitSpecificationDetailObj) {
+  preValidate = (unitSpecificationDetailObj) => {
     if (!_.isArray(unitSpecificationDetailObj) || unitSpecificationDetailObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Unit specification detail request object needs to be an array'))
@@ -74,6 +68,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
+        return true
       })
     }
     return Promise.resolve()

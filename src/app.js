@@ -48,7 +48,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(appBaseUrl, middleware.swaggerUi())
   })
 
-
   app.use((err, req, res) => {
     const errorLogMessage = ''
     if (err) {
@@ -65,7 +64,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     logger.error(errorLogMessage + err)
     return res.status(500).json(err)
   })
-
 
   const port = config.port
 

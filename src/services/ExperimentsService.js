@@ -18,6 +18,7 @@ class ExperimentsService {
 
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, tx) {
+    console.log(this.validator)
     return this.validator.validate(experiments, 'POST', tx).then(() => db.experiments.batchCreate(experiments, context, tx).then((data) => {
       const experimentIds = _.map(data, d => d.id)
       const tags = this.assignExperimentIdToTags(experimentIds, experiments)

@@ -20,11 +20,9 @@ class ExperimentalUnitValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'ExperimentalUnit'
-  }
+  getEntityName = () => 'ExperimentalUnit'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return ExperimentalUnitValidator.POST_VALIDATION_SCHEMA
@@ -39,7 +37,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
     }
   }
 
-  preValidate(combinationElementObj) {
+  preValidate = (combinationElementObj) => {
     if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('ExperimentalUnit request object needs to be an array'))
@@ -47,10 +45,9 @@ class ExperimentalUnitValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
-  postValidate(targetObject) {
-    // No business key to validate
-    return Promise.resolve()
-  }
+  postValidate = () =>
+  // No business key to validate
+    Promise.resolve()
 }
 
 module.exports = ExperimentalUnitValidator

@@ -23,7 +23,7 @@ export class SchemaValidator extends BaseValidator {
     )
   }
 
-  schemaElementCheck(elementValue, elementSchema, targetObject, optionalTransaction) {
+  schemaElementCheck(elementValue, elementSchema) {
     return new Promise((resolve) => {
       if (this.literalCheck(elementValue, elementSchema.paramName)) {
         if (elementSchema.required) {
@@ -53,12 +53,12 @@ export class SchemaValidator extends BaseValidator {
     })
   }
 
-  validateEntity(targetObject, operationName, optionalTransaction) {
+  validateEntity = (targetObject, operationName, optionalTransaction) => {
     return this.schemaCheck(targetObject, this.getSchema(operationName), optionalTransaction)
   }
 
-  validateBatchForRI(batchPayload, operationName, optionalTransaction) {
-    return new Promise((resolve, reject) => {
+  validateBatchForRI = (batchPayload, operationName, optionalTransaction) =>
+    new Promise((resolve, reject) => {
       const riSchema = _.filter(this.getSchema(operationName), schema => schema.type === 'refData' || schema.type === 'businessKey')
       const riCheckArray = []
       _.map(riSchema, (schema) => {
@@ -90,7 +90,6 @@ export class SchemaValidator extends BaseValidator {
         })
       }
     })
-  }
 
   postValidate(targetObject) {
     if (!this.hasErrors()) {
@@ -109,17 +108,17 @@ export class SchemaValidator extends BaseValidator {
     return Promise.resolve()
   }
 
-  getSchema(operationName) {
+  getSchema = () => {
     logger.error('getSchema not implemented')
     throw new Error('getSchema not implemented')
   }
 
-  getBusinessKeyPropertyNames() {
+  getBusinessKeyPropertyNames = () => {
     logger.error('getBusinessKeyPropertyNames not implemented')
     throw new Error('getBusinessKeyPropertyNames not implemented')
   }
 
-  getDuplicateBusinessKeyError() {
+  getDuplicateBusinessKeyError = () => {
     logger.error('getDuplicateBusinessKeyError not implemented')
     throw new Error('getDuplicateBusinessKeyError not implemented')
   }

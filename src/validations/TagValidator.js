@@ -26,11 +26,9 @@ class TagValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'Tag'
-  }
+  getEntityName = () => 'Tag'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return TagValidator.POST_VALIDATION_SCHEMA
@@ -45,15 +43,11 @@ class TagValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['name', 'value', 'experimentId']
-  }
+  getBusinessKeyPropertyNames = () => ['name', 'value', 'experimentId']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate Tag  in request payload with same experiment id'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate Tag  in request payload with same experiment id'
 
-  preValidate(obj) {
+  preValidate = (obj) => {
     if (!_.isArray(obj) || obj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Tag request object needs to be an array'))
@@ -75,7 +69,7 @@ class TagValidator extends SchemaValidator {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }
-
+        return true
       })
     }
     return Promise.resolve()

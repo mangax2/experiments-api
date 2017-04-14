@@ -27,11 +27,9 @@ class TreatmentValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'Treatment'
-  }
+  getEntityName = () => 'Treatment'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return TreatmentValidator.POST_VALIDATION_SCHEMA
@@ -46,15 +44,11 @@ class TreatmentValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['experimentId', 'treatmentNumber']
-  }
+  getBusinessKeyPropertyNames = () => ['experimentId', 'treatmentNumber']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate treatment name in request payload with same experiment id'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate treatment name in request payload with same experiment id'
 
-  preValidate(treatmentObj) {
+  preValidate = (treatmentObj) => {
     if (!_.isArray(treatmentObj) || treatmentObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array'))

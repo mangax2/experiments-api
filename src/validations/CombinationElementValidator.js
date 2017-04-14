@@ -26,11 +26,9 @@ class CombinationElementValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName() {
-    return 'CombinationElement'
-  }
+  getEntityName = () => 'CombinationElement'
 
-  getSchema(operationName) {
+  getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return CombinationElementValidator.POST_VALIDATION_SCHEMA
@@ -45,15 +43,11 @@ class CombinationElementValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames() {
-    return ['treatmentId', 'name']
-  }
+  getBusinessKeyPropertyNames = () => ['treatmentId', 'name']
 
-  getDuplicateBusinessKeyError() {
-    return 'Duplicate name in request payload with same treatmentId'
-  }
+  getDuplicateBusinessKeyError = () => 'Duplicate name in request payload with same treatmentId'
 
-  preValidate(combinationElementObj) {
+  preValidate = (combinationElementObj) => {
     if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('CombinationElement request object needs to be an array'))

@@ -10,14 +10,9 @@ class VariablesValidator extends SchemaValidator {
     ]
   }
 
-  getSchema() {
-    return VariablesValidator.SCHEMA
-  }
+  getSchema = () => VariablesValidator.SCHEMA
 
-  postValidate(targetObject) {
-    // No business key to validate
-    return Promise.resolve()
-  }
+  postValidate = () => Promise.resolve()
 }
 
 module.exports = VariablesValidator

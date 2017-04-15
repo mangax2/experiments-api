@@ -24,8 +24,7 @@ class DependentVariablesValidator extends SchemaValidator {
         return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
           { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
       default:
-        return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
-          { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

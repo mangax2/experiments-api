@@ -39,9 +39,7 @@ class GroupValidator extends SchemaValidator {
           GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return GroupValidator.POST_VALIDATION_SCHEMA.concat(
-          GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

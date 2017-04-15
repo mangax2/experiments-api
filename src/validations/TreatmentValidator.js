@@ -38,9 +38,7 @@ class TreatmentValidator extends SchemaValidator {
           TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return TreatmentValidator.POST_VALIDATION_SCHEMA.concat(
-          TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

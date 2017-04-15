@@ -41,9 +41,7 @@ class FactorsValidator extends SchemaValidator {
           FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return FactorsValidator.POST_VALIDATION_SCHEMA.concat(
-          FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

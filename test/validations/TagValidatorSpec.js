@@ -33,6 +33,12 @@ describe('TagValidator', () => {
         TagValidator.POST_VALIDATION_SCHEMA
           .concat(TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
     })
+
+    it('returns put schema when operation name is invalid', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
+    })
   })
 
   describe('entityName', () => {

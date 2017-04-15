@@ -33,6 +33,12 @@ describe('TreatmentValidator', () => {
         TreatmentValidator.POST_VALIDATION_SCHEMA
           .concat(TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
     })
+
+    it('returns put schema when operation name is invalid', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
+    })
   })
 
   describe('entityName', () => {

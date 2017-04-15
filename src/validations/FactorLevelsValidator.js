@@ -36,9 +36,7 @@ class FactorLevelsValidator extends SchemaValidator {
           FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return FactorLevelsValidator.POST_VALIDATION_SCHEMA.concat(
-          FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

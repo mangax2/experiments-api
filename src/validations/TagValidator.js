@@ -37,9 +37,7 @@ class TagValidator extends SchemaValidator {
           TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return TagValidator.POST_VALIDATION_SCHEMA.concat(
-          TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

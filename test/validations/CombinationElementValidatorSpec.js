@@ -29,10 +29,16 @@ describe('CombinationElementValidator', () => {
         CombinationElementValidator.POST_VALIDATION_SCHEMA)
     })
 
-    it('returns put schema when operation name is POST', () => {
+    it('returns put schema when operation name is PUT', () => {
       target.getSchema('PUT').should.deep.equal(
         CombinationElementValidator.POST_VALIDATION_SCHEMA
           .concat(CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
+    })
+
+    it('throws an error when operation name is invalid', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
     })
   })
 

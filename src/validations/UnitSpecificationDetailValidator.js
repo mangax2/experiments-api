@@ -39,9 +39,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
           UnitSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return UnitSpecificationDetailValidator.POST_VALIDATION_SCHEMA.concat(
-          UnitSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

@@ -39,7 +39,7 @@ class ExperimentsValidator extends SchemaValidator {
       case 'FILTER':
         return ExperimentsValidator.FILTER_SCHEMA_ELEMENTS
       default:
-        return ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

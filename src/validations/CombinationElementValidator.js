@@ -37,9 +37,7 @@ class CombinationElementValidator extends SchemaValidator {
           CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return CombinationElementValidator.POST_VALIDATION_SCHEMA.concat(
-          CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

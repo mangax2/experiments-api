@@ -29,10 +29,16 @@ describe('GroupValidator', () => {
         GroupValidator.POST_VALIDATION_SCHEMA)
     })
 
-    it('returns put schema when operation name is POST', () => {
+    it('returns put schema when operation name is PUT', () => {
       target.getSchema('PUT').should.deep.equal(
         GroupValidator.POST_VALIDATION_SCHEMA
           .concat(GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
+    })
+
+    it('returns put schema when operation name is invalid', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
     })
   })
 

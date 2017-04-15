@@ -31,9 +31,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
           ExperimentalUnitValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        return ExperimentalUnitValidator.POST_VALIDATION_SCHEMA.concat(
-          ExperimentalUnitValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
+        throw AppError.badRequest('Invalid Operation')
     }
   }
 

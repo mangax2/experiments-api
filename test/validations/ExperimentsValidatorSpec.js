@@ -64,6 +64,11 @@ describe('ExperimentValidator', () => {
     it('returns schema array for FILTER ', () => {
       target.getSchema('FILTER').should.eql(filterSchema)
     })
+    it('throws and error when operation is invalid ', () => {
+      (() => {
+        target.getSchema('test')
+      }).should.throw()
+    })
   })
 
   describe('entityName', () => {

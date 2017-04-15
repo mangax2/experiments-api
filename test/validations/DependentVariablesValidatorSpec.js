@@ -57,6 +57,11 @@ describe('DependentVariablesValidator', () => {
     it('returns schema array for PUT operation', () => {
       target.getSchema('PUT').should.eql(schemaArrayForPutOperation)
     })
+    it('returns schema array for invalid operation', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
+    })
   })
 
   describe('entityName', () => {

@@ -29,10 +29,16 @@ describe('FactorLevelsValidator', () => {
         FactorLevelsValidator.POST_VALIDATION_SCHEMA)
     })
 
-    it('returns put schema when operation name is POST', () => {
+    it('returns put schema when operation name is PUT', () => {
       target.getSchema('PUT').should.deep.equal(
         FactorLevelsValidator.POST_VALIDATION_SCHEMA
           .concat(FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS))
+    })
+
+    it('returns put schema when operation name is invalid', () => {
+      (() =>
+          target.getSchema('test')
+      ).should.throw()
     })
   })
 

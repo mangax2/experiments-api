@@ -54,7 +54,7 @@ const options = {
 }
 
 // Without this option, mocking parts of pg-promise in tests is not possible
-if (config.node_env === 'UNITTEST') {
+if (config.node_env === 'UNITTEST' || config.node_env === 'test') {
   options.noLocking = true
 }
 

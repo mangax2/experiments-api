@@ -12,6 +12,8 @@
     "eslintFix": "./node_modules/.bin/eslint src --fix; exit 0",
     "nyc": "nyc report --reporter=html",
     "start": "NODE_ENV=production node ./build/app",
+    "testJest": "NODE_ENV='UNITTEST' && jest --config .jestCoveragerc.json",
+    "testJestDev": "jest --config .jestrc.json --watch",
     "test": "node_modules/.bin/_mocha --compilers js:babel-core/register test",
     "testCoverage": "node_modules/.bin/nyc node_modules/.bin/_mocha test",
     "test:dev": "_mocha --watch test"
@@ -60,6 +62,7 @@
     "eslint-plugin-react": "~6.9.0",
     "husky": "~0.13.1",
     "istanbul": "~0.4.5",
+    "jest": "~19.0.2",
     "mocha": "~3.2.0",
     "nodemon": "~1.11.0",
     "nyc": "~10.1.2",

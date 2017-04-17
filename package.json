@@ -11,6 +11,8 @@
     "eslint": "./node_modules/.bin/eslint src; exit 0",
     "eslintFix": "./node_modules/.bin/eslint src --fix; exit 0",
     "nyc": "nyc report --reporter=html",
+    "precommit": "eslint src",
+    "prepush": "node_modules/.bin/mocha --compilers js:babel-core/register test",
     "start": "NODE_ENV=production node ./build/app",
     "test": "node_modules/.bin/_mocha --compilers js:babel-core/register test",
     "testCoverage": "node_modules/.bin/nyc node_modules/.bin/_mocha test",

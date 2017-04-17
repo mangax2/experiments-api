@@ -76,7 +76,7 @@ class GroupExperimentalUnitCompositeService {
     const treatmentIds = _.uniq(_.map(units, 'treatmentId'))
     return db.treatment.getDistinctExperimentIds(treatmentIds, tx).then((experimentIdsResp) => {
       const experimentIds = _.compact(_.map(experimentIdsResp, 'experiment_id'))
-      if (experimentIds.length > 1 || experimentIds[0] !== experimentId) {
+      if (experimentIds.length > 1 || experimentIds[0].toString() !== experimentId.toString()) {
         throw AppError.badRequest('Treatments not associated with same experiment')
       } else {
         return this.experimentalUnitService.batchCreateExperimentalUnits(units, context, tx)

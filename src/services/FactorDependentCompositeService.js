@@ -122,8 +122,8 @@ class FactorDependentCompositeService {
   }
 
   static mapIndependentAndExogenousVariableDTO2Entity(experimentId,
-                                                      independentVariables,
-                                                      exogenousVariables) {
+    independentVariables,
+    exogenousVariables) {
     const independentVariableEntities =
       FactorDependentCompositeService.mapVariableDTO2DbEntity(
         independentVariables,
@@ -187,10 +187,10 @@ class FactorDependentCompositeService {
   }
 
   persistVariables(experimentId,
-                   independentAndExogenousVariables,
-                   dependentVariables,
-                   context,
-                   tx) {
+    independentAndExogenousVariables,
+    dependentVariables,
+    context,
+    tx) {
     return this.persistVariablesWithLevels(
       experimentId,
       independentAndExogenousVariables,

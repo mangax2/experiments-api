@@ -1,15 +1,7 @@
-module.exports = (rep, pgp) => {
-    return {
-        repository: () => {
-            return rep
-        },
+module.exports = rep => ({
+  repository: () => rep,
 
-        find: (id,tx = rep) => {
-            return tx.oneOrNone("SELECT * FROM experiment_summary WHERE id = $1", id)
-        },
+  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM experiment_summary WHERE id = $1', id),
 
-        all: () => {
-            return rep.any("SELECT * FROM experiment_summary")
-        }
-    }
-}
+  all: () => rep.any('SELECT * FROM experiment_summary'),
+})

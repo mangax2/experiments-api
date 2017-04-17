@@ -1,80 +1,67 @@
+import log4js from 'log4js'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
-import log4js from 'log4js'
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('FactorService')
 
 class FactorService {
 
-    constructor() {
-        this._validator = new FactorsValidator()
-        this._experimentService = new ExperimentsService()
-    }
+  constructor() {
+    this.validator = new FactorsValidator()
+    this.experimentService = new ExperimentsService()
+  }
 
-    @Transactional('batchCreateFactors')
-    batchCreateFactors(factors, context, tx) {
-        return this._validator.validate(factors, 'POST', tx).then(() => {
-            return db.factor.batchCreate(factors, context, tx).then(data => {
-                return AppUtil.createPostResponse(data)
-            })
-        })
-    }
+  @Transactional('batchCreateFactors')
+  batchCreateFactors(factors, context, tx) {
+    return this.validator.validate(factors, 'POST', tx).then(() => db.factor.batchCreate(factors, context, tx).then(data => AppUtil.createPostResponse(data)))
+  }
 
-    @Transactional('getAllFactors')
-    getAllFactors(tx) {
-        return db.factor.all(tx)
-    }
+  @Transactional('getAllFactors')
+  getAllFactors = tx => db.factor.all(tx)
 
-    @Transactional('getFactorsByExperimentId')
-    getFactorsByExperimentId(id, tx) {
-        return this._experimentService.getExperimentById(id, tx).then(()=> {
-            return db.factor.findByExperimentId(id, tx)
-        })
-    }
+  @Transactional('getFactorsByExperimentId')
+  getFactorsByExperimentId(id, tx) {
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.factor.findByExperimentId(id, tx))
+  }
 
-    @Transactional('getFactorById')
-    getFactorById(id, tx) {
-        return db.factor.find(id, tx).then((data) => {
-            if (!data) {
-                logger.error('Factor Not Found for requested id = ' + id)
-                throw AppError.notFound('Factor Not Found for requested id')
-            } else {
-                return data
-            }
-        })
+  @Transactional('getFactorById')
+  getFactorById = (id, tx) => db.factor.find(id, tx).then((data) => {
+    if (!data) {
+      logger.error(`Factor Not Found for requested id = ${id}`)
+      throw AppError.notFound('Factor Not Found for requested id')
+    } else {
+      return data
     }
+  })
 
-    @Transactional('batchUpdateFactors')
-    batchUpdateFactors(factors, context, tx) {
-        return this._validator.validate(factors, 'PUT', tx).then(() => {
-            return db.factor.batchUpdate(factors, context, tx).then(data => {
-                return AppUtil.createPutResponse(data)
-            })
-        })
-    }
+  @Transactional('batchUpdateFactors')
+  batchUpdateFactors(factors, context, tx) {
+    return this.validator.validate(factors, 'PUT', tx)
+      .then(() => db.factor.batchUpdate(factors, context, tx)
+        .then(data => AppUtil.createPutResponse(data)))
+  }
 
-    @Transactional('deleteFactor')
-    deleteFactor(id, tx) {
-        return db.factor.remove(id, tx).then((data) => {
-            if (!data) {
-                logger.error('Factor Not Found for requested id = ' + id)
-                throw AppError.notFound('Factor Not Found for requested id')
-            } else {
-                return data
-            }
-        })
-    }
+  @Transactional('deleteFactor')
+  deleteFactor = (id, tx) => db.factor.remove(id, tx)
+    .then((data) => {
+      if (!data) {
+        logger.error(`Factor Not Found for requested id = ${id}`)
+        throw AppError.notFound('Factor Not Found for requested id')
+      } else {
+        return data
+      }
+    })
 
-    @Transactional('deleteFactorsForExperimentId')
-    deleteFactorsForExperimentId(id, tx) {
-        return this._experimentService.getExperimentById(id, tx).then(() => {
-            return db.factor.removeByExperimentId(id, tx)
-        })
-    }
+  @Transactional('deleteFactorsForExperimentId')
+  deleteFactorsForExperimentId(id, tx) {
+    return this.experimentService.getExperimentById(id, tx)
+      .then(() => db.factor.removeByExperimentId(id, tx))
+  }
 }
 
 module.exports = FactorService

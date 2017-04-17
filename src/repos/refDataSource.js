@@ -1,23 +1,11 @@
-module.exports = (rep, pgp) => {
-    return {
-        repository: () => {
-            return rep
-        },
+module.exports = rep => ({
+  repository: () => rep,
 
-        find: (id) => {
-            return rep.oneOrNone("SELECT * FROM ref_data_source WHERE id = $1", id)
-        },
+  find: id => rep.oneOrNone('SELECT * FROM ref_data_source WHERE id = $1', id),
 
-        findByTypeId: (id) => {
-            return rep.any("SELECT * FROM ref_data_source WHERE ref_data_source_type_id = $1", id)
-        },
+  findByTypeId: id => rep.any('SELECT * FROM ref_data_source WHERE ref_data_source_type_id = $1', id),
 
-        all: () => {
-            return rep.any("SELECT * FROM ref_data_source")
-        },
+  all: () => rep.any('SELECT * FROM ref_data_source'),
 
-        batchFind: (ids, tx = rep) => {
-            return tx.any("SELECT * FROM ref_data_source WHERE id IN ($1:csv)", [ids])
-        }
-    }
-}
+  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM ref_data_source WHERE id IN ($1:csv)', [ids]),
+})

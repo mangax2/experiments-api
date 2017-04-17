@@ -1,6 +1,5 @@
 const sinon = require('sinon')
 const VariablesValidator = require('../../src/validations/VariablesValidator')
-import db from '../../src/db/DbManager'
 
 describe('VariablesValidator', () => {
     let target = new VariablesValidator()

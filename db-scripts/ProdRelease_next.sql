@@ -73,3 +73,16 @@ UPDATE public.ref_unit_spec
 SET name='Description'
 WHERE ref_unit_type_id = 2 AND name = 'Type'
 	OR ref_unit_type_id = 3 AND name = 'Comment';
+
+
+------------------
+ALTER TABLE public.group
+  DROP CONSTRAINT group_ref_randomization_strategy_fk
+  ALTER COLUMN ref_randomization_strategy_id DROP NOT NULL;
+
+ALTER TABLE public.tag
+  DROP CONSTRAINT tag_experiment
+  ADD CONSTRAINT tag_experiment FOREIGN KEY (experiment_id)
+    REFERENCES public.experiment (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;

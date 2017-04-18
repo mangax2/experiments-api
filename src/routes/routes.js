@@ -16,7 +16,6 @@ import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
-import RandomizationStrategyService from '../services/RandomizationStrategyService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
@@ -296,13 +295,6 @@ router.get('/group-types', (req, res, next) => new GroupTypeService().getAllGrou
   .catch(err => next(err)))
 router.get('/group-types/:id', (req, res, next) => new GroupTypeService().getGroupTypeById(req.params.id)
   .then(groupType => res.json(groupType))
-  .catch(err => next(err)))
-
-router.get('/randomization-strategies/:id', (req, res, next) => new RandomizationStrategyService().getRandomizationStrategyById(req.params.id)
-  .then(strategy => res.json(strategy))
-  .catch(err => next(err)))
-router.get('/randomization-strategies', (req, res, next) => new RandomizationStrategyService().getAllRandomizationStrategies()
-  .then(strategies => res.json(strategies))
   .catch(err => next(err)))
 
 router.post('/experiments/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.params.id, req.body, req.context)

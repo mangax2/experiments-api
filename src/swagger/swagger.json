@@ -2792,89 +2792,6 @@
         }
       }
     },
-    "/randomization-strategies": {
-      "get": {
-        "summary": "Get all randomization strategies",
-        "description": "Returns all randomization strategies that can be used\n",
-        "operationId": "getRandomizationStrategies",
-        "tags": [
-          "Randomization Strategies"
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of randomization strategies",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/RandomizationStrategy"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/randomization-strategies/{id}": {
-      "get": {
-        "summary": "Get one randomization strategy entity",
-        "description": "Returns a single randomization strategy entity\n",
-        "operationId": "getRandomizationStrategyById",
-        "tags": [
-          "Randomization Strategies"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Single Randomization Strategy Entity",
-            "schema": {
-              "$ref": "#/definitions/RandomizationStrategy"
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Randomization Does Not Exist",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/ref-data-source-types": {
       "get": {
         "summary": "Gets all Reference Data Source Types and all their defined Data Sources",
@@ -4484,35 +4401,6 @@
     },
     "Levels": {
       "type": "string"
-    },
-    "RandomizationStrategy": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of the randomization strategy."
-        },
-        "name": {
-          "type": "string",
-          "description": "nome of the randomization strategy."
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        }
-      }
     },
     "RefDataSource": {
       "type": "object",

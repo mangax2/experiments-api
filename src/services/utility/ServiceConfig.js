@@ -22,8 +22,11 @@ if (localEnv) {
   services.experimentsDataSource.user = VaultUtil.dbAppUser
   services.experimentsDataSource.password = VaultUtil.dbAppPassword
   services.experimentsDataSource.ssl = true
-  services.pingDataSource.clientId = VaultUtil.clientId
-  services.pingDataSource.clientSecret = VaultUtil.clientSecret
+  services.pingDataSource = {
+    url: services.experimentsExternalAPIUrls.pingAPIUrl,
+    clientId: VaultUtil.clientId,
+    clientSecret: VaultUtil.clientSecret,
+  }
   cfServices = services
 }
 

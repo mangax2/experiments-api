@@ -13,6 +13,11 @@ const cfServices = {
         min: 10,
         max: 10,
         idleTimeoutMillis: 30000
+    },
+    pingDataSource: {
+        url: 'https://test.amp.monsanto.com/as/token.oauth2',
+        clientId: process.env.EXPERIMENTS_API_CLIENT_ID,
+        clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
     }
 }
 

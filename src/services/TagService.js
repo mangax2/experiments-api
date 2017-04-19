@@ -22,6 +22,9 @@ class TagService {
   @Transactional('getTagsByExperimentId')
   getTagsByExperimentId = (id, tx) => db.tag.findByExperimentId(id, tx)
 
+  @Transactional('getTagsByExperimentIds')
+  getTagsByExperimentIds = (ids, tx) => db.tag.batchFindByExperimentIds(ids, tx)
+
   @Transactional('getTagById')
   getTagById = (id, tx) => db.tag.find(id, tx)
     .then((data) => {

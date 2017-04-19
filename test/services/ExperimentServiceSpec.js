@@ -23,6 +23,7 @@ describe('ExperimentsService', () => {
   let validateStub
 
   let getTagsByExperimentIdStub
+  let getTagsByExperimentIdsStub
   let batchCreateTagsStub
   let deleteTagsForExperimentIdStub
   let findExperimentsByTagsStub
@@ -46,6 +47,7 @@ describe('ExperimentsService', () => {
     validateStub = sinon.stub(experimentsService.validator, 'validate')
 
     getTagsByExperimentIdStub = sinon.stub(experimentsService.tagService, 'getTagsByExperimentId')
+    getTagsByExperimentIdsStub = sinon.stub(experimentsService.tagService, 'getTagsByExperimentIds')
     batchCreateTagsStub = sinon.stub(experimentsService.tagService, 'batchCreateTags')
     deleteTagsForExperimentIdStub = sinon.stub(experimentsService.tagService, 'deleteTagsForExperimentId')
   })
@@ -61,6 +63,7 @@ describe('ExperimentsService', () => {
     validateStub.restore()
 
     getTagsByExperimentIdStub.restore()
+    getTagsByExperimentIdsStub.restore()
     batchCreateTagsStub.restore()
     deleteTagsForExperimentIdStub.restore()
     findExperimentsByTagsStub.restore()
@@ -77,6 +80,7 @@ describe('ExperimentsService', () => {
     validateStub.reset()
 
     getTagsByExperimentIdStub.reset()
+    getTagsByExperimentIdsStub.reset()
     batchCreateTagsStub.reset()
     deleteTagsForExperimentIdStub.reset()
     findExperimentsByTagsStub.reset()
@@ -501,22 +505,143 @@ describe('ExperimentsService', () => {
   })
 
   describe('getExperiments:', () => {
-    it('calls getStub when query string is empty object', () => {
-      getStub.resolves(testResponse)
-      return experimentsService.getExperiments({}).then((experiments) => {
-        sinon.assert.calledOnce(getStub)
-        experiments.should.equal(testResponse)
+
+    describe('without query string', () => {
+
+      it('calls getStub and returns experiment without tags', () => {
+        getStub.resolves([{id: 1}])
+        getTagsByExperimentIdsStub.resolves([])
+        return experimentsService.getExperiments({}).then((experiments) => {
+          sinon.assert.calledOnce(getStub)
+          experiments.length.should.equal(1)
+          experiments[0].id.should.equal(1)
+          should.not.exist(experiments[0].tags)
+
+        })
       })
+
+      it('calls getStub and returns experiment with tags', () => {
+
+        const expectedResult = [
+          {
+            id: 1,
+            name: 'exp1',
+            tags: [
+              {
+                experiment_id: 1,
+                id: 10,
+                name: 'A',
+                value: 'tagValue1'
+              }
+            ]
+          }
+        ]
+
+        getStub.resolves([{id: 1, name: 'exp1'}])
+        getTagsByExperimentIdsStub.resolves([{id: 10, name: 'A', value: 'tagValue1', experiment_id: 1}])
+
+        return experimentsService.getExperiments({}).then((experiments) => {
+          sinon.assert.calledOnce(getStub)
+          experiments.should.eql(expectedResult)
+
+        })
+      })
+
     })
 
-    it('calls findExperimentsByTagsStub when query string is not an empty object', () => {
-      findExperimentsByTagsStub.resolves(testResponse)
-      return experimentsService.getExperiments({ 'tags.name': 'A' }).then((experiments) => {
-        sinon.assert.calledOnce(findExperimentsByTagsStub)
-        experiments.should.equal(testResponse)
+    describe('populateTags', () => {
+
+      it('returns experiments array with tags when tags found for experiment id', ()=>{
+          getTagsByExperimentIdsStub.resolves([{id: 10, name: 'A', value: 'tagValue1', experiment_id: 1}])
+          const expectedResult = [
+            {
+              id: 1,
+              tags: [
+                {
+                  experiment_id: 1,
+                  id: 10,
+                  name: 'A',
+                  value: 'tagValue1'
+                }
+              ]
+            }
+          ]
+          return experimentsService.populateTags([{id:1}]).then((experimentWithTags) => {
+            sinon.assert.calledOnce(getTagsByExperimentIdsStub)
+            experimentWithTags.should.eql(expectedResult)
+          })
+
+        })
+
+      it('returns experiments array without tags when tags not found for experiment id', ()=>{
+        getTagsByExperimentIdsStub.resolves([])
+        const expectedResult = [
+          {
+            id: 1,
+            tags:undefined
+          }
+        ]
+        return experimentsService.populateTags([{id:1}]).then((experimentWithTags) => {
+          sinon.assert.calledOnce(getTagsByExperimentIdsStub)
+          experimentWithTags.should.eql(expectedResult)
+        })
+
+      })
+
+
+      it('returns empty array when experiments is empty array', ()=>{
+        getTagsByExperimentIdsStub.resolves([])
+        const expectedResult = []
+        return experimentsService.populateTags([]).then((experimentWithTags) => {
+          sinon.assert.notCalled(getTagsByExperimentIdsStub)
+          experimentWithTags.should.eql(expectedResult)
+        })
+
+      })
+
+
+    })
+
+    describe('with query string', () => {
+
+      it('calls findExperimentsByTagsStub and returns experiments with tags when query string match found', () => {
+        const expectedResult = [
+          {
+            id: 1,
+            name: 'exp1',
+            tags: [
+              {
+                experiment_id: 1,
+                id: 10,
+                name: 'A',
+                value: 'tagValue1'
+              }
+            ]
+          }
+        ]
+        findExperimentsByTagsStub.resolves([{id: 1, name: 'exp1'}])
+        getTagsByExperimentIdsStub.resolves([{id: 10, name: 'A', value: 'tagValue1', experiment_id: 1}])
+        validateStub.resolves()
+        return experimentsService.getExperiments({'tags.name': 'A'}).then((experiments) => {
+          sinon.assert.calledOnce(findExperimentsByTagsStub)
+          experiments.should.eql(expectedResult)
+        })
+
+      })
+
+      it('calls findExperimentsByTagsStub and returns empty array when no query string match found', () => {
+        const expectedResult = []
+        findExperimentsByTagsStub.resolves([])
+        return experimentsService.getExperiments({'tags.name': 'A'}).then((experiments) => {
+          sinon.assert.calledOnce(findExperimentsByTagsStub)
+          sinon.assert.notCalled(getTagsByExperimentIdsStub)
+          experiments.should.eql(expectedResult)
+        })
+
       })
 
     })
+
   })
 
   describe('_isFilterRequest:', () => {
@@ -549,6 +674,13 @@ describe('ExperimentsService', () => {
       const result = experimentsService.isFilterRequest({})
       result.should.be.false
     })
+
+    it('returns false if query  does not match filters', () => {
+      const query = {'tag.name1':'name'}
+      const result = experimentsService.isFilterRequest(query)
+      result.should.be.false
+    })
+
   })
 
   describe('_toLowerCaseArray:', () => {

@@ -36,13 +36,13 @@ CREATE TABLE ref_data_source
 INSERT INTO public.ref_data_source(
             name, ref_data_source_type_id, created_user_id, created_date,
             modified_user_id, modified_date)
-    VALUES ( 'Formulation Catalog', 2, 'KPRAT1', CURRENT_TIMESTAMP,
+    VALUES ( 'Formulation Catalog', 1, 'KPRAT1', CURRENT_TIMESTAMP,
             'KPRAT1', CURRENT_TIMESTAMP);
 
  INSERT INTO public.ref_data_source(
             name, ref_data_source_type_id, created_user_id, created_date,
             modified_user_id, modified_date)
-    VALUES ( 'Other', 3, 'KPRAT1', CURRENT_TIMESTAMP,
+    VALUES ( 'Other', 2, 'KPRAT1', CURRENT_TIMESTAMP,
             'KPRAT1', CURRENT_TIMESTAMP);
 
 

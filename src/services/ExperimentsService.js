@@ -38,7 +38,7 @@ class ExperimentsService {
 
   populateTags(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
-    const experimentIds = _.map(experiments, experiment => experiment.id)
+    const experimentIds = _.map(experiments, 'id')
     return this.tagService.getTagsByExperimentIds(experimentIds).then((tags) => {
       const experimentsAndTagsMap = _.groupBy(tags, 'experiment_id')
       return _.map(experiments.slice(), (experiment) => {

@@ -24,7 +24,7 @@ class VaultUtil {
     }], JSON.stringify(body))
       .then((result) => {
         const vaultToken = result.body.auth.client_token
-        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/db`, this.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments-api/${vaultEnv}/db`, this.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.dbAppUser = vaultObj.body.data.appUser
           this.dbAppPassword = vaultObj.body.data.appUserPassword
         })

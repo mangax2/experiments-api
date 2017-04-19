@@ -31,9 +31,21 @@ class ExperimentsService {
 
   getExperiments(queryString) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString)
+      return this.getExperimentsByFilters(queryString).then(data => this.populateTags(data))
     }
-    return this.getAllExperiments()
+    return this.getAllExperiments().then(data => this.populateTags(data))
+  }
+
+  populateTags(experiments) {
+    if (experiments.length === 0) return Promise.resolve([])
+    const experimentIds = _.map(experiments, experiment => experiment.id)
+    return this.tagService.getTagsByExperimentIds(experimentIds).then((tags) => {
+      const experimentsAndTagsMap = _.groupBy(tags, 'experiment_id')
+      return _.map(experiments.slice(), (experiment) => {
+        experiment.tags = experimentsAndTagsMap[experiment.id]
+        return experiment
+      })
+    })
   }
 
   @Transactional('getExperimentById')

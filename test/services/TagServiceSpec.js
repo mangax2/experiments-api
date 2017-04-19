@@ -22,6 +22,7 @@ describe('TagService Specs', () => {
   let findStub
   let batchFindStub
   let findByExperimentIdStub
+  let batchFindByExperimentIds
   let batchCreateStub
   let batchUpdateStub
   let removeStub
@@ -38,6 +39,7 @@ describe('TagService Specs', () => {
     findStub = sinon.stub(db.tag, 'find')
     batchFindStub = sinon.stub(db.tag, 'batchFind')
     findByExperimentIdStub = sinon.stub(db.tag, 'findByExperimentId')
+    batchFindByExperimentIds = sinon.stub(db.tag, 'batchFindByExperimentIds')
     batchCreateStub = sinon.stub(db.tag, 'batchCreate')
     batchUpdateStub = sinon.stub(db.tag, 'batchUpdate')
     removeStub = sinon.stub(db.tag, 'remove')
@@ -53,6 +55,7 @@ describe('TagService Specs', () => {
     findStub.reset()
     batchFindStub.reset()
     findByExperimentIdStub.reset()
+    batchFindByExperimentIds.reset()
     batchCreateStub.reset()
     batchUpdateStub.reset()
     removeStub.reset()
@@ -68,6 +71,7 @@ describe('TagService Specs', () => {
     findStub.restore()
     batchFindStub.restore()
     findByExperimentIdStub.restore()
+    batchFindByExperimentIds.restore()
     batchCreateStub.restore()
     batchUpdateStub.restore()
     removeStub.restore()
@@ -147,6 +151,32 @@ describe('TagService Specs', () => {
         sinon.assert.calledWith(
           findByExperimentIdStub,
           7,
+          sinon.match.same(tx))
+      })
+    })
+  })
+
+
+  describe('getTagsByExperimentIds', () => {
+    it('returns rejected promise when findByExperimentIds fails', () => {
+      batchFindByExperimentIds.rejects(testError)
+
+      return target.getTagsByExperimentIds([1,2], tx).should.be.rejected.then((err) => {
+        err.should.equal(testError)
+        sinon.assert.calledWith(
+          batchFindByExperimentIds,
+          [1,2],
+          sinon.match.same(tx))
+      })
+    })
+
+    it('returns resolved promise from getByExperimentIds method upon success', () => {
+      batchFindByExperimentIds.resolves(testData)
+      return target.getTagsByExperimentIds([1,2], tx).then((data) => {
+        data.should.equal(testData)
+        sinon.assert.calledWith(
+          batchFindByExperimentIds,
+          [1,2],
           sinon.match.same(tx))
       })
     })

@@ -24,11 +24,11 @@ class VaultUtil {
     }], JSON.stringify(body))
       .then((result) => {
         const vaultToken = result.body.auth.client_token
-        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments-api/${vaultEnv}/db`, this.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments-api/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.dbAppUser = vaultObj.body.data.appUser
           this.dbAppPassword = vaultObj.body.data.appUserPassword
         })
-        const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments-api/${vaultEnv}/client`, this.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments-api/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })
@@ -40,7 +40,12 @@ class VaultUtil {
       })
   }
 
-  getVaultHeader = vaultToken => [{ headerName: 'X-Vault-Token', headerValue: vaultToken }]
+  static getVaultHeader(vaultToken) {
+    return [{
+      headerName: 'X-Vault-Token',
+      headerValue: vaultToken,
+    }]
+  }
 
 }
 

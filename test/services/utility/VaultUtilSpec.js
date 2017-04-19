@@ -13,7 +13,7 @@ const vaultConfig = {
   secretId: 'secret_id',
 
 }
-describe.skip('configureDbCredentials', () => {
+describe('configureDbCredentials', () => {
   before(() => {
     httpUtilPostStub = sinon.stub(HttpUtil, 'post')
     httpUtilGetStub = sinon.stub(HttpUtil, 'get')
@@ -22,7 +22,6 @@ describe.skip('configureDbCredentials', () => {
   afterEach(() => {
     httpUtilPostStub.reset()
     httpUtilGetStub.reset()
-
   })
 
   after(() => {
@@ -40,16 +39,17 @@ describe.skip('configureDbCredentials', () => {
   it('configureDbCredentials returns resolved promise when env is local', () => {
     return VaultUtil.configureDbCredentials('local', {}).then((p) => {
       //resolved promise
-
     })
 
   })
 
   it('configureDbCredentials when env is non prod', () => {
     const postResponse = { 'body': { 'auth': { 'client_token': 'token' } } }
-    const getResponse = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
+    const getResponse1 = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
+    const getResponse2 = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
     httpUtilPostStub.resolves(postResponse)
-    httpUtilGetStub.resolves(getResponse)
+    httpUtilGetStub.onCall(0).resolves(getResponse1)
+    httpUtilGetStub.onCall(1).resolves(getResponse2)
 
     const body = {}
     body.role_id = 'role_id'
@@ -60,20 +60,16 @@ describe.skip('configureDbCredentials', () => {
         headerValue: 'application/json',
       }], JSON.stringify(body))
 
-      sinon.assert.calledWithExactly(httpUtilGetStub, 'https://my.vault.services/v1/secret/cosmos/experiments-api/np/db', [{
-        headerName: 'X-Vault-Token',
-        headerValue: 'token',
-      }])
+      httpUtilGetStub.calledTwice.should.equal(true)
       VaultUtil.dbAppUser.should.equal('user1')
       VaultUtil.dbAppPassword.should.equal('pass1')
-
     })
 
   })
 
   it('configureDbCredentials when env is prod', () => {
     const postResponse = { 'body': { 'auth': { 'client_token': 'token' } } }
-    const getResponse = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
+    const getResponse = { 'body': { 'data': { 'appUser': 'user2', 'appUserPassword': 'pass2' } } }
     httpUtilPostStub.resolves(postResponse)
     httpUtilGetStub.resolves(getResponse)
 
@@ -85,11 +81,8 @@ describe.skip('configureDbCredentials', () => {
         headerName: 'Accept',
         headerValue: 'application/json',
       }], JSON.stringify(body))
-      sinon.assert.calledWithExactly(httpUtilGetStub, 'https://my.vault.services/v1/secret/cosmos/experiments-api/prod/db', [{
-        headerName: 'X-Vault-Token',
-        headerValue: 'token',
-      }])
 
+      httpUtilGetStub.calledTwice.should.equal(true)
     })
 
   })
@@ -118,21 +111,18 @@ describe.skip('configureDbCredentials', () => {
     const testError = {}
     const postResponse = { 'body': { 'auth': { 'client_token': 'token' } } }
     httpUtilPostStub.resolves(postResponse)
-    httpUtilGetStub.rejects(testError)
+    httpUtilGetStub.onCall(0).rejects(testError)
+    httpUtilGetStub.onCall(1).rejects(testError)
     const body = {}
     body.role_id = 'role_id'
     body.secret_id = 'secret_id'
+
     return VaultUtil.configureDbCredentials('prod', vaultConfig).should.be.rejected.then((err) => {
       sinon.assert.calledWithExactly(httpUtilPostStub, 'https://my.vault.services/v1/auth/approle/login', [{
         headerName: 'Accept',
         headerValue: 'application/json',
       }], JSON.stringify(body))
-      sinon.assert.calledWithExactly(httpUtilGetStub, 'https://my.vault.services/v1/secret/cosmos/experiments-api/prod/db', [{
-        headerName: 'X-Vault-Token',
-        headerValue: 'token',
-      }])
       err.should.equal(testError)
-
     })
 
   })

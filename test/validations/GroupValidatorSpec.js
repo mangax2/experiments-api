@@ -178,15 +178,16 @@ describe('GroupValidator', () => {
       const strategyRetrievalPromise = target.strategyRetrievalPromise
 
       return resultingPromise.then(() => {
-        strategyRetrievalPromise.should.be.rejected.then(() => {
+        return strategyRetrievalPromise.should.be.rejected.then((err) => {
           err.should.equal(testError)
           sinon.assert.calledWithExactly(
             badRequestStub,
             'Unable to validate randomization strategy ids.')
+
+          sinon.assert.called(getMonsantoHeaderStub)
+          sinon.assert.called(getErrorMessageForLogsStub)
+          sinon.assert.match(target.strategyRetrievalPromise, undefined)
         })
-        sinon.assert.called(getMonsantoHeaderStub)
-        sinon.assert.called(getErrorMessageForLogsStub)
-        sinon.assert.match(target.strategyRetrievalPromise, undefined)
       })
     })
 
@@ -202,16 +203,12 @@ describe('GroupValidator', () => {
       const strategyRetrievalPromise = target.strategyRetrievalPromise
 
       return resultingPromise.then(() => {
-        strategyRetrievalPromise.should.be.rejected.then(() => {
-          err.should.equal(testError)
-          sinon.assert.calledWithExactly(
-            badRequestStub,
-            'Unable to validate randomization strategy ids.')
+        return strategyRetrievalPromise.then(() => {
+          sinon.assert.called(getMonsantoHeaderStub)
+          sinon.assert.notCalled(getErrorMessageForLogsStub)
+          sinon.assert.match(target.validRandomizationIds, [1, 3, 8])
+          sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
         })
-        sinon.assert.called(getMonsantoHeaderStub)
-        sinon.assert.notCalled(getErrorMessageForLogsStub)
-        sinon.assert.match(target.validRandomizationIds, [1, 3, 8])
-        sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
       })
     })
     
@@ -221,16 +218,12 @@ describe('GroupValidator', () => {
       const strategyRetrievalPromise = target.strategyRetrievalPromise
 
       return resultingPromise.then(() => {
-        strategyRetrievalPromise.should.be.rejected.then(() => {
-          err.should.equal(testError)
-          sinon.assert.calledWithExactly(
-            badRequestStub,
-            'Unable to validate randomization strategy ids.')
+        return strategyRetrievalPromise.then(() => {
+          sinon.assert.called(getMonsantoHeaderStub)
+          sinon.assert.notCalled(getErrorMessageForLogsStub)
+          sinon.assert.match(target.validRandomizationIds, undefined)
+          sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
         })
-        sinon.assert.called(getMonsantoHeaderStub)
-        sinon.assert.notCalled(getErrorMessageForLogsStub)
-        sinon.assert.match(target.validRandomizationIds, undefined)
-        sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
       })
     })
 
@@ -242,16 +235,17 @@ describe('GroupValidator', () => {
       const strategyRetrievalPromise = target.strategyRetrievalPromise
 
       return resultingPromise.then(() => {
-        strategyRetrievalPromise.should.be.rejected.then(() => {
+        return strategyRetrievalPromise.should.be.rejected.then((err) => {
           err.should.equal(testError)
           sinon.assert.calledWithExactly(
             badRequestStub,
             'Unable to validate randomization strategy ids.')
+
+          sinon.assert.called(getMonsantoHeaderStub)
+          sinon.assert.called(getErrorMessageForLogsStub)
+          sinon.assert.notCalled(getStub)
+          sinon.assert.match(target.strategyRetrievalPromise, undefined)
         })
-        sinon.assert.called(getMonsantoHeaderStub)
-        sinon.assert.called(getErrorMessageForLogsStub)
-        sinon.assert.notCalled(getStub)
-        sinon.assert.match(target.strategyRetrievalPromise, undefined)
       })
     })
   })

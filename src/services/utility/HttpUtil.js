@@ -25,7 +25,7 @@ class HttpUtil {
         const error = JSON.parse(err.response.text)
 
         if (_.isArray(error)) {
-          return _.map(error, errObj => errObj.errorMessage).join()
+          return _.map(error, 'errorMessage').join()
         }
 
         if (error.errorMessage) {

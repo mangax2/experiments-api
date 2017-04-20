@@ -77,13 +77,13 @@ WHERE ref_unit_type_id = 2 AND name = 'Type'
 
 ------------------
 ALTER TABLE public.group
-  DROP CONSTRAINT group_ref_randomization_strategy_fk
+  DROP CONSTRAINT group_ref_randomization_strategy_fk,
   ALTER COLUMN ref_randomization_strategy_id DROP NOT NULL;
 
 DROP TABLE public.ref_randomization_strategy;
 
 ALTER TABLE public.tag
-  DROP CONSTRAINT tag_experiment
+  DROP CONSTRAINT tag_experiment,
   ADD CONSTRAINT tag_experiment FOREIGN KEY (experiment_id)
     REFERENCES public.experiment (id) MATCH SIMPLE
     ON UPDATE NO ACTION

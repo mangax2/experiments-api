@@ -43,7 +43,7 @@ describe('configureDbCredentials', () => {
 
   })
 
-  it.skip('configureDbCredentials when env is non prod', () => {
+  it('configureDbCredentials when env is non prod', () => {
     const postResponse = { 'body': { 'auth': { 'client_token': 'token' } } }
     const getResponse1 = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
     const getResponse2 = { 'body': { 'data': { 'appUser': 'user1', 'appUserPassword': 'pass1' } } }
@@ -67,7 +67,7 @@ describe('configureDbCredentials', () => {
 
   })
 
-  it.skip('configureDbCredentials when env is prod', () => {
+  it('configureDbCredentials when env is prod', () => {
     const postResponse = { 'body': { 'auth': { 'client_token': 'token' } } }
     const getResponse = { 'body': { 'data': { 'appUser': 'user2', 'appUserPassword': 'pass2' } } }
     httpUtilPostStub.resolves(postResponse)

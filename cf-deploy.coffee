@@ -1,4 +1,5 @@
 module.exports = (cfDeploy) ->
+  {experimentsExternalAPIUrls} = cfDeploy.args
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
   diskLimit: "1G"

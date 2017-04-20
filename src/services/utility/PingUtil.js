@@ -8,7 +8,6 @@ class PingUtil {
       clientSecret: cfServices.pingDataSource.clientSecret,
       url: cfServices.pingDataSource.url,
     }
-    console.info(`url: '${params.url}'`)
     return oauthPing.httpGetToken(params).then(token => [
       { headerName: 'authorization', headerValue: `Bearer ${token}` },
       { headerName: 'Content-Type', headerValue: 'application/json' },

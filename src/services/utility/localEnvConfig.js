@@ -20,7 +20,9 @@ const cfServices = {
         clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
     },
     experimentsExternalAPIUrls: {
-        randomizationAPIUrl: 'https://api01-np.agro.services:443/randomizer/1.0.1'
+        value: {
+            randomizationAPIUrl: 'https://api01-np.agro.services:443/randomizer/1.0.1'
+        }
     }
 }
 

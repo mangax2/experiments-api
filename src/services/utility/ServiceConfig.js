@@ -5,7 +5,7 @@ let cfServices
 let services
 
 const automationSpecEnv = config.node_env !== 'production' && config.env === 'nonprod'
-const localEnv = config.env !== 'prod' && config.env !== 'nonprod'
+const localEnv = config.env !== 'prod' && config.env !== 'nonprod' && config.env !== 'dev'
 // disabled eslint's are because we want to conditionally load files
 if (localEnv) {
   console.info('environment is local')

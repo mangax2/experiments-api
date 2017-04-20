@@ -1,5 +1,5 @@
 module.exports = (cfDeploy) ->
-  {experimentsExternalAPIUrls} = cfDeploy.args
+  {experimentsExternalAPIUrls, experimentsVault} = cfDeploy.args
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
   diskLimit: "1G"
@@ -17,6 +17,6 @@ module.exports = (cfDeploy) ->
   services: [
     'experimentsDataSource',
     'expSys',
-    'experimentsVault',
+    "#{experimentsVault}",
     "#{experimentsExternalAPIUrls}",
   ]

@@ -207,11 +207,11 @@ describe('GroupValidator', () => {
           sinon.assert.calledWithExactly(
             badRequestStub,
             'Unable to validate randomization strategy ids.')
+          sinon.assert.called(getMonsantoHeaderStub)
+          sinon.assert.notCalled(getErrorMessageForLogsStub)
+          sinon.assert.match(target.validRandomizationIds, [1, 3, 8])
+          sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
         })
-        sinon.assert.called(getMonsantoHeaderStub)
-        sinon.assert.notCalled(getErrorMessageForLogsStub)
-        sinon.assert.match(target.validRandomizationIds, [1, 3, 8])
-        sinon.assert.match(target.strategyRetrievalPromise, strategyRetrievalPromise)
       })
     })
     

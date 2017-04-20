@@ -24,16 +24,19 @@ class VaultUtil {
     }], JSON.stringify(body))
       .then((result) => {
         const vaultToken = result.body.auth.client_token
-        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        console.info(vaultToken)
+        console.info(VaultUtil.getVaultHeader(vaultToken))
+        return HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.dbAppUser = vaultObj.body.data.appUser
           this.dbAppPassword = vaultObj.body.data.appUserPassword
         })
-        const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
-          this.clientId = vaultObj.body.data.client_id
-          this.clientSecret = vaultObj.body.data.client_secret
-        })
-
-        return Promise.all([dbPromise, clientPromise])
+        // const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/
+        // ${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        //   this.clientId = vaultObj.body.data.client_id
+        //   this.clientSecret = vaultObj.body.data.client_secret
+        // })
+        //
+        // return Promise.all([dbPromise, clientPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

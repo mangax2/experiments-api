@@ -29,7 +29,6 @@ class VaultUtil {
           this.dbAppPassword = vaultObj.body.data.appUserPassword
         })
         const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
-          console.info(vaultObj)
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })

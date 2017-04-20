@@ -22,6 +22,7 @@ if (localEnv) {
   services.experimentsDataSource.user = VaultUtil.dbAppUser
   services.experimentsDataSource.password = VaultUtil.dbAppPassword
   services.experimentsDataSource.ssl = true
+  console.info(services)
   services.pingDataSource = {
     url: services.experimentsExternalAPIUrls.pingAPIUrl,
     clientId: VaultUtil.clientId,

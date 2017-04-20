@@ -17,5 +17,5 @@ module.exports = (cfDeploy) ->
     'experimentsDataSource',
     'expSys',
     'experimentsVault',
-    'experimentsExternalAPIUrls',
+    '#{experimentsExternalAPIUrls}',
   ]

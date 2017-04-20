@@ -81,17 +81,23 @@ class GroupValidator extends SchemaValidator {
       resolver = resolve
       rejecter = reject
     })
-    return PingUtil.getMonsantoHeader().then(header =>
-      HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.randomizationAPIUrl}/strategies`, header).then((result) => {
+    logger.info('calling ping')
+    return PingUtil.getMonsantoHeader().then((header) => {
+      logger.info('calling adastra')
+      logger.info(`Token: ${header[0].headerValue}`)
+      logger.info(`url: ${`${cfServices.experimentsExternalAPIUrls.randomizationAPIUrl}/strategies`}`)
+      return HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.randomizationAPIUrl}/strategies`, header).then((result) => {
         if (result && result.body) {
           this.validRandomizationIds = _.map(result.body, 'id')
         }
         resolver()
-      })).catch((err) => {
-        logger.error(`An error occurred when retrieving randomization strategies: ${HttpUtil.getErrorMessageForLogs(err)}`)
-        this.strategyRetrievalPromise = undefined
-        rejecter(AppError.badRequest('Unable to validate randomization strategy ids.'))
       })
+    }).catch((err) => {
+      logger.info(err)
+      logger.error(`An error occurred when retrieving randomization strategies: ${HttpUtil.getErrorMessageForLogs(err)}`)
+      this.strategyRetrievalPromise = undefined
+      rejecter(AppError.badRequest('Unable to validate randomization strategy ids.'))
+    })
   }
 }
 

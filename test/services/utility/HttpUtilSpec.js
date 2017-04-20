@@ -6,6 +6,7 @@ const internals = {}
 let setHeadersStub
 let requestPostStub
 let requestGetStub
+let httpGetTokenStub
 
 describe('HttpUtil', () => {
   before(() => {
@@ -18,7 +19,6 @@ describe('HttpUtil', () => {
     setHeadersStub.reset()
     requestPostStub.reset()
     requestGetStub.reset()
-
   })
 
   after(() => {
@@ -83,5 +83,66 @@ describe('HttpUtil', () => {
 
   })
 
+  describe('getErrorMessageForLogs', () => {
+    it('returns unauthorized if status is 401', () => {
+      const error = {status: 401}
+
+      const result = target.getErrorMessageForLogs(error)
+
+      result.should.equal('Unauthorized')
+    })
+
+    it('parses arrays of errors', () => {
+      const error = {
+        response: {
+          text: '[{"errorMessage": "this is a test message"}, {"errorMessage": "second test message"}]'
+        }
+      }
+
+      const result = target.getErrorMessageForLogs(error)
+
+      result.should.equal('this is a test message,second test message')
+    })
+
+    it('parses single errors', () => {
+      const error = {
+        response: {
+          text: '{"errorMessage": "this is a test message"}'
+        }
+      }
+
+      const result = target.getErrorMessageForLogs(error)
+
+      result.should.equal('this is a test message')
+    })
+
+    it('returns a default message if the error does not have a response', () => {
+      const error = {}
+
+      const result = target.getErrorMessageForLogs(error)
+
+      result.should.equal('Unable to retrieve error message.')
+    })
+
+    it('returns a default message if it cannot parse the error', () => {
+      const error = {
+        response: {
+          text: '{}'
+        }
+      }
+
+      const result = target.getErrorMessageForLogs(error)
+
+      result.should.equal('Unable to retrieve error message.')
+    })
+
+    it('returns a default message otherwise', () => {
+      const error = undefined
+
+      const result = target.getErrorMessageForLogs(error)
+      
+      result.should.equal('Unable to retrieve error message.')
+    })
+  })
 })
 

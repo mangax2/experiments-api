@@ -1,5 +1,5 @@
 //TODO update for experiments local db
-import config from '../../../config'
+const config = require('../../../config')
 
 const cfServices = {
     experimentsDataSource: {
@@ -13,6 +13,14 @@ const cfServices = {
         min: 10,
         max: 10,
         idleTimeoutMillis: 30000
+    },
+    pingDataSource: {
+        url: 'https://test.amp.monsanto.com/as/token.oauth2',
+        clientId: process.env.EXPERIMENTS_API_CLIENT_ID,
+        clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
+    },
+    experimentsExternalAPIUrls: {
+        randomizationAPIUrl: 'https://api01-np.agro.services:443/randomizer/1.0.1'
     }
 }
 

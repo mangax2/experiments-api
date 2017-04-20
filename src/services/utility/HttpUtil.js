@@ -17,6 +17,24 @@ class HttpUtil {
     return httpCall
   }
 
+  static getErrorMessageForLogs(err) {
+    if (err) {
+      if (err.status === 401) {
+        return 'Unauthorized'
+      } else if (err.response) {
+        const error = JSON.parse(err.response.text)
+
+        if (_.isArray(error)) {
+          return _.map(error, 'errorMessage').join()
+        }
+
+        if (error.errorMessage) {
+          return error.errorMessage
+        }
+      }
+    }
+    return 'Unable to retrieve error message.'
+  }
 }
 
 module.exports = HttpUtil

@@ -9,7 +9,8 @@ class FactorTypeService {
 
   createFactorType(factorType, context) {
     return this.validator.validate([factorType])
-      .then(() => db.factorType.repository().tx('createFactorType', tx => db.factorType.create(tx, factorType, context)))
+      .then(() => db.factorType.repository().tx('createFactorType', tx =>
+        db.factorType.create(tx, factorType, context)))
   }
 
   getAllFactorTypes = () => db.factorType.all()
@@ -24,23 +25,27 @@ class FactorTypeService {
     })
 
   updateFactorType(id, factorType, context) {
-    return this.validator.validate([factorType]).then(() => db.factorType.repository().tx('updateFactorType', tx => db.factorType.update(tx, id, factorType, context).then((data) => {
-      if (!data) {
-        throw AppError.notFound('Factor Type Not Found')
-      } else {
-        return data
-      }
-    })))
+    return this.validator.validate([factorType])
+      .then(() => db.factorType.repository().tx('updateFactorType', tx =>
+        db.factorType.update(tx, id, factorType, context)
+          .then((data) => {
+            if (!data) {
+              throw AppError.notFound('Factor Type Not Found')
+            } else {
+              return data
+            }
+          })))
   }
 
-  deleteFactorType = id => db.factorType.repository().tx('deleteFactorType', tx => db.factorType.delete(tx, id)
-    .then((data) => {
-      if (!data) {
-        throw AppError.notFound('Factor Type Not Found')
-      } else {
-        return data
-      }
-    }),
+  deleteFactorType = id => db.factorType.repository().tx('deleteFactorType', tx =>
+    db.factorType.delete(tx, id)
+      .then((data) => {
+        if (!data) {
+          throw AppError.notFound('Factor Type Not Found')
+        } else {
+          return data
+        }
+      }),
   )
 }
 

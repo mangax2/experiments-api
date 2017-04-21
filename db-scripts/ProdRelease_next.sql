@@ -36,13 +36,13 @@ CREATE TABLE ref_data_source
 INSERT INTO public.ref_data_source(
             name, ref_data_source_type_id, created_user_id, created_date,
             modified_user_id, modified_date)
-    VALUES ( 'Formulation Catalog', 2, 'KPRAT1', CURRENT_TIMESTAMP,
+    VALUES ( 'Formulation Catalog', 1, 'KPRAT1', CURRENT_TIMESTAMP,
             'KPRAT1', CURRENT_TIMESTAMP);
 
  INSERT INTO public.ref_data_source(
             name, ref_data_source_type_id, created_user_id, created_date,
             modified_user_id, modified_date)
-    VALUES ( 'Other', 3, 'KPRAT1', CURRENT_TIMESTAMP,
+    VALUES ( 'Other', 2, 'KPRAT1', CURRENT_TIMESTAMP,
             'KPRAT1', CURRENT_TIMESTAMP);
 
 
@@ -73,3 +73,21 @@ UPDATE public.ref_unit_spec
 SET name='Description'
 WHERE ref_unit_type_id = 2 AND name = 'Type'
 	OR ref_unit_type_id = 3 AND name = 'Comment';
+
+
+------------------
+ALTER TABLE public.group
+  DROP CONSTRAINT group_ref_randomization_strategy_fk,
+  ALTER COLUMN ref_randomization_strategy_id DROP NOT NULL;
+
+DROP TABLE public.ref_randomization_strategy;
+
+ALTER TABLE public.tag
+  DROP CONSTRAINT tag_experiment,
+  ADD CONSTRAINT tag_experiment FOREIGN KEY (experiment_id)
+    REFERENCES public.experiment (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+
+UPDATE public.group
+SET ref_randomization_strategy_id = 1;

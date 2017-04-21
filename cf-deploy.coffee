@@ -1,4 +1,5 @@
 module.exports = (cfDeploy) ->
+  {experimentsDataSource, experimentsExternalAPIUrls, experimentsVault} = cfDeploy.args
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
   diskLimit: "1G"
@@ -7,12 +8,11 @@ module.exports = (cfDeploy) ->
 #  smokeTest: 'nonProd'
   environment:
     ENV: process.env.ENV
-    EXPERIMENTS_DB_LOCAL_USER: process.env.EXPERIMENTS_DB_LOCAL_USER
-    EXPERIMENTS_DB_LOCAL_PASSWORD: process.env.EXPERIMENTS_DB_LOCAL_PASSWORD
   route: 'experiments-api'
   startupCommand: 'npm start'
   services: [
-    'experimentsDataSource',
     'expSys',
-    'experimentsVault'
+    "#{experimentsDataSource}",
+    "#{experimentsVault}",
+    "#{experimentsExternalAPIUrls}",
   ]

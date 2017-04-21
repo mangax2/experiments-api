@@ -55,7 +55,9 @@ class FactorDependentCompositeService {
       }
 
       const factors = _.map(value[0].factors, (factor) => {
-        const levels = _.filter(value[0].levels, level => level.factor_id === factor.id)
+        const levels = _.filter(value[0].levels, level =>
+          Number(level.factor_id) === Number(factor.id),
+        )
         const levelValues = _.map(levels, level => level.value)
 
         const type = _.find(value[1], { id: factor.ref_factor_type_id }).type.toLowerCase()
@@ -159,9 +161,9 @@ class FactorDependentCompositeService {
             )
             if (levelEntities.length > 0) {
               return this.factorLevelService.batchCreateFactorLevels(
-              levelEntities,
-              context,
-              tx)
+                levelEntities,
+                context,
+                tx)
             }
             return Promise.resolve()
           })

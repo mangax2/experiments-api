@@ -22,11 +22,10 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use(requestContext)
 
   app.use(inflector())
-  //eslint-disable-next-line
-  const pingFunc = (function() {
+  const pingFunc = (function () {
     const createPingPage = require('@monsantoit/ping-page')
     const pingPage = createPingPage(require('../package.json'))
-    const ref = ['/ping', `${appBaseUrl}/ping`]
+    const ref = ['/ping']
     const results = []
     let i
     let len
@@ -35,7 +34,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       results.push(app.get(path, pingPage))
     }
     return results
-  }())
+  })
+
+  pingFunc()
 
   const compression = require('compression')
   app.use(compression())
@@ -47,6 +48,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(appBaseUrl, middleware.swaggerUi())
   })
 
+  // Disabling lint for this app.use, removing 'next' parameter causes the errors to be
+  // improperly formatted, but eslint says it is not being used.
   //eslint-disable-next-line
   app.use((err, req, res, next) => {
     const errorLogMessage = ''

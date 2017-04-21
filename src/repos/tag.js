@@ -8,6 +8,9 @@ module.exports = (rep, pgp) => ({
   all: () => rep.any('SELECT * FROM tag'),
 
   findByExperimentId: experimentId => rep.any('SELECT * FROM tag where experiment_id=$1', experimentId),
+
+  batchFindByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT * FROM tag where experiment_id IN ($1:csv)', [experimentIds]),
+
   batchCreate: (tags, context, t = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['name', 'value', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],

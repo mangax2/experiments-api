@@ -1,3 +1,4 @@
+import { mock } from '../../jestUtil'
 import agent from 'superagent'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
@@ -5,7 +6,7 @@ describe('HttpUtil', () => {
 
   describe('setHeaders', () => {
     it('sets headers of the httpCall', () => {
-      const httpCall = {set: jest.fn()}
+      const httpCall = {set: mock()}
 
       HttpUtil.setHeaders(httpCall, [
         {headerName: 'testHeader', headerValue: 'testValue'},
@@ -19,8 +20,8 @@ describe('HttpUtil', () => {
 
   describe('get', () => {
     it('calls setHeaders and agent.get', () => {
-      HttpUtil.setHeaders = jest.fn()
-      agent.get = jest.fn(() => {return {}})
+      HttpUtil.setHeaders = mock()
+      agent.get = mock({})
 
       HttpUtil.get('testUrl', [])
 
@@ -31,9 +32,9 @@ describe('HttpUtil', () => {
 
   describe('post', () => {
     it('calls setHeaders and agent.post', () => {
-      const httpCall = {send: jest.fn()}
-      HttpUtil.setHeaders = jest.fn(() => {return httpCall})
-      agent.post = jest.fn(() => {return {}})
+      const httpCall = {send: mock()}
+      HttpUtil.setHeaders = mock(httpCall)
+      agent.post = mock({})
 
       HttpUtil.post('testUrl', [], {})
 

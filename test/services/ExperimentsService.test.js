@@ -1,3 +1,4 @@
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -11,11 +12,11 @@ describe('ExperimentsService', () => {
     it('calls validate, batchCreate, assignExperimentIdToTags, batchCreateTags, and' +
       ' createPostResponse', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.batchCreate = jest.fn(() => Promise.resolve([{ id: 1 }]))
-      target.assignExperimentIdToTags = jest.fn(() => [{}])
-      target.tagService.batchCreateTags = jest.fn(() => Promise.resolve({}))
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      target.assignExperimentIdToTags = mock([{}])
+      target.tagService.batchCreateTags = mockResolve({})
+      AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -29,11 +30,11 @@ describe('ExperimentsService', () => {
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when there are no tags', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.batchCreate = jest.fn(() => Promise.resolve([{ id: 1 }]))
-      target.assignExperimentIdToTags = jest.fn(() => [])
-      target.tagService.batchCreateTags = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.batchCreateTags = mock()
+      AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -47,11 +48,11 @@ describe('ExperimentsService', () => {
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when tags are undefined', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.batchCreate = jest.fn(() => Promise.resolve([{ id: 1 }]))
-      target.assignExperimentIdToTags = jest.fn(() => undefined)
-      target.tagService.batchCreateTags = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -64,52 +65,55 @@ describe('ExperimentsService', () => {
 
     it('rejects when batchCreateTags fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.batchCreate = jest.fn(() => Promise.resolve([{ id: 1 }]))
-      target.assignExperimentIdToTags = jest.fn(() => [{}])
-      target.tagService.batchCreateTags = jest.fn(() => Promise.reject())
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      target.assignExperimentIdToTags = mock([{}])
+      target.tagService.batchCreateTags = mockReject('error')
+      AppUtil.createPostResponse = mock()
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, () => {
+      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when batchCreate fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.batchCreate = jest.fn(() => Promise.reject())
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.batchCreate = mockReject('error')
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, () => {
+      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.reject())
-      db.experiments.batchCreate = jest.fn()
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockReject('error')
+      db.experiments.batchCreate = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, () => {
+      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -117,9 +121,9 @@ describe('ExperimentsService', () => {
   describe('getExperiments', () => {
     it('calls getAllExperiments', () => {
       const target = new ExperimentsService()
-      target.isFilterRequest = jest.fn(() => false)
-      target.getExperimentsByFilters = jest.fn()
-      target.getAllExperiments = jest.fn()
+      target.isFilterRequest = mock(false)
+      target.getExperimentsByFilters = mock()
+      target.getAllExperiments = mock()
 
       target.getExperiments('')
       expect(target.isFilterRequest).toHaveBeenCalledWith('')
@@ -129,9 +133,9 @@ describe('ExperimentsService', () => {
 
     it('calls getExperimentsByFilters', () => {
       const target = new ExperimentsService()
-      target.isFilterRequest = jest.fn(() => true)
-      target.getExperimentsByFilters = jest.fn()
-      target.getAllExperiments = jest.fn()
+      target.isFilterRequest = mock(true)
+      target.getExperimentsByFilters = mock()
+      target.getAllExperiments = mock()
 
       target.getExperiments('')
       expect(target.isFilterRequest).toHaveBeenCalledWith('')
@@ -143,8 +147,8 @@ describe('ExperimentsService', () => {
   describe('getExperimentById', () => {
     it('calls find, getTagsByExperimentId, and returns data', () => {
       const target = new ExperimentsService()
-      db.experiments.find = jest.fn(() => Promise.resolve({}))
-      target.tagService.getTagsByExperimentId = jest.fn(() => Promise.resolve([]))
+      db.experiments.find = mockResolve({})
+      target.tagService.getTagsByExperimentId = mockResolve([])
 
       return target.getExperimentById(1, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
@@ -155,20 +159,21 @@ describe('ExperimentsService', () => {
 
     it('rejects when tagService fails', () => {
       const target = new ExperimentsService()
-      db.experiments.find = jest.fn(() => Promise.resolve({}))
-      target.tagService.getTagsByExperimentId = jest.fn(() => Promise.reject(''))
+      db.experiments.find = mockResolve({})
+      target.tagService.getTagsByExperimentId = mockReject('error')
 
-      return target.getExperimentById(1, testTx).then(() => {}, () => {
+      return target.getExperimentById(1, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
       })
     })
 
     it('throws when find returns undefined', () => {
       const target = new ExperimentsService()
-      db.experiments.find = jest.fn(() => Promise.resolve(undefined))
-      target.tagService.getTagsByExperimentId = jest.fn()
-      AppError.notFound = jest.fn()
+      db.experiments.find = mockResolve()
+      target.tagService.getTagsByExperimentId = mock()
+      AppError.notFound = mock()
 
       return target.getExperimentById(1, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
@@ -182,11 +187,11 @@ describe('ExperimentsService', () => {
   describe('updateExperiment', () => {
     it('calls validate, update, deleteTagsForExperimentId, batchCreateTags', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.resolve({}))
-      target.tagService.deleteTagsForExperimentId = jest.fn(() => Promise.resolve())
-      target.assignExperimentIdToTags = jest.fn(() => [{}])
-      target.tagService.batchCreateTags = jest.fn(() => Promise.resolve())
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.assignExperimentIdToTags = mock([{}])
+      target.tagService.batchCreateTags = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -200,11 +205,11 @@ describe('ExperimentsService', () => {
 
     it('calls validate, update, deleteTagsForExperimentId, but not batchCreateTags', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.resolve({}))
-      target.tagService.deleteTagsForExperimentId = jest.fn(() => Promise.resolve())
-      target.assignExperimentIdToTags = jest.fn(() => [])
-      target.tagService.batchCreateTags = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.batchCreateTags = mock()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -218,46 +223,48 @@ describe('ExperimentsService', () => {
 
     it('rejects when batchCreateTags fails' , () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.resolve({}))
-      target.tagService.deleteTagsForExperimentId = jest.fn(() => Promise.resolve())
-      target.assignExperimentIdToTags = jest.fn(() => [{}])
-      target.tagService.batchCreateTags = jest.fn(() => Promise.reject())
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.assignExperimentIdToTags = mock([{}])
+      target.tagService.batchCreateTags = mockReject('error')
 
-      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
+      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{}])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when deleteTagsForExperimentId fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.resolve({}))
-      target.tagService.deleteTagsForExperimentId = jest.fn(() => Promise.reject())
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.tagService.deleteTagsForExperimentId = mockReject('error')
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
 
-      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
+      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('throws an error when returned updated data is undefined', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.resolve(undefined))
-      target.tagService.deleteTagsForExperimentId = jest.fn()
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
-      AppError.notFound = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve()
+      target.tagService.deleteTagsForExperimentId = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      AppError.notFound = mock()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -271,35 +278,37 @@ describe('ExperimentsService', () => {
 
     it('rejects when update fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.experiments.update = jest.fn(() => Promise.reject())
-      target.tagService.deleteTagsForExperimentId = jest.fn()
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockReject('error')
+      target.tagService.deleteTagsForExperimentId = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
 
-      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
+      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.tagService.deleteTagsForExperimentId).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.reject())
-      db.experiments.update = jest.fn(() => Promise.reject())
-      target.tagService.deleteTagsForExperimentId = jest.fn()
-      target.assignExperimentIdToTags = jest.fn()
-      target.tagService.batchCreateTags = jest.fn()
+      target.validator.validate = mockReject('error')
+      db.experiments.update = mock()
+      target.tagService.deleteTagsForExperimentId = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
 
-      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
+      return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).not.toHaveBeenCalled()
         expect(target.tagService.deleteTagsForExperimentId).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -307,7 +316,7 @@ describe('ExperimentsService', () => {
   describe('deleteExperiment', () => {
     it('returns data when successfully deleted data', () => {
       const target = new ExperimentsService()
-      db.experiments.remove = jest.fn(() => Promise.resolve({}))
+      db.experiments.remove = mockResolve({})
 
       return target.deleteExperiment(1).then((data) => {
         expect(db.experiments.remove).toHaveBeenCalledWith(1)
@@ -317,8 +326,8 @@ describe('ExperimentsService', () => {
 
     it('throws an error when data is undefined', () => {
       const target = new ExperimentsService()
-      db.experiments.remove = jest.fn(() => Promise.resolve(undefined))
-      AppError.notFound = jest.fn()
+      db.experiments.remove = mockResolve()
+      AppError.notFound = mock()
 
       return target.deleteExperiment(1).then(() => {}, () => {
         expect(db.experiments.remove).toHaveBeenCalledWith(1)
@@ -331,9 +340,9 @@ describe('ExperimentsService', () => {
   describe('getExperimentsByFilters', () => {
     it('calls validate and findExperimentByTags', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      target.toLowerCaseArray = jest.fn(() => [])
-      db.experiments.findExperimentsByTags = jest.fn(() => Promise.resolve())
+      target.validator.validate = mockResolve()
+      target.toLowerCaseArray = mock([])
+      db.experiments.findExperimentsByTags = mockResolve()
 
       return target.getExperimentsByFilters('').then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
@@ -344,27 +353,29 @@ describe('ExperimentsService', () => {
 
     it('rejects when findExperimentsByTags fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      target.toLowerCaseArray = jest.fn(() => [])
-      db.experiments.findExperimentsByTags = jest.fn(() => Promise.reject())
+      target.validator.validate = mockResolve()
+      target.toLowerCaseArray = mock([])
+      db.experiments.findExperimentsByTags = mockReject('error')
 
-      return target.getExperimentsByFilters('').then(() => {}, () => {
+      return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).toHaveBeenCalledTimes(2)
         expect(db.experiments.findExperimentsByTags).toHaveBeenCalledWith([],[])
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       const target = new ExperimentsService()
-      target.validator.validate = jest.fn(() => Promise.reject())
-      target.toLowerCaseArray = jest.fn()
-      db.experiments.findExperimentsByTags = jest.fn()
+      target.validator.validate = mockReject('error')
+      target.toLowerCaseArray = mock()
+      db.experiments.findExperimentsByTags = mock()
 
-      return target.getExperimentsByFilters('').then(() => {}, () => {
+      return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).not.toHaveBeenCalled()
         expect(db.experiments.findExperimentsByTags).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -372,7 +383,7 @@ describe('ExperimentsService', () => {
   describe('getAllExperiments', () => {
     it('calls database', () => {
       const target = new ExperimentsService()
-      db.experiments.all = jest.fn()
+      db.experiments.all = mock()
 
       target.getAllExperiments()
       expect(db.experiments.all).toHaveBeenCalled()

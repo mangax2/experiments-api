@@ -1,9 +1,10 @@
+import { mock, mockReject, mockResolve } from '../../jestUtil'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
 describe('VaultUtil', () => {
   beforeAll(() => {
-    console.error = jest.fn()
+    console.error = mock()
   })
 
   afterAll(() => {
@@ -25,8 +26,8 @@ describe('VaultUtil', () => {
     })
 
     it('calls HttpUtil and sets dbAppUser and dbAppPassword', () => {
-      HttpUtil.post = jest.fn(() => Promise.resolve({body: {auth: {client_token: 'testToken'}}}))
-      HttpUtil.get = jest.fn(() => Promise.resolve({body: {data: {appUser: 'testUser', appUserPassword: 'testPassword'}}}))
+      HttpUtil.post = mockResolve({body: {auth: {client_token: 'testToken'}}})
+      HttpUtil.get = mockResolve({body: {data: {appUser: 'testUser', appUserPassword: 'testPassword'}}})
 
       return VaultUtil.configureDbCredentials('np', {roleId: 'id', secretId: 'id'}).then(() => {
         expect(VaultUtil.dbAppPassword).toEqual('testPassword')
@@ -35,8 +36,8 @@ describe('VaultUtil', () => {
     })
 
     it('rejects when the post to HttpUtil fails', () => {
-      HttpUtil.post = jest.fn(() => Promise.reject('error'))
-      HttpUtil.get = jest.fn()
+      HttpUtil.post = mockReject('error')
+      HttpUtil.get = mock()
 
       return VaultUtil.configureDbCredentials('np', {}).then(() => {}, () => {
         expect(HttpUtil.get).not.toHaveBeenCalled()
@@ -44,8 +45,8 @@ describe('VaultUtil', () => {
     })
 
     it('rejects when the get to HttpUtil fails', () => {
-      HttpUtil.post = jest.fn(() => Promise.resolve({body: {auth: {client_token: 'testToken'}}}))
-      HttpUtil.get = jest.fn()
+      HttpUtil.post = mockResolve({body: {auth: {client_token: 'testToken'}}})
+      HttpUtil.get = mock()
 
       return VaultUtil.configureDbCredentials('prod', {baseUrl: 'localhost/', secretUri: 'vault'}).then(() => {}, () => {
         expect(HttpUtil.get).toHaveBeenCalledWith(

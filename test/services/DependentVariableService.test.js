@@ -1,3 +1,4 @@
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
@@ -7,16 +8,14 @@ describe('DependentVariableService', () => {
   const testContext = {}
   const testTx = { tx: {} }
 
-  db.dependentVariable.repository = jest.fn(() => {
-    return { tx: function (transactionName, callback) {return callback(testTx)} }
-  })
+  db.dependentVariable.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
 
   describe('batchCreateDependentVariables', () => {
     it('calls validate, batchCreate, and AppUtil on success', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.dependentVariable.batchCreate = jest.fn(() => Promise.resolve({}))
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.dependentVariable.batchCreate = mockResolve({})
+      AppUtil.createPostResponse = mock()
 
       return target.batchCreateDependentVariables([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -27,27 +26,29 @@ describe('DependentVariableService', () => {
 
     it('rejects when batchCreate fails', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.dependentVariable.batchCreate = jest.fn(() => Promise.reject('error'))
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.dependentVariable.batchCreate = mockReject('error')
+      AppUtil.createPostResponse = mock()
 
-      return target.batchCreateDependentVariables([], testContext, testTx).then(() => {}, () => {
+      return target.batchCreateDependentVariables([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.dependentVariable.batchCreate).toHaveBeenCalledWith(testTx, [], testContext)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.reject('error'))
-      db.dependentVariable.batchCreate = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
+      target.validator.validate = mockReject('error')
+      db.dependentVariable.batchCreate = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchCreateDependentVariables([], testContext, testTx).then(() => {}, () => {
+      return target.batchCreateDependentVariables([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.dependentVariable.batchCreate).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -55,7 +56,7 @@ describe('DependentVariableService', () => {
   describe('getAllDependentVariables', () => {
     it('calls dependentVariable all', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.all = jest.fn(() => Promise.resolve())
+      db.dependentVariable.all = mockResolve()
 
       return target.getAllDependentVariables().then(() => {
         expect(db.dependentVariable.all).toHaveBeenCalled()
@@ -66,8 +67,8 @@ describe('DependentVariableService', () => {
   describe('getDependentVariablesByExperimentId', () => {
     it('calls getExperimentById and findByExperimentId', () => {
       const target = new DependentVariableService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.resolve())
-      db.dependentVariable.findByExperimentId = jest.fn(() => Promise.resolve())
+      target.experimentService.getExperimentById = mockResolve()
+      db.dependentVariable.findByExperimentId = mockResolve()
 
       return target.getDependentVariablesByExperimentId(1).then(() => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1)
@@ -77,12 +78,13 @@ describe('DependentVariableService', () => {
 
     it('rejects when getExperimentById fails', () => {
       const target = new DependentVariableService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.reject())
-      db.dependentVariable.findByExperimentId = jest.fn()
+      target.experimentService.getExperimentById = mockReject('error')
+      db.dependentVariable.findByExperimentId = mock()
 
-      return target.getDependentVariablesByExperimentId(1).then(() => {}, () => {
+      return target.getDependentVariablesByExperimentId(1).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1)
         expect(db.dependentVariable.findByExperimentId).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -90,7 +92,7 @@ describe('DependentVariableService', () => {
   describe('getDependentVariableById', () => {
     it('calls dependentVariable find', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.find = jest.fn(() => Promise.resolve({}))
+      db.dependentVariable.find = mockResolve({})
 
       return target.getDependentVariableById(1).then(() => {
         expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
@@ -99,8 +101,8 @@ describe('DependentVariableService', () => {
 
     it('throws an error when data is undefined', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.find = jest.fn(() => Promise.resolve(undefined))
-      AppError.notFound = jest.fn()
+      db.dependentVariable.find = mockResolve()
+      AppError.notFound = mock()
 
       return target.getDependentVariableById(1).then(() => {}, () => {
         expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
@@ -111,12 +113,13 @@ describe('DependentVariableService', () => {
 
     it('rejects when dependentVariable find fails', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.find = jest.fn(() => Promise.reject('error'))
-      AppError.notFound = jest.fn()
+      db.dependentVariable.find = mockReject('error')
+      AppError.notFound = mock()
 
-      return target.getDependentVariableById(1).then(() => {}, () => {
+      return target.getDependentVariableById(1).then(() => {}, (err) => {
         expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
         expect(AppError.notFound).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -124,9 +127,9 @@ describe('DependentVariableService', () => {
   describe('batchUpdateDependentVariables', () => {
     it('calls validate, batchUpdate, and createPutResponse', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.dependentVariable.batchUpdate = jest.fn(() => Promise.resolve({}))
-      AppUtil.createPutResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.dependentVariable.batchUpdate = mockResolve({})
+      AppUtil.createPutResponse = mock()
 
       return target.batchUpdateDependentVariables([], testContext).then(() => {
         expect(db.dependentVariable.batchUpdate).toHaveBeenCalled()
@@ -137,35 +140,37 @@ describe('DependentVariableService', () => {
 
     it('rejects when batchUpdate fails', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.resolve())
-      db.dependentVariable.batchUpdate = jest.fn(() => Promise.reject(''))
-      AppUtil.createPutResponse = jest.fn()
+      target.validator.validate = mockResolve()
+      db.dependentVariable.batchUpdate = mockReject('error')
+      AppUtil.createPutResponse = mock()
 
-      return target.batchUpdateDependentVariables([], testContext).then(() => {}, () => {
+      return target.batchUpdateDependentVariables([], testContext).then(() => {}, (err) => {
         expect(db.dependentVariable.batchUpdate).toHaveBeenCalled()
         expect(target.validator.validate).toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       const target = new DependentVariableService()
-      target.validator.validate = jest.fn(() => Promise.reject(''))
-      db.dependentVariable.batchUpdate = jest.fn()
-      AppUtil.createPutResponse = jest.fn()
+      target.validator.validate = mockReject('error')
+      db.dependentVariable.batchUpdate = mock()
+      AppUtil.createPutResponse = mock()
 
-      return target.batchUpdateDependentVariables([], testContext).then(() => {}, () => {
+      return target.batchUpdateDependentVariables([], testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalled()
         expect(db.dependentVariable.batchUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
 
   describe('deleteDependentVariable', () => {
-    it('sucessfully calls remove', () => {
+    it('successfully calls remove', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.remove = jest.fn(() => Promise.resolve({}))
+      db.dependentVariable.remove = mockResolve({})
 
       return target.deleteDependentVariable(1).then((data) => {
         expect(data).toEqual({})
@@ -175,8 +180,8 @@ describe('DependentVariableService', () => {
 
     it('throws an error when data is undefined after removing', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.remove = jest.fn(() => Promise.resolve(undefined))
-      AppError.notFound = jest.fn()
+      db.dependentVariable.remove = mockResolve()
+      AppError.notFound = mock()
 
       return target.deleteDependentVariable(1).then(() => {}, () => {
         expect(db.dependentVariable.remove).toHaveBeenCalledWith(1)
@@ -187,8 +192,8 @@ describe('DependentVariableService', () => {
 
     it('rejects when remove call fails', () => {
       const target = new DependentVariableService()
-      db.dependentVariable.remove = jest.fn(() => Promise.reject('error'))
-      AppError.notFound = jest.fn()
+      db.dependentVariable.remove = mockReject('error')
+      AppError.notFound = mock()
 
       return target.deleteDependentVariable(1).then(() => {}, (err) => {
         expect(db.dependentVariable.remove).toHaveBeenCalledWith(1)
@@ -200,8 +205,8 @@ describe('DependentVariableService', () => {
   describe('deleteDependentVariablesForExperimentId', () => {
     it('calls removeByExperimentId', () => {
       const target = new DependentVariableService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.resolve())
-      db.dependentVariable.removeByExperimentId = jest.fn(() => Promise.resolve())
+      target.experimentService.getExperimentById = mockResolve()
+      db.dependentVariable.removeByExperimentId = mockResolve()
 
       return target.deleteDependentVariablesForExperimentId(1, testTx).then(() => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
@@ -211,12 +216,13 @@ describe('DependentVariableService', () => {
 
     it('rejects when getExperimentById fails', () => {
       const target = new DependentVariableService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.reject())
-      db.dependentVariable.removeByExperimentId = jest.fn()
+      target.experimentService.getExperimentById = mockReject('error')
+      db.dependentVariable.removeByExperimentId = mock()
 
-      return target.deleteDependentVariablesForExperimentId(1, testTx).then(() => {}, () => {
+      return target.deleteDependentVariablesForExperimentId(1, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
         expect(db.dependentVariable.removeByExperimentId).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })

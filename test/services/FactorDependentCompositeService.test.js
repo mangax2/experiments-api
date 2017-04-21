@@ -1,3 +1,4 @@
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import AppUtil from '../../src/services/utility/AppUtil'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
 
@@ -8,8 +9,8 @@ describe('FactorDependentCompositeService', () => {
   describe('getFactorsWithLevels', () => {
     it('returns factors and levels object', () => {
       const target = new FactorDependentCompositeService()
-      target.getFactors = jest.fn(() => Promise.resolve([{}]))
-      target.getFactorLevels = jest.fn(() => Promise.resolve([{}, {}]))
+      target.getFactors = mockResolve([{}])
+      target.getFactorLevels = mockResolve([{}, {}])
 
       return target.getFactorsWithLevels(1).then((data) => {
         expect(target.getFactors).toHaveBeenCalledWith(1)
@@ -20,23 +21,25 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when getFactorLevels fails', () => {
       const target = new FactorDependentCompositeService()
-      target.getFactors = jest.fn(() => Promise.resolve([{}]))
-      target.getFactorLevels = jest.fn(() => Promise.reject())
+      target.getFactors = mockResolve([{}])
+      target.getFactorLevels = mockReject('error')
 
-      return target.getFactorsWithLevels(1).then(() => {}, () => {
+      return target.getFactorsWithLevels(1).then(() => {}, (err) => {
         expect(target.getFactors).toHaveBeenCalledWith(1)
         expect(target.getFactorLevels).toHaveBeenCalledWith([{}])
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when getFactors fails', () => {
       const target = new FactorDependentCompositeService()
-      target.getFactors = jest.fn(() => Promise.reject())
-      target.getFactorLevels = jest.fn()
+      target.getFactors = mockReject('error')
+      target.getFactorLevels = mock()
 
-      return target.getFactorsWithLevels(1).then(() => {}, () => {
+      return target.getFactorsWithLevels(1).then(() => {}, (err) => {
         expect(target.getFactors).toHaveBeenCalledWith(1)
         expect(target.getFactorLevels).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })
@@ -44,7 +47,7 @@ describe('FactorDependentCompositeService', () => {
   describe('getFactors', () => {
     it('returns data from factorService', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.getFactorsByExperimentId = jest.fn(() => { return Promise.resolve([{}])})
+      target.factorService.getFactorsByExperimentId = mockResolve([{}])
 
       return target.getFactors(1).then((data) => {
         expect(data).toEqual([{}])
@@ -56,7 +59,7 @@ describe('FactorDependentCompositeService', () => {
   describe('getFactorLevels', () => {
     it('calls getFactorLevelsByFactorId multiple times', () => {
       const target = new FactorDependentCompositeService()
-      target.factorLevelService.getFactorLevelsByFactorId = jest.fn(() => Promise.resolve({}))
+      target.factorLevelService.getFactorLevelsByFactorId = mockResolve({})
 
       return target.getFactorLevels([{ id: 1 }, { id: 2 }]).then((data) => {
         expect(target.factorLevelService.getFactorLevelsByFactorId).toHaveBeenCalledTimes(2)
@@ -83,11 +86,11 @@ describe('FactorDependentCompositeService', () => {
           factor_id: 1,
         }],
       }
-      target.getFactorsWithLevels = jest.fn(() => Promise.resolve(factorsWithLevels))
+      target.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
-      target.factorTypeService.getAllFactorTypes = jest.fn(() => Promise.resolve(factorTypes))
+      target.factorTypeService.getAllFactorTypes = mockResolve(factorTypes)
       const dependentVariables = [{ name: 'testDependent', required: true }]
-      target.dependentVariableService.getDependentVariablesByExperimentId = jest.fn(() => Promise.resolve(dependentVariables))
+      target.dependentVariableService.getDependentVariablesByExperimentId = mockResolve(dependentVariables)
       const expectedReturn = {
         independent: [{
           name: 'testFactor',
@@ -110,14 +113,15 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when a call fails in the Promise all', () => {
       const target = new FactorDependentCompositeService()
-      target.getFactorsWithLevels = jest.fn(() => Promise.resolve())
-      target.factorTypeService.getAllFactorTypes = jest.fn(() => Promise.resolve())
-      target.dependentVariableService.getDependentVariablesByExperimentId = jest.fn(() => Promise.reject())
+      target.getFactorsWithLevels = mockResolve()
+      target.factorTypeService.getAllFactorTypes = mockResolve()
+      target.dependentVariableService.getDependentVariablesByExperimentId = mockReject('error')
 
-      return target.getAllVariablesByExperimentId(1).then(() => {}, () => {
+      return target.getAllVariablesByExperimentId(1).then(() => {}, (err) => {
         expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1)
+        expect(err).toEqual('error')
       })
     })
   })
@@ -182,7 +186,7 @@ describe('FactorDependentCompositeService', () => {
 
   describe('mapIndependentAndExogenousVariableDTO2Entity', () => {
     it('maps independent and exogenous variables to DB entities and concats them together', () => {
-      FactorDependentCompositeService.mapVariableDTO2DbEntity = jest.fn(() => [{}])
+      FactorDependentCompositeService.mapVariableDTO2DbEntity = mock([{}])
 
       const result = FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(1, [{}], [{}])
       expect(FactorDependentCompositeService.mapVariableDTO2DbEntity).toHaveBeenCalledTimes(2)
@@ -209,10 +213,10 @@ describe('FactorDependentCompositeService', () => {
   describe('persistVariablesWithLevels', () => {
     it('deletes factors, batchCreates factors, and batchCreates levels', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.resolve())
-      target.factorService.batchCreateFactors = jest.fn(() => Promise.resolve([1, 2]))
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn(() => [{}])
-      target.factorLevelService.batchCreateFactorLevels = jest.fn(() => Promise.resolve())
+      target.factorService.deleteFactorsForExperimentId = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([1, 2])
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
 
       return target.persistVariablesWithLevels(1, [{}, {}], testContext, testTx).then(() => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -224,10 +228,10 @@ describe('FactorDependentCompositeService', () => {
 
     it('deletes factors, batchCreates, but does not create levels', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.resolve())
-      target.factorService.batchCreateFactors = jest.fn(() => Promise.resolve([1, 2]))
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn(() => [])
-      target.factorLevelService.batchCreateFactorLevels = jest.fn()
+      target.factorService.deleteFactorsForExperimentId = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([1, 2])
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([])
+      target.factorLevelService.batchCreateFactorLevels = mock()
 
       return target.persistVariablesWithLevels(1, [{}, {}], testContext, testTx).then(() => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -239,10 +243,10 @@ describe('FactorDependentCompositeService', () => {
 
     it('deletes factors only', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.resolve())
-      target.factorService.batchCreateFactors = jest.fn()
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn()
-      target.factorLevelService.batchCreateFactorLevels = jest.fn()
+      target.factorService.deleteFactorsForExperimentId = mockResolve()
+      target.factorService.batchCreateFactors = mock()
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+      target.factorLevelService.batchCreateFactorLevels = mock()
 
       return target.persistVariablesWithLevels(1, [], testContext, testTx).then(() => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -254,10 +258,10 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when batchCreateFactorLevels fails', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.resolve())
-      target.factorService.batchCreateFactors = jest.fn(() => Promise.resolve([1, 2]))
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn(() => [{}])
-      target.factorLevelService.batchCreateFactorLevels = jest.fn(() => Promise.reject('error'))
+      target.factorService.deleteFactorsForExperimentId = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([1, 2])
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
+      target.factorLevelService.batchCreateFactorLevels = mockReject('error')
 
       return target.persistVariablesWithLevels(1, [{}, {}], testContext, testTx).then(() => {}, (err) => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -270,10 +274,10 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when batchCreateFactors fails', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.resolve())
-      target.factorService.batchCreateFactors = jest.fn(() => Promise.reject('error'))
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn()
-      target.factorLevelService.batchCreateFactorLevels = jest.fn()
+      target.factorService.deleteFactorsForExperimentId = mockResolve()
+      target.factorService.batchCreateFactors = mockReject('error')
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+      target.factorLevelService.batchCreateFactorLevels = mock()
 
       return target.persistVariablesWithLevels(1, [{}, {}], testContext, testTx).then(() => {}, (err) => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -286,10 +290,10 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when deleteFactorsForExperimentId fails', () => {
       const target = new FactorDependentCompositeService()
-      target.factorService.deleteFactorsForExperimentId = jest.fn(() => Promise.reject('error'))
-      target.factorService.batchCreateFactors = jest.fn()
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = jest.fn()
-      target.factorLevelService.batchCreateFactorLevels = jest.fn()
+      target.factorService.deleteFactorsForExperimentId = mockReject('error')
+      target.factorService.batchCreateFactors = mock()
+      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+      target.factorLevelService.batchCreateFactorLevels = mock()
 
       return target.persistVariablesWithLevels(1, [{}, {}], testContext, testTx).then(() => {}, (err) => {
         expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -304,8 +308,8 @@ describe('FactorDependentCompositeService', () => {
   describe('persistVariablesWithoutLevels', () => {
     it('deletes and creates dependent variables', () => {
       const target = new FactorDependentCompositeService()
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = jest.fn(() => Promise.resolve())
-      target.dependentVariableService.batchCreateDependentVariables = jest.fn(() => Promise.resolve())
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, testTx).then(() => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -315,8 +319,8 @@ describe('FactorDependentCompositeService', () => {
 
     it('deletes dependent variables, but does not create new ones', () => {
       const target = new FactorDependentCompositeService()
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = jest.fn(() => Promise.resolve())
-      target.dependentVariableService.batchCreateDependentVariables = jest.fn()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mock()
 
       return target.persistVariablesWithoutLevels(1, [], testContext, testTx).then(() => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -326,8 +330,8 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when batchCreateDependentVariables fails', () => {
       const target = new FactorDependentCompositeService()
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = jest.fn(() => Promise.resolve())
-      target.dependentVariableService.batchCreateDependentVariables = jest.fn(() => Promise.reject('error'))
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -338,8 +342,8 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when deleteDependentVariablesForExperimentId fails', () => {
       const target = new FactorDependentCompositeService()
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = jest.fn(() => Promise.reject('error'))
-      target.dependentVariableService.batchCreateDependentVariables = jest.fn()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
+      target.dependentVariableService.batchCreateDependentVariables = mock()
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -352,8 +356,8 @@ describe('FactorDependentCompositeService', () => {
   describe('persistVariables', () => {
     it('calls persistVariablesWithLevels and persistVariablesWithoutLevels', () => {
       const target = new FactorDependentCompositeService()
-      target.persistVariablesWithLevels = jest.fn(() => Promise.resolve())
-      target.persistVariablesWithoutLevels = jest.fn(() => Promise.resolve())
+      target.persistVariablesWithLevels = mockResolve()
+      target.persistVariablesWithoutLevels = mockResolve()
 
       return target.persistVariables(1, [{}], [{}], testContext, testTx).then(() => {
         expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, testTx)
@@ -363,8 +367,8 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when persistVariablesWithoutLevels fails', () => {
       const target = new FactorDependentCompositeService()
-      target.persistVariablesWithLevels = jest.fn(() => Promise.resolve())
-      target.persistVariablesWithoutLevels = jest.fn(() => Promise.reject('error'))
+      target.persistVariablesWithLevels = mockResolve()
+      target.persistVariablesWithoutLevels = mockReject('error')
 
       return target.persistVariables(1, [{}], [{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, testTx)
@@ -375,8 +379,8 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when persistVariablesWithLevels fails', () => {
       const target = new FactorDependentCompositeService()
-      target.persistVariablesWithLevels = jest.fn(() => Promise.reject('error'))
-      target.persistVariablesWithoutLevels = jest.fn()
+      target.persistVariablesWithLevels = mockReject('error')
+      target.persistVariablesWithoutLevels = mock()
 
       return target.persistVariables(1, [{}], [{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, testTx)
@@ -389,11 +393,11 @@ describe('FactorDependentCompositeService', () => {
   describe('persistAllVariables', () => {
     it('validates, persists variables, and returns response', () => {
       const target = new FactorDependentCompositeService()
-      target.variablesValidator.validate = jest.fn(() => Promise.resolve())
-      target.persistVariables = jest.fn(() => Promise.resolve())
-      AppUtil.createPostResponse = jest.fn()
-      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = jest.fn(() => [{}])
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = jest.fn(() => [{}, {}])
+      target.variablesValidator.validate = mockResolve()
+      target.persistVariables = mockResolve()
+      AppUtil.createPostResponse = mock()
+      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
+      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
       const experimentVariables = {
         independent: [{}],
         exogenous: [],
@@ -410,11 +414,11 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when persistVariables fails' , () => {
       const target = new FactorDependentCompositeService()
-      target.variablesValidator.validate = jest.fn(() => Promise.resolve())
-      target.persistVariables = jest.fn(() => Promise.reject('error'))
-      AppUtil.createPostResponse = jest.fn()
-      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = jest.fn(() => [{}])
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = jest.fn(() => [{}, {}])
+      target.variablesValidator.validate = mockResolve()
+      target.persistVariables = mockReject('error')
+      AppUtil.createPostResponse = mock()
+      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
+      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
       const experimentVariables = {
         independent: [{}],
         exogenous: [],
@@ -432,11 +436,11 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when validate fails' , () => {
       const target = new FactorDependentCompositeService()
-      target.variablesValidator.validate = jest.fn(() => Promise.reject('error'))
-      target.persistVariables = jest.fn()
-      AppUtil.createPostResponse = jest.fn()
-      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = jest.fn(() => [{}])
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = jest.fn(() => [{}, {}])
+      target.variablesValidator.validate = mockReject('error')
+      target.persistVariables = mock()
+      AppUtil.createPostResponse = mock()
+      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
+      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
       const experimentVariables = {
         independent: [{}],
         exogenous: [],

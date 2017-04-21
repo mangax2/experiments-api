@@ -1,3 +1,4 @@
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import ExperimentSummaryService from '../../src/services/ExperimentSummaryService'
 import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
@@ -8,8 +9,8 @@ describe('ExperimentSummaryService', () => {
   describe('getExperimentSummaryById', () => {
     it('returns summary data', () => {
       const target = new ExperimentSummaryService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.resolve())
-      db.experimentSummary.find = jest.fn(() => Promise.resolve({}))
+      target.experimentService.getExperimentById = mockResolve()
+      db.experimentSummary.find = mockResolve({})
 
       return target.getExperimentSummaryById(1, testTx).then((data) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
@@ -20,9 +21,9 @@ describe('ExperimentSummaryService', () => {
 
     it('throws an error when summary is not found', () => {
       const target = new ExperimentSummaryService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.resolve())
-      db.experimentSummary.find = jest.fn(() => Promise.resolve(undefined))
-      AppError.notFound = jest.fn()
+      target.experimentService.getExperimentById = mockResolve()
+      db.experimentSummary.find = mockResolve()
+      AppError.notFound = mock()
 
       return target.getExperimentSummaryById(1, testTx).then(() => {}, () => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
@@ -34,23 +35,25 @@ describe('ExperimentSummaryService', () => {
 
     it('rejects when experimentSummary find fails', () => {
       const target = new ExperimentSummaryService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.resolve())
-      db.experimentSummary.find = jest.fn(() => Promise.reject())
+      target.experimentService.getExperimentById = mockResolve()
+      db.experimentSummary.find = mockReject('error')
 
-      return target.getExperimentSummaryById(1, testTx).then(() => {}, () => {
+      return target.getExperimentSummaryById(1, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
         expect(db.experimentSummary.find).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
       })
     })
 
     it('rejects when getExperimentById fails', () => {
       const target = new ExperimentSummaryService()
-      target.experimentService.getExperimentById = jest.fn(() => Promise.reject())
-      db.experimentSummary.find = jest.fn()
+      target.experimentService.getExperimentById = mockReject('error')
+      db.experimentSummary.find = mock()
 
-      return target.getExperimentSummaryById(1, testTx).then(() => {}, () => {
+      return target.getExperimentSummaryById(1, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
         expect(db.experimentSummary.find).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
       })
     })
   })

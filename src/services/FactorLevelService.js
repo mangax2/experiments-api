@@ -40,11 +40,13 @@ class FactorLevelService {
     })
 
   batchUpdateFactorLevels(factorLevels, context) {
-    return this.validator.validate(factorLevels, 'PUT').then(() => db.factorLevel.repository().tx('updateFactorLevelsTx', t => db.factorLevel.batchUpdate(t, factorLevels, context).then(data => AppUtil.createPutResponse(data))))
+    return this.validator.validate(factorLevels, 'PUT')
+      .then(() => db.factorLevel.repository().tx('updateFactorLevelsTx', t => db.factorLevel.batchUpdate(t, factorLevels, context)
+        .then(data => AppUtil.createPutResponse(data))))
   }
 
-  deleteFactorLevel = id => db.factorLevel
-    .remove(id).then((data) => {
+  deleteFactorLevel = id => db.factorLevel.remove(id)
+    .then((data) => {
       if (!data) {
         logger.error(`Factor Level Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Level Not Found for requested id')

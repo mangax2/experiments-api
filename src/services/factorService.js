@@ -17,7 +17,9 @@ class FactorService {
 
   @Transactional('batchCreateFactors')
   batchCreateFactors(factors, context, tx) {
-    return this.validator.validate(factors, 'POST', tx).then(() => db.factor.batchCreate(factors, context, tx).then(data => AppUtil.createPostResponse(data)))
+    return this.validator.validate(factors, 'POST', tx)
+      .then(() => db.factor.batchCreate(factors, context, tx)
+        .then(data => AppUtil.createPostResponse(data)))
   }
 
   @Transactional('getAllFactors')
@@ -30,14 +32,15 @@ class FactorService {
   }
 
   @Transactional('getFactorById')
-  getFactorById = (id, tx) => db.factor.find(id, tx).then((data) => {
-    if (!data) {
-      logger.error(`Factor Not Found for requested id = ${id}`)
-      throw AppError.notFound('Factor Not Found for requested id')
-    } else {
-      return data
-    }
-  })
+  getFactorById = (id, tx) => db.factor.find(id, tx)
+    .then((data) => {
+      if (!data) {
+        logger.error(`Factor Not Found for requested id = ${id}`)
+        throw AppError.notFound('Factor Not Found for requested id')
+      } else {
+        return data
+      }
+    })
 
   @Transactional('batchUpdateFactors')
   batchUpdateFactors(factors, context, tx) {

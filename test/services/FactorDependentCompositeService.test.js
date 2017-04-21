@@ -198,7 +198,7 @@ describe('FactorDependentCompositeService', () => {
 
   describe('mapVariablesDTO2LevelsEntity', () => {
     it('returns levels with factorIds', () => {
-      FactorDependentCompositeService.mapLevelDTO2DbEntity = jest.fn((factorLevels, id) => [{ factorId: id }])
+      FactorDependentCompositeService.mapLevelDTO2DbEntity = mock((factorLevels, id) => [{ factorId: id }])
 
       const result = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity([{ levels: [{}] }, { levels: [{}] }], [{ id: 1 }, { id: 2 }])
 

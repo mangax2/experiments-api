@@ -43,5 +43,33 @@ describe('HttpUtil', () => {
       expect(httpCall.send).toHaveBeenCalledWith({})
     })
   })
+
+  describe('getErrorMessageForLogs', () => {
+    it('returns Unauthorized if status is 401', () => {
+      expect(HttpUtil.getErrorMessageForLogs({status: 401})).toEqual('Unauthorized')
+    })
+
+    it('returns Unable to retrieve error message if err is not defined', () => {
+      expect(HttpUtil.getErrorMessageForLogs()).toEqual('Unable to retrieve error message.')
+    })
+
+    it('returns an array of error messages', () => {
+      const err = {response: {text: '[{"errorMessage": "test"},{"errorMessage": "test2"}]'}}
+
+      expect(HttpUtil.getErrorMessageForLogs(err)).toEqual('test,test2')
+    })
+
+    it('returns errorMessage', () => {
+      expect(HttpUtil.getErrorMessageForLogs({response: {text: '{"errorMessage": "test"}'}})).toEqual('test')
+    })
+
+    it('returns default if error is not array, nor is errorMessage defined', () => {
+      expect(HttpUtil.getErrorMessageForLogs({response: {text: '{}'}})).toEqual('Unable to retrieve error message.')
+    })
+
+    it('returns default if error has no response', () => {
+      expect(HttpUtil.getErrorMessageForLogs({})).toEqual('Unable to retrieve error message.')
+    })
+  })
 })
 

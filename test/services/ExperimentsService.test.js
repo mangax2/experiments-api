@@ -23,7 +23,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{id: 1}])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
     })
 
@@ -41,7 +41,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{id: 1}])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
     })
 
@@ -59,7 +59,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{id: 1}])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
     })
 
@@ -119,28 +119,75 @@ describe('ExperimentsService', () => {
   })
 
   describe('getExperiments', () => {
+    /*
+     if (this.isFilterRequest(queryString) === true) {
+     return this.getExperimentsByFilters(queryString).then(data => this.populateTags(data))
+     }
+     return this.getAllExperiments().then(data => this.populateTags(data))
+     */
+
     it('calls getAllExperiments', () => {
       const target = new ExperimentsService()
       target.isFilterRequest = mock(false)
       target.getExperimentsByFilters = mock()
-      target.getAllExperiments = mock()
+      target.getAllExperiments = mockResolve([{}])
+      target.populateTags = mock()
 
-      target.getExperiments('')
-      expect(target.isFilterRequest).toHaveBeenCalledWith('')
-      expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
-      expect(target.getAllExperiments).toHaveBeenCalled()
+      return target.getExperiments('').then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith('')
+        expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
+        expect(target.getAllExperiments).toHaveBeenCalled()
+        expect(target.populateTags).toHaveBeenCalledWith([{}])
+      })
     })
 
     it('calls getExperimentsByFilters', () => {
       const target = new ExperimentsService()
       target.isFilterRequest = mock(true)
-      target.getExperimentsByFilters = mock()
+      target.getExperimentsByFilters = mockResolve()
       target.getAllExperiments = mock()
+      target.populateTags = mock()
 
-      target.getExperiments('')
-      expect(target.isFilterRequest).toHaveBeenCalledWith('')
-      expect(target.getExperimentsByFilters).toHaveBeenCalledWith('')
-      expect(target.getAllExperiments).not.toHaveBeenCalled()
+      return target.getExperiments('').then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith('')
+        expect(target.getExperimentsByFilters).toHaveBeenCalledWith('')
+        expect(target.getAllExperiments).not.toHaveBeenCalled()
+        expect(target.populateTags).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('populateTags', () => {
+    it('returns mapped tags to an experiment', () => {
+      const target = new ExperimentsService()
+      target.tagService.getTagsByExperimentIds = mockResolve([{ experiment_id: 1 }, { experiment_id: 1 }, { experiment_id: 2 }])
+      const expectedResult = [{
+        id: 1,
+        tags: [{ experiment_id: 1 }, { experiment_id: 1 }],
+      }, { id: 2, tags: [{ experiment_id: 2 }] }]
+
+      return target.populateTags([{ id: 1 }, { id: 2 }]).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+    it('resolves when no experiments are passed in', () => {
+      const target = new ExperimentsService()
+      target.tagService.getTagsByExperimentIds = mock()
+
+      return target.populateTags([]).then(() => {
+        expect(target.tagService.getTagsByExperimentIds).not.toHaveBeenCalled()
+      })
+    })
+
+    it('rejects when getTagsByExperimentIds fails', () => {
+      const target = new ExperimentsService()
+      target.tagService.getTagsByExperimentIds = mockReject('error')
+
+      return target.populateTags([{ id: 1 }]).then(() => {}, (err) => {
+        expect(target.tagService.getTagsByExperimentIds).toHaveBeenCalledWith([1])
+        expect(err).toEqual('error')
+      })
     })
   })
 
@@ -153,7 +200,7 @@ describe('ExperimentsService', () => {
       return target.getExperimentById(1, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({tags: []})
+        expect(data).toEqual({ tags: [] })
       })
     })
 
@@ -221,7 +268,7 @@ describe('ExperimentsService', () => {
       })
     })
 
-    it('rejects when batchCreateTags fails' , () => {
+    it('rejects when batchCreateTags fails', () => {
       const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
@@ -347,7 +394,7 @@ describe('ExperimentsService', () => {
       return target.getExperimentsByFilters('').then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).toHaveBeenCalledTimes(2)
-        expect(db.experiments.findExperimentsByTags).toHaveBeenCalledWith([],[])
+        expect(db.experiments.findExperimentsByTags).toHaveBeenCalledWith([], [])
       })
     })
 
@@ -360,7 +407,7 @@ describe('ExperimentsService', () => {
       return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).toHaveBeenCalledTimes(2)
-        expect(db.experiments.findExperimentsByTags).toHaveBeenCalledWith([],[])
+        expect(db.experiments.findExperimentsByTags).toHaveBeenCalledWith([], [])
         expect(err).toEqual('error')
       })
     })
@@ -400,33 +447,41 @@ describe('ExperimentsService', () => {
     it('assigns experiment Id to experiment tags', () => {
       const target = new ExperimentsService()
       const experimentIds = [1]
-      const experiments = [{id: 1, tags: [{}]}]
+      const experiments = [{ id: 1, tags: [{}] }]
 
-      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{experimentId: 1, name: undefined, value: undefined}])
+      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{
+        experimentId: 1,
+        name: undefined,
+        value: undefined,
+      }])
     })
 
     it('assigns name, value, and experimentId to tags', () => {
       const target = new ExperimentsService()
       const experimentIds = [1]
-      const experiments = [{id: 1, tags: [{name: 'testN', value: 'testV'}]}]
+      const experiments = [{ id: 1, tags: [{ name: 'testN', value: 'testV' }] }]
 
-      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{experimentId: 1, name: 'testn', value: 'testv'}])
+      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{
+        experimentId: 1,
+        name: 'testn',
+        value: 'testv',
+      }])
     })
 
     it('returns an empty array when tags are undefined', () => {
       const target = new ExperimentsService()
       const experimentIds = [1]
-      const experiments = [{id: 1}]
+      const experiments = [{ id: 1 }]
 
       expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([])
     })
   })
 
   describe('isFilterRequest', () => {
-    it('returns true when queryString is supplied and contains allowed filters', () =>{
+    it('returns true when queryString is supplied and contains allowed filters', () => {
       const target = new ExperimentsService()
 
-      expect(target.isFilterRequest({'tags.name': 'test', 'tags.value': 'test'})).toEqual(true)
+      expect(target.isFilterRequest({ 'tags.name': 'test', 'tags.value': 'test' })).toEqual(true)
     })
 
     it('returns false when queryString is empty', () => {
@@ -438,13 +493,17 @@ describe('ExperimentsService', () => {
     it('returns false when no matching parameters are supplied', () => {
       const target = new ExperimentsService()
 
-      expect(target.isFilterRequest({'test':'test'})).toEqual(false)
+      expect(target.isFilterRequest({ 'test': 'test' })).toEqual(false)
     })
 
     it('returns true even when extra parameters are supplied', () => {
       const target = new ExperimentsService()
 
-      expect(target.isFilterRequest({'tags.name': 'test', 'tags.value': 'test', 'test': 'test'})).toEqual(true)
+      expect(target.isFilterRequest({
+        'tags.name': 'test',
+        'tags.value': 'test',
+        'test': 'test',
+      })).toEqual(true)
     })
   })
 
@@ -452,7 +511,7 @@ describe('ExperimentsService', () => {
     it('lower cases all values from query string value', () => {
       const target = new ExperimentsService()
 
-      expect(target.toLowerCaseArray('x,Y,Z')).toEqual(['x','y','z'])
+      expect(target.toLowerCaseArray('x,Y,Z')).toEqual(['x', 'y', 'z'])
     })
 
     it('returns an empty array if not value is given', () => {

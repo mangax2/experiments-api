@@ -3,7 +3,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import FactorLevelsValidator from '../validations/FactorLevelsValidator'
-import FactorService from './factorService'
+import FactorService from './FactorService'
 import Transactional from '../decorators/transactional'
 
 const logger = log4js.getLogger('FactorLevelService')

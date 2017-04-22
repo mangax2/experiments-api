@@ -1,9 +1,9 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
-import FactorTypeService from '../../src/services/factorTypeService'
+import FactorTypeService from '../../src/services/FactorTypeService'
 import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 
-describe('FactorTypeService', () => {
+describe('factorTypeService', () => {
 
   const testContext = {}
   const testTx = { tx: {} }

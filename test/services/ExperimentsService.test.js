@@ -5,13 +5,17 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
 
 describe('ExperimentsService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
+
+  beforeEach(() => {
+    target = new ExperimentsService()
+  })
 
   describe('batchCreateExperiments', () => {
     it('calls validate, batchCreate, assignExperimentIdToTags, batchCreateTags, and' +
       ' createPostResponse', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
@@ -29,7 +33,6 @@ describe('ExperimentsService', () => {
 
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when there are no tags', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([])
@@ -47,7 +50,6 @@ describe('ExperimentsService', () => {
 
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when tags are undefined', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock()
@@ -64,7 +66,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when batchCreateTags fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
@@ -82,7 +83,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.batchCreate = mockReject('error')
       target.assignExperimentIdToTags = mock()
@@ -100,7 +100,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockReject('error')
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
@@ -119,15 +118,7 @@ describe('ExperimentsService', () => {
   })
 
   describe('getExperiments', () => {
-    /*
-     if (this.isFilterRequest(queryString) === true) {
-     return this.getExperimentsByFilters(queryString).then(data => this.populateTags(data))
-     }
-     return this.getAllExperiments().then(data => this.populateTags(data))
-     */
-
     it('calls getAllExperiments', () => {
-      const target = new ExperimentsService()
       target.isFilterRequest = mock(false)
       target.getExperimentsByFilters = mock()
       target.getAllExperiments = mockResolve([{}])
@@ -142,7 +133,6 @@ describe('ExperimentsService', () => {
     })
 
     it('calls getExperimentsByFilters', () => {
-      const target = new ExperimentsService()
       target.isFilterRequest = mock(true)
       target.getExperimentsByFilters = mockResolve()
       target.getAllExperiments = mock()
@@ -159,7 +149,6 @@ describe('ExperimentsService', () => {
 
   describe('populateTags', () => {
     it('returns mapped tags to an experiment', () => {
-      const target = new ExperimentsService()
       target.tagService.getTagsByExperimentIds = mockResolve([{ experiment_id: 1 }, { experiment_id: 1 }, { experiment_id: 2 }])
       const expectedResult = [{
         id: 1,
@@ -172,7 +161,6 @@ describe('ExperimentsService', () => {
     })
 
     it('resolves when no experiments are passed in', () => {
-      const target = new ExperimentsService()
       target.tagService.getTagsByExperimentIds = mock()
 
       return target.populateTags([]).then(() => {
@@ -181,7 +169,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when getTagsByExperimentIds fails', () => {
-      const target = new ExperimentsService()
       target.tagService.getTagsByExperimentIds = mockReject('error')
 
       return target.populateTags([{ id: 1 }]).then(() => {}, (err) => {
@@ -193,7 +180,6 @@ describe('ExperimentsService', () => {
 
   describe('getExperimentById', () => {
     it('calls find, getTagsByExperimentId, and returns data', () => {
-      const target = new ExperimentsService()
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockResolve([])
 
@@ -205,7 +191,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when tagService fails', () => {
-      const target = new ExperimentsService()
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockReject('error')
 
@@ -217,7 +202,6 @@ describe('ExperimentsService', () => {
     })
 
     it('throws when find returns undefined', () => {
-      const target = new ExperimentsService()
       db.experiments.find = mockResolve()
       target.tagService.getTagsByExperimentId = mock()
       AppError.notFound = mock()
@@ -233,7 +217,6 @@ describe('ExperimentsService', () => {
 
   describe('updateExperiment', () => {
     it('calls validate, update, deleteTagsForExperimentId, batchCreateTags', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -251,7 +234,6 @@ describe('ExperimentsService', () => {
     })
 
     it('calls validate, update, deleteTagsForExperimentId, but not batchCreateTags', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -269,7 +251,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when batchCreateTags fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -287,7 +268,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when deleteTagsForExperimentId fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockReject('error')
@@ -305,7 +285,6 @@ describe('ExperimentsService', () => {
     })
 
     it('throws an error when returned updated data is undefined', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve()
       target.tagService.deleteTagsForExperimentId = mock()
@@ -324,7 +303,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when update fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       db.experiments.update = mockReject('error')
       target.tagService.deleteTagsForExperimentId = mock()
@@ -342,7 +320,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockReject('error')
       db.experiments.update = mock()
       target.tagService.deleteTagsForExperimentId = mock()
@@ -362,7 +339,6 @@ describe('ExperimentsService', () => {
 
   describe('deleteExperiment', () => {
     it('returns data when successfully deleted data', () => {
-      const target = new ExperimentsService()
       db.experiments.remove = mockResolve({})
 
       return target.deleteExperiment(1).then((data) => {
@@ -372,7 +348,6 @@ describe('ExperimentsService', () => {
     })
 
     it('throws an error when data is undefined', () => {
-      const target = new ExperimentsService()
       db.experiments.remove = mockResolve()
       AppError.notFound = mock()
 
@@ -386,7 +361,6 @@ describe('ExperimentsService', () => {
 
   describe('getExperimentsByFilters', () => {
     it('calls validate and findExperimentByTags', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       target.toLowerCaseArray = mock([])
       db.experiments.findExperimentsByTags = mockResolve()
@@ -399,7 +373,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when findExperimentsByTags fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockResolve()
       target.toLowerCaseArray = mock([])
       db.experiments.findExperimentsByTags = mockReject('error')
@@ -413,7 +386,6 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentsService()
       target.validator.validate = mockReject('error')
       target.toLowerCaseArray = mock()
       db.experiments.findExperimentsByTags = mock()
@@ -429,7 +401,6 @@ describe('ExperimentsService', () => {
 
   describe('getAllExperiments', () => {
     it('calls database', () => {
-      const target = new ExperimentsService()
       db.experiments.all = mock()
 
       target.getAllExperiments()
@@ -439,13 +410,10 @@ describe('ExperimentsService', () => {
 
   describe('assignExperimentIdToTags', () => {
     it('returns empty array when no experimentIds are passed in', () => {
-      const target = new ExperimentsService()
-
       expect(target.assignExperimentIdToTags([], [])).toEqual([])
     })
 
     it('assigns experiment Id to experiment tags', () => {
-      const target = new ExperimentsService()
       const experimentIds = [1]
       const experiments = [{ id: 1, tags: [{}] }]
 
@@ -457,7 +425,6 @@ describe('ExperimentsService', () => {
     })
 
     it('assigns name, value, and experimentId to tags', () => {
-      const target = new ExperimentsService()
       const experimentIds = [1]
       const experiments = [{ id: 1, tags: [{ name: 'testN', value: 'testV' }] }]
 
@@ -469,7 +436,6 @@ describe('ExperimentsService', () => {
     })
 
     it('returns an empty array when tags are undefined', () => {
-      const target = new ExperimentsService()
       const experimentIds = [1]
       const experiments = [{ id: 1 }]
 
@@ -479,26 +445,18 @@ describe('ExperimentsService', () => {
 
   describe('isFilterRequest', () => {
     it('returns true when queryString is supplied and contains allowed filters', () => {
-      const target = new ExperimentsService()
-
       expect(target.isFilterRequest({ 'tags.name': 'test', 'tags.value': 'test' })).toEqual(true)
     })
 
     it('returns false when queryString is empty', () => {
-      const target = new ExperimentsService()
-
       expect(target.isFilterRequest()).toEqual(false)
     })
 
     it('returns false when no matching parameters are supplied', () => {
-      const target = new ExperimentsService()
-
       expect(target.isFilterRequest({ 'test': 'test' })).toEqual(false)
     })
 
     it('returns true even when extra parameters are supplied', () => {
-      const target = new ExperimentsService()
-
       expect(target.isFilterRequest({
         'tags.name': 'test',
         'tags.value': 'test',
@@ -509,14 +467,10 @@ describe('ExperimentsService', () => {
 
   describe('toLowerCaseArray', () => {
     it('lower cases all values from query string value', () => {
-      const target = new ExperimentsService()
-
       expect(target.toLowerCaseArray('x,Y,Z')).toEqual(['x', 'y', 'z'])
     })
 
     it('returns an empty array if not value is given', () => {
-      const target = new ExperimentsService()
-
       expect(target.toLowerCaseArray()).toEqual([])
     })
   })

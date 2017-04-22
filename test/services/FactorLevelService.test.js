@@ -5,14 +5,17 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('FactorLevelService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
-
   db.factorLevel.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
+
+  beforeEach(() => {
+    target = new FactorLevelService()
+  })
 
   describe('batchCreateFactorLevels', () => {
     it('validates, calls batchCreate, and returns postResponse', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockResolve()
       db.factorLevel.batchCreate = mockResolve([])
       AppUtil.createPostResponse = mock()
@@ -25,7 +28,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockResolve()
       db.factorLevel.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -39,7 +41,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockReject('error')
       db.factorLevel.batchCreate = mock()
       AppUtil.createPostResponse = mock()
@@ -55,7 +56,6 @@ describe('FactorLevelService', () => {
 
   describe('getAllFactorLevels', () => {
     it('returns all factorLevels', () => {
-      const target = new FactorLevelService()
       db.factorLevel.all = mockResolve([{}])
 
       return target.getAllFactorLevels().then((data) => {
@@ -64,7 +64,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when get all factorLevels fails', () => {
-      const target = new FactorLevelService()
       db.factorLevel.all = mockReject('error')
 
       return target.getAllFactorLevels().then(() => {}, (err) => {
@@ -75,7 +74,6 @@ describe('FactorLevelService', () => {
 
   describe('getFactorLevelsByFactorId', () => {
     it('calls getFactorById and findByFactorId', () => {
-      const target = new FactorLevelService()
       target.factorService.getFactorById = mockResolve()
       db.factorLevel.findByFactorId = mockResolve([{}])
 
@@ -87,7 +85,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when findByFactorId fails', () => {
-      const target = new FactorLevelService()
       target.factorService.getFactorById = mockResolve()
       db.factorLevel.findByFactorId = mockReject('error')
 
@@ -99,7 +96,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when getFactorById fails', () => {
-      const target = new FactorLevelService()
       target.factorService.getFactorById = mockReject('error')
       db.factorLevel.findByFactorId = mock()
 
@@ -113,7 +109,6 @@ describe('FactorLevelService', () => {
 
   describe('getFactorLevelById', () => {
     it('returns data from find', () => {
-      const target = new FactorLevelService()
       db.factorLevel.find = mockResolve({})
 
       return target.getFactorLevelById(1).then((data) => {
@@ -123,7 +118,6 @@ describe('FactorLevelService', () => {
     })
 
     it('throws an error when no data is returned', () => {
-      const target = new FactorLevelService()
       db.factorLevel.find = mockResolve()
       AppError.notFound = mock()
 
@@ -134,7 +128,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when factorLevel find fails', () => {
-      const target = new FactorLevelService()
       db.factorLevel.find = mockReject('error')
 
       return target.getFactorLevelById(1).then(() => {}, (err) => {
@@ -146,7 +139,6 @@ describe('FactorLevelService', () => {
 
   describe('batchUpdateFactorLevels', () => {
     it('calls validate, batchUpdate, and returns put response', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockResolve([])
       AppUtil.createPutResponse = mock()
@@ -159,7 +151,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when batchUpdate fails', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockReject('error')
       AppUtil.createPutResponse = mock()
@@ -173,7 +164,6 @@ describe('FactorLevelService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorLevelService()
       target.validator.validate = mockReject('error')
       db.factorLevel.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
@@ -189,7 +179,6 @@ describe('FactorLevelService', () => {
 
   describe('deleteFactorLevel', () => {
     it('calls factorLevel remove and returns data', () => {
-      const target = new FactorLevelService()
       db.factorLevel.remove = mockResolve([])
 
       return target.deleteFactorLevel(1).then((data) => {
@@ -199,7 +188,6 @@ describe('FactorLevelService', () => {
     })
 
     it('throws an error when remove returns no data', () => {
-      const target = new FactorLevelService()
       db.factorLevel.remove = mockResolve()
       AppError.notFound = mock()
 

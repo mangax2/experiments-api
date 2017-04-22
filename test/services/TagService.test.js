@@ -5,12 +5,16 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
 
 describe('TagService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
 
+  beforeEach(() => {
+    target = new TagService()
+  })
+
   describe('batchCreateTags', () => {
     it('creates tags', () => {
-      const target = new TagService()
       target.validator.validate = mockResolve()
       db.tag.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -23,7 +27,6 @@ describe('TagService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new TagService()
       target.validator.validate = mockResolve()
       db.tag.batchCreate = mockReject('error')
 
@@ -35,7 +38,6 @@ describe('TagService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new TagService()
       target.validator.validate = mockReject('error')
       db.tag.batchCreate = mock()
 
@@ -49,7 +51,6 @@ describe('TagService', () => {
 
   describe('getTagsByExperimentId', () => {
     it('gets tags for an experiment', () => {
-      const target = new TagService()
       db.tag.findByExperimentId = mockResolve([{}])
 
       return target.getTagsByExperimentId(1, testTx).then((data) => {
@@ -59,7 +60,6 @@ describe('TagService', () => {
     })
 
     it('rejects when get tags fails', () => {
-      const target = new TagService()
       db.tag.findByExperimentId = mockReject('error')
 
       return target.getTagsByExperimentId(1, testTx).then(() => {}, (err) => {
@@ -71,7 +71,6 @@ describe('TagService', () => {
 
   describe('getTagsByExperimentsIds', () => {
     it('gets all tags for passed in ids', () => {
-      const target = new TagService()
       db.tag.batchFindByExperimentIds = mockResolve([{}])
 
       return target.getTagsByExperimentIds([1, 2], testTx).then((data) => {
@@ -81,7 +80,6 @@ describe('TagService', () => {
     })
 
     it('rejects when batchFindByExperimentIds fails', () => {
-      const target = new TagService()
       db.tag.batchFindByExperimentIds = mockReject('error')
 
       return target.getTagsByExperimentIds([1, 2], testTx).then(() => {}, (err) => {
@@ -93,7 +91,6 @@ describe('TagService', () => {
 
   describe('getTagById', () => {
     it('returns a tag', () => {
-      const target = new TagService()
       db.tag.find = mockResolve({})
 
       return target.getTagById(1, testTx).then((data) => {
@@ -103,7 +100,6 @@ describe('TagService', () => {
     })
 
     it('throws an error when no tag is returned', () => {
-      const target = new TagService()
       db.tag.find = mockResolve()
       AppError.notFound = mock()
 
@@ -114,7 +110,6 @@ describe('TagService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new TagService()
       db.tag.find = mockReject('error')
 
       return target.getTagById(1, testTx).then(() => {}, (err) => {
@@ -126,7 +121,6 @@ describe('TagService', () => {
 
   describe('batchGetTagByIds', () => {
     it('returns tags for ids', () => {
-      const target = new TagService()
       db.tag.batchFind = mockResolve([{}])
 
       return target.batchGetTagByIds([1, 2], testTx).then((data) => {
@@ -136,7 +130,6 @@ describe('TagService', () => {
     })
 
     it('rejects when batchFind fails', () => {
-      const target = new TagService()
       db.tag.batchFind = mockReject('error')
 
       return target.batchGetTagByIds([1, 2], testTx).then(() => {}, (err) => {
@@ -148,7 +141,6 @@ describe('TagService', () => {
 
   describe('batchUpdateTags', () => {
     it('updates tags', () => {
-      const target = new TagService()
       target.validator.validate = mockResolve()
       db.tag.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
@@ -161,7 +153,6 @@ describe('TagService', () => {
     })
 
     it('rejects when batchUpdate fails', () => {
-      const target = new TagService()
       target.validator.validate = mockResolve()
       db.tag.batchUpdate = mockReject('error')
 
@@ -173,7 +164,6 @@ describe('TagService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new TagService()
       target.validator.validate = mockReject('error')
       db.tag.batchUpdate = mockReject('error')
 
@@ -187,7 +177,6 @@ describe('TagService', () => {
 
   describe('deleteTag', () => {
     it('deletes a tag', () => {
-      const target = new TagService()
       db.tag.remove = mockResolve(1)
 
       return target.deleteTag(1, testTx).then((data) => {
@@ -197,7 +186,6 @@ describe('TagService', () => {
     })
 
     it('throws an error when delete returns an empty value', () => {
-      const target = new TagService()
       db.tag.remove = mockResolve()
       AppError.notFound = mock()
 
@@ -208,7 +196,6 @@ describe('TagService', () => {
     })
 
     it('rejects when remove fails', () => {
-      const target = new TagService()
       db.tag.remove = mockReject('error')
 
       return target.deleteTag(1, testTx).then(() => {}, (err) => {
@@ -220,21 +207,19 @@ describe('TagService', () => {
 
   describe('batchDeleteTags', () => {
     it('removes tags', () => {
-      const target = new TagService()
-      db.tag.batchRemove = mockResolve([1,2])
+      db.tag.batchRemove = mockResolve([1, 2])
 
-      return target.batchDeleteTags([1,2], testTx).then((data) => {
-        expect(db.tag.batchRemove).toHaveBeenCalledWith([1,2], testTx)
-        expect(data).toEqual([1,2])
+      return target.batchDeleteTags([1, 2], testTx).then((data) => {
+        expect(db.tag.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(data).toEqual([1, 2])
       })
     })
 
     it('rejects when batchRemove fails', () => {
-      const target = new TagService()
       db.tag.batchRemove = mockReject('error')
 
-      return target.batchDeleteTags([1,2], testTx).then(() => {}, (err) => {
-        expect(db.tag.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+      return target.batchDeleteTags([1, 2], testTx).then(() => {}, (err) => {
+        expect(db.tag.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
     })
@@ -242,17 +227,15 @@ describe('TagService', () => {
 
   describe('deleteTagsForExperimentId', () => {
     it('deletes tags for an experimentId', () => {
-      const target = new TagService()
-      db.tag.removeByExperimentId = mockResolve([1,2])
+      db.tag.removeByExperimentId = mockResolve([1, 2])
 
       return target.deleteTagsForExperimentId(1, testTx).then((data) => {
         expect(db.tag.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual([1,2])
+        expect(data).toEqual([1, 2])
       })
     })
 
     it('rejects when removeByExperimentId fails', () => {
-      const target = new TagService()
       db.tag.removeByExperimentId = mockReject('error')
 
       return target.deleteTagsForExperimentId(1, testTx).then(() => {}, (err) => {

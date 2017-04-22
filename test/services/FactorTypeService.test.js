@@ -4,14 +4,17 @@ import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 
 describe('factorTypeService', () => {
-
+  let target
   const testContext = {}
   const testTx = { tx: {} }
   db.factorType.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
 
+  beforeEach(() => {
+    target = new FactorTypeService()
+  })
+
   describe('createFactorType', () => {
     it('validates and factorType create', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockResolve()
       db.factorType.create = mockResolve({})
 
@@ -23,7 +26,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when factorType create fails', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockResolve()
       db.factorType.create = mockReject('error')
 
@@ -35,7 +37,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockReject('error')
       db.factorType.create = mockReject('error')
 
@@ -49,7 +50,6 @@ describe('factorTypeService', () => {
 
   describe('getAllFactorTypes', () => {
     it('returns factorTypes', () => {
-      const target = new FactorTypeService()
       db.factorType.all = mockResolve([{}])
 
       return target.getAllFactorTypes().then((data) => {
@@ -58,8 +58,7 @@ describe('factorTypeService', () => {
       })
     })
 
-    it('rejects when get all fails' , () => {
-      const target = new FactorTypeService()
+    it('rejects when get all fails', () => {
       db.factorType.all = mockReject('error')
 
       return target.getAllFactorTypes().then(() => {}, (err) => {
@@ -71,7 +70,6 @@ describe('factorTypeService', () => {
 
   describe('getFactorTypeById', () => {
     it('returns a factor type', () => {
-      const target = new FactorTypeService()
       db.factorType.find = mockResolve({})
 
       return target.getFactorTypeById(1).then((data) => {
@@ -81,7 +79,6 @@ describe('factorTypeService', () => {
     })
 
     it('throws an error when returned data is empty', () => {
-      const target = new FactorTypeService()
       db.factorType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -92,7 +89,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new FactorTypeService()
       db.factorType.find = mockReject('error')
 
       return target.getFactorTypeById(1).then(() => {}, (err) => {
@@ -104,7 +100,6 @@ describe('factorTypeService', () => {
 
   describe('updateFactorType', () => {
     it('updates a factorType', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockResolve()
       db.factorType.update = mockResolve({})
 
@@ -116,7 +111,6 @@ describe('factorTypeService', () => {
     })
 
     it('throws an error when update returns no data', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockResolve()
       db.factorType.update = mockResolve()
       AppError.notFound = mock()
@@ -129,7 +123,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when update fails', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockResolve()
       db.factorType.update = mockReject('error')
 
@@ -141,7 +134,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorTypeService()
       target.validator.validate = mockReject('error')
       db.factorType.update = mockReject()
 
@@ -155,7 +147,6 @@ describe('factorTypeService', () => {
 
   describe('deleteFactorType', () => {
     it('deletes a factor type', () => {
-      const target = new FactorTypeService()
       db.factorType.delete = mockResolve(1)
 
       return target.deleteFactorType(1).then((data) => {
@@ -165,7 +156,6 @@ describe('factorTypeService', () => {
     })
 
     it('throws an error when delete returns empty', () => {
-      const target = new FactorTypeService()
       db.factorType.delete = mockResolve()
       AppError.notFound = mock()
 
@@ -176,7 +166,6 @@ describe('factorTypeService', () => {
     })
 
     it('rejects when delete fails', () => {
-      const target = new FactorTypeService()
       db.factorType.delete = mockReject('error')
 
       return target.deleteFactorType(1).then(() => {}, (err) => {

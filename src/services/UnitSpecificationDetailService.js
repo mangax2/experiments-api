@@ -70,8 +70,7 @@ class UnitSpecificationDetailService {
 
   @Transactional('deleteUnitSpecificationDetails')
   deleteUnitSpecificationDetails = (idsToDelete, tx) => {
-    if (_.isUndefined(idsToDelete)
-      || idsToDelete.length === 0) {
+    if (_.compact(idsToDelete).length === 0) {
       return Promise.resolve()
     }
     return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
@@ -86,14 +85,14 @@ class UnitSpecificationDetailService {
   }
 
   updateUnitSpecificationDetails(unitSpecificationDetails, tx) {
-    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length === 0) {
+    if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
     return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, tx)
   }
 
   createUnitSpecificationDetails(unitSpecificationDetails, tx) {
-    if (_.isUndefined(unitSpecificationDetails) || unitSpecificationDetails.length === 0) {
+    if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
     return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, tx)

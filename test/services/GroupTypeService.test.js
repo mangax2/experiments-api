@@ -4,9 +4,14 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('GroupTypeService', () => {
+  let target
+
+  beforeEach(() => {
+    target = new GroupTypeService()
+  })
+
   describe('getGroupTypeById', () => {
     it('returns a group type', () => {
-      const target = new GroupTypeService()
       db.groupType.find = mockResolve({})
 
       return target.getGroupTypeById(1).then((data) => {
@@ -16,7 +21,6 @@ describe('GroupTypeService', () => {
     })
 
     it('throws an error when find returns empty', () => {
-      const target = new GroupTypeService()
       db.groupType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -27,7 +31,6 @@ describe('GroupTypeService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new GroupTypeService()
       db.groupType.find = mockReject('error')
 
       return target.getGroupTypeById(1).then(() => {}, (err) => {
@@ -39,7 +42,6 @@ describe('GroupTypeService', () => {
 
   describe('getAllGroupTypes', () => {
     it('gets all group types', () => {
-      const target = new GroupTypeService()
       db.groupType.all = mockResolve([{}])
 
       return target.getAllGroupTypes().then((data) => {
@@ -49,7 +51,6 @@ describe('GroupTypeService', () => {
     })
 
     it('rejects when get all fails', () => {
-      const target = new GroupTypeService()
       db.groupType.all = mockReject('error')
 
       return target.getAllGroupTypes().then(() => {}, (err) => {

@@ -3,12 +3,16 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
 
 describe('FactorDependentCompositeService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
 
+  beforeEach(() => {
+    target = new FactorDependentCompositeService()
+  })
+
   describe('getFactorsWithLevels', () => {
     it('returns factors and levels object', () => {
-      const target = new FactorDependentCompositeService()
       target.getFactors = mockResolve([{}])
       target.getFactorLevels = mockResolve([{}, {}])
 
@@ -20,7 +24,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when getFactorLevels fails', () => {
-      const target = new FactorDependentCompositeService()
       target.getFactors = mockResolve([{}])
       target.getFactorLevels = mockReject('error')
 
@@ -32,7 +35,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when getFactors fails', () => {
-      const target = new FactorDependentCompositeService()
       target.getFactors = mockReject('error')
       target.getFactorLevels = mock()
 
@@ -46,7 +48,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('getFactors', () => {
     it('returns data from factorService', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.getFactorsByExperimentId = mockResolve([{}])
 
       return target.getFactors(1).then((data) => {
@@ -58,7 +59,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('getFactorLevels', () => {
     it('calls getFactorLevelsByFactorId multiple times', () => {
-      const target = new FactorDependentCompositeService()
       target.factorLevelService.getFactorLevelsByFactorId = mockResolve({})
 
       return target.getFactorLevels([{ id: 1 }, { id: 2 }]).then((data) => {
@@ -71,7 +71,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('getAllVariablesByExperimentId', () => {
     it('returns all variables with their levels', () => {
-      const target = new FactorDependentCompositeService()
       const factorsWithLevels = {
         factors: [{
           id: 1,
@@ -112,7 +111,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when a call fails in the Promise all', () => {
-      const target = new FactorDependentCompositeService()
       target.getFactorsWithLevels = mockResolve()
       target.factorTypeService.getAllFactorTypes = mockResolve()
       target.dependentVariableService.getDependentVariablesByExperimentId = mockReject('error')
@@ -212,7 +210,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistVariablesWithLevels', () => {
     it('deletes factors, batchCreates factors, and batchCreates levels', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockResolve()
       target.factorService.batchCreateFactors = mockResolve([1, 2])
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
@@ -227,7 +224,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('deletes factors, batchCreates, but does not create levels', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockResolve()
       target.factorService.batchCreateFactors = mockResolve([1, 2])
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([])
@@ -242,7 +238,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('deletes factors only', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockResolve()
       target.factorService.batchCreateFactors = mock()
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
@@ -257,7 +252,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when batchCreateFactorLevels fails', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockResolve()
       target.factorService.batchCreateFactors = mockResolve([1, 2])
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
@@ -273,7 +267,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when batchCreateFactors fails', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockResolve()
       target.factorService.batchCreateFactors = mockReject('error')
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
@@ -289,7 +282,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when deleteFactorsForExperimentId fails', () => {
-      const target = new FactorDependentCompositeService()
       target.factorService.deleteFactorsForExperimentId = mockReject('error')
       target.factorService.batchCreateFactors = mock()
       FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
@@ -307,7 +299,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistVariablesWithoutLevels', () => {
     it('deletes and creates dependent variables', () => {
-      const target = new FactorDependentCompositeService()
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mockResolve()
 
@@ -318,7 +309,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('deletes dependent variables, but does not create new ones', () => {
-      const target = new FactorDependentCompositeService()
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
@@ -329,7 +319,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when batchCreateDependentVariables fails', () => {
-      const target = new FactorDependentCompositeService()
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
 
@@ -341,7 +330,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when deleteDependentVariablesForExperimentId fails', () => {
-      const target = new FactorDependentCompositeService()
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
@@ -355,7 +343,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistVariables', () => {
     it('calls persistVariablesWithLevels and persistVariablesWithoutLevels', () => {
-      const target = new FactorDependentCompositeService()
       target.persistVariablesWithLevels = mockResolve()
       target.persistVariablesWithoutLevels = mockResolve()
 
@@ -366,7 +353,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when persistVariablesWithoutLevels fails', () => {
-      const target = new FactorDependentCompositeService()
       target.persistVariablesWithLevels = mockResolve()
       target.persistVariablesWithoutLevels = mockReject('error')
 
@@ -378,7 +364,6 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when persistVariablesWithLevels fails', () => {
-      const target = new FactorDependentCompositeService()
       target.persistVariablesWithLevels = mockReject('error')
       target.persistVariablesWithoutLevels = mock()
 
@@ -392,7 +377,6 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistAllVariables', () => {
     it('validates, persists variables, and returns response', () => {
-      const target = new FactorDependentCompositeService()
       target.variablesValidator.validate = mockResolve()
       target.persistVariables = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -412,8 +396,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when persistVariables fails' , () => {
-      const target = new FactorDependentCompositeService()
+    it('rejects when persistVariables fails', () => {
       target.variablesValidator.validate = mockResolve()
       target.persistVariables = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -434,8 +417,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when validate fails' , () => {
-      const target = new FactorDependentCompositeService()
+    it('rejects when validate fails', () => {
       target.variablesValidator.validate = mockReject('error')
       target.persistVariables = mock()
       AppUtil.createPostResponse = mock()

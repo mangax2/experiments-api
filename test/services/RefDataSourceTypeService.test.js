@@ -4,9 +4,14 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('RefDataSourceTypeService', () => {
+  let target
+
+  beforeEach(() => {
+    target = new RefDataSourceTypeService()
+  })
+
   describe('getRefDataSourceTypes', () => {
     it('gets ref data source types', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.all = mockResolve([{}])
 
       return target.getRefDataSourceTypes().then((data) => {
@@ -16,7 +21,6 @@ describe('RefDataSourceTypeService', () => {
     })
 
     it('rejects when get all fails', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.all = mockReject('error')
 
       return target.getRefDataSourceTypes().then(() => {}, (err) => {
@@ -28,7 +32,6 @@ describe('RefDataSourceTypeService', () => {
 
   describe('getRefDataSourceTypeById', () => {
     it('returns ref data source type', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.find = mockResolve({})
 
       return target.getRefDataSourceTypeById(1).then((data) => {
@@ -38,7 +41,6 @@ describe('RefDataSourceTypeService', () => {
     })
 
     it('throws an error when get returns empty', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -50,7 +52,6 @@ describe('RefDataSourceTypeService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.find = mockReject('error')
 
       return target.getRefDataSourceTypeById(1).then(() => {}, (err) => {
@@ -71,7 +72,7 @@ describe('RefDataSourceTypeService', () => {
         id: 3,
         ref_data_sources: [],
       }]
-      const target = new RefDataSourceTypeService()
+
       db.refDataSourceType.all = mockResolve(dataSourceTypes)
       target.refDataSourceService.getRefDataSources = mockResolve(dataSources)
 
@@ -83,7 +84,6 @@ describe('RefDataSourceTypeService', () => {
     })
 
     it('rejects when getRefDataSources fails', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.all = mockResolve([])
       target.refDataSourceService.getRefDataSources = mockReject('error')
 
@@ -95,7 +95,6 @@ describe('RefDataSourceTypeService', () => {
     })
 
     it('rejects when get all ref data source types fails', () => {
-      const target = new RefDataSourceTypeService()
       db.refDataSourceType.all = mockReject('error')
       target.refDataSourceService.getRefDataSources = mockReject('error')
 

@@ -4,9 +4,14 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('RefDataSourceService', () => {
+  let target
+
+  beforeEach(() => {
+    target = new RefDataSourceService()
+  })
+
   describe('getRefDataSources', () => {
     it('returns ref data sources', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.all = mockResolve([{}])
 
       return target.getRefDataSources().then((data) => {
@@ -16,7 +21,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('rejects when get all fails', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.all = mockReject('error')
 
       return target.getRefDataSources().then(() => {}, (err) => {
@@ -28,7 +32,6 @@ describe('RefDataSourceService', () => {
 
   describe('getRefDataSourceById', () => {
     it('returns a ref data source', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockResolve({})
 
       return target.getRefDataSourceById(1).then((data) => {
@@ -38,7 +41,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('throws an error when find returns empty', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockResolve()
       AppError.notFound = mock()
 
@@ -49,7 +51,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockReject('error')
 
       return target.getRefDataSourceById(1).then(() => {}, (err) => {
@@ -61,7 +62,6 @@ describe('RefDataSourceService', () => {
 
   describe('getRefDataSourcesByRefDataSourceTypeId', () => {
     it('returns data sources for a type', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.findByTypeId = mockResolve([{}])
 
       return target.getRefDataSourcesByRefDataSourceTypeId(1).then((data) => {
@@ -71,7 +71,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('rejects when findByTypeId fails', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.findByTypeId = mockReject('error')
 
       return target.getRefDataSourcesByRefDataSourceTypeId(1).then(() => {}, (err) => {
@@ -83,7 +82,6 @@ describe('RefDataSourceService', () => {
 
   describe('getCompleteRefDataSourceById', () => {
     it('gets ref data source, type, and combines them', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockResolve({ ref_data_source_type_id: 2 })
       db.refDataSourceType.find = mockResolve({ id: 2 })
 
@@ -95,7 +93,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('throws an error when ref data source is empty', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockResolve()
       AppError.notFound = mock()
 
@@ -106,7 +103,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('rejects when it fails to find data source type', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockResolve({ ref_data_source_type_id: 2 })
       db.refDataSourceType.find = mockReject('error')
 
@@ -118,7 +114,6 @@ describe('RefDataSourceService', () => {
     })
 
     it('rejects when find data source fails', () => {
-      const target = new RefDataSourceService()
       db.refDataSource.find = mockReject('error')
       db.refDataSourceType.find = mock()
 

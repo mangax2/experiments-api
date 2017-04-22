@@ -4,9 +4,14 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('UnitSpecificationService', () => {
+  let target
+
+  beforeEach(() => {
+    target = new UnitSpecificationService()
+  })
+
   describe('getUnitSpecificationById', () => {
     it('returns a unit specification', () => {
-      const target = new UnitSpecificationService()
       db.unitSpecification.find = mockResolve({})
 
       return target.getUnitSpecificationById(1).then((data) => {
@@ -16,7 +21,6 @@ describe('UnitSpecificationService', () => {
     })
 
     it('throws an error when find returns empty', () => {
-      const target = new UnitSpecificationService()
       db.unitSpecification.find = mockResolve()
       AppError.notFound = mock()
 
@@ -28,7 +32,6 @@ describe('UnitSpecificationService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new UnitSpecificationService()
       db.unitSpecification.find = mockReject('error')
 
       return target.getUnitSpecificationById(1).then(() => {}, (err) => {
@@ -40,7 +43,6 @@ describe('UnitSpecificationService', () => {
 
   describe('getAllUnitSpecifications', () => {
     it('gets all unit specifications', () => {
-      const target = new UnitSpecificationService()
       db.unitSpecification.all = mockResolve([{}])
 
       return target.getAllUnitSpecifications().then((data) => {
@@ -50,7 +52,6 @@ describe('UnitSpecificationService', () => {
     })
 
     it('rejects when find all fails', () => {
-      const target = new UnitSpecificationService()
       db.unitSpecification.all = mockReject('error')
 
       return target.getAllUnitSpecifications().then(() => {}, (err) => {

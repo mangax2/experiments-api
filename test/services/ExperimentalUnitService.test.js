@@ -5,11 +5,16 @@ import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 
 describe('ExperimentalUnitService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
+
+  beforeEach(() => {
+    target = new ExperimentalUnitService()
+  })
+
   describe('batchCreateExperimentalUnits', () => {
     it('calls validate, batchCreate, and createPostResponse on success', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockResolve()
       db.unit.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -22,7 +27,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockResolve()
       db.unit.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -36,7 +40,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockReject('error')
       db.unit.batchCreate = mock()
       AppUtil.createPostResponse = mock()
@@ -52,7 +55,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('getExperimentalUnitsByTreatmentId', () => {
     it('calls getTreatmentById and findAllByTreatmentId', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.getTreatmentById = mockResolve()
       db.unit.findAllByTreatmentId = mockResolve()
 
@@ -63,7 +65,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to findAllByTreatmentId fails', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.getTreatmentById = mockResolve()
       db.unit.findAllByTreatmentId = mockReject('error')
 
@@ -75,7 +76,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to getTreatmentById fails', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.getTreatmentById = mockReject('error')
       db.unit.findAllByTreatmentId = mock()
 
@@ -89,7 +89,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('batchGetExperimentalUnitsByTreatmentIds', () => {
     it('calls batchGetTreatmentByIds and batchFindAllByTreatmentIds', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.batchGetTreatmentByIds = mockResolve()
       db.unit.batchFindAllByTreatmentIds = mockResolve()
 
@@ -100,7 +99,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to batchFindAllByTreatmentIds fails', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.batchGetTreatmentByIds = mockResolve()
       db.unit.batchFindAllByTreatmentIds = mockReject('error')
 
@@ -112,7 +110,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to batchGetTreatmentByIds fails', () => {
-      const target = new ExperimentalUnitService()
       target.treatmentService.batchGetTreatmentByIds = mockReject('error')
       db.unit.batchFindAllByTreatmentIds = mock()
 
@@ -126,7 +123,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('batchGetExperimentalUnitsByGroupIds', () => {
     it('calls batchGetGroupsByIds and batchFindAllByGroupIds', () => {
-      const target = new ExperimentalUnitService()
       target.groupService.batchGetGroupsByIds = mockResolve()
       db.unit.batchFindAllByGroupIds = mockResolve()
 
@@ -137,7 +133,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to batchGetGroupsByIds fails', () => {
-      const target = new ExperimentalUnitService()
       target.groupService.batchGetGroupsByIds = mockResolve()
       db.unit.batchFindAllByGroupIds = mockReject('error')
 
@@ -149,7 +144,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when call to batchFindAllByGroupIds fails', () => {
-      const target = new ExperimentalUnitService()
       target.groupService.batchGetGroupsByIds = mockReject('error')
       db.unit.batchFindAllByGroupIds = mock()
 
@@ -163,7 +157,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('batchGetExperimentalUnitsByGroupIdsNoValidate', () => {
     it('calls batchFindAllByGroupIds', () => {
-      const target = new ExperimentalUnitService()
       db.unit.batchFindAllByGroupIds = mockResolve()
 
       return target.batchGetExperimentalUnitsByGroupIdsNoValidate([1], testTx).then(() => {
@@ -174,7 +167,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('getExperimentalUnitbyId', () => {
     it('calls find and returns data', () => {
-      const target = new ExperimentalUnitService()
       db.unit.find = mockResolve({})
 
       return target.getExperimentalUnitById(1, testTx).then((data) => {
@@ -184,7 +176,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('throws an error when data is undefined', () => {
-      const target = new ExperimentalUnitService()
       db.unit.find = mockResolve()
       AppError.notFound = mock()
 
@@ -198,7 +189,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('getExperimentalUnitsByExperimentId', () => {
     it('calls getExperimentById and findAllByExperimentId', () => {
-      const target = new ExperimentalUnitService()
       target.experimentService.getExperimentById = mockResolve()
       db.unit.findAllByExperimentId = mock()
 
@@ -209,7 +199,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when getExperimentById fails', () => {
-      const target = new ExperimentalUnitService()
       target.experimentService.getExperimentById = mockReject('error')
       db.unit.findAllByExperimentId = mock()
 
@@ -223,7 +212,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('batchUpdateExperimentalUnits', () => {
     it('calls validate, batchUpdate, and createPutResponse', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockResolve()
       db.unit.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
@@ -236,7 +224,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when batchUpdate fails', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockResolve()
       db.unit.batchUpdate = mockReject('error')
       AppUtil.createPutResponse = mock()
@@ -250,7 +237,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentalUnitService()
       target.validator.validate = mockReject('error')
       db.unit.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
@@ -266,7 +252,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('deleteExperimentalUnit', () => {
     it('deletes and returns data', () => {
-      const target = new ExperimentalUnitService()
       db.unit.remove = mockResolve({})
 
       return target.deleteExperimentalUnit(1, testTx).then(() => {
@@ -275,7 +260,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('throws an error when returned data is undefined', () => {
-      const target = new ExperimentalUnitService()
       db.unit.remove = mockResolve()
       AppError.notFound = mock()
 
@@ -289,7 +273,6 @@ describe('ExperimentalUnitService', () => {
 
   describe('batchDeleteExperimentalUnits', () => {
     it('successfully calls batchRemove and returns data', () => {
-      const target = new ExperimentalUnitService()
       db.unit.batchRemove = mockResolve([1])
 
       return target.batchDeleteExperimentalUnits([1], testTx).then((data) => {
@@ -299,7 +282,6 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('throws an error when no elements due to nulls', () => {
-      const target = new ExperimentalUnitService()
       db.unit.batchRemove = mockResolve([null])
       AppError.notFound = mock()
 
@@ -311,12 +293,11 @@ describe('ExperimentalUnitService', () => {
     })
 
     it('throws an error when not all elements are deleted', () => {
-      const target = new ExperimentalUnitService()
       db.unit.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
-      return target.batchDeleteExperimentalUnits([1,2], testTx).then(() => {}, () => {
-        expect(db.unit.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+      return target.batchDeleteExperimentalUnits([1, 2], testTx).then(() => {}, () => {
+        expect(db.unit.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for' +
           ' delete were found')
       })

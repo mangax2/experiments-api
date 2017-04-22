@@ -5,12 +5,16 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('FactorService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
 
+  beforeEach(() => {
+    target = new FactorService()
+  })
+
   describe('batchCreateFactors', () => {
     it('validates, calls batchCreate, and returns postResponse', () => {
-      const target = new FactorService()
       target.validator.validate = mockResolve()
       db.factor.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -23,7 +27,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new FactorService()
       target.validator.validate = mockResolve()
       db.factor.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -37,7 +40,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorService()
       target.validator.validate = mockReject('error')
       db.factor.batchCreate = mock()
       AppUtil.createPostResponse = mock()
@@ -53,7 +55,6 @@ describe('FactorService', () => {
 
   describe('getAllFactors', () => {
     it('returns factors', () => {
-      const target = new FactorService()
       db.factor.all = mockResolve([{}])
 
       return target.getAllFactors(testTx).then((data) => {
@@ -63,7 +64,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when get all call fails', () => {
-      const target = new FactorService()
       db.factor.all = mockReject('error')
 
       return target.getAllFactors(testTx).then(() => {}, (err) => {
@@ -75,7 +75,6 @@ describe('FactorService', () => {
 
   describe('getFactorsByExperimentId', () => {
     it('gets an experiment, and finds factors by that id', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockResolve()
       db.factor.findByExperimentId = mockResolve([])
 
@@ -87,7 +86,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when findByExperimentId fails', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockResolve()
       db.factor.findByExperimentId = mockReject('error')
 
@@ -99,7 +97,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when getExperimentById fails', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockReject('error')
       db.factor.findByExperimentId = mockReject('error')
 
@@ -113,7 +110,6 @@ describe('FactorService', () => {
 
   describe('getFactorById', () => {
     it('returns factor found by id', () => {
-      const target = new FactorService()
       db.factor.find = mockResolve({})
 
       return target.getFactorById(1, testTx).then((data) => {
@@ -123,7 +119,6 @@ describe('FactorService', () => {
     })
 
     it('throws an error when no data is returned', () => {
-      const target = new FactorService()
       db.factor.find = mockResolve()
       AppError.notFound = mock()
 
@@ -134,7 +129,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when factor find fails', () => {
-      const target = new FactorService()
       db.factor.find = mockReject('error')
       AppError.notFound = mock()
 
@@ -148,7 +142,6 @@ describe('FactorService', () => {
 
   describe('batchUpdateFactors', () => {
     it('validates, batchUpdates and returns put resposne', () => {
-      const target = new FactorService()
       target.validator.validate = mockResolve()
       db.factor.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -161,7 +154,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when batchUpdate fails', () => {
-      const target = new FactorService()
       target.validator.validate = mockResolve()
       db.factor.batchUpdate = mockReject('error')
 
@@ -173,7 +165,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new FactorService()
       target.validator.validate = mockReject('error')
       db.factor.batchUpdate = mockReject('error')
 
@@ -187,7 +178,6 @@ describe('FactorService', () => {
 
   describe('deleteFactor', () => {
     it('returns data when factor is deleted', () => {
-      const target = new FactorService()
       db.factor.remove = mockResolve(1)
 
       return target.deleteFactor(1, testTx).then((data) => {
@@ -197,7 +187,6 @@ describe('FactorService', () => {
     })
 
     it('throws an error when no factor was found to delete', () => {
-      const target = new FactorService()
       db.factor.remove = mockResolve()
       AppError.notFound = mock()
 
@@ -207,8 +196,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when factor remove fails', () =>{
-      const target = new FactorService()
+    it('rejects when factor remove fails', () => {
       db.factor.remove = mockReject('error')
 
       return target.deleteFactor(1, testTx).then(() => {}, (err) => {
@@ -220,7 +208,6 @@ describe('FactorService', () => {
 
   describe('deleteFactorsForExperimentId', () => {
     it('getsExperimentById, and removes factors', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockResolve()
       db.factor.removeByExperimentId = mockResolve([1])
 
@@ -232,7 +219,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when removeByExperimentId fails', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockResolve()
       db.factor.removeByExperimentId = mockReject('error')
 
@@ -244,7 +230,6 @@ describe('FactorService', () => {
     })
 
     it('rejects when getExperimentById fails', () => {
-      const target = new FactorService()
       target.experimentService.getExperimentById = mockReject('error')
       db.factor.removeByExperimentId = mockReject('error')
 

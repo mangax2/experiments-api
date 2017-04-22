@@ -4,9 +4,14 @@ import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 
 describe('UnitTypeService', () => {
+  let target
+
+  beforeEach(() => {
+    target = new UnitTypeService()
+  })
+
   describe('getUnitTypeById', () => {
     it('gets a unitType', () => {
-      const target = new UnitTypeService()
       db.unitType.find = mockResolve({})
 
       return target.getUnitTypeById(1).then((data) => {
@@ -16,7 +21,6 @@ describe('UnitTypeService', () => {
     })
 
     it('throws an error when nothing is returned', () => {
-      const target = new UnitTypeService()
       db.unitType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -27,7 +31,6 @@ describe('UnitTypeService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new UnitTypeService()
       db.unitType.find = mockReject('error')
 
       return target.getUnitTypeById(1).then(() => {}, (err) => {
@@ -39,7 +42,6 @@ describe('UnitTypeService', () => {
 
   describe('getAllUnitTypes', () => {
     it('gets unit types', () => {
-      const target = new UnitTypeService()
       db.unitType.all = mockResolve([{}])
 
       return target.getAllUnitTypes().then((data) => {
@@ -49,7 +51,6 @@ describe('UnitTypeService', () => {
     })
 
     it('rejects when find all fails', () => {
-      const target = new UnitTypeService()
       db.unitType.all = mockReject('error')
 
       return target.getAllUnitTypes().then(() => {}, (err) => {

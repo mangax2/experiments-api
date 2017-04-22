@@ -5,12 +5,16 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
 
 describe('GroupService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
 
+  beforeEach(() => {
+    target = new GroupService()
+  })
+
   describe('batchCreateGroups', () => {
     it('validates, and creates groups', () => {
-      const target = new GroupService()
       target.validator.validate = mockResolve()
       db.group.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -23,7 +27,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when batchCreate fails', () => {
-      const target = new GroupService()
       target.validator.validate = mockResolve()
       db.group.batchCreate = mockReject('error')
 
@@ -35,7 +38,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new GroupService()
       target.validator.validate = mockReject('error')
       db.group.batchCreate = mockReject('error')
 
@@ -49,7 +51,6 @@ describe('GroupService', () => {
 
   describe('getGroupsByExperimentId', () => {
     it('returns groups for an experiment', () => {
-      const target = new GroupService()
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockResolve([{}])
 
@@ -61,7 +62,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when findAllByExperimentId fails', () => {
-      const target = new GroupService()
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockReject('error')
 
@@ -73,7 +73,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when getExperimentById fails', () => {
-      const target = new GroupService()
       target.experimentService.getExperimentById = mockReject('error')
       db.group.findAllByExperimentId = mockReject('error')
 
@@ -87,7 +86,6 @@ describe('GroupService', () => {
 
   describe('batchGetGroupsByIds', () => {
     it('returns groups for experiment ids', () => {
-      const target = new GroupService()
       db.group.batchFind = mockResolve([{}, {}])
 
       return target.batchGetGroupsByIds([1, 2], testTx).then((data) => {
@@ -97,7 +95,6 @@ describe('GroupService', () => {
     })
 
     it('throws an error when returned groups do not match the number of groups requested', () => {
-      const target = new GroupService()
       db.group.batchFind = mockResolve([{}])
       AppError.notFound = mock()
 
@@ -108,7 +105,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when batchFind fails', () => {
-      const target = new GroupService()
       db.group.batchFind = mockReject('error')
 
       return target.batchGetGroupsByIds([1, 2], testTx).then(() => {}, (err) => {
@@ -120,7 +116,6 @@ describe('GroupService', () => {
 
   describe('getGroupById', () => {
     it('returns a group', () => {
-      const target = new GroupService()
       db.group.find = mockResolve({})
 
       return target.getGroupById(1, testTx).then((data) => {
@@ -130,7 +125,6 @@ describe('GroupService', () => {
     })
 
     it('throws an error when group is not found', () => {
-      const target = new GroupService()
       db.group.find = mockResolve()
       AppError.notFound = mock()
 
@@ -141,7 +135,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when find fails', () => {
-      const target = new GroupService()
       db.group.find = mockReject('error')
 
       return target.getGroupById(1, testTx).then(() => {}, (err) => {
@@ -153,7 +146,6 @@ describe('GroupService', () => {
 
   describe('batchUpdateGroups', () => {
     it('updates groups', () => {
-      const target = new GroupService()
       target.validator.validate = mockResolve()
       db.group.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -166,7 +158,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when batchUpdate fails', () => {
-      const target = new GroupService()
       target.validator.validate = mockResolve()
       db.group.batchUpdate = mockReject('error')
 
@@ -178,7 +169,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new GroupService()
       target.validator.validate = mockReject('error')
       db.group.batchUpdate = mockReject('error')
 
@@ -192,7 +182,6 @@ describe('GroupService', () => {
 
   describe('deleteGroup', () => {
     it('deletes a group', () => {
-      const target = new GroupService()
       db.group.remove = mockResolve({})
 
       return target.deleteGroup(1, testTx).then((data) => {
@@ -202,7 +191,6 @@ describe('GroupService', () => {
     })
 
     it('throws an error when delete returns empty data', () => {
-      const target = new GroupService()
       db.group.remove = mockResolve()
       AppError.notFound = mock()
 
@@ -213,7 +201,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when remove fails', () => {
-      const target = new GroupService()
       db.group.remove = mockReject('error')
 
       return target.deleteGroup(1, testTx).then(() => {}, (err) => {
@@ -224,8 +211,7 @@ describe('GroupService', () => {
   })
 
   describe('deleteGroupsForExperimentId', () => {
-    it('delets all groups for an experiment', () => {
-      const target = new GroupService()
+    it('deletes all groups for an experiment', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.group.removeByExperimentId = mockResolve([1, 2])
 
@@ -237,7 +223,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when removeByExperimentId fails', () => {
-      const target = new GroupService()
       target.experimentService.getExperimentById = mockResolve()
       db.group.removeByExperimentId = mockReject('error')
 
@@ -249,7 +234,6 @@ describe('GroupService', () => {
     })
 
     it('rejects when getExperimentById fails', () => {
-      const target = new GroupService()
       target.experimentService.getExperimentById = mockReject('error')
       db.group.removeByExperimentId = mockReject('error')
 

@@ -4,14 +4,17 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('ExperimentDesignService', () => {
+  let target
   const testContext = {}
   const testTx = { tx: {} }
+  db.experimentDesign.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
 
-  const transactionMock = db.experimentDesign.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
+  beforeEach(() => {
+    target = new ExperimentDesignService()
+  })
 
   describe('createExperimentDesign', () => {
     it('calls validate and create', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockResolve()
       db.experimentDesign.create = mockResolve(1)
 
@@ -23,7 +26,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockReject('error')
       db.experimentDesign.create = mock()
 
@@ -37,7 +39,6 @@ describe('ExperimentDesignService', () => {
 
   describe('getAllExperimentDesigns', () => {
     it('calls experimentDesign all', () => {
-      const target = new ExperimentDesignService()
       db.experimentDesign.all = mockResolve([])
 
       return target.getAllExperimentDesigns().then((data) => {
@@ -49,7 +50,6 @@ describe('ExperimentDesignService', () => {
 
   describe('getExperimentDesignById', () => {
     it('returns data from experimentDesign find', () => {
-      const target = new ExperimentDesignService()
       db.experimentDesign.find = mockResolve({})
 
       return target.getExperimentDesignById(1).then((data) => {
@@ -59,7 +59,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('throws an error when data returned is undefined', () => {
-      const target = new ExperimentDesignService()
       db.experimentDesign.find = mockResolve()
       AppError.notFound = mock()
 
@@ -72,7 +71,6 @@ describe('ExperimentDesignService', () => {
 
   describe('updateExperimentDesign', () => {
     it('calls validate and update successfully', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockResolve()
       db.experimentDesign.update = mockResolve({})
 
@@ -84,7 +82,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('throws an error when update returns no data', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockResolve()
       db.experimentDesign.update = mockResolve()
       AppError.notFound = mock()
@@ -97,7 +94,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('rejects when update fails', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockResolve()
       db.experimentDesign.update = mockReject('error')
       AppError.notFound = mock()
@@ -111,7 +107,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('rejects when validate fails', () => {
-      const target = new ExperimentDesignService()
       target.validator.validate = mockReject('error')
       db.experimentDesign.update = mock()
       AppError.notFound = mock()
@@ -127,7 +122,6 @@ describe('ExperimentDesignService', () => {
 
   describe('deleteExperimentDesign', () => {
     it('calls delete successfully', () => {
-      const target = new ExperimentDesignService()
       db.experimentDesign.delete = mockResolve({})
 
       return target.deleteExperimentDesign(1).then((data) => {
@@ -137,7 +131,6 @@ describe('ExperimentDesignService', () => {
     })
 
     it('throws notFound when data returned is null', () => {
-      const target = new ExperimentDesignService()
       db.experimentDesign.delete = mockResolve()
       AppError.notFound = mock()
 

@@ -14,8 +14,8 @@ module.exports = (rep, pgp) => ({
       return Promise.resolve([])
     }
     return tx.any('SELECT * FROM combination_element WHERE treatment_id IN ($1:csv)', [treatmentIds]).then((data) => {
-      const groups = _.groupBy(data, d => d.treatment_id)
-      return _.map(treatmentIds, treatmentId => groups[treatmentId])
+      const elements = _.groupBy(data, d => d.treatment_id)
+      return _.map(treatmentIds, treatmentId => elements[treatmentId])
     })
   },
 

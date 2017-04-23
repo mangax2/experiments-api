@@ -34,8 +34,8 @@ class DependentVariablesValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'duplicate dependent variable name in request payload with same experiment id'
 
-  preValidate = (factorObj) => {
-    if (!_.isArray(factorObj) || factorObj.length === 0) {
+  preValidate = (dependentObj) => {
+    if (!_.isArray(dependentObj) || dependentObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Dependent Variables request object needs to be an array'))
     }
@@ -47,6 +47,7 @@ class DependentVariablesValidator extends SchemaValidator {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
       const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
+
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
         if (_.uniq(names).length !== names.length) {

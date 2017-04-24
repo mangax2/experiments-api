@@ -35,14 +35,14 @@ class TreatmentDetailsService {
   }
 
   deleteTreatments(treatmentIdsToDelete, tx) {
-    if (_.isUndefined(treatmentIdsToDelete) || treatmentIdsToDelete.length === 0) {
+    if (_.compact(treatmentIdsToDelete).length === 0) {
       return Promise.resolve()
     }
     return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx)
   }
 
   createTreatments(treatmentAdds, context, tx) {
-    if (_.isUndefined(treatmentAdds) || treatmentAdds.length === 0) {
+    if (_.compact(treatmentAdds).length === 0) {
       return Promise.resolve()
     }
 
@@ -81,7 +81,7 @@ class TreatmentDetailsService {
   removeUndefinedElements = elements => _.filter(elements, element => !_.isUndefined(element))
 
   updateTreatments(treatmentUpdates, context, tx) {
-    if (_.isUndefined(treatmentUpdates) || treatmentUpdates.length === 0) {
+    if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
     }
     return this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
@@ -101,17 +101,18 @@ class TreatmentDetailsService {
 
   identifyCombinationElementIdsForDelete(treatments, tx) {
     const treatmentIds = _.map(treatments, treatment => treatment.id)
+
     return this.combinationElementService.batchGetCombinationElementsByTreatmentIds(
-      treatmentIds,
-      tx).then(currentCombinationElementsByTreatment =>
-      _.flatMap(currentCombinationElementsByTreatment, (curCombinationElements, index) => {
-        const currentCombinationElements = _.map(curCombinationElements, curCombinationElement =>
-          curCombinationElement.id,
-        )
-        const newCombinationElements =
-          _.map(treatments[index].combinationElements, combinationElement => combinationElement.id)
-        return _.difference(currentCombinationElements, newCombinationElements)
-      }))
+      treatmentIds, tx)
+      .then(currentCombinationElementsByTreatment =>
+        _.flatMap(currentCombinationElementsByTreatment, (curCombinationElements, index) => {
+          const currentCombinationElements = _.map(curCombinationElements, curCombinationElement =>
+            curCombinationElement.id,
+          )
+          const newCombinationElements =
+            _.map(treatments[index].combinationElements, cE => cE.id)
+          return _.difference(currentCombinationElements, newCombinationElements)
+        }))
   }
 
   createAndUpdateCombinationElements(treatmentUpdates, context, tx) {

@@ -35,9 +35,10 @@ class BaseValidator {
   }
 
   validate(targetObject, operationName, optionalTransaction) {
-    return this.preValidate(targetObject).then(() => this.validateArrayOrSingleEntity(
-      targetObject, operationName, optionalTransaction,
-    ).then(() => this.postValidate(targetObject)).then(() => this.check()))
+    return this.preValidate(targetObject)
+      .then(() => this.validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction)
+        .then(() => this.postValidate(targetObject))
+        .then(() => this.check()))
   }
 
   preValidate = () => Promise.resolve()
@@ -96,7 +97,7 @@ class BaseValidator {
 
   checkBoolean(value, name) {
     if (!validator.isBoolean(value.toString())) {
-      this.messages.push(`${name} must be boolean`)
+      this.messages.push(`${name} must be a boolean`)
     }
   }
 
@@ -155,7 +156,7 @@ class BaseValidator {
       entity,
       optionalTransaction).then((data) => {
         if (data && data.length > 0) {
-          this.messages.push(`${this.getEntityName()} already exists for business keys${this.formatBusinessKey(data)}`)
+          this.messages.push(`${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`)
         }
       })
   }

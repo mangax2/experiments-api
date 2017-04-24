@@ -60,18 +60,22 @@ class SchemaValidator extends BaseValidator {
     new Promise((resolve, reject) => {
       const riSchema = _.filter(this.getSchema(operationName), schema => schema.type === 'refData' || schema.type === 'businessKey')
       const riCheckArray = []
+
       _.map(riSchema, (schema) => {
         _.forEach(batchPayload, (p) => {
           const riCheckObj = {}
           const key = _.keys(p).find(x => x === schema.paramName)
+
           riCheckObj.entity = schema.entity
           riCheckObj.updateId = p.id
+
           if (schema.type === 'businessKey') {
             riCheckObj.keys = _.map(schema.keys, k => p[k])
           } else {
             riCheckObj.id = p[key]
           }
           riCheckObj.paramName = schema.paramName
+
           if (riCheckObj.keys || riCheckObj.id) {
             riCheckArray.push(riCheckObj)
           }
@@ -93,8 +97,8 @@ class SchemaValidator extends BaseValidator {
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       // Check the business key
-      const uniqArray = _.uniqWith(_.map(targetObject, obj =>
-        _.pick(obj, this.getBusinessKeyPropertyNames())), _.isEqual,
+      const uniqArray = _.uniqWith(
+        _.map(targetObject, obj => _.pick(obj, this.getBusinessKeyPropertyNames())), _.isEqual,
       )
 
       if (uniqArray.length !== targetObject.length) {

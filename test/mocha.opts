@@ -1,5 +1,0 @@
---recursive
---colors
---reporter list
---require test/setup
---timeout 25000

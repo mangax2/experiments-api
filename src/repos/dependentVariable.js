@@ -9,11 +9,14 @@ module.exports = (rep, pgp) => ({
   findByExperimentId: experimentId => rep.any('SELECT * FROM dependent_variable where experiment_id=$1', experimentId),
 
   batchCreate: (t, dependentVariables, context) => t.batch(dependentVariables.map(dependentVariable => t.one('insert into dependent_variable(required, name, experiment_id, created_user_id, created_date,' +
-    'modified_user_id, modified_date) values($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP)  RETURNING id', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId]),
+    'modified_user_id, modified_date, question_code) values($1, $2, $3, $4, CURRENT_TIMESTAMP,' +
+    ' $4,' +
+    ' CURRENT_TIMESTAMP,$5)  RETURNING id', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.questionCode]),
   )),
 
   batchUpdate: (t, dependentVariables, context) => t.batch(dependentVariables.map(dependentVariable => t.oneOrNone('UPDATE dependent_variable SET (required, name, experiment_id,' +
-    'modified_user_id, modified_date) = ($1,$2,$3,$4,CURRENT_TIMESTAMP) WHERE id=$5 RETURNING *', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.id]),
+    'modified_user_id, modified_date, question_code) = ($1,$2,$3,$4,CURRENT_TIMESTAMP,$5) WHERE' +
+    ' id=$5 RETURNING *', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.id, dependentVariable.questionCode]),
   )),
 
   remove: id => rep.oneOrNone('delete from dependent_variable where id=$1 RETURNING id', id),

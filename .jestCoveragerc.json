@@ -2,7 +2,6 @@
   "testEnvironment": "jsdom",
   "moduleFileExtensions": [
     "js",
-    "jsx",
     "json"
   ],
   "coverageThreshold": {

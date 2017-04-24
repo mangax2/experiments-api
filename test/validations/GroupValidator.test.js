@@ -220,10 +220,18 @@ describe('GroupValidator', () => {
       HttpUtil.get = mockReject('error')
       AppError.badRequest = mock()
 
-      return target.getValidRandomizationIds().then(() => {}, (err) => {
-        expect(target.validRandomizationIds).toEqual(undefined)
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
-          ' strategy ids.')
+      const resultingPromise = target.getValidRandomizationIds()
+      const strategyPromise = target.strategyRetrievalPromise
+
+      return resultingPromise.then(() => {
+        expect(target.strategyRetrievalPromise).toEqual(undefined)
+        return strategyPromise.then(() => {
+          expect(true).toBe(false)
+        }, (err) => {
+          expect(target.validRandomizationIds).toEqual(undefined)
+          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
+            ' strategy ids.')
+        })
       })
     })
 
@@ -232,10 +240,18 @@ describe('GroupValidator', () => {
       HttpUtil.get = mockReject('error')
       AppError.badRequest = mock()
 
-      return target.getValidRandomizationIds().then(() => {}, (err) => {
-        expect(target.validRandomizationIds).toEqual(undefined)
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
-          ' strategy ids.')
+      const resultingPromise = target.getValidRandomizationIds()
+      const strategyPromise = target.strategyRetrievalPromise
+
+      return resultingPromise.then(() => {
+        expect(target.strategyRetrievalPromise).toEqual(undefined)
+        return strategyPromise.then(() => {
+          expect(true).toBe(false)
+        }, (err) => {
+          expect(target.validRandomizationIds).toEqual(undefined)
+          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
+            ' strategy ids.')
+        })
       })
     })
   })

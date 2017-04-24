@@ -1,14 +1,58 @@
 import { mock } from '../jestUtil'
 import AppError from '../../src/services/utility/AppError'
 import requestContextMiddlewareFunction from '../../src/middleware/requestContext'
+import config from '../../config'
 
 describe('requestContextMiddlewareFunction', () => {
+  let originalEnv
+
+  beforeEach(() => {
+    originalEnv = config.node_env
+  })
+
+  afterEach(() => {
+    config.node_env = originalEnv
+  })
+
   it('calls next if a url is in the whitelisted urls', () => {
     const nextFunc = mock()
     const req = { url: '/experiments-api/api-docs' }
 
     requestContextMiddlewareFunction(req, null, nextFunc)
     expect(nextFunc).toHaveBeenCalled()
+  })
+
+  it('calls next if a request is a local options', () => {
+    const nextFunc = mock()
+    const req = {
+      method: 'OPTIONS',
+    }
+    const res = {
+      header: mock()
+    }
+    config.node_env = 'development'
+
+    requestContextMiddlewareFunction(req, res, nextFunc)
+
+    expect(res.header).toBeCalledWith('Access-Control-Allow-Origin', '*')
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
+  it('does not call next if a request is a non-local options', () => {
+    const nextFunc = mock()
+    AppError.badRequest = mock({})
+    const req = { 
+      method: 'OPTIONS',
+    }
+    const res = {
+      header: mock()
+    }
+    config.node_env = 'not-dev'
+
+    expect(() => {requestContextMiddlewareFunction(req, res, nextFunc)}).toThrow()
+
+    expect(res.header).not.toHaveBeenCalled()
+    expect(nextFunc).not.toHaveBeenCalled()
   })
 
   it('throws an error when headers are null', () => {

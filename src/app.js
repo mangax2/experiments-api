@@ -9,6 +9,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     //eslint-disable-next-line
     require('babel-register')
   }
+
   const express = require('express')
   const _ = require('lodash')
   const inflector = require('json-inflector')
@@ -17,6 +18,14 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
   const app = express()
+
+  if (config.node_env === 'development') {
+    app.options('*', (req, res) => {
+      res.header('Access-Control-Allow-Origin', '*')
+      res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
+      return res.json('')
+    })
+  }
 
   const requestContext = require('./middleware/requestContext')
   app.use(requestContext)

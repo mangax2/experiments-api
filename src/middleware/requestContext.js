@@ -1,15 +1,10 @@
 import _ from 'lodash'
-import config from '../../config'
 import AppError from '../services/utility/AppError'
 
 function requestContextMiddlewareFunction(req, res, next) {
-  const isLocalInstance = config.node_env === 'development'
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping']
-  if (isLocalInstance) {
-    res.header('Access-Control-Allow-Origin', '*')
-  }
 
-  if (whitelistedUrls.includes(req.url) || (req.method === 'OPTIONS' && isLocalInstance)) {
+  if (whitelistedUrls.includes(req.url)) {
     next()
   } else {
     if (!req.headers) {

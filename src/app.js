@@ -19,16 +19,21 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const appBaseUrl = '/experiments-api'
   const app = express()
 
-  if (config.node_env === 'development') {
-    app.options('*', (req, res) => {
-      res.header('Access-Control-Allow-Origin', '*')
-      res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
-      return res.json('')
-    })
-  }
-
   const requestContext = require('./middleware/requestContext')
-  app.use(requestContext)
+
+  if (config.node_env === 'development') {
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*')
+      if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
+        next()
+      } else {
+        requestContext(req, res, next)
+      }
+    })
+  } else {
+    app.use(requestContext)
+  }
 
   app.use(inflector())
   const pingFunc = (function () {

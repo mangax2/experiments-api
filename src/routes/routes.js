@@ -3,6 +3,7 @@ import log4js from 'log4js'
 
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
+import DocumentationService from '../services/DocumentationService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -337,4 +338,11 @@ router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeSe
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/getImage', (req, res) => {
+  DocumentationService.getImage().then((data) => {
+    res.set('Content-Type', 'image/png')
+    res.set('Content-Transfer-Encoding', 'binary')
+    res.send(data.body)
+  })
+})
 module.exports = router

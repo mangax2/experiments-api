@@ -26,6 +26,7 @@
     "@monsantoit/oauth-ping": "~3.0.1",
     "@monsantoit/ping-page": "~2.0.3",
     "@monsantoit/profile-middleware": "~3.1.0",
+    "aws-sdk": "~2.45.0",
     "bluebird": "~3.4.7",
     "body-parser": "~1.16.0",
     "compression": "~1.6.2",

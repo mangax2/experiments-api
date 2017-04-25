@@ -9,6 +9,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     //eslint-disable-next-line
     require('babel-register')
   }
+
   const express = require('express')
   const _ = require('lodash')
   const inflector = require('json-inflector')
@@ -19,7 +20,20 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const app = express()
 
   const requestContext = require('./middleware/requestContext')
-  app.use(requestContext)
+
+  if (config.node_env === 'development') {
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*')
+      if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
+        next()
+      } else {
+        requestContext(req, res, next)
+      }
+    })
+  } else {
+    app.use(requestContext)
+  }
 
   app.use(inflector())
   const pingFunc = (function () {

@@ -58,14 +58,15 @@ class CombinationElementService {
   }
 
   @Transactional('deleteCombinationElement')
-  deleteCombinationElement = (id, tx) => db.combinationElement.remove(id, tx).then((data) => {
-    if (!data) {
-      logger.error(`Combination Element Not Found for requested id = ${id}`)
-      throw AppError.notFound('Combination Element Not Found for requested id')
-    } else {
-      return data
-    }
-  })
+  deleteCombinationElement = (id, tx) => db.combinationElement.remove(id, tx)
+    .then((data) => {
+      if (!data) {
+        logger.error(`Combination Element Not Found for requested id = ${id}`)
+        throw AppError.notFound('Combination Element Not Found for requested id')
+      } else {
+        return data
+      }
+    })
 
   @Transactional('batchDeleteCombinationElements')
   batchDeleteCombinationElements = (ids, tx) => db.combinationElement.batchRemove(ids, tx)

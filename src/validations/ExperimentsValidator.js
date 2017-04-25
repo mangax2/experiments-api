@@ -45,8 +45,8 @@ class ExperimentsValidator extends SchemaValidator {
 
   getEntityName = () => 'Experiment'
 
-  preValidate = (factorObj) => {
-    if (!_.isArray(factorObj) || factorObj.length === 0) {
+  preValidate = (experimentObj) => {
+    if (!_.isArray(experimentObj) || experimentObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Experiments request object needs to be an array'))
     }

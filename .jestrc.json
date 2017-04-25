@@ -1,0 +1,8 @@
+{
+  "testEnvironment": "jsdom",
+  "moduleFileExtensions": [
+    "js",
+    "json"
+  ],
+  "setupTestFrameworkScriptFile": "./test/jestSetup.js"
+}

@@ -26,8 +26,6 @@ class TagValidator extends SchemaValidator {
     ]
   }
 
-  getEntityName = () => 'Tag'
-
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -41,9 +39,12 @@ class TagValidator extends SchemaValidator {
     }
   }
 
+  getEntityName = () => 'Tag'
+
+
   getBusinessKeyPropertyNames = () => ['name', 'value', 'experimentId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate Tag  in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => 'Duplicate Tag in request payload with same experiment id'
 
   preValidate = (obj) => {
     if (!_.isArray(obj) || obj.length === 0) {

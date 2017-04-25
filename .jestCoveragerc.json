@@ -1,0 +1,27 @@
+{
+  "testEnvironment": "jsdom",
+  "moduleFileExtensions": [
+    "js",
+    "json"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "branches": 90,
+      "functions": 90,
+      "lines": 90,
+      "statements": 90
+    }
+  },
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "**/src/**/*.{js,jsx}",
+    "!**/src/app.js",
+    "!**/src/db/*.js",
+    "!**/src/decorators/transactional.js",
+    "!**/src/repos/*.js",
+    "!**/src/routes/*.js",
+    "!**/src/services/utility/*Config.js",
+    "!**/node_modules/**"
+  ],
+  "setupTestFrameworkScriptFile": "./test/jestSetup.js"
+}

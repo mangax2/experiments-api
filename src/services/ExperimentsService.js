@@ -18,15 +18,17 @@ class ExperimentsService {
 
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, tx) {
-    return this.validator.validate(experiments, 'POST', tx).then(() => db.experiments.batchCreate(experiments, context, tx).then((data) => {
-      const experimentIds = _.map(data, d => d.id)
-      const tags = this.assignExperimentIdToTags(experimentIds, experiments)
-      if (tags && tags.length > 0) {
-        return this.tagService.batchCreateTags(tags, context, tx)
-          .then(() => AppUtil.createPostResponse(data))
-      }
-      return AppUtil.createPostResponse(data)
-    }))
+    return this.validator.validate(experiments, 'POST', tx)
+      .then(() => db.experiments.batchCreate(experiments, context, tx)
+        .then((data) => {
+          const experimentIds = _.map(data, d => d.id)
+          const tags = this.assignExperimentIdToTags(experimentIds, experiments)
+          if (tags && tags.length > 0) {
+            return this.tagService.batchCreateTags(tags, context, tx)
+              .then(() => AppUtil.createPostResponse(data))
+          }
+          return AppUtil.createPostResponse(data)
+        }))
   }
 
   getExperiments(queryString) {
@@ -65,20 +67,23 @@ class ExperimentsService {
 
   @Transactional('updateExperiment')
   updateExperiment(id, experiment, context, tx) {
-    return this.validator.validate([experiment], 'PUT', tx).then(() => db.experiments.update(id, experiment, context, tx).then((data) => {
-      if (!data) {
-        logger.error(`Experiment Not Found to Update for id = ${id}`)
-        throw AppError.notFound('Experiment Not Found to Update')
-      } else {
-        return this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
-          const tags = this.assignExperimentIdToTags([id], [experiment])
-          if (tags.length > 0) {
-            return this.tagService.batchCreateTags(tags, context, tx).then(() => data)
+    return this.validator.validate([experiment], 'PUT', tx)
+      .then(() => db.experiments.update(id, experiment, context, tx)
+        .then((data) => {
+          if (!data) {
+            logger.error(`Experiment Not Found to Update for id = ${id}`)
+            throw AppError.notFound('Experiment Not Found to Update')
+          } else {
+            return this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
+              const tags = this.assignExperimentIdToTags([id], [experiment])
+              if (tags.length > 0) {
+                return this.tagService.batchCreateTags(tags, context, tx)
+                  .then(() => data)
+              }
+              return data
+            })
           }
-          return data
-        })
-      }
-    }))
+        }))
   }
 
   deleteExperiment = id => db.experiments.remove(id)

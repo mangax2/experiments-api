@@ -338,8 +338,8 @@ router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeSe
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.get('/getImage', (req, res) => {
-  DocumentationService.getImage().then((data) => {
+router.get('/getImage/:topic/:imageName', (req, res) => {
+  DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
     res.set('Content-Type', 'image/png')
     res.set('Content-Transfer-Encoding', 'binary')
     res.send(data.body)
@@ -351,10 +351,5 @@ router.get('/getDoc/:topic', (req, res) => {
     res.set('Content-Type', 'text/plain')
     res.send(data.text)
   })
-})
-
-router.get('/getCookies', (req, res) => {
-  const cookies = DocumentationService.setCloudfrontCookies(req, res)
-  res.json(cookies)
 })
 module.exports = router

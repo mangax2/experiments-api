@@ -995,23 +995,23 @@
         "tags": [
           "Experiments"
         ],
-        "parameters":[
+        "parameters": [
           {
-            "name":"tags.name",
-            "in":"query",
-            "description":"Tag names comma separated list",
-            "required":false,
-            "type":"string"
+            "name": "tags.name",
+            "in": "query",
+            "description": "Tag names comma separated list",
+            "required": false,
+            "type": "string"
           },
           {
-            "name":"tags.value",
-            "in":"query",
-            "description":"Tag values comma separated list",
-            "required":false,
-            "type":"string"
+            "name": "tags.value",
+            "in": "query",
+            "description": "Tag values comma separated list",
+            "required": false,
+            "type": "string"
           }
-          ],
-          "responses": {
+        ],
+        "responses": {
           "200": {
             "description": "An array of experiments",
             "schema": {
@@ -2797,7 +2797,9 @@
         "summary": "Gets all Reference Data Source Types and all their defined Data Sources",
         "description": "Returns an array of reference data source types and their data sources",
         "operationId": "getRefDataSourceTypes",
-        "tags": ["Ref Data Sources"],
+        "tags": [
+          "Ref Data Sources"
+        ],
         "responses": {
           "200": {
             "description": "All Reference Data Source Type Entities With Data Sources",
@@ -3759,6 +3761,10 @@
         "required": {
           "type": "boolean",
           "description": "required or optional boolean value"
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "refers to Q&A application , its an optional field"
         }
       }
     },
@@ -3767,7 +3773,7 @@
       "properties": {
         "required": {
           "type": "boolean",
-          "description": "is rquired boolean value."
+          "description": "is required boolean value."
         },
         "name": {
           "type": "string",
@@ -3776,6 +3782,10 @@
         "experimentId": {
           "type": "integer",
           "description": "experimentId of experiment entity."
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "Refers to Q&A question Code,its an optional field"
         }
       }
     },
@@ -3784,11 +3794,11 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "id of dependent varable to update."
+          "description": "id of dependent variable to update."
         },
         "required": {
           "type": "boolean",
-          "description": "is rquired boolean value."
+          "description": "is required boolean value."
         },
         "name": {
           "type": "string",
@@ -3797,6 +3807,10 @@
         "experimentId": {
           "type": "integer",
           "description": "experimentId of experiment entity."
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "Refers to Q&A question Code"
         }
       }
     },
@@ -3809,7 +3823,7 @@
         },
         "required": {
           "type": "boolean",
-          "description": "boolean vaule to specify dependent variable is required or not."
+          "description": "boolean value to specify dependent variable is required or not."
         },
         "name": {
           "type": "string",
@@ -3834,6 +3848,10 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "Refers to Q&A question Code"
         }
       }
     },
@@ -4007,7 +4025,6 @@
           "items": {
             "$ref": "#/definitions/TagPayloadForPOST"
           }
-
         }
       }
     },
@@ -4445,7 +4462,7 @@
           "type": "string",
           "description": "name of the data source type"
         },
-        "refDataSources":{
+        "refDataSources": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/RefDataSource"

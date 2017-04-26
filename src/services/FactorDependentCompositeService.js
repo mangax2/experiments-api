@@ -79,6 +79,7 @@ class FactorDependentCompositeService {
       variablesObject.dependent = _.map(value[2], dependentVariable => ({
         name: dependentVariable.name,
         required: dependentVariable.required,
+        questionCode: dependentVariable.questionCode,
       }))
 
       return variablesObject

@@ -88,7 +88,7 @@ describe('FactorDependentCompositeService', () => {
       target.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
       target.factorTypeService.getAllFactorTypes = mockResolve(factorTypes)
-      const dependentVariables = [{ name: 'testDependent', required: true,questionCode:"ABC_GDEG" }]
+      const dependentVariables = [{ name: 'testDependent', required: true,question_code:"ABC_GDEG" }]
       target.dependentVariableService.getDependentVariablesByExperimentId = mockResolve(dependentVariables)
       const expectedReturn = {
         independent: [{

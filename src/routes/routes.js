@@ -345,4 +345,16 @@ router.get('/getImage', (req, res) => {
     res.send(data.body)
   })
 })
+
+router.get('/getDoc/:topic', (req, res) => {
+  DocumentationService.getDoc(req.params.topic).then((data) => {
+    res.set('Content-Type', 'text/plain')
+    res.send(data.text)
+  })
+})
+
+router.get('/getCookies', (req, res) => {
+  const cookies = DocumentationService.setCloudfrontCookies(req, res)
+  res.json(cookies)
+})
 module.exports = router

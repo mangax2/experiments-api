@@ -1,10 +1,15 @@
+import _ from 'lodash'
 import cf from 'aws-cloudfront-sign'
 import HttpUtil from './utility/HttpUtil'
 // import config from '../../config'
 
 class DocumentationService {
   static getImage(topic, imageName) {
-    // const cookies = DocumentationService.setCloudfrontCookies()
+    const cookies = DocumentationService.setCloudfrontCookies()
+
+    const cloudFrontCookies = _.map(cookies, (value, key) => `${key}=${value}`)
+
+    const joinedCookies = cloudFrontCookies.join('; ')
 
     const headers = [{
       headerName: 'Accept',
@@ -12,7 +17,7 @@ class DocumentationService {
     },
     {
       headerName: 'Cookie',
-      headerValue: 'CloudFront-Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiZGNiNmc1OGl5M2d1cS5jbG91ZGZyb250Lm5ldC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNDkzMjQ2OTI5fX19XX0_; CloudFront-Signature=AugN8SfXx7QoUP-6TXjoBTy3KSYs7VO99ckQewm0CAQBRtuA-8JoirXNP5WYZnstTNOeWmdudAkrobok7F-dgivVKSxlsWspqOAuXaWWR7PfQeyUP4Fo1YTXL2dy5rY7ICTNWXA5o-WG6biQHCG~LdAiM4JXaqUPeIywamZGEU0WJYObuUh42-C2UlwTbXRE1lIEKLmz-HWOMo~vS8anNOj5OAG-5rZMo1hYkdjglAU3o6OYdP1RSj57gR~5jBwJM73Xr0-6qFyjpOeEEvHJ8HzL3t7Fz2R2wLnLQ1b1vp-t9y6-IlEsepJmXwr4lefVAhB8LtUJvxCeAbqR8YGwoA__; CloudFront-Key-Pair-Id=APKAIDNVPE572RTKAYCQ',
+      headerValue: joinedCookies,
     }]
 
     return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/${imageName}`, headers)

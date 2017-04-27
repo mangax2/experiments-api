@@ -346,8 +346,8 @@ router.get('/getImage/:topic/:imageName', (req, res) => {
   })
 })
 
-router.get('/getDoc/:topic', (req, res) => {
-  DocumentationService.getDoc(req.params.topic).then((data) => {
+router.get('/getDoc/:topic/:fileName', (req, res) => {
+  DocumentationService.getDoc(req.params.topic, req.params.fileName).then((data) => {
     res.set('Content-Type', 'text/plain')
     res.send(data.text)
   })

@@ -338,18 +338,18 @@ router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeSe
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.get('/getImage/:topic/:imageName', (req, res) => {
+router.get('/getImage/:topic/:imageName', (req, res, next) => {
   DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
     res.set('Content-Type', 'image/png')
     res.set('Content-Transfer-Encoding', 'binary')
     res.send(data.body)
-  })
+  }).catch(err => next(err))
+})
+router.get('/getDoc/:topic/:fileName', (req, res, next) => {
+  DocumentationService.getDoc(req.params.topic, req.params.fileName).then((data) => {
+    res.set('Content-Type', 'text/markdown')
+    res.send(data.text)
+  }).catch(err => next(err))
 })
 
-router.get('/getDoc/:topic/:fileName', (req, res) => {
-  DocumentationService.getDoc(req.params.topic, req.params.fileName).then((data) => {
-    res.set('Content-Type', 'text/plain')
-    res.send(data.text)
-  })
-})
 module.exports = router

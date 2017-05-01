@@ -57,6 +57,16 @@ class TagService {
       }
     })
 
+  searchByTagName = (queryStr) => {
+    const queryStrTagName = queryStr.tagName ? queryStr.tagName : ''
+    return db.tag.searchByTagName(queryStrTagName)
+  }
+
+  searchByTagValueForATagName = (tagName, queryStr) => {
+    const queryStrTagValue = queryStr.tagValue ? queryStr.tagValue : ''
+    return db.tag.searchByTagValueForATagName(tagName, queryStrTagValue)
+  }
+
   @Transactional('batchDeleteTags')
   batchDeleteTags = (ids, tx) => db.tag.batchRemove(ids, tx)
 

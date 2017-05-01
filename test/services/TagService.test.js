@@ -244,4 +244,48 @@ describe('TagService', () => {
       })
     })
   })
+
+  describe('Search Tags By Name Contains', () => {
+    it('SearchTagByName', () => {
+      db.tag.searchByTagName = mockResolve([1, 2])
+      return target.searchByTagName({ tagName: 'test' }).then((data) => {
+        expect(db.tag.searchByTagName).toHaveBeenCalledWith('test')
+        expect(data).toEqual([1, 2])
+        db.tag.searchByTagName.mockReset()
+        db.tag.searchByTagName.mockRestore()
+      })
+
+    })
+
+    it('SearchTagByName with out Tag filters', () => {
+      db.tag.searchByTagName = mockResolve([1, 2])
+      return target.searchByTagName({ tagName: '' }).then((data) => {
+        expect(db.tag.searchByTagName).toHaveBeenCalledWith('')
+        expect(data).toEqual([1, 2])
+        db.tag.searchByTagName.mockReset()
+        db.tag.searchByTagName.mockRestore()
+      })
+
+    })
+
+    it('SearchTagByName and Value', () => {
+      db.tag.searchByTagValueForATagName = mockResolve([1, 2])
+      return target.searchByTagValueForATagName('org', { tagValue: 'test' }).then((data) => {
+        expect(db.tag.searchByTagValueForATagName).toHaveBeenCalledWith('org', 'test')
+        expect(data).toEqual([1, 2])
+        db.tag.searchByTagValueForATagName.mockReset()
+        db.tag.searchByTagValueForATagName.mockRestore()
+      })
+    })
+    it('SearchTagByName and not filter returns all values', () => {
+      db.tag.searchByTagValueForATagName = mockResolve([1, 2])
+      return target.searchByTagValueForATagName('org', { tagValue: '' }).then((data) => {
+        expect(db.tag.searchByTagValueForATagName).toHaveBeenCalledWith('org', '')
+        expect(data).toEqual([1, 2])
+        db.tag.searchByTagValueForATagName.mockReset()
+        db.tag.searchByTagValueForATagName.mockRestore()
+      })
+    })
+
+  })
 })

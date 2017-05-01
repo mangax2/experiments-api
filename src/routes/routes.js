@@ -1,5 +1,6 @@
 import express from 'express'
 import log4js from 'log4js'
+import _ from 'lodash'
 
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
@@ -13,6 +14,7 @@ import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/FactorTypeService'
 import GroupValueService from '../services/GroupValueService'
 import TreatmentService from '../services/TreatmentService'
+import TagService from '../services/TagService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
@@ -335,6 +337,14 @@ router.post('/composites/unit-specification-details', (req, res, next) => new Un
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()
   .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/tags', (req, res, next) => new TagService().searchByTagName(req.query)
+  .then(tagNames => res.json(_.map(tagNames, 'name')))
+  .catch(err => next(err)))
+
+router.get('/tags/:tagName', (req, res, next) => new TagService().searchByTagValueForATagName(req.params.tagName, req.query)
+  .then(tagValues => res.json(_.map(tagValues, 'value')))
   .catch(err => next(err)))
 
 module.exports = router

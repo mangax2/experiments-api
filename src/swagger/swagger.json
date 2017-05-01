@@ -2556,6 +2556,70 @@
         }
       }
     },
+    "/getDoc/{topic}/{fileName}": {
+      "get": {
+        "summary": "Gets a markdown of a documentation file",
+        "description": "Returns markdown string of documentation",
+        "operationId": "getDoc",
+        "tags": [
+          "Documentation"
+        ],
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Markdown of requested page"
+          },
+          "403": {
+            "description": "Forbidden. Catch All From Cloudfront"
+          }
+        }
+      }
+    },
+    "/getImage/{topic}/{imageName}": {
+      "get": {
+        "summary": "Gets an image ",
+        "description": "Returns an image",
+        "operationId": "getImage",
+        "tags": [
+          "Documentation"
+        ],
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "imageName",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requested Image"
+          },
+          "403": {
+            "description": "Forbidden. Catch All From Cloudfront"
+          }
+        }
+      }
+    },
     "/groups/{id}": {
       "get": {
         "summary": "Get one group entity",

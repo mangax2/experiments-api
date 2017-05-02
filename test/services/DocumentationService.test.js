@@ -10,6 +10,9 @@ describe('DocumentationService', () => {
   describe('getCloudFrontCookies', () => {
     it('calls getSignedCookie' +
       ' undefined', () => {
+      config.env = 'local'
+      VaultUtil.cloudFrontKeyPair = ''
+      VaultUtil.cloudFrontSecret = ''
       cf.getSignedCookies = mock({})
 
       const result = DocumentationService.getCloudfrontCookies()

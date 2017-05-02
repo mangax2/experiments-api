@@ -33,3 +33,7 @@ benchmarks/graphs
 /.idea_modules
 *.iml
 *.tgz
+
+
+# pem files
+*.pem

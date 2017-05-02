@@ -4,6 +4,7 @@ import _ from 'lodash'
 
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
+import DocumentationService from '../services/DocumentationService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -346,5 +347,19 @@ router.get('/tags', (req, res, next) => new TagService().searchByTagName(req.que
 router.get('/tags/:tagName', (req, res, next) => new TagService().searchByTagValueForATagName(req.params.tagName, req.query)
   .then(tagValues => res.json(_.map(tagValues, 'value')))
   .catch(err => next(err)))
+
+router.get('/getImage/:topic/:imageName', (req, res, next) => {
+  DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
+    res.set('Content-Type', 'image/png')
+    res.set('Content-Transfer-Encoding', 'binary')
+    res.send(data.body)
+  }).catch(err => next(err))
+})
+router.get('/getDoc/:topic/:fileName', (req, res, next) => {
+  DocumentationService.getDoc(req.params.topic, req.params.fileName).then((data) => {
+    res.set('Content-Type', 'text/markdown')
+    res.send(data.text)
+  }).catch(err => next(err))
+})
 
 module.exports = router

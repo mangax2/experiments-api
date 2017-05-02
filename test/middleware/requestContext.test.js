@@ -11,6 +11,30 @@ describe('requestContextMiddlewareFunction', () => {
     expect(nextFunc).toHaveBeenCalled()
   })
 
+  it('calls next if a url is a png request', () => {
+    const nextFunc = mock()
+    const req = { url: '/experiments-api/api-docs.png' }
+
+    requestContextMiddlewareFunction(req, null, nextFunc)
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
+  it('calls next if a url is a jpeg request', () => {
+    const nextFunc = mock()
+    const req = { url: '/experiments-api/api-docs.jpg' }
+
+    requestContextMiddlewareFunction(req, null, nextFunc)
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
+  it('calls next if a url is an markdown request', () => {
+    const nextFunc = mock()
+    const req = { url: '/experiments-api/api-docs.md' }
+
+    requestContextMiddlewareFunction(req, null, nextFunc)
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
   it('throws an error when headers are null', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})

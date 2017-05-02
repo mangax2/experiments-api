@@ -7,6 +7,8 @@ class VaultUtil {
     this.dbAppPassword = ''
     this.clientId = ''
     this.clientSecret = ''
+    this.cloudFrontKeyPair = ''
+    this.cloudFrontSecret = ''
   }
 
   static configureDbCredentials(env, vaultConfig) {
@@ -32,8 +34,11 @@ class VaultUtil {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })
-
-        return Promise.all([dbPromise, clientPromise])
+        const cloudFrontPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/cloudFront`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+          this.cloudFrontKeyPair = vaultObj.body.data.keyPair
+          this.cloudFrontSecret = vaultObj.body.data.secret
+        })
+        return Promise.all([dbPromise, clientPromise, cloudFrontPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

@@ -4,7 +4,7 @@ import AppError from '../services/utility/AppError'
 function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping']
 
-  if (whitelistedUrls.includes(req.url)) {
+  if (whitelistedUrls.includes(req.url) || (req.url && (req.url.includes('.png') || req.url.includes('.jpg') || req.url.includes('.md')))) {
     next()
   } else {
     if (!req.headers) {

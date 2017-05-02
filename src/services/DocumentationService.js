@@ -43,8 +43,8 @@ class DocumentationService {
 
   static getCloudfrontCookies() {
     const keyPairId = config.env === 'local' ? 'APKAIDNVPE572RTKAYCQ' : VaultUtil.cloudFrontKeyPair
-    const privateKeyPath = config.env === 'local' ? `./src/pk-${keyPairId}.pem` : undefined
-    const privateKeyString = config.env === 'local' ? undefined : VaultUtil.cloudFrontSecret
+    const privateKeyPath = config.env === `./src/pk-${keyPairId}.pem`
+    // const privateKeyString = config.env === 'local' ? undefined : VaultUtil.cloudFrontSecret
     const url = config.env === 'prod' ? '' : 'http://dcb6g58iy3guq.cloudfront.net/*'
 
     const options = {
@@ -52,16 +52,13 @@ class DocumentationService {
       keypairId: keyPairId,
     }
 
-    if (privateKeyPath) {
-      console.info('This should not be getting hit!')
-      options.privateKeyPath = privateKeyPath
-    } else {
-      options.privateKeyString = privateKeyString
-      options.privateKeyString.replace(/\\n/g, '\n')
-    }
-
-    console.info(options)
-    console.info(privateKeyString)
+    // if (privateKeyPath) {
+    //   console.info('This should not be getting hit!')
+    options.privateKeyPath = privateKeyPath
+    // } else {
+    //   options.privateKeyString = privateKeyString
+    //   options.privateKeyString.replace(/\\n/g, '\n')
+    // }
 
     return cf.getSignedCookies(url, options)
   }

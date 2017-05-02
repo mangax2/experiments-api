@@ -58,9 +58,8 @@ module.exports = (rep, pgp) => ({
   searchByTagName: queryStr => rep.any('SELECT DISTINCT(name) FROM tag where LOWER(name) like $1', `%${queryStr.toLowerCase()}%`),
 
   searchByTagValueForATagName: (tagName, queryStr) => rep.any('SELECT DISTINCT(value) FROM' +
-    '  (SELECT' +
-    ' value FROM' +
-    ' tag WHERE LOWER(name) = $1) as TAGS WHERE LOWER(TAGS.value) LIKE $2', [tagName.toLowerCase(), `%${queryStr.toLowerCase()}%`]),
+    ' TAG  WHERE LOWER(name) = $1 AND LOWER(TAGS.value) LIKE $2', [tagName.toLowerCase(),
+      `%${queryStr.toLowerCase()}%`]),
 
   findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM tag where experiment_id=$1 and name= $2', keys),
 

@@ -53,10 +53,14 @@ class DocumentationService {
     }
 
     if (privateKeyPath) {
+      console.info('This should not be getting hit!')
       options.privateKeyPath = privateKeyPath
     } else {
       options.privateKeyString = privateKeyString
     }
+
+    console.info(options)
+    console.info(privateKeyString)
 
     return cf.getSignedCookies(url, options)
   }

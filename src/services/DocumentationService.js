@@ -57,6 +57,7 @@ class DocumentationService {
       options.privateKeyPath = privateKeyPath
     } else {
       options.privateKeyString = privateKeyString
+      options.privateKeyString.replace(/\\n/g, '\n')
     }
 
     console.info(options)

@@ -60,6 +60,8 @@ class DocumentationService {
     //   options.privateKeyString.replace(/\\n/g, '\n')
     // }
 
+    console.info(options)
+
     return cf.getSignedCookies(url, options)
   }
 }

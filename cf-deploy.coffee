@@ -8,6 +8,7 @@ module.exports = (cfDeploy) ->
 #  smokeTest: 'nonProd'
   environment:
     ENV: process.env.ENV
+    CLOUDFRONT_PK: process.env.CLOUDFRONT_PK
   route: 'experiments-api'
   startupCommand: 'npm start'
   services: [

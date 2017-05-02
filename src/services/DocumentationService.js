@@ -44,7 +44,7 @@ class DocumentationService {
   static getCloudfrontCookies() {
     const keyPairId = config.env === 'local' ? 'APKAIDNVPE572RTKAYCQ' : VaultUtil.cloudFrontKeyPair
     const privateKeyPath = config.env === 'local' ? `./src/pk-${keyPairId}.pem` : undefined
-    const privateKeyString = config.env === 'local' ? undefined : VaultUtil.cloudFrontSecret
+    const privateKeyString = config.env === 'local' ? undefined : process.env.CLOUDFRONT_PK
     const url = config.env === 'prod' ? '' : 'http://dcb6g58iy3guq.cloudfront.net/*'
 
     const options = {

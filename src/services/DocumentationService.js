@@ -20,10 +20,10 @@ class DocumentationService {
       headerValue: joinedCookies,
     }]
 
-    return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/${topic}/${imageName}`, headers)
+    return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/experiments/images/${topic}/${imageName}`, headers)
   }
 
-  static getDoc(topic, fileName) {
+  static getDoc(fileName) {
     const cookies = DocumentationService.getCloudfrontCookies()
 
     const cloudFrontCookies = _.map(cookies, (value, key) => `${key}=${value}`)
@@ -38,7 +38,7 @@ class DocumentationService {
       headerValue: joinedCookies,
     }]
 
-    return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/${topic}/${fileName}`, headers)
+    return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/experiments/${fileName}`, headers)
   }
 
   static getCloudfrontCookies() {
@@ -59,8 +59,6 @@ class DocumentationService {
     //   options.privateKeyString = privateKeyString
     //   options.privateKeyString.replace(/\\n/g, '\n')
     // }
-
-    console.info(options)
 
     return cf.getSignedCookies(url, options)
   }

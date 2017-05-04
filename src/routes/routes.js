@@ -355,8 +355,8 @@ router.get('/getImage/:topic/:imageName', (req, res, next) => {
     res.send(data.body)
   }).catch(err => next(err))
 })
-router.get('/getDoc/:topic/:fileName', (req, res, next) => {
-  DocumentationService.getDoc(req.params.topic, req.params.fileName).then((data) => {
+router.get('/getDoc/:fileName', (req, res, next) => {
+  DocumentationService.getDoc(req.params.fileName).then((data) => {
     res.set('Content-Type', 'text/markdown')
     res.send(data.text)
   }).catch(err => next(err))

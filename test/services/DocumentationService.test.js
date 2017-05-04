@@ -40,7 +40,7 @@ describe('DocumentationService', () => {
       const headers = [{headerName: 'Accept', headerValue: 'image/png'}, {headerName: 'Cookie', headerValue: 'header=value; header2=value2'}]
 
       return DocumentationService.getImage('topic', 'image').then(() => {
-        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/topic/image', headers)
+        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/experiments/images/topic/image', headers)
       })
     })
   })
@@ -51,8 +51,8 @@ describe('DocumentationService', () => {
       HttpUtil.get = mockResolve()
       const headers = [{headerName: 'Accept', headerValue: 'text/markdown'}, {headerName: 'Cookie', headerValue: 'header=value; header2=value2'}]
 
-      return DocumentationService.getDoc('topic', 'doc.md').then(() => {
-        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/topic/doc.md', headers)
+      return DocumentationService.getDoc('doc.md').then(() => {
+        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/experiments/doc.md', headers)
       })
     })
   })

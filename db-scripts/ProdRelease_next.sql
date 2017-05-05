@@ -50,22 +50,9 @@ ALTER TABLE public.factor ADD ref_data_source_id integer;
 ALTER TABLE public.factor ADD CONSTRAINT factor_data_source_fk FOREIGN KEY (ref_data_source_id) REFERENCES public.ref_data_source(id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+ALTER TABLE public.dependent_variable ADD question_code varchar NULL;
+COMMENT ON COLUMN dependent_variable.question_code IS 'Referencing Question Code from Q&A';
 
-
----------------------Run after the table creation dev---------------------------------
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_dev_app_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_dev_app_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_ro_user;
-
----------------------Run after the table creation non prod---------------------------------
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_app_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_app_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_ro_user;
-
----------------------Run after the table creation prod---------------------------------
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_secure_app_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_secure_app_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_secure_ro_user;
 
 
 ------------------
@@ -91,3 +78,21 @@ ALTER TABLE public.tag
 
 UPDATE public.group
 SET ref_randomization_strategy_id = 1;
+
+
+
+---------------------Run after the table creation dev---------------------------------
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_dev_app_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_dev_app_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_ro_user;
+
+---------------------Run after the table creation non prod---------------------------------
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_app_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_app_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_ro_user;
+
+---------------------Run after the table creation prod---------------------------------
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO experiments_secure_app_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO experiments_secure_app_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO experiments_secure_ro_user;
+

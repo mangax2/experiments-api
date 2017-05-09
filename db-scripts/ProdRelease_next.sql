@@ -13,3 +13,7 @@ CREATE TABLE public.owner
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 );
+
+INSERT INTO public.owner (experiment_id, user_ids, created_user_id, created_date, modified_user_id, modified_date)
+SELECT id, ARRAY(SELECT created_user_id UNION SELECT modified_user_id), created_user_id,  CURRENT_TIMESTAMP, created_user_id, CURRENT_TIMESTAMP
+FROM public.experiment;

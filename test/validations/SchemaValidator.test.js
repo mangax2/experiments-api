@@ -57,7 +57,7 @@ describe('SchemaValidator', () => {
       target.checkBoolean = mock()
 
       return target.schemaElementCheck({}, { paramName: 'test' }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', undefined)
         expect(target.checkRequired).not.toHaveBeenCalled()
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -77,7 +77,7 @@ describe('SchemaValidator', () => {
       target.checkBoolean = mock()
 
       return target.schemaElementCheck({}, { paramName: 'test' }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', undefined)
         expect(target.checkRequired).not.toHaveBeenCalled()
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -100,7 +100,7 @@ describe('SchemaValidator', () => {
         required: true,
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith(undefined, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith(undefined, 'test', undefined)
         expect(target.checkRequired).toHaveBeenCalledWith(undefined, 'test')
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -120,7 +120,7 @@ describe('SchemaValidator', () => {
       target.checkBoolean = mock()
 
       return target.schemaElementCheck(null, { required: true, paramName: 'test' }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith(null, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith(null, 'test', undefined)
         expect(target.checkRequired).toHaveBeenCalledWith(null, 'test')
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -144,7 +144,7 @@ describe('SchemaValidator', () => {
         type: 'numeric',
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', 'numeric')
         expect(target.checkRequired).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumeric).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -169,7 +169,7 @@ describe('SchemaValidator', () => {
         numericRange: {},
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', 'numeric')
         expect(target.checkRequired).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumeric).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumericRange).toHaveBeenCalledWith({}, {}, 'test')
@@ -194,7 +194,7 @@ describe('SchemaValidator', () => {
         lengthRange: {},
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', 'text')
         expect(target.checkRequired).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -219,7 +219,7 @@ describe('SchemaValidator', () => {
         data: [],
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', 'constant')
         expect(target.checkRequired).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()
@@ -243,7 +243,7 @@ describe('SchemaValidator', () => {
         type: 'boolean',
         paramName: 'test',
       }).then(() => {
-        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test')
+        expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', 'boolean')
         expect(target.checkRequired).toHaveBeenCalledWith({}, 'test')
         expect(target.checkNumeric).not.toHaveBeenCalled()
         expect(target.checkNumericRange).not.toHaveBeenCalled()

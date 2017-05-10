@@ -25,7 +25,7 @@ class SchemaValidator extends BaseValidator {
 
   schemaElementCheck(elementValue, elementSchema) {
     return new Promise((resolve) => {
-      if (this.literalCheck(elementValue, elementSchema.paramName)) {
+      if (this.literalCheck(elementValue, elementSchema.paramName, elementSchema.type)) {
         if (elementSchema.required) {
           this.checkRequired(elementValue, elementSchema.paramName)
         }
@@ -46,6 +46,8 @@ class SchemaValidator extends BaseValidator {
             this.checkConstants(elementValue, elementSchema.data, elementSchema.paramName)
           } else if (elementSchema.type === 'boolean') {
             this.checkBoolean(elementValue, elementSchema.paramName)
+          } else if (elementSchema.type === 'array') {
+            this.checkArray(elementValue, elementSchema.paramName, elementSchema.entityCount)
           }
         }
       }

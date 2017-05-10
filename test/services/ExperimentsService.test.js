@@ -17,9 +17,10 @@ describe('ExperimentsService', () => {
     it('calls validate, batchCreate, assignExperimentIdToTags, batchCreateTags, and' +
       ' createPostResponse', () => {
       target.validator.validate = mockResolve()
-      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL']}])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
+      target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
@@ -27,16 +28,17 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL'] }])
       })
     })
 
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when there are no tags', () => {
       target.validator.validate = mockResolve()
-      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
@@ -44,16 +46,17 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL'] }])
       })
     })
 
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but not' +
       ' tagService when tags are undefined', () => {
       target.validator.validate = mockResolve()
-      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
@@ -61,7 +64,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL'] }])
       })
     })
 
@@ -70,6 +73,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject('error')
+      target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
@@ -122,6 +126,7 @@ describe('ExperimentsService', () => {
       target.isFilterRequest = mock(false)
       target.getExperimentsByFilters = mock()
       target.getAllExperiments = mockResolve([{}])
+      target.populateOwners = mockResolve(['KMCCL'])
       target.populateTags = mock()
 
       return target.getExperiments('').then(() => {
@@ -137,6 +142,7 @@ describe('ExperimentsService', () => {
       target.getExperimentsByFilters = mockResolve()
       target.getAllExperiments = mock()
       target.populateTags = mock()
+      target.populateOwners = mockResolve(['KMCCL'])
 
       return target.getExperiments('').then(() => {
         expect(target.isFilterRequest).toHaveBeenCalledWith('')
@@ -182,6 +188,7 @@ describe('ExperimentsService', () => {
     it('calls find, getTagsByExperimentId, and returns data', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockResolve([])
+      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
 
       return target.getExperimentById(1, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
@@ -193,6 +200,7 @@ describe('ExperimentsService', () => {
     it('rejects when tagService fails', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockReject('error')
+      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
 
       return target.getExperimentById(1, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
@@ -222,6 +230,7 @@ describe('ExperimentsService', () => {
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -239,6 +248,7 @@ describe('ExperimentsService', () => {
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
+      target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -256,6 +266,7 @@ describe('ExperimentsService', () => {
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject('error')
+      target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -273,6 +284,7 @@ describe('ExperimentsService', () => {
       target.tagService.deleteTagsForExperimentId = mockReject('error')
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)

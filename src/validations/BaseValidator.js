@@ -34,10 +34,10 @@ class BaseValidator {
       : this.validateEntity(targetObject, operationName, optionalTransaction)
   }
 
-  validate(targetObject, operationName, optionalTransaction) {
+  validate(targetObject, operationName, optionalTransaction, context = undefined) {
     return this.preValidate(targetObject)
       .then(() => this.validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction)
-        .then(() => this.postValidate(targetObject))
+        .then(() => this.postValidate(targetObject, context))
         .then(() => this.check()))
   }
 
@@ -46,7 +46,7 @@ class BaseValidator {
   postValidate = () => Promise.resolve()
 
   validateEntity = (targetObject) => {
-    logger.error(`validateEntity validation method not implemented to validate${targetObject}`)
+    logger.error(`validateEntity validation method not implemented to validate ${targetObject}`)
     return Promise.reject('Server error, please contact support')
   }
 
@@ -63,8 +63,8 @@ class BaseValidator {
     }
   }
 
-  literalCheck(value, name) {
-    if (_.isObject(value)) {
+  literalCheck(value, name, type) {
+    if (_.isObject(value) && type !== 'array') {
       this.messages.push(`${name} must be a literal value. Object and Arrays are not supported.`)
       return false
     }
@@ -117,6 +117,12 @@ class BaseValidator {
         // checks, or business key uniqueness checks
         this.getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)),
     )
+  }
+
+  checkArray(value, name, entityCount) {
+    if (value.length < entityCount.min || value.length > entityCount.max) {
+      this.messages.push(`${name} is out of item count range(min=${entityCount.min} max=${entityCount.max}`)
+    }
   }
 
   getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction) {

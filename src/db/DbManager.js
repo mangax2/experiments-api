@@ -13,6 +13,7 @@ import FactorType from '../repos/factorType'
 import Group from '../repos/group'
 import GroupType from '../repos/groupType'
 import GroupValue from '../repos/groupValue'
+import Owner from '../repos/owner'
 import RefDataSource from '../repos/refDataSource'
 import RefDataSourceType from '../repos/refDataSourceType'
 import Tag from '../repos/tag'
@@ -40,6 +41,7 @@ const options = {
     obj.group = new (Group)(obj, pgp)
     obj.groupType = new (GroupType)(obj, pgp)
     obj.groupValue = new (GroupValue)(obj, pgp)
+    obj.owner = new (Owner)(obj, pgp)
     obj.refDataSource = new (RefDataSource)(obj, pgp)
     obj.refDataSourceType = new (RefDataSourceType)(obj, pgp)
     obj.tag = new (Tag)(obj, pgp)

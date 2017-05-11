@@ -26,6 +26,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       res.header('Access-Control-Allow-Origin', '*')
       if (req.method === 'OPTIONS') {
         res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
+        if (req.headers['access-control-request-method']) {
+          res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method'])
+        }
         next()
       } else {
         requestContext(req, res, next)

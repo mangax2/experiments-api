@@ -9,20 +9,20 @@ class OwnerService {
     this.validator = new OwnerValidator()
   }
 
-  @Transactional('batchCreateTags')
+  @Transactional('batchCreateOwners')
   batchCreateOwners(experimentsOwners, context, tx) {
     return this.validator.validate(experimentsOwners, 'POST', tx, context)
       .then(() => db.owner.batchCreate(experimentsOwners, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
-  @Transactional('getTagsByExperimentId')
+  @Transactional('getOwnersByExperimentId')
   getOwnersByExperimentId = (id, tx) => db.owner.findByExperimentId(id, tx)
 
-  @Transactional('getTagsByExperimentIds')
+  @Transactional('getOwnersByExperimentIds')
   getOwnersByExperimentIds = (ids, tx) => db.owner.batchFindByExperimentIds(ids, tx)
 
-  @Transactional('batchUpdateTags')
+  @Transactional('batchUpdateOwners')
   batchUpdateOwners(experimentsOwners, context, tx) {
     return this.validator.validate(experimentsOwners, 'PUT', tx, context)
       .then(() => db.owner.batchUpdate(experimentsOwners, context, tx)

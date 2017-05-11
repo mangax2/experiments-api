@@ -50,8 +50,7 @@ class ExperimentsService {
           .then(() => this.populateTags(data)))
     }
     return this.getAllExperiments()
-      .then(data => this.populateOwners(data)
-        .then(() => this.populateTags(data)))
+      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)]))
   }
 
   populateOwners(experiments) {
@@ -85,13 +84,15 @@ class ExperimentsService {
         logger.error(`Experiment Not Found for requested experimentId = ${id}`)
         throw AppError.notFound('Experiment Not Found for requested experimentId')
       } else {
-        return this.ownerService.getOwnersByExperimentId(id, tx).then((owners) => {
-          data.owners = owners.user_ids
-
-          return this.tagService.getTagsByExperimentId(id, tx).then((dbTags) => {
-            data.tags = dbTags
-            return data
-          })
+        return Promise.all(
+          [
+            this.ownerService.getOwnersByExperimentId(id, tx),
+            this.tagService.getTagsByExperimentId(id, tx),
+          ],
+        ).then((ownersAndTags) => {
+          data.owners = ownersAndTags[0].user_ids
+          data.tags = ownersAndTags[1]
+          return data
         })
       }
     })

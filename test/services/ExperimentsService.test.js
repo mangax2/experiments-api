@@ -250,6 +250,7 @@ describe('ExperimentsService', () => {
       return target.getExperimentById(1, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({ tags: [] })
       })
     })
@@ -262,6 +263,20 @@ describe('ExperimentsService', () => {
       return target.getExperimentById(1, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+
+    it('rejects when ownerService fails', () => {
+      db.experiments.find = mockResolve({})
+      target.tagService.getTagsByExperimentId = mockResolve([])
+      target.ownerService.getOwnersByExperimentId = mockReject('error')
+
+      return target.getExperimentById(1, testTx).then(() => {}, (err) => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, testTx)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })

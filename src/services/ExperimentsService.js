@@ -57,9 +57,11 @@ class ExperimentsService {
   populateOwners(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
     const experimentIds = _.map(experiments, 'id')
-    return this.ownerService.getOwnersByExperimentIds((experimentIds)).then(owners =>
+    return this.ownerService.getOwnersByExperimentIds((experimentIds)).then(result =>
       _.map(experiments.slice(), (experiment) => {
-        experiment.owners = owners.find(o => o.experiment_id === experiment.id) || []
+        const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
+        experiment.owners = owners.user_ids
+        return experiment
       }),
     )
   }
@@ -104,7 +106,8 @@ class ExperimentsService {
             logger.error(`Experiment Not Found to Update for id = ${id}`)
             throw AppError.notFound('Experiment Not Found to Update')
           } else {
-            const owners = { experimentId: id, userIds: experiment.owners }
+            const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
+            const owners = { experimentId: id, userIds: trimmedUserIds }
 
             return this.ownerService.batchUpdateOwners([owners], context, tx)
               .then(() => this.tagService.deleteTagsForExperimentId(id, tx).then(() => {

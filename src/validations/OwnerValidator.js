@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
@@ -7,11 +6,7 @@ import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
 
-const logger = log4js.getLogger('OwnerValidator')
-
 class OwnerValidator extends SchemaValidator {
-  ownerRetrievalPromise
-  userIds
 
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -55,45 +50,27 @@ class OwnerValidator extends SchemaValidator {
 
   postValidate = (ownerObj, context) => {
     if (!this.hasErrors()) {
-      if (!this.ownerRetrievalPromise) {
-        this.getUserIds(ownerObj[0].userIds)
-      }
-      return this.ownerRetrievalPromise.then(() =>
-        this.validateOwnerIds(ownerObj[0], context.userId))
+      return this.validateUserIds(ownerObj[0].userIds, context.userId)
     }
     return Promise.resolve()
   }
 
-  validateOwnerIds = (ownerObj, userId) => {
-    if (ownerObj.userIds.length !== this.userIds.length) {
-      return Promise.reject(AppError.badRequest('Some users listed are invalid'))
-    }
-    if (!_.includes(ownerObj.userIds, userId)) {
-      return Promise.reject(AppError.badRequest('You cannot remove yourself as an owner'))
-    }
-    return Promise.resolve()
-  }
+  validateUserIds = (userIds, userId) => PingUtil.getMonsantoHeader()
+    .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users?ids=${userIds.join()}`, header)
+      .then((result) => {
+        const profileIds = _.map(result.body, 'id')
+        const invalidUsers = _.difference(userIds, profileIds)
 
-  getUserIds = (userIds) => {
-    let resolver
-    let rejecter
-    this.ownerRetrievalPromise = new Promise((resolve, reject) => {
-      resolver = resolve
-      rejecter = reject
-    })
-    return PingUtil.getMonsantoHeader().then(header =>
-      HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users?ids=${userIds.join()}`, header).then((result) => {
-        if (result && result.body) {
-          this.userIds = _.map(result.body, 'id')
+        if (userIds.length !== profileIds.length) {
+          return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`))
         }
-        resolver()
+        if (!_.includes(profileIds, userId)) {
+          return Promise.reject(AppError.badRequest('You cannot remove yourself as an owner'))
+        }
+
+        return Promise.resolve()
       }),
-    ).catch((err) => {
-      logger.error(`An error occurred when retrieving user ids: ${HttpUtil.getErrorMessageForLogs(err)}`)
-      this.strategyRetrievalPromise = undefined
-      rejecter(AppError.badRequest('Unable to retrieve user ids.'))
-    })
-  }
+    )
 }
 
 module.exports = OwnerValidator

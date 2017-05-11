@@ -368,6 +368,24 @@ describe('BaseValidator', () => {
     })
   })
 
+  describe('checkArray', () => {
+    it('does not push a message when entityCount min and max are undefined', () => {
+      target.checkArray([], 'test', {})
+
+      expect(target.messages.length).toEqual(0)
+    })
+
+    it('pushes a message when value is shorter than min value', () => {
+      target.checkArray(['1'], 'test', {min: 2})
+      expect(target.messages.length).toEqual(1)
+    })
+
+    it('pushes a message when value is longer than max value', () => {
+      target.checkArray(['1','2'], 'test', {max: 1})
+      expect(target.messages.length).toEqual(1)
+    })
+  })
+
   describe('getPromiseForRIorBusinessKeyCheck', () => {
     it('returns a resolved promise if groupSet is empty', () => {
       target.verifyBusinessKeysAreUnique = mock()

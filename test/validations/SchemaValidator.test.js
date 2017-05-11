@@ -55,6 +55,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, { paramName: 'test' }).then(() => {
         expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', undefined)
@@ -64,6 +65,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -75,6 +77,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, { paramName: 'test' }).then(() => {
         expect(target.literalCheck).toHaveBeenCalledWith({}, 'test', undefined)
@@ -84,6 +87,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -95,6 +99,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck(undefined, {
         required: true,
@@ -107,6 +112,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -118,6 +124,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck(null, { required: true, paramName: 'test' }).then(() => {
         expect(target.literalCheck).toHaveBeenCalledWith(null, 'test', undefined)
@@ -127,6 +134,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -138,6 +146,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, {
         required: true,
@@ -151,6 +160,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -162,6 +172,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, {
         required: true,
@@ -176,6 +187,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -187,6 +199,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, {
         required: true,
@@ -201,6 +214,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).toHaveBeenCalledWith({}, {}, 'test')
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -212,6 +226,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, {
         required: true,
@@ -226,6 +241,7 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).toHaveBeenCalledWith({}, [], 'test')
         expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).not.toHaveBeenCalled()
       })
     })
 
@@ -237,6 +253,7 @@ describe('SchemaValidator', () => {
       target.checkLength = mock()
       target.checkConstants = mock()
       target.checkBoolean = mock()
+      target.checkArray = mock()
 
       return target.schemaElementCheck({}, {
         required: true,
@@ -250,6 +267,34 @@ describe('SchemaValidator', () => {
         expect(target.checkLength).not.toHaveBeenCalled()
         expect(target.checkConstants).not.toHaveBeenCalled()
         expect(target.checkBoolean).toHaveBeenCalledWith({}, 'test')
+        expect(target.checkArray).not.toHaveBeenCalled()
+      })
+    })
+
+    it('checks literal, required, and array', () => {
+      target.literalCheck = mock(true)
+      target.checkRequired = mock()
+      target.checkNumeric = mock()
+      target.checkNumericRange = mock()
+      target.checkLength = mock()
+      target.checkConstants = mock()
+      target.checkBoolean = mock()
+      target.checkArray = mock()
+
+      return target.schemaElementCheck([], {
+        required: true,
+        type: 'array',
+        paramName: 'test',
+        entityCount: {}
+      }).then(() => {
+        expect(target.literalCheck).toHaveBeenCalledWith([], 'test', 'array')
+        expect(target.checkRequired).toHaveBeenCalledWith([], 'test')
+        expect(target.checkNumeric).not.toHaveBeenCalled()
+        expect(target.checkNumericRange).not.toHaveBeenCalled()
+        expect(target.checkLength).not.toHaveBeenCalled()
+        expect(target.checkConstants).not.toHaveBeenCalled()
+        expect(target.checkBoolean).not.toHaveBeenCalled()
+        expect(target.checkArray).toHaveBeenCalledWith([], 'test', {})
       })
     })
   })

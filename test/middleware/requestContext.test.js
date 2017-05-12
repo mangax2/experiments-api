@@ -111,7 +111,7 @@ describe('requestContextMiddlewareFunction', () => {
 
     const req = { headers: { oauth_resourceownerinfo: 'user_id=testUser' } }
     requestContextMiddlewareFunction(req, null, nextFunc)
-    expect(req.context.userId).toEqual('testUser')
+    expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
     expect(AppError.badRequest).not.toHaveBeenCalled()
   })
@@ -122,7 +122,7 @@ describe('requestContextMiddlewareFunction', () => {
 
     const req = { headers: { oauth_resourceownerinfo: 'notMe=wrongValue,user_id=testUser,another=value' } }
     requestContextMiddlewareFunction(req, null, nextFunc)
-    expect(req.context.userId).toEqual('testUser')
+    expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
     expect(AppError.badRequest).not.toHaveBeenCalled()
   })

@@ -28,7 +28,7 @@ function requestContextMiddlewareFunction(req, res, next) {
       throw AppError.badRequest('user_id within oauth_resourceownerinfo is empty string.')
     }
     req.context = {
-      userId,
+      userId: userId.toUpperCase(),
     }
     next()
   }

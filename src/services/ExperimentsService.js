@@ -50,7 +50,8 @@ class ExperimentsService {
           .then(() => this.populateTags(data)))
     }
     return this.getAllExperiments()
-      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)]))
+      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)])
+        .then(() => data))
   }
 
   populateOwners(experiments) {

@@ -97,7 +97,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([])
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).toHaveBeenCalled()
       })
     })
@@ -111,7 +111,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([])
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -126,7 +126,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([])
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -365,6 +365,24 @@ describe('BaseValidator', () => {
         expect(target.getPromiseForRIorBusinessKeyCheck).toHaveBeenCalledTimes(1)
         expect(err).toEqual('error')
       })
+    })
+  })
+
+  describe('checkArray', () => {
+    it('does not push a message when entityCount min and max are undefined', () => {
+      target.checkArray([], 'test', {})
+
+      expect(target.messages.length).toEqual(0)
+    })
+
+    it('pushes a message when value is shorter than min value', () => {
+      target.checkArray(['1'], 'test', {min: 2})
+      expect(target.messages.length).toEqual(1)
+    })
+
+    it('pushes a message when value is longer than max value', () => {
+      target.checkArray(['1','2'], 'test', {max: 1})
+      expect(target.messages.length).toEqual(1)
     })
   })
 

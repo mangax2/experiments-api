@@ -4141,6 +4141,12 @@
           "items": {
             "$ref": "#/definitions/TagPayloadForPOST"
           }
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -4171,6 +4177,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Tags"
+          }
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         },
         "createdDate": {

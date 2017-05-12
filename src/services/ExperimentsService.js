@@ -4,6 +4,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsValidator from '../validations/ExperimentsValidator'
+import OwnerService from './OwnerService'
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
 
@@ -13,6 +14,7 @@ class ExperimentsService {
 
   constructor() {
     this.validator = new ExperimentsValidator()
+    this.ownerService = new OwnerService()
     this.tagService = new TagService()
   }
 
@@ -22,20 +24,45 @@ class ExperimentsService {
       .then(() => db.experiments.batchCreate(experiments, context, tx)
         .then((data) => {
           const experimentIds = _.map(data, d => d.id)
-          const tags = this.assignExperimentIdToTags(experimentIds, experiments)
-          if (tags && tags.length > 0) {
-            return this.tagService.batchCreateTags(tags, context, tx)
-              .then(() => AppUtil.createPostResponse(data))
-          }
-          return AppUtil.createPostResponse(data)
+
+          const experimentsOwners = _.map(experiments, (exp, index) => {
+            const owners = _.map(exp.owners, own => _.trim(own))
+            return { experimentId: experimentIds[index], userIds: owners }
+          })
+
+          return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
+            const tags = this.assignExperimentIdToTags(experimentIds, experiments)
+            if (tags && tags.length > 0) {
+              return this.tagService.batchCreateTags(tags, context, tx)
+                .then(() => {
+                  AppUtil.createPostResponse(data)
+                })
+            }
+            return AppUtil.createPostResponse(data)
+          })
         }))
   }
 
   getExperiments(queryString) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString).then(data => this.populateTags(data))
+      return this.getExperimentsByFilters(queryString)
+        .then(data => this.populateOwners(data)
+          .then(() => this.populateTags(data)))
     }
-    return this.getAllExperiments().then(data => this.populateTags(data))
+    return this.getAllExperiments()
+      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)]))
+  }
+
+  populateOwners(experiments) {
+    if (experiments.length === 0) return Promise.resolve([])
+    const experimentIds = _.map(experiments, 'id')
+    return this.ownerService.getOwnersByExperimentIds((experimentIds)).then(result =>
+      _.map(experiments.slice(), (experiment) => {
+        const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
+        experiment.owners = owners.user_ids
+        return experiment
+      }),
+    )
   }
 
   populateTags(experiments) {
@@ -57,8 +84,14 @@ class ExperimentsService {
         logger.error(`Experiment Not Found for requested experimentId = ${id}`)
         throw AppError.notFound('Experiment Not Found for requested experimentId')
       } else {
-        return this.tagService.getTagsByExperimentId(id, tx).then((dbTags) => {
-          data.tags = dbTags
+        return Promise.all(
+          [
+            this.ownerService.getOwnersByExperimentId(id, tx),
+            this.tagService.getTagsByExperimentId(id, tx),
+          ],
+        ).then((ownersAndTags) => {
+          data.owners = ownersAndTags[0].user_ids
+          data.tags = ownersAndTags[1]
           return data
         })
       }
@@ -74,14 +107,18 @@ class ExperimentsService {
             logger.error(`Experiment Not Found to Update for id = ${id}`)
             throw AppError.notFound('Experiment Not Found to Update')
           } else {
-            return this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
-              const tags = this.assignExperimentIdToTags([id], [experiment])
-              if (tags.length > 0) {
-                return this.tagService.batchCreateTags(tags, context, tx)
-                  .then(() => data)
-              }
-              return data
-            })
+            const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
+            const owners = { experimentId: id, userIds: trimmedUserIds }
+
+            return this.ownerService.batchUpdateOwners([owners], context, tx)
+              .then(() => this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
+                const tags = this.assignExperimentIdToTags([id], [experiment])
+                if (tags.length > 0) {
+                  return this.tagService.batchCreateTags(tags, context, tx)
+                    .then(() => data)
+                }
+                return data
+              }))
           }
         }))
   }

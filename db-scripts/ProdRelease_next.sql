@@ -22,3 +22,5 @@ GRANT SELECT ON TABLE public.owner TO experiments_ro_user;
 INSERT INTO public.owner (experiment_id, user_ids, created_user_id, created_date, modified_user_id, modified_date)
 SELECT id, ARRAY(SELECT created_user_id UNION SELECT modified_user_id), created_user_id,  CURRENT_TIMESTAMP, created_user_id, CURRENT_TIMESTAMP
 FROM public.experiment;
+
+SELECT audit.audit_table('owner');

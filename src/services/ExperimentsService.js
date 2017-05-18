@@ -34,9 +34,7 @@ class ExperimentsService {
             const tags = this.assignExperimentIdToTags(experimentIds, experiments)
             if (tags && tags.length > 0) {
               return this.tagService.batchCreateTags(tags, context, tx)
-                .then(() => {
-                  AppUtil.createPostResponse(data)
-                })
+                .then(() => AppUtil.createPostResponse(data))
             }
             return AppUtil.createPostResponse(data)
           })

@@ -33,7 +33,7 @@ class TagService {
     })
   }
 
-  createTags(tags, experimentId) {
+  saveTags(tags, experimentId) {
     return this.validator.validate(tags)
       .then(() => PingUtil.getMonsantoHeader().then((header) => {
         const tagsRequest = _.map(tags, t => ({ category: t.name, value: t.value }))

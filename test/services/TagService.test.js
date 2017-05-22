@@ -52,7 +52,7 @@ describe('TagService', () => {
   })
 
 
-  describe('createTags', () => {
+  describe('saveTags', () => {
     it('creates tags', () => {
       target.validator.validate = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve({})
@@ -60,18 +60,18 @@ describe('TagService', () => {
       AppUtil.createPostResponse = mock()
       const tags=[{name:'tagname', value:'tagValue'}]
 
-      return target.createTags(tags,1).then(() => {
+      return target.saveTags(tags,1).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)
       })
     })
 
-    it('rejects when createTags fails', () => {
+    it('rejects when saveTags fails', () => {
       target.validator.validate = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.put =  mockReject('error')
       const tags=[{name:'tagname', value:'tagValue'}]
 
-      return target.createTags(tags,1).then(() => {}, (err) => {
+      return target.saveTags(tags,1).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)
         expect(err).toEqual('error')
       })
@@ -81,7 +81,7 @@ describe('TagService', () => {
       target.validator.validate = mockReject('error')
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.put =  mockReject('error')
-      return target.createTags([],1).then(() => {}, (err) => {
+      return target.saveTags([],1).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([])
         expect( HttpUtil.put).not.toHaveBeenCalled()
         expect(err).toEqual('error')

@@ -47,7 +47,9 @@ class ExperimentsService {
         .then(data => this.populateOwners(data))
     }
     return this.getAllExperiments()
-      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)])
+      .then(data => Promise.all(
+        [this.populateOwners(data), this.populateTagsForAllExperiments(data)],
+      )
         .then(() => data))
   }
 
@@ -63,7 +65,7 @@ class ExperimentsService {
     )
   }
 
-  populateTags(experiments) {
+  populateTagsForAllExperiments(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
     return this.tagService.getAllTagsForEntity('experiment').then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
@@ -105,7 +107,7 @@ class ExperimentsService {
               .then(() => {
                 const tags = this.assignExperimentIdToTags([id], [experiment])
                 if (tags.length > 0) {
-                  return this.tagService.createTags(tags, id)
+                  return this.tagService.saveTags(tags, id)
                       .then(() => data)
                 }
                 return this.tagService.deleteTagsForExperimentId(id).then(() => data)

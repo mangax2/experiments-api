@@ -332,7 +332,7 @@ describe('ExperimentsService', () => {
   })
 
   describe('updateExperiment', () => {
-    it('calls validate, update, batchUpdateOwners, deleteTagsForExperimentId,' +
+    it('calls validate, update, batchUpdateOwners,' +
       ' batchCreateTags', () => {
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
@@ -350,11 +350,12 @@ describe('ExperimentsService', () => {
       })
     })
 
-    it('calls validate, update, deleteTagsForExperimentId, but not batchCreateTags', () => {
+    it('calls validate, update,deleteTagsForExperimentId but not batchCreateTags', () => {
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.assignExperimentIdToTags = mock([])
       target.tagService.createTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
@@ -362,6 +363,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{}])
         expect(target.tagService.createTags).not.toHaveBeenCalled()
+        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual({})
       })
     })

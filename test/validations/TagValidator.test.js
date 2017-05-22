@@ -10,82 +10,31 @@ describe('TagValidator', () => {
     target = new TagValidator()
   })
 
-  describe('get POST_VALIDATION_SCHEMA', () => {
+  describe('get VALIDATION_SCHEMA', () => {
     db.experiments = {}
-    db.tag = {}
     const schema = [
       { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-      { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: {} },
-      {
-        paramName: 'Tag',
-        type: 'businessKey',
-        keys: ['name', 'value', 'experimentId'],
-        entity: {},
-      },
-    ]
+      { paramName: 'experimentId', type: 'numeric', required: true }
+      ]
 
-    expect(TagValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
+    expect(TagValidator.VALIDATION_SCHEMA).toEqual(schema)
   })
 
-  describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    db.tag = {}
-    const schema = [
-      { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.tag },
-    ]
-
-    expect(TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS).toEqual(schema)
-  })
 
   describe('getSchema', () => {
-    it('returns post schema', () => {
+    it('returns schema', () => {
       db.experiments = {}
-      db.tag = {}
       const schema = [
         { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'experimentId', type: 'numeric', required: true },
-        { paramName: 'experimentId', type: 'refData', entity: {} },
-        {
-          paramName: 'Tag',
-          type: 'businessKey',
-          keys: ['name', 'value', 'experimentId'],
-          entity: {},
-        },
       ]
 
-      expect(target.getSchema('POST')).toEqual(schema)
+      expect(target.getSchema()).toEqual(schema)
     })
 
-    it('returns put schema', () => {
-      db.experiments = {}
-      db.tag = {}
-      const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'experimentId', type: 'numeric', required: true },
-        { paramName: 'experimentId', type: 'refData', entity: {} },
-        {
-          paramName: 'Tag',
-          type: 'businessKey',
-          keys: ['name', 'value', 'experimentId'],
-          entity: {},
-        },
-        { paramName: 'id', type: 'numeric', required: true },
-        { paramName: 'id', type: 'refData', entity: db.tag },
-      ]
 
-      expect(target.getSchema('PUT')).toEqual(schema)
-    })
-
-    it('throws an error when POST and PUT are not supplied', () => {
-      AppError.badRequest = mock('')
-
-      expect(() => {target.getSchema('test')}).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
-    })
   })
 
   describe('getEntityName', () => {

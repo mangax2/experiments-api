@@ -1,77 +1,79 @@
 import log4js from 'log4js'
-import db from '../db/DbManager'
-import AppUtil from './utility/AppUtil'
-import AppError from './utility/AppError'
+import _ from 'lodash'
 import TagValidator from '../validations/TagValidator'
-import Transactional from '../decorators/transactional'
+import HttpUtil from './utility/HttpUtil'
+import PingUtil from './utility/PingUtil'
+import cfServices from './utility/ServiceConfig'
 
 const logger = log4js.getLogger('TagService')
+
 class TagService {
 
   constructor() {
     this.validator = new TagValidator()
   }
 
-  @Transactional('batchCreateTags')
-  batchCreateTags(tags, context, tx) {
-    return this.validator.validate(tags, 'POST', tx)
-      .then(() => db.tag.batchCreate(tags, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+  batchCreateTags(tags) {
+    return this.validator.validate(tags)
+      .then(() => PingUtil.getMonsantoHeader().then((header) => {
+        const experimentIds = _.uniq(_.map(tags, 'experimentId'))
+        const tagsRequest = TagService.createTagRequest(tags, experimentIds)
+        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, header, tagsRequest).then(() => Promise.resolve()).catch((err) => {
+          logger.error(err)
+          return Promise.reject(err)
+        })
+      }))
   }
 
-  @Transactional('getTagsByExperimentId')
-  getTagsByExperimentId = (id, tx) => db.tag.findByExperimentId(id, tx)
-
-  @Transactional('getTagsByExperimentIds')
-  getTagsByExperimentIds = (ids, tx) => db.tag.batchFindByExperimentIds(ids, tx)
-
-  @Transactional('getTagById')
-  getTagById = (id, tx) => db.tag.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Tag Not Found for requested id = ${id}`)
-        throw AppError.notFound('Tag Not Found for requested id')
-      } else {
-        return data
-      }
+  static createTagRequest(tags, experimentIds) {
+    const entityTagsMap = _.groupBy(tags, 'experimentId')
+    return _.map(experimentIds, (id) => {
+      const entityTags = _.map(entityTagsMap[id], t => ({ category: t.name, value: t.value }))
+      return { entityName: 'experiment', entityId: String(id), tags: entityTags }
     })
-
-  @Transactional('batchGetTagByIds')
-  batchGetTagByIds = (ids, tx) => db.tag.batchFind(ids, tx)
-
-  @Transactional('batchUpdateTags')
-  batchUpdateTags(tags, context, tx) {
-    return this.validator.validate(tags, 'PUT', tx)
-      .then(() => db.tag.batchUpdate(tags, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @Transactional('deleteTag')
-  deleteTag = (id, tx) => db.tag.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Tag Not Found for requested id = ${id}`)
-        throw AppError.notFound('Tag Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
-  searchByTagName = (queryStr) => {
-    const queryStrTagName = queryStr.tagName ? queryStr.tagName : ''
-    return db.tag.searchByTagName(queryStrTagName)
+  createTags(tags, experimentId) {
+    return this.validator.validate(tags)
+      .then(() => PingUtil.getMonsantoHeader().then((header) => {
+        const tagsRequest = _.map(tags, t => ({ category: t.name, value: t.value }))
+        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${experimentId}`, header, tagsRequest).then(() => Promise.resolve()).catch((err) => {
+          logger.error(err)
+          return Promise.reject(err)
+        })
+      }))
   }
 
-  searchByTagValueForATagName = (tagName, queryStr) => {
-    const queryStrTagValue = queryStr.tagValue ? queryStr.tagValue : ''
-    return db.tag.searchByTagValueForATagName(tagName, queryStrTagValue)
-  }
+  getTagsByExperimentId = id => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${id}`, header).then(result => result.body.tags).catch((err) => {
+    if (err.status === 404) {
+      return Promise.resolve([])
+    }
+    logger.error(err)
+    return Promise.reject(err)
+  }),
+  )
 
-  @Transactional('batchDeleteTags')
-  batchDeleteTags = (ids, tx) => db.tag.batchRemove(ids, tx)
+  getEntityTagsByTagFilters = (tagNames, tagValues) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=${tagNames}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
+    logger.error(err)
+    return Promise.reject(err)
+  }),
+  )
 
-  @Transactional('deleteTagsForExperimentId')
-  deleteTagsForExperimentId = (id, tx) => db.tag.removeByExperimentId(id, tx)
+  getAllTagsForEntity = entityName => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${entityName}`, header).then(result => result.body).catch((err) => {
+    if (err.status === 404) {
+      return Promise.resolve([])
+    }
+    return Promise.reject(err)
+  }),
+  )
+
+  deleteTagsForExperimentId = id => PingUtil.getMonsantoHeader().then(header => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${id}`, header).then(() => Promise.resolve()).catch((err) => {
+    if (err.status === 404) {
+      return Promise.resolve()
+    }
+    return Promise.reject(err)
+  }),
+  )
 }
 
 module.exports = TagService

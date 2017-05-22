@@ -10,6 +10,14 @@ class HttpUtil {
     return HttpUtil.setHeaders(agent.post(url), headers).send(data)
   }
 
+  static put(url, headers, data) {
+    return HttpUtil.setHeaders(agent.put(url), headers).send(data)
+  }
+
+  static delete(url, headers) {
+    return HttpUtil.setHeaders(agent.delete(url), headers)
+  }
+
   static setHeaders(httpCall, headers) {
     _.forEach(headers, (h) => {
       httpCall.set(h.headerName, h.headerValue)

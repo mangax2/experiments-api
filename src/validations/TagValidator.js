@@ -1,43 +1,17 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
 
 class TagValidator extends SchemaValidator {
-  static get POST_VALIDATION_SCHEMA() {
+  static get VALIDATION_SCHEMA() {
     return [
       { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
-      {
-        paramName: 'Tag',
-        type: 'businessKey',
-        keys: ['name', 'value', 'experimentId'],
-        entity: db.tag,
-      },
     ]
   }
 
-  static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
-    return [
-      { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.tag },
-    ]
-  }
-
-  getSchema = (operationName) => {
-    switch (operationName) {
-      case 'POST':
-        return TagValidator.POST_VALIDATION_SCHEMA
-      case 'PUT':
-        return TagValidator.POST_VALIDATION_SCHEMA.concat(
-          TagValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
-        )
-      default:
-        throw AppError.badRequest('Invalid Operation')
-    }
-  }
+  getSchema = () => TagValidator.VALIDATION_SCHEMA
 
   getEntityName = () => 'Tag'
 

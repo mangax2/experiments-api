@@ -23,7 +23,8 @@ const cfServices = {
   experimentsExternalAPIUrls: {
     value: {
       randomizationAPIUrl: 'https://api01-np.agro.services:443/randomizer/1.0.1',
-      profileAPIUrl: 'https://profile.velocity-np.ag/v2'
+      profileAPIUrl: 'https://profile.velocity-np.ag/v2',
+      experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api'
     },
   },
 }

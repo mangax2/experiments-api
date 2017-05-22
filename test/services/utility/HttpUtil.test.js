@@ -44,6 +44,33 @@ describe('HttpUtil', () => {
     })
   })
 
+  describe('put', () => {
+    it('calls setHeaders and agent.put', () => {
+      const httpCall = {send: mock()}
+      HttpUtil.setHeaders = mock(httpCall)
+      agent.put = mock({})
+
+      HttpUtil.put('testUrl', [], {})
+
+      expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
+      expect(agent.put).toHaveBeenCalledWith('testUrl')
+      expect(httpCall.send).toHaveBeenCalledWith({})
+    })
+  })
+
+  describe('delete', () => {
+    it('calls setHeaders and agent.put', () => {
+      const httpCall = {send: mock()}
+      HttpUtil.setHeaders = mock(httpCall)
+      agent.delete = mock({})
+
+      HttpUtil.delete('testUrl', [])
+
+      expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
+      expect(agent.delete).toHaveBeenCalledWith('testUrl')
+    })
+  })
+
   describe('getErrorMessageForLogs', () => {
     it('returns Unauthorized if status is 401', () => {
       expect(HttpUtil.getErrorMessageForLogs({status: 401})).toEqual('Unauthorized')

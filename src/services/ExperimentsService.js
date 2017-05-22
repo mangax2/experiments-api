@@ -33,7 +33,7 @@ class ExperimentsService {
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
             const tags = this.assignExperimentIdToTags(experimentIds, experiments)
             if (tags && tags.length > 0) {
-              return this.tagService.batchCreateTags(tags, context, tx)
+              return this.tagService.batchCreateTags(tags)
                 .then(() => AppUtil.createPostResponse(data))
             }
             return AppUtil.createPostResponse(data)
@@ -44,11 +44,12 @@ class ExperimentsService {
   getExperiments(queryString) {
     if (this.isFilterRequest(queryString) === true) {
       return this.getExperimentsByFilters(queryString)
-        .then(data => this.populateOwners(data)
-          .then(() => this.populateTags(data)))
+        .then(data => this.populateOwners(data))
     }
     return this.getAllExperiments()
-      .then(data => Promise.all([this.populateOwners(data), this.populateTags(data)])
+      .then(data => Promise.all(
+        [this.populateOwners(data), this.populateTagsForAllExperiments(data)],
+      )
         .then(() => data))
   }
 
@@ -64,16 +65,9 @@ class ExperimentsService {
     )
   }
 
-  populateTags(experiments) {
+  populateTagsForAllExperiments(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
-    const experimentIds = _.map(experiments, 'id')
-    return this.tagService.getTagsByExperimentIds(experimentIds).then((tags) => {
-      const experimentsAndTagsMap = _.groupBy(tags, 'experiment_id')
-      return _.map(experiments.slice(), (experiment) => {
-        experiment.tags = experimentsAndTagsMap[experiment.id]
-        return experiment
-      })
-    })
+    return this.tagService.getAllTagsForEntity('experiment').then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
 
   @Transactional('getExperimentById')
@@ -86,11 +80,11 @@ class ExperimentsService {
         return Promise.all(
           [
             this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, tx),
+            this.tagService.getTagsByExperimentId(id),
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
-          data.tags = ownersAndTags[1]
+          data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
           return data
         })
       }
@@ -110,14 +104,15 @@ class ExperimentsService {
             const owners = { experimentId: id, userIds: trimmedUserIds }
 
             return this.ownerService.batchUpdateOwners([owners], context, tx)
-              .then(() => this.tagService.deleteTagsForExperimentId(id, tx).then(() => {
+              .then(() => {
                 const tags = this.assignExperimentIdToTags([id], [experiment])
                 if (tags.length > 0) {
-                  return this.tagService.batchCreateTags(tags, context, tx)
-                    .then(() => data)
+                  return this.tagService.saveTags(tags, id)
+                      .then(() => data)
                 }
-                return data
-              }))
+                return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+              },
+              )
           }
         }))
   }
@@ -128,15 +123,23 @@ class ExperimentsService {
         logger.error(`Experiment Not Found for requested experimentId = ${id}`)
         throw AppError.notFound('Experiment Not Found for requested experimentId')
       } else {
-        return data
+        return this.tagService.deleteTagsForExperimentId(id).then(() => data)
       }
     })
 
   getExperimentsByFilters(queryString) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
-      const lowerCaseTagNames = this.toLowerCaseArray(queryString['tags.name'])
-      const lowerCaseTagValues = this.toLowerCaseArray(queryString['tags.value'])
-      return db.experiments.findExperimentsByTags(lowerCaseTagNames, lowerCaseTagValues)
+      const lowerCaseTagNames = _.toLower(queryString['tags.name'])
+      const lowerCaseTagValues = _.toLower(queryString['tags.value'])
+      return this.tagService.getEntityTagsByTagFilters(lowerCaseTagNames, lowerCaseTagValues)
+        .then((eTags) => {
+          if (eTags.length === 0) {
+            return []
+          }
+          const experimentIds = _.map(eTags, 'entityId')
+          return db.experiments.batchFind(experimentIds)
+            .then(experiments => ExperimentsService.mergeTagsWithExperiments(experiments, eTags))
+        })
     })
   }
 
@@ -161,9 +164,21 @@ class ExperimentsService {
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
-  toLowerCaseArray = queryStringValue => (
-    queryStringValue ? _.map(queryStringValue.split(','), _.toLower) : []
-  )
+
+  static mergeTagsWithExperiments(experiments, entityTags) {
+    const experimentsAndTagsMap = _.groupBy(entityTags, 'entityId')
+    return _.map(experiments.slice(), (experiment) => {
+      const tags = experimentsAndTagsMap[experiment.id] ?
+        experimentsAndTagsMap[experiment.id][0].tags : []
+      experiment.tags = ExperimentsService.prepareTagResponse(tags)
+      return experiment
+    })
+  }
+
+  static prepareTagResponse(tags) {
+    return _.map(tags, t => ({ name: t.category, value: t.value }))
+  }
+
 }
 
 module.exports = ExperimentsService

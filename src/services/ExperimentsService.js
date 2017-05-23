@@ -91,6 +91,20 @@ class ExperimentsService {
     })
   }
 
+  getUserPermissionsForExperiment(id, context) {
+    return this.ownerService.getOwnersByExperimentId(id).then((data) => {
+      if (data) {
+        const upperCaseUserIds = _.map(data.user_ids, _.toUpper)
+        if (upperCaseUserIds.includes(context.userId)) {
+          return ['write']
+        }
+        return []
+      }
+      return []
+    },
+    )
+  }
+
   @Transactional('updateExperiment')
   updateExperiment(id, experiment, context, tx) {
     return this.validator.validate([experiment], 'PUT', tx)

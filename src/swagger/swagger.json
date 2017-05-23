@@ -1558,6 +1558,47 @@
         }
       }
     },
+    "/experiments/{id}/permissions": {
+      "get": {
+        "summary": "get user permissions for the user for experiment id",
+        "description": "This endpoint returns information about the user permissions om experiment",
+        "operationId": "getPermissionsForUserByExperimentId",
+        "tags": [
+          "Permissions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permissions",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PermissionsResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experiments/{id}/summary": {
       "get": {
         "summary": "get the experiment summary for given experiment id.",
@@ -4866,6 +4907,10 @@
           "description": "modified user id for audit tracking."
         }
       }
-    }
+    },
+
+  "PermissionsResponse": {
+    "type": "string"
+     }
   }
 }

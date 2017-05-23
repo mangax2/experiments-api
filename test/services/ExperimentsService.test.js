@@ -176,6 +176,52 @@ describe('ExperimentsService', () => {
     })
   })
 
+
+  describe('getUserPermissionsForExperiment', () => {
+    it('returns user permissions array ignoringCase', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['ak']
+      } )
+      const expectedResult = ['write']
+
+      return target.getUserPermissionsForExperiment(1,{userId:'AK'}).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+    it('returns user permissions array when more than one owner exists', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['AK','ky']
+      } )
+      const expectedResult = ['write']
+
+      return target.getUserPermissionsForExperiment(1,{userId:'AK'}).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+    it('returns empty permissions array when user not matched', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['AK']
+      } )
+      const expectedResult = []
+
+      return target.getUserPermissionsForExperiment(1,{userId:'JN'}).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+    it('returns empty permissions array when db query returns null', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve(null)
+      const expectedResult = []
+
+      return target.getUserPermissionsForExperiment(1,{userId:'JN'}).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+  })
+
   describe('populateOwners', () => {
     it('returns mapped owners to an experiment', () => {
       target.ownerService.getOwnersByExperimentIds = mockResolve([{

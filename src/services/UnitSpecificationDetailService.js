@@ -4,6 +4,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
+import SecurityService from './SecurityService'
 import UnitSpecificationDetailValidator from '../validations/UnitSpecificationDetailValidator'
 import Transactional from '../decorators/transactional'
 
@@ -14,6 +15,7 @@ class UnitSpecificationDetailService {
   constructor() {
     this.validator = new UnitSpecificationDetailValidator()
     this.experimentService = new ExperimentsService()
+    this.securityService = new SecurityService()
   }
 
   @Transactional('getUnitSpecificationDetailsByExperimentId')
@@ -60,7 +62,7 @@ class UnitSpecificationDetailService {
 
   @Transactional('manageAllUnitSpecificationDetails')
   manageAllUnitSpecificationDetails(unitSpecificationDetailsObj, context, tx) {
-    return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, tx)
+    return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, context, tx)
       .then(() =>
         this.updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx)
           .then(() =>
@@ -69,33 +71,42 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('deleteUnitSpecificationDetails')
-  deleteUnitSpecificationDetails = (idsToDelete, tx) => {
+  deleteUnitSpecificationDetails = (idsToDelete, context, tx) => {
     if (_.compact(idsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
-      .then((data) => {
-        if (_.filter(data, element => element !== null).length !== idsToDelete.length) {
-          logger.error('Not all unit specification detail ids requested for delete were found')
-          throw AppError.notFound('Not all unit specification detail ids requested for delete were found')
-        } else {
-          return data
-        }
-      })
+    return this.batchGetUnitSpecificationDetailsByIds(idsToDelete, tx).then((unitSpecsData) => {
+      const experimentIds = _.map(unitSpecsData, 'experiment_id')
+      return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
+        .then(() => db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
+          .then((data) => {
+            if (_.filter(data, element => element !== null).length !== idsToDelete.length) {
+              logger.error('Not all unit specification detail ids requested for delete were found')
+              throw AppError.notFound(
+                'Not all unit specification detail ids requested for delete were found')
+            } else {
+              return data
+            }
+          }))
+    })
   }
 
-  updateUnitSpecificationDetails(unitSpecificationDetails, tx) {
+  updateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, tx)
+    const experimentIds = _.uniq(_.map(unitSpecificationDetails, 'experimentId'))
+    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
+      .then(() => this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx))
   }
 
-  createUnitSpecificationDetails(unitSpecificationDetails, tx) {
+  createUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, tx)
+    const experimentIds = _.uniq(_.map(unitSpecificationDetails, 'experimentId'))
+    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
+      .then(() => this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, context, tx))
   }
 }
 

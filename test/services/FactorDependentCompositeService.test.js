@@ -377,6 +377,7 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistAllVariables', () => {
     it('validates, persists variables, and returns response', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.variablesValidator.validate = mockResolve()
       target.persistVariables = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -390,6 +391,7 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, testContext, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
         expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
@@ -397,6 +399,7 @@ describe('FactorDependentCompositeService', () => {
     })
 
     it('rejects when persistVariables fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.variablesValidator.validate = mockResolve()
       target.persistVariables = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -410,6 +413,7 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
         expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
@@ -419,6 +423,7 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when validate fails', () => {
       target.variablesValidator.validate = mockReject('error')
+      target.securityService.permissionsCheck = mockResolve()
       target.persistVariables = mock()
       AppUtil.createPostResponse = mock()
       FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
@@ -431,6 +436,7 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
         expect(target.persistVariables).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()

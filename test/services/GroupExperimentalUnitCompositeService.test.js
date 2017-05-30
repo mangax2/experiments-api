@@ -15,6 +15,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('saveGroupAndUnitDetails', () => {
     it('saves groups and units', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock(undefined)
       target.groupService.deleteGroupsForExperimentId = mockResolve()
       target.recursiveBatchCreate = mockResolve()
@@ -22,6 +23,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
+
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.groupService.deleteGroupsForExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
@@ -29,11 +32,13 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     it('rejects when recursiveBatchCreate fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock(undefined)
       target.groupService.deleteGroupsForExperimentId = mockResolve()
       target.recursiveBatchCreate = mockReject('error')
 
       return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
         expect(target.groupService.deleteGroupsForExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
@@ -42,11 +47,13 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     it('rejects when deleteGroupsForExperimentId fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock(undefined)
       target.groupService.deleteGroupsForExperimentId = mockReject('error')
       target.recursiveBatchCreate = mockReject('error')
 
       return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
         expect(target.groupService.deleteGroupsForExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.recursiveBatchCreate).not.toHaveBeenCalled()
@@ -55,12 +62,18 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     it('throws an error when there are group validation errors', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock('error!')
       AppError.badRequest = mock('')
       target.groupService.deleteGroupsForExperimentId = mock()
 
-      expect(() => { target.saveGroupAndUnitDetails(1, [{}], testContext, testTx)}).toThrow()
-      expect(target.groupService.deleteGroupsForExperimentId).not.toHaveBeenCalled()
+      return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(target.validateGroups).toHaveBeenCalledWith([{}])
+        expect(target.groupService.deleteGroupsForExperimentId).not.toHaveBeenCalled()
+        expect(err).toEqual('')
+      })
+
     })
   })
 

@@ -61,7 +61,7 @@ describe('TreatmentDetailsService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, testTx).then(() => {
-        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createTreatments).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
@@ -78,7 +78,7 @@ describe('TreatmentDetailsService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, testTx).then(() => {}, (err) => {
-        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createTreatments).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(err).toEqual('error')
@@ -95,7 +95,7 @@ describe('TreatmentDetailsService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, testTx).then(() => {}, (err) => {
-        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createTreatments).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -112,7 +112,7 @@ describe('TreatmentDetailsService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, testTx).then(() => {}, (err) => {
-        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.createTreatments).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -123,8 +123,14 @@ describe('TreatmentDetailsService', () => {
   describe('deleteTreatments', () => {
     it('deletes treatments', () => {
       target.treatmentService.batchDeleteTreatments = mockResolve([1])
+      target.treatmentService.batchGetTreatmentByIds =  mockResolve([{id:1, experiment_id:10}])
+      target.securityService.permissionsCheckForExperiments = mockResolve()
 
-      return target.deleteTreatments([1], testTx).then((data) => {
+
+      return target.deleteTreatments([1], testContext, testTx).then((data) => {
+        expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith([1])
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalledWith([10], testContext, testTx)
+
         expect(target.treatmentService.batchDeleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([1])
       })
@@ -132,8 +138,12 @@ describe('TreatmentDetailsService', () => {
 
     it('rejects when batchDelete fails', () => {
       target.treatmentService.batchDeleteTreatments = mockReject('error')
+      target.treatmentService.batchGetTreatmentByIds =  mockResolve([{id:1, experiment_id:10}])
+      target.securityService.permissionsCheckForExperiments = mockResolve()
 
-      return target.deleteTreatments([1], testTx).then(() => {}, (err) => {
+      return target.deleteTreatments([1], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith([1])
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalledWith([10], testContext, testTx)
         expect(target.treatmentService.batchDeleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(err).toEqual('error')
       })
@@ -159,18 +169,21 @@ describe('TreatmentDetailsService', () => {
 
     it('calls batchCreateTreatments, createCombinationElements, and' +
       ' assembleBatchCreateCombincationElementsRequestFromAdds', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchCreateTreatments = mockResolve([{ id: 1 }])
       target.createCombinationElements = mockResolve()
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
-      return target.createTreatments([{}], testContext, testTx).then(() => {
-        expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.createTreatments([{id:1, experimentId:10}], testContext, testTx).then(() => {
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalledWith([10], testContext, testTx)
+        expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{id:1, experimentId:10}], testContext, testTx)
         expect(target.createCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).toHaveBeenCalledWith([{}], [1])
+        expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).toHaveBeenCalledWith([{id:1, experimentId:10}], [1])
       })
     })
 
     it('rejects when createCombinationElements fails', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchCreateTreatments = mockResolve([{ id: 1 }])
       target.createCombinationElements = mockReject('error')
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
@@ -184,6 +197,7 @@ describe('TreatmentDetailsService', () => {
     })
 
     it('rejects when batchCreateTreatments fails', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchCreateTreatments = mockReject('error')
       target.createCombinationElements = mockReject('error')
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
@@ -241,11 +255,14 @@ describe('TreatmentDetailsService', () => {
     })
 
     it('updates treatments, deletes, and creates combination elements', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
+
       target.treatmentService.batchUpdateTreatments = mockResolve()
       target.deleteCombinationElements = mockResolve()
       target.createAndUpdateCombinationElements = mockResolve()
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalled()
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], testTx)
         expect(target.createAndUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
@@ -253,11 +270,13 @@ describe('TreatmentDetailsService', () => {
     })
 
     it('rejects when createAndUpdateCombinationElements fails', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchUpdateTreatments = mockResolve()
       target.deleteCombinationElements = mockResolve()
       target.createAndUpdateCombinationElements = mockReject('error')
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalled()
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], testTx)
         expect(target.createAndUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
@@ -266,11 +285,14 @@ describe('TreatmentDetailsService', () => {
     })
 
     it('rejects when deleteCombinationElements fails', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
+
       target.treatmentService.batchUpdateTreatments = mockResolve()
       target.deleteCombinationElements = mockReject('error')
       target.createAndUpdateCombinationElements = mockReject('error')
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalled()
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], testTx)
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()
@@ -279,11 +301,13 @@ describe('TreatmentDetailsService', () => {
     })
 
     it('rejects when batchUpdateTreatments fails', () => {
+      target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchUpdateTreatments = mockReject('error')
       target.deleteCombinationElements = mockReject('error')
       target.createAndUpdateCombinationElements = mockReject('error')
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheckForExperiments).toHaveBeenCalled()
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).not.toHaveBeenCalled()
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()

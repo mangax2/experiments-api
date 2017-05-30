@@ -3,6 +3,8 @@ import Transactional from '../decorators/transactional'
 import GroupService from './GroupService'
 import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
+import SecurityService from './SecurityService'
+
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from '../services/utility/AppError'
@@ -13,17 +15,20 @@ class GroupExperimentalUnitCompositeService {
     this.groupService = new GroupService()
     this.groupValueService = new GroupValueService()
     this.experimentalUnitService = new ExperimentalUnitService()
+    this.securityService = new SecurityService()
   }
 
   @Transactional('saveGroupAndUnitDetails')
   saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx) {
-    const error = this.validateGroups(groupAndUnitDetails)
-    if (error) {
-      throw AppError.badRequest(error)
-    }
-    return this.groupService.deleteGroupsForExperimentId(experimentId, tx)
-      .then(() => this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
-        .then(() => AppUtil.createCompositePostResponse()))
+    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+      const error = this.validateGroups(groupAndUnitDetails)
+      if (error) {
+        throw AppError.badRequest(error)
+      }
+      return this.groupService.deleteGroupsForExperimentId(experimentId, tx)
+        .then(() => this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
+          .then(() => AppUtil.createCompositePostResponse()))
+    })
   }
 
   recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx) {

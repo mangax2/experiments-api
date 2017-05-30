@@ -176,52 +176,6 @@ describe('ExperimentsService', () => {
     })
   })
 
-
-  describe('getUserPermissionsForExperiment', () => {
-    it('returns user permissions array ignoringCase', () => {
-      target.ownerService.getOwnersByExperimentId = mockResolve({
-        user_ids: ['ak']
-      } )
-      const expectedResult = ['write']
-
-      return target.getUserPermissionsForExperiment(1,{userId:'AK'}).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
-    })
-
-    it('returns user permissions array when more than one owner exists', () => {
-      target.ownerService.getOwnersByExperimentId = mockResolve({
-        user_ids: ['AK','ky']
-      } )
-      const expectedResult = ['write']
-
-      return target.getUserPermissionsForExperiment(1,{userId:'AK'}).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
-    })
-
-    it('returns empty permissions array when user not matched', () => {
-      target.ownerService.getOwnersByExperimentId = mockResolve({
-        user_ids: ['AK']
-      } )
-      const expectedResult = []
-
-      return target.getUserPermissionsForExperiment(1,{userId:'JN'}).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
-    })
-
-    it('returns empty permissions array when db query returns null', () => {
-      target.ownerService.getOwnersByExperimentId = mockResolve(null)
-      const expectedResult = []
-
-      return target.getUserPermissionsForExperiment(1,{userId:'JN'}).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
-    })
-
-  })
-
   describe('populateOwners', () => {
     it('returns mapped owners to an experiment', () => {
       target.ownerService.getOwnersByExperimentIds = mockResolve([{
@@ -381,12 +335,14 @@ describe('ExperimentsService', () => {
     it('calls validate, update, batchUpdateOwners,' +
       ' batchCreateTags', () => {
       target.validator.validate = mockResolve()
+      target.securityService.permissionsCheck = mockResolve()
       db.experiments.update = mockResolve({})
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {owners: ['KMCCL ']}, testContext, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx )
         expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL ']}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {owners: ['KMCCL ']}, testContext, testTx)
         expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{experimentId: 1, userIds: ['KMCCL']}], testContext, testTx)
@@ -397,6 +353,7 @@ describe('ExperimentsService', () => {
     })
 
     it('calls validate, update,deleteTagsForExperimentId but not batchCreateTags', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.assignExperimentIdToTags = mock([])
@@ -405,6 +362,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{}])
@@ -415,6 +373,7 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when batchCreateTags fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.assignExperimentIdToTags = mock([{}])
@@ -422,6 +381,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{}])
@@ -432,6 +392,7 @@ describe('ExperimentsService', () => {
 
 
     it('throws an error when returned updated data is undefined', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve()
       target.assignExperimentIdToTags = mock()
@@ -439,6 +400,7 @@ describe('ExperimentsService', () => {
       AppError.notFound = mock()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, () => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found to Update')
@@ -448,12 +410,14 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when update fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
       db.experiments.update = mockReject('error')
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -463,12 +427,14 @@ describe('ExperimentsService', () => {
     })
 
     it('rejects when validate fails', () => {
+      target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockReject('error')
       db.experiments.update = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
 
       return target.updateExperiment(1, {}, testContext, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.experiments.update).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -480,11 +446,13 @@ describe('ExperimentsService', () => {
 
   describe('deleteExperiment', () => {
     it('returns data when successfully deleted data', () => {
+      target.securityService.permissionsCheck = mockResolve()
       db.experiments.remove = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
 
 
-      return target.deleteExperiment(1).then((data) => {
+      return target.deleteExperiment(1, testContext, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1)
         expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual({})
@@ -494,8 +462,10 @@ describe('ExperimentsService', () => {
     it('throws an error when data is undefined', () => {
       db.experiments.remove = mockResolve()
       AppError.notFound = mock()
+      target.securityService.permissionsCheck = mockResolve()
 
-      return target.deleteExperiment(1).then(() => {}, () => {
+      return target.deleteExperiment(1, testContext, testTx).then(() => {}, () => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
           ' experimentId')

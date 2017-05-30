@@ -5,6 +5,8 @@ import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsValidator from '../validations/ExperimentsValidator'
 import OwnerService from './OwnerService'
+import SecurityService from './SecurityService'
+
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
 
@@ -16,6 +18,7 @@ class ExperimentsService {
     this.validator = new ExperimentsValidator()
     this.ownerService = new OwnerService()
     this.tagService = new TagService()
+    this.securityService = new SecurityService()
   }
 
   @Transactional('batchCreateExperiments')
@@ -67,7 +70,8 @@ class ExperimentsService {
 
   populateTagsForAllExperiments(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
-    return this.tagService.getAllTagsForEntity('experiment').then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
+    return this.tagService.getAllTagsForEntity('experiment')
+      .then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
 
   @Transactional('getExperimentById')
@@ -91,55 +95,44 @@ class ExperimentsService {
     })
   }
 
-  getUserPermissionsForExperiment(id, context) {
-    return this.ownerService.getOwnersByExperimentId(id).then((data) => {
-      if (data) {
-        const upperCaseUserIds = _.map(data.user_ids, _.toUpper)
-        if (upperCaseUserIds.includes(context.userId)) {
-          return ['write']
-        }
-        return []
-      }
-      return []
-    },
-    )
-  }
-
   @Transactional('updateExperiment')
   updateExperiment(id, experiment, context, tx) {
-    return this.validator.validate([experiment], 'PUT', tx)
-      .then(() => db.experiments.update(id, experiment, context, tx)
-        .then((data) => {
-          if (!data) {
-            logger.error(`Experiment Not Found to Update for id = ${id}`)
-            throw AppError.notFound('Experiment Not Found to Update')
-          } else {
-            const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
-            const owners = { experimentId: id, userIds: trimmedUserIds }
+    return this.securityService.permissionsCheck(id, context, tx)
+      .then(() => this.validator.validate([experiment], 'PUT', tx)
+        .then(() => db.experiments.update(id, experiment, context, tx)
+          .then((data) => {
+            if (!data) {
+              logger.error(`Experiment Not Found to Update for id = ${id}`)
+              throw AppError.notFound('Experiment Not Found to Update')
+            } else {
+              const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
+              const owners = { experimentId: id, userIds: trimmedUserIds }
 
-            return this.ownerService.batchUpdateOwners([owners], context, tx)
-              .then(() => {
-                const tags = this.assignExperimentIdToTags([id], [experiment])
-                if (tags.length > 0) {
-                  return this.tagService.saveTags(tags, id)
-                      .then(() => data)
-                }
-                return this.tagService.deleteTagsForExperimentId(id).then(() => data)
-              },
-              )
-          }
-        }))
+              return this.ownerService.batchUpdateOwners([owners], context, tx)
+                .then(() => {
+                  const tags = this.assignExperimentIdToTags([id], [experiment])
+                  if (tags.length > 0) {
+                    return this.tagService.saveTags(tags, id)
+                        .then(() => data)
+                  }
+                  return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+                },
+                )
+            }
+          })))
   }
 
-  deleteExperiment = id => db.experiments.remove(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Experiment Not Found for requested experimentId = ${id}`)
-        throw AppError.notFound('Experiment Not Found for requested experimentId')
-      } else {
-        return this.tagService.deleteTagsForExperimentId(id).then(() => data)
-      }
-    })
+  deleteExperiment = (id, context, tx) => this.securityService.permissionsCheck(id, context, tx)
+    .then(() => db.experiments.remove(id)
+      .then((data) => {
+        if (!data) {
+          logger.error(`Experiment Not Found for requested experimentId = ${id}`)
+          throw AppError.notFound('Experiment Not Found for requested experimentId')
+        } else {
+          return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+        }
+      }))
+
 
   getExperimentsByFilters(queryString) {
     return this.validator.validate([queryString], 'FILTER').then(() => {

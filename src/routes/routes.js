@@ -18,6 +18,7 @@ import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
+import RefDesignSpecService from '../services/RefDesignSpecService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
@@ -213,6 +214,14 @@ router.post('/composites/unit-specification-details', (req, res, next) => new Un
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/ref-design-specs', (req, res, next) => new RefDesignSpecService().getAllRefDesignSpecs()
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/ref-design-specs/:id', (req, res, next) => new RefDesignSpecService().getDesignSpecById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

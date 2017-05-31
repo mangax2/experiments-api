@@ -16,6 +16,7 @@ import GroupValue from '../repos/groupValue'
 import Owner from '../repos/owner'
 import RefDataSource from '../repos/refDataSource'
 import RefDataSourceType from '../repos/refDataSourceType'
+import RefDesignSpec from '../repos/refDesignSpec'
 import Treatment from '../repos/treatment'
 import Unit from '../repos/unit'
 import UnitSpecification from '../repos/unitSpecification'
@@ -43,6 +44,7 @@ const options = {
     obj.owner = new (Owner)(obj, pgp)
     obj.refDataSource = new (RefDataSource)(obj, pgp)
     obj.refDataSourceType = new (RefDataSourceType)(obj, pgp)
+    obj.refDesignSpec = new RefDesignSpec(obj, pgp)
     obj.treatment = new (Treatment)(obj, pgp)
     obj.unit = new (Unit)(obj, pgp)
     obj.unitSpecification = new (UnitSpecification)(obj, pgp)

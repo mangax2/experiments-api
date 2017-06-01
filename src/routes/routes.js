@@ -19,7 +19,7 @@ import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
-import RefDesignSpecService from '../services/RefDesignSpecService'
+import RefDesignSpecificationService from '../services/RefDesignSpecificationService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
@@ -225,11 +225,11 @@ router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeSe
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.get('/ref-design-specs', (req, res, next) => new RefDesignSpecService().getAllRefDesignSpecs()
+router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecificationService().getAllRefDesignSpecs()
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.get('/ref-design-specs/:id', (req, res, next) => new RefDesignSpecService().getDesignSpecById(req.params.id)
+router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

@@ -4,8 +4,8 @@ import AppError from './utility/AppError'
 
 const logger = log4js.getLogger('RefDesignSpecService')
 
-class RefDesignSpecService {
-  getDesignSpecById = id => db.refDesignSpec.find(id)
+class RefDesignSpecificationService {
+  getDesignSpecById = id => db.refDesignSpecification.find(id)
     .then((data) => {
       if (!data) {
         logger.error(`RefDesignSpec Not Found for requested id = ${id}`)
@@ -15,7 +15,7 @@ class RefDesignSpecService {
       }
     })
 
-  getAllRefDesignSpecs = () => db.refDesignSpec.all()
+  getAllRefDesignSpecs = () => db.refDesignSpecification.all()
 }
 
-module.exports = RefDesignSpecService
+module.exports = RefDesignSpecificationService

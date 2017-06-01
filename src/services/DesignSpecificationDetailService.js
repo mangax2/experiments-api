@@ -19,7 +19,7 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getDesignSpecificationDetailsByExperimentId')
-  getUnitSpecificationDetailsByExperimentId(id, tx) {
+  getDesignSpecificationDetailsByExperimentId(id, tx) {
     return this.experimentService.getExperimentById(id, tx)
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
@@ -35,8 +35,8 @@ class DesignSpecificationDetailService {
       }
     })
 
-  @Transactional('getDesignSpecificationDetailsByIds')
-  batchGetUnitSpecificationDetailsByIds = (ids, tx) =>
+  @Transactional('batchGetDesignSpecificationDetailsByIds')
+  batchGetDesignSpecificationDetailsByIds = (ids, tx) =>
     db.designSpecificationDetail.batchFind(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
@@ -61,8 +61,8 @@ class DesignSpecificationDetailService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  populateExperimentId= (detailSpecs, experimentId) => {
-    _.forEach(detailSpecs, (ds) => {
+  populateExperimentId= (designSpecs, experimentId) => {
+    _.forEach(designSpecs, (ds) => {
       ds.experimentId = parseInt(experimentId, 10)
     })
   }
@@ -78,7 +78,7 @@ class DesignSpecificationDetailService {
         .then(() =>
           this.updateDesignSpecificationDetails(designSpecificationDetailsObj.updates, context, tx)
             .then(() =>
-              this.createUnitSpecificationDetails(designSpecificationDetailsObj.adds, context, tx)
+              this.createDesignSpecificationDetails(designSpecificationDetailsObj.adds, context, tx)
                 .then(() => AppUtil.createCompositePostResponse())))
     })
   }
@@ -108,7 +108,7 @@ class DesignSpecificationDetailService {
     return this.batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx)
   }
 
-  createUnitSpecificationDetails(designSpecificationDetails, context, tx) {
+  createDesignSpecificationDetails(designSpecificationDetails, context, tx) {
     if (_.compact(designSpecificationDetails).length === 0) {
       return Promise.resolve()
     }

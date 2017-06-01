@@ -8,7 +8,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
     return [
       { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
       { paramName: 'refDesignSpecId', type: 'numeric', required: true },
-      { paramName: 'refDesignSpecId', type: 'refData', entity: db.refDesignSpec },
+      { paramName: 'refDesignSpecId', type: 'refData', entity: db.refDesignSpecification },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
       {

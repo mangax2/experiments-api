@@ -137,6 +137,11 @@ router.get('/experiments/:id/composites/treatments', (req, res, next) => new Tre
 router.post('/composites/treatments', (req, res, next) => new TreatmentDetailsService().manageAllTreatmentDetails(req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
+
+router.get('/design-specification-details/:id', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailById(req.params.id)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/experiments/:id/treatments', (req, res, next) => new TreatmentService().getTreatmentsByExperimentId(req.params.id)
   .then(treatments => res.json(treatments))
   .catch(err => next(err)))
@@ -191,6 +196,13 @@ router.get('/experiments/:id/composites/group-experimental-units', (req, res, ne
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -212,12 +224,6 @@ router.get('/unit-specification-details/:id', (req, res, next) => new UnitSpecif
   .then(value => res.json(value))
   .catch(err => next(err)))
 router.post('/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.body, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id)
-  .then(values => res.json(values))
-  .catch(err => next(err)))
-router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

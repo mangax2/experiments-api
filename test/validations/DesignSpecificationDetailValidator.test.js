@@ -159,7 +159,7 @@ describe('DesignSpecificationDetailValidator', () => {
     })
 
     it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {
@@ -168,7 +168,7 @@ describe('DesignSpecificationDetailValidator', () => {
     })
 
     it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

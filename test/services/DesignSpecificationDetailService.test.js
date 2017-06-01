@@ -198,7 +198,7 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{},{}], testContext, testTx)
+        expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
@@ -215,12 +215,12 @@ describe('DesignSpecificationDetailService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1,  testContext, testTx).then(() => {}, (err) => {
+      }, 1, testContext, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{},{}], testContext, testTx)
+        expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -264,7 +264,7 @@ describe('DesignSpecificationDetailService', () => {
       }, 1, testContext, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
-        expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1],testContext, testTx)
+        expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(target.createDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
@@ -276,7 +276,7 @@ describe('DesignSpecificationDetailService', () => {
   describe('deleteDesignSpecificationDetails', () => {
     it('deletes design specification details', () => {
       db.designSpecificationDetail.batchRemove = mockResolve([1])
-      return target.deleteDesignSpecificationDetails([1],testContext, testTx).then((data) => {
+      return target.deleteDesignSpecificationDetails([1], testContext, testTx).then((data) => {
         expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([1])
       })
@@ -294,8 +294,8 @@ describe('DesignSpecificationDetailService', () => {
       db.designSpecificationDetail.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
-      return target.deleteDesignSpecificationDetails([1,2], testContext, testTx).then(() => {}, () => {
-        expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+      return target.deleteDesignSpecificationDetails([1, 2], testContext, testTx).then(() => {}, () => {
+        expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all design specification detail ids' +
           ' requested for delete were found')
       })
@@ -306,8 +306,8 @@ describe('DesignSpecificationDetailService', () => {
     it('updates design specification details', () => {
       target.batchUpdateDesignSpecificationDetails = mockResolve([{}])
 
-      return target.updateDesignSpecificationDetails([{experimentId:1}], testContext, testTx).then((data) => {
-        expect(target.batchUpdateDesignSpecificationDetails).toHaveBeenCalledWith([{experimentId:1}], testContext, testTx)
+      return target.updateDesignSpecificationDetails([{ experimentId: 1 }], testContext, testTx).then((data) => {
+        expect(target.batchUpdateDesignSpecificationDetails).toHaveBeenCalledWith([{ experimentId: 1 }], testContext, testTx)
         expect(data).toEqual([{}])
       })
     })
@@ -325,8 +325,8 @@ describe('DesignSpecificationDetailService', () => {
     it('creates design specification details', () => {
       target.batchCreateDesignSpecificationDetails = mockResolve([{}])
 
-      return target.createDesignSpecificationDetails([{experimentId:1}], testContext, testTx).then((data) => {
-        expect(target.batchCreateDesignSpecificationDetails).toHaveBeenCalledWith([{experimentId:1}],testContext, testTx)
+      return target.createDesignSpecificationDetails([{ experimentId: 1 }], testContext, testTx).then((data) => {
+        expect(target.batchCreateDesignSpecificationDetails).toHaveBeenCalledWith([{ experimentId: 1 }], testContext, testTx)
         expect(data).toEqual([{}])
       })
     })
@@ -342,8 +342,10 @@ describe('DesignSpecificationDetailService', () => {
 
   describe('populateExperimentId', () => {
     it('populates experimentId in design specification detail objects', () => {
-      const data = [{id:1, refDesignSpecId:1, value:10}]
+      const data = [{ id: 1, refDesignSpecId: 1, value: 10 }]
       target.populateExperimentId(data, 1)
+      expect(data).toEqual([{ id: 1, refDesignSpecId: 1, value: 10, experimentId: 1 }])
+
     })
 
   })

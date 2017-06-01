@@ -36,7 +36,7 @@ CREATE TABLE public.ref_design_spec
   modified_user_id character varying NOT NULL,
   modified_date timestamp with time zone NOT NULL,
   CONSTRAINT ref_design_spec_pk PRIMARY KEY (id)
-)
+);
 
 CREATE TABLE public.design_spec_detail
 (
@@ -56,7 +56,7 @@ CREATE TABLE public.design_spec_detail
       REFERENCES public.ref_design_spec (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT design_spec_detail_ak_1 UNIQUE (ref_design_spec_id, experiment_id)
-)
+);
 
 
 -----------------------Run after the table creation dev---------------------------------

@@ -2687,7 +2687,7 @@
         "adds": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DesignSpecificationDetailPayloadForPOST"
+            "$ref": "#/definitions/UnitSpecificationDetailPayloadForPOST"
           }
         },
         "deletes": {
@@ -2699,7 +2699,7 @@
         "updates": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DesignSpecificationDetailPayloadForPUT"
+            "$ref": "#/definitions/UnitSpecificationDetailPayloadForPUT"
           }
         }
       }

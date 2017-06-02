@@ -6,7 +6,7 @@ import db from '../db/DbManager'
 class DesignSpecificationDetailValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+      { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true },
       { paramName: 'refDesignSpecId', type: 'numeric', required: true },
       { paramName: 'refDesignSpecId', type: 'refData', entity: db.refDesignSpecification },
       { paramName: 'experimentId', type: 'numeric', required: true },

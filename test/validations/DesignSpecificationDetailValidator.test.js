@@ -17,7 +17,7 @@ describe('DesignSpecificationDetailValidator', () => {
       db.refDesignSpecification = {}
 
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true },
         { paramName: 'refDesignSpecId', type: 'numeric', required: true },
         { paramName: 'refDesignSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
@@ -60,7 +60,7 @@ describe('DesignSpecificationDetailValidator', () => {
       db.experiments = {}
       db.refDesignSpecification = {}
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true },
         { paramName: 'refDesignSpecId', type: 'numeric', required: true },
         { paramName: 'refDesignSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
@@ -81,7 +81,7 @@ describe('DesignSpecificationDetailValidator', () => {
       db.experiments = {}
       db.refDesignSpecification = {}
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true },
         { paramName: 'refDesignSpecId', type: 'numeric', required: true },
         { paramName: 'refDesignSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },

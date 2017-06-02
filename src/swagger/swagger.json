@@ -212,6 +212,50 @@
         }
       }
     },
+    "/design-specification-details/{id}": {
+      "get": {
+        "summary": "Get one design specification detail entity by id",
+        "description": "Returns specification detail entity by id",
+        "operationId": "getDesign-specification-detailsById",
+        "tags": [
+          "Design Specification Detail"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Design Specification Detail Entities",
+            "schema": {
+                "$ref": "#/definitions/DesignSpecificationDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experimental-units/{id}": {
       "get": {
         "summary": "get one experimental unit entity",
@@ -799,6 +843,106 @@
           },
           "404": {
             "description": "No Experiment Found For ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/experiments/{id}/design-specification-details/": {
+      "get": {
+        "summary": "Get all design specification details for an experiment",
+        "description": "Returns all design specification details for an experiment\n",
+        "operationId": "getDesign-specification-detailsByExperimentId",
+        "tags": [
+          "Design Specification Detail"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Design Specification Detail Entities",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DesignSpecificationDetail"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates, updates and deletes DesignSpecificationDetail",
+        "description": "Creates, updates and deletes DesignSpecificationDetail",
+        "operationId": "post_DesignSpecificationDetail",
+        "tags": [
+          "Design Specification Detail"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "DesignSpecificationDetail",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DesignSpecificationDetail operation SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1699,6 +1843,89 @@
         }
       }
     },
+    "/ref-design-specifications": {
+      "get": {
+        "summary": "Gets all ref-design-specifications and all their defined Data Sources",
+        "description": "Returns an array of reference data source types and their data sources",
+        "operationId": "getRefDesignSpecifications",
+        "tags": [
+          "Ref Design Specifications"
+        ],
+        "responses": {
+          "200": {
+            "description": "All Reference Design specifications",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RefDesignSpecifications"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/ref-design-specifications/{id}": {
+      "get": {
+        "summary": "Gets one ref-design-specification entity",
+        "description": "Returns ref-design-specification entity by id",
+        "operationId": "getRefDesignSpecificationsById",
+        "tags": [
+          "Ref Design Specifications"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All Reference Design specifications",
+            "schema": {
+                "$ref": "#/definitions/RefDesignSpecifications"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/treatments/{id}": {
       "get": {
         "summary": "Get one treatment entity",
@@ -2431,6 +2658,29 @@
         }
       }
     },
+    "CompositeDesignSpecificationDetailPayloadForPOST": {
+      "type": "object",
+      "properties": {
+        "adds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DesignSpecificationDetailPayloadForPOST"
+          }
+        },
+        "deletes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ids"
+          }
+        },
+        "updates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DesignSpecificationDetailPayloadForPUT"
+          }
+        }
+      }
+    },
     "CompositeUnitSpecificationDetailPayloadForPOST": {
       "type": "object",
       "properties": {
@@ -2572,6 +2822,81 @@
         "questionCode": {
           "type": "string",
           "description": "Refers to Q&A question Code"
+        }
+      }
+    },
+    "DesignSpecificationDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Design Spec Id"
+        },
+        "value": {
+          "type": "string",
+          "description": "Value of the design specification detail"
+        },
+        "refDesignSpecId": {
+          "type": "integer",
+          "description": "Reference to Design Specification"
+        },
+        "experimentId": {
+          "type": "integer",
+          "description": "Reference to Experiment"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "DesignSpecificationDetailPayloadForPOST": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Value of the design specification detail"
+        },
+        "refDesignSpecId": {
+          "type": "integer",
+          "description": "Reference to Design Specification"
+        },
+        "experimentId": {
+          "type": "integer",
+          "description": "Reference to Experiment"
+        }
+      }
+    },
+    "DesignSpecificationDetailPayloadForPUT": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the Design Specification Detail to update"
+        },
+        "value": {
+          "type": "string",
+          "description": "Value of the design specification detail"
+        },
+        "refDesignSpecId": {
+          "type": "integer",
+          "description": "Reference to Design Specification"
+        },
+        "experimentId": {
+          "type": "integer",
+          "description": "Reference to Experiment"
         }
       }
     },
@@ -3199,6 +3524,35 @@
           "items": {
             "$ref": "#/definitions/RefDataSource"
           }
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "RefDesignSpecifications":{
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id of ref design spec"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of ref design spec"
         },
         "createdDate": {
           "type": "string",

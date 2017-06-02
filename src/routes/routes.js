@@ -3,6 +3,7 @@ import log4js from 'log4js'
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
+import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -18,10 +19,12 @@ import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import GroupService from '../services/GroupService'
 import GroupTypeService from '../services/GroupTypeService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
+import RefDesignSpecificationService from '../services/RefDesignSpecificationService'
 import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
+
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -134,6 +137,11 @@ router.get('/experiments/:id/composites/treatments', (req, res, next) => new Tre
 router.post('/composites/treatments', (req, res, next) => new TreatmentDetailsService().manageAllTreatmentDetails(req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
+
+router.get('/design-specification-details/:id', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailById(req.params.id)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/experiments/:id/treatments', (req, res, next) => new TreatmentService().getTreatmentsByExperimentId(req.params.id)
   .then(treatments => res.json(treatments))
   .catch(err => next(err)))
@@ -188,6 +196,13 @@ router.get('/experiments/:id/composites/group-experimental-units', (req, res, ne
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -213,6 +228,14 @@ router.post('/composites/unit-specification-details', (req, res, next) => new Un
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecificationService().getAllRefDesignSpecs()
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

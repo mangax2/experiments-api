@@ -6,7 +6,7 @@ FROM (
        and table_name  not in ('experiment_summary', 'group', 'unit')
      )  as tables ;
 
-
+--Run only above script when new tables are added
 
 CREATE TRIGGER audit_trigger_row
   AFTER INSERT OR UPDATE OR DELETE

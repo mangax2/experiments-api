@@ -15,17 +15,17 @@ function requestContextMiddlewareFunction(req, res, next) {
       throw AppError.badRequest('oauth_resourceownerinfo header not found.')
     }
     const tokens = header.split(',')
-    const userIdToken = _.find(tokens, token => token.startsWith('user_id'))
+    const userIdToken = _.find(tokens, token => token.startsWith('username'))
     if (!userIdToken) {
-      throw AppError.badRequest('user_id not found within oauth_resourceownerinfo.')
+      throw AppError.badRequest('username not found within oauth_resourceownerinfo.')
     }
     const userIdTokens = userIdToken.split('=')
     if (userIdTokens.length !== 2) {
-      throw AppError.badRequest('user_id within oauth_resourceownerinfo does not represent key=value pair.')
+      throw AppError.badRequest('username within oauth_resourceownerinfo does not represent key=value pair.')
     }
     const userId = userIdTokens[1]
     if (userId.trim().length === 0) {
-      throw AppError.badRequest('user_id within oauth_resourceownerinfo is empty string.')
+      throw AppError.badRequest('username within oauth_resourceownerinfo is empty string.')
     }
     req.context = {
       userId: userId.toUpperCase(),

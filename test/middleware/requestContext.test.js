@@ -69,39 +69,43 @@ describe('requestContextMiddlewareFunction', () => {
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
-  it('throws an error when user_id is missing from header value', () => {
+  it('throws an error when username is missing from header value', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
     expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'notUserId=blah' } }, null, nextFunc)}).toThrow()
-    expect(AppError.badRequest).toHaveBeenCalledWith('user_id not found within oauth_resourceownerinfo.')
+    expect(AppError.badRequest).toHaveBeenCalledWith('username not found within' +
+      ' oauth_resourceownerinfo.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
-  it('throws an error when user_id does not represent a key value pair', () => {
+  it('throws an error when username does not represent a key value pair', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'user_id' } }, null, nextFunc)}).toThrow()
-    expect(AppError.badRequest).toHaveBeenCalledWith('user_id within oauth_resourceownerinfo does not represent key=value pair.')
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username' } }, null, nextFunc)}).toThrow()
+    expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo' +
+      ' does not represent key=value pair.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
-  it('throws an error when user_id value is empty', () => {
+  it('throws an error when username value is empty', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'user_id=' } }, null, nextFunc)}).toThrow()
-    expect(AppError.badRequest).toHaveBeenCalledWith('user_id within oauth_resourceownerinfo is empty string.')
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=' } }, null, nextFunc)}).toThrow()
+    expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo is' +
+      ' empty string.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
-  it('throws an error when user_id value is a space', () => {
+  it('throws an error when username value is a space', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'user_id= ' } }, null, nextFunc)}).toThrow()
-    expect(AppError.badRequest).toHaveBeenCalledWith('user_id within oauth_resourceownerinfo is empty string.')
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username= ' } }, null, nextFunc)}).toThrow()
+    expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo is' +
+      ' empty string.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
@@ -109,7 +113,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    const req = { headers: { oauth_resourceownerinfo: 'user_id=testUser' } }
+    const req = { headers: { oauth_resourceownerinfo: 'username=testUser' } }
     requestContextMiddlewareFunction(req, null, nextFunc)
     expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
@@ -120,7 +124,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    const req = { headers: { oauth_resourceownerinfo: 'notMe=wrongValue,user_id=testUser,another=value' } }
+    const req = { headers: { oauth_resourceownerinfo: 'notMe=wrongValue,username=testUser,another=value' } }
     requestContextMiddlewareFunction(req, null, nextFunc)
     expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
@@ -131,7 +135,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'user_id=test' } }, null, nextFunc)
+    requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=test' } }, null, nextFunc)
     expect(AppError.badRequest).not.toHaveBeenCalled()
     expect(nextFunc).toHaveBeenCalled()
   })

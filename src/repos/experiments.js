@@ -7,12 +7,12 @@ module.exports = rep => ({
 
   all: () => rep.any('SELECT * FROM experiment'),
 
-  findExperimentsByTags: (lowerCaseTagNames, lowerCaseTagValues) => {
+  findExperimentsByTags: (lowerCaseTagCategories, lowerCaseTagValues) => {
     const query = 'SELECT DISTINCT e.* from experiment e , tag t where t.experiment_id = e.id'
-    if (lowerCaseTagNames.length > 0 && lowerCaseTagValues.length > 0) {
-      return rep.any(`${query} and lower(t.name) IN ($1:csv) and lower(t.value) IN ($2:csv)`, [lowerCaseTagNames, lowerCaseTagValues])
-    } else if (lowerCaseTagNames.length > 0) {
-      return rep.any(`${query} and lower(t.name) IN ($1:csv)`, [lowerCaseTagNames])
+    if (lowerCaseTagCategories.length > 0 && lowerCaseTagValues.length > 0) {
+      return rep.any(`${query} and lower(t.category) IN ($1:csv) and lower(t.value) IN ($2:csv)`, [lowerCaseTagCategories, lowerCaseTagValues])
+    } else if (lowerCaseTagCategories.length > 0) {
+      return rep.any(`${query} and lower(t.category) IN ($1:csv)`, [lowerCaseTagCategories])
     } else if (lowerCaseTagValues.length > 0) {
       return rep.any(`${query} and lower(t.value) IN ($1:csv)`, [lowerCaseTagValues])
     }

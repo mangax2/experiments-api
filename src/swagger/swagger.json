@@ -476,9 +476,9 @@
         ],
         "parameters": [
           {
-            "name": "tags.name",
+            "name": "tags.category",
             "in": "query",
-            "description": "Tag names comma separated list",
+            "description": "Tag categories comma separated list",
             "required": false,
             "type": "string"
           },
@@ -4050,13 +4050,13 @@
           "type": "integer",
           "description": "Tag Id"
         },
-        "name": {
+        "category": {
           "type": "string",
-          "description": "Name of the tag"
+          "description": "Category of the tag"
         },
         "value": {
           "type": "string",
-          "description": "value of the tag"
+          "description": "Value of the tag"
         },
         "experimentId": {
           "type": "string",

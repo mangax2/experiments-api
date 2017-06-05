@@ -58,7 +58,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.put = mockResolve({body: {id: 1}})
       AppUtil.createPostResponse = mock()
-      const tags=[{name:'tagname', value:'tagValue'}]
+      const tags=[{category:'tagCategory', value:'tagValue'}]
 
       return target.saveTags(tags,1).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)
@@ -69,7 +69,7 @@ describe('TagService', () => {
       target.validator.validate = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.put =  mockReject('error')
-      const tags=[{name:'tagname', value:'tagValue'}]
+      const tags=[{category:'tagCategory', value:'tagValue'}]
 
       return target.saveTags(tags,1).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)

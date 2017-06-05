@@ -10,12 +10,6 @@
     "https"
   ],
   "basePath": "/experiments-api",
-  "produces": [
-    "application/json"
-  ],
-  "consumes": [
-    "application/json"
-  ],
   "paths": {
     "/combination-elements/{id}": {
       "get": {
@@ -4086,7 +4080,7 @@
         }
       }
     },
-    
+
     "PermissionsResponse": {
       "type": "string"
     }

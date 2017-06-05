@@ -10,9 +10,6 @@
     "https"
   ],
   "basePath": "/experiments-api",
-  "produces": [
-    "application/json"
-  ],
   "paths": {
     "/combination-elements/{id}": {
       "get": {
@@ -21,6 +18,9 @@
         "operationId": "getCombination-elementsById",
         "tags": [
           "Combination Elements"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -72,6 +72,12 @@
         "tags": [
           "Composites"
         ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "Composites Treatments",
@@ -121,6 +127,12 @@
         "tags": [
           "Unit Specification Detail"
         ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "Composites Unit Specification Details",
@@ -169,6 +181,9 @@
         "operationId": "getDependent-variablesById",
         "tags": [
           "Dependent Variables"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -220,6 +235,9 @@
         "tags": [
           "Design Specification Detail"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -263,6 +281,9 @@
         "operationId": "getExperimental-unitsById",
         "tags": [
           "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -314,6 +335,9 @@
         "tags": [
           "Groups"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -355,6 +379,9 @@
         "tags": [
           "Experiment Designs"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "Array of experiment designs",
@@ -387,6 +414,9 @@
         "operationId": "getExperiment-designById",
         "tags": [
           "Experiment Designs"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -441,6 +471,9 @@
         "tags": [
           "Experiments"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "tags.name",
@@ -487,6 +520,12 @@
         "operationId": "postExperiments",
         "tags": [
           "Experiments"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -543,6 +582,9 @@
         "tags": [
           "Experiments"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -590,6 +632,12 @@
         "operationId": "putExperimentById",
         "tags": [
           "Experiments"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -652,6 +700,9 @@
         "tags": [
           "Composites"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -705,6 +756,9 @@
         "tags": [
           "Composites"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -755,6 +809,12 @@
         "operationId": "postComposites_Group-experimental-unitsByExperimentId",
         "tags": [
           "Composites"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -811,6 +871,9 @@
         "tags": [
           "Dependent Variables"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -864,6 +927,9 @@
         "tags": [
           "Design Specification Detail"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -908,6 +974,12 @@
         "operationId": "post_DesignSpecificationDetail",
         "tags": [
           "Design Specification Detail"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -964,6 +1036,9 @@
         "tags": [
           "Experimental Units"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1016,6 +1091,9 @@
         "operationId": "getFactorsByExperimentId",
         "tags": [
           "Factors"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1070,6 +1148,9 @@
         "tags": [
           "Permissions"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1110,6 +1191,9 @@
         "operationId": "getSummaryByExperimentId",
         "tags": [
           "Experiment Summary"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1160,6 +1244,9 @@
         "operationId": "getTreatmentsByExperimentId",
         "tags": [
           "Treatments"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1214,6 +1301,9 @@
         "tags": [
           "Unit Specification Detail"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1260,6 +1350,9 @@
         "operationId": "getVariablesByExperimentId",
         "tags": [
           "Variables"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1314,6 +1407,9 @@
         "tags": [
           "Factors"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1363,6 +1459,9 @@
         "operationId": "getFactor-levelsByFactorId",
         "tags": [
           "Factor Levels"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1417,6 +1516,9 @@
         "tags": [
           "Factor Levels"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1467,6 +1569,9 @@
         "tags": [
           "Factor Types"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "Array of factor types",
@@ -1499,6 +1604,9 @@
         "operationId": "getFactorTypeById",
         "tags": [
           "Factor Types"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1550,6 +1658,9 @@
         "tags": [
           "Documentation"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "fileName",
@@ -1575,6 +1686,9 @@
         "operationId": "getGroupById",
         "tags": [
           "Groups"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1625,6 +1739,9 @@
         "operationId": "getGroupValuesByGroupId",
         "tags": [
           "Group Value"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1679,6 +1796,9 @@
         "tags": [
           "Group Types"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "Array of group types",
@@ -1711,6 +1831,9 @@
         "operationId": "getGroupTypeById",
         "tags": [
           "Group Types"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1762,6 +1885,9 @@
         "tags": [
           "Group Value"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1812,6 +1938,9 @@
         "tags": [
           "Ref Data Sources"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "All Reference Data Source Type Entities With Data Sources",
@@ -1851,6 +1980,9 @@
         "tags": [
           "Ref Design Specifications"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "All Reference Design specifications",
@@ -1889,6 +2021,9 @@
         "operationId": "getRefDesignSpecificationsById",
         "tags": [
           "Ref Design Specifications"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1933,6 +2068,9 @@
         "operationId": "getTreatmentById",
         "tags": [
           "Treatments"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -1983,6 +2121,9 @@
         "operationId": "getCombination-elementsByTreatmentId",
         "tags": [
           "Combination Elements"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -2037,6 +2178,9 @@
         "tags": [
           "Experimental Units"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -2090,6 +2234,9 @@
         "tags": [
           "Unit Specification"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "Unit Specification Entities",
@@ -2128,6 +2275,9 @@
         "operationId": "getUnitSpecificationById",
         "tags": [
           "Unit Specification"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -2179,6 +2329,9 @@
         "tags": [
           "Unit Specification Detail"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -2229,6 +2382,9 @@
         "tags": [
           "Unit Type"
         ],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "Unit Type Entities",
@@ -2267,6 +2423,9 @@
         "operationId": "getUnitTypeById",
         "tags": [
           "Unit Type"
+        ],
+        "produces": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -2317,6 +2476,12 @@
         "operationId": "postVariables",
         "tags": [
           "Variables"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "parameters": [
           {
@@ -3916,8 +4081,8 @@
       }
     },
 
-  "PermissionsResponse": {
-    "type": "string"
-     }
+    "PermissionsResponse": {
+      "type": "string"
+    }
   }
 }

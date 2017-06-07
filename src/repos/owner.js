@@ -1,7 +1,8 @@
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  findByExperimentId: (experimentId, tx = rep) => tx.oneOrNone('SELECT user_ids FROM owner WHERE' +
+  findByExperimentId: (experimentId, tx = rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
+    ' owner WHERE' +
     ' experiment_id = $1', experimentId),
 
   batchFindByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT * FROM owner where' +

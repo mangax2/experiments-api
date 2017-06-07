@@ -64,6 +64,7 @@ class ExperimentsService {
       _.map(experiments.slice(), (experiment) => {
         const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
         experiment.owners = owners.user_ids
+        experiment.ownerGroups = owners.group_ids
         return experiment
       }),
     )
@@ -89,6 +90,7 @@ class ExperimentsService {
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
+          data.ownerGroups = ownersAndTags[0].group_ids
           data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
           return data
         })

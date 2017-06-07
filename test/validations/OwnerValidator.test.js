@@ -1,6 +1,8 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import OwnerValidator from '../../src/validations/OwnerValidator'
 import HttpUtil from '../../src/services/utility/HttpUtil'
+import cfServices from '../../src//services/utility/ServiceConfig'
+
 import PingUtil from '../../src/services/utility/PingUtil'
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
@@ -146,21 +148,9 @@ describe('OwnerValidator', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
 
-      return target.validateUserIds(['KMCCL'], 'KMCCL').then(() => {
+      return target.validateUserIds(['KMCCL']).then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalled()
-      })
-    })
-
-    it('rejects when the user making the call is not present in the list', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
-      AppError.badRequest = mock()
-
-      return target.validateUserIds(['KMCCL'], 'JGORD1').then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
       })
     })
 
@@ -169,11 +159,68 @@ describe('OwnerValidator', () => {
       HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
       AppError.badRequest = mock()
 
-      return target.validateUserIds(['KMCCL', 'JGORD1'], 'KMCCL').then(() => {}, () => {
+      return target.validateUserIds(['KMCCL', 'JGORD1']).then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Some users listed are invalid: JGORD1')
       })
     })
   })
+
+  describe('validateGroupIds', () => {
+    it('resolves when all group ids are valid, and the user enacting the call is present in' +
+      ' the' +
+      ' list', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group1' }] } })
+
+      return target.validateGroupIds(['group1']).then(() => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/groups?ids=group1`,{})
+      })
+    })
+
+
+    it('rejects when the not all groups are valid', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group1' }] } })
+      AppError.badRequest = mock()
+
+      return target.validateGroupIds(['group1', 'group2']).then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.get).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Some groups listed are invalid: group2')
+      })
+    })
+
+  })
+
+
+
+  describe('userOwnershipCheck', () => {
+    it('resolves when userId is present in userIds', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group1' }] } })
+
+      return target.userOwnershipCheck(['group1'],['user1'], 'user1').then(() => {
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+      })
+    })
+
+
+    it('rejects when userId is not the owner', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group1' }] } })
+      AppError.badRequest = mock()
+
+      return target.userOwnershipCheck([],['user1'], 'user2').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
+      })
+    })
+
+
+
+  })
+
 })

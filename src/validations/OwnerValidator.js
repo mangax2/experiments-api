@@ -58,7 +58,7 @@ class OwnerValidator extends SchemaValidator {
     if (!this.hasErrors()) {
       return this.additionalCheck(ownerObj[0])
         .then(() => this.validateUserIds(ownerObj[0].userIds)
-          .then(() => this.validateGroupIds(ownerObj[0].groupIds, context.userId)
+          .then(() => this.validateGroupIds(ownerObj[0].groupIds)
             .then(() => {
               const groupIds = ownerObj[0].groupIds ? ownerObj[0].groupIds : []
               const userIds = ownerObj[0].userIds ? ownerObj[0].userIds : []
@@ -111,7 +111,7 @@ class OwnerValidator extends SchemaValidator {
         const invalidGroups = _.difference(groupIds, profileIds)
 
         if (groupIds.length !== profileIds.length) {
-          return Promise.reject(AppError.badRequest(`Some group listed are invalid: ${invalidGroups}`))
+          return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`))
         }
 
         return Promise.resolve()

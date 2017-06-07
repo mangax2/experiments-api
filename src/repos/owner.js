@@ -9,7 +9,7 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (experimentsOwners, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['experiment_id', 'user_ids', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['experiment_id', 'user_ids', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'group_ids'],
       { table: 'owner' },
     )
 
@@ -20,6 +20,8 @@ module.exports = (rep, pgp) => ({
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
+      group_ids: ownershipInfo.groupIds,
+
     }))
 
     const query = `${pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
@@ -29,7 +31,7 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (experimentsOwners, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'experiment_id', 'user_ids', 'modified_user_id', 'modified_date'],
+      ['?id', 'experiment_id', 'user_ids', 'group_ids', 'modified_user_id', 'modified_date'],
       { table: 'owner' },
     )
 
@@ -37,6 +39,7 @@ module.exports = (rep, pgp) => ({
       id: ownershipInfo.id,
       experiment_id: parseInt(ownershipInfo.experimentId, 10),
       user_ids: ownershipInfo.userIds,
+      group_ids: ownershipInfo.groupIds,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))

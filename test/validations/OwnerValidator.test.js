@@ -21,8 +21,14 @@ describe('OwnerValidator', () => {
         {
           paramName: 'userIds',
           type: 'array',
-          entityCount: { min: 1 },
-          required: true,
+          entityCount: { min: 0 },
+          required: false,
+        },
+        {
+          paramName: 'groupIds',
+          type: 'array',
+          entityCount: { min: 0 },
+          required: false,
         },
       ]
 
@@ -49,8 +55,14 @@ describe('OwnerValidator', () => {
       {
         paramName: 'userIds',
         type: 'array',
-        entityCount: { min: 1 },
-        required: true,
+        entityCount: { min: 0 },
+        required: false,
+      },
+      {
+        paramName: 'groupIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
       },
     ]
 
@@ -113,7 +125,7 @@ describe('OwnerValidator', () => {
       target.validateUserIds = mockResolve()
 
       return target.postValidate([{ userIds: ['KMCCL'] }], testContext).then(() => {
-        expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'], 'KMCCL')
+        expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
       })
     })
 
@@ -122,7 +134,7 @@ describe('OwnerValidator', () => {
       target.validateUserIds = mockReject('error')
 
       return target.postValidate([{ userIds: ['KMCCL'] }], testContext).then(() => {}, (err) => {
-        expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'], 'KMCCL')
+        expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
         expect(err).toEqual('error')
       })
     })

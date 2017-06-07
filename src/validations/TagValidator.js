@@ -5,7 +5,7 @@ import AppError from '../services/utility/AppError'
 class TagValidator extends SchemaValidator {
   static get VALIDATION_SCHEMA() {
     return [
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+      { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'experimentId', type: 'numeric', required: true },
     ]
@@ -15,8 +15,7 @@ class TagValidator extends SchemaValidator {
 
   getEntityName = () => 'Tag'
 
-
-  getBusinessKeyPropertyNames = () => ['name', 'value', 'experimentId']
+  getBusinessKeyPropertyNames = () => ['category', 'value', 'experimentId']
 
   getDuplicateBusinessKeyError = () => 'Duplicate Tag in request payload with same experiment id'
 
@@ -34,11 +33,11 @@ class TagValidator extends SchemaValidator {
       const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
       _.forEach(groupByObject, (innerArray) => {
-        const namesAndValues = _.map(innerArray, e => ({
-          name: e[businessKeyPropertyNames[0]],
+        const categoriesAndValues = _.map(innerArray, e => ({
+          category: e[businessKeyPropertyNames[0]],
           value: e[businessKeyPropertyNames[1]],
         }))
-        if (_.uniqWith(namesAndValues, _.isEqual).length !== namesAndValues.length) {
+        if (_.uniqWith(categoriesAndValues, _.isEqual).length !== categoriesAndValues.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

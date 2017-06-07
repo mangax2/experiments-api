@@ -216,8 +216,8 @@ describe('ExperimentsService', () => {
       target.tagService.getAllTagsForEntity = mockResolve([{ entityId: 1, tags:[{category:'cat1', value:'val1'}] }, { entityId: 2, tags:[{category:'cat2', value:'val2'}] }])
       const expectedResult = [{
         id: 1,
-        tags: [{ name:'cat1', value:'val1' }],
-      }, { id: 2, tags: [ { name:'cat2', value:'val2'} ] }]
+        tags: [{ category:'cat1', value:'val1' }],
+      }, { id: 2, tags: [ { category:'cat2', value:'val2'} ] }]
 
       return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }]).then((data) => {
         expect(data).toEqual(expectedResult)
@@ -228,8 +228,8 @@ describe('ExperimentsService', () => {
       target.tagService.getAllTagsForEntity = mockResolve([{ entityId: 1, tags:[{category:'cat1', value:'val1'}] }, { entityId: 2, tags:[{category:'cat2', value:'val2'}] }])
       const expectedResult = [{
         id: 1,
-        tags: [{ name:'cat1', value:'val1' }],
-      }, { id: 2, tags: [ { name:'cat2', value:'val2'} ] }]
+        tags: [{ category:'cat1', value:'val1' }],
+      }, { id: 2, tags: [ { category:'cat2', value:'val2'} ] }]
 
       return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }]).then((data) => {
         expect(data).toEqual(expectedResult)
@@ -259,7 +259,7 @@ describe('ExperimentsService', () => {
     it('maps category to name to prepare response ', ()=>{
 
       const result = ExperimentsService.prepareTagResponse([{category:'tagName', value:'tagValue'}])
-      expect(result).toEqual([{name:'tagName', value: 'tagValue'}])
+      expect(result).toEqual([{category:'tagName', value: 'tagValue'}])
     })
   })
 
@@ -267,7 +267,7 @@ describe('ExperimentsService', () => {
 
     it('merges experiments and entityTags to  return experiments with tags ', ()=>{
       const result = ExperimentsService.mergeTagsWithExperiments([{id:1}], [{entityId:1, tags:[{category:'tagName', value:'tagValue'}]}])
-      expect(result).toEqual([{id:1, tags:[{name:'tagName', value: 'tagValue'}]}])
+      expect(result).toEqual([{id:1, tags:[{category:'tagName', value: 'tagValue'}]}])
     })
 
     it('merges experiments and entityTags to  return experiments with empty tags ', ()=>{
@@ -526,12 +526,10 @@ describe('ExperimentsService', () => {
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       target.toLowerCaseArray = mock()
-      db.experiments.findExperimentsByTags = mock()
 
       return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).not.toHaveBeenCalled()
-        expect(db.experiments.findExperimentsByTags).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
@@ -562,13 +560,13 @@ describe('ExperimentsService', () => {
       }])
     })
 
-    it('assigns name, value, and experimentId to tags', () => {
+    it('assigns category, value, and experimentId to tags', () => {
       const experimentIds = [1]
-      const experiments = [{ id: 1, tags: [{ name: 'testN', value: 'testV' }] }]
+      const experiments = [{ id: 1, tags: [{ category: 'testN', value: 'testV' }] }]
 
       expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{
         experimentId: 1,
-        name: 'testn',
+        category: 'testn',
         value: 'testv',
       }])
     })

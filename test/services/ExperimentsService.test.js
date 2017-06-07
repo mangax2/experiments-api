@@ -525,12 +525,10 @@ describe('ExperimentsService', () => {
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       target.toLowerCaseArray = mock()
-      db.experiments.findExperimentsByTags = mock()
 
       return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).not.toHaveBeenCalled()
-        expect(db.experiments.findExperimentsByTags).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })

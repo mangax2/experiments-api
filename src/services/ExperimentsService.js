@@ -29,8 +29,8 @@ class ExperimentsService {
           const experimentIds = _.map(data, d => d.id)
 
           const experimentsOwners = _.map(experiments, (exp, index) => {
-            const owners = _.map(exp.owners, own => _.trim(own))
-            const ownerGroups = _.map(exp.ownerGroups, gOwn => _.trim(gOwn))
+            const owners = _.map(exp.owners, _.trim)
+            const ownerGroups = _.map(exp.ownerGroups, _.trim)
             return { experimentId: experimentIds[index], userIds: owners, groupIds: ownerGroups }
           })
 
@@ -108,10 +108,12 @@ class ExperimentsService {
               logger.error(`Experiment Not Found to Update for id = ${id}`)
               throw AppError.notFound('Experiment Not Found to Update')
             } else {
-              const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
-              const ownerGroups = _.map(experiment.ownerGroups, oGp => _.trim(oGp))
+              const trimmedUserIds = _.map(experiment.owners, _.trim)
+              const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
 
-              const owners = { experimentId: id, userIds: trimmedUserIds, groupIds: ownerGroups }
+              const owners = { experimentId: id,
+                userIds: trimmedUserIds,
+                groupIds: trimmedOwnerGroups }
               return this.ownerService.batchUpdateOwners([owners], context, tx)
                 .then(() => {
                   const tags = this.assignExperimentIdToTags([id], [experiment])

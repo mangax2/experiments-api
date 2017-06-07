@@ -115,7 +115,10 @@ describe('OwnerValidator', () => {
   describe('postValidate', () => {
     it('resolves when there are errors', () => {
       target.hasErrors = mock(true)
+      target.requiredOwnerCheck = mock()
       target.validateUserIds = mock()
+      target.validateGroupIds = mock()
+
 
       return target.postValidate([], testContext).then(() => {
         expect(target.validateUserIds).not.toHaveBeenCalled()
@@ -124,10 +127,30 @@ describe('OwnerValidator', () => {
 
     it('calls validateUserIds and resolves', () => {
       target.hasErrors = mock(false)
+      target.requiredOwnerCheck = mockResolve()
       target.validateUserIds = mockResolve()
+      target.validateGroupIds = mockResolve()
+      target.userOwnershipCheck = mockResolve()
+
 
       return target.postValidate([{ userIds: ['KMCCL'] }], testContext).then(() => {
         expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
+      })
+    })
+
+    it('calls validateGroupIds and resolves', () => {
+      target.hasErrors = mock(false)
+      target.requiredOwnerCheck = mockResolve()
+      target.validateUserIds = mockResolve()
+      target.validateGroupIds = mockResolve()
+      target.userOwnershipCheck = mockResolve()
+
+
+
+
+      return target.postValidate([{ groupIds: ['group1'] }], testContext).then(() => {
+        expect(target.validateGroupIds).toHaveBeenCalledWith(['group1'])
+
       })
     })
 
@@ -142,7 +165,48 @@ describe('OwnerValidator', () => {
     })
   })
 
+
+
+  describe('requiredOwnerCheck', () => {
+    it('resolves when  userIds is present', () => {
+      AppError.badRequest = mock()
+      return target.requiredOwnerCheck([],['user1','user2']).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+
+      })
+    })
+
+    it('resolves when  groupIds is present', () => {
+      AppError.badRequest = mock()
+      return target.requiredOwnerCheck(['user1','user2'],[]).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+
+      })
+    })
+
+
+    it('rejects when both userIds and groupIds are empty', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
+      AppError.badRequest = mock()
+
+      return target.requiredOwnerCheck([],[]).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Owner is required in request')
+      })
+    })
+
+  })
+
   describe('validateUserIds', () => {
+
+
+    it('Resolves  when userIds is empty', () => {
+      AppError.badRequest = mock()
+      return target.validateUserIds([]).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalledWith()
+      })
+    })
+
     it('resolves when all user ids are valid, and the user enacting the call is present in the' +
       ' list', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
@@ -168,6 +232,17 @@ describe('OwnerValidator', () => {
   })
 
   describe('validateGroupIds', () => {
+
+
+    it('resolves when groupIds is empty', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group1' }] } })
+
+      return target.validateGroupIds([]).then(() => {
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()})
+    })
+
+
     it('resolves when all group ids are valid, and the user enacting the call is present in' +
       ' the' +
       ' list', () => {
@@ -219,6 +294,30 @@ describe('OwnerValidator', () => {
       })
     })
 
+    it('rejects when userId is not the owner and not in group', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group2' }] } })
+      AppError.badRequest = mock()
+
+      return target.userOwnershipCheck(['group1'],['user1'], 'user2').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`,{})
+
+        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
+      })
+    })
+
+    it('Promise Resolves when userId is in group', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.get = mockResolve({ body:{ groups: [{ id: 'group2' }] } })
+      AppError.badRequest = mock()
+
+      return target.userOwnershipCheck(['group2'],['user1'], 'user2').then(() => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`,{})
+
+      })
+    })
 
 
   })

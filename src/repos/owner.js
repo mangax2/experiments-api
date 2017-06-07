@@ -10,19 +10,18 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (experimentsOwners, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['experiment_id', 'user_ids', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'group_ids'],
+      ['experiment_id', 'user_ids', 'group_ids', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'owner' },
     )
 
     const values = experimentsOwners.map(ownershipInfo => ({
       experiment_id: ownershipInfo.experimentId,
       user_ids: ownershipInfo.userIds,
+      group_ids: ownershipInfo.groupIds,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-      group_ids: ownershipInfo.groupIds,
-
     }))
 
     const query = `${pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`

@@ -21,7 +21,7 @@ class ExperimentsValidator extends SchemaValidator {
 
   static get FILTER_SCHEMA_ELEMENTS() {
     return [
-      { paramName: 'tags.name', type: 'text', lengthRange: { min: 1, max: 1000 }, required: false },
+      { paramName: 'tags.category', type: 'text', lengthRange: { min: 1, max: 1000 }, required: false },
       {
         paramName: 'tags.value',
         type: 'text',

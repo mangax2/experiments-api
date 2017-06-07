@@ -28,7 +28,7 @@ class TagService {
   static createTagRequest(tags, experimentIds) {
     const entityTagsMap = _.groupBy(tags, 'experimentId')
     return _.map(experimentIds, (id) => {
-      const entityTags = _.map(entityTagsMap[id], t => ({ category: t.name, value: t.value }))
+      const entityTags = _.map(entityTagsMap[id], t => ({ category: t.category, value: t.value }))
       return { entityName: 'experiment', entityId: String(id), tags: entityTags }
     })
   }
@@ -36,7 +36,7 @@ class TagService {
   saveTags(tags, experimentId) {
     return this.validator.validate(tags)
       .then(() => PingUtil.getMonsantoHeader().then((header) => {
-        const tagsRequest = _.map(tags, t => ({ category: t.name, value: t.value }))
+        const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
         return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${experimentId}`, header, tagsRequest).then(() => Promise.resolve()).catch((err) => {
           logger.error(err)
           return Promise.reject(err)
@@ -53,7 +53,7 @@ class TagService {
   }),
   )
 
-  getEntityTagsByTagFilters = (tagNames, tagValues) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=${tagNames}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
+  getEntityTagsByTagFilters = (tagCategories, tagValues) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
     logger.error(err)
     return Promise.reject(err)
   }),

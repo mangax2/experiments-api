@@ -136,9 +136,9 @@ class ExperimentsService {
 
   getExperimentsByFilters(queryString) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
-      const lowerCaseTagNames = _.toLower(queryString['tags.name'])
+      const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
-      return this.tagService.getEntityTagsByTagFilters(lowerCaseTagNames, lowerCaseTagValues)
+      return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories, lowerCaseTagValues)
         .then((eTags) => {
           if (eTags.length === 0) {
             return []
@@ -158,7 +158,7 @@ class ExperimentsService {
       if (tags && tags.length > 0) {
         _.forEach(tags, (tag) => {
           tag.experimentId = id
-          tag.name = tag.name ? tag.name.toLowerCase() : undefined
+          tag.category = tag.category ? tag.category.toLowerCase() : undefined
           tag.value = tag.value ? tag.value.toLowerCase() : undefined
         })
       }
@@ -166,7 +166,7 @@ class ExperimentsService {
     }))
 
   isFilterRequest = (queryString) => {
-    const allowedFilters = ['tags.name', 'tags.value']
+    const allowedFilters = ['tags.category', 'tags.value']
     return !_.isEmpty(queryString)
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
@@ -183,7 +183,7 @@ class ExperimentsService {
   }
 
   static prepareTagResponse(tags) {
-    return _.map(tags, t => ({ name: t.category, value: t.value }))
+    return _.map(tags, t => ({ category: t.category, value: t.value }))
   }
 
 }

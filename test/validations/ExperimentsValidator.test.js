@@ -33,7 +33,7 @@ describe('ExperimentsValidator', () => {
     it('gets schema', () => {
       const schema = [
         {
-          paramName: 'tags.name',
+          paramName: 'tags.category',
           type: 'text',
           lengthRange: { min: 1, max: 1000 },
           required: false,
@@ -88,7 +88,7 @@ describe('ExperimentsValidator', () => {
     it('returns FILTER schema when FILTER is supplied', () => {
       const schema = [
         {
-          paramName: 'tags.name',
+          paramName: 'tags.category',
           type: 'text',
           lengthRange: { min: 1, max: 1000 },
           required: false,

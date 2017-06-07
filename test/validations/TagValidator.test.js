@@ -13,7 +13,7 @@ describe('TagValidator', () => {
   describe('get VALIDATION_SCHEMA', () => {
     db.experiments = {}
     const schema = [
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+      { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'experimentId', type: 'numeric', required: true }
       ]
@@ -26,7 +26,7 @@ describe('TagValidator', () => {
     it('returns schema', () => {
       db.experiments = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'experimentId', type: 'numeric', required: true },
       ]
@@ -45,7 +45,7 @@ describe('TagValidator', () => {
 
   describe('getBusinessKeyPropertyNames', () => {
     it('returns business key names', () => {
-      expect(target.getBusinessKeyPropertyNames()).toEqual(['name', 'value', 'experimentId'])
+      expect(target.getBusinessKeyPropertyNames()).toEqual(['category', 'value', 'experimentId'])
     })
   })
 
@@ -95,8 +95,8 @@ describe('TagValidator', () => {
     })
 
     it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{name: 'a', value: 1, experimentId: 1},{name: 'b', value: 2, experimentId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['namae', 'value', 'experimentId'])
+      const targetObject = [{category: 'a', value: 1, experimentId: 1},{category: 'b', value: 2, experimentId: 1}]
+      target.getBusinessKeyPropertyNames = mock(['category', 'value', 'experimentId'])
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(0)
@@ -104,8 +104,8 @@ describe('TagValidator', () => {
     })
 
     it('adds a message when there are business key errors', () => {
-      const targetObject = [{name: 'a', value: 1, experimentId: 1},{name: 'a', value: 1, experimentId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['name', 'value', 'experimentId'])
+      const targetObject = [{category: 'a', value: 1, experimentId: 1},{category: 'a', value: 1, experimentId: 1}]
+      target.getBusinessKeyPropertyNames = mock(['category', 'value', 'experimentId'])
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(1)

@@ -28,7 +28,6 @@ describe('ExperimentsService', () => {
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
-          groupIds:[],
           userIds: ['KMCCL'],
           groupIds:['group1']
         }], testContext, testTx)
@@ -347,7 +346,7 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx )
         expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups:['group1']}], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {owners: ['KMCCL '], ownerGroups:['group1']}, testContext, testTx)
-        expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{experimentId: 1, groupIds: [], userIds: ['KMCCL'], groupIds:['group1']}], testContext, testTx)
+        expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{experimentId: 1, userIds: ['KMCCL'], groupIds:['group1']}], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{owners: ['KMCCL '], ownerGroups:['group1']}])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {})
         expect(data).toEqual({})
@@ -504,8 +503,6 @@ describe('ExperimentsService', () => {
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
         expect(db.experiments.batchFind).toHaveBeenCalledWith([1])
         expect(ExperimentsService.mergeTagsWithExperiments ).toHaveBeenCalledWith([{experimentId:1}], [{entityId:1, tags:[]}])
-
-
       })
     })
 

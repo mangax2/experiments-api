@@ -48,9 +48,9 @@ class SecurityService {
         if (data[0] && data[1]) {
           const groupIdsAssignedToExperiments = data[0].group_ids
           const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
-          const userGoupIds = data[1]
+          const userGroupIds = data[1]
           if (upperCaseUserIds.includes(context.userId) ||
-          _.intersection(groupIdsAssignedToExperiments, userGoupIds).length > 0) {
+          _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
             return ['write']
           }
           return []

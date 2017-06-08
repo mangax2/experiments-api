@@ -1,5 +1,8 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import HttpUtil from '../services/utility/HttpUtil'
+import PingUtil from '../services/utility/PingUtil'
+import cfServices from '../services/utility/ServiceConfig'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
 import Transactional from '../decorators/transactional'
@@ -22,23 +25,38 @@ class SecurityService {
     })
   }
 
+  getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
+      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
+      .then((result) => {
+        let groupIds = []
+        if (result.body && result.body.groups) {
+          groupIds = _.map(result.body.groups, 'id')
+          return groupIds
+        }
+        return groupIds
+      }))
+
+
   @Transactional('permissionsCheckForExperiments')
   permissionsCheckForExperiments(ids, context, tx) {
     return Promise.all(_.map(ids, id => this.permissionsCheck(id, context, tx)))
   }
 
   getUserPermissionsForExperiment(id, context, tx) {
-    return this.ownerService.getOwnersByExperimentId(id, tx).then((data) => {
-      if (data) {
-        const upperCaseUserIds = _.map(data.user_ids, _.toUpper)
-        if (upperCaseUserIds.includes(context.userId)) {
-          return ['write']
+    return Promise.all([this.ownerService.getOwnersByExperimentId(id, tx),
+      this.getGroupsByUserId(context.userId)]).then((data) => {
+        if (data[0] && data[1]) {
+          const groupIdsAssignedToExperiments = data[0].group_ids
+          const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
+          const userGroupIds = data[1]
+          if (upperCaseUserIds.includes(context.userId) ||
+          _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
+            return ['write']
+          }
+          return []
         }
         return []
-      }
-      return []
-    },
-    )
+      })
   }
 
 }

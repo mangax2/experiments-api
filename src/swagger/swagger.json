@@ -3241,6 +3241,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "ownerGroups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -3274,6 +3280,12 @@
           }
         },
         "owners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ownerGroups": {
           "type": "array",
           "items": {
             "type": "string"

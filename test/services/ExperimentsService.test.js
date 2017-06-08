@@ -23,14 +23,16 @@ describe('ExperimentsService', () => {
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
 
-      return target.batchCreateExperiments([{ owners: ['KMCCL '] }], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL '] }], 'POST', testTx)
-        expect(db.experiments.batchCreate).toHaveBeenCalledWith([{ owners: ['KMCCL '] }], testContext, testTx)
+      return target.batchCreateExperiments([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], 'POST', testTx)
+        expect(db.experiments.batchCreate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
+          groupIds:[],
           userIds: ['KMCCL'],
+          groupIds:['group1']
         }], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{ owners: ['KMCCL '] }])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{ owners: ['KMCCL '] , ownerGroups: ['group1 '] }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}])
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
@@ -341,12 +343,12 @@ describe('ExperimentsService', () => {
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
 
-      return target.updateExperiment(1, {owners: ['KMCCL ']}, testContext, testTx).then((data) => {
+      return target.updateExperiment(1, {owners: ['KMCCL '], ownerGroups:['group1']}, testContext, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx )
-        expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL ']}], 'PUT', testTx)
-        expect(db.experiments.update).toHaveBeenCalledWith(1, {owners: ['KMCCL ']}, testContext, testTx)
-        expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{experimentId: 1, userIds: ['KMCCL']}], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{owners: ['KMCCL ']}])
+        expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups:['group1']}], 'PUT', testTx)
+        expect(db.experiments.update).toHaveBeenCalledWith(1, {owners: ['KMCCL '], ownerGroups:['group1']}, testContext, testTx)
+        expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{experimentId: 1, groupIds: [], userIds: ['KMCCL'], groupIds:['group1']}], testContext, testTx)
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{owners: ['KMCCL '], ownerGroups:['group1']}])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1)
         expect(data).toEqual({})
       })

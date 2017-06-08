@@ -17,32 +17,33 @@ describe('TagService', () => {
   })
 
   describe('batchCreateTags', () => {
+    const context = { userId: 'KMCCL' }
     it('creates tags', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.post = mockResolve({body: [{id: 1}]})
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.post = mockResolve({ body: [{ id: 1 }] })
       AppUtil.createPostResponse = mock()
 
-      return target.batchCreateTags([{experimentId:1}]).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{"experimentId": 1}])
+      return target.batchCreateTags([{ experimentId: 1 }], context).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ 'experimentId': 1 }])
       })
     })
 
     it('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.post =  mockReject('error')
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.post = mockReject('error')
 
-      return target.batchCreateTags([{experimentId:1}]).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{experimentId:1}])
+      return target.batchCreateTags([{ experimentId: 1 }], context).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ experimentId: 1 }])
         expect(err).toEqual('error')
       })
     })
 
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.post =  mockReject('error')
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.post = mockReject('error')
       return target.batchCreateTags([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([])
         expect(HttpUtil.post).not.toHaveBeenCalled()
@@ -51,27 +52,27 @@ describe('TagService', () => {
     })
   })
 
-
   describe('saveTags', () => {
+    const context = { userId: 'KMCCL' }
     it('creates tags', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.put = mockResolve({body: {id: 1}})
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.put = mockResolve({ body: { id: 1 } })
       AppUtil.createPostResponse = mock()
-      const tags=[{category:'tagCategory', value:'tagValue'}]
+      const tags = [{ category: 'tagCategory', value: 'tagValue' }]
 
-      return target.saveTags(tags,1).then(() => {
+      return target.saveTags(tags, 1, context).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)
       })
     })
 
     it('rejects when saveTags fails', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.put =  mockReject('error')
-      const tags=[{category:'tagCategory', value:'tagValue'}]
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.put = mockReject('error')
+      const tags = [{ category: 'tagCategory', value: 'tagValue' }]
 
-      return target.saveTags(tags,1).then(() => {}, (err) => {
+      return target.saveTags(tags, 1, context).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith(tags)
         expect(err).toEqual('error')
       })
@@ -79,21 +80,20 @@ describe('TagService', () => {
 
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.put =  mockReject('error')
-      return target.saveTags([],1).then(() => {}, (err) => {
+      PingUtil.getMonsantoHeader = mockResolve([{}])
+      HttpUtil.put = mockReject('error')
+      return target.saveTags([], 1).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([])
-        expect( HttpUtil.put).not.toHaveBeenCalled()
+        expect(HttpUtil.put).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
   })
 
-
   describe('getTagsByExperimentId', () => {
-    it ('gets tags for an experiment', () => {
+    it('gets tags for an experiment', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({body: {tags:[]}})
+      HttpUtil.get = mockResolve({ body: { tags: [] } })
 
       return target.getTagsByExperimentId(1, testTx).then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
@@ -102,7 +102,7 @@ describe('TagService', () => {
     })
     it('returns empty array when 404 status is returned by tagging api', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockReject({status:404})
+      HttpUtil.get = mockReject({ status: 404 })
 
       return target.getTagsByExperimentId(1, testTx).then(() => {}, (data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
@@ -121,20 +121,19 @@ describe('TagService', () => {
     })
   })
 
-
   describe('getAllTagsForEntity', () => {
-    it ('gets tags for all experiments', () => {
+    it('gets tags for all experiments', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({body: {entityId:1, tags:[]}})
+      HttpUtil.get = mockResolve({ body: { entityId: 1, tags: [] } })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
-        expect(data).toEqual({entityId:1, tags:[]})
+        expect(data).toEqual({ entityId: 1, tags: [] })
       })
     })
     it('returns empty array when error status code is 404', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockReject({status:404})
+      HttpUtil.get = mockReject({ status: 404 })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
@@ -154,31 +153,27 @@ describe('TagService', () => {
 
   })
 
-
   describe('getEntityTagsByTagFilters', () => {
-    it ('gets tag entities matching filter criteria', () => {
+    it('gets tag entities matching filter criteria', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({body: [{entityId:1, tags:[]}]})
+      HttpUtil.get = mockResolve({ body: [{ entityId: 1, tags: [] }] })
 
-      return target.getEntityTagsByTagFilters(['tag1'],['val1']).then((data) => {
+      return target.getEntityTagsByTagFilters(['tag1'], ['val1']).then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
-        expect(data).toEqual([{entityId:1, tags:[]}])
+        expect(data).toEqual([{ entityId: 1, tags: [] }])
       })
     })
     it('rejects when get tags fails', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockReject('error')
 
-      return target.getEntityTagsByTagFilters(['tag1'],['val1']).then(() => {}, (err) => {
+      return target.getEntityTagsByTagFilters(['tag1'], ['val1']).then(() => {}, (err) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
         expect(err).toEqual('error')
       })
     })
 
   })
-
-
-
 
   describe('deleteTagsForExperimentId', () => {
     it('deletes tags for an experimentId', () => {
@@ -192,7 +187,7 @@ describe('TagService', () => {
 
     it('Resolves promise when tagging api returns 404 status', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.delete = mockReject({status:404})
+      HttpUtil.delete = mockReject({ status: 404 })
       return target.deleteTagsForExperimentId(1).then(() => {
         expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
       })

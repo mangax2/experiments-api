@@ -15,8 +15,14 @@ class OwnerValidator extends SchemaValidator {
       {
         paramName: 'userIds',
         type: 'array',
-        entityCount: { min: 1 },
-        required: true,
+        entityCount: { min: 0 },
+        required: false,
+      },
+      {
+        paramName: 'groupIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
       },
     ]
   }
@@ -50,27 +56,84 @@ class OwnerValidator extends SchemaValidator {
 
   postValidate = (ownerObj, context) => {
     if (!this.hasErrors()) {
-      return this.validateUserIds(ownerObj[0].userIds, context.userId)
+      const groupIds = _.compact(ownerObj[0].groupIds)
+      const userIds = _.compact(ownerObj[0].userIds)
+      return this.requiredOwnerCheck(groupIds, userIds)
+        .then(() => this.validateUserIds(userIds)
+          .then(() => this.validateGroupIds(groupIds)
+            .then(() => this.userOwnershipCheck(groupIds, userIds, context.userId))))
     }
     return Promise.resolve()
   }
 
-  validateUserIds = (userIds, userId) => PingUtil.getMonsantoHeader()
-    .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users?ids=${userIds.join()}`, header)
-      .then((result) => {
-        const profileIds = _.map(result.body, 'id')
-        const invalidUsers = _.difference(userIds, profileIds)
+  requiredOwnerCheck = (groupIds, userIds) => {
+    if (userIds.length === 0 && groupIds.length === 0) {
+      return Promise.reject(
+        AppError.badRequest('Owner is required in request'),
+      )
+    }
+    return Promise.resolve()
+  }
 
-        if (userIds.length !== profileIds.length) {
-          return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`))
-        }
-        if (!_.includes(profileIds, userId)) {
-          return Promise.reject(AppError.badRequest('You cannot remove yourself as an owner'))
-        }
+  validateUserIds = (userIds) => {
+    if (userIds.length === 0) {
+      return Promise.resolve()
+    }
+    return PingUtil.getMonsantoHeader()
+      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users?ids=${userIds.join()}`, header)
+        .then((result) => {
+          const profileIds = _.map(result.body, 'id')
+          const invalidUsers = _.difference(userIds, profileIds)
 
-        return Promise.resolve()
-      }),
-    )
+          if (userIds.length !== profileIds.length) {
+            return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`))
+          }
+
+          return Promise.resolve()
+        }),
+      )
+  }
+
+  validateGroupIds = (groupIds) => {
+    if (groupIds.length === 0) {
+      return Promise.resolve()
+    }
+    return PingUtil.getMonsantoHeader()
+      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/groups?ids=${groupIds.join()}`, header)
+        .then((result) => {
+          const profileIds = _.map(result.body.groups, 'id')
+          const invalidGroups = _.difference(groupIds, profileIds)
+
+          if (groupIds.length !== profileIds.length) {
+            return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`))
+          }
+
+          return Promise.resolve()
+        }),
+      )
+  }
+
+  userOwnershipCheck = (groupIds, userIds, userId) => {
+    if (_.includes(userIds, userId)) {
+      return Promise.resolve()
+    }
+    const errorMessage = 'You cannot remove yourself as an owner'
+    if (groupIds.length === 0) {
+      return Promise.reject(AppError.badRequest(errorMessage))
+    }
+
+    return PingUtil.getMonsantoHeader()
+      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
+        .then((result) => {
+          const profileGroupIds = _.map(result.body.groups, 'id')
+
+          if (_.intersection(groupIds, profileGroupIds).length === 0) {
+            return Promise.reject(AppError.badRequest(errorMessage))
+          }
+
+          return Promise.resolve()
+        }))
+  }
 }
 
 module.exports = OwnerValidator

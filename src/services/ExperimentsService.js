@@ -29,8 +29,9 @@ class ExperimentsService {
           const experimentIds = _.map(data, d => d.id)
 
           const experimentsOwners = _.map(experiments, (exp, index) => {
-            const owners = _.map(exp.owners, own => _.trim(own))
-            return { experimentId: experimentIds[index], userIds: owners }
+            const owners = _.map(exp.owners, _.trim)
+            const ownerGroups = _.map(exp.ownerGroups, _.trim)
+            return { experimentId: experimentIds[index], userIds: owners, groupIds: ownerGroups }
           })
 
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
@@ -63,6 +64,7 @@ class ExperimentsService {
       _.map(experiments.slice(), (experiment) => {
         const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
         experiment.owners = owners.user_ids
+        experiment.ownerGroups = owners.group_ids
         return experiment
       }),
     )
@@ -88,6 +90,7 @@ class ExperimentsService {
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
+          data.ownerGroups = ownersAndTags[0].group_ids
           data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
           return data
         })
@@ -105,9 +108,12 @@ class ExperimentsService {
               logger.error(`Experiment Not Found to Update for id = ${id}`)
               throw AppError.notFound('Experiment Not Found to Update')
             } else {
-              const trimmedUserIds = _.map(experiment.owners, o => _.trim(o))
-              const owners = { experimentId: id, userIds: trimmedUserIds }
+              const trimmedUserIds = _.map(experiment.owners, _.trim)
+              const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
 
+              const owners = { experimentId: id,
+                userIds: trimmedUserIds,
+                groupIds: trimmedOwnerGroups }
               return this.ownerService.batchUpdateOwners([owners], context, tx)
                 .then(() => {
                   const tags = this.assignExperimentIdToTags([id], [experiment])

@@ -121,7 +121,7 @@ class ExperimentsService {
                     return this.tagService.saveTags(tags, id, context)
                         .then(() => data)
                   }
-                  return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+                  return this.tagService.deleteTagsForExperimentId(id, context).then(() => data)
                 },
                 )
             }

@@ -368,7 +368,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).toHaveBeenCalledWith(1, {}, testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{}])
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
-        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1)
+        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {})
         expect(data).toEqual({})
       })
     })

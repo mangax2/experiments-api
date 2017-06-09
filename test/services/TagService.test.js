@@ -176,25 +176,26 @@ describe('TagService', () => {
   })
 
   describe('deleteTagsForExperimentId', () => {
+    const context = { userId: 'KMCCL' }
     it('deletes tags for an experimentId', () => {
 
-      PingUtil.getMonsantoHeader = mockResolve({})
+      PingUtil.getMonsantoHeader = mockResolve([{}])
       HttpUtil.delete = mockResolve([])
-      return target.deleteTagsForExperimentId(1).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
+      return target.deleteTagsForExperimentId(1, context).then(() => {
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}, {'headerName': 'oauth_resourceownerinfo', 'headerValue': 'username=KMCCL'}])
       })
     })
 
     it('Resolves promise when tagging api returns 404 status', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      PingUtil.getMonsantoHeader = mockResolve([{}])
       HttpUtil.delete = mockReject({ status: 404 })
-      return target.deleteTagsForExperimentId(1).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
+      return target.deleteTagsForExperimentId(1, context).then(() => {
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}, {'headerName': 'oauth_resourceownerinfo', 'headerValue': 'username=KMCCL'}])
       })
     })
 
     it('rejects when removeByExperimentId fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      PingUtil.getMonsantoHeader = mockResolve([{}])
       HttpUtil.delete = mockReject('error')
 
       return target.deleteTagsForExperimentId(1, testTx).then(() => {}, (err) => {

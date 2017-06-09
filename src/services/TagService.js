@@ -13,12 +13,17 @@ class TagService {
     this.validator = new TagValidator()
   }
 
-  batchCreateTags(tags) {
+  batchCreateTags(tags, context) {
     return this.validator.validate(tags)
       .then(() => PingUtil.getMonsantoHeader().then((header) => {
+        const headers = header.slice()
+        headers.push({
+          headerName: 'oauth_resourceownerinfo',
+          headerValue: `username=${context.userId}`,
+        })
         const experimentIds = _.uniq(_.map(tags, 'experimentId'))
         const tagsRequest = TagService.createTagRequest(tags, experimentIds)
-        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, header, tagsRequest).then(() => Promise.resolve()).catch((err) => {
+        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
           logger.error(err)
           return Promise.reject(err)
         })
@@ -33,11 +38,16 @@ class TagService {
     })
   }
 
-  saveTags(tags, experimentId) {
+  saveTags(tags, experimentId, context) {
     return this.validator.validate(tags)
       .then(() => PingUtil.getMonsantoHeader().then((header) => {
+        const headers = header.slice()
+        headers.push({
+          headerName: 'oauth_resourceownerinfo',
+          headerValue: `username=${context.userId}`,
+        })
         const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
-        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${experimentId}`, header, tagsRequest).then(() => Promise.resolve()).catch((err) => {
+        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${experimentId}`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
           logger.error(err)
           return Promise.reject(err)
         })
@@ -67,13 +77,21 @@ class TagService {
   }),
   )
 
-  deleteTagsForExperimentId = id => PingUtil.getMonsantoHeader().then(header => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${id}`, header).then(() => Promise.resolve()).catch((err) => {
-    if (err.status === 404) {
-      return Promise.resolve()
-    }
-    return Promise.reject(err)
-  }),
-  )
+  deleteTagsForExperimentId = (id, context) =>
+    PingUtil.getMonsantoHeader().then((header) => {
+      const headers = header.slice()
+      headers.push({
+        headerName: 'oauth_resourceownerinfo',
+        headerValue: `username=${context.userId}`,
+      })
+      return HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${id}`, headers).then(() => Promise.resolve()).catch((err) => {
+        if (err.status === 404) {
+          return Promise.resolve()
+        }
+        return Promise.reject(err)
+      })
+    },
+    )
 }
 
 module.exports = TagService

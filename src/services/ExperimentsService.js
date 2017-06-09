@@ -37,7 +37,7 @@ class ExperimentsService {
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
             const tags = this.assignExperimentIdToTags(experimentIds, experiments)
             if (tags && tags.length > 0) {
-              return this.tagService.batchCreateTags(tags)
+              return this.tagService.batchCreateTags(tags, context)
                 .then(() => AppUtil.createPostResponse(data))
             }
             return AppUtil.createPostResponse(data)
@@ -118,10 +118,10 @@ class ExperimentsService {
                 .then(() => {
                   const tags = this.assignExperimentIdToTags([id], [experiment])
                   if (tags.length > 0) {
-                    return this.tagService.saveTags(tags, id)
+                    return this.tagService.saveTags(tags, id, context)
                         .then(() => data)
                   }
-                  return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+                  return this.tagService.deleteTagsForExperimentId(id, context).then(() => data)
                 },
                 )
             }

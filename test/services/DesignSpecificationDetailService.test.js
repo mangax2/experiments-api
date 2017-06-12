@@ -203,6 +203,24 @@ describe('DesignSpecificationDetailService', () => {
       })
     })
 
+    it('returns nothing when designSpecificationDetailsObj is null', () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.populateExperimentId = mockResolve()
+      target.deleteDesignSpecificationDetails = mock()
+      target.updateDesignSpecificationDetails = mock()
+      target.createDesignSpecificationDetails = mock()
+      AppUtil.createCompositePostResponse = mock()
+
+      return target.manageAllDesignSpecificationDetails(null, 1, testContext, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(target.populateExperimentId).not.toHaveBeenCalled()
+        expect(target.deleteDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(target.updateDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(target.createDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
+      })
+    })
+
     it('rejects when create fails', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.populateExperimentId = mockResolve()

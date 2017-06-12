@@ -70,16 +70,20 @@ class DesignSpecificationDetailService {
   @Transactional('manageAllDesignSpecificationDetails')
   manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context, tx) {
     return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
-      this.populateExperimentId(designSpecificationDetailsObj.updates, experimentId)
-      this.populateExperimentId(designSpecificationDetailsObj.adds, experimentId)
+      if (designSpecificationDetailsObj) {
+        const { adds, updates, deletes } = designSpecificationDetailsObj
+        this.populateExperimentId(updates, experimentId)
+        this.populateExperimentId(adds, experimentId)
 
-      return this.deleteDesignSpecificationDetails(
-        designSpecificationDetailsObj.deletes, context, tx)
-        .then(() =>
-          this.updateDesignSpecificationDetails(designSpecificationDetailsObj.updates, context, tx)
-            .then(() =>
-              this.createDesignSpecificationDetails(designSpecificationDetailsObj.adds, context, tx)
-                .then(() => AppUtil.createCompositePostResponse())))
+        return this.deleteDesignSpecificationDetails(deletes, context, tx)
+          .then(() =>
+            this.updateDesignSpecificationDetails(updates, context, tx)
+              .then(() =>
+                this.createDesignSpecificationDetails(adds, context, tx)
+                  .then(() => AppUtil.createCompositePostResponse())))
+      }
+
+      return Promise.resolve()
     })
   }
 

@@ -4,6 +4,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsValidator from '../validations/ExperimentsValidator'
+import CapacityRequestService from './CapacityRequestService'
 import OwnerService from './OwnerService'
 import SecurityService from './SecurityService'
 
@@ -24,25 +25,45 @@ class ExperimentsService {
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, tx) {
     return this.validator.validate(experiments, 'POST', tx)
+      .then(() => this.validateAssociatedRequests(experiments))
       .then(() => db.experiments.batchCreate(experiments, context, tx)
-        .then((data) => {
-          const experimentIds = _.map(data, d => d.id)
+      .then((data) => {
+        const experimentIds = _.map(data, d => d.id)
+        _.forEach(experiments, (experiment, index) => {
+          experiment.id = experimentIds[index]
+        })
 
-          const experimentsOwners = _.map(experiments, (exp, index) => {
-            const owners = _.map(exp.owners, _.trim)
-            const ownerGroups = _.map(exp.ownerGroups, _.trim)
-            return { experimentId: experimentIds[index], userIds: owners, groupIds: ownerGroups }
-          })
+        const experimentsOwners = _.map(experiments, (exp) => {
+          const owners = _.map(exp.owners, _.trim)
+          const ownerGroups = _.map(exp.ownerGroups, _.trim)
+          return { experimentId: exp.id, userIds: owners, groupIds: ownerGroups }
+        })
 
-          return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
-            const tags = this.assignExperimentIdToTags(experimentIds, experiments)
-            if (tags && tags.length > 0) {
-              return this.tagService.batchCreateTags(tags, context)
-                .then(() => AppUtil.createPostResponse(data))
-            }
-            return AppUtil.createPostResponse(data)
-          })
-        }))
+        return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
+          const capacityRequestPromises =
+            CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments, context)
+          return Promise.all(capacityRequestPromises)
+            .then(() => this.batchCreateExperimentTags(experiments, context))
+            .then(() => AppUtil.createPostResponse(data))
+        })
+      }))
+  }
+
+  batchCreateExperimentTags(experiments, context) {
+    const tags = this.assignExperimentIdToTags(experiments)
+    if (tags && tags.length > 0) {
+      return this.tagService.batchCreateTags(tags, context)
+    }
+    return Promise.resolve()
+  }
+
+  validateAssociatedRequests = (experiments) => {
+    const associatedRequests = _.map(_.filter(experiments, 'request'), exp => exp.request)
+    const invalidAssociateRequests = _.filter(associatedRequests, req => !req.id || !req.type)
+    if (invalidAssociateRequests.length > 0) {
+      return Promise.reject(AppError.badRequest('Each request must have an id and a type.'))
+    }
+    return Promise.resolve()
   }
 
   getExperiments(queryString) {
@@ -158,17 +179,17 @@ class ExperimentsService {
 
   getAllExperiments = () => db.experiments.all()
 
-  assignExperimentIdToTags = (experimentIds, experiments) => _.compact(
-    _.flatMap(experimentIds, (id, index) => {
-      const tags = experiments[index].tags
+  assignExperimentIdToTags = experiments => _.compact(
+    _.flatMap(experiments, (exp) => {
+      const tags = exp.tags
       if (tags && tags.length > 0) {
         _.forEach(tags, (tag) => {
-          tag.experimentId = id
+          tag.experimentId = exp.id
           tag.category = tag.category ? tag.category.toLowerCase() : undefined
           tag.value = tag.value ? tag.value.toLowerCase() : undefined
         })
       }
-      return experiments[index].tags
+      return exp.tags
     }))
 
   isFilterRequest = (queryString) => {

@@ -3304,6 +3304,24 @@
           "items": {
             "type": "string"
           }
+        },
+        "request": {
+          "type": "object",
+          "description": "The identifiers for the Capacity Request to associate with the experiment. This element is optional.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The id of the capacity request"
+            },
+            "type": {
+              "type": "string",
+              "description": "The type of capacity request('field' or 'ce')"
+            }
+          },
+          "required": [
+            "id",
+            "type"
+          ]
         }
       }
     },

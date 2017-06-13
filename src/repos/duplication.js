@@ -2,7 +2,7 @@ module.exports = (rep, pgp) => ({
   repository: () => rep,
 
   duplicateExperiment: (experimentId, context, tx = rep) => tx.oneOrNone(
-    "WITH ins_parent AS (" +
+    "WITH experiment_parent AS (" +
     "INSERT INTO experiment " +
     "SELECT (e1).* FROM (" +
       "SELECT e " +
@@ -31,11 +31,11 @@ module.exports = (rep, pgp) => ({
           "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
           "#= hstore('created_user_id', $2) " +
           "#= hstore('modified_user_id', $2) " +
-          "#= hstore('experiment_id', (SELECT id::text FROM ins_parent)) AS c " +
+          "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) AS c " +
         "FROM owner o " +
         "WHERE experiment_id = $1 ) sub " +
       "RETURNING id) " +
-    "SELECT * FROM ins_parent;",
+    "SELECT * FROM experiment_parent;",
     [experimentId, context.userId],
   ),
 })

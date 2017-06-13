@@ -203,6 +203,10 @@ router.post('/experiments/:id/design-specification-details', (req, res, next) =>
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/experiments/:id/composites/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))

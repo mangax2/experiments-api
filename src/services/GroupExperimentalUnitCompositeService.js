@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
+import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 import GroupService from './GroupService'
 import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
@@ -15,7 +16,25 @@ class GroupExperimentalUnitCompositeService {
     this.groupService = new GroupService()
     this.groupValueService = new GroupValueService()
     this.experimentalUnitService = new ExperimentalUnitService()
+    this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
+  }
+
+  @Transactional('saveDesignSpecsAndGroupUnitDetails')
+  saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context, tx) {
+    if (designSpecsAndGroupAndUnitDetails) {
+      const designSpecifications = designSpecsAndGroupAndUnitDetails.designSpecifications
+      const groupAndUnitDetails = designSpecsAndGroupAndUnitDetails.groupAndUnitDetails
+      return Promise.all([
+        this.saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx),
+        this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
+          designSpecifications, experimentId, context, tx,
+        ),
+      ]).then(() => AppUtil.createCompositePostResponse())
+    }
+
+    throw AppError.badRequest('Design Specifications and Group-Experimental-Units object must be' +
+      ' defined')
   }
 
   @Transactional('saveGroupAndUnitDetails')

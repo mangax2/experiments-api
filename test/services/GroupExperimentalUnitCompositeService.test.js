@@ -13,6 +13,74 @@ describe('GroupExperimentalUnitCompositeService', () => {
     target = new GroupExperimentalUnitCompositeService()
   })
 
+  describe('saveDesignSpecsAndGroupUnitDetails', () => {
+    it('saves design specifications, groups, and units', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockResolve(),
+      }
+      target.saveGroupAndUnitDetails = mockResolve()
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndGroupAndUnitDetails = {
+        designSpecifications: [],
+        groupAndUnitDetails: [],
+      }
+
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+        expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
+      })
+    })
+
+    it('rejects when group and units call fails', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockResolve(),
+      }
+      target.saveGroupAndUnitDetails = mockReject('error')
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndGroupAndUnitDetails = {
+        designSpecifications: [],
+        groupAndUnitDetails: [],
+      }
+
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+        expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
+      })
+    })
+
+    it('rejects when design specification call fails', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockReject('error'),
+      }
+      target.saveGroupAndUnitDetails = mockResolve()
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndGroupAndUnitDetails = {
+        designSpecifications: [],
+        groupAndUnitDetails: [],
+      }
+
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+        expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
+      })
+    })
+
+    it('throws a bad request when passed in object is null', () => {
+      AppError.badRequest = mock('')
+
+      const designSpecsAndGroupAndUnitDetails = null
+      expect(() => target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx)).toThrow()
+    })
+  })
+
   describe('saveGroupAndUnitDetails', () => {
     it('saves groups and units', () => {
       target.securityService.permissionsCheck = mockResolve()
@@ -427,8 +495,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       return target.getGroupAndUnitDetails(1, testTx).then((data) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate).toHaveBeenCalledWith([1,2], testTx)
-        expect(target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate).toHaveBeenCalledWith([1,2], testTx)
+        expect(target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate).toHaveBeenCalledWith([1, 2], testTx)
+        expect(target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate).toHaveBeenCalledWith([1, 2], testTx)
         expect(data).toEqual(expectedResult)
       })
     })

@@ -172,43 +172,35 @@ describe('ExperimentsService', () => {
   })
 
   describe('validateAssociatedRequests', () => {
-    it('resolves if the experiments have no associated requests', () => {
+    it('resolves if the experiments have no associated requests', (done) => {
       const target = new ExperimentsService()
 
-      return target.validateAssociatedRequests([{}]).then(() => {
-        expect(true).toBe(true)
-      }).catch(() => {
-        expect(true).toBe(false)
+      target.validateAssociatedRequests([{}]).then(() => {
+        done()
       })
     })
 
-    it('resolves if the experiments have associated requests that are completely filled out', () => {
+    it('resolves if the experiments have associated requests that are completely filled out', (done) => {
       const target = new ExperimentsService()
 
-      return target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }]).then(() => {
-        expect(true).toBe(true)
-      }).catch(() => {
-        expect(true).toBe(false)
+      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }]).then(() => {
+        done()
       })
     })
 
-    it('resolves if the experiments have associated requests with only an id', () => {
+    it('resolves if the experiments have associated requests with only an id', (done) => {
       const target = new ExperimentsService()
 
-      return target.validateAssociatedRequests([{ request: { id: 1 } }]).then(() => {
-        expect(true).toBe(false)
-      }).catch(() => {
-        expect(true).toBe(true)
+      target.validateAssociatedRequests([{ request: { id: 1 } }]).catch(() => {
+        done()
       })
     })
 
-    it('resolves if the experiments have associated requests with only a type', () => {
+    it('resolves if the experiments have associated requests with only a type', (done) => {
       const target = new ExperimentsService()
 
-      return target.validateAssociatedRequests([{ request: { type: 'ce' } }]).then(() => {
-        expect(true).toBe(false)
-      }).catch(() => {
-        expect(true).toBe(true)
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }]).catch(() => {
+        done()
       })
     })
   })

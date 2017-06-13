@@ -36,12 +36,9 @@ describe('CapacityRequestService', () => {
           expect(capacityRequest.protocol_number).toBe(100)
           expect(HttpUtil.put).toBeCalledWith('test/services/requests/53?type=ce', headers, { currentUser: 'testUser', request: capacityRequest })
         })
-        .catch(() => {
-          expect(true).toBe(false)
-        })
     })
 
-    it('rejects if something goes wrong', () => {
+    it('rejects if something goes wrong', (done) => {
       PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject('err'))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: capacityRequest }))
       HttpUtil.put = jest.fn(() => Promise.resolve())
@@ -54,15 +51,13 @@ describe('CapacityRequestService', () => {
         }
       }
 
-      return CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
-        .then(() => {
-          expect(true).toBe(false)
-        })
+      CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
         .catch((error) => {
           expect(error).toBe('err')
           expect(PingUtil.getMonsantoHeader).toBeCalled()
           expect(HttpUtil.get).not.toBeCalled()
           expect(HttpUtil.put).not.toBeCalledWith()
+          done()
         })
     })
   })

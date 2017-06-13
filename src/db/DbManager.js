@@ -5,6 +5,7 @@ import config from '../../config'
 import CombinationElement from '../repos/combinationElement'
 import DependentVariable from '../repos/dependentVariable'
 import DesignSpecificationDetail from '../repos/designSpecificationDetail'
+import Duplication from '../repos/duplication'
 import Experiments from '../repos/experiments'
 import ExperimentDesign from '../repos/experimentDesign'
 import ExperimentSummary from '../repos/experimentSummary'
@@ -34,6 +35,7 @@ const options = {
     obj.combinationElement = new (CombinationElement)(obj, pgp)
     obj.dependentVariable = new (DependentVariable)(obj, pgp)
     obj.designSpecificationDetail = new (DesignSpecificationDetail)(obj, pgp)
+    obj.duplication = new (Duplication)(obj, pgp)
     obj.experiments = new (Experiments)(obj, pgp)
     obj.experimentDesign = new (ExperimentDesign)(obj, pgp)
     obj.experimentSummary = new (ExperimentSummary)(obj, pgp)

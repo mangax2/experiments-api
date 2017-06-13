@@ -4,6 +4,7 @@ import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
+import DuplicationService from '../services/DuplicationService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -243,6 +244,9 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/duplicate', (req, res, next) => DuplicationService.duplicateExperiment(req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
 
 router.get('/getImage/:topic/:imageName', (req, res, next) => {
   DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {

@@ -3,6 +3,7 @@ import ExperimentsService from '../../src/services/ExperimentsService'
 import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
+import CapacityRequestService from '../../src/services/CapacityRequestService'
 
 describe('ExperimentsService', () => {
   let target
@@ -14,24 +15,31 @@ describe('ExperimentsService', () => {
   })
 
   describe('batchCreateExperiments', () => {
+    let originalFunction
+    beforeAll(() => {
+      originalFunction = CapacityRequestService.batchAssociateExperimentsToCapacityRequests
+    })
+
     it('calls validate, batchCreate, batchCreateOwners, assignExperimentIdToTags,' +
       ' batchCreateTags, and createPostResponse', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], 'POST', testTx)
-        expect(db.experiments.batchCreate).toHaveBeenCalledWith([{ owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL '], ownerGroups: ['group1 '] }], 'POST', testTx)
+        expect(db.experiments.batchCreate).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL '], ownerGroups: ['group1 '] }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds:['group1']
         }], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [{ owners: ['KMCCL '] , ownerGroups: ['group1 '] }])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL '] , ownerGroups: ['group1 '] }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
@@ -41,16 +49,18 @@ describe('ExperimentsService', () => {
       ' not' +
       ' tagService when there are no tags', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL'] }])
       })
@@ -60,16 +70,18 @@ describe('ExperimentsService', () => {
       ' not' +
       ' tagService when tags are undefined', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1, owners: ['KMCCL'] }])
       })
@@ -77,16 +89,18 @@ describe('ExperimentsService', () => {
 
     it('rejects when batchCreateTags fails', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject('error')
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([1], [])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -95,11 +109,13 @@ describe('ExperimentsService', () => {
 
     it('rejects when batchCreateOwners fails', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockReject('error')
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -114,10 +130,12 @@ describe('ExperimentsService', () => {
 
     it('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockReject('error')
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -131,10 +149,12 @@ describe('ExperimentsService', () => {
 
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
@@ -143,6 +163,44 @@ describe('ExperimentsService', () => {
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
+      })
+    })
+
+    afterAll(() => {
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = originalFunction
+    })
+  })
+
+  describe('validateAssociatedRequests', () => {
+    it('resolves if the experiments have no associated requests', (done) => {
+      const target = new ExperimentsService()
+
+      target.validateAssociatedRequests([{}]).then(() => {
+        done()
+      })
+    })
+
+    it('resolves if the experiments have associated requests that are completely filled out', (done) => {
+      const target = new ExperimentsService()
+
+      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }]).then(() => {
+        done()
+      })
+    })
+
+    it('resolves if the experiments have associated requests with only an id', (done) => {
+      const target = new ExperimentsService()
+
+      target.validateAssociatedRequests([{ request: { id: 1 } }]).catch(() => {
+        done()
+      })
+    })
+
+    it('resolves if the experiments have associated requests with only a type', (done) => {
+      const target = new ExperimentsService()
+
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }]).catch(() => {
+        done()
       })
     })
   })
@@ -548,10 +606,9 @@ describe('ExperimentsService', () => {
     })
 
     it('assigns experiment Id to experiment tags', () => {
-      const experimentIds = [1]
       const experiments = [{ id: 1, tags: [{}] }]
 
-      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{
+      expect(target.assignExperimentIdToTags(experiments)).toEqual([{
         experimentId: 1,
         name: undefined,
         value: undefined,
@@ -559,10 +616,9 @@ describe('ExperimentsService', () => {
     })
 
     it('assigns category, value, and experimentId to tags', () => {
-      const experimentIds = [1]
       const experiments = [{ id: 1, tags: [{ category: 'testN', value: 'testV' }] }]
 
-      expect(target.assignExperimentIdToTags(experimentIds, experiments)).toEqual([{
+      expect(target.assignExperimentIdToTags(experiments)).toEqual([{
         experimentId: 1,
         category: 'testn',
         value: 'testv',

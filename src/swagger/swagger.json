@@ -274,6 +274,47 @@
         }
       }
     },
+    "/duplicate": {
+      "post": {
+        "summary": "Duplicates a given experiment",
+        "description": "Fully duplicates an experiment",
+        "operationId": "duplicateExperiment",
+        "tags": [
+          "Duplicate"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Experiment Id",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Numeric Id of the Experiment to duplicate"
+          }
+        ],
+        "responses": {
+         "201": {
+           "description": "Experiment Duplication SUCCESS"
+         },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/experimental-units/{id}": {
       "get": {
         "summary": "get one experimental unit entity",

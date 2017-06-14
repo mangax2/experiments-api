@@ -24,7 +24,7 @@ class CapacityRequestService {
         }))
       .catch((err) => {
         logger.error('Error received from Capacity Request API.', err)
-        return Promise.reject(CapacityRequestService.handleCapacityRequestError(err))
+        throw CapacityRequestService.handleCapacityRequestError(err)
       })
   }
 

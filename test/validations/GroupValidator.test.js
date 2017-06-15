@@ -188,9 +188,9 @@ describe('GroupValidator', () => {
   })
 
   describe('getValidRandomizationIds', () => {
-    it('calls ping and then randomzation strategy service', () => {
+    it('calls ping and then randomization strategy service', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({body: [{id: 1}]})
+      HttpUtil.getWithRetry = mockResolve({body: [{id: 1}]})
 
       return target.getValidRandomizationIds().then(() => {
         expect(target.validRandomizationIds).toEqual([1])
@@ -199,7 +199,7 @@ describe('GroupValidator', () => {
 
     it('does not set any valid ids when result is undefined', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve()
+      HttpUtil.getWithRetry = mockResolve()
 
       return target.getValidRandomizationIds().then(() => {
         expect(target.validRandomizationIds).toEqual(undefined)
@@ -208,7 +208,7 @@ describe('GroupValidator', () => {
 
     it('does not set any valid ids when result has no body', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({})
+      HttpUtil.getWithRetry = mockResolve({})
 
       return target.getValidRandomizationIds().then(() => {
         expect(target.validRandomizationIds).toEqual(undefined)
@@ -217,7 +217,7 @@ describe('GroupValidator', () => {
 
     it('rejects when HttpUtil get fails', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockReject('error')
+      HttpUtil.getWithRetry = mockReject('error')
       AppError.badRequest = mock()
 
       const resultingPromise = target.getValidRandomizationIds()
@@ -237,7 +237,7 @@ describe('GroupValidator', () => {
 
     it('rejects when PingUtil getMonsantoHeader fails', () => {
       PingUtil.getMonsantoHeader = mockReject('error')
-      HttpUtil.get = mockReject('error')
+      HttpUtil.getWithRetry = mockReject('error')
       AppError.badRequest = mock()
 
       const resultingPromise = target.getValidRandomizationIds()

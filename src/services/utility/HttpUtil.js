@@ -2,8 +2,19 @@ const agent = require('superagent')
 const _ = require('lodash')
 
 class HttpUtil {
+
   static get(url, headers) {
     return HttpUtil.setHeaders(agent.get(url), headers)
+  }
+
+  static getWithRetry(url, headers, retryCount = 0) {
+    return HttpUtil.setHeaders(agent.get(url), headers)
+      .catch((error) => {
+        if (retryCount < 2) {
+          return HttpUtil.getWithRetry(url, headers, retryCount + 1)
+        }
+        return Promise.reject(error)
+      })
   }
 
   static post(url, headers, data) {

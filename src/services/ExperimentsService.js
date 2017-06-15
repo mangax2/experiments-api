@@ -137,7 +137,8 @@ class ExperimentsService {
                 groupIds: trimmedOwnerGroups }
               return this.ownerService.batchUpdateOwners([owners], context, tx)
                 .then(() => {
-                  const tags = this.assignExperimentIdToTags([id], [experiment])
+                  experiment.id = id
+                  const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
                     return this.tagService.saveTags(tags, id, context)
                         .then(() => data)

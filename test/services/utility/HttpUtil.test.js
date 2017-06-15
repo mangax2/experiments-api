@@ -1,4 +1,4 @@
-import { mock } from '../../jestUtil'
+import { mock, mockResolve, mockReject } from '../../jestUtil'
 import agent from 'superagent'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
@@ -27,6 +27,33 @@ describe('HttpUtil', () => {
 
       expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
       expect(agent.get).toHaveBeenCalledWith('testUrl')
+    })
+  })
+
+  describe('getWithRetry', () => {
+    it('calls setHeaders and agent.get', () => {
+      HttpUtil.setHeaders = mockResolve()
+      agent.get = mock({})
+
+     return HttpUtil.getWithRetry('testUrl', []).then(()=>{
+        expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
+        expect(agent.get).toHaveBeenCalledWith('testUrl')
+
+      })
+
+    })
+
+    it('calls setHeaders 3 times in case of error', () => {
+      HttpUtil.setHeaders = mockReject('error')
+      agent.get = mock({})
+
+    return HttpUtil.getWithRetry('testUrl', []).then(() => {}, (error) =>{
+        expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
+        expect(agent.get).toHaveBeenCalledWith('testUrl')
+        expect(agent.get.mock.calls.length).toBe(3)
+        expect(error).toBe('error')
+      })
+
     })
   })
 

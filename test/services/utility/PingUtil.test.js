@@ -18,11 +18,13 @@ describe('PingUtil', () => {
     })
 
     it('rejects if oauth call fails', () => {
-      oauthPing.httpGetToken = mockReject('error')
+      oauthPing.httpGetToken = mockReject()
 
       return PingUtil.getMonsantoHeader().then(() => {}, (err) => {
         expect(oauthPing.httpGetToken).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err.data).toEqual('Authentication service returned error')
+        expect(err.message).toEqual('Internal Server Error')
+
       })
     })
   })

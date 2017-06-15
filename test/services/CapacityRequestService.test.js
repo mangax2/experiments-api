@@ -130,7 +130,7 @@ describe('CapacityRequestService', () => {
 
       CapacityRequestService.handleCapacityRequestError({ status: 404, response: { text: 'testText' } })
 
-      expect(AppError.badRequest).toBeCalledWith('Invalid capacity request information')
+      expect(AppError.badRequest).toBeCalledWith('The associated capacity request does not exist')
       expect(AppError.unauthorized).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })

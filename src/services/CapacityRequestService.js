@@ -39,12 +39,14 @@ class CapacityRequestService {
   }
 
   static handleCapacityRequestError(err) {
-    if (err.status === 400 || err.status === 404) {
+    if (err.status === 400) {
       return AppError.badRequest('Invalid capacity request information')
     } else if (err.status === 401) {
       return AppError.unauthorized(err.response.text)
     } else if (err.status === 403) {
       return AppError.forbidden(err.response.text)
+    } else if (err.status === 404) {
+      return AppError.badRequest('The associated capacity request does not exist')
     }
     return {
       status: 500,

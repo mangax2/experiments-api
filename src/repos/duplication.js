@@ -142,6 +142,22 @@ const duplicateUnitSpecificationScript =
     "RETURNING id" +
   ")"
 
+const duplicateDesignSpecificationScript =
+  "design_spec_detail_ids AS (" +
+    "INSERT INTO design_spec_detail " +
+    "SELECT (c).* FROM  (" +
+      "SELECT dsd " +
+        "#= hstore('id', nextval(pg_get_serial_sequence('design_spec_detail', 'id'))::text) " +
+        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
+        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
+        "#= hstore('created_user_id', $2) " +
+        "#= hstore('modified_user_id', $2) " +
+        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
+      "AS c FROM design_spec_detail dsd " +
+    "WHERE experiment_id = $1 ) sub " +
+    "RETURNING id" +
+  ")"
+
 
 module.exports = (rep, pgp) => ({
   repository: () => rep,
@@ -155,6 +171,7 @@ module.exports = (rep, pgp) => ({
     ", " + duplicateTreatmentScript +
     ", " + duplicateCombinationElementScript +
     ", " + duplicateUnitSpecificationScript +
+    ", " + duplicateDesignSpecificationScript +
     " SELECT * FROM experiment_parent;",
     [experimentId, context.userId],
   )

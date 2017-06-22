@@ -207,7 +207,7 @@ const duplicateGroupScript =
   "UPDATE public.group " +
   "SET parent_id = mgi.new_id " +
   "FROM public.group gtc " +
-    "INNER JOIN mapped_group_ids mgi ON gtc.parent_id = mgi.old_id " +
+    "LEFT OUTER JOIN mapped_group_ids mgi ON gtc.parent_id = mgi.old_id " +
   "WHERE public.group.id IN (SELECT new_id FROM mapped_group_ids) " +
     "AND public.group.parent_id = gtc.id;"
 

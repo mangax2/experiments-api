@@ -63,6 +63,19 @@ class TagService {
   }),
   )
 
+  copyTags = (sourceExperimentId, targetExperimentId, context) =>
+    this.getTagsByExperimentId(sourceExperimentId).then((data) => {
+      const tags = _.map(data, t => ({
+        category: t.category,
+        value: t.value,
+        experimentId: targetExperimentId,
+      }))
+      if (tags.length > 0) {
+        return this.batchCreateTags(tags, context)
+      }
+      return Promise.resolve()
+    })
+
   getEntityTagsByTagFilters = (tagCategories, tagValues) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
     logger.error(err)
     return Promise.reject(err)

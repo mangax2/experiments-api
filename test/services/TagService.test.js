@@ -153,6 +153,39 @@ describe('TagService', () => {
 
   })
 
+  describe('copyTags', () => {
+
+    it('calls getTagsByExperimentId and batchCreateTags to copy tags of experiment when tags' +
+      ' exists', () => {
+      const context = { userId: 'user' }
+      target.getTagsByExperimentId = mockResolve([{ category: 'org', value: 'dev' }])
+      target.batchCreateTags = mockResolve()
+      return target.copyTags(1, 2, context).then(() => {
+        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.batchCreateTags).toHaveBeenCalledWith([{
+          category: 'org',
+          value: 'dev',
+          experimentId: 2
+        }], context)
+
+      })
+    })
+
+    it('calls getTagsByExperimentId and does not call batchCreateTags when tags do not exist', () => {
+      const context = { userId: 'user' }
+      target.getTagsByExperimentId = mockResolve([])
+      target.batchCreateTags = mockResolve()
+      return target.copyTags(1, 2, context).then((data) => {
+        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.batchCreateTags).not.toHaveBeenCalled()
+      })
+    })
+
+  })
+
+
+
+
   describe('getEntityTagsByTagFilters', () => {
     it('gets tag entities matching filter criteria', () => {
       PingUtil.getMonsantoHeader = mockResolve({})

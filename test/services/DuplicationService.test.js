@@ -17,11 +17,26 @@ describe('DuplicationService', () => {
   describe('duplicateExperiment', () => {
     it('duplicates and returns the new experiment id that was created', () => {
       db.duplication.duplicateExperiment = mockResolve({id: 2})
-      AppUtil.createPostResponse = mock()
+      target.tagService.copyTags = mockResolve()
+      AppUtil.createPostResponse = mock('success')
 
-      return DuplicationService.duplicateExperiment({id: 1}, testContext, testTx).then(() => {
+      return target.duplicateExperiment({id: 1}, testContext, testTx).then((data) => {
         expect(db.duplication.duplicateExperiment).toHaveBeenCalledWith(1, testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{id: 2}])
+        expect(data).toBe('success')
+
+      })
+    })
+
+
+    it('throws a bad request when tagging api returns error', () => {
+      db.duplication.duplicateExperiment = mockResolve({id: 2})
+      target.tagService.copyTags = mockReject()
+      AppError.badRequest = mock()
+
+      return target.duplicateExperiment({id: 1}, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Duplications Failed, Tagging API' +
+          ' returned error')
       })
     })
 
@@ -29,7 +44,7 @@ describe('DuplicationService', () => {
       db.duplication.duplicateExperiment = mockReject('error')
       AppUtil.createPostResponse = mock()
 
-      return DuplicationService.duplicateExperiment({id: 1}, testContext, testTx).then(() => {}, (err) => {
+      return target.duplicateExperiment({id: 1}, testContext, testTx).then(() => {}, (err) => {
         expect(db.duplication.duplicateExperiment).toHaveBeenCalledWith(1, testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -40,7 +55,7 @@ describe('DuplicationService', () => {
       db.duplication.duplicateExperiment = mockResolve(null)
       AppError.badRequest = mock('')
 
-      return DuplicationService.duplicateExperiment({id: 1}, testContext, testTx).then(() => {}, () => {
+      return target.duplicateExperiment({id: 1}, testContext, testTx).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Not Found To Duplicate For Id: 1')
       })
     })
@@ -48,14 +63,14 @@ describe('DuplicationService', () => {
     it('throws a bad request when id is missing from the body', () => {
       AppError.badRequest = mock('')
 
-      expect(() => DuplicationService.duplicateExperiment({}, testContext, testTx)).toThrow()
+      expect(() => target.duplicateExperiment({}, testContext, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain an experiment id to duplicate')
     })
 
     it('throws a bad request when body is missing from request', () => {
       AppError.badRequest = mock('')
 
-      expect(() => DuplicationService.duplicateExperiment(null, testContext, testTx)).toThrow()
+      expect(() => target.duplicateExperiment(null, testContext, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain an experiment id to duplicate')
     })
   })

@@ -43,15 +43,19 @@ class DocumentationService {
 
   static getCloudfrontCookies() {
     const keyPairId = config.env === 'local' ? 'APKAIDNVPE572RTKAYCQ' : VaultUtil.cloudFrontKeyPair
-    const privateKeyPath = `./src/pk-${keyPairId}.pem`
-    const url = 'http://dcb6g58iy3guq.cloudfront.net/*'
+    const url = config.env === 'local' ? 'http://dcb6g58iy3guq.cloudfront.net/*' : VaultUtil.cloudFrontUrl
 
     const options = {
       expireTime: new Date().getTime() + (4 * 60 * 60 * 1000),
       keypairId: keyPairId,
     }
 
-    options.privateKeyPath = privateKeyPath
+    if (config.env === 'local') {
+      options.privateKeyPath = `./src/pk-${keyPairId}.pem`
+    } else {
+      const b = new Buffer(VaultUtil.cloudFrontPrivateKey, 'base64')
+      options.privateKeyString = b.toString()
+    }
 
     return cf.getSignedCookies(url, options)
   }

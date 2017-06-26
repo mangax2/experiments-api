@@ -24,7 +24,7 @@ describe('DocumentationService', () => {
     it('calls getSignedCookie for prod', () => {
       config.env = 'prod'
       VaultUtil.cloudFrontKeyPair = ''
-      VaultUtil.cloudFrontSecret = ''
+      VaultUtil.cloudFrontPrivateKey = ''
       cf.getSignedCookies = mock({})
 
       const result = DocumentationService.getCloudfrontCookies()

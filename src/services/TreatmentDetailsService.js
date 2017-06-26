@@ -30,31 +30,35 @@ class TreatmentDetailsService {
   }
 
   @Transactional('manageAllTreatmentDetails')
-  manageAllTreatmentDetails(treatmentDetailsObj, context, tx) {
-    return this.deleteTreatments(treatmentDetailsObj.deletes, context, tx)
-      .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
-        .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
-          .then(() => AppUtil.createCompositePostResponse())))
+  manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+      TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.updates, experimentId)
+      TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.adds, experimentId)
+      return this.deleteTreatments(treatmentDetailsObj.deletes, tx)
+        .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
+          .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
+            .then(() => AppUtil.createCompositePostResponse())))
+    })
   }
 
-  deleteTreatments(treatmentIdsToDelete, context, tx) {
+  static populateExperimentId(treatments, experimentId) {
+    _.forEach(treatments, (t) => {
+      t.experimentId = Number(experimentId)
+    })
+  }
+
+  deleteTreatments(treatmentIdsToDelete, tx) {
     if (_.compact(treatmentIdsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return this.treatmentService.batchGetTreatmentByIds(treatmentIdsToDelete).then((data) => {
-      const experimentIds = _.uniq(_.map(data, 'experiment_id'))
-      return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-        .then(() => this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx))
-    })
+    return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx)
   }
 
   createTreatments(treatmentAdds, context, tx) {
     if (_.compact(treatmentAdds).length === 0) {
       return Promise.resolve()
     }
-    const experimentIds = _.uniq(_.map(treatmentAdds, 'experimentId'))
-    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-      .then(() => this.treatmentService.batchCreateTreatments(treatmentAdds, context, tx)
+    return this.treatmentService.batchCreateTreatments(treatmentAdds, context, tx)
         .then((createTreatmentsResponses) => {
           const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
           return this.createCombinationElements(
@@ -65,7 +69,7 @@ class TreatmentDetailsService {
             context,
             tx,
           )
-        }))
+        })
   }
 
   assembleBatchCreateCombinationElementsRequestFromAdds(treatments, treatmentIds) {
@@ -92,12 +96,9 @@ class TreatmentDetailsService {
     if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
     }
-
-    const experimentIds = _.uniq(_.map(treatmentUpdates, 'experimentId'))
-    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-      .then(() => this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
+    return this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
         .then(() => this.deleteCombinationElements(treatmentUpdates, tx)
-          .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx))))
+          .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
   }
 
   deleteCombinationElements(treatmentUpdates, tx) {

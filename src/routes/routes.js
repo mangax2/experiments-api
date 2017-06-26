@@ -135,7 +135,7 @@ router.get('/factor-levels/:id', (req, res, next) => new FactorLevelService().ge
 router.get('/experiments/:id/composites/treatments', (req, res, next) => new TreatmentDetailsService().getAllTreatmentDetails(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.post('/composites/treatments', (req, res, next) => new TreatmentDetailsService().manageAllTreatmentDetails(req.body, req.context)
+router.post('/experiments/:id/composites/treatments', (req, res, next) => new TreatmentDetailsService().manageAllTreatmentDetails(req.params.id, req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

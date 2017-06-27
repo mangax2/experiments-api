@@ -228,7 +228,7 @@ router.get('/unit-specifications/:id', (req, res, next) => new UnitSpecification
 router.get('/unit-specification-details/:id', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.post('/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.body, req.context)
+router.post('/experiments/:id/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.params.id, req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

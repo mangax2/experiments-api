@@ -61,33 +61,41 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('manageAllUnitSpecificationDetails')
-  manageAllUnitSpecificationDetails(unitSpecificationDetailsObj, context, tx) {
-    return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, context, tx)
-      .then(() =>
-        this.updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx)
-          .then(() =>
-            this.createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx)
-              .then(() => AppUtil.createCompositePostResponse())))
+  manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+      UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj
+        .updates, experimentId)
+      UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj
+        .adds, experimentId)
+      return this.deleteUnitSpecificationDetails(unitSpecificationDetailsObj.deletes, tx)
+        .then(() =>
+          this.updateUnitSpecificationDetails(unitSpecificationDetailsObj.updates, context, tx)
+            .then(() =>
+              this.createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx)
+                .then(() => AppUtil.createCompositePostResponse())))
+    })
   }
 
   @Transactional('deleteUnitSpecificationDetails')
-  deleteUnitSpecificationDetails = (idsToDelete, context, tx) => {
+  deleteUnitSpecificationDetails = (idsToDelete, tx) => {
     if (_.compact(idsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return this.batchGetUnitSpecificationDetailsByIds(idsToDelete, tx).then((unitSpecsData) => {
-      const experimentIds = _.map(unitSpecsData, 'experiment_id')
-      return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-        .then(() => db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
-          .then((data) => {
-            if (_.filter(data, element => element !== null).length !== idsToDelete.length) {
-              logger.error('Not all unit specification detail ids requested for delete were found')
-              throw AppError.notFound(
-                'Not all unit specification detail ids requested for delete were found')
-            } else {
-              return data
-            }
-          }))
+    return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
+      .then((data) => {
+        if (_.compact(data).length !== idsToDelete.length) {
+          logger.error('Not all unit specification detail ids requested for delete were found')
+          throw AppError.notFound(
+            'Not all unit specification detail ids requested for delete were found')
+        } else {
+          return data
+        }
+      })
+  }
+
+  static populateExperimentId(unitSpecificationDetailsObj, experimentId) {
+    _.forEach(unitSpecificationDetailsObj, (u) => {
+      u.experimentId = Number(experimentId)
     })
   }
 
@@ -95,18 +103,14 @@ class UnitSpecificationDetailService {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    const experimentIds = _.uniq(_.map(unitSpecificationDetails, 'experimentId'))
-    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-      .then(() => this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx))
+    return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx)
   }
 
   createUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    const experimentIds = _.uniq(_.map(unitSpecificationDetails, 'experimentId'))
-    return this.securityService.permissionsCheckForExperiments(experimentIds, context, tx)
-      .then(() => this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, context, tx))
+    return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, context, tx)
   }
 }
 

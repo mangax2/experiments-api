@@ -83,7 +83,7 @@ class UnitSpecificationDetailService {
     }
     return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
-        if (_.filter(data, element => element !== null).length !== idsToDelete.length) {
+        if (_.compact(data).length !== idsToDelete.length) {
           logger.error('Not all unit specification detail ids requested for delete were found')
           throw AppError.notFound(
             'Not all unit specification detail ids requested for delete were found')
@@ -93,9 +93,9 @@ class UnitSpecificationDetailService {
       })
   }
 
-  static populateExperimentId(treatments, experimentId) {
-    _.forEach(treatments, (t) => {
-      t.experimentId = Number(experimentId)
+  static populateExperimentId(unitSpecificationDetailsObj, experimentId) {
+    _.forEach(unitSpecificationDetailsObj, (u) => {
+      u.experimentId = Number(experimentId)
     })
   }
 

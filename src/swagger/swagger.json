@@ -64,61 +64,7 @@
         }
       }
     },
-    "/composites/unit-specification-details": {
-      "post": {
-        "summary": "post one or more unit specification detail entities",
-        "description": "Creates/updates/deletes unit specification detail entities put into a JSON body",
-        "operationId": "postComposites_unit-specification-details",
-        "tags": [
-          "Unit Specification Detail"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "Composites Unit Specification Details",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Composite-Unit Specification Details operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Error"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
+
     "/dependent-variables/{id}": {
       "get": {
         "summary": "get one dependent variable entity",
@@ -4106,10 +4052,6 @@
         "refUnitSpecId": {
           "type": "integer",
           "description": "Reference to Unit Specification"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "Reference to Experiment"
         }
       }
     },
@@ -4131,10 +4073,6 @@
         "refUnitSpecId": {
           "type": "integer",
           "description": "Reference to Unit Specification"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "Reference to Experiment"
         }
       }
     },

@@ -9,7 +9,7 @@ FROM (
 --Run only above script when new tables are added
 
 CREATE TRIGGER audit_trigger_row
-  AFTER INSERT OR UPDATE OR DELETE
+  AFTER  UPDATE OR DELETE
   ON public."group"
   FOR EACH ROW
   EXECUTE PROCEDURE audit.if_modified_func('true');

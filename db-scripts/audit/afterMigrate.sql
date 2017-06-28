@@ -8,6 +8,9 @@ FROM (
 
 --Run only above script when new tables are added
 
+ DROP TRIGGER audit_trigger_row ON public."group";
+ DROP TRIGGER audit_trigger_stm ON public."group";
+
 CREATE TRIGGER audit_trigger_row
   AFTER  UPDATE OR DELETE
   ON public."group"

@@ -900,7 +900,7 @@
         }
       }
     },
-    "/experiments/{id}/composites/design-specification-details/": {
+    "/experiments/{id}/composites/design-specification-details": {
       "post": {
         "summary": "Creates, updates and deletes DesignSpecificationDetail",
         "description": "Creates, updates and deletes DesignSpecificationDetail",

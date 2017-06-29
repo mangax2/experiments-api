@@ -900,6 +900,67 @@
         }
       }
     },
+    "/experiments/{id}/composites/design-specification-details/": {
+      "post": {
+        "summary": "Creates, updates and deletes DesignSpecificationDetail",
+        "description": "Creates, updates and deletes DesignSpecificationDetail",
+        "operationId": "post_compositesDesignSpecificationDetail",
+        "tags": [
+          "Composites"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "DesignSpecificationDetail",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DesignSpecificationDetail operation SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experiments/{id}/dependent-variables": {
       "get": {
         "summary": "get all dependent variables for given experiment id.",
@@ -989,65 +1050,6 @@
             "description": "Invalid Request",
             "schema": {
               "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Creates, updates and deletes DesignSpecificationDetail",
-        "description": "Creates, updates and deletes DesignSpecificationDetail",
-        "operationId": "post_DesignSpecificationDetail",
-        "tags": [
-          "Design Specification Detail"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "DesignSpecificationDetail",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "DesignSpecificationDetail operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Error"
-              }
             }
           },
           "401": {

@@ -900,11 +900,11 @@
         }
       }
     },
-    "/experiments/{id}/composites/design-specification-details": {
+    "/experiments/{id}/composites/unit-specification-details": {
       "post": {
-        "summary": "Creates, updates and deletes DesignSpecificationDetail",
-        "description": "Creates, updates and deletes DesignSpecificationDetail",
-        "operationId": "post_compositesDesignSpecificationDetail",
+        "summary": "Creates, updates and deletes UnitSpecificationDetail",
+        "description": "Creates, updates and deletes UnitSpecificationDetail",
+        "operationId": "post_compositesUnitSpecificationDetail",
         "tags": [
           "Composites"
         ],
@@ -922,7 +922,7 @@
             "required": true
           },
           {
-            "name": "DesignSpecificationDetail",
+            "name": "UnitSpecificationDetail",
             "in": "body",
             "required": true,
             "schema": {
@@ -935,7 +935,7 @@
         ],
         "responses": {
           "200": {
-            "description": "DesignSpecificationDetail operation SUCCESS"
+            "description": "UnitSpecificationDetail operation SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input",

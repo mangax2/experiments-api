@@ -208,8 +208,8 @@
     },
     "/experimental-units": {
       "patch": {
-        "summary": "",
-        "description": "",
+        "summary": "partially update experimental units",
+        "description": "Allows for a set of experimental units to be partially updated. Currently only allows the update of the entryId field.",
         "operationId": "patchExperimental-units",
         "tags": [
           "Experimental Units"

@@ -27,6 +27,13 @@ class ExperimentalUnitService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @Transactional('partialUpdateExperimentalUnitsTx')
+  batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {
+    return this.validator.validate(experimentalUnits, 'PATCH', tx)
+      .then(() => db.unit.batchPartialUpdate(experimentalUnits, context, tx)
+        .then(data => AppUtil.createPutResponse(data)))
+  }
+
   @Transactional('getExperimentalUnitsByTreatmentId')
   getExperimentalUnitsByTreatmentId(id, tx) {
     return this.treatmentService.getTreatmentById(id, tx)

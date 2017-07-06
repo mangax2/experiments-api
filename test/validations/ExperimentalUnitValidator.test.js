@@ -19,9 +19,22 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'groupId', type: 'refData', entity: db.group },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
+        { paramName: 'entryId', type: 'numeric' },
       ]
 
       expect(ExperimentalUnitValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
+    })
+  })
+
+  describe('get PATCH_VALIDATION_SCHEMA', () => {
+    it('returns schema', () => {
+      db.unit = {}
+
+      const schema = [
+        { paramName: 'entryId', type: 'numeric' },
+      ]
+
+      expect(ExperimentalUnitValidator.PATCH_VALIDATION_SCHEMA).toEqual(schema)
     })
   })
 
@@ -52,6 +65,7 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'groupId', type: 'refData', entity: db.group },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
+        { paramName: 'entryId', type: 'numeric' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -66,11 +80,25 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'groupId', type: 'refData', entity: db.group },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
+        { paramName: 'entryId', type: 'numeric' },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]
 
       expect(target.getSchema('PUT')).toEqual(schema)
+    })
+
+    it('returns the PATCH and PUT schemas when PATCH is passed in', () => {
+      db.treatment = {}
+      db.unit = {}
+
+      const schema = [
+        { paramName: 'entryId', type: 'numeric' },
+        { paramName: 'id', type: 'numeric', required: true },
+        { paramName: 'id', type: 'refData', entity: {} },
+      ]
+
+      expect(target.getSchema('PATCH')).toEqual(schema)
     })
 
     it('throws an error when request is neither POST nor PUT', () => {

@@ -201,7 +201,7 @@ $body$;
                                                ignored_cols TEXT [])
     RETURNS VOID AS $body$
   DECLARE
-    stm_targets        TEXT = 'INSERT OR UPDATE OR DELETE OR TRUNCATE';
+    stm_targets        TEXT = 'UPDATE OR DELETE OR TRUNCATE';
     _q_txt             TEXT;
     _ignored_cols_snip TEXT = '';
   BEGIN
@@ -214,7 +214,7 @@ $body$;
       THEN
         _ignored_cols_snip = ', ' || quote_literal(ignored_cols);
       END IF;
-      _q_txt = 'CREATE TRIGGER audit_trigger_row AFTER INSERT OR UPDATE OR DELETE ON ' ||
+      _q_txt = 'CREATE TRIGGER audit_trigger_row AFTER UPDATE OR DELETE ON ' ||
                quote_ident(target_table :: TEXT) ||
                ' FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func(' ||
                quote_literal(audit_query_text) || _ignored_cols_snip || ');';

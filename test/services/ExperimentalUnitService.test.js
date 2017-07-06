@@ -250,6 +250,46 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
+  describe('batchPartialUpdateExperimentalUnits', () => {
+    it('calls validate, batchUpdate, and createPutResponse', () => {
+      target.validator.validate = mockResolve()
+      db.unit.batchPartialUpdate = mockResolve({})
+      AppUtil.createPutResponse = mock()
+
+      return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
+        expect(db.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
+      })
+    })
+
+    it('rejects when batchUpdate fails', () => {
+      target.validator.validate = mockResolve()
+      db.unit.batchPartialUpdate = mockReject('error')
+      AppUtil.createPutResponse = mock()
+
+      return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
+        expect(db.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
+      })
+    })
+
+    it('rejects when validate fails', () => {
+      target.validator.validate = mockReject('error')
+      db.unit.batchPartialUpdate = mock()
+      AppUtil.createPutResponse = mock()
+
+      return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
+        expect(db.unit.batchPartialUpdate).not.toHaveBeenCalled()
+        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('deleteExperimentalUnit', () => {
     it('deletes and returns data', () => {
       db.unit.remove = mockResolve({})

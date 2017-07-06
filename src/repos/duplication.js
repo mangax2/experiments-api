@@ -242,7 +242,7 @@ const duplicateUnitScript =
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('group_id', mgi.new_id::text) " +
         "#= hstore('treatment_id', mti.new_id::text) " +
-        "#= hstore('set_entry_id', null) " +
+        "#= hstore('entry_id', null) " +
       "AS c FROM unit u " +
         "INNER JOIN mapped_treatment_ids mti ON u.treatment_id = mti.old_id " +
         "INNER JOIN mapped_group_ids mgi ON u.group_id = mgi.old_id) sub " +

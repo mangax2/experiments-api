@@ -236,7 +236,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Experiment Duplication SUCCESS"
+            "description": "Experimental Unit Update SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input"
@@ -3186,7 +3186,7 @@
           "type": "integer",
           "description": "id of experimental unit to update."
         },
-        "setEntryId": {
+        "entryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3207,7 +3207,7 @@
           "type": "integer",
           "description": "rep number of experimental unit."
         },
-        "setEntryId": {
+        "entryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3232,7 +3232,7 @@
           "type": "integer",
           "description": "rep number of experimental unit."
         },
-        "setEntryId": {
+        "entryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3257,7 +3257,7 @@
           "type": "integer",
           "description": "rep number of experimental unit"
         },
-        "setEntryId": {
+        "entryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
         },
@@ -3298,7 +3298,7 @@
           "type": "integer",
           "description": "rep number of experimental unit"
         },
-        "setEntryId": {
+        "entryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
         }

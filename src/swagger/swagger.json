@@ -191,9 +191,53 @@
           }
         ],
         "responses": {
-         "201": {
-           "description": "Experiment Duplication SUCCESS"
-         },
+          "201": {
+            "description": "Experiment Duplication SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/experimental-units": {
+      "patch": {
+        "summary": "",
+        "description": "",
+        "operationId": "patchExperimental-units",
+        "tags": [
+          "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Experimental Units",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ExperimentalUnitPayloadForPATCH"
+              }
+            },
+            "description": "Numeric Id of the Experiment to duplicate"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Experiment Duplication SUCCESS"
+          },
           "400": {
             "description": "Invalid/Problematic Input"
           },
@@ -3135,6 +3179,19 @@
         }
       }
     },
+    "ExperimentalUnitPayloadForPATCH": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "id of experimental unit to update."
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "set entry id for experimental unit."
+        }
+      }
+    },
     "ExperimentalUnitPayloadForPOST": {
       "type": "object",
       "properties": {
@@ -3149,6 +3206,10 @@
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit."
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "set entry id for experimental unit."
         }
       }
     },
@@ -3170,6 +3231,10 @@
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit."
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "set entry id for experimental unit."
         }
       }
     },
@@ -3191,6 +3256,10 @@
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit"
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "the set entry id for the experimental unit"
         },
         "createdDate": {
           "type": "string",
@@ -3228,6 +3297,10 @@
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit"
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "the set entry id for the experimental unit"
         }
       }
     },

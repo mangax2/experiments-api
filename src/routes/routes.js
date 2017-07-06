@@ -166,6 +166,9 @@ router.get('/treatments/:id/experimental-units', (req, res, next) => new Experim
 router.get('/experimental-units/:id', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitById(req.params.id)
   .then(experimentalUnit => res.json(experimentalUnit))
   .catch(err => next(err)))
+router.patch('/experimental-units', (req, res, next) => new ExperimentalUnitService().batchPartialUpdateExperimentalUnits(req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
 
 router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id)
   .then(summary => res.json(summary))

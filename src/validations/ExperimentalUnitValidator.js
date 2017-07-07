@@ -10,13 +10,13 @@ class ExperimentalUnitValidator extends SchemaValidator {
       { paramName: 'groupId', type: 'refData', entity: db.group },
       { paramName: 'treatmentId', type: 'numeric', required: true },
       { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
-      { paramName: 'entryId', type: 'numeric' },
+      { paramName: 'setEntryId', type: 'numeric' },
     ]
   }
 
   static get PATCH_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'entryId', type: 'numeric' },
+      { paramName: 'setEntryId', type: 'numeric' },
     ]
   }
 

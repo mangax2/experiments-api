@@ -181,13 +181,12 @@
         ],
         "parameters": [
           {
-            "name": "Experiment Id",
+            "name": "Duplication Request",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "integer"
-            },
-            "description": "Numeric Id of the Experiment to duplicate"
+              "$ref": "#/definitions/DuplicationRequest"
+            }
           }
         ],
         "responses": {
@@ -3151,6 +3150,26 @@
         }
       }
     },
+    "DuplicationRequest": {
+      "type": "object",
+      "properties":{
+        "ids": {
+          "description": "The IDs of the experiments to duplicate.",
+          "type": "array",
+          "items":{
+            "type": "integer"
+          }
+        },
+        "numberOfCopies": {
+          "description": "The number of copies to make of each experiment.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ids",
+        "numberOfCopies"
+      ]
+    },
     "Error": {
       "type": "object",
       "properties": {
@@ -3186,7 +3205,7 @@
           "type": "integer",
           "description": "id of experimental unit to update."
         },
-        "entryId": {
+        "setEntryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3207,7 +3226,7 @@
           "type": "integer",
           "description": "rep number of experimental unit."
         },
-        "entryId": {
+        "setEntryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3232,7 +3251,7 @@
           "type": "integer",
           "description": "rep number of experimental unit."
         },
-        "entryId": {
+        "setEntryId": {
           "type": "integer",
           "description": "set entry id for experimental unit."
         }
@@ -3257,7 +3276,7 @@
           "type": "integer",
           "description": "rep number of experimental unit"
         },
-        "entryId": {
+        "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
         },
@@ -3298,7 +3317,7 @@
           "type": "integer",
           "description": "rep number of experimental unit"
         },
-        "entryId": {
+        "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
         }

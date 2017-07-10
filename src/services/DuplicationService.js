@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -10,21 +11,33 @@ class DuplicationService {
     this.tagService = new TagService()
   }
 
-  @Transactional('DuplicateExperiment')
-  duplicateExperiment(body, context, tx) {
-    if (body && body.id) {
-      return db.duplication.duplicateExperiment(body.id, context, tx)
-        .then((newExperimentIdObject) => {
-          if (newExperimentIdObject) {
-            return this.tagService.copyTags(body.id, newExperimentIdObject.id, context)
-              .then(() => AppUtil.createPostResponse([newExperimentIdObject])).catch(() => {
-                throw AppError.badRequest('Duplications Failed, Tagging API returned error')
-              })
-          }
-          throw AppError.badRequest(`Experiment Not Found To Duplicate For Id: ${body.id}`)
-        })
+  @Transactional('DuplicateExperiments')
+  duplicateExperiments(body, context, tx) {
+    const promiseArrays = []
+    if (body && body.ids && body.ids.length > 0 && Number(body.numberOfCopies) > 0) {
+      _.forEach(body.ids, (id) => {
+        for (let i = 0; i < body.numberOfCopies; i += 1) {
+          promiseArrays.push(this.duplicateExperiment(id, context, tx))
+        }
+      })
+      return Promise.all(promiseArrays)
+        .then(idObjects => AppUtil.createPostResponse(idObjects))
     }
-    throw AppError.badRequest('Body must contain an experiment id to duplicate')
+    throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+  }
+
+  @Transactional('DuplicateExperiment')
+  duplicateExperiment(id, context, tx) {
+    return db.duplication.duplicateExperiment(id, context, tx)
+      .then((newExperimentIdObject) => {
+        if (newExperimentIdObject) {
+          return this.tagService.copyTags(id, newExperimentIdObject.id, context)
+            .then(() => newExperimentIdObject).catch(() => {
+              throw AppError.badRequest('Duplications Failed, Tagging API returned error')
+            })
+        }
+        throw AppError.badRequest(`Experiment Not Found To Duplicate For Id: ${id}`)
+      })
   }
 }
 

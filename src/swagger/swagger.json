@@ -181,13 +181,12 @@
         ],
         "parameters": [
           {
-            "name": "Experiment Id",
+            "name": "Duplication Request",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "integer"
-            },
-            "description": "Numeric Id of the Experiment to duplicate"
+              "$ref": "#/definitions/DuplicationRequest"
+            }
           }
         ],
         "responses": {
@@ -3150,6 +3149,26 @@
           "description": "Reference to Experiment"
         }
       }
+    },
+    "DuplicationRequest": {
+      "type": "object",
+      "properties":{
+        "ids": {
+          "description": "The IDs of the experiments to duplicate.",
+          "type": "array",
+          "items":{
+            "type": "integer"
+          }
+        },
+        "numberOfCopies": {
+          "description": "The number of copies to make of each experiment.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ids",
+        "numberOfCopies"
+      ]
     },
     "Error": {
       "type": "object",

@@ -16,7 +16,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
 
   static get PATCH_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'setEntryId', type: 'numeric' },
+      { paramName: 'setEntryId', type: 'numeric', required: true },
     ]
   }
 

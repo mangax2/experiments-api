@@ -19,7 +19,7 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'groupId', type: 'refData', entity: db.group },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
-        { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'setEntryId', type: 'numeric'},
       ]
 
       expect(ExperimentalUnitValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -31,7 +31,7 @@ describe('ExperimentalUnitValidator', () => {
       db.unit = {}
 
       const schema = [
-        { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'setEntryId', type: 'numeric' , required: true },
       ]
 
       expect(ExperimentalUnitValidator.PATCH_VALIDATION_SCHEMA).toEqual(schema)
@@ -93,7 +93,7 @@ describe('ExperimentalUnitValidator', () => {
       db.unit = {}
 
       const schema = [
-        { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'setEntryId', type: 'numeric',  required: true  },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

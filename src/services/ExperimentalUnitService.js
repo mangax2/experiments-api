@@ -30,8 +30,18 @@ class ExperimentalUnitService {
   @Transactional('partialUpdateExperimentalUnitsTx')
   batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PATCH', tx)
-      .then(() => db.unit.batchPartialUpdate(experimentalUnits, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
+      .then(() => {
+        ExperimentalUnitService.uniqueIdsCheck(experimentalUnits)
+        return db.unit.batchPartialUpdate(experimentalUnits, context, tx)
+          .then(data => AppUtil.createPutResponse(data))
+      })
+  }
+
+  static uniqueIdsCheck(experimentalUnits) {
+    const ids = _.map(experimentalUnits, 'id')
+    if (ids.length !== _.uniq(ids).length) {
+      throw AppError.badRequest('Duplicate ids in request payload')
+    }
   }
 
   @Transactional('getExperimentalUnitsByTreatmentId')

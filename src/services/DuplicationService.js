@@ -26,6 +26,7 @@ class DuplicationService {
     throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
   }
 
+  @Transactional('DuplicateExperiment')
   duplicateExperiment(id, context, tx) {
     return db.duplication.duplicateExperiment(id, context, tx)
       .then((newExperimentIdObject) => {

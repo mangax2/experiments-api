@@ -247,7 +247,7 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.post('/duplicate', (req, res, next) => new DuplicationService().duplicateExperiment(req.body, req.context)
+router.post('/duplicate', (req, res, next) => new DuplicationService().duplicateExperiments(req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

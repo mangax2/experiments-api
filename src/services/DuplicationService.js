@@ -13,31 +13,46 @@ class DuplicationService {
 
   @Transactional('DuplicateExperiments')
   duplicateExperiments(body, context, tx) {
-    const promiseArrays = []
     if (body && body.ids && body.ids.length > 0 && Number(body.numberOfCopies) > 0) {
-      _.forEach(body.ids, (id) => {
-        for (let i = 0; i < body.numberOfCopies; i += 1) {
-          promiseArrays.push(this.duplicateExperiment(id, context, tx))
-        }
-      })
-      return Promise.all(promiseArrays)
-        .then(idObjects => AppUtil.createPostResponse(idObjects))
+      const getTagsPromise = this.getAllTagsToDuplicate(body.ids)
+      const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies, context, tx)
+
+      return Promise.all([getTagsPromise, sqlPromise])
+        .then(results => this.duplicateTagsForExperiments(results[0], results[1], context))
     }
     throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
   }
 
-  @Transactional('DuplicateExperiment')
-  duplicateExperiment(id, context, tx) {
-    return db.duplication.duplicateExperiment(id, context, tx)
-      .then((newExperimentIdObject) => {
-        if (newExperimentIdObject) {
-          return this.tagService.copyTags(id, newExperimentIdObject.id, context)
-            .then(() => newExperimentIdObject).catch(() => {
-              throw AppError.badRequest('Duplications Failed, Tagging API returned error')
-            })
-        }
-        throw AppError.badRequest(`Experiment Not Found To Duplicate For Id: ${id}`)
-      })
+  getAllTagsToDuplicate = (ids) => {
+    const tagsToDuplicate = {}
+    return Promise.all(_.map(ids, id => this.tagService.getTagsByExperimentId(id)
+      .then((tags) => { tagsToDuplicate[id] = tags })))
+      .then(() => tagsToDuplicate)
+  }
+
+  @Transactional('DuplicateExperiments')
+  duplicateExperimentData = (ids, numberOfCopies, context, tx) => {
+    let sqlPromise = Promise.resolve()
+    const conversionMap = []
+    _.forEach(ids, (id) => {
+      for (let i = 0; i < numberOfCopies; i += 1) {
+        sqlPromise = sqlPromise.then(() => db.duplication.duplicateExperiment(id, context, tx))
+          .then((newIdObject) => { conversionMap.push({ oldId: id, newId: newIdObject.id }) })
+      }
+    })
+
+    return sqlPromise.then(() => conversionMap)
+  }
+
+  duplicateTagsForExperiments = (tagsToDuplicate, idConversionMap, context) => {
+    const newTags = _.flatMap(idConversionMap, cm =>
+      _.map(tagsToDuplicate[cm.oldId],
+        tag => ({ experimentId: cm.newId, category: tag.category, value: tag.value })))
+
+    const tagsPromise = newTags.length > 0
+      ? this.tagService.batchCreateTags(newTags, context)
+      : Promise.resolve()
+    return tagsPromise.then(() => AppUtil.createPostResponse(_.map(idConversionMap, 'newId')))
   }
 }
 

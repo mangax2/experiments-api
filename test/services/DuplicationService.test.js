@@ -5,37 +5,26 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('DuplicationService', () => {
-  let target
   const testContext = {}
   const testTx = { tx: {} }
   db.duplication.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
 
-  beforeEach(() => {
-    target = new DuplicationService()
-  })
-
   describe('duplicateExperiments', () => {
-    it('calls duplicateExperiment the required number of times', () => {
-      AppUtil.createPostResponse = jest.fn(() => 'success')
-      target.duplicateExperiment = jest.fn(() => Promise.resolve())
+    it('calls the correct functions if valid', () => {
+      const target = new DuplicationService()
+      target.getAllTagsToDuplicate = jest.fn(() => Promise.resolve({tags: null}))
+      target.duplicateExperimentData = jest.fn(() => Promise.resolve({ids: null}))
+      target.duplicateTagsForExperiments = jest.fn(() => Promise.resolve())
 
       return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext, testTx).then(() => {
-        expect(target.duplicateExperiment).toHaveBeenCalledTimes(2)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledTimes(1)
-      })
-    })
-
-    it('throws only one error if multiple occur', (done) => {
-      target.duplicateExperiment = jest.fn(() => Promise.reject('error'))
-
-      return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext, testTx).catch((err) => {
-        expect(target.duplicateExperiment).toHaveBeenCalledTimes(2)
-        expect(err).toBe('error')
-        done()
+        expect(target.getAllTagsToDuplicate).toBeCalledWith([1])
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, testContext, testTx)
+        expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext)
       })
     })
 
     it('throws a bad request when numberOfCopies is missing from the body', () => {
+      const target = new DuplicationService()
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({ids: [1]}, testContext, testTx)).toThrow()
@@ -43,6 +32,7 @@ describe('DuplicationService', () => {
     })
 
     it('throws a bad request when ids has no values is missing from the body', () => {
+      const target = new DuplicationService()
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({ids: []}, testContext, testTx)).toThrow()
@@ -50,6 +40,7 @@ describe('DuplicationService', () => {
     })
 
     it('throws a bad request when id is missing from the body', () => {
+      const target = new DuplicationService()
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({}, testContext, testTx)).toThrow()
@@ -57,6 +48,7 @@ describe('DuplicationService', () => {
     })
 
     it('throws a bad request when body is missing from request', () => {
+      const target = new DuplicationService()
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments(null, testContext, testTx)).toThrow()
@@ -64,45 +56,66 @@ describe('DuplicationService', () => {
     })
   })
 
-  describe('duplicateExperiment', () => {
-    it('duplicates and returns the new experiment id that was created', () => {
-      db.duplication.duplicateExperiment = mockResolve({id: 2})
-      target.tagService.copyTags = mockResolve()
+  describe('duplicateExperimentData', () => {
+    it('calls duplicateExperiment the correct number of times', () => {
+      const target = new DuplicationService()
+      db.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
 
-      return target.duplicateExperiment(1, testContext, testTx).then((data) => {
-        expect(db.duplication.duplicateExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(data).toEqual({id: 2})
+      return target.duplicateExperimentData([3, 5], 3, testContext, testTx)
+        .then((result) => {
+          expect(result.length).toBe(6)
+          expect(db.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)
+        })
+    })
+  })
+
+  describe('getAllTagsToDuplicate', () => {
+    it('calls the tag service for each id passed in', () => {
+      const target = new DuplicationService()
+      target.tagService = { getTagsByExperimentId: jest.fn(() => Promise.resolve()) }
+
+      return target.getAllTagsToDuplicate([3, 5, 7]).then(() => {
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledTimes(3)
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(3)
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(5)
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(7)
       })
     })
 
-    it('throws a bad request when tagging api returns error', () => {
-      db.duplication.duplicateExperiment = mockResolve({id: 2})
-      target.tagService.copyTags = mockReject()
-      AppError.badRequest = mock()
+    it('returns an object with keys that match the ids passed in', () => {
+      const target = new DuplicationService()
+      target.tagService = { getTagsByExperimentId: jest.fn(() => Promise.resolve([])) }
 
-      return target.duplicateExperiment(1, testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Duplications Failed, Tagging API' +
-          ' returned error')
+      return target.getAllTagsToDuplicate([3, 5, 7]).then((result) => {
+        expect(result[3]).toEqual([])
+        expect(result[5]).toEqual([])
+        expect(result[7]).toEqual([])
+      })
+    })
+  })
+
+  describe('duplicateTagsForExperiments', () => {
+    it('does not call tagService if no tags to create', () => {
+      const target = new DuplicationService()
+      target.tagService = { batchCreateTags: jest.fn(() => Promise.resolve() ) }
+      AppUtil.createPostResponse = jest.fn()
+
+      return target.duplicateTagsForExperiments({}, [{ oldId: 3, newId: 5 }], testContext).then(() => {
+        expect(target.tagService.batchCreateTags).not.toBeCalled()
+        expect(AppUtil.createPostResponse).toBeCalledWith([5])
       })
     })
 
-    it('rejects when db duplicateExperiment fails', () => {
-      db.duplication.duplicateExperiment = mockReject('error')
-      AppUtil.createPostResponse = mock()
+    it('does call tagService if there are tags to create', () => {
+      const target = new DuplicationService()
+      const tagsToDuplicate = {}
+      tagsToDuplicate[3] = [{ category: 'category', value: 'value' }]
+      target.tagService = { batchCreateTags: jest.fn(() => Promise.resolve() ) }
+      AppUtil.createPostResponse = jest.fn()
 
-      return target.duplicateExperiment(1, testContext, testTx).then(() => {}, (err) => {
-        expect(db.duplication.duplicateExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('throws a bad request when no experiment is found to duplicate', () => {
-      db.duplication.duplicateExperiment = mockResolve(null)
-      AppError.badRequest = mock('')
-
-      return target.duplicateExperiment(1, testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Not Found To Duplicate For Id: 1')
+      return target.duplicateTagsForExperiments(tagsToDuplicate, [{ oldId: 3, newId: 5 }], testContext).then(() => {
+        expect(target.tagService.batchCreateTags).toBeCalledWith([{ experimentId: 5, category: 'category', value: 'value' }], testContext)
+        expect(AppUtil.createPostResponse).toBeCalledWith([5])
       })
     })
   })

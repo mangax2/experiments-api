@@ -31,16 +31,18 @@ class ExperimentalUnitService {
   batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PATCH', tx)
       .then(() => {
-        ExperimentalUnitService.uniqueIdsCheck(experimentalUnits)
+        ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'id')
+        ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'setEntryId')
+
         return db.unit.batchPartialUpdate(experimentalUnits, context, tx)
           .then(data => AppUtil.createPutResponse(data))
       })
   }
 
-  static uniqueIdsCheck(experimentalUnits) {
-    const ids = _.map(experimentalUnits, 'id')
+  static uniqueIdsCheck(experimentalUnits, idKey) {
+    const ids = _.map(experimentalUnits, idKey)
     if (ids.length !== _.uniq(ids).length) {
-      throw AppError.badRequest('Duplicate ids in request payload')
+      throw AppError.badRequest(`Duplicate ${idKey}(s) in request payload`)
     }
   }
 

@@ -343,4 +343,27 @@ describe('ExperimentalUnitService', () => {
       })
     })
   })
+
+  describe('uniqueIdsCheck', () => {
+    it('throws an error when duplicate ids are passed in', () => {
+      AppError.badRequest = mock('')
+      expect(() => ExperimentalUnitService.uniqueIdsCheck([{ id: 1 }, { id: 1 }])).toThrow()
+      expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate ids in request payload')
+    })
+
+    it('Does not throw an error when no duplicate id found', () => {
+      AppError.badRequest = mock('')
+      ExperimentalUnitService.uniqueIdsCheck([{ id: 1 }, { id: 2 }])
+      expect(AppError.badRequest).not.toHaveBeenCalled()
+
+    })
+
+    it('Does not throw an error when empty array is passed in', () => {
+      AppError.badRequest = mock('')
+      ExperimentalUnitService.uniqueIdsCheck([])
+      expect(AppError.badRequest).not.toHaveBeenCalled()
+
+    })
+  })
+
 })

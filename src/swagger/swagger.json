@@ -1152,12 +1152,12 @@
                 "$ref": "#/definitions/ExperimentalUnitPayloadForPATCH"
               }
             },
-            "description": "Numeric Id of the Experiment to duplicate"
+            "description": "Numeric Id of the Experimental Unit to patch"
           }
         ],
         "responses": {
-          "201": {
-            "description": "Experimental Unit Update SUCCESS"
+          "200": {
+            "description": "Experimental Unit Patch SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input"

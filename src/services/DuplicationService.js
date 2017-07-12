@@ -13,7 +13,8 @@ class DuplicationService {
 
   @Transactional('DuplicateExperiments')
   duplicateExperiments(body, context, tx) {
-    if (body && body.ids && body.ids.length > 0 && Number(body.numberOfCopies) > 0) {
+    const parsedCopyNum = Number(body ? body.numberOfCopies : undefined)
+    if (body && body.ids && body.ids.length > 0 && parsedCopyNum > 0 && parsedCopyNum % 1 === 0) {
       const getTagsPromise = this.getAllTagsToDuplicate(body.ids)
       const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies, context, tx)
 

@@ -102,7 +102,7 @@ describe('DuplicationService', () => {
 
       return target.duplicateTagsForExperiments({}, [{ oldId: 3, newId: 5 }], testContext).then(() => {
         expect(target.tagService.batchCreateTags).not.toBeCalled()
-        expect(AppUtil.createPostResponse).toBeCalledWith([5])
+        expect(AppUtil.createPostResponse).toBeCalledWith([{ id: 5 }])
       })
     })
 
@@ -115,7 +115,7 @@ describe('DuplicationService', () => {
 
       return target.duplicateTagsForExperiments(tagsToDuplicate, [{ oldId: 3, newId: 5 }], testContext).then(() => {
         expect(target.tagService.batchCreateTags).toBeCalledWith([{ experimentId: 5, category: 'category', value: 'value' }], testContext)
-        expect(AppUtil.createPostResponse).toBeCalledWith([5])
+        expect(AppUtil.createPostResponse).toBeCalledWith([{ id: 5 }])
       })
     })
   })

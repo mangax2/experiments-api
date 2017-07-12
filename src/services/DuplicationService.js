@@ -53,7 +53,8 @@ class DuplicationService {
     const tagsPromise = newTags.length > 0
       ? this.tagService.batchCreateTags(newTags, context)
       : Promise.resolve()
-    return tagsPromise.then(() => AppUtil.createPostResponse(_.map(idConversionMap, 'newId')))
+    const newIds = _.map(idConversionMap, ids => ({ id: ids.newId }))
+    return tagsPromise.then(() => AppUtil.createPostResponse(newIds))
   }
 }
 

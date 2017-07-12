@@ -1,4 +1,18 @@
 const duplicateExperimentInfoScript =
+  "DROP TABLE IF EXISTS experiment_parent; " +
+  "DROP TABLE IF EXISTS owner_ids; " +
+  "DROP TABLE IF EXISTS dependent_variable_ids; " +
+  "DROP TABLE IF EXISTS new_factors; " +
+  "DROP TABLE IF EXISTS mapped_factor_ids; " +
+  "DROP TABLE IF EXISTS factor_level_ids; " +
+  "DROP TABLE IF EXISTS new_treatments; " +
+  "DROP TABLE IF EXISTS mapped_treatment_ids; " +
+  "DROP TABLE IF EXISTS combination_element_ids; " +
+  "DROP TABLE IF EXISTS unit_spec_detail_ids; " +
+  "DROP TABLE IF EXISTS design_spec_detail_ids; " +
+  "DROP TABLE IF EXISTS mapped_group_ids; " +
+  "DROP TABLE IF EXISTS group_value_ids; " +
+  "DROP TABLE IF EXISTS unit_ids; " +
   "WITH temp_experiment_parent AS (" +
     "INSERT INTO experiment " +
     "SELECT (e1).* FROM (" +

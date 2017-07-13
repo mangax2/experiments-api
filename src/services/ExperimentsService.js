@@ -120,7 +120,8 @@ class ExperimentsService {
   }
 
   @Transactional('updateExperiment')
-  updateExperiment(id, experiment, context, tx) {
+  updateExperiment(experimentId, experiment, context, tx) {
+    const id = Number(experimentId)
     return this.securityService.permissionsCheck(id, context, tx)
       .then(() => this.validator.validate([experiment], 'PUT', tx)
         .then(() => db.experiments.update(id, experiment, context, tx)

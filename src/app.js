@@ -78,6 +78,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
         logger.error(errorLogMessage + err)
         return res.status(err.status).json(err)
       }
+      logger.error(errorLogMessage + err)
       if (Object.hasOwnProperty.call(err, 'table')) {
         const pgerror = {
           status: 500,
@@ -86,7 +87,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
         }
         return res.status(500).json(pgerror)
       }
-      logger.error(errorLogMessage + err)
       return res.status(500).json(err)
     }
     logger.error(errorLogMessage + err)

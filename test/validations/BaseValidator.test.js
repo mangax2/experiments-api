@@ -265,6 +265,13 @@ describe('BaseValidator', () => {
       expect(target.messages[0]).toEqual('test must be numeric')
     })
 
+    it('adds a message if the value is numeric but in string format', () => {
+      target.checkNumeric('1', 'test')
+
+      expect(target.messages[0]).toEqual('test must be numeric')
+    })
+
+
     it('does not add a message if the value is numeric', () => {
       target.checkNumeric(1, 'test')
 

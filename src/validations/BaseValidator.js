@@ -78,7 +78,7 @@ class BaseValidator {
   }
 
   checkNumeric(value, name) {
-    if (!_.isNumber(value)) {
+    if (!_.isFinite(value)) {
       this.messages.push(`${name} must be numeric`)
     }
   }

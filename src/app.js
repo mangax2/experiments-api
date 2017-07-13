@@ -78,6 +78,14 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
         logger.error(errorLogMessage + err)
         return res.status(err.status).json(err)
       }
+      if (Object.hasOwnProperty.call(err, 'table')) {
+        const pgerror = {
+          status: 500,
+          code: 'Internal Server Error',
+          message: err.toString(),
+        }
+        return res.status(500).json(pgerror)
+      }
       logger.error(errorLogMessage + err)
       return res.status(500).json(err)
     }

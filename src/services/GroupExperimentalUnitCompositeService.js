@@ -52,7 +52,7 @@ class GroupExperimentalUnitCompositeService {
 
   recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx) {
     const groups = _.map(groupAndUnitDetails, (gU) => {
-      gU.experimentId = experimentId
+      gU.experimentId = Number(experimentId)
       return _.omit(gU, ['groupValues', 'units', 'childGroups'])
     })
 

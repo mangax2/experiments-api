@@ -179,26 +179,27 @@ class GroupExperimentalUnitCompositeService {
           }
         })
 
-        return groups
+        return _.filter(groups, g => !g.parentId)
       })
   }
 
   compareGroupTrees = (newTree, oldTree) => {
-    const newGroups = _.forEach(newTree.groups, g => this.assignAncestry(g))
-    const oldGroups = _.forEach(oldTree, g => this.assignAncestry(g))
+    const newGroups = _.forEach(newTree.groups, g => this.assignAncestryAndLocation(g))
+    const oldGroups = _.forEach(oldTree, g => this.assignAncestryAndLocation(g))
     const hashedOldGroups = _.groupBy(oldGroups, 'ancestors')
     const newUnits = _.flatMap(newGroups, g => g.units)
     const oldUnits = _.flatMap(oldGroups, g => g.units)
     const hashedOldUnits = _.groupBy(oldUnits, 'hashKey')
 
     _.forEach(newGroups, (g) => {
-      this.findMatchingEntity(g, hashedOldGroups, 'ancestors', () => _.forEach(g.units, (u) => { u.groupId = g.id }))
+      this.findMatchingEntity(g, hashedOldGroups, 'ancestors',
+        group => _.forEach(group.units, (u) => { u.groupId = group.id }))
     })
 
     _.forEach(newUnits, (u) => {
-      this.findMatchingEntity(u, hashedOldUnits, 'hashKey', (entity) => {
-        u.oldGroupId = entity.group.id
-        u.setEntryId = entity.setEntryId
+      this.findMatchingEntity(u, hashedOldUnits, 'hashKey', (unit, entity) => {
+        unit.oldGroupId = entity.group.id
+        unit.setEntryId = entity.setEntryId
       })
     })
 
@@ -210,14 +211,16 @@ class GroupExperimentalUnitCompositeService {
     if (matchingEntity) {
       matchingEntity.used = true
       entity.id = matchingEntity.id
-      additionalLogic(entity)
+      additionalLogic(entity, matchingEntity)
+    } else {
+      entity.id = undefined
     }
-    entity.id = undefined
   }
 
   assignAncestryAndLocation = (group, parent) => {
-    const businessKeys = _.map(group.groupValues, gv => `${gv.name}::${gv.value}`).join('\t')
-    group.ancestors = `${parent.ancestors}\n${businessKeys}`
+    const parentAncestors = parent ? parent.ancestors : ''
+    const businessKeys = _.map(group.groupValues, gv => `${gv.name}::${gv.value}`).sort().join('\t')
+    group.ancestors = `${parentAncestors}\n${businessKeys}`
 
     if (parent === undefined) {
       group.locNumber = group.groupValues[0].value
@@ -226,7 +229,8 @@ class GroupExperimentalUnitCompositeService {
     }
 
     if (group.childGroups) {
-      const descendents = _.flatMap(group.childGroups, cg => this.assignAncestry(cg, group))
+      const descendents = _.flatMap(group.childGroups,
+        cg => this.assignAncestryAndLocation(cg, group))
       descendents.push(group)
       return descendents
     }

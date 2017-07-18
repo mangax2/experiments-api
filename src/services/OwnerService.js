@@ -4,7 +4,6 @@ import OwnerValidator from '../validations/OwnerValidator'
 import Transactional from '../decorators/transactional'
 
 class OwnerService {
-
   constructor() {
     this.validator = new OwnerValidator()
   }

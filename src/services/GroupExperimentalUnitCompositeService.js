@@ -11,7 +11,6 @@ import AppUtil from './utility/AppUtil'
 import AppError from '../services/utility/AppError'
 
 class GroupExperimentalUnitCompositeService {
-
   constructor() {
     this.groupService = new GroupService()
     this.groupValueService = new GroupValueService()

@@ -7,7 +7,6 @@ import RefDataSourceService from './RefDataSourceService'
 const logger = log4js.getLogger('RefDataSourceTypeService')
 
 class RefDataSourceTypeService {
-
   constructor() {
     this.refDataSourceService = new RefDataSourceService()
   }

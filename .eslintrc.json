@@ -4,7 +4,7 @@
         "commonjs": true,
         "es6": true
     },
-    "extends": "airbnb",
+    "extends": "airbnb-base",
     "parserOptions": {
         "sourceType": "module"
     },
@@ -27,6 +27,5 @@
         "no-use-before-define": "off",
         "prefer-rest-params": "off",
         "func-names": "off"
-
     }
 }

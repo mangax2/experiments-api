@@ -71,7 +71,6 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
     }
     return Promise.resolve()
   }
-
 }
 
 module.exports = DesignSpecificationDetailValidator

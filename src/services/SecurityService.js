@@ -10,7 +10,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('SecurityService')
 
 class SecurityService {
-
   constructor() {
     this.ownerService = new OwnerService()
   }
@@ -26,7 +25,7 @@ class SecurityService {
   }
 
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
-      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
+    .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
       .then((result) => {
         let groupIds = []
         if (result.body && result.body.groups) {
@@ -58,7 +57,6 @@ class SecurityService {
         return []
       })
   }
-
 }
 
 module.exports = SecurityService

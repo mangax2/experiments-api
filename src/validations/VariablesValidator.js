@@ -2,7 +2,6 @@ import SchemaValidator from './SchemaValidator'
 import db from '../db/DbManager'
 
 class VariablesValidator extends SchemaValidator {
-
   static get SCHEMA() {
     return [
       { paramName: 'experimentId', type: 'numeric', required: true },

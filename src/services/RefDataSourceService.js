@@ -5,7 +5,6 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('RefDataSourceService')
 
 class RefDataSourceService {
-
   getRefDataSources = () => db.refDataSource.all()
 
   getRefDataSourceById = id => db.refDataSource.find(id)

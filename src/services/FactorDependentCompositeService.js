@@ -10,7 +10,6 @@ import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 
 class FactorDependentCompositeService {
-
   constructor() {
     this.experimentService = new ExperimentsService()
     this.factorLevelService = new FactorLevelService()

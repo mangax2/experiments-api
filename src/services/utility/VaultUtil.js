@@ -1,7 +1,6 @@
 const HttpUtil = require('./HttpUtil')
 
 class VaultUtil {
-
   constructor() {
     this.dbAppUser = ''
     this.dbAppPassword = ''
@@ -53,7 +52,6 @@ class VaultUtil {
       headerValue: vaultToken,
     }]
   }
-
 }
 
 module.exports = VaultUtil

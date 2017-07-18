@@ -70,11 +70,16 @@ class GroupService {
       }
     })
 
-  @Transactional('deleteGroupsForExperimentId')
-  deleteGroupsForExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
-      .then(() => db.group.removeByExperimentId(id, tx))
-  }
+  @Transactional('batchDeleteGroups')
+  batchDeleteGroups = (ids, tx) => db.group.batchRemove(ids, tx)
+    .then((data) => {
+      if (_.filter(data, element => element !== null).length !== ids.length) {
+        logger.error('Not all groups requested for delete were found')
+        throw AppError.notFound('Not all groups requested for delete were found')
+      } else {
+        return data
+      }
+    })
 }
 
 module.exports = GroupService

@@ -52,19 +52,32 @@ class GroupExperimentalUnitCompositeService {
 
       const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
       return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
-        .then(() => this.groupValueService.batchCreateGroupValues(
-          _.flatMap(comparisonResults.groups.adds, g => g.groupValues), context, tx))
+        .then(() => this.createGroupValues(comparisonResults.groups.adds, context, tx))
         .then(() => this.createExperimentalUnits(experimentId, comparisonResults.units.adds,
           context, tx))
-        .then(() => this.experimentalUnitService.batchUpdateExperimentalUnits(
-          comparisonResults.units.updates, context, tx))
-        .then(() => this.experimentalUnitService.batchDeleteExperimentalUnits(
-          _.map(comparisonResults.units.deletes, 'id'), tx))
-        .then(() => this.groupService.batchDeleteGroups(
-          _.map(comparisonResults.groups.deletes, 'id'), context, tx))
+        .then(() => this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx))
+        .then(() => this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx))
+        .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
         .then(() => AppUtil.createCompositePostResponse())
     })
   }
+
+  createGroupValues = (groupAdds, context, tx) => (groupAdds.length > 0
+    ? this.groupValueService.batchCreateGroupValues(_.flatMap(groupAdds, g => g.groupValues),
+        context, tx)
+    : Promise.resolve())
+
+  batchUpdateExperimentalUnits = (unitUpdates, context, tx) => (unitUpdates.length > 0
+    ? this.experimentalUnitService.batchUpdateExperimentalUnits(unitUpdates, context, tx)
+    : Promise.resolve())
+
+  batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
+    ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), tx)
+    : Promise.resolve())
+
+  batchDeleteGroups = (groupDeletes, tx) => (groupDeletes.length > 0
+    ? this.groupService.batchDeleteGroups(_.map(groupDeletes, 'id'), tx)
+    : Promise.resolve())
 
   recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx) {
     const groups = _.map(groupAndUnitDetails, (gU) => {
@@ -72,17 +85,14 @@ class GroupExperimentalUnitCompositeService {
       return _.omit(gU, ['groupValues', 'units', 'childGroups'])
     })
     const groupsToCreate = _.filter(groups, g => !g.id)
-    return this.groupService.batchCreateGroups(groupsToCreate, context, tx)
+    const createPromise = groupsToCreate.length > 0
+      ? this.groupService.batchCreateGroups(groupsToCreate, context, tx)
+      : Promise.resolve([])
+    return createPromise
       .then(groupResp => _.forEach(groupsToCreate, (g, index) => { g.id = groupResp[index].id }))
       .then(() =>
-        this.createGroupValuesUnitsAndChildGroups(
-          experimentId,
-          groups,
-          groupAndUnitDetails,
-          context,
-          tx,
-        ),
-      )
+        this.createGroupValuesUnitsAndChildGroups(experimentId, groups, groupAndUnitDetails,
+          context, tx))
   }
 
   createGroupValuesUnitsAndChildGroups(
@@ -100,6 +110,9 @@ class GroupExperimentalUnitCompositeService {
   }
 
   createExperimentalUnits(experimentId, units, context, tx) {
+    if (units.length === 0) {
+      return Promise.resolve()
+    }
     const treatmentIds = _.uniq(_.map(units, 'treatmentId'))
     return db.treatment.getDistinctExperimentIds(treatmentIds, tx).then((experimentIdsResp) => {
       const experimentIds = _.compact(_.map(experimentIdsResp, 'experiment_id'))
@@ -171,7 +184,7 @@ class GroupExperimentalUnitCompositeService {
   getGroupTree(experimentId, tx) {
     return this.getGroupAndUnitDetails(experimentId, tx)
       .then((groups) => {
-        const childGroupHash = _.groupBy(groups, 'parentId')
+        const childGroupHash = _.groupBy(groups, 'parent_id')
         _.forEach(groups, (g) => {
           const childGroups = childGroupHash[g.id]
           if (childGroups && childGroups.length > 0) {
@@ -179,16 +192,16 @@ class GroupExperimentalUnitCompositeService {
           }
         })
 
-        return _.filter(groups, g => !g.parentId)
+        return _.filter(groups, g => !g.parent_id)
       })
   }
 
   compareGroupTrees = (newTree, oldTree) => {
-    const newGroups = _.forEach(newTree.groups, g => this.assignAncestryAndLocation(g))
-    const oldGroups = _.forEach(oldTree, g => this.assignAncestryAndLocation(g))
+    const newGroups = _.flatMap(newTree, g => this.assignAncestryAndLocation(g))
+    const oldGroups = _.flatMap(oldTree, g => this.assignAncestryAndLocation(g))
     const hashedOldGroups = _.groupBy(oldGroups, 'ancestors')
-    const newUnits = _.flatMap(newGroups, g => g.units)
-    const oldUnits = _.flatMap(oldGroups, g => g.units)
+    const newUnits = _.filter(_.flatMap(newGroups, g => g.units))
+    const oldUnits = _.filter(_.flatMap(oldGroups, g => g.units))
     const hashedOldUnits = _.groupBy(oldUnits, 'hashKey')
 
     _.forEach(newGroups, (g) => {
@@ -235,7 +248,7 @@ class GroupExperimentalUnitCompositeService {
       return descendents
     }
     _.forEach(group.units, (u) => {
-      u.hashKey = `${group.locNumber}|${u.rep}|${u.treatmentId}`
+      u.hashKey = `${group.locNumber}|${u.rep}|${u.treatmentId || u.treatment_id}`
       u.oldGroupId = undefined
       u.group = group
     })

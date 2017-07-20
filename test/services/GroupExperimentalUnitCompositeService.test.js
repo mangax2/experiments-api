@@ -477,9 +477,13 @@ describe('GroupExperimentalUnitCompositeService', () => {
   describe('getGroupAndUnitDetails', () => {
     it('returns an empty array if groupIds are empty', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([])
+      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve([])
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
       return target.getGroupAndUnitDetails(1, testTx).then((data) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
       })
     })
@@ -497,48 +501,52 @@ describe('GroupExperimentalUnitCompositeService', () => {
       ]
 
       target.groupService.getGroupsByExperimentId = mockResolve(groups)
-      target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate = mockResolve(groupValues)
-      target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate = mockResolve(units)
+      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve(groupValues)
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve(units)
 
       return target.getGroupAndUnitDetails(1, testTx).then((data) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate).toHaveBeenCalledWith([1, 2], testTx)
-        expect(target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate).toHaveBeenCalledWith([1, 2], testTx)
+        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual(expectedResult)
       })
     })
 
     it('rejects when batchGetExperimentalUnitsByGroupIdsNoValidate fails', () => {
-      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 1 }])
-      target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate = mockResolve()
-      target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate = mockReject('error')
+      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
+      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockReject('error')
 
       return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate).toHaveBeenCalledWith([1], testTx)
+        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })
 
     it('rejects when batchGetGroupValuesByGroupIdsNoValidate fails', () => {
-      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 1 }])
-      target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate = mockReject('error')
-      target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate = mock()
+      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
+      target.groupValueService.batchGetGroupValuesByExperimentId = mockReject('error')
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
 
       return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByGroupIdsNoValidate).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate).toHaveBeenCalled()
+        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })
 
     it('rejects when getGroupsByExperimentId fails', () => {
       target.groupService.getGroupsByExperimentId = mockReject('error')
+      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
 
       return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
         expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })

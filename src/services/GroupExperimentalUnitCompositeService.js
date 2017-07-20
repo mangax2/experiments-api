@@ -160,23 +160,18 @@ class GroupExperimentalUnitCompositeService {
 
   @Transactional('getGroupAndUnitDetails')
   getGroupAndUnitDetails(experimentId, tx) {
-    return this.groupService.getGroupsByExperimentId(experimentId, tx).then((groups) => {
-      const groupIds = _.map(groups, 'id')
-      if (groupIds.length > 0) {
-        return Promise.all([
-          this.groupValueService.batchGetGroupValuesByGroupIdsNoValidate(groupIds, tx),
-          this.experimentalUnitService.batchGetExperimentalUnitsByGroupIdsNoValidate(groupIds, tx)],
-        ).then((groupValuesAndUnits) => {
-          const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[0], d => d.group_id)
-          const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[1], u => u.group_id)
-          return _.map(groups, (group) => {
-            group.groupValues = groupValuesGroupByGroupId[group.id]
-            group.units = unitsGroupByGroupId[group.id]
-            return group
-          })
-        })
-      }
-      return []
+    return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, tx),
+      this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
+      this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
+    .then((groupValuesAndUnits) => {
+      const groups = groupValuesAndUnits[0]
+      const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
+      const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
+      return _.map(groups, (group) => {
+        group.groupValues = groupValuesGroupByGroupId[group.id]
+        group.units = unitsGroupByGroupId[group.id]
+        return group
+      })
     })
   }
 
@@ -215,7 +210,6 @@ class GroupExperimentalUnitCompositeService {
         unit.setEntryId = entity.setEntryId
       })
     })
-
     return this.formatComparisonResults(oldGroups, newGroups, oldUnits, newUnits)
   }
 

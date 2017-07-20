@@ -143,6 +143,16 @@ describe('GroupValueService', () => {
     })
   })
 
+  describe('batchGetGroupValuesByExperimentId', () => {
+    it('calls ', () => {
+      db.groupValue.batchFindAllByExperimentId = mockResolve()
+
+      return target.batchGetGroupValuesByExperimentId(1, testTx).then(() => {
+        expect(db.groupValue.batchFindAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+      })
+    })
+  })
+
   describe('getGroupValueById', () => {
     it('returns a group value', () => {
       db.groupValue.find = mockResolve({})

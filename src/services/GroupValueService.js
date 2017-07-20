@@ -35,6 +35,10 @@ class GroupValueService {
       .then(() => db.groupValue.batchFindAllByGroupIds(ids, tx))
   }
 
+  @Transactional('batchGetGroupValuesByExperimentId')
+  batchGetGroupValuesByExperimentId = (id, tx) =>
+    db.groupValue.batchFindAllByExperimentId(id, tx)
+
   @Transactional('batchGetGroupValuesByGroupIdsNoValidate')
   batchGetGroupValuesByGroupIdsNoValidate = (ids, tx) =>
     db.groupValue.batchFindAllByGroupIds(ids, tx)

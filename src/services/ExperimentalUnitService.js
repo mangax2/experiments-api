@@ -85,6 +85,10 @@ class ExperimentalUnitService {
       .then(() => db.unit.findAllByExperimentId(id, tx))
   }
 
+  @Transactional('getExperimentalUnitsByExperimentIdNoValidate')
+  getExperimentalUnitsByExperimentIdNoValidate = (id, tx) =>
+    db.unit.findAllByExperimentId(id, tx)
+
   @Transactional('batchUpdateExperimentalUnits')
   batchUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PUT', tx)

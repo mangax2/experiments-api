@@ -155,6 +155,16 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
+  describe('getExperimentalUnitsByExperimentIdNoValidate', () => {
+    it('calls findAllByExperimentId', () => {
+      db.unit.findAllByExperimentId = mockResolve()
+
+      return target.getExperimentalUnitsByExperimentIdNoValidate(1, testTx).then(() => {
+        expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+      })
+    })
+  })
+
   describe('batchGetExperimentalUnitsByGroupIdsNoValidate', () => {
     it('calls batchFindAllByGroupIds', () => {
       db.unit.batchFindAllByGroupIds = mockResolve()

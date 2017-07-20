@@ -14,7 +14,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
-
   constructor() {
     this.validator = new ExperimentsValidator()
     this.ownerService = new OwnerService()
@@ -27,26 +26,26 @@ class ExperimentsService {
     return this.validator.validate(experiments, 'POST', tx)
       .then(() => this.validateAssociatedRequests(experiments))
       .then(() => db.experiments.batchCreate(experiments, context, tx)
-      .then((data) => {
-        const experimentIds = _.map(data, d => d.id)
-        _.forEach(experiments, (experiment, index) => {
-          experiment.id = experimentIds[index]
-        })
+        .then((data) => {
+          const experimentIds = _.map(data, d => d.id)
+          _.forEach(experiments, (experiment, index) => {
+            experiment.id = experimentIds[index]
+          })
 
-        const experimentsOwners = _.map(experiments, (exp) => {
-          const owners = _.map(exp.owners, _.trim)
-          const ownerGroups = _.map(exp.ownerGroups, _.trim)
-          return { experimentId: exp.id, userIds: owners, groupIds: ownerGroups }
-        })
+          const experimentsOwners = _.map(experiments, (exp) => {
+            const owners = _.map(exp.owners, _.trim)
+            const ownerGroups = _.map(exp.ownerGroups, _.trim)
+            return { experimentId: exp.id, userIds: owners, groupIds: ownerGroups }
+          })
 
-        return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
-          const capacityRequestPromises =
+          return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
+            const capacityRequestPromises =
             CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments, context)
-          return Promise.all(capacityRequestPromises)
-            .then(() => this.batchCreateExperimentTags(experiments, context))
-            .then(() => AppUtil.createPostResponse(data))
-        })
-      }))
+            return Promise.all(capacityRequestPromises)
+              .then(() => this.batchCreateExperimentTags(experiments, context))
+              .then(() => AppUtil.createPostResponse(data))
+          })
+        }))
   }
 
   batchCreateExperimentTags(experiments, context) {
@@ -142,7 +141,7 @@ class ExperimentsService {
                   const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
                     return this.tagService.saveTags(tags, id, context)
-                        .then(() => data)
+                      .then(() => data)
                   }
                   return this.tagService.deleteTagsForExperimentId(id, context).then(() => data)
                 },
@@ -214,7 +213,6 @@ class ExperimentsService {
   static prepareTagResponse(tags) {
     return _.map(tags, t => ({ category: t.category, value: t.value }))
   }
-
 }
 
 module.exports = ExperimentsService

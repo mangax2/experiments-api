@@ -5,7 +5,6 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('GroupTypeService')
 
 class GroupTypeService {
-
   getGroupTypeById = id => db.groupType.find(id)
     .then((data) => {
       if (!data) {

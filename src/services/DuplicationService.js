@@ -6,7 +6,6 @@ import Transactional from '../decorators/transactional'
 import TagService from './TagService'
 
 class DuplicationService {
-
   constructor() {
     this.tagService = new TagService()
   }

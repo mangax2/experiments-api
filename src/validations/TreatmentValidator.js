@@ -70,7 +70,6 @@ class TreatmentValidator extends SchemaValidator {
     }
     return Promise.resolve()
   }
-
 }
 
 module.exports = TreatmentValidator

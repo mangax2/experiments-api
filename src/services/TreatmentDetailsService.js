@@ -7,7 +7,6 @@ import AppUtil from './utility/AppUtil'
 import Transactional from '../decorators/transactional'
 
 class TreatmentDetailsService {
-
   constructor() {
     this.treatmentService = new TreatmentService()
     this.combinationElementService = new CombinationElementService()
@@ -59,17 +58,17 @@ class TreatmentDetailsService {
       return Promise.resolve()
     }
     return this.treatmentService.batchCreateTreatments(treatmentAdds, context, tx)
-        .then((createTreatmentsResponses) => {
-          const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
-          return this.createCombinationElements(
-            this.assembleBatchCreateCombinationElementsRequestFromAdds(
-              treatmentAdds,
-              newTreatmentIds,
-            ),
-            context,
-            tx,
-          )
-        })
+      .then((createTreatmentsResponses) => {
+        const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
+        return this.createCombinationElements(
+          this.assembleBatchCreateCombinationElementsRequestFromAdds(
+            treatmentAdds,
+            newTreatmentIds,
+          ),
+          context,
+          tx,
+        )
+      })
   }
 
   assembleBatchCreateCombinationElementsRequestFromAdds(treatments, treatmentIds) {
@@ -97,8 +96,8 @@ class TreatmentDetailsService {
       return Promise.resolve()
     }
     return this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
-        .then(() => this.deleteCombinationElements(treatmentUpdates, tx)
-          .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
+      .then(() => this.deleteCombinationElements(treatmentUpdates, tx)
+        .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
   }
 
   deleteCombinationElements(treatmentUpdates, tx) {

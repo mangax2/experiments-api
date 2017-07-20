@@ -7,7 +7,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('ExperimentSummaryService')
 
 class ExperimentSummaryService {
-
   constructor() {
     this.experimentService = new ExperimentsService()
   }
@@ -26,7 +25,6 @@ class ExperimentSummaryService {
         }),
       )
   }
-
 }
 
 module.exports = ExperimentSummaryService

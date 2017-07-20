@@ -10,7 +10,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('CombinationElementService')
 
 class CombinationElementService {
-
   constructor() {
     this.validator = new CombinationElementValidator()
     this.treatmentService = new TreatmentService()

@@ -8,7 +8,6 @@ import cfServices from './utility/ServiceConfig'
 const logger = log4js.getLogger('TagService')
 
 class TagService {
-
   constructor() {
     this.validator = new TagValidator()
   }

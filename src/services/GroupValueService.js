@@ -10,7 +10,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('GroupValueService')
 
 class GroupValueService {
-
   constructor() {
     this.validator = new GroupValueValidator()
     this.groupService = new GroupService()

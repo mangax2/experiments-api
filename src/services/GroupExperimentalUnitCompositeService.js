@@ -39,26 +39,24 @@ class GroupExperimentalUnitCompositeService {
 
   @Transactional('saveGroupAndUnitDetails')
   saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx) {
-    const permissionsCheckPromise = this.securityService.permissionsCheck(experimentId, context, tx)
+    return this.securityService.permissionsCheck(experimentId, context, tx)
       .then(() => {
         const error = this.validateGroups(groupAndUnitDetails)
         if (error) {
           throw AppError.badRequest(error)
         }
+        return this.getGroupTree(experimentId, tx).then((oldGroupsAndUnits) => {
+          const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
+          return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
+            .then(() => Promise.all([
+              this.createGroupValues(comparisonResults.groups.adds, context, tx),
+              this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx),
+              this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
+              this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
+            .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
+            .then(() => AppUtil.createCompositePostResponse())
+        })
       })
-    const existingGroupTreePromise = this.getGroupTree(experimentId, tx)
-    return Promise.all([existingGroupTreePromise, permissionsCheckPromise]).then((results) => {
-      const oldGroupsAndUnits = results[0]
-
-      const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
-      return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
-        .then(() => Promise.all([this.createGroupValues(comparisonResults.groups.adds, context, tx),
-          this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx),
-          this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
-          this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
-        .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
-        .then(() => AppUtil.createCompositePostResponse())
-    })
   }
 
   createGroupValues = (groupAdds, context, tx) => (groupAdds.length > 0

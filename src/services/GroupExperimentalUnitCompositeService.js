@@ -50,6 +50,7 @@ class GroupExperimentalUnitCompositeService {
             .then(() => Promise.all([
               this.createGroupValues(comparisonResults.groups.adds, context, tx),
               this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx),
+              this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
               this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
               this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
             .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
@@ -69,6 +70,10 @@ class GroupExperimentalUnitCompositeService {
 
   batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
     ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), tx)
+    : Promise.resolve())
+
+  batchUpdateGroups = (groupUpdates, context, tx) => (groupUpdates.length > 0
+    ? this.groupService.batchUpdateGroupsNoValidate(groupUpdates, context, tx)
     : Promise.resolve())
 
   batchDeleteGroups = (groupDeletes, tx) => (groupDeletes.length > 0
@@ -197,7 +202,10 @@ class GroupExperimentalUnitCompositeService {
 
     _.forEach(newGroups, (g) => {
       this.findMatchingEntity(g, hashedOldGroups, 'ancestors',
-        group => _.forEach(group.units, (u) => { u.groupId = group.id }))
+        (group, matchingGroup) => {
+          group.oldRefRandomizationStrategyId = matchingGroup.ref_randomization_strategy_id
+          _.forEach(group.units, (u) => { u.groupId = group.id })
+        })
     })
 
     _.forEach(newUnits, (u) => {
@@ -246,11 +254,14 @@ class GroupExperimentalUnitCompositeService {
   }
 
   formatComparisonResults = (oldGroups, newGroups, oldUnits, newUnits) => {
+    const partitionedGroups = _.partition(newGroups, g => !g.id)
     const partitionedUnits = _.partition(newUnits, u => !u.id)
 
     return {
       groups: {
-        adds: _.filter(newGroups, g => !g.id),
+        adds: partitionedGroups[0],
+        updates: _.filter(partitionedGroups[1],
+          g => g.refRandomizationStrategyId !== g.oldRefRandomizationStrategyId),
         deletes: _.filter(oldGroups, g => !g.used),
       },
       units: {

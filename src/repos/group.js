@@ -29,19 +29,24 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  batchUpdate: (groups, context, tx = rep) => tx.batch(
-    groups.map(
-      g => tx.oneOrNone(
-        'UPDATE "group" SET (experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, modified_user_id, modified_date) = ' +
-        '($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) WHERE id = $6 RETURNING *',
-        [g.experimentId,
-          g.parentId,
-          g.refRandomizationStrategyId,
-          g.refGroupTypeId,
-          context.userId, g.id],
-      ),
-    ),
-  ),
+  batchUpdate: (groups, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      ['?id', 'experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'ref_group_type_id', 'modified_user_id', 'modified_date'],
+      { table: 'group' },
+    )
+    const data = groups.map(u => ({
+      id: u.id,
+      experiment_id: u.experimentId,
+      parent_id: u.parentId,
+      ref_randomization_strategy_id: u.refRandomizationStrategyId,
+      ref_group_type_id: u.refGroupTypeId,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+    const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+
+    return tx.any(query)
+  },
 
   remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM "group" WHERE id=$1 RETURNING id', id),
 

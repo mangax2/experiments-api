@@ -58,6 +58,10 @@ class GroupService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
+  @Transactional('batchUpdateGroups')
+  batchUpdateGroupsNoValidate = (groups, context, tx) =>
+    db.group.batchUpdate(groups, context, tx)
+
   @Transactional('deleteGroup')
   deleteGroup = (id, tx) => db.group.remove(id, tx)
     .then((data) => {

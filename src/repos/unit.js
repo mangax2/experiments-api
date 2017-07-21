@@ -31,15 +31,24 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  batchUpdate: (units, context, tx = rep) => tx.batch(
-    units.map(
-      u => tx.oneOrNone(
-        'UPDATE unit SET (group_id, treatment_id, rep, set_entry_id, modified_user_id, modified_date) = ' +
-        '($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) WHERE id = $6 RETURNING *',
-        [u.groupId, u.treatmentId, u.rep, u.setEntryId, context.userId, u.id],
-      ),
-    ),
-  ),
+  batchUpdate: (units, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      ['?id', 'group_id', 'treatment_id', 'rep', { name: 'set_entry_id', cast: 'int' }, 'modified_user_id', 'modified_date'],
+      { table: 'unit' },
+    )
+    const data = units.map(u => ({
+      id: u.id,
+      group_id: u.groupId,
+      treatment_id: u.treatmentId,
+      rep: u.rep,
+      set_entry_id: u.setEntryId,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+    const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+
+    return tx.any(query)
+  },
 
   batchPartialUpdate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(

@@ -180,6 +180,16 @@ describe('GroupService', () => {
     })
   })
 
+  describe('batchUpdateGroupsNoValidate', () => {
+    it('updates groups', () => {
+      db.group.batchUpdate = mockResolve([{}])
+
+      return target.batchUpdateGroupsNoValidate([{}], testContext, testTx).then(() => {
+        expect(db.group.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+      })
+    })
+  })
+
   describe('deleteGroup', () => {
     it('deletes a group', () => {
       db.group.remove = mockResolve({})

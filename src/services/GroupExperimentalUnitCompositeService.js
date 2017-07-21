@@ -52,11 +52,10 @@ class GroupExperimentalUnitCompositeService {
 
       const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
       return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
-        .then(() => this.createGroupValues(comparisonResults.groups.adds, context, tx))
-        .then(() => this.createExperimentalUnits(experimentId, comparisonResults.units.adds,
-          context, tx))
-        .then(() => this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx))
-        .then(() => this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx))
+        .then(() => Promise.all([this.createGroupValues(comparisonResults.groups.adds, context, tx),
+          this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx),
+          this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
+          this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
         .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
         .then(() => AppUtil.createCompositePostResponse())
     })

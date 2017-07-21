@@ -84,61 +84,12 @@ describe('GroupValueService', () => {
     })
   })
 
-  describe('batchGetGroupValuesByGroupIds', () => {
-    it('returns group values', () => {
-      target.groupService.batchGetGroupsByIds = mockResolve()
-      db.groupValue.batchFindAllByGroupIds = mockResolve([{}, {}])
+  describe('batchGetGroupValuesByExperimentId', () => {
+    it('calls ', () => {
+      db.groupValue.batchFindAllByExperimentId = mockResolve()
 
-      return target.batchGetGroupValuesByGroupIds([1, 2], testTx).then((data) => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(db.groupValue.batchFindAllByGroupIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(data).toEqual([{}, {}])
-      })
-    })
-
-    it('rejects when batchFindAllByGroupIds fails', () => {
-      target.groupService.batchGetGroupsByIds = mockResolve()
-      db.groupValue.batchFindAllByGroupIds = mockReject('error')
-
-      return target.batchGetGroupValuesByGroupIds([1, 2], testTx).then(() => {}, (err) => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(db.groupValue.batchFindAllByGroupIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when batchGetGroupsByIds fails', () => {
-      target.groupService.batchGetGroupsByIds = mockReject('error')
-      db.groupValue.batchFindAllByGroupIds = mockReject('error')
-
-      return target.batchGetGroupValuesByGroupIds([1, 2], testTx).then(() => {}, (err) => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(db.groupValue.batchFindAllByGroupIds).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetGroupValuesByGroupIdsNoValidate', () => {
-    it('returns group values without calling validate', () => {
-      target.validator.validate = mock()
-      db.groupValue.batchFindAllByGroupIds = mockResolve([{}])
-
-      return target.batchGetGroupValuesByGroupIdsNoValidate([1, 2], testTx).then((data) => {
-        expect(target.validator.validate).not.toHaveBeenCalled()
-        expect(db.groupValue.batchFindAllByGroupIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(data).toEqual([{}])
-      })
-    })
-
-    it('rejects when batchFindAllByGroupIds fails', () => {
-      target.validator.validate = mock()
-      db.groupValue.batchFindAllByGroupIds = mockReject('error')
-
-      return target.batchGetGroupValuesByGroupIdsNoValidate([1, 2], testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).not.toHaveBeenCalled()
-        expect(db.groupValue.batchFindAllByGroupIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(err).toEqual('error')
+      return target.batchGetGroupValuesByExperimentId(1, testTx).then(() => {
+        expect(db.groupValue.batchFindAllByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
   })

@@ -7,11 +7,11 @@ module.exports = (rep, pgp) => ({
 
   findAllByGroupId: (groupId, tx = rep) => tx.any('SELECT * FROM group_value WHERE group_id = $1', groupId),
 
-  batchFindAllByGroupIds: (groupIds, tx = rep) => {
-    if (!groupIds || groupIds.length === 0) {
-      return Promise.resolve([])
+  batchFindAllByExperimentId: (experimentId, tx = rep) => {
+    if (!experimentId) {
+      return Promise.reject('Invalid or missing experiment id.')
     }
-    return tx.any('SELECT  id, name, value, group_id  FROM group_value WHERE group_id IN ($1:csv)', [groupIds])
+    return tx.any('SELECT * FROM group_value WHERE group_id in (SELECT id from public.group WHERE experiment_id = $1)', experimentId)
   },
 
   batchCreate: (groupValues, context, tx = rep) => {

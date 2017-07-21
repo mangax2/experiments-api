@@ -28,15 +28,9 @@ class GroupValueService {
       .then(() => db.groupValue.findAllByGroupId(id, tx))
   }
 
-  @Transactional('batchGetGroupValuesByGroupIds')
-  batchGetGroupValuesByGroupIds(ids, tx) {
-    return this.groupService.batchGetGroupsByIds(ids, tx)
-      .then(() => db.groupValue.batchFindAllByGroupIds(ids, tx))
-  }
-
-  @Transactional('batchGetGroupValuesByGroupIdsNoValidate')
-  batchGetGroupValuesByGroupIdsNoValidate = (ids, tx) =>
-    db.groupValue.batchFindAllByGroupIds(ids, tx)
+  @Transactional('batchGetGroupValuesByExperimentId')
+  batchGetGroupValuesByExperimentId = (id, tx) =>
+    db.groupValue.batchFindAllByExperimentId(id, tx)
 
   @Transactional('getGroupValueById')
   getGroupValueById = (id, tx) => db.groupValue.find(id, tx)

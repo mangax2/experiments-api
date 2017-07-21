@@ -210,37 +210,33 @@ describe('GroupService', () => {
     })
   })
 
-  describe('deleteGroupsForExperimentId', () => {
-    it('deletes all groups for an experiment', () => {
-      target.experimentService.getExperimentById = mockResolve()
-      db.group.removeByExperimentId = mockResolve([1, 2])
+  describe('batchDeleteGroups', () => {
+    it('successfully calls batchRemove and returns data', () => {
+      db.group.batchRemove = mockResolve([1])
 
-      return target.deleteGroupsForExperimentId(1, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
-        expect(db.group.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual([1, 2])
+      return target.batchDeleteGroups([1], testTx).then((data) => {
+        expect(db.group.batchRemove).toHaveBeenCalledWith([1], testTx)
+        expect(data).toEqual([1])
       })
     })
 
-    it('rejects when removeByExperimentId fails', () => {
-      target.experimentService.getExperimentById = mockResolve()
-      db.group.removeByExperimentId = mockReject('error')
+    it('throws an error when no elements due to nulls', () => {
+      db.group.batchRemove = mockResolve([null])
+      AppError.notFound = mock()
 
-      return target.deleteGroupsForExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
-        expect(db.group.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+      return target.batchDeleteGroups([1], testTx).then(() => {}, () => {
+        expect(db.group.batchRemove).toHaveBeenCalledWith([1], testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found')
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
-      target.experimentService.getExperimentById = mockReject('error')
-      db.group.removeByExperimentId = mockReject('error')
+    it('throws an error when not all elements are deleted', () => {
+      db.group.batchRemove = mockResolve([1])
+      AppError.notFound = mock()
 
-      return target.deleteGroupsForExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
-        expect(db.group.removeByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+      return target.batchDeleteGroups([1, 2], testTx).then(() => {}, () => {
+        expect(db.group.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found')
       })
     })
   })

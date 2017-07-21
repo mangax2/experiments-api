@@ -512,7 +512,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when batchGetExperimentalUnitsByGroupIdsNoValidate fails', () => {
+    it('rejects when getExperimentalUnitsByExperimentIdNoValidate fails', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockReject('error')
@@ -525,7 +525,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when batchGetGroupValuesByGroupIdsNoValidate fails', () => {
+    it('rejects when batchGetGroupValuesByExperimentId fails', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
       target.groupValueService.batchGetGroupValuesByExperimentId = mockReject('error')
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()

@@ -195,8 +195,8 @@ class GroupExperimentalUnitCompositeService {
     const newGroups = _.flatMap(newTree, g => this.assignAncestryAndLocation(g))
     const oldGroups = _.flatMap(oldTree, g => this.assignAncestryAndLocation(g))
     const hashedOldGroups = _.groupBy(oldGroups, 'ancestors')
-    const newUnits = _.filter(_.flatMap(newGroups, g => g.units))
-    const oldUnits = _.filter(_.flatMap(oldGroups, g => g.units))
+    const newUnits = _.compact(_.flatMap(newGroups, g => g.units))
+    const oldUnits = _.compact(_.flatMap(oldGroups, g => g.units))
     const hashedOldUnits = _.groupBy(oldUnits, 'hashKey')
 
     _.forEach(newGroups, (g) => {

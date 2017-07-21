@@ -73,7 +73,7 @@ class GroupService {
   @Transactional('batchDeleteGroups')
   batchDeleteGroups = (ids, tx) => db.group.batchRemove(ids, tx)
     .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
+      if (_.compact(data).length !== ids.length) {
         logger.error('Not all groups requested for delete were found')
         throw AppError.notFound('Not all groups requested for delete were found')
       } else {

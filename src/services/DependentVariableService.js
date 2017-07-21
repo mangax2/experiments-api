@@ -9,7 +9,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('DependentVariableService')
 
 class DependentVariableService {
-
   constructor() {
     this.validator = new DependentVariablesValidator()
     this.experimentService = new ExperimentsService()

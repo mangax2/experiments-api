@@ -21,7 +21,6 @@ class AppUtil {
       message: 'SUCCESS',
     }
   }
-
 }
 
 module.exports = AppUtil

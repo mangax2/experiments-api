@@ -5,7 +5,6 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('UnitTypeService')
 
 class UnitTypeService {
-
   getUnitTypeById = id => db.unitType.find(id)
     .then((data) => {
       if (!data) {

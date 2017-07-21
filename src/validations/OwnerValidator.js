@@ -7,7 +7,6 @@ import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
 
 class OwnerValidator extends SchemaValidator {
-
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'experimentId', type: 'numeric', required: true },

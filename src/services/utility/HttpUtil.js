@@ -2,7 +2,6 @@ const agent = require('superagent')
 const _ = require('lodash')
 
 class HttpUtil {
-
   static get(url, headers) {
     return HttpUtil.setHeaders(agent.get(url), headers)
   }

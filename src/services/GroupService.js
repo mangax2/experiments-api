@@ -11,7 +11,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('GroupService')
 
 class GroupService {
-
   constructor() {
     this.validator = new GroupValidator()
     this.experimentService = new ExperimentsService()

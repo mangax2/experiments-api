@@ -9,7 +9,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('FactorLevelService')
 
 class FactorLevelService {
-
   constructor() {
     this.validator = new FactorLevelsValidator()
     this.factorService = new FactorService()

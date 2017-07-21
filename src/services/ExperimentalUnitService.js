@@ -12,7 +12,6 @@ import Transactional from '../decorators/transactional'
 const logger = log4js.getLogger('ExperimentalUnitService')
 
 class ExperimentalUnitService {
-
   constructor() {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()

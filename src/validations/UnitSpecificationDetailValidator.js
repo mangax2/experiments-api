@@ -71,7 +71,6 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
     }
     return Promise.resolve()
   }
-
 }
 
 module.exports = UnitSpecificationDetailValidator

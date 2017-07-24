@@ -30,8 +30,9 @@ module.exports = (rep, pgp) => ({
   },
 
   batchUpdate: (groups, context, tx = rep) => {
+    console.log(groups)
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'ref_group_type_id', 'modified_user_id', 'modified_date'],
+      ['?id', 'experiment_id', { name: 'parent_id', cast: 'int' }, { name: 'ref_randomization_strategy_id', cast: 'int' }, 'ref_group_type_id', 'modified_user_id', 'modified_date'],
       { table: 'group' },
     )
     const data = groups.map(u => ({

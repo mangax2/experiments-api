@@ -15,8 +15,9 @@ class DuplicationService {
     const parsedCopyNum = Number(body ? body.numberOfCopies : undefined)
     if (body && body.ids && body.ids.length > 0 && parsedCopyNum > 0 && parsedCopyNum % 1 === 0) {
       const getTagsPromise = this.getAllTagsToDuplicate(body.ids)
+      const isTemplate = body.isTemplate || false
       const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies,
-        body.isTemplate, context, tx)
+        isTemplate, context, tx)
 
       return Promise.all([getTagsPromise, sqlPromise])
         .then(results => this.duplicateTagsForExperiments(results[0], results[1], context))
@@ -32,7 +33,7 @@ class DuplicationService {
   }
 
   @Transactional('DuplicateExperiments')
-  duplicateExperimentData = (ids, numberOfCopies, isTemplate = false, context, tx) => {
+  duplicateExperimentData = (ids, numberOfCopies, isTemplate, context, tx) => {
     let sqlPromise = Promise.resolve()
     const conversionMap = []
     _.forEach(ids, (id) => {

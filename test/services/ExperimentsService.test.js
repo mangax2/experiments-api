@@ -701,4 +701,110 @@ describe('ExperimentsService', () => {
     })
   })
 
+  describe('Templates', () => {
+    it('manage Templates when there is no query parameter in the post end point', () => {
+      const requestBody = {}
+      target.batchCreateTemplates = mockResolve()
+      return target.manageTemplates(requestBody, {}, testContext, testTx).then(() => {
+        expect(target.batchCreateTemplates).toHaveBeenCalled()
+
+      })
+    })
+    it('manage Templates when there is an inavlid query parameter in the post end point', () => {
+      const requestBody = {}
+      AppError.badRequest = mock()
+      return target.manageTemplates(requestBody, {source:"fgsdhfhsdf"}, testContext, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith("Invalid Source Type")
+
+      })
+    })
+
+    it('manage Templates when there is  query parameter source is experiment', () => {
+      const requestBody = { id: 1, numberOfCopies: 1 }
+      target.createTemplateFromExperiment = mockResolve()
+      return target.manageTemplates(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
+        expect(target.createTemplateFromExperiment).toHaveBeenCalledWith(1, 1, testContext, testTx)
+
+      })
+    })
+
+    it('manage Templates when there is  query parameter source is experiment when if the' +
+      ' numberOfCopies is no defined default to 1', () => {
+      const requestBody = { id: 1}
+      target.createTemplateFromExperiment = mockResolve()
+      return target.manageTemplates(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
+        expect(target.createTemplateFromExperiment).toHaveBeenCalledWith(1, 1, testContext, testTx)
+
+      })
+    })
+
+
+    it('manage Templates when there is  query parameter source is template', () => {
+      const requestBody = { ids: [1], numberOfCopies: 1 }
+      target.copyTemplates = mockResolve()
+      return target.manageTemplates(requestBody, { source: 'template' }, testContext, testTx).then(() => {
+        expect(target.copyTemplates).toHaveBeenCalledWith([1], 1, testContext, testTx)
+
+      })
+    })
+
+    it('batchCreateTemplates', () => {
+      const templates = [{ name: 'test' }]
+      target.batchCreateExperiments = mockResolve()
+
+      return target.batchCreateTemplates(templates, testContext, testTx).then(() => {
+        expect(target.batchCreateExperiments).toHaveBeenCalledWith([{
+          name: 'test',
+          isTemplate: true,
+        }], testContext, testTx)
+      })
+    })
+
+    it('CopyTemplates', () => {
+      target.generateTemplates = mockResolve()
+      return target.copyTemplates([1, 2], 1, testContext, testTx).then(() => {
+        expect(target.generateTemplates).toHaveBeenCalledWith([1, 2], 1, testContext, testTx)
+      })
+    })
+
+    it('generateTemplates', () => {
+      target.duplicationService.duplicateExperiments = mockResolve()
+      return target.generateTemplates([1, 2], 1, testContext, testTx).then(() => {
+        expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({ids:[1, 2], isTemplate:true,numberOfCopies:1}, testContext, testTx)
+      })
+    })
+    it('createTemplates from experiment', () => {
+      target.generateTemplates = mockResolve()
+      return target.createTemplateFromExperiment(1, 1, testContext, testTx).then(() => {
+        expect(target.generateTemplates).toHaveBeenCalledWith([1], 1, testContext, testTx)
+      })
+    })
+
+
+    it('Throw Validations when the experimentId or numberofCopies is not a number ', () => {
+      AppError.badRequest = mock()
+      return target.createTemplateFromExperiment('test', '2', testContext, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Experiment Id or number of' +
+          ' Copies')
+
+      })
+    })
+
+    it('Throw Validations when the ids is not array during Copy Templates ', () => {
+      AppError.badRequest = mock()
+      return target.copyTemplates('test', '2', testContext, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array')
+
+      })
+    })
+
+    it('Throw Validations when the ids is not a numeric array during Copy Templates ', () => {
+      AppError.badRequest = mock()
+      return target.copyTemplates([1, 2, '3'], '2', testContext, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies')
+      })
+    })
+
+  })
+
 })

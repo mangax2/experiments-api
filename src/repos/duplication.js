@@ -271,7 +271,7 @@ const duplicateUnitScript =
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  duplicateExperiment: function(experimentId,isTemplate = false ,context, tx = rep){ return tx.oneOrNone(
+  duplicateExperiment: function(experimentId,isTemplate ,context, tx = rep){ return tx.oneOrNone(
       duplicateExperimentInfoScript +
         duplicateOwnersScript +
         duplicateFactorScript +

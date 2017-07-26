@@ -216,8 +216,9 @@ class ExperimentsService {
         break
       }
       case 'experiment' : {
+        const numberOfCopies = requestBody.numberOfCopies || 1
         templatePromise = this.createTemplateFromExperiment(requestBody.id,
-          requestBody.numberOfCopies,
+          numberOfCopies,
           context, tx)
         break
       }
@@ -229,9 +230,8 @@ class ExperimentsService {
   }
 
   createTemplateFromExperiment(id, numberOfCopies, context, tx) {
-    const numberOfCopiesT = numberOfCopies || 1
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateTemplates([id], numberOfCopiesT,
+      return this.generateTemplates([id], numberOfCopies,
         context, tx)
     }
     return Promise.reject(AppError.badRequest('Invalid Experiment Id or number' +

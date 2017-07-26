@@ -15,7 +15,8 @@ class DuplicationService {
     const parsedCopyNum = Number(body ? body.numberOfCopies : undefined)
     if (body && body.ids && body.ids.length > 0 && parsedCopyNum > 0 && parsedCopyNum % 1 === 0) {
       const getTagsPromise = this.getAllTagsToDuplicate(body.ids)
-      const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies, context, tx)
+      const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies,
+        body.isTemplate, context, tx)
 
       return Promise.all([getTagsPromise, sqlPromise])
         .then(results => this.duplicateTagsForExperiments(results[0], results[1], context))
@@ -31,12 +32,13 @@ class DuplicationService {
   }
 
   @Transactional('DuplicateExperiments')
-  duplicateExperimentData = (ids, numberOfCopies, context, tx) => {
+  duplicateExperimentData = (ids, numberOfCopies, isTemplate = false, context, tx) => {
     let sqlPromise = Promise.resolve()
     const conversionMap = []
     _.forEach(ids, (id) => {
       for (let i = 0; i < numberOfCopies; i += 1) {
-        sqlPromise = sqlPromise.then(() => db.duplication.duplicateExperiment(id, context, tx))
+        sqlPromise = sqlPromise.then(() =>
+          db.duplication.duplicateExperiment(id, isTemplate, context, tx))
           .then((newIdObject) => { conversionMap.push({ oldId: id, newId: newIdObject.id }) })
       }
     })

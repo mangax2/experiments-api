@@ -45,7 +45,7 @@ class SecurityService {
     return Promise.all([this.ownerService.getOwnersByExperimentId(id, tx),
       this.getGroupsByUserId(context.userId)]).then((data) => {
         if (data[0] && data[1]) {
-          const groupIdsAssignedToExperiments = data[0].group_ids
+          const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, 'COSMOS-ADMIN')
           const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
           const userGroupIds = data[1]
           if (upperCaseUserIds.includes(context.userId) ||

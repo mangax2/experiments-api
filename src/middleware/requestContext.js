@@ -6,7 +6,7 @@ function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
 
   if (whitelistedUrls.includes(req.url)
-    || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext).length > 0))) {
+    || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)) {
     next()
   } else {
     if (!req.headers) {

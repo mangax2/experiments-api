@@ -739,8 +739,8 @@
     },
     "/experiments/{id}/composites/group-experimental-units": {
       "get": {
-        "summary": "get all groups , groupvalues and Units  for a given experiment id",
-        "description": "This endpoint returns information about the group,groupValues and  experimental Units entities associated with an Experiment",
+        "summary": "get all Groups, Group Values, and Experimental Units for a given experiment id",
+        "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with an Experiment",
         "operationId": "getComposites_Group-experimental-unitsByExperimentId",
         "tags": [
           "Composites"
@@ -793,7 +793,7 @@
         }
       },
       "post": {
-        "summary": "post one or more groups,groupvalues and experimental Units entities",
+        "summary": "post one or more Groups, Group Values, and Experimental Units entities",
         "description": "This Service would delete the existing groups groupValues and ExperimentalUnits for the experimentId and then recreates them based on request Payload",
         "operationId": "postComposites_Group-experimental-unitsByExperimentId",
         "tags": [
@@ -1172,7 +1172,7 @@
     },
     "/experiments/{id}/factors": {
       "get": {
-        "summary": "get all factors  for given experiment id.",
+        "summary": "get all factors for given experiment id.",
         "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
         "operationId": "getFactorsByExperimentId",
         "tags": [
@@ -1540,8 +1540,8 @@
     },
     "/factors/{id}/factor-levels": {
       "get": {
-        "summary": "get all factors  for given factor id.",
-        "description": "This endpoint returns information about the factor entities associated with one Factor.\n",
+        "summary": "get all factor levels for given factor id.",
+        "description": "This endpoint returns information about the factor level entities associated with one Factor.\n",
         "operationId": "getFactor-levelsByFactorId",
         "tags": [
           "Factor Levels"
@@ -1559,11 +1559,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Factors",
+            "description": "Factor Levels",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/FactorResponse"
+                "$ref": "#/definitions/FactorLevelResponse"
               }
             }
           },
@@ -1760,7 +1760,7 @@
             "description": "Markdown of requested page"
           },
           "403": {
-            "description": "Forbidden. Catch All From Cloudfront"
+            "description": "Forbidden. Catch All From CloudFront"
           }
         }
       }
@@ -2257,7 +2257,7 @@
     },
     "/treatments/{id}/combination-elements": {
       "get": {
-        "summary": "get all combination elements  for given treatment id.",
+        "summary": "get all combination elements for given treatment id.",
         "description": "This endpoint returns information about the combination-elements entities associated with one treatment.\n",
         "operationId": "getCombination-elementsByTreatmentId",
         "tags": [
@@ -2663,29 +2663,12 @@
     }
   },
   "definitions": {
-    "TagPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of the combinationElement."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the combinationElement."
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "id of treatment entity."
-        }
-      }
-    },
     "CombinationElementResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "name": {
           "type": "string",
@@ -2876,7 +2859,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "isControl": {
           "type": "boolean",
@@ -2888,7 +2871,7 @@
         },
         "notes": {
           "type": "string",
-          "description": "notes related to treatment - optinal field."
+          "description": "notes related to treatment - optional field."
         },
         "experimentId": {
           "type": "integer",
@@ -2988,7 +2971,7 @@
         },
         "id": {
           "type": "integer",
-          "description": "id of newely created resource or black in case of error."
+          "description": "id of newly created resource or black in case of error."
         }
       }
     },
@@ -3014,7 +2997,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "required": {
           "type": "boolean",
@@ -3191,7 +3174,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "groupId": {
           "type": "integer",
@@ -3232,7 +3215,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "groupId": {
           "type": "integer",
@@ -3419,7 +3402,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "value": {
           "type": "string",
@@ -3452,7 +3435,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for  entity"
+          "description": "unique id for entity"
         },
         "name": {
           "type": "string",
@@ -3488,7 +3471,7 @@
         },
         "tier": {
           "type": "integer",
-          "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10"
+          "description": "tier is used categorize factors in to main/sub/sub-sub etc plots (valid Range : 1 to 10)"
         }
       }
     },
@@ -3634,6 +3617,9 @@
       "type": "integer"
     },
     "Levels": {
+      "type": "string"
+    },
+    "PermissionsResponse": {
       "type": "string"
     },
     "RefDataSource": {
@@ -3967,6 +3953,19 @@
         }
       }
     },
+    "TagPayloadForPOST": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "category of the tag."
+        },
+        "value": {
+          "type": "string",
+          "description": "value of the tag."
+        }
+      }
+    },
     "Tags": {
       "type": "object",
       "properties": {
@@ -4003,9 +4002,6 @@
           "description": "modified user id for audit tracking."
         }
       }
-    },
-    "PermissionsResponse": {
-      "type": "string"
     }
   }
 }

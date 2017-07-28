@@ -2147,6 +2147,61 @@
         }
       }
     },
+    "/templates": {
+      "post": {
+        "summary": "post one or more template entities", 
+        "description": "Creates new template(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>experiment: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>template: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ],\n    \"request\": {\n      \"id\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]</pre></li></ul>",
+        "operationId": "postTemplates",
+        "tags": [
+          "Templates"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "type": "string",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Template Created",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CreateResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/treatments/{id}": {
       "get": {
         "summary": "Get one treatment entity",

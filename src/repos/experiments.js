@@ -11,12 +11,15 @@ module.exports = rep => ({
     experiments.map(
       experiment => tx.one(
         'insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date,' +
-        'modified_user_id, modified_date) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP)  RETURNING id',
+        'modified_user_id, modified_date,is_template) values($1, $2, $3, $4, $5,' +
+        ' CURRENT_TIMESTAMP, $5,' +
+        ' CURRENT_TIMESTAMP,$6)  RETURNING id',
         [experiment.name,
           experiment.description,
           experiment.refExperimentDesignId,
           experiment.status,
-          context.userId],
+          context.userId,
+          experiment.isTemplate],
       ),
     ),
   ),

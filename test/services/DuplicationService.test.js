@@ -18,7 +18,7 @@ describe('DuplicationService', () => {
 
       return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext, testTx).then(() => {
         expect(target.getAllTagsToDuplicate).toBeCalledWith([1])
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, testContext, testTx)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false,testContext, testTx)
         expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext)
       })
     })
@@ -61,7 +61,7 @@ describe('DuplicationService', () => {
       const target = new DuplicationService()
       db.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
 
-      return target.duplicateExperimentData([3, 5], 3, testContext, testTx)
+      return target.duplicateExperimentData([3, 5], 3, false,testContext, testTx)
         .then((result) => {
           expect(result.length).toBe(6)
           expect(db.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)

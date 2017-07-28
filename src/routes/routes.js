@@ -26,7 +26,6 @@ import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 
-
 const logger = log4js.getLogger('Router')
 const router = express.Router()
 
@@ -251,6 +250,9 @@ router.post('/duplicate', (req, res, next) => new DuplicationService().duplicate
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
 router.get('/getImage/:topic/:imageName', (req, res, next) => {
   DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
     res.set('Content-Type', 'image/png')

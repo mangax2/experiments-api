@@ -64,7 +64,6 @@
         }
       }
     },
-
     "/dependent-variables/{id}": {
       "get": {
         "summary": "get one dependent variable entity",
@@ -1137,7 +1136,7 @@
         "parameters": [
           {
             "name": "id",
-            "description":"experiment id",
+            "description": "experiment id",
             "in": "path",
             "type": "integer",
             "required": true
@@ -2148,6 +2147,61 @@
         }
       }
     },
+    "/templates": {
+      "post": {
+        "summary": "post one or more template entities", 
+        "description": "Creates new template(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>experiment: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>template: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ],\n    \"request\": {\n      \"id\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]</pre></li></ul>",
+        "operationId": "postTemplates",
+        "tags": [
+          "Templates"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "type": "string",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Template Created",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CreateResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/treatments/{id}": {
       "get": {
         "summary": "Get one treatment entity",
@@ -2609,44 +2663,6 @@
     }
   },
   "definitions": {
-    "CombinationElementPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of the combinationElement."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the combinationElement."
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatment entity."
-        }
-      }
-    },
-    "CombinationElementPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of combinationElement to update."
-        },
-        "name": {
-          "type": "string",
-          "description": "name of the combinationElement."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the combinationElement."
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatment entity."
-        }
-      }
-    },
     "TagPayloadForPOST": {
       "type": "object",
       "properties": {
@@ -2993,52 +3009,6 @@
         }
       }
     },
-    "DependentVariablePayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "required": {
-          "type": "boolean",
-          "description": "is required boolean value."
-        },
-        "name": {
-          "type": "string",
-          "description": "name of dependent variable."
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "experimentId of experiment entity."
-        },
-        "questionCode": {
-          "type": "string",
-          "description": "Refers to Q&A question Code,its an optional field"
-        }
-      }
-    },
-    "DependentVariablePayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of dependent variable to update."
-        },
-        "required": {
-          "type": "boolean",
-          "description": "is required boolean value."
-        },
-        "name": {
-          "type": "string",
-          "description": "name of dependent variable."
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "experimentId of experiment entity."
-        },
-        "questionCode": {
-          "type": "string",
-          "description": "Refers to Q&A question Code"
-        }
-      }
-    },
     "DependentVariableResponse": {
       "type": "object",
       "properties": {
@@ -3157,11 +3127,11 @@
     },
     "DuplicationRequest": {
       "type": "object",
-      "properties":{
+      "properties": {
         "ids": {
           "description": "The IDs of the experiments to duplicate.",
           "type": "array",
-          "items":{
+          "items": {
             "type": "integer"
           }
         },
@@ -3209,52 +3179,6 @@
         "id": {
           "type": "integer",
           "description": "id of experimental unit to update."
-        },
-        "setEntryId": {
-          "type": "integer",
-          "description": "set entry id for experimental unit."
-        }
-      }
-    },
-    "ExperimentalUnitPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "groupId": {
-          "type": "integer",
-          "description": "experimental unit's group id"
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatmentId entity."
-        },
-        "rep": {
-          "type": "integer",
-          "description": "rep number of experimental unit."
-        },
-        "setEntryId": {
-          "type": "integer",
-          "description": "set entry id for experimental unit."
-        }
-      }
-    },
-    "ExperimentalUnitPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of experimental unit to update."
-        },
-        "groupId": {
-          "type": "integer",
-          "description": "experimental unit's group id"
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatmentId entity."
-        },
-        "rep": {
-          "type": "integer",
-          "description": "rep number of experimental unit."
         },
         "setEntryId": {
           "type": "integer",
@@ -3335,15 +3259,6 @@
           "type": "string",
           "description": "unique id for experiment design entity"
         },
-        "name": {
-          "type": "string",
-          "description": "name of experiment design"
-        }
-      }
-    },
-    "ExperimentDesignPayload": {
-      "type": "object",
-      "properties": {
         "name": {
           "type": "string",
           "description": "name of experiment design"
@@ -3499,36 +3414,6 @@
         }
       }
     },
-    "FactorLevelPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "string",
-          "description": "value of the factor."
-        },
-        "factorId": {
-          "type": "integer",
-          "description": "id of Factor entity."
-        }
-      }
-    },
-    "FactorLevelPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of factorLevel to update."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the factor."
-        },
-        "factorId": {
-          "type": "integer",
-          "description": "id of Factor entity."
-        }
-      }
-    },
     "FactorLevelResponse": {
       "type": "object",
       "properties": {
@@ -3559,56 +3444,6 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
-        }
-      }
-    },
-    "FactorPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of the factor."
-        },
-        "refFactorTypeId": {
-          "type": "integer",
-          "description": "id of FactorType entity."
-        },
-        "refDataSourceId": {
-          "type": "integer",
-          "description": "id of the dataSource entity"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "id of experiment entity."
-        },
-        "tier": {
-          "type": "integer",
-          "description": "tier is used categorize factors in to mainplots/sub/plots/sub-sub-plots(valid Range : 1 to 10)"
-        }
-      }
-    },
-    "FactorPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "id of factor to update."
-        },
-        "name": {
-          "type": "string",
-          "description": "name of the factor."
-        },
-        "refFactorTypeId": {
-          "type": "integer",
-          "description": "id of FactorType entity."
-        },
-        "refDataSourceId": {
-          "type": "integer",
-          "description": "id of the dataSource entity"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "id of experiment entity."
         }
       }
     },
@@ -3664,15 +3499,6 @@
           "type": "string",
           "description": "unique id for factor type"
         },
-        "type": {
-          "type": "string",
-          "description": "name of the factor type"
-        }
-      }
-    },
-    "FactorTypePayload": {
-      "type": "object",
-      "properties": {
         "type": {
           "type": "string",
           "description": "name of the factor type"
@@ -3931,52 +3757,6 @@
         }
       }
     },
-    "TreatmentsRequestPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "experimentId": {
-          "type": "integer",
-          "description": "Experiment Id that treatment lives on"
-        },
-        "treatmentNumber": {
-          "type": "integer",
-          "description": "Number of the treatment"
-        },
-        "isControl": {
-          "type": "boolean",
-          "description": "Specifies if treatment is a control treatment"
-        },
-        "notes": {
-          "type": "string",
-          "description": "Used to specify treatment information"
-        }
-      }
-    },
-    "TreatmentsRequestPayloadForPUT": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Treatment Id"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "Experiment Id that treatment lives on"
-        },
-        "treatmentNumber": {
-          "type": "integer",
-          "description": "Number of the treatment"
-        },
-        "isControl": {
-          "type": "boolean",
-          "description": "Specifies if treatment is a control treatment"
-        },
-        "notes": {
-          "type": "string",
-          "description": "Used to specify control treatment information"
-        }
-      }
-    },
     "Variable": {
       "type": "object",
       "properties": {
@@ -4039,23 +3819,6 @@
           "items": {
             "$ref": "#/definitions/DependentVariable"
           }
-        }
-      }
-    },
-    "UpdateResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "integer",
-          "description": "http status code, 200 for success and 4.x.x for errors."
-        },
-        "message": {
-          "type": "string",
-          "description": "Resource updated or error description in case of error."
-        },
-        "id": {
-          "type": "integer",
-          "description": "id of updated resource or black in case of error."
         }
       }
     },

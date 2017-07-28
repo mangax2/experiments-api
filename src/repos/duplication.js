@@ -23,6 +23,7 @@ const duplicateExperimentInfoScript =
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('name', CAST(('COPY OF ' || e.name) AS varchar(100))) " +
+        "#= hstore('is_template', $3) " +
       "AS e1 FROM experiment e " +
     "WHERE id = $1) sub " +
     "RETURNING id" +
@@ -270,7 +271,7 @@ const duplicateUnitScript =
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  duplicateExperiment: function(experimentId, context, tx = rep){ return tx.oneOrNone(
+  duplicateExperiment: function(experimentId,isTemplate ,context, tx = rep){ return tx.oneOrNone(
       duplicateExperimentInfoScript +
         duplicateOwnersScript +
         duplicateFactorScript +
@@ -284,7 +285,7 @@ module.exports = (rep, pgp) => ({
         duplicateGroupValueScript +
         duplicateUnitScript +
       " SELECT * FROM experiment_parent;",
-    [experimentId, context.userId],
+    [experimentId, context.userId,isTemplate.toString()],
   )
   },
 })

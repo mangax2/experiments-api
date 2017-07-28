@@ -7,7 +7,7 @@ import ExperimentsValidator from '../validations/ExperimentsValidator'
 import CapacityRequestService from './CapacityRequestService'
 import OwnerService from './OwnerService'
 import SecurityService from './SecurityService'
-
+import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
 
@@ -19,6 +19,7 @@ class ExperimentsService {
     this.ownerService = new OwnerService()
     this.tagService = new TagService()
     this.securityService = new SecurityService()
+    this.duplicationService = new DuplicationService()
   }
 
   @Transactional('batchCreateExperiments')
@@ -40,7 +41,8 @@ class ExperimentsService {
 
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
             const capacityRequestPromises =
-            CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments, context)
+              CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
+                context)
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context))
               .then(() => AppUtil.createPostResponse(data))
@@ -132,16 +134,18 @@ class ExperimentsService {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
 
-              const owners = { experimentId: id,
+              const owners = {
+                experimentId: id,
                 userIds: trimmedUserIds,
-                groupIds: trimmedOwnerGroups }
+                groupIds: trimmedOwnerGroups,
+              }
               return this.ownerService.batchUpdateOwners([owners], context, tx)
                 .then(() => {
                   experiment.id = id
                   const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
                     return this.tagService.saveTags(tags, id, context)
-                      .then(() => data)
+                        .then(() => data)
                   }
                   return this.tagService.deleteTagsForExperimentId(id, context).then(() => data)
                 },
@@ -160,7 +164,6 @@ class ExperimentsService {
           return this.tagService.deleteTagsForExperimentId(id).then(() => data)
         }
       }))
-
 
   getExperimentsByFilters(queryString) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
@@ -199,6 +202,68 @@ class ExperimentsService {
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
+  @Transactional('manageTemplates')
+  manageTemplates(requestBody, queryString, context, tx) {
+    const source = queryString.source
+    let templatePromise
+    switch (source) {
+      case undefined :
+        templatePromise = this.batchCreateTemplates(requestBody, context, tx)
+        break
+      case 'template' : {
+        templatePromise = this.copyTemplates(requestBody.ids, requestBody.numberOfCopies,
+          context, tx)
+        break
+      }
+      case 'experiment' : {
+        const numberOfCopies = requestBody.numberOfCopies || 1
+        templatePromise = this.createTemplateFromExperiment(requestBody.id,
+          numberOfCopies,
+          context, tx)
+        break
+      }
+      default :
+        templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
+        break
+    }
+    return templatePromise
+  }
+
+  createTemplateFromExperiment(id, numberOfCopies, context, tx) {
+    if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
+      return this.generateTemplates([id], numberOfCopies,
+        context, tx)
+    }
+    return Promise.reject(AppError.badRequest('Invalid Experiment Id or number' +
+      ' of Copies'))
+  }
+
+  copyTemplates(ids, numberOfCopies, context, tx) {
+    if (!_.isArray(ids)) {
+      return Promise.reject(AppError.badRequest('ids must be an array'))
+    }
+
+    const idsCheck = _.partition(ids, id => _.isNumber(id))
+    if (_.isNumber(numberOfCopies) && ids.length > 0 && idsCheck[1].length === 0) {
+      return this.generateTemplates(ids, numberOfCopies,
+        context, tx)
+    }
+    return Promise.reject(AppError.badRequest('Invalid ids or number' +
+      ' of Copies'))
+  }
+
+  batchCreateTemplates(templates, context, tx) {
+    const templatesArrayObj = _.map(templates, (t) => {
+      t.isTemplate = true
+      return t
+    })
+    return this.batchCreateExperiments(templatesArrayObj, context, tx)
+  }
+
+  generateTemplates(ids, numberOfCopies, context, tx) {
+    const duplicationObj = { ids, numberOfCopies, isTemplate: true }
+    return this.duplicationService.duplicateExperiments(duplicationObj, context, tx)
+  }
 
   static mergeTagsWithExperiments(experiments, entityTags) {
     const experimentsAndTagsMap = _.groupBy(entityTags, 'entityId')

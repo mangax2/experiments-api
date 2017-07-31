@@ -20,7 +20,7 @@ describe('HttpUtil', () => {
 
   describe('get', () => {
     it('calls setHeaders and agent.get', () => {
-      HttpUtil.setHeaders = mock()
+      HttpUtil.setHeaders = mockResolve()
       agent.get = mock({})
 
       HttpUtil.get('testUrl', [])
@@ -59,7 +59,7 @@ describe('HttpUtil', () => {
 
   describe('post', () => {
     it('calls setHeaders and agent.post', () => {
-      const httpCall = {send: mock()}
+      const httpCall = {send: mockResolve()}
       HttpUtil.setHeaders = mock(httpCall)
       agent.post = mock({})
 
@@ -73,7 +73,7 @@ describe('HttpUtil', () => {
 
   describe('put', () => {
     it('calls setHeaders and agent.put', () => {
-      const httpCall = {send: mock()}
+      const httpCall = {send: mockResolve()}
       HttpUtil.setHeaders = mock(httpCall)
       agent.put = mock({})
 
@@ -88,7 +88,7 @@ describe('HttpUtil', () => {
   describe('delete', () => {
     it('calls setHeaders and agent.put', () => {
       const httpCall = {send: mock()}
-      HttpUtil.setHeaders = mock(httpCall)
+      HttpUtil.setHeaders = mockResolve(httpCall)
       agent.delete = mock({})
 
       HttpUtil.delete('testUrl', [])

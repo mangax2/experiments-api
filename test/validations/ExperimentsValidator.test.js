@@ -22,7 +22,8 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'], required: true },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
+        {paramName: "is_template", type: "boolean"},
       ]
 
       expect(ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS).toEqual(schema)
@@ -62,7 +63,8 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'], required: true },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
+        {paramName: "is_template", type: "boolean"},
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -79,7 +81,8 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'], required: true },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
+        {paramName: "is_template", type: "boolean"},
       ]
 
       expect(target.getSchema('PUT')).toEqual(schema)
@@ -141,6 +144,14 @@ describe('ExperimentsValidator', () => {
 
       return target.preValidate([]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Experiments request object needs to be' +
+          ' an array')
+      })
+    })
+    it('rejects when experimentObj is not an array with Istemplate True', () => {
+      AppError.badRequest = mock()
+
+      return target.preValidate({isTemplate:true}).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Templates request object needs to be' +
           ' an array')
       })
     })

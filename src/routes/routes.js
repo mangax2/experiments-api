@@ -53,17 +53,17 @@ router.post('/experiments', (req, res, next) => {
 router.put('/experiments/:id', (req, res, next) => {
   const id = req.params.id
   const experiment = req.body
-  return new ExperimentsService().updateExperiment(id, experiment, req.context)
+  return new ExperimentsService().updateExperiment(id, experiment, req.context, false)
     .then(value => res.json(value))
     .catch(err => next(err))
 })
 router.get('/experiments', (req, res, next) => {
-  new ExperimentsService().getExperiments(req.query)
+  new ExperimentsService().getExperiments(req.query, false)
     .then(experiments => res.json(experiments))
     .catch(err => next(err))
 })
 router.get('/experiments/:id', (req, res, next) => {
-  new ExperimentsService().getExperimentById(req.params.id)
+  new ExperimentsService().getExperimentById(req.params.id, false)
     .then(experiment => res.json(experiment))
     .catch(err => next(err))
 })
@@ -253,6 +253,95 @@ router.post('/duplicate', (req, res, next) => new DuplicationService().duplicate
 router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
+
+router.get('/templates', (req, res, next) => {
+  new ExperimentsService().getExperiments(req.query, true)
+    .then(templates => res.json(templates))
+    .catch(err => next(err))
+})
+router.get('/templates/:id', (req, res, next) => {
+  new ExperimentsService().getExperimentById(req.params.id, true)
+    .then(template => res.json(template))
+    .catch(err => next(err))
+})
+router.put('/templates/:id', (req, res, next) => {
+  const id = req.params.id
+  const experiment = req.body
+  return new ExperimentsService().updateExperiment(id, experiment, req.context, true)
+    .then(value => res.json(value))
+    .catch(err => next(err))
+})
+
+router.get('/templates/:id/permissions', (req, res, next) => {
+  new SecurityService().getUserPermissionsForExperiment(req.params.id, req.context)
+    .then(permissions => res.json(permissions))
+    .catch(err => next(err))
+})
+
+router.get('/templates/:id/dependent-variables', (req, res, next) => {
+  const id = req.params.id
+  return new DependentVariableService().getDependentVariablesByExperimentId(id)
+    .then(dependentVariables => res.json(dependentVariables))
+    .catch(err => next(err))
+})
+
+router.get('/templates/:id/variables', (req, res, next) => new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id)
+  .then(success => res.json(success))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/factors', (req, res, next) => new FactorService().getFactorsByExperimentId(req.params.id)
+  .then(factors => res.json(factors))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/composites/treatments', (req, res, next) => new TreatmentDetailsService().getAllTreatmentDetails(req.params.id)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+router.post('/templates/:id/composites/treatments', (req, res, next) => new TreatmentDetailsService().manageAllTreatmentDetails(req.params.id, req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/treatments', (req, res, next) => new TreatmentService().getTreatmentsByExperimentId(req.params.id)
+  .then(treatments => res.json(treatments))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id)
+  .then(experimentalUnits => res.json(experimentalUnits))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id)
+  .then(summary => res.json(summary))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/groups', (req, res, next) => new GroupService().getGroupsByExperimentId(req.params.id)
+  .then(factors => res.json(factors))
+  .catch(err => next(err)))
+
+router.post('/templates/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.params.id, req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+router.get('/templates/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+router.post('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.post('/templates/:id/composites/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/unit-specification-details/', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+
+router.post('/experiments/:id/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.params.id, req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/getImage/:topic/:imageName', (req, res, next) => {
   DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
     res.set('Content-Type', 'image/png')

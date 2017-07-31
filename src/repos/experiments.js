@@ -19,7 +19,7 @@ module.exports = rep => ({
           experiment.refExperimentDesignId,
           experiment.status,
           context.userId,
-          experiment.isTemplate],
+          experiment.isTemplate || false],
       ),
     ),
   ),

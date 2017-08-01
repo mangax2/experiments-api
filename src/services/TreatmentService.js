@@ -24,8 +24,8 @@ class TreatmentService {
   }
 
   @Transactional('getTreatmentsByExperimentId')
-  getTreatmentsByExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  getTreatmentsByExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
@@ -81,8 +81,8 @@ class TreatmentService {
     })
 
   @Transactional('deleteTreatmentsForExperimentId')
-  deleteTreatmentsForExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  deleteTreatmentsForExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.treatment.removeByExperimentId(id, tx))
   }
 }

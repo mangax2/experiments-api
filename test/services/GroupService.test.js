@@ -54,8 +54,8 @@ describe('GroupService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockResolve([{}])
 
-      return target.getGroupsByExperimentId(1, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupsByExperimentId(1, false, testTx).then((data) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.group.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -65,8 +65,8 @@ describe('GroupService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockReject('error')
 
-      return target.getGroupsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.group.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -76,8 +76,8 @@ describe('GroupService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.group.findAllByExperimentId = mockReject('error')
 
-      return target.getGroupsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.group.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

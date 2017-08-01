@@ -202,8 +202,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -212,8 +212,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.unit.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -357,7 +357,10 @@ describe('ExperimentalUnitService', () => {
   describe('uniqueIdsCheck', () => {
     it('throws an error when duplicate id(s) are passed in', () => {
       AppError.badRequest = mock('')
-      expect(() => ExperimentalUnitService.uniqueIdsCheck([{ id: 1, setEntryId: 1 }, { id: 1 , setEntryId: 2}], 'id')).toThrow()
+      expect(() => ExperimentalUnitService.uniqueIdsCheck([{ id: 1, setEntryId: 1 }, {
+        id: 1,
+        setEntryId: 2,
+      }], 'id')).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate id(s) in request payload')
     })
 
@@ -369,7 +372,10 @@ describe('ExperimentalUnitService', () => {
 
     it('Does not throw an error when no duplicate id found', () => {
       AppError.badRequest = mock('')
-      ExperimentalUnitService.uniqueIdsCheck([{ id: 1, setEntryId:1 }, { id: 2 ,setEntryId:2}],'id')
+      ExperimentalUnitService.uniqueIdsCheck([{ id: 1, setEntryId: 1 }, {
+        id: 2,
+        setEntryId: 2,
+      }], 'id')
       expect(AppError.badRequest).not.toHaveBeenCalled()
 
     })

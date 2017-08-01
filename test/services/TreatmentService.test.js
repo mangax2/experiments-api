@@ -54,8 +54,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockResolve([{}])
 
-      return target.getTreatmentsByExperimentId(1, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testTx).then((data) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -65,8 +65,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockReject('error')
 
-      return target.getTreatmentsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -76,8 +76,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.treatment.findAllByExperimentId = mockReject('error')
 
-      return target.getTreatmentsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -246,8 +246,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.removeByExperimentId = mockResolve([1])
 
-      return target.deleteTreatmentsForExperimentId(1, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.deleteTreatmentsForExperimentId(1, false, testTx).then((data) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([1])
       })
@@ -257,8 +257,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.removeByExperimentId = mockReject('error')
 
-      return target.deleteTreatmentsForExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.deleteTreatmentsForExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -268,8 +268,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.treatment.removeByExperimentId = mockReject('error')
 
-      return target.deleteTreatmentsForExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.deleteTreatmentsForExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.treatment.removeByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

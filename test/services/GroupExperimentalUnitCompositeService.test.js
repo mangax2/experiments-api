@@ -100,10 +100,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.batchDeleteGroups = mockResolve()
       AppUtil.createCompositePostResponse = mock()
 
-      return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {
+      return target.saveGroupAndUnitDetails(1, [{}], testContext, false, testTx).then(() => {
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
 
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.createGroupValues).toBeCalled()
         expect(target.createExperimentalUnits).toBeCalled()
@@ -132,8 +132,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.batchDeleteGroups = mockResolve()
       target.getGroupTree = mockResolve([])
 
-      return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      return target.saveGroupAndUnitDetails(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.createGroupValues).not.toBeCalled()
@@ -153,8 +153,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupService.deleteGroupsForExperimentId = mock()
       target.getGroupTree = mockResolve([])
 
-      return target.saveGroupAndUnitDetails(1, [{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      return target.saveGroupAndUnitDetails(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validateGroups).toHaveBeenCalledWith([{}])
         expect(target.groupService.deleteGroupsForExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('')
@@ -261,7 +261,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       return target.recursiveBatchCreate(1, groupUnitDetails, testContext, testTx).then(() => {
         expect(target.groupService.batchCreateGroups).not.toBeCalled()
-        expect(target.createGroupValuesUnitsAndChildGroups).toHaveBeenCalledWith(1, groupUnitDetails, [{ id: 1, experimentId: 1 }, { id: 2, experimentId: 1 }], testContext, testTx)
+        expect(target.createGroupValuesUnitsAndChildGroups).toHaveBeenCalledWith(1, groupUnitDetails, [{
+          id: 1,
+          experimentId: 1,
+        }, { id: 2, experimentId: 1 }], testContext, testTx)
       })
     })
 
@@ -502,8 +505,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve([])
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
-      return target.getGroupAndUnitDetails(1, testTx).then((data) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupAndUnitDetails(1, false, testTx).then((data) => {
+        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
         expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
@@ -526,8 +529,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve(groupValues)
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve(units)
 
-      return target.getGroupAndUnitDetails(1, testTx).then((data) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupAndUnitDetails(1, false, testTx).then((data) => {
+        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
         expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual(expectedResult)
@@ -539,8 +542,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockReject('error')
 
-      return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupAndUnitDetails(1, false, testTx).then(() => {}, (err) => {
+        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
         expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
@@ -552,8 +555,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupValueService.batchGetGroupValuesByExperimentId = mockReject('error')
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
 
-      return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupAndUnitDetails(1, false, testTx).then(() => {}, (err) => {
+        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
         expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
@@ -565,8 +568,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
 
-      return target.getGroupAndUnitDetails(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getGroupAndUnitDetails(1, false, testTx).then(() => {}, (err) => {
+        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
         expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
@@ -591,8 +594,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
   describe('compareGroupTrees', () => {
     it('properly calls everything', () => {
       const additionalLogicFuncs = []
-      const testGroup = { id: 5,  units: [{}] }
-      target.assignAncestryAndLocation = mock([{  units: [{}] }])
+      const testGroup = { id: 5, units: [{}] }
+      target.assignAncestryAndLocation = mock([{ units: [{}] }])
       target.findMatchingEntity = jest.fn((a, b, c, d) => additionalLogicFuncs.push(d))
       target.formatComparisonResults = mock('formatted results')
 
@@ -602,13 +605,13 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.assignAncestryAndLocation).toHaveBeenCalledTimes(2)
       expect(target.findMatchingEntity).toHaveBeenCalledTimes(2)
 
-      additionalLogicFuncs[0](testGroup, { ref_randomization_strategy_id: 3})
+      additionalLogicFuncs[0](testGroup, { ref_randomization_strategy_id: 3 })
 
       expect(testGroup.oldRefRandomizationStrategyId).toBe(3)
       expect(testGroup.units[0].groupId).toBe(5)
 
       additionalLogicFuncs[1](testGroup.units[0], { group: { id: 7 }, setEntryId: 3 })
-      
+
       expect(testGroup.units[0].oldGroupId).toBe(7)
       expect(testGroup.units[0].setEntryId).toBe(3)
     })
@@ -616,8 +619,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('findMatchingEntity', () => {
     it('assigns the id, marks the entity used, and calls the additional logic on match', () => {
-      const hashedEntities = {'5': [{ id: 3, used: true }, { id: 7 }]}
-      const entity = { value: '5'}
+      const hashedEntities = { '5': [{ id: 3, used: true }, { id: 7 }] }
+      const entity = { value: '5' }
       const mockLogic = mock()
 
       target.findMatchingEntity(entity, hashedEntities, 'value', mockLogic)
@@ -683,9 +686,17 @@ describe('GroupExperimentalUnitCompositeService', () => {
   describe('formatComparisonResults', () => {
     it('properly categorizes all results', () => {
       const oldGroups = [{ id: 3, used: true }, { id: 5 }]
-      const newGroups = [{ id: 3, refRandomizationStrategyId: 1, oldRefRandomizationStrategyId: 3 }, {}]
+      const newGroups = [{
+        id: 3,
+        refRandomizationStrategyId: 1,
+        oldRefRandomizationStrategyId: 3,
+      }, {}]
       const oldUnits = [{ id: 1, used: true }, { id: 2 }, { id: 3, used: true }]
-      const newUnits = [{ id: 1, groupId: 5, oldGroupId: 3}, { id: 3, groupId: 3, oldGroupId: 3 }, {}]
+      const newUnits = [{ id: 1, groupId: 5, oldGroupId: 3 }, {
+        id: 3,
+        groupId: 3,
+        oldGroupId: 3,
+      }, {}]
 
       const result = target.formatComparisonResults(oldGroups, newGroups, oldUnits, newUnits)
 
@@ -693,13 +704,13 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groups: {
           adds: [newGroups[1]],
           deletes: [oldGroups[1]],
-          updates: [newGroups[0]]
+          updates: [newGroups[0]],
         },
         units: {
           adds: [newUnits[2]],
           updates: [newUnits[0]],
           deletes: [oldUnits[1]],
-        }
+        },
       })
     })
   })

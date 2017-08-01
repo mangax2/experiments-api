@@ -24,8 +24,8 @@ class GroupService {
   }
 
   @Transactional('getGroupsByExperimentId')
-  getGroupsByExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  getGroupsByExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.group.findAllByExperimentId(id, tx))
   }
 

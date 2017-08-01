@@ -18,8 +18,8 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getDesignSpecificationDetailsByExperimentId')
-  getDesignSpecificationDetailsByExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  getDesignSpecificationDetailsByExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
@@ -67,8 +67,9 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('manageAllDesignSpecificationDetails')
-  manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+  manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context,
+    isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
       if (designSpecificationDetailsObj) {
         const { adds, updates, deletes } = designSpecificationDetailsObj
         this.populateExperimentId(updates, experimentId)

@@ -69,7 +69,7 @@ router.get('/experiments/:id', (req, res, next) => {
 })
 
 router.get('/experiments/:id/permissions', (req, res, next) => {
-  new SecurityService().getUserPermissionsForExperiment(req.params.id, req.context, false)
+  new SecurityService().permissionsCheck(req.params.id, req.context, false)
     .then(permissions => res.json(permissions))
     .catch(err => next(err))
 })
@@ -273,7 +273,7 @@ router.put('/templates/:id', (req, res, next) => {
 })
 
 router.get('/templates/:id/permissions', (req, res, next) => {
-  new SecurityService().getUserPermissionsForExperiment(req.params.id, req.context, true)
+  new SecurityService().permissionsCheck(req.params.id, req.context, true)
     .then(permissions => res.json(permissions))
     .catch(err => next(err))
 })

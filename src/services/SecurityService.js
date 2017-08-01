@@ -25,11 +25,12 @@ class SecurityService {
           logger.error(`${errorMessage} = ${id}`)
           throw AppError.notFound(errorMessage)
         } else {
-          this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
+          return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
             if (result.length === 0) {
               logger.error(`Access denied for ${context.userId} on experimentId ${id}`)
               throw AppError.unauthorized('Access denied')
             }
+            return result
           })
         }
       })

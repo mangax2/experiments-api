@@ -1,5 +1,6 @@
 import log4js from 'log4js'
 import AppError from './AppError'
+import HttpUtil from './HttpUtil'
 
 const oauthPing = require('@monsantoit/oauth-ping')
 const cfServices = require('./ServiceConfig')
@@ -13,10 +14,14 @@ class PingUtil {
       clientSecret: cfServices.pingDataSource.clientSecret,
       url: cfServices.pingDataSource.url,
     }
-    return oauthPing.httpGetToken(params).then(token => [
-      { headerName: 'authorization', headerValue: `Bearer ${token}` },
-      { headerName: 'Content-Type', headerValue: 'application/json' },
-    ]).catch((error) => {
+    const startTime = new Date().getTime()
+    return oauthPing.httpGetToken(params).then((token) => {
+      HttpUtil.logExternalTime(startTime, 10000, 'oauth-ping', 'GET')
+      return [
+        { headerName: 'authorization', headerValue: `Bearer ${token}` },
+        { headerName: 'Content-Type', headerValue: 'application/json' },
+      ]
+    }).catch((error) => {
       logger.error('Authentication service returned error', error)
       return Promise.reject(AppError.create(500, 'Internal Server Error', 'Authentication service' +
         ' returned' +

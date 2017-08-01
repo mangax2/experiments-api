@@ -2867,55 +2867,6 @@
             }
           }
         }
-      },
-      "patch": {
-        "summary": "partially update experimental units",
-        "description": "Allows for a set of experimental units to be partially updated. Currently only allows the update of the entryId field.",
-        "operationId": "patchexperimental-units",
-        "tags": [
-          "experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Template id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "experimental Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ExperimentalUnitPayloadForPATCH"
-              }
-            },
-            "description": "Numeric Id of the experimental Unit to patch"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "experimental Unit Patch SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
       }
     },
     "/templates/{id}/factors": {

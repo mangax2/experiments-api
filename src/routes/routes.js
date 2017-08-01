@@ -308,9 +308,6 @@ router.get('/templates/:id/experimental-units', (req, res, next) => new Experime
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 
-router.patch('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().batchPartialUpdateExperimentalUnits(req.body, req.context, false)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
 
 router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id, true)
   .then(summary => res.json(summary))

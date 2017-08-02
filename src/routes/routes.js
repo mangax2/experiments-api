@@ -4,7 +4,6 @@ import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
-import DuplicationService from '../services/DuplicationService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -46,7 +45,7 @@ router.get('/experiment-designs/:id', (req, res, next) => {
 
 router.post('/experiments', (req, res, next) => {
   const experiments = req.body
-  return new ExperimentsService().batchCreateExperiments(experiments, req.context)
+  return new ExperimentsService().manageExperiments(experiments, req.query, req.context)
     .then(id => res.json(id))
     .catch(err => next(err))
 })
@@ -243,10 +242,6 @@ router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecif
   .catch(err => next(err)))
 
 router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.post('/duplicate', (req, res, next) => new DuplicationService().duplicateExperiments(req.body, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

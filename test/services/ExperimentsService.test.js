@@ -633,7 +633,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchFind = mockResolve()
       ExperimentsService.mergeTagsWithExperiments = mock([])
 
-      return target.getExperimentsByFilters('',false).then((result) => {
+      return target.getExperimentsByFilters('', false).then((result) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
         expect(result).toEqual([])
@@ -647,10 +647,10 @@ describe('ExperimentsService', () => {
       db.experiments.batchFind = mockResolve([{ experimentId: 1 }])
       ExperimentsService.mergeTagsWithExperiments = mock([])
 
-      return target.getExperimentsByFilters('',false).then((result) => {
+      return target.getExperimentsByFilters('', false).then((result) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
-        expect(db.experiments.batchFind).toHaveBeenCalledWith([1],false)
+        expect(db.experiments.batchFind).toHaveBeenCalledWith([1], false)
         expect(ExperimentsService.mergeTagsWithExperiments).toHaveBeenCalledWith([{ experimentId: 1 }], [{
           entityId: 1,
           tags: [],
@@ -748,6 +748,104 @@ describe('ExperimentsService', () => {
     })
   })
 
+  describe('Experiments Manage', () => {
+    it('manage Experiments when there is no query parameter in the post end point', () => {
+      const requestBody = {}
+      target.batchCreateExperiments = mockResolve()
+      return target.manageExperiments(requestBody, {}, testContext, testTx).then(() => {
+        expect(target.batchCreateExperiments).toHaveBeenCalled()
+
+      })
+    })
+    it('manage Experiments when there is an inavlid query parameter in the post end point', () => {
+      const requestBody = {}
+      AppError.badRequest = mock()
+      return target.manageExperiments(requestBody, { source: 'fgsdhfhsdf' }, testContext, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Source Type')
+
+      })
+    })
+
+    it('manage Experiments when there is  query parameter source is experiment', () => {
+      const requestBody = { ids: [1], numberOfCopies: 1 }
+      target.copyEntities = mockResolve()
+      return target.manageExperiments(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
+        expect(target.copyEntities).toHaveBeenCalledWith([1], 1, testContext, false, testTx)
+
+      })
+    })
+
+    it('manage experiment when there is  query parameter source is template when if the' +
+      ' numberOfCopies is not defined default to 1', () => {
+      const requestBody = { id: 1 }
+      target.createEntity = mockResolve()
+      return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+
+      })
+    })
+
+    it('manage Experiment when there is  query parameter source is template', () => {
+      const requestBody = { id: 1, numberOfCopies: 1 }
+      target.createEntity = mockResolve()
+      return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+
+      })
+    })
+
+
+
+    it('CopyExperiments', () => {
+      target.generateEntities = mockResolve()
+      return target.copyEntities([1, 2], 1, testContext, false, testTx).then(() => {
+        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, false, testTx)
+      })
+    })
+
+    it('generateExperiments', () => {
+      target.duplicationService.duplicateExperiments = mockResolve()
+      return target.generateEntities([1, 2], 1, testContext, false, testTx).then(() => {
+        expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
+          ids: [1, 2],
+          isTemplate: false,
+          numberOfCopies: 1,
+        }, testContext, testTx)
+      })
+    })
+    it('createExperiments from Template', () => {
+      target.generateEntities = mockResolve()
+      return target.createEntity(1, 1, testContext, false, testTx).then(() => {
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, false, testTx)
+      })
+    })
+
+    it('Throw Validations when the templateId or numberofCopies is not a number ', () => {
+      AppError.badRequest = mock()
+      return target.createEntity('test', '2', testContext, false, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Template Id or number of' +
+          ' Copies')
+
+      })
+    })
+
+    it('Throw Validations when the ids is not array during Copy Experiments ', () => {
+      AppError.badRequest = mock()
+      return target.copyEntities('test', '2', testContext, false, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array')
+
+      })
+    })
+
+    it('Throw Validations when the ids is not a numeric array during Copy Experiments ', () => {
+      AppError.badRequest = mock()
+      return target.copyEntities([1, 2, '3'], '2', testContext, false, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies')
+      })
+    })
+
+  })
+
   describe('Templates', () => {
     it('manage Templates when there is no query parameter in the post end point', () => {
       const requestBody = {}
@@ -768,9 +866,9 @@ describe('ExperimentsService', () => {
 
     it('manage Templates when there is  query parameter source is experiment', () => {
       const requestBody = { id: 1, numberOfCopies: 1 }
-      target.createTemplateFromExperiment = mockResolve()
+      target.createEntity = mockResolve()
       return target.manageTemplates(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
-        expect(target.createTemplateFromExperiment).toHaveBeenCalledWith(1, 1, testContext, testTx)
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, true, testTx)
 
       })
     })
@@ -778,18 +876,18 @@ describe('ExperimentsService', () => {
     it('manage Templates when there is  query parameter source is experiment when if the' +
       ' numberOfCopies is no defined default to 1', () => {
       const requestBody = { id: 1 }
-      target.createTemplateFromExperiment = mockResolve()
+      target.createEntity = mockResolve()
       return target.manageTemplates(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
-        expect(target.createTemplateFromExperiment).toHaveBeenCalledWith(1, 1, testContext, testTx)
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, true, testTx)
 
       })
     })
 
     it('manage Templates when there is  query parameter source is template', () => {
       const requestBody = { ids: [1], numberOfCopies: 1 }
-      target.copyTemplates = mockResolve()
+      target.copyEntities = mockResolve()
       return target.manageTemplates(requestBody, { source: 'template' }, testContext, testTx).then(() => {
-        expect(target.copyTemplates).toHaveBeenCalledWith([1], 1, testContext, testTx)
+        expect(target.copyEntities).toHaveBeenCalledWith([1], 1, testContext, true, testTx)
 
       })
     })
@@ -807,15 +905,15 @@ describe('ExperimentsService', () => {
     })
 
     it('CopyTemplates', () => {
-      target.generateTemplates = mockResolve()
-      return target.copyTemplates([1, 2], 1, testContext, testTx).then(() => {
-        expect(target.generateTemplates).toHaveBeenCalledWith([1, 2], 1, testContext, testTx)
+      target.generateEntities = mockResolve()
+      return target.copyEntities([1, 2], 1, testContext, true, testTx).then(() => {
+        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, true, testTx)
       })
     })
 
     it('generateTemplates', () => {
       target.duplicationService.duplicateExperiments = mockResolve()
-      return target.generateTemplates([1, 2], 1, testContext, testTx).then(() => {
+      return target.generateEntities([1, 2], 1, testContext, true, testTx).then(() => {
         expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
           ids: [1, 2],
           isTemplate: true,
@@ -824,15 +922,15 @@ describe('ExperimentsService', () => {
       })
     })
     it('createTemplates from experiment', () => {
-      target.generateTemplates = mockResolve()
-      return target.createTemplateFromExperiment(1, 1, testContext, testTx).then(() => {
-        expect(target.generateTemplates).toHaveBeenCalledWith([1], 1, testContext, testTx)
+      target.generateEntities = mockResolve()
+      return target.createEntity(1, 1, testContext, true, testTx).then(() => {
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, true, testTx)
       })
     })
 
     it('Throw Validations when the experimentId or numberofCopies is not a number ', () => {
       AppError.badRequest = mock()
-      return target.createTemplateFromExperiment('test', '2', testContext, testTx).catch(() => {
+      return target.createEntity('test', '2', testContext, true, testTx).catch(() => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Experiment Id or number of' +
           ' Copies')
 
@@ -841,7 +939,7 @@ describe('ExperimentsService', () => {
 
     it('Throw Validations when the ids is not array during Copy Templates ', () => {
       AppError.badRequest = mock()
-      return target.copyTemplates('test', '2', testContext, testTx).catch(() => {
+      return target.copyEntities('test', '2', testContext, true, testTx).catch(() => {
         expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array')
 
       })
@@ -849,7 +947,7 @@ describe('ExperimentsService', () => {
 
     it('Throw Validations when the ids is not a numeric array during Copy Templates ', () => {
       AppError.badRequest = mock()
-      return target.copyTemplates([1, 2, '3'], '2', testContext, testTx).catch(() => {
+      return target.copyEntities([1, 2, '3'], '2', testContext, true, testTx).catch(() => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies')
       })
     })

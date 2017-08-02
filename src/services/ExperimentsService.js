@@ -11,7 +11,6 @@ import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
 
-
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
@@ -67,7 +66,6 @@ class ExperimentsService {
     }
     return Promise.resolve()
   }
-
 
   getExperiments(queryString, isTemplate) {
     if (this.isFilterRequest(queryString) === true) {
@@ -209,6 +207,33 @@ class ExperimentsService {
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
+  @Transactional('manageExperiments')
+  manageExperiments(requestBody, queryString, context, tx) {
+    const source = queryString.source
+    let experimentPromise
+    switch (source) {
+      case undefined :
+        experimentPromise = this.batchCreateExperiments(requestBody, context, tx)
+        break
+      case 'template' : {
+        const numberOfCopies = requestBody.numberOfCopies || 1
+        experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
+          context, false, tx)
+        break
+      }
+      case 'experiment' : {
+        experimentPromise = this.copyEntities(requestBody.ids,
+          requestBody.numberOfCopies,
+          context, false, tx)
+        break
+      }
+      default :
+        experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
+        break
+    }
+    return experimentPromise
+  }
+
   @Transactional('manageTemplates')
   manageTemplates(requestBody, queryString, context, tx) {
     const source = queryString.source
@@ -218,15 +243,15 @@ class ExperimentsService {
         templatePromise = this.batchCreateTemplates(requestBody, context, tx)
         break
       case 'template' : {
-        templatePromise = this.copyTemplates(requestBody.ids, requestBody.numberOfCopies,
-          context, tx)
+        templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
+          context, true, tx)
         break
       }
       case 'experiment' : {
         const numberOfCopies = requestBody.numberOfCopies || 1
-        templatePromise = this.createTemplateFromExperiment(requestBody.id,
+        templatePromise = this.createEntity(requestBody.id,
           numberOfCopies,
-          context, tx)
+          context, true, tx)
         break
       }
       default :
@@ -236,24 +261,24 @@ class ExperimentsService {
     return templatePromise
   }
 
-  createTemplateFromExperiment(id, numberOfCopies, context, tx) {
+  createEntity(id, numberOfCopies, context, isTemplate, tx) {
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateTemplates([id], numberOfCopies,
-        context, tx)
+      return this.generateEntities([id], numberOfCopies,
+        context, isTemplate, tx)
     }
-    return Promise.reject(AppError.badRequest('Invalid Experiment Id or number' +
-      ' of Copies'))
+    const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
+    return Promise.reject(AppError.badRequest(`Invalid ${entityCreatedFrom} Id or number of Copies`))
   }
 
-  copyTemplates(ids, numberOfCopies, context, tx) {
+  copyEntities(ids, numberOfCopies, context, isTemplate, tx) {
     if (!_.isArray(ids)) {
       return Promise.reject(AppError.badRequest('ids must be an array'))
     }
 
     const idsCheck = _.partition(ids, id => _.isNumber(id))
     if (_.isNumber(numberOfCopies) && ids.length > 0 && idsCheck[1].length === 0) {
-      return this.generateTemplates(ids, numberOfCopies,
-        context, tx)
+      return this.generateEntities(ids, numberOfCopies,
+        context, isTemplate, tx)
     }
     return Promise.reject(AppError.badRequest('Invalid ids or number' +
       ' of Copies'))
@@ -267,8 +292,8 @@ class ExperimentsService {
     return this.batchCreateExperiments(templatesArrayObj, context, tx)
   }
 
-  generateTemplates(ids, numberOfCopies, context, tx) {
-    const duplicationObj = { ids, numberOfCopies, isTemplate: true }
+  generateEntities(ids, numberOfCopies, context, isTemplate, tx) {
+    const duplicationObj = { ids, numberOfCopies, isTemplate }
     return this.duplicationService.duplicateExperiments(duplicationObj, context, tx)
   }
 

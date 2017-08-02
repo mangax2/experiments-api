@@ -45,7 +45,7 @@ router.get('/experiment-designs/:id', (req, res, next) => {
 
 router.post('/experiments', (req, res, next) => {
   const experiments = req.body
-  return new ExperimentsService().batchCreateExperiments(experiments, req.context)
+  return new ExperimentsService().manageExperiments(experiments, req.query, req.context)
     .then(id => res.json(id))
     .catch(err => next(err))
 })

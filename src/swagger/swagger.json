@@ -164,46 +164,6 @@
         }
       }
     },
-    "/duplicate": {
-      "post": {
-        "summary": "Duplicates a given experiment",
-        "description": "Fully duplicates an experiment",
-        "operationId": "duplicateExperiment",
-        "tags": [
-          "Duplicate"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "Duplication Request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DuplicationRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Experiment Duplication SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/experimental-units/{id}": {
       "get": {
         "summary": "get one experimental unit entity",
@@ -446,7 +406,7 @@
       },
       "post": {
         "summary": "post one or more experiment entities",
-        "description": "Creates new experiments in Experiments System.\n",
+        "description": "Creates new experiment(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>template: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0\n}</pre><br/></li><li>experiment: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br/></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ],\n    \"request\": {\n      \"id\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]</pre></li></ul>",
         "operationId": "postExperiments",
         "tags": [
           "Experiments"
@@ -459,15 +419,9 @@
         ],
         "parameters": [
           {
-            "name": "experiment",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ExperimentPayload"
-              }
-            }
+            "name": "source",
+            "type": "string",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4093,26 +4047,6 @@
           "description": "Reference to Experiment"
         }
       }
-    },
-    "DuplicationRequest": {
-      "type": "object",
-      "properties": {
-        "ids": {
-          "description": "The IDs of the experiments to duplicate.",
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "numberOfCopies": {
-          "description": "The number of copies to make of each experiment.",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "ids",
-        "numberOfCopies"
-      ]
     },
     "Error": {
       "type": "object",

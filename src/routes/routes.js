@@ -4,7 +4,6 @@ import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
-import DuplicationService from '../services/DuplicationService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -102,7 +101,10 @@ router.get('/dependent-variables/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.context)
+router.post('/experiments/:id/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.params.id, req.context, false)
+  .then(success => res.json(success))
+  .catch(err => next(err)))
+router.post('/templates/:id/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.params.id, req.context, true)
   .then(success => res.json(success))
   .catch(err => next(err)))
 router.get('/experiments/:id/variables', (req, res, next) => new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id, false)
@@ -245,11 +247,6 @@ router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecif
 router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
-
-router.post('/duplicate', (req, res, next) => new DuplicationService().duplicateExperiments(req.body, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
 router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
@@ -307,7 +304,6 @@ router.get('/templates/:id/treatments', (req, res, next) => new TreatmentService
 router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, true)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
-
 
 router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id, true)
   .then(summary => res.json(summary))

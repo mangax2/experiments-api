@@ -14,8 +14,8 @@ class TreatmentDetailsService {
   }
 
   @Transactional('getAllTreatmentDetails')
-  getAllTreatmentDetails(experimentId, tx) {
-    return this.treatmentService.getTreatmentsByExperimentId(experimentId, tx)
+  getAllTreatmentDetails(experimentId, isTemplate, tx) {
+    return this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, tx)
       .then((treatments) => {
         const treatmentIds = _.map(treatments, t => t.id)
         return this.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate(
@@ -29,8 +29,8 @@ class TreatmentDetailsService {
   }
 
   @Transactional('manageAllTreatmentDetails')
-  manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+  manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.updates, experimentId)
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.adds, experimentId)
       return this.deleteTreatments(treatmentDetailsObj.deletes, tx)

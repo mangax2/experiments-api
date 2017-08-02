@@ -37,8 +37,8 @@ class GroupExperimentalUnitCompositeService {
   }
 
   @Transactional('saveGroupAndUnitDetails')
-  saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, tx)
+  saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
       .then(() => {
         const error = this.validateGroups(groupAndUnitDetails)
         if (error) {
@@ -61,7 +61,7 @@ class GroupExperimentalUnitCompositeService {
 
   createGroupValues = (groupAdds, context, tx) => (groupAdds.length > 0
     ? this.groupValueService.batchCreateGroupValues(_.flatMap(groupAdds, g => g.groupValues),
-        context, tx)
+      context, tx)
     : Promise.resolve())
 
   batchUpdateExperimentalUnits = (unitUpdates, context, tx) => (unitUpdates.length > 0
@@ -96,8 +96,8 @@ class GroupExperimentalUnitCompositeService {
           context, tx))
   }
 
-  createGroupValuesUnitsAndChildGroups(
-    experimentId, groupResponse, groupAndUnitDetails, context, tx) {
+  createGroupValuesUnitsAndChildGroups(experimentId, groupResponse, groupAndUnitDetails,
+    context, tx) {
     const updatedGroupAndUnitDetails = this.assignGroupIdToGroupValuesAndUnits(
       groupAndUnitDetails,
       _.map(groupResponse, 'id'),
@@ -160,20 +160,20 @@ class GroupExperimentalUnitCompositeService {
   }
 
   @Transactional('getGroupAndUnitDetails')
-  getGroupAndUnitDetails(experimentId, tx) {
-    return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, tx),
+  getGroupAndUnitDetails(experimentId, isTemplate, tx) {
+    return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate, tx),
       this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
       this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
-    .then((groupValuesAndUnits) => {
-      const groups = groupValuesAndUnits[0]
-      const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
-      const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
-      return _.map(groups, (group) => {
-        group.groupValues = groupValuesGroupByGroupId[group.id]
-        group.units = unitsGroupByGroupId[group.id]
-        return group
+      .then((groupValuesAndUnits) => {
+        const groups = groupValuesAndUnits[0]
+        const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
+        const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
+        return _.map(groups, (group) => {
+          group.groupValues = groupValuesGroupByGroupId[group.id]
+          group.units = unitsGroupByGroupId[group.id]
+          return group
+        })
       })
-    })
   }
 
   @Transactional('getGroupTree')

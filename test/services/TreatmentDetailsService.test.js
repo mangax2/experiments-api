@@ -18,8 +18,8 @@ describe('TreatmentDetailsService', () => {
       target.treatmentService.getTreatmentsByExperimentId = mockResolve(treatments)
       target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockResolve(combinationElements)
 
-      return target.getAllTreatmentDetails(1, testTx).then((data) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllTreatmentDetails(1,false, testTx).then((data) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
         expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([{ id: 1, combinationElements: [{}, {}] }])
       })
@@ -30,8 +30,8 @@ describe('TreatmentDetailsService', () => {
       target.treatmentService.getTreatmentsByExperimentId = mockResolve(treatments)
       target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockReject('error')
 
-      return target.getAllTreatmentDetails(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllTreatmentDetails(1, false,testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false,testTx)
         expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).toHaveBeenCalledWith([1], testTx)
         expect(err).toEqual('error')
       })
@@ -41,8 +41,8 @@ describe('TreatmentDetailsService', () => {
       target.treatmentService.getTreatmentsByExperimentId = mockReject('error')
       target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockReject('error')
 
-      return target.getAllTreatmentDetails(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllTreatmentDetails(1,false, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
         expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -62,7 +62,7 @@ describe('TreatmentDetailsService', () => {
         deletes: [1],
         updates: [{id:10, value:20}],
         adds: [{value:30}, {value:40}],
-      }, testContext, testTx).then(() => {
+      }, testContext,false, testTx).then(() => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{"experimentId": 1, "id": 10, value:20}], testContext, testTx)
         expect(target.createTreatments).toHaveBeenCalledWith([{"experimentId": 1,value:30},{ "experimentId": 1, value:40}], testContext, testTx)
@@ -81,7 +81,7 @@ describe('TreatmentDetailsService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, testContext, testTx).then(() => {}, (err) => {
+      }, testContext, false,testTx).then(() => {}, (err) => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{experimentId:-1}], testContext, testTx)
         expect(target.createTreatments).toHaveBeenCalledWith([{"experimentId": -1}, {"experimentId": -1}], testContext, testTx)
@@ -99,7 +99,7 @@ describe('TreatmentDetailsService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, testContext, testTx).then(() => {}, (err) => {
+      }, testContext, false,testTx).then(() => {}, (err) => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{experimentId: -1}], testContext, testTx)
         expect(target.createTreatments).not.toHaveBeenCalled()
@@ -117,7 +117,7 @@ describe('TreatmentDetailsService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, testContext, testTx).then(() => {}, (err) => {
+      }, testContext,false, testTx).then(() => {}, (err) => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.createTreatments).not.toHaveBeenCalled()

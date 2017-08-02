@@ -11,6 +11,7 @@ import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
 
+
 const logger = log4js.getLogger('ExperimentsService')
 
 class ExperimentsService {
@@ -67,12 +68,13 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
-  getExperiments(queryString) {
+
+  getExperiments(queryString, isTemplate) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString)
+      return this.getExperimentsByFilters(queryString, isTemplate)
         .then(data => this.populateOwners(data))
     }
-    return this.getAllExperiments()
+    return this.getAllExperiments(isTemplate)
       .then(data => Promise.all(
         [this.populateOwners(data), this.populateTagsForAllExperiments(data)],
       )
@@ -99,11 +101,13 @@ class ExperimentsService {
   }
 
   @Transactional('getExperimentById')
-  getExperimentById(id, tx) {
-    return db.experiments.find(id, tx).then((data) => {
+  getExperimentById(id, isTemplate, tx) {
+    return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
-        logger.error(`Experiment Not Found for requested experimentId = ${id}`)
-        throw AppError.notFound('Experiment Not Found for requested experimentId')
+        const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
+          : 'Experiment Not Found for requested experimentId'
+        logger.error(`${errorMessage} = ${id}`)
+        throw AppError.notFound(errorMessage)
       } else {
         return Promise.all(
           [
@@ -121,15 +125,18 @@ class ExperimentsService {
   }
 
   @Transactional('updateExperiment')
-  updateExperiment(experimentId, experiment, context, tx) {
+  updateExperiment(experimentId, experiment, context, isTemplate, tx) {
     const id = Number(experimentId)
+    experiment.isTemplate = isTemplate
     return this.securityService.permissionsCheck(id, context, tx)
       .then(() => this.validator.validate([experiment], 'PUT', tx)
         .then(() => db.experiments.update(id, experiment, context, tx)
           .then((data) => {
             if (!data) {
-              logger.error(`Experiment Not Found to Update for id = ${id}`)
-              throw AppError.notFound('Experiment Not Found to Update')
+              const errorMessage = isTemplate ? 'Template Not Found to Update for id'
+                : 'Experiment Not Found to Update for id'
+              logger.error(`${errorMessage} = ${id}`)
+              throw AppError.notFound(errorMessage)
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
@@ -165,7 +172,7 @@ class ExperimentsService {
         }
       }))
 
-  getExperimentsByFilters(queryString) {
+  getExperimentsByFilters(queryString, isTemplate) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
@@ -175,13 +182,13 @@ class ExperimentsService {
             return []
           }
           const experimentIds = _.map(eTags, 'entityId')
-          return db.experiments.batchFind(experimentIds)
+          return db.experiments.batchFind(experimentIds, isTemplate)
             .then(experiments => ExperimentsService.mergeTagsWithExperiments(experiments, eTags))
         })
     })
   }
 
-  getAllExperiments = () => db.experiments.all()
+  getAllExperiments = isTemplate => db.experiments.all(isTemplate)
 
   assignExperimentIdToTags = experiments => _.compact(
     _.flatMap(experiments, (exp) => {

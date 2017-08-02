@@ -3,6 +3,7 @@ import SecurityService from '../../src/services/SecurityService'
 import AppError from '../../src/services/utility/AppError'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
+import db from '../../src/db/DbManager'
 
 describe('SecurityService', () => {
   let target
@@ -140,17 +141,54 @@ describe('SecurityService', () => {
   describe('permissionsCheck', () => {
     it('calls getUserPermissionsForExperiment and returns resolved promise when user has access', () => {
       target.getUserPermissionsForExperiment = mockResolve(['write'])
-      return target.permissionsCheck(1, testContext, testTx).then(() => {
+      db.experiments.find = mockResolve({})
+      return target.permissionsCheck(1, testContext,false, testTx).then(() => {
         expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
       })
     })
 
     it('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
+      db.experiments.find = mockResolve({})
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext, testTx).then(() => {}, (err) => {
+      return target.permissionsCheck(1, testContext,false, testTx).then(() => {}, (err) => {
         expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(err).toBe('')
+      })
+    })
+
+
+    it('Doesnot call getUserPermissionsForExperiment and throws error when we are trying check' +
+      ' for an' +
+      ' invalid experimentId', () => {
+      target.getUserPermissionsForExperiment = mockResolve([])
+      db.experiments.find = mockResolve(undefined)
+      AppError.notFound = mock()
+      AppError.unauthorized = mock('')
+      return target.permissionsCheck(1, testContext,false, testTx).then(() => {}, (err) => {
+        expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
+        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
+          ' experimentId')
+      })
+    })
+
+
+
+    it('Doesnot call getUserPermissionsForExperiment and throws error when we are trying check' +
+      ' for an' +
+      ' invalid TemplateId', () => {
+      target.getUserPermissionsForExperiment = mockResolve([])
+      db.experiments.find = mockResolve(undefined)
+      AppError.notFound = mock()
+      AppError.unauthorized = mock('')
+      return target.permissionsCheck(1, testContext,true, testTx).then(() => {}, (err) => {
+        expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
+        expect(  db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested' +
+          ' templateId')
       })
     })
 
@@ -159,6 +197,7 @@ describe('SecurityService', () => {
   describe('permissionsCheckForExperiments', () => {
     it('calls permissionsCheck for each experiment', () => {
       target.permissionsCheck = mockResolve()
+      db.experiments.find = mockResolve({})
       return target.permissionsCheckForExperiments([1, 2], testContext, testTx).then(() => {
         expect(target.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.permissionsCheck).toHaveBeenLastCalledWith(2, testContext, testTx)

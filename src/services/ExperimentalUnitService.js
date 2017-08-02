@@ -79,8 +79,8 @@ class ExperimentalUnitService {
     })
 
   @Transactional('getExperimentalUnitsByExperimentId')
-  getExperimentalUnitsByExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  getExperimentalUnitsByExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.unit.findAllByExperimentId(id, tx))
   }
 

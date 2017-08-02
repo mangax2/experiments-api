@@ -14,13 +14,19 @@ class ExperimentsValidator extends SchemaValidator {
         required: false,
       },
       { paramName: 'refExperimentDesignId', type: 'refData', entity: db.experimentDesign },
-      { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'], required: true },
+      { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+      { paramName: 'is_template', type: 'boolean' },
     ]
   }
 
   static get FILTER_SCHEMA_ELEMENTS() {
     return [
-      { paramName: 'tags.category', type: 'text', lengthRange: { min: 1, max: 1000 }, required: false },
+      {
+        paramName: 'tags.category',
+        type: 'text',
+        lengthRange: { min: 1, max: 1000 },
+        required: false,
+      },
       {
         paramName: 'tags.value',
         type: 'text',
@@ -46,8 +52,9 @@ class ExperimentsValidator extends SchemaValidator {
 
   preValidate = (experimentObj) => {
     if (!_.isArray(experimentObj) || experimentObj.length === 0) {
+      const entity = experimentObj && experimentObj.isTemplate ? 'Templates' : 'Experiments'
       return Promise.reject(
-        AppError.badRequest('Experiments request object needs to be an array'))
+        AppError.badRequest(`${entity} request object needs to be an array`))
     }
     return Promise.resolve()
   }

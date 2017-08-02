@@ -40,12 +40,12 @@ class FactorDependentCompositeService {
     )
   }
 
-  getAllVariablesByExperimentId(experimentId) {
+  getAllVariablesByExperimentId(experimentId, isTemplate) {
     return Promise.all(
       [
         this.getFactorsWithLevels(experimentId),
         this.factorTypeService.getAllFactorTypes(),
-        this.dependentVariableService.getDependentVariablesByExperimentId(experimentId),
+        this.dependentVariableService.getDependentVariablesByExperimentId(experimentId, isTemplate),
       ],
     ).then((value) => {
       const variablesObject = {
@@ -122,8 +122,7 @@ class FactorDependentCompositeService {
   }
 
   static mapIndependentAndExogenousVariableDTO2Entity(experimentId,
-    independentVariables,
-    exogenousVariables) {
+    independentVariables, exogenousVariables) {
     const independentVariableEntities =
       FactorDependentCompositeService.mapVariableDTO2DbEntity(
         independentVariables,

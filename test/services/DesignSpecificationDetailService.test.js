@@ -18,7 +18,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{}])
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, testTx).then((data) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then((data) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -28,7 +28,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockReject('error')
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, testTx).then(() => {}, (err) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1,false, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -38,8 +38,8 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.designSpecificationDetail.findAllByExperimentId = mock()
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, testTx)
+      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -193,8 +193,8 @@ describe('DesignSpecificationDetailService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, testTx).then(() => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      }, 1, testContext,false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false,testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
@@ -211,8 +211,8 @@ describe('DesignSpecificationDetailService', () => {
       target.createDesignSpecificationDetails = mock()
       AppUtil.createCompositePostResponse = mock()
 
-      return target.manageAllDesignSpecificationDetails(null, 1, testContext, testTx).then(() => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      return target.manageAllDesignSpecificationDetails(null, 1, testContext, false,testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
         expect(target.populateExperimentId).not.toHaveBeenCalled()
         expect(target.deleteDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(target.updateDesignSpecificationDetails).not.toHaveBeenCalled()
@@ -233,8 +233,8 @@ describe('DesignSpecificationDetailService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      }, 1, testContext, false,testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
@@ -256,8 +256,8 @@ describe('DesignSpecificationDetailService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      }, 1, testContext,false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
@@ -279,8 +279,8 @@ describe('DesignSpecificationDetailService', () => {
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
+      }, 1, testContext,false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateDesignSpecificationDetails).not.toHaveBeenCalled()

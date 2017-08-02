@@ -18,8 +18,8 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('getUnitSpecificationDetailsByExperimentId')
-  getUnitSpecificationDetailsByExperimentId(id, tx) {
-    return this.experimentService.getExperimentById(id, tx)
+  getUnitSpecificationDetailsByExperimentId(id, isTemplate, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, tx)
       .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
@@ -60,8 +60,9 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('manageAllUnitSpecificationDetails')
-  manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, tx).then(() => {
+  manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context,
+    isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
       UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj
         .updates, experimentId)
       UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj

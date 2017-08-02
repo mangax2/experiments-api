@@ -101,10 +101,10 @@ describe('FactorDependentCompositeService', () => {
         dependent: [{ name: 'testDependent', required: true , questionCode:"ABC_GDEG"}],
       }
 
-      return target.getAllVariablesByExperimentId(1).then((data) => {
+      return target.getAllVariablesByExperimentId(1,false).then((data) => {
         expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1,false)
 
         expect(data).toEqual(expectedReturn)
       })
@@ -115,10 +115,10 @@ describe('FactorDependentCompositeService', () => {
       target.factorTypeService.getAllFactorTypes = mockResolve()
       target.dependentVariableService.getDependentVariablesByExperimentId = mockReject('error')
 
-      return target.getAllVariablesByExperimentId(1).then(() => {}, (err) => {
+      return target.getAllVariablesByExperimentId(1,false).then(() => {}, (err) => {
         expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1,false)
         expect(err).toEqual('error')
       })
     })

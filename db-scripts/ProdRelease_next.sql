@@ -14,3 +14,6 @@ ALTER TABLE experiment ALTER COLUMN is_template SET NOT NULL;
 ALTER TABLE experiment ALTER COLUMN is_template SET DEFAULT FALSE;
 CREATE INDEX experiment_is_template ON public.experiment using btree(is_template) TABLESPACE
 pg_default;
+
+ALTER TABLE experiment ALTER COLUMN status SET DEFAULT 'DRAFT';
+

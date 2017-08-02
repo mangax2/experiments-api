@@ -23,8 +23,8 @@ class DependentVariableService {
 
   getAllDependentVariables = () => db.dependentVariable.all()
 
-  getDependentVariablesByExperimentId(experimentId) {
-    return this.experimentService.getExperimentById(experimentId)
+  getDependentVariablesByExperimentId(experimentId, isTemplate) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate)
       .then(() => db.dependentVariable.findByExperimentId(experimentId))
   }
 

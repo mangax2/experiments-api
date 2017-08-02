@@ -16,8 +16,8 @@ describe('FactorDependentCompositeService', () => {
       target.getFactors = mockResolve([{}])
       target.getFactorLevels = mockResolve([{}, {}])
 
-      return target.getFactorsWithLevels(1).then((data) => {
-        expect(target.getFactors).toHaveBeenCalledWith(1)
+      return target.getFactorsWithLevels(1,false).then((data) => {
+        expect(target.getFactors).toHaveBeenCalledWith(1,false)
         expect(target.getFactorLevels).toHaveBeenCalledWith([{}])
         expect(data).toEqual({ factors: [{}], levels: [{}, {}] })
       })
@@ -27,8 +27,8 @@ describe('FactorDependentCompositeService', () => {
       target.getFactors = mockResolve([{}])
       target.getFactorLevels = mockReject('error')
 
-      return target.getFactorsWithLevels(1).then(() => {}, (err) => {
-        expect(target.getFactors).toHaveBeenCalledWith(1)
+      return target.getFactorsWithLevels(1,false).then(() => {}, (err) => {
+        expect(target.getFactors).toHaveBeenCalledWith(1,false)
         expect(target.getFactorLevels).toHaveBeenCalledWith([{}])
         expect(err).toEqual('error')
       })
@@ -38,8 +38,8 @@ describe('FactorDependentCompositeService', () => {
       target.getFactors = mockReject('error')
       target.getFactorLevels = mock()
 
-      return target.getFactorsWithLevels(1).then(() => {}, (err) => {
-        expect(target.getFactors).toHaveBeenCalledWith(1)
+      return target.getFactorsWithLevels(1,false).then(() => {}, (err) => {
+        expect(target.getFactors).toHaveBeenCalledWith(1,false)
         expect(target.getFactorLevels).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -50,9 +50,9 @@ describe('FactorDependentCompositeService', () => {
     it('returns data from factorService', () => {
       target.factorService.getFactorsByExperimentId = mockResolve([{}])
 
-      return target.getFactors(1).then((data) => {
+      return target.getFactors(1,false).then((data) => {
         expect(data).toEqual([{}])
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1,false)
       })
     })
   })
@@ -102,7 +102,7 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.getAllVariablesByExperimentId(1,false).then((data) => {
-        expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1)
+        expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1,false)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1,false)
 
@@ -116,7 +116,7 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.getDependentVariablesByExperimentId = mockReject('error')
 
       return target.getAllVariablesByExperimentId(1,false).then(() => {}, (err) => {
-        expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1)
+        expect(target.getFactorsWithLevels).toHaveBeenCalledWith(1,false)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1,false)
         expect(err).toEqual('error')

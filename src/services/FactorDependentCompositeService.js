@@ -20,8 +20,8 @@ class FactorDependentCompositeService {
     this.variablesValidator = new VariablesValidator()
   }
 
-  getFactorsWithLevels(experimentId) {
-    return this.getFactors(experimentId)
+  getFactorsWithLevels(experimentId, isTemplate) {
+    return this.getFactors(experimentId, isTemplate)
       .then(factors => this.getFactorLevels(factors)
         .then(levels => ({
           factors: _.flatten(factors),
@@ -30,8 +30,8 @@ class FactorDependentCompositeService {
       )
   }
 
-  getFactors(experimentId) {
-    return this.factorService.getFactorsByExperimentId(experimentId)
+  getFactors(experimentId, isTemplate) {
+    return this.factorService.getFactorsByExperimentId(experimentId, isTemplate)
   }
 
   getFactorLevels(factors) {
@@ -43,7 +43,7 @@ class FactorDependentCompositeService {
   getAllVariablesByExperimentId(experimentId, isTemplate) {
     return Promise.all(
       [
-        this.getFactorsWithLevels(experimentId),
+        this.getFactorsWithLevels(experimentId, isTemplate),
         this.factorTypeService.getAllFactorTypes(),
         this.dependentVariableService.getDependentVariablesByExperimentId(experimentId, isTemplate),
       ],

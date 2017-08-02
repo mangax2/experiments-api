@@ -647,7 +647,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchFind = mockResolve([{ experimentId: 1 }])
       ExperimentsService.mergeTagsWithExperiments = mock([])
 
-      return target.getExperimentsByFilters('', false).then((result) => {
+      return target.getExperimentsByFilters('', false).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
         expect(db.experiments.batchFind).toHaveBeenCalledWith([1], false)

@@ -205,22 +205,23 @@ class FactorDependentCompositeService {
 
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+    const expId = Number(experimentId)
+    return this.securityService.permissionsCheck(expId, context, isTemplate, tx)
       .then(() => this.persistVariables(
-        experimentId,
+        expId,
         FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(
-          experimentId,
+          expId,
           experimentVariables.independent,
           experimentVariables.exogenous,
         ),
         FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
           experimentVariables.dependent,
-          experimentId,
+          expId,
         ),
         context,
         isTemplate,
         tx)
-        .then(() => AppUtil.createPostResponse([{ id: experimentId }])))
+        .then(() => AppUtil.createPostResponse([{ id: expId }])))
   }
 }
 

@@ -644,13 +644,13 @@ describe('ExperimentsService', () => {
       target.validator.validate = mockResolve()
       ExperimentsService.mergeTagsWithExperiments = mock([])
       target.tagService.getEntityTagsByTagFilters = mockResolve([{ entityId: 1, tags: [] }])
-      db.experiments.batchFind = mockResolve([{ experimentId: 1 }])
+      db.experiments.batchFindExperimentOrTemplate = mockResolve([{ experimentId: 1 }])
       ExperimentsService.mergeTagsWithExperiments = mock([])
 
       return target.getExperimentsByFilters('',false).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
-        expect(db.experiments.batchFind).toHaveBeenCalledWith([1],false)
+        expect(db.experiments.batchFindExperimentOrTemplate).toHaveBeenCalledWith([1],false)
         expect(ExperimentsService.mergeTagsWithExperiments).toHaveBeenCalledWith([{ experimentId: 1 }], [{
           entityId: 1,
           tags: [],

@@ -182,7 +182,7 @@ class ExperimentsService {
             return []
           }
           const experimentIds = _.map(eTags, 'entityId')
-          return db.experiments.batchFind(experimentIds, isTemplate)
+          return db.experiments.batchFindExperimentOrTemplate(experimentIds, isTemplate)
             .then(experiments => ExperimentsService.mergeTagsWithExperiments(experiments, eTags))
         })
     })

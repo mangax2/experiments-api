@@ -31,7 +31,7 @@ module.exports = rep => ({
   ),
 
   update: (id, experimentObj, context, tx = rep) => tx.oneOrNone('UPDATE experiment SET (name, description, ref_experiment_design_id,status,' +
-    'modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP,$6,$7) WHERE' +
+    'modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE' +
     ' id=$6 AND is_template=$7 RETURNING *', [experimentObj.name, experimentObj.description, experimentObj.refExperimentDesignId, experimentObj.status, context.userId, id,experimentObj.isTemplate]),
 
   remove: (id, isTemplate) => rep.oneOrNone('delete from experiment where id=$1 AND is_template =' +

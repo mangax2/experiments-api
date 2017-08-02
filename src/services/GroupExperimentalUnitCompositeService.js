@@ -20,14 +20,15 @@ class GroupExperimentalUnitCompositeService {
   }
 
   @Transactional('saveDesignSpecsAndGroupUnitDetails')
-  saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context, tx) {
+  saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context,
+    isTemplate, tx) {
     if (designSpecsAndGroupAndUnitDetails) {
       const designSpecifications = designSpecsAndGroupAndUnitDetails.designSpecifications
       const groupAndUnitDetails = designSpecsAndGroupAndUnitDetails.groupAndUnitDetails
       return Promise.all([
-        this.saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, tx),
+        this.saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, isTemplate, tx),
         this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
-          designSpecifications, experimentId, context, tx,
+          designSpecifications, experimentId, context, isTemplate, tx,
         ),
       ]).then(() => AppUtil.createCompositePostResponse())
     }
@@ -44,7 +45,7 @@ class GroupExperimentalUnitCompositeService {
         if (error) {
           throw AppError.badRequest(error)
         }
-        return this.getGroupTree(experimentId, tx).then((oldGroupsAndUnits) => {
+        return this.getGroupTree(experimentId, isTemplate, tx).then((oldGroupsAndUnits) => {
           const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
           return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
             .then(() => Promise.all([
@@ -177,8 +178,8 @@ class GroupExperimentalUnitCompositeService {
   }
 
   @Transactional('getGroupTree')
-  getGroupTree(experimentId, tx) {
-    return this.getGroupAndUnitDetails(experimentId, tx)
+  getGroupTree(experimentId, isTemplate, tx) {
+    return this.getGroupAndUnitDetails(experimentId, isTemplate, tx)
       .then((groups) => {
         const childGroupHash = _.groupBy(groups, 'parent_id')
         _.forEach(groups, (g) => {

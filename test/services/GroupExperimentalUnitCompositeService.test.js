@@ -26,9 +26,9 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
@@ -45,9 +45,9 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {}, (err) => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -65,9 +65,9 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, testTx).then(() => {}, (err) => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -584,8 +584,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       const secondChildGroup = { id: 5, parent_id: 2 }
       target.getGroupAndUnitDetails = mockResolve([firstChildGroup, parentGroup, secondChildGroup])
 
-      return target.getGroupTree(1, testTx).then((result) => {
-        expect(target.getGroupAndUnitDetails).toBeCalledWith(1, testTx)
+      return target.getGroupTree(1,false, testTx).then((result) => {
+        expect(target.getGroupAndUnitDetails).toBeCalledWith(1,false, testTx)
         expect(result).toEqual([{ id: 2, childGroups: [firstChildGroup, secondChildGroup] }])
       })
     })

@@ -126,7 +126,7 @@ class ExperimentsService {
   updateExperiment(experimentId, experiment, context, isTemplate, tx) {
     const id = Number(experimentId)
     experiment.isTemplate = isTemplate
-    return this.securityService.permissionsCheck(id, context, tx)
+    return this.securityService.permissionsCheck(id, context, isTemplate, tx)
       .then(() => this.validator.validate([experiment], 'PUT', tx)
         .then(() => db.experiments.update(id, experiment, context, tx)
           .then((data) => {
@@ -159,16 +159,18 @@ class ExperimentsService {
           })))
   }
 
-  deleteExperiment = (id, context, tx) => this.securityService.permissionsCheck(id, context, tx)
-    .then(() => db.experiments.remove(id)
-      .then((data) => {
-        if (!data) {
-          logger.error(`Experiment Not Found for requested experimentId = ${id}`)
-          throw AppError.notFound('Experiment Not Found for requested experimentId')
-        } else {
-          return this.tagService.deleteTagsForExperimentId(id).then(() => data)
-        }
-      }))
+  deleteExperiment =
+    (id, context, isTemplate, tx) => this.securityService.permissionsCheck(id, context,
+      isTemplate, tx)
+      .then(() => db.experiments.remove(id, isTemplate)
+        .then((data) => {
+          if (!data) {
+            logger.error(`Experiment Not Found for requested experimentId = ${id}`)
+            throw AppError.notFound('Experiment Not Found for requested experimentId')
+          } else {
+            return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+          }
+        }))
 
   getExperimentsByFilters(queryString, isTemplate) {
     return this.validator.validate([queryString], 'FILTER').then(() => {

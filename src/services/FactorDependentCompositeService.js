@@ -7,7 +7,7 @@ import DependentVariableService from './DependentVariableService'
 import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
 import Transactional from '../decorators/transactional'
-import VariablesValidator from '../validations/VariablesValidator'
+
 
 class FactorDependentCompositeService {
   constructor() {
@@ -17,11 +17,10 @@ class FactorDependentCompositeService {
     this.dependentVariableService = new DependentVariableService()
     this.factorTypeService = new FactorTypeService()
     this.securityService = new SecurityService()
-    this.variablesValidator = new VariablesValidator()
   }
 
-  getFactorsWithLevels(experimentId) {
-    return this.getFactors(experimentId)
+  getFactorsWithLevels(experimentId, isTemplate) {
+    return this.getFactors(experimentId, isTemplate)
       .then(factors => this.getFactorLevels(factors)
         .then(levels => ({
           factors: _.flatten(factors),
@@ -30,8 +29,8 @@ class FactorDependentCompositeService {
       )
   }
 
-  getFactors(experimentId) {
-    return this.factorService.getFactorsByExperimentId(experimentId)
+  getFactors(experimentId, isTemplate) {
+    return this.factorService.getFactorsByExperimentId(experimentId, isTemplate)
   }
 
   getFactorLevels(factors) {
@@ -43,7 +42,7 @@ class FactorDependentCompositeService {
   getAllVariablesByExperimentId(experimentId, isTemplate) {
     return Promise.all(
       [
-        this.getFactorsWithLevels(experimentId),
+        this.getFactorsWithLevels(experimentId, isTemplate),
         this.factorTypeService.getAllFactorTypes(),
         this.dependentVariableService.getDependentVariablesByExperimentId(experimentId, isTemplate),
       ],
@@ -149,30 +148,34 @@ class FactorDependentCompositeService {
     return _.flatten(factorLevels)
   }
 
-  persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context, tx) {
-    return this.factorService.deleteFactorsForExperimentId(experimentId, tx).then(() => {
-      if (independentAndExogenousVariables.length > 0) {
-        return this.factorService.batchCreateFactors(independentAndExogenousVariables, context, tx)
-          .then((ids) => {
-            const levelEntities = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity(
-              independentAndExogenousVariables,
-              ids,
-            )
-            if (levelEntities.length > 0) {
-              return this.factorLevelService.batchCreateFactorLevels(
-                levelEntities,
-                context,
-                tx)
-            }
-            return Promise.resolve()
-          })
-      }
-      return Promise.resolve()
-    })
+  persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context,
+    isTemplate, tx) {
+    return this.factorService.deleteFactorsForExperimentId(experimentId, isTemplate, tx)
+      .then(() => {
+        if (independentAndExogenousVariables.length > 0) {
+          return this.factorService.batchCreateFactors(independentAndExogenousVariables,
+            context, tx)
+            .then((ids) => {
+              const levelEntities = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity(
+                independentAndExogenousVariables,
+                ids,
+              )
+              if (levelEntities.length > 0) {
+                return this.factorLevelService.batchCreateFactorLevels(
+                  levelEntities,
+                  context,
+                  tx)
+              }
+              return Promise.resolve()
+            })
+        }
+        return Promise.resolve()
+      })
   }
 
-  persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx) {
-    return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId, tx)
+  persistVariablesWithoutLevels(experimentId, dependentVariables, context, isTemplate, tx) {
+    return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId,
+      isTemplate, tx)
       .then(() => {
         if (dependentVariables.length > 0) {
           return this.dependentVariableService.batchCreateDependentVariables(
@@ -188,35 +191,36 @@ class FactorDependentCompositeService {
   persistVariables(experimentId,
     independentAndExogenousVariables,
     dependentVariables,
-    context,
+    context, isTemplate,
     tx) {
     return this.persistVariablesWithLevels(
       experimentId,
       independentAndExogenousVariables,
       context,
+      isTemplate,
       tx,
-    ).then(() => this.persistVariablesWithoutLevels(experimentId, dependentVariables, context, tx))
+    ).then(() =>
+      this.persistVariablesWithoutLevels(experimentId, dependentVariables, context, isTemplate, tx))
   }
 
   @Transactional('persistAllVariables')
-  persistAllVariables(experimentVariables, context, tx) {
-    const experimentId = experimentVariables.experimentId
-    return this.securityService.permissionsCheck(experimentId, context, tx)
-      .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx)
-        .then(() => this.persistVariables(
+  persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => this.persistVariables(
+        experimentId,
+        FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(
           experimentId,
-          FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(
-            experimentId,
-            experimentVariables.independent,
-            experimentVariables.exogenous,
-          ),
-          FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
-            experimentVariables.dependent,
-            experimentId,
-          ),
-          context,
-          tx)
-          .then(() => AppUtil.createPostResponse([{ id: experimentId }]))))
+          experimentVariables.independent,
+          experimentVariables.exogenous,
+        ),
+        FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
+          experimentVariables.dependent,
+          experimentId,
+        ),
+        context,
+        isTemplate,
+        tx)
+        .then(() => AppUtil.createPostResponse([{ id: experimentId }])))
   }
 }
 

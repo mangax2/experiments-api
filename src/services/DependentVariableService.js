@@ -55,8 +55,8 @@ class DependentVariableService {
     })
 
   @Transactional('deleteDependentVariablesForExperimentId')
-  deleteDependentVariablesForExperimentId(experimentId, tx) {
-    return this.experimentService.getExperimentById(experimentId, tx)
+  deleteDependentVariablesForExperimentId(experimentId, isTemplate, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
       .then(() => db.dependentVariable.removeByExperimentId(tx, experimentId))
   }
 }

@@ -1,5 +1,6 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import config from '../../config'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
@@ -57,7 +58,7 @@ class SecurityService {
       this.ownerService.getOwnersByExperimentId(id, tx),
       this.getGroupsByUserId(context.userId)]).then((data) => {
         if (data[0] && data[1]) {
-          const groupIdsAssignedToExperiments = data[0].group_ids
+          const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)
           const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
           const userGroupIds = data[1]
           if (upperCaseUserIds.includes(context.userId) ||

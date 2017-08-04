@@ -862,7 +862,7 @@ describe('ExperimentsService', () => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{
           category: 'FROM TEMPLATE',
-          value: '2',
+          value: '1',
           experimentId: 2,
         }], 2, testContext)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 2 }])

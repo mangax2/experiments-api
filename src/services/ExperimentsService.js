@@ -234,7 +234,7 @@ class ExperimentsService {
                 const experimentId = data[t].id
                 tags.push({
                   category: 'FROM TEMPLATE',
-                  value: String(experimentId),
+                  value: String(requestBody.id),
                   experimentId,
                 })
                 tagsPromise.push(this.tagService.saveTags(tags, experimentId, context))

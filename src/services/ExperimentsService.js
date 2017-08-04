@@ -68,7 +68,7 @@ class ExperimentsService {
       return Promise.resolve()
     }
     if (associatedRequests.length > 0) {
-      return Promise.reject(AppError.badRequest('Template(s) cannot be associated to request'))
+      return Promise.reject(AppError.badRequest('Template(s) cannot be associated to a request'))
     }
     return Promise.resolve()
   }
@@ -226,7 +226,25 @@ class ExperimentsService {
       case 'template' : {
         const numberOfCopies = requestBody.numberOfCopies || 1
         experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
-          context, false, tx)
+          context, false, tx).then((data) => {
+            if (data && _.isArray(data)) {
+              const tags = []
+              const tagsPromise = []
+              _.forEach(_.range(numberOfCopies), (t) => {
+                const experimentId = data[t].id
+                tags.push({
+                  category: 'FROM TEMPLATE',
+                  value: String(requestBody.id),
+                  experimentId,
+                })
+                tagsPromise.push(this.tagService.saveTags(tags, experimentId, context))
+              })
+              return Promise.all(tagsPromise).then(() =>
+              AppUtil.createPostResponse(data),
+            )
+            }
+            return Promise.reject('Create Experiment From Template Failed')
+          })
         break
       }
       case 'experiment' : {

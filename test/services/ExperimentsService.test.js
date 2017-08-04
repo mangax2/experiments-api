@@ -61,30 +61,35 @@ describe('ExperimentsService', () => {
     })
 
     it('calls validate, batchCreate, batchCreateOwners, assignExperimentIdToTags,' +
-      ' batchCreateTags, and createPostResponse Will not Call ValidateAssociatedRequests and' +
-      ' batchAssociateExperimentsToCapacityRequests ', () => {
+      ' batchCreateTags, and createPostResponse Will  Call ValidateAssociatedRequests and' +
+      ' validate the template objects' +
+      ' and' +
+      ' not batchAssociateExperimentsToCapacityRequests ', () => {
       target.validator.validate = mockResolve()
-      target.validateAssociatedRequests = mockResolve()
+      target.validateAssociatedRequests = mock()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
+      AppError.badRequest = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
-      }], testContext, true, testTx).then(() => {
+        request: { id: 1, type: 'field' },
+      }], testContext, true, testTx).catch(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          request: { 'id': 1, 'type': 'field' },
         }], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
-          ownerGroups: ['group1 '],
+          ownerGroups: ['group1 '], request: { 'id': 1, 'type': 'field' },
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
@@ -94,12 +99,13 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
-          ownerGroups: ['group1 '],
+          ownerGroups: ['group1 '],"request": {"id": 1, "type": "field"}
         }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
-       // expect(target.validateAssociatedRequests).not.toHaveBeenCalled()
-       //expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
+        expect(target.validateAssociatedRequests).toHaveBeenCalled()
+        expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request')
       })
     })
 
@@ -233,7 +239,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have no associated requests', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{}]).then(() => {
+      target.validateAssociatedRequests([{}],false).then(() => {
         done()
       })
     })
@@ -241,7 +247,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests that are completely filled out', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }]).then(() => {
+      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }],false).then(() => {
         done()
       })
     })
@@ -249,7 +255,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests with only an id', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { id: 1 } }]).catch(() => {
+      target.validateAssociatedRequests([{ request: { id: 1 } }],false).catch(() => {
         done()
       })
     })
@@ -257,10 +263,32 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests with only a type', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { type: 'ce' } }]).catch(() => {
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }],false).catch(() => {
         done()
       })
     })
+
+    it('rejects if the templates have associated requests ', (done) => {
+      const target = new ExperimentsService()
+      AppError.badRequest = mock()
+
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }],true).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith("Template(s) cannot be associated to a request")
+        done()
+      })
+    })
+
+    it('resolves if the templates have associated requests ', (done) => {
+      const target = new ExperimentsService()
+      AppError.badRequest = mock()
+
+      target.validateAssociatedRequests([],true).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalledWith("Template(s) cannot be associated to" +
+          " a request")
+        done()
+      })
+    })
+
   })
 
   describe('getExperiments', () => {
@@ -538,7 +566,10 @@ describe('ExperimentsService', () => {
           id: 1,
           isTemplate: false,
         }, testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{ id: 1, isTemplate: false }])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
+          id: 1,
+          isTemplate: false,
+        }])
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
         expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {})
         expect(data).toEqual({})
@@ -563,7 +594,10 @@ describe('ExperimentsService', () => {
           id: 1,
           isTemplate: false,
         }, testContext, testTx)
-        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{ id: 1, isTemplate: false }])
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
+          id: 1,
+          isTemplate: false,
+        }])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {})
         expect(err).toEqual('error')
       })
@@ -821,18 +855,48 @@ describe('ExperimentsService', () => {
     it('manage experiment when there is  query parameter source is template when if the' +
       ' numberOfCopies is not defined default to 1', () => {
       const requestBody = { id: 1 }
-      target.createEntity = mockResolve()
+      target.createEntity = mockResolve([{ id: 2 }])
+      target.tagService.saveTags = mockResolve()
+      AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{
+          category: 'FROM TEMPLATE',
+          value: '2',
+          experimentId: 2,
+        }], 2, testContext)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 2 }])
+
+      })
+    })
+
+    it('manage experiment when there is  query parameter source is template when if the' +
+      'Rejects if the Create Entity service return invalid Data', () => {
+      const requestBody = { id: 1 }
+      target.createEntity = mockResolve({})
+      target.tagService.saveTags = mockResolve()
+      AppUtil.createPostResponse = mockResolve({})
+      return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).catch((error) => {
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+        expect(target.tagService.saveTags).not.toHaveBeenCalledWith([{
+          category: 'FROM TEMPLATE',
+          value: '2',
+          experimentId: 2,
+        }], 2, testContext)
+        expect(error).toBe("Create Experiment From Template Failed")
+        expect(AppUtil.createPostResponse).not.toHaveBeenCalledWith([{ id: 2 }])
 
       })
     })
 
     it('manage Experiment when there is  query parameter source is template', () => {
       const requestBody = { id: 1, numberOfCopies: 1 }
-      target.createEntity = mockResolve()
+      target.createEntity = mockResolve([{id:1}])
+      target.tagService.saveTags = mockResolve()
+      AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+        expect(target.tagService.saveTags ).toHaveBeenCalled()
 
       })
     })

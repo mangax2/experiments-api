@@ -34,7 +34,7 @@ describe('ExperimentsService', () => {
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
-      }], testContext, testTx).then(() => {
+      }], testContext, false, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
@@ -60,6 +60,49 @@ describe('ExperimentsService', () => {
       })
     })
 
+    it('calls validate, batchCreate, batchCreateOwners, assignExperimentIdToTags,' +
+      ' batchCreateTags, and createPostResponse Will not Call ValidateAssociatedRequests and' +
+      ' batchAssociateExperimentsToCapacityRequests ', () => {
+      target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
+      db.experiments.batchCreate = mockResolve([{ id: 1 }])
+      target.assignExperimentIdToTags = mock([{}])
+      target.tagService.batchCreateTags = mockResolve({})
+      target.ownerService.batchCreateOwners = mockResolve({})
+      AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
+
+      return target.batchCreateExperiments([{
+        owners: ['KMCCL '],
+        ownerGroups: ['group1 '],
+      }], testContext, true, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL '],
+          ownerGroups: ['group1 '],
+        }], 'POST', testTx)
+        expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL '],
+          ownerGroups: ['group1 '],
+        }], testContext, testTx)
+        expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
+          experimentId: 1,
+          userIds: ['KMCCL'],
+          groupIds: ['group1'],
+        }], testContext, testTx)
+        expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL '],
+          ownerGroups: ['group1 '],
+        }])
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+       // expect(target.validateAssociatedRequests).not.toHaveBeenCalled()
+       //expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
+      })
+    })
+
     it('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but' +
       ' not' +
       ' tagService when there are no tags', () => {
@@ -72,7 +115,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
@@ -93,7 +136,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
@@ -112,7 +155,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
@@ -132,7 +175,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -152,7 +195,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -171,7 +214,7 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
-      return target.batchCreateExperiments([], testContext, testTx).then(() => {}, (err) => {
+      return target.batchCreateExperiments([], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -447,7 +490,7 @@ describe('ExperimentsService', () => {
         ownerGroups: ['group1'],
 
       }, testContext, false, testTx).then((data) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
@@ -486,7 +529,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then((data) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
@@ -511,7 +554,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
@@ -535,7 +578,7 @@ describe('ExperimentsService', () => {
       AppError.notFound = mock()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, () => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: false }, testContext, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found to Update for id')
@@ -553,7 +596,7 @@ describe('ExperimentsService', () => {
       AppError.notFound = mock()
 
       return target.updateExperiment(1, {}, testContext, true, testTx).then(() => {}, () => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,true, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, true, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: true }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: true }, testContext, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found to Update for id')
@@ -570,7 +613,7 @@ describe('ExperimentsService', () => {
       target.tagService.batchCreateTags = mock()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: false }, testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -587,7 +630,7 @@ describe('ExperimentsService', () => {
       target.tagService.batchCreateTags = mock()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
@@ -603,9 +646,9 @@ describe('ExperimentsService', () => {
       db.experiments.remove = mockResolve({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
 
-      return target.deleteExperiment(1, testContext,false, testTx).then((data) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
-        expect(db.experiments.remove).toHaveBeenCalledWith(1,false)
+      return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
         expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual({})
       })
@@ -616,9 +659,9 @@ describe('ExperimentsService', () => {
       AppError.notFound = mock()
       target.securityService.permissionsCheck = mockResolve()
 
-      return target.deleteExperiment(1, testContext,false, testTx).then(() => {}, () => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext,false, testTx)
-        expect(db.experiments.remove).toHaveBeenCalledWith(1,false)
+      return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
           ' experimentId')
       })
@@ -794,8 +837,6 @@ describe('ExperimentsService', () => {
       })
     })
 
-
-
     it('CopyExperiments', () => {
       target.generateEntities = mockResolve()
       return target.copyEntities([1, 2], 1, testContext, false, testTx).then(() => {
@@ -900,7 +941,7 @@ describe('ExperimentsService', () => {
         expect(target.batchCreateExperiments).toHaveBeenCalledWith([{
           name: 'test',
           isTemplate: true,
-        }], testContext, testTx)
+        }], testContext, true, testTx)
       })
     })
 

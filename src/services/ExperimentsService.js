@@ -23,9 +23,9 @@ class ExperimentsService {
   }
 
   @Transactional('batchCreateExperiments')
-  batchCreateExperiments(experiments, context, tx) {
+  batchCreateExperiments(experiments, context, isTemplate, tx) {
     return this.validator.validate(experiments, 'POST', tx)
-      .then(() => this.validateAssociatedRequests(experiments))
+      .then(() => this.validateAssociatedRequests(experiments, isTemplate))
       .then(() => db.experiments.batchCreate(experiments, context, tx)
         .then((data) => {
           const experimentIds = _.map(data, d => d.id)
@@ -40,9 +40,9 @@ class ExperimentsService {
           })
 
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
-            const capacityRequestPromises =
+            const capacityRequestPromises = !isTemplate ?
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
-                context)
+                context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context))
               .then(() => AppUtil.createPostResponse(data))
@@ -58,11 +58,17 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
-  validateAssociatedRequests = (experiments) => {
+  validateAssociatedRequests = (experiments, isTemplate) => {
     const associatedRequests = _.map(_.filter(experiments, 'request'), exp => exp.request)
-    const invalidAssociateRequests = _.filter(associatedRequests, req => !req.id || !req.type)
-    if (invalidAssociateRequests.length > 0) {
-      return Promise.reject(AppError.badRequest('Each request must have an id and a type.'))
+    if (!isTemplate) {
+      const invalidAssociateRequests = _.filter(associatedRequests, req => !req.id || !req.type)
+      if (invalidAssociateRequests.length > 0) {
+        return Promise.reject(AppError.badRequest('Each request must have an id and a type.'))
+      }
+      return Promise.resolve()
+    }
+    if (associatedRequests.length > 0) {
+      return Promise.reject(AppError.badRequest('Template(s) cannot be associated to request'))
     }
     return Promise.resolve()
   }
@@ -215,7 +221,7 @@ class ExperimentsService {
     let experimentPromise
     switch (source) {
       case undefined :
-        experimentPromise = this.batchCreateExperiments(requestBody, context, tx)
+        experimentPromise = this.batchCreateExperiments(requestBody, context, false, tx)
         break
       case 'template' : {
         const numberOfCopies = requestBody.numberOfCopies || 1
@@ -291,7 +297,7 @@ class ExperimentsService {
       t.isTemplate = true
       return t
     })
-    return this.batchCreateExperiments(templatesArrayObj, context, tx)
+    return this.batchCreateExperiments(templatesArrayObj, context, true, tx)
   }
 
   generateEntities(ids, numberOfCopies, context, isTemplate, tx) {
@@ -299,7 +305,8 @@ class ExperimentsService {
     return this.duplicationService.duplicateExperiments(duplicationObj, context, tx)
   }
 
-  static mergeTagsWithExperiments(experiments, entityTags) {
+  static
+  mergeTagsWithExperiments(experiments, entityTags) {
     const experimentsAndTagsMap = _.groupBy(entityTags, 'entityId')
     return _.map(experiments.slice(), (experiment) => {
       const tags = experimentsAndTagsMap[experiment.id] ?
@@ -309,7 +316,8 @@ class ExperimentsService {
     })
   }
 
-  static prepareTagResponse(tags) {
+  static
+  prepareTagResponse(tags) {
     return _.map(tags, t => ({ category: t.category, value: t.value }))
   }
 }

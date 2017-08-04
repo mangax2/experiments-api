@@ -5,6 +5,7 @@ import db from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
+import config from '../../config'
 
 class OwnerValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
@@ -116,17 +117,16 @@ class OwnerValidator extends SchemaValidator {
     if (_.includes(userIds, userId)) {
       return Promise.resolve()
     }
-    const errorMessage = 'You cannot remove yourself as an owner'
-    if (groupIds.length === 0) {
-      return Promise.reject(AppError.badRequest(errorMessage))
-    }
 
     return PingUtil.getMonsantoHeader()
       .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
         .then((result) => {
           const profileGroupIds = _.map(result.body.groups, 'id')
+          const errorMessage = 'You cannot remove yourself as an owner'
 
-          if (_.intersection(groupIds, profileGroupIds).length === 0) {
+          const concatGroups = _.concat(groupIds, config.admin_group)
+
+          if (_.intersection(concatGroups, profileGroupIds).length === 0) {
             return Promise.reject(AppError.badRequest(errorMessage))
           }
 

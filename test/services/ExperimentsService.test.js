@@ -55,7 +55,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
     })
@@ -101,7 +101,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],"request": {"id": 1, "type": "field"}
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
         expect(target.validateAssociatedRequests).toHaveBeenCalled()
         expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
@@ -165,7 +165,7 @@ describe('ExperimentsService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {})
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

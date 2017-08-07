@@ -44,16 +44,16 @@ class ExperimentsService {
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
                 context) : []
             return Promise.all(capacityRequestPromises)
-              .then(() => this.batchCreateExperimentTags(experiments, context))
+              .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
   }
 
-  batchCreateExperimentTags(experiments, context) {
+  batchCreateExperimentTags(experiments, context, isTemplate) {
     const tags = this.assignExperimentIdToTags(experiments)
     if (tags && tags.length > 0) {
-      return this.tagService.batchCreateTags(tags, context)
+      return this.tagService.batchCreateTags(tags, context, isTemplate)
     }
     return Promise.resolve()
   }
@@ -158,7 +158,8 @@ class ExperimentsService {
                     return this.tagService.saveTags(tags, id, context)
                         .then(() => data)
                   }
-                  return this.tagService.deleteTagsForExperimentId(id, context).then(() => data)
+                  return this.tagService.deleteTagsForExperimentId(id, context)
+                    .then(() => data)
                 },
                 )
             }

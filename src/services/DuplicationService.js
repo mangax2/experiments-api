@@ -20,7 +20,8 @@ class DuplicationService {
         isTemplate, context, tx)
 
       return Promise.all([getTagsPromise, sqlPromise])
-        .then(results => this.duplicateTagsForExperiments(results[0], results[1], context))
+        .then(results => this.duplicateTagsForExperiments(results[0], results[1],
+          context, isTemplate))
     }
     throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
   }
@@ -47,13 +48,13 @@ class DuplicationService {
     return sqlPromise.then(() => conversionMap)
   }
 
-  duplicateTagsForExperiments = (tagsToDuplicate, idConversionMap, context) => {
+  duplicateTagsForExperiments = (tagsToDuplicate, idConversionMap, context, isTemplate) => {
     const newTags = _.flatMap(idConversionMap, cm =>
       _.map(tagsToDuplicate[cm.oldId],
         tag => ({ experimentId: cm.newId, category: tag.category, value: tag.value })))
 
     const tagsPromise = newTags.length > 0
-      ? this.tagService.batchCreateTags(newTags, context)
+      ? this.tagService.batchCreateTags(newTags, context, isTemplate)
       : Promise.resolve()
     const newIds = _.map(idConversionMap, ids => ({ id: ids.newId }))
     return tagsPromise.then(() => AppUtil.createPostResponse(newIds))

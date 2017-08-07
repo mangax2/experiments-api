@@ -16,10 +16,10 @@ describe('DuplicationService', () => {
       target.duplicateExperimentData = jest.fn(() => Promise.resolve({ids: null}))
       target.duplicateTagsForExperiments = jest.fn(() => Promise.resolve())
 
-      return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext,false, testTx).then(() => {
+      return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext, testTx).then(() => {
         expect(target.getAllTagsToDuplicate).toBeCalledWith([1],false)
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false,testContext,false)
-        expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false,testContext,testTx)
+        expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext,false)
       })
     })
 
@@ -113,8 +113,8 @@ describe('DuplicationService', () => {
       target.tagService = { batchCreateTags: jest.fn(() => Promise.resolve() ) }
       AppUtil.createPostResponse = jest.fn()
 
-      return target.duplicateTagsForExperiments(tagsToDuplicate, [{ oldId: 3, newId: 5 }], testContext).then(() => {
-        expect(target.tagService.batchCreateTags).toBeCalledWith([{ experimentId: 5, category: 'category', value: 'value' }], testContext)
+      return target.duplicateTagsForExperiments(tagsToDuplicate, [{ oldId: 3, newId: 5 }], testContext,false).then(() => {
+        expect(target.tagService.batchCreateTags).toBeCalledWith([{ experimentId: 5, category: 'category', value: 'value' }], testContext,false)
         expect(AppUtil.createPostResponse).toBeCalledWith([{ id: 5 }])
       })
     })

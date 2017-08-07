@@ -293,7 +293,7 @@ class ExperimentsService {
   createEntity(id, numberOfCopies, context, isTemplate, tx) {
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
       return this.generateEntities([id], numberOfCopies,
-        context, isTemplate, tx)
+        context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
     return Promise.reject(AppError.badRequest(`Invalid ${entityCreatedFrom} Id or number of Copies`))
@@ -307,7 +307,7 @@ class ExperimentsService {
     const idsCheck = _.partition(ids, id => _.isNumber(id))
     if (_.isNumber(numberOfCopies) && ids.length > 0 && idsCheck[1].length === 0) {
       return this.generateEntities(ids, numberOfCopies,
-        context, isTemplate, tx)
+        context, isTemplate, 'copy', tx)
     }
     return Promise.reject(AppError.badRequest('Invalid ids or number' +
       ' of Copies'))
@@ -321,9 +321,9 @@ class ExperimentsService {
     return this.batchCreateExperiments(templatesArrayObj, context, true, tx)
   }
 
-  generateEntities(ids, numberOfCopies, context, isTemplate, tx) {
+  generateEntities(ids, numberOfCopies, context, isTemplate, source, tx) {
     const duplicationObj = { ids, numberOfCopies, isTemplate }
-    return this.duplicationService.duplicateExperiments(duplicationObj, context, tx)
+    return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }
 
   static

@@ -11,11 +11,12 @@ class DuplicationService {
   }
 
   @Transactional('DuplicateExperiments')
-  duplicateExperiments(body, context, tx) {
+  duplicateExperiments(body, context, source, tx) {
     const parsedCopyNum = Number(body ? body.numberOfCopies : undefined)
     if (body && body.ids && body.ids.length > 0 && parsedCopyNum > 0 && parsedCopyNum % 1 === 0) {
       const isTemplate = body.isTemplate || false
-      const getTagsPromise = this.getAllTagsToDuplicate(body.ids, isTemplate)
+      const updateFlag = source === 'conversion' ? !isTemplate : isTemplate
+      const getTagsPromise = this.getAllTagsToDuplicate(body.ids, updateFlag)
       const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies,
         isTemplate, context, tx)
 

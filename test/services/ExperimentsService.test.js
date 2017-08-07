@@ -55,7 +55,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
       })
     })
@@ -99,9 +99,9 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
-          ownerGroups: ['group1 '],"request": {"id": 1, "type": "field"}
+          ownerGroups: ['group1 '], 'request': { 'id': 1, 'type': 'field' },
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
         expect(target.validateAssociatedRequests).toHaveBeenCalled()
         expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
@@ -165,7 +165,7 @@ describe('ExperimentsService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {},false)
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -239,7 +239,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have no associated requests', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{}],false).then(() => {
+      target.validateAssociatedRequests([{}], false).then(() => {
         done()
       })
     })
@@ -247,7 +247,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests that are completely filled out', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }],false).then(() => {
+      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }], false).then(() => {
         done()
       })
     })
@@ -255,7 +255,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests with only an id', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { id: 1 } }],false).catch(() => {
+      target.validateAssociatedRequests([{ request: { id: 1 } }], false).catch(() => {
         done()
       })
     })
@@ -263,7 +263,7 @@ describe('ExperimentsService', () => {
     it('resolves if the experiments have associated requests with only a type', (done) => {
       const target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{ request: { type: 'ce' } }],false).catch(() => {
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }], false).catch(() => {
         done()
       })
     })
@@ -272,8 +272,8 @@ describe('ExperimentsService', () => {
       const target = new ExperimentsService()
       AppError.badRequest = mock()
 
-      target.validateAssociatedRequests([{ request: { type: 'ce' } }],true).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith("Template(s) cannot be associated to a request")
+      target.validateAssociatedRequests([{ request: { type: 'ce' } }], true).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request')
         done()
       })
     })
@@ -282,9 +282,9 @@ describe('ExperimentsService', () => {
       const target = new ExperimentsService()
       AppError.badRequest = mock()
 
-      target.validateAssociatedRequests([],true).then(() => {
-        expect(AppError.badRequest).not.toHaveBeenCalledWith("Template(s) cannot be associated to" +
-          " a request")
+      target.validateAssociatedRequests([], true).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalledWith('Template(s) cannot be associated to' +
+          ' a request')
         done()
       })
     })
@@ -299,11 +299,11 @@ describe('ExperimentsService', () => {
       target.populateOwners = mockResolve(['KMCCL'])
       target.populateTagsForAllExperiments = mock()
 
-      return target.getExperiments('',false).then(() => {
+      return target.getExperiments('', false).then(() => {
         expect(target.isFilterRequest).toHaveBeenCalledWith('')
         expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
         expect(target.getAllExperiments).toHaveBeenCalled()
-        expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}],false)
+        expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}], false)
       })
     })
 
@@ -313,7 +313,7 @@ describe('ExperimentsService', () => {
       target.getAllExperiments = mock()
       target.populateOwners = mockResolve(['KMCCL'])
 
-      return target.getExperiments('',false).then(() => {
+      return target.getExperiments('', false).then(() => {
         expect(target.isFilterRequest).toHaveBeenCalledWith('')
         expect(target.getExperimentsByFilters).toHaveBeenCalledWith('', false)
         expect(target.getAllExperiments).not.toHaveBeenCalled()
@@ -366,7 +366,7 @@ describe('ExperimentsService', () => {
         tags: [{ category: 'cat1', value: 'val1' }],
       }, { id: 2, tags: [{ category: 'cat2', value: 'val2' }] }]
 
-      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }],false).then((data) => {
+      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }], false).then((data) => {
         expect(data).toEqual(expectedResult)
         expect(target.tagService.getAllTagsForEntity).toHaveBeenCalledWith('experiment')
       })
@@ -381,7 +381,7 @@ describe('ExperimentsService', () => {
         tags: [{ category: 'cat1', value: 'val1' }],
       }, { id: 2, tags: [{ category: 'cat2', value: 'val2' }] }]
 
-      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }],true).then((data) => {
+      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }], true).then((data) => {
         expect(data).toEqual(expectedResult)
         expect(target.tagService.getAllTagsForEntity).toHaveBeenCalledWith('template')
       })
@@ -460,7 +460,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({ tags: [] })
       })
@@ -473,7 +473,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -486,7 +486,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -558,7 +558,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
         }])
-        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {},false)
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
         expect(data).toEqual({})
       })
     })
@@ -587,7 +587,7 @@ describe('ExperimentsService', () => {
           isTemplate: false,
         }])
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
-        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {},false)
+        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {}, false)
         expect(data).toEqual({})
       })
     })
@@ -614,7 +614,7 @@ describe('ExperimentsService', () => {
           id: 1,
           isTemplate: false,
         }])
-        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {},false)
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
         expect(err).toEqual('error')
       })
     })
@@ -728,7 +728,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentsByFilters('', false).then((result) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '', false)
         expect(result).toEqual([])
       })
     })
@@ -742,7 +742,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentsByFilters('', false).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '', false)
         expect(db.experiments.batchFindExperimentOrTemplate).toHaveBeenCalledWith([1], false)
         expect(ExperimentsService.mergeTagsWithExperiments).toHaveBeenCalledWith([{ experimentId: 1 }], [{
           entityId: 1,
@@ -757,9 +757,9 @@ describe('ExperimentsService', () => {
       target.tagService.getEntityTagsByTagFilters = mockReject('error')
       db.experiments.batchFind = mockResolve()
 
-      return target.getExperimentsByFilters('',false).then(() => {}, (err) => {
+      return target.getExperimentsByFilters('', false).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '', false)
         expect(db.experiments.batchFind).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -880,7 +880,7 @@ describe('ExperimentsService', () => {
           category: 'FROM TEMPLATE',
           value: '1',
           experimentId: 2,
-        }], 2, testContext,false)
+        }], 2, testContext, false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 2 }])
 
       })
@@ -899,7 +899,7 @@ describe('ExperimentsService', () => {
           value: '2',
           experimentId: 2,
         }], 2, testContext)
-        expect(error).toBe("Create Experiment From Template Failed")
+        expect(error).toBe('Create Experiment From Template Failed')
         expect(AppUtil.createPostResponse).not.toHaveBeenCalledWith([{ id: 2 }])
 
       })
@@ -907,12 +907,12 @@ describe('ExperimentsService', () => {
 
     it('manage Experiment when there is  query parameter source is template', () => {
       const requestBody = { id: 1, numberOfCopies: 1 }
-      target.createEntity = mockResolve([{id:1}])
+      target.createEntity = mockResolve([{ id: 1 }])
       target.tagService.saveTags = mockResolve()
       AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
-        expect(target.tagService.saveTags ).toHaveBeenCalled()
+        expect(target.tagService.saveTags).toHaveBeenCalled()
 
       })
     })
@@ -920,24 +920,24 @@ describe('ExperimentsService', () => {
     it('CopyExperiments', () => {
       target.generateEntities = mockResolve()
       return target.copyEntities([1, 2], 1, testContext, false, testTx).then(() => {
-        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, false, testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, false, 'copy', testTx)
       })
     })
 
     it('generateExperiments', () => {
       target.duplicationService.duplicateExperiments = mockResolve()
-      return target.generateEntities([1, 2], 1, testContext, false, testTx).then(() => {
+      return target.generateEntities([1, 2], 1, testContext, false, 'copy', testTx).then(() => {
         expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
           ids: [1, 2],
           isTemplate: false,
           numberOfCopies: 1,
-        }, testContext, testTx)
+        }, testContext, 'copy', testTx)
       })
     })
     it('createExperiments from Template', () => {
       target.generateEntities = mockResolve()
       return target.createEntity(1, 1, testContext, false, testTx).then(() => {
-        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, false, testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, false, 'conversion', testTx)
       })
     })
 
@@ -1028,24 +1028,24 @@ describe('ExperimentsService', () => {
     it('CopyTemplates', () => {
       target.generateEntities = mockResolve()
       return target.copyEntities([1, 2], 1, testContext, true, testTx).then(() => {
-        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, true, testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1, 2], 1, testContext, true, 'copy', testTx)
       })
     })
 
     it('generateTemplates', () => {
       target.duplicationService.duplicateExperiments = mockResolve()
-      return target.generateEntities([1, 2], 1, testContext, true, testTx).then(() => {
+      return target.generateEntities([1, 2], 1, testContext, true, 'copy', testTx).then(() => {
         expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
           ids: [1, 2],
           isTemplate: true,
           numberOfCopies: 1,
-        }, testContext, testTx)
+        }, testContext, 'copy', testTx)
       })
     })
     it('createTemplates from experiment', () => {
       target.generateEntities = mockResolve()
       return target.createEntity(1, 1, testContext, true, testTx).then(() => {
-        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, true, testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, testContext, true, 'conversion', testTx)
       })
     })
 

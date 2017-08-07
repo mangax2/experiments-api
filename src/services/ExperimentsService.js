@@ -231,16 +231,23 @@ class ExperimentsService {
         experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
           context, false, tx).then((data) => {
             if (data && _.isArray(data)) {
-              const tags = []
               const tagsPromise = []
               _.forEach(_.range(numberOfCopies), (t) => {
                 const experimentId = data[t].id
-                tags.push({
+                const newTag = {
                   category: 'FROM TEMPLATE',
                   value: String(requestBody.id),
                   experimentId,
-                })
-                tagsPromise.push(this.tagService.saveTags(tags, experimentId, context, false))
+                }
+                tagsPromise.push(this.tagService.getTagsByExperimentId(data[t].id, 'experiment').then((result) => {
+                  result = result || []
+                  _.forEach(result, (tag) => {
+                    tag.experimentId = data[t].id
+                  })
+
+                  result.push(newTag)
+                  return this.tagService.saveTags(result, experimentId, context, false)
+                }))
               })
               return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),

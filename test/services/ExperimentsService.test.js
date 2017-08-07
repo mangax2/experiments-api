@@ -873,10 +873,11 @@ describe('ExperimentsService', () => {
       const requestBody = { id: 1 }
       target.createEntity = mockResolve([{ id: 2 }])
       target.tagService.saveTags = mockResolve()
+      target.tagService.getTagsByExperimentId = mockResolve([{category:"a",value:"b"}])
       AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
-        expect(target.tagService.saveTags).toHaveBeenCalledWith([{
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{category:"a",value:"b", experimentId: 2},{
           category: 'FROM TEMPLATE',
           value: '1',
           experimentId: 2,
@@ -909,6 +910,21 @@ describe('ExperimentsService', () => {
       const requestBody = { id: 1, numberOfCopies: 1 }
       target.createEntity = mockResolve([{ id: 1 }])
       target.tagService.saveTags = mockResolve()
+      target.tagService.getTagsByExperimentId = mockResolve([])
+      AppUtil.createPostResponse = mockResolve({})
+      return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
+        expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)
+        expect(target.tagService.saveTags).toHaveBeenCalled()
+
+      })
+    })
+
+    it('manage Experiment when there is  query parameter source is template where' +
+      ' getTagsByExperimentId is undefined default to empty array ', () => {
+      const requestBody = { id: 1, numberOfCopies: 1 }
+      target.createEntity = mockResolve([{ id: 1 }])
+      target.tagService.saveTags = mockResolve()
+      target.tagService.getTagsByExperimentId = mockResolve(undefined)
       AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, testContext, false, testTx)

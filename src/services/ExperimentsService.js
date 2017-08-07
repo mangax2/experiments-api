@@ -80,7 +80,7 @@ class ExperimentsService {
     }
     return this.getAllExperiments(isTemplate)
       .then(data => Promise.all(
-        [this.populateOwners(data), this.populateTagsForAllExperiments(data)],
+        [this.populateOwners(data), this.populateTagsForAllExperiments(data, isTemplate)],
       )
         .then(() => data))
   }
@@ -98,9 +98,10 @@ class ExperimentsService {
     )
   }
 
-  populateTagsForAllExperiments(experiments) {
+  populateTagsForAllExperiments(experiments, isTemplate) {
     if (experiments.length === 0) return Promise.resolve([])
-    return this.tagService.getAllTagsForEntity('experiment')
+    const entity = isTemplate ? 'template' : 'experiment'
+    return this.tagService.getAllTagsForEntity(entity)
       .then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
 
@@ -155,10 +156,10 @@ class ExperimentsService {
                   experiment.id = id
                   const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
-                    return this.tagService.saveTags(tags, id, context)
+                    return this.tagService.saveTags(tags, id, context, isTemplate)
                         .then(() => data)
                   }
-                  return this.tagService.deleteTagsForExperimentId(id, context)
+                  return this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
                     .then(() => data)
                 },
                 )

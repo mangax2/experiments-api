@@ -299,11 +299,11 @@ describe('ExperimentsService', () => {
       target.populateOwners = mockResolve(['KMCCL'])
       target.populateTagsForAllExperiments = mock()
 
-      return target.getExperiments('').then(() => {
+      return target.getExperiments('',false).then(() => {
         expect(target.isFilterRequest).toHaveBeenCalledWith('')
         expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
         expect(target.getAllExperiments).toHaveBeenCalled()
-        expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}])
+        expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}],false)
       })
     })
 
@@ -313,9 +313,9 @@ describe('ExperimentsService', () => {
       target.getAllExperiments = mock()
       target.populateOwners = mockResolve(['KMCCL'])
 
-      return target.getExperiments('').then(() => {
+      return target.getExperiments('',false).then(() => {
         expect(target.isFilterRequest).toHaveBeenCalledWith('')
-        expect(target.getExperimentsByFilters).toHaveBeenCalledWith('', undefined)
+        expect(target.getExperimentsByFilters).toHaveBeenCalledWith('', false)
         expect(target.getAllExperiments).not.toHaveBeenCalled()
       })
     })
@@ -366,8 +366,24 @@ describe('ExperimentsService', () => {
         tags: [{ category: 'cat1', value: 'val1' }],
       }, { id: 2, tags: [{ category: 'cat2', value: 'val2' }] }]
 
-      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }]).then((data) => {
+      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }],false).then((data) => {
         expect(data).toEqual(expectedResult)
+        expect(target.tagService.getAllTagsForEntity).toHaveBeenCalledWith('experiment')
+      })
+    })
+    it('returns mapped tags to an template when isTemplate is true ', () => {
+      target.tagService.getAllTagsForEntity = mockResolve([{
+        entityId: 1,
+        tags: [{ category: 'cat1', value: 'val1' }],
+      }, { entityId: 2, tags: [{ category: 'cat2', value: 'val2' }] }])
+      const expectedResult = [{
+        id: 1,
+        tags: [{ category: 'cat1', value: 'val1' }],
+      }, { id: 2, tags: [{ category: 'cat2', value: 'val2' }] }]
+
+      return target.populateTagsForAllExperiments([{ id: 1 }, { id: 2 }],true).then((data) => {
+        expect(data).toEqual(expectedResult)
+        expect(target.tagService.getAllTagsForEntity).toHaveBeenCalledWith('template')
       })
     })
 
@@ -542,7 +558,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
         }])
-        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {})
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {},false)
         expect(data).toEqual({})
       })
     })
@@ -571,7 +587,7 @@ describe('ExperimentsService', () => {
           isTemplate: false,
         }])
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
-        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {})
+        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1, {},false)
         expect(data).toEqual({})
       })
     })
@@ -598,7 +614,7 @@ describe('ExperimentsService', () => {
           id: 1,
           isTemplate: false,
         }])
-        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {})
+        expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {},false)
         expect(err).toEqual('error')
       })
     })

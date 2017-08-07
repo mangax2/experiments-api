@@ -460,7 +460,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({ tags: [] })
       })
@@ -473,7 +473,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -486,7 +486,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -728,7 +728,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentsByFilters('', false).then((result) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
         expect(result).toEqual([])
       })
     })
@@ -742,7 +742,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentsByFilters('', false).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
         expect(db.experiments.batchFindExperimentOrTemplate).toHaveBeenCalledWith([1], false)
         expect(ExperimentsService.mergeTagsWithExperiments).toHaveBeenCalledWith([{ experimentId: 1 }], [{
           entityId: 1,
@@ -757,9 +757,9 @@ describe('ExperimentsService', () => {
       target.tagService.getEntityTagsByTagFilters = mockReject('error')
       db.experiments.batchFind = mockResolve()
 
-      return target.getExperimentsByFilters('').then(() => {}, (err) => {
+      return target.getExperimentsByFilters('',false).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
-        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '')
+        expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '',false)
         expect(db.experiments.batchFind).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -880,7 +880,7 @@ describe('ExperimentsService', () => {
           category: 'FROM TEMPLATE',
           value: '1',
           experimentId: 2,
-        }], 2, testContext)
+        }], 2, testContext,false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 2 }])
 
       })

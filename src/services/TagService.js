@@ -53,7 +53,7 @@ class TagService {
       }))
   }
 
-  getTagsByExperimentId = id => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/${id}`, header).then(result => result.body.tags).catch((err) => {
+  getTagsByExperimentId = (id, isTemplate) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header).then(result => result.body.tags).catch((err) => {
     if (err.status === 404) {
       return Promise.resolve([])
     }
@@ -62,20 +62,20 @@ class TagService {
   }),
   )
 
-  copyTags = (sourceExperimentId, targetExperimentId, context) =>
-    this.getTagsByExperimentId(sourceExperimentId).then((data) => {
+  copyTags = (sourceExperimentId, targetExperimentId, context, isTemplate) =>
+    this.getTagsByExperimentId(sourceExperimentId, isTemplate).then((data) => {
       const tags = _.map(data, t => ({
         category: t.category,
         value: t.value,
         experimentId: targetExperimentId,
       }))
       if (tags.length > 0) {
-        return this.batchCreateTags(tags, context)
+        return this.batchCreateTags(tags, context, isTemplate)
       }
       return Promise.resolve()
     })
 
-  getEntityTagsByTagFilters = (tagCategories, tagValues) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
+  getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
     logger.error(err)
     return Promise.reject(err)
   }),

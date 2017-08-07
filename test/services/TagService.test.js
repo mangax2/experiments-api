@@ -98,7 +98,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { tags: [] } })
 
-      return target.getTagsByExperimentId(1, testTx).then((data) => {
+      return target.getTagsByExperimentId(1, false,testTx).then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(data).toEqual([])
       })
@@ -107,7 +107,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockReject({ status: 404 })
 
-      return target.getTagsByExperimentId(1, testTx).then(() => {}, (data) => {
+      return target.getTagsByExperimentId(1,false, testTx).then(() => {}, (data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(data).toEqual([])
       })
@@ -117,7 +117,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockReject('error')
 
-      return target.getTagsByExperimentId(1, testTx).then(() => {}, (err) => {
+      return target.getTagsByExperimentId(1, false,testTx).then(() => {}, (err) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(err).toEqual('error')
       })
@@ -163,13 +163,13 @@ describe('TagService', () => {
       const context = { userId: 'user' }
       target.getTagsByExperimentId = mockResolve([{ category: 'org', value: 'dev' }])
       target.batchCreateTags = mockResolve()
-      return target.copyTags(1, 2, context).then(() => {
-        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1)
+      return target.copyTags(1, 2, context,false).then(() => {
+        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
         expect(target.batchCreateTags).toHaveBeenCalledWith([{
           category: 'org',
           value: 'dev',
           experimentId: 2,
-        }], context)
+        }], context,false)
 
       })
     })
@@ -178,8 +178,8 @@ describe('TagService', () => {
       const context = { userId: 'user' }
       target.getTagsByExperimentId = mockResolve([])
       target.batchCreateTags = mockResolve()
-      return target.copyTags(1, 2, context).then(() => {
-        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1)
+      return target.copyTags(1, 2, context,false).then(() => {
+        expect(target.getTagsByExperimentId).toHaveBeenCalledWith(1,false)
         expect(target.batchCreateTags).not.toHaveBeenCalled()
       })
     })

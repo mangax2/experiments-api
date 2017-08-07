@@ -117,7 +117,7 @@ class ExperimentsService {
         return Promise.all(
           [
             this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id),
+            this.tagService.getTagsByExperimentId(id, isTemplate),
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
@@ -160,7 +160,7 @@ class ExperimentsService {
                         .then(() => data)
                   }
                   return this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
-                    .then(() => data)
+                      .then(() => data)
                 },
                 )
             }
@@ -184,7 +184,8 @@ class ExperimentsService {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
-      return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories, lowerCaseTagValues)
+      return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories,
+        lowerCaseTagValues, isTemplate)
         .then((eTags) => {
           if (eTags.length === 0) {
             return []
@@ -239,7 +240,7 @@ class ExperimentsService {
                   value: String(requestBody.id),
                   experimentId,
                 })
-                tagsPromise.push(this.tagService.saveTags(tags, experimentId, context))
+                tagsPromise.push(this.tagService.saveTags(tags, experimentId, context, false))
               })
               return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),

@@ -239,14 +239,13 @@ class ExperimentsService {
                   value: String(requestBody.id),
                   experimentId,
                 }
-                tagsPromise.push(this.tagService.getTagsByExperimentId(data[t].id, 'experiment').then((result) => {
-                  result = result || []
-                  _.forEach(result, (tag) => {
-                    tag.experimentId = data[t].id
+                tagsPromise.push(this.getExperimentById(experimentId, false, tx).then((result) => {
+                  const tags = _.map(result.tags, (tag) => {
+                    tag.experimentId = experimentId
+                    return tag
                   })
-
-                  result.push(newTag)
-                  return this.tagService.saveTags(result, experimentId, context, false)
+                  tags.push(newTag)
+                  return this.tagService.saveTags(tags, experimentId, context, false)
                 }))
               })
               return Promise.all(tagsPromise).then(() =>

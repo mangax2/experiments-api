@@ -2267,7 +2267,7 @@
         "description": "The templates endpoint returns information about the Template entities in templates System.\n",
         "operationId": "getTemplateById",
         "tags": [
-          "templates"
+          "Templates"
         ],
         "produces": [
           "application/json"
@@ -2318,7 +2318,7 @@
         "description": "update Template entity in templates System.\n",
         "operationId": "putTemplateById",
         "tags": [
-          "templates"
+          "Templates"
         ],
         "produces": [
           "application/json"
@@ -2828,7 +2828,7 @@
         "description": "This endpoint returns information about the experimental units entities associated with an Template",
         "operationId": "getexperimentalUnitsByTemplateId",
         "tags": [
-          "experimental Units"
+          "Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -3180,6 +3180,61 @@
           },
           "404": {
             "description": "No Template Found For ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add variables",
+        "description": "Creates a new variables, clears existing variables when new variables are provided",
+        "operationId": "postTemplateVariables",
+        "tags": [
+          "Variables"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Variables",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/VariablesRequestPayload"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }

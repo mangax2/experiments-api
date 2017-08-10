@@ -1,19 +1,23 @@
 import _ from 'lodash'
 
+const columns = "ce.id, f.name, COALESCE(fl.value->>'level', fl.value->>'refId', fl.value->>'text') AS value, ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date"
+const tables = 'combination_element ce INNER JOIN factor_level fl ON ce.factor_level_id = fl.id INNER JOIN factor f ON fl.factor_id = f.id'
+const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
+
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element WHERE id = $1', id),
+  find: (id, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.id = $1`, id),
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM combination_element WHERE id IN ($1:csv)', [ids]),
+  batchFind: (ids, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids]),
 
-  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM combination_element WHERE treatment_id = $1', treatmentId),
+  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId),
 
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
     if (!treatmentIds || treatmentIds.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('SELECT * FROM combination_element WHERE treatment_id IN ($1:csv)', [treatmentIds]).then((data) => {
+    return tx.any(`${genericSqlStatement} WHERE ce.treatment_id IN ($1:csv)`, [treatmentIds]).then((data) => {
       const elements = _.groupBy(data, d => d.treatment_id)
       return _.map(treatmentIds, treatmentId => elements[treatmentId])
     })
@@ -65,7 +69,7 @@ module.exports = (rep, pgp) => ({
     return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2', keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.treatment_id = $1 and f.name = $2`, keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -73,7 +77,7 @@ module.exports = (rep, pgp) => ({
       name: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
+    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) SELECT ce.treatment_id, f.name FROM ${tables} INNER JOIN d ON ce.treatment_id = CAST(d.treatment_id AS integer) AND ce.name = d.name AND (d.id IS NULL OR ce.id != CAST(d.id AS integer))`
     return tx.any(query)
   },
 })

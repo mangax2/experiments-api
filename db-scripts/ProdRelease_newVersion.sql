@@ -21,7 +21,7 @@ CREATE TABLE public.factor_new
   CONSTRAINT factor_data_source_fk FOREIGN KEY (ref_data_source_id)
       REFERENCES public.ref_data_source (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT factor_ak_1 UNIQUE (name, experiment_id),
+  CONSTRAINT factor_new_ak_1 UNIQUE (name, experiment_id),
   CONSTRAINT factor_tier_check CHECK (tier > 0::numeric)
 )
 

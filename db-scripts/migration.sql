@@ -18,7 +18,7 @@ create or replace function factor_level_value_check(value text ,factor_id intege
 $$
 begin
   if ( (select ref_data_source_id from factor where id=$2)=3  AND isNumeric($1) then
-       return  jsonb_build_object('ref_id',$1);
+       return  jsonb_build_object('refId',$1);
   else
     return jsonb_build_object('text',$1);
   end if;

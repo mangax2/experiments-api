@@ -1,17 +1,21 @@
+const columns = "gv.id, COALESCE(gv.name, f.name) AS name, COALESCE(gv.value, fl.value->>'refId', fl.value->>'text') AS value, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date"
+const tables = 'group_value_new gv LEFT OUTER JOIN factor_level_new fl ON gv.factor_level_id = fl.id LEFT OUTER JOIN factor_new f ON fl.factor_id = f.id'
+const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
+
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM group_value WHERE id = $1', id),
+  find: (id, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.id = $1`, id),
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM group_value WHERE id IN ($1:csv)', [ids]),
+  batchFind: (ids, tx = rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids]),
 
-  findAllByGroupId: (groupId, tx = rep) => tx.any('SELECT * FROM group_value WHERE group_id = $1', groupId),
+  findAllByGroupId: (groupId, tx = rep) => tx.any(`${genericSqlStatement} WHERE gv.group_id = $1`, groupId),
 
   batchFindAllByExperimentId: (experimentId, tx = rep) => {
     if (!experimentId) {
       return Promise.reject('Invalid or missing experiment id.')
     }
-    return tx.any('SELECT * FROM group_value WHERE group_id in (SELECT id from public.group WHERE experiment_id = $1)', experimentId)
+    return tx.any(`${genericSqlStatement} WHERE gv.group_id IN (SELECT id FROM public.group WHERE experiment_id = $1)`, experimentId)
   },
 
   batchCreate: (groupValues, context, tx = rep) => {
@@ -62,7 +66,7 @@ module.exports = (rep, pgp) => ({
     return tx.any('DELETE FROM group_value WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM group_value WHERE group_id = $1 and name = $2', keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.group_id = $1 AND COALESCE(gv.name, f.name) = $2`, keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -70,7 +74,7 @@ module.exports = (rep, pgp) => ({
       group_id: obj.keys[0],
       id: obj.updateId,
     }))
-    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) select gv.group_id, gv.name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))`
+    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) SELECT gv.group_id, gv.name FROM ${tables} INNER JOIN d ON gv.group_id = CAST(d.group_id AS integer) AND COALESCE(gv.name, f.name) = d.name AND (d.id IS NULL OR gv.id != CAST(d.id AS integer))`
     return tx.any(query)
   },
 })

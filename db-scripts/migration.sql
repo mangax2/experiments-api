@@ -1,7 +1,7 @@
 ------------------------------
 ---Migartion Scripts
 INSERT INTO factor_new(id,name,ref_factor_type_id,experiment_id,ref_data_source_id,tier,created_user_id,created_date,modified_user_id,modified_date)
-SELECT id,name,ref_factor_type_id,experiment_id,ref_data_source_id,tier,created_user_id,created_date,modified_user_id,modified_date FROM factor
+SELECT id,name,ref_factor_type_id,experiment_id,ref_data_source_id,tier,created_user_id,created_date,modified_user_id,modified_date FROM factor;
 ----2.Copy data from factor_level to factor_level_new
 CREATE OR REPLACE FUNCTION isnumeric(text) RETURNS BOOLEAN AS $$
 DECLARE x NUMERIC;
@@ -17,7 +17,7 @@ LANGUAGE plpgsql ;
 create or replace function factor_level_value_check(value text ,factor_id integer) returns jsonb as
 $$
 begin
-  if ( (select ref_data_source_id from factor where id=$2)=3  AND isNumeric($1) then
+  if ( (select ref_data_source_id from factor where id=$2)=3  AND isNumeric($1) ) then
        return  jsonb_build_object('refId',$1);
   else
     return jsonb_build_object('text',$1);
@@ -29,20 +29,27 @@ $$ LANGUAGE plpgsql;
 INSERT INTO factor_level_new(id,value,factor_id,created_user_id,created_date,modified_user_id,modified_date)
 select id,factor_level_value_check(value,factor_id),factor_id,created_user_id,created_date,modified_user_id,modified_date FROM factor_level;
 
-DROP FUNCTION isnumeric;
-DROP FUNCTION factor_level_value_check;
+DROP FUNCTION isnumeric(text);
+DROP FUNCTION factor_level_value_check(text, integer);
 -----------------------------------------------------
 --Copy data from combination_element to combination_element_new
 ---select distinct(experiment_id) from treatment where id in (select distinct(treatment_id) from combination_element where value = '')
-create or replace function  combination_element_factor_level_id(name text ,value text,treatment_id integer) returns integer AS $$
-    SELECT id from factor_level where factor_id = (select id from factor where experiment_id = (select experiment_id from treatment where id = $3) and name = $1) and value = $2;
+create or replace function combination_element_factor_level_id(nameParam text ,valueParam text,treatment_id integer) returns integer AS
+$$
+declare x integer;
+begin
+    SELECT id from factor_level where factor_id = (select id from factor where experiment_id = (select experiment_id from treatment where id = $3) and name = $1) and value = $2 into x;
+    return x;
+end;
 $$ LANGUAGE plpgsql;
 
 INSERT INTO combination_element_new(id,factor_level_id,treatment_id,created_user_id,created_date,modified_user_id,modified_date)
-select id,combination_element_factor_level_id(name,value,treatment_id),treatment_id,
-created_user_id,created_date,modified_user_id,modified_date from combination_element;
+SELECT id,factor_level_id,treatment_id,created_user_id,created_date,modified_user_id,modified_date FROM (
+	SELECT id,combination_element_factor_level_id(name,value,treatment_id) AS factor_level_id,treatment_id,
+	created_user_id,created_date,modified_user_id,modified_date FROM combination_element
+) t WHERE t.factor_level_id IS NOT NULL;
 
-DROP FUNCTION combination_element_factor_level_id;
+DROP FUNCTION combination_element_factor_level_id(text, text, integer);
 ----------------------------------------------------------
 --Copy Data from group_value to group_value_new
 create or replace function  group_value_factor_level_id(name text ,value text,group_id integer) returns TABLE(name1 text ,value1 text,factor_level_id integer) AS
@@ -56,14 +63,14 @@ BEGIN
   else
   return QUERY select COALESCE(NULL),COALESCE(NULL),x;
   end if;
- END
+END;
 $$ LANGUAGE plpgsql;
 
 INSERT INTO group_value_new(id,name,value,factor_level_id,group_id,created_user_id,created_date,modified_user_id,modified_date)
-select id,group_value_factor_level_id(name,value,group_id),group_id,created_user_id,created_date,
-modified_user_id,modified_date from group_value;
+select id,f.*,group_id,created_user_id,created_date,modified_user_id,modified_date
+from group_value left join lateral group_value_factor_level_id(name,value,group_id) f on true;
 
-DROP function group_value_factor_level_id;
+DROP function group_value_factor_level_id(text, text, integer);
 ---------------------------------------------------------------
 ALTER SEQUENCE factor_id_seq OWNED BY factor_new;
 DROP TABLE public.factor;

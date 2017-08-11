@@ -40,7 +40,7 @@ $$ LANGUAGE plpgsql;
 
 INSERT INTO combination_element_new(id,factor_level_id,treatment_id,created_user_id,created_date,modified_user_id,modified_date)
 select id,combination_element_factor_level_id(name,value,treatment_id),treatment_id,
-created_user_id,created_date,modified_user_id,modified_date;
+created_user_id,created_date,modified_user_id,modified_date from combination_element;
 
 DROP FUNCTION combination_element_factor_level_id;
 ----------------------------------------------------------

@@ -1,5 +1,5 @@
-const columns = "select id,COALESCE(value->>'refId',value->>'text') AS" +
-" value,factor_id,created_user,created_date,modified_user_id,modified_date"
+const columns = "id,COALESCE(value->>'refId',value->>'text') AS" +
+" value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
 
 
 module.exports = (rep, pgp) => ({
@@ -35,7 +35,7 @@ module.exports = (rep, pgp) => ({
 
   remove: id => rep.oneOrNone('DELETE FROM factor_level WHERE id = $1 RETURNING id', id),
 
-  findByBusinessKey: (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level_new WHERE` +
+  findByBusinessKey: (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE` +
     ' factor_id = $1' +
     ' and value = $2', keys),
 
@@ -45,7 +45,7 @@ module.exports = (rep, pgp) => ({
       value: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, COALESCE(entity.value->>'refId',entity.value->>'text') from public.factor_level_new entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = d.value and (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = d.value and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

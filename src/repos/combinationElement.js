@@ -69,7 +69,7 @@ module.exports = (rep, pgp) => ({
     return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.treatment_id = $1 and f.name = $2`, keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -77,7 +77,7 @@ module.exports = (rep, pgp) => ({
       name: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) SELECT ce.treatment_id, f.name FROM ${tables} INNER JOIN d ON ce.treatment_id = CAST(d.treatment_id AS integer) AND ce.name = d.name AND (d.id IS NULL OR ce.id != CAST(d.id AS integer))`
+    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

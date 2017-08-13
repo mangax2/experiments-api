@@ -1,19 +1,20 @@
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id),
+  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM factor_new WHERE id = $1', id),
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]),
+  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM factor_new WHERE id IN ($1:csv)', [ids]),
 
-  findByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId),
+  findByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM factor_new WHERE' +
+    ' experiment_id=$1', experimentId),
 
-  all: (tx = rep) => tx.any('SELECT * FROM factor'),
+  all: (tx = rep) => tx.any('SELECT * FROM factor_new'),
 
   batchCreate: (factors, context, tx = rep) => tx.batch(
     factors.map(
       factor => tx.one(
         'INSERT INTO factor(name, ref_factor_type_id, ref_data_source_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) ' +
-        'VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP, $6) RETURNING id',
+        'VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6, CURRENT_TIMESTAMP, $6) RETURNING id',
         [factor.name,
           factor.refFactorTypeId,
           factor.refDataSourceId,

@@ -66,7 +66,7 @@ module.exports = (rep, pgp) => ({
     return tx.any('DELETE FROM group_value WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.group_id = $1 AND COALESCE(gv.name, f.name) = $2`, keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM group_value WHERE group_id = $1 and name = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -74,7 +74,7 @@ module.exports = (rep, pgp) => ({
       group_id: obj.keys[0],
       id: obj.updateId,
     }))
-    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) SELECT gv.group_id, gv.name FROM ${tables} INNER JOIN d ON gv.group_id = CAST(d.group_id AS integer) AND COALESCE(gv.name, f.name) = d.name AND (d.id IS NULL OR gv.id != CAST(d.id AS integer))`
+    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) select gv.group_id, gv.name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

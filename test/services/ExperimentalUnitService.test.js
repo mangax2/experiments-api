@@ -175,6 +175,46 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
+  describe('getExperimentalUnitInfoBySetEntryId', () => {
+    it('throws an error when setEntryIds are not defined', () => {
+      db.unit.batchFindAllBySetEntryIds = mock()
+      AppError.badRequest = mock('')
+
+      expect(() => target.getExperimentalUnitInfoBySetEntryId()).toThrow()
+    })
+
+    it('returns a map of Set Entry Ids to treatmentId and rep number', () => {
+      const result = [
+        {
+          set_entry_id: 1,
+          treatment_id: 1,
+          rep: 1,
+        }
+      ]
+      const expectedMap = {
+        1: {
+          treatmentId: 1,
+          rep: 1,
+        }
+      }
+      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
+
+      return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
+        expect(data).toEqual(expectedMap)
+      })
+    })
+
+    it('returns an empty map of Set Entry Ids', () => {
+      const result = []
+      const expectedMap = {}
+      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
+
+      return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
+        expect(data).toEqual(expectedMap)
+      })
+    })
+  })
+
   describe('getExperimentalUnitbyId', () => {
     it('calls find and returns data', () => {
       db.unit.find = mockResolve({})

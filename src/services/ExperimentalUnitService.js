@@ -88,6 +88,23 @@ class ExperimentalUnitService {
   getExperimentalUnitsByExperimentIdNoValidate = (id, tx) =>
     db.unit.findAllByExperimentId(id, tx)
 
+  getExperimentalUnitInfoBySetEntryId = (setEntryIds) => {
+    if (setEntryIds) {
+      return db.unit.batchFindAllBySetEntryIds(setEntryIds).then((units) => {
+        const setEntryUnitMap = {}
+        _.forEach(units, (u) => {
+          setEntryUnitMap[u.set_entry_id] = {
+            treatmentId: u.treatment_id,
+            rep: u.rep,
+          }
+        })
+        return setEntryUnitMap
+      })
+    }
+
+    throw AppError.badRequest('Body must contain at least one set entry id')
+  }
+
   @Transactional('batchUpdateExperimentalUnits')
   batchUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PUT', tx)

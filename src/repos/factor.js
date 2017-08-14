@@ -14,7 +14,7 @@ module.exports = (rep, pgp) => ({
     factors.map(
       factor => tx.one(
         'INSERT INTO factor(name, ref_factor_type_id, ref_data_source_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) ' +
-        'VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6, CURRENT_TIMESTAMP, $6) RETURNING id',
+        'VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6) RETURNING id',
         [factor.name,
           factor.refFactorTypeId,
           factor.refDataSourceId,

@@ -251,10 +251,14 @@ router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecif
 router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)
+
+router.post('/set-entries', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitInfoBySetEntryId(req.body)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
 router.get('/templates', (req, res, next) => {
   new ExperimentsService().getExperiments(req.query, true)
     .then(templates => res.json(templates))

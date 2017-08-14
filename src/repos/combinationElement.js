@@ -1,6 +1,8 @@
 import _ from 'lodash'
 
-const columns = "ce.id, f.name, COALESCE(fl.value->>'refId', fl.value->>'text') AS value, ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date"
+const columns = "ce.id, f.name, COALESCE(fl.value->>'refId', fl.value->>'text') AS" +
+  " value,ce.treatment_id," +
+  " ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date"
 const tables = 'combination_element_new ce INNER JOIN factor_level_new fl ON ce.factor_level_id = fl.id INNER JOIN factor_new f ON fl.factor_id = f.id'
 const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
 

@@ -188,12 +188,14 @@ describe('ExperimentalUnitService', () => {
         {
           set_entry_id: 1,
           treatment_id: 1,
+          treatment_number: 1,
           rep: 1,
         }
       ]
       const expectedMap = {
         1: {
           treatmentId: 1,
+          treatmentNumber: 1,
           rep: 1,
         }
       }

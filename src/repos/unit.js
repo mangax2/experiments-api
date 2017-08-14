@@ -9,7 +9,7 @@ module.exports = (rep, pgp) => ({
 
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds]),
   batchFindAllByGroupIds: (groupIds, tx = rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds]),
-  batchFindAllBySetEntryIds: (setEntryIds, tx = rep) => tx.any('SELECT treatment_id, rep, set_entry_id FROM unit WHERE set_entry_id IN ($1:csv)', [setEntryIds]),
+  batchFindAllBySetEntryIds: (setEntryIds, tx = rep) => tx.any('SELECT treatment.treatment_number, unit.treatment_id, unit.rep, unit.set_entry_id FROM unit INNER JOIN treatment ON unit.treatment_id = treatment.id WHERE set_entry_id IN ($1:csv)', [setEntryIds]),
   batchCreate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],

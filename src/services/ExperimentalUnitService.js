@@ -95,6 +95,7 @@ class ExperimentalUnitService {
         _.forEach(units, (u) => {
           setEntryUnitMap[u.set_entry_id] = {
             treatmentId: u.treatment_id,
+            treatmentNumber: u.treatment_number,
             rep: u.rep,
           }
         })

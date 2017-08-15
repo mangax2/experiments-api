@@ -2156,6 +2156,65 @@
         }
       }
     },
+    "/set-entries": {
+      "post": {
+        "summary": "Returns a mapping of Set Entry Ids to corresponding Treatment Id, Treatment Number and Rep Number",
+        "description": "Returns the relationship betweten Set Entry Id and Treatment",
+        "tags": [
+          "Unit",
+          "Treatment",
+          "Set Entry"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Set Entry Ids",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Set Entry/Treatment/Rep Mapping",
+            "schema": {
+              "$ref": "#/definitions/SetEntryTreatmentRepInfo"
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/templates": {
       "get": {
         "summary": "get all Template entities",
@@ -4690,6 +4749,28 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "SetEntryTreatmentRepInfo": {
+      "type": "object",
+      "properties": {
+        "setEntryId": {
+          "type": "object",
+          "properties": {
+            "treatmentId": {
+              "type": "integer",
+              "description": "Treatment Id that the specific set entry maps to"
+            },
+            "treatmentNumber": {
+              "type": "integer",
+              "description": "Treatment Number that the specific set entry maps to"
+            },
+            "rep": {
+              "type": "integer",
+              "description": "Rep number that the specific set entry maps to"
+            }
+          }
         }
       }
     },

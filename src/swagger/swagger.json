@@ -2216,6 +2216,7 @@
       "post": {
         "summary": "Returns a mapping of Set Entry Ids to corresponding Treatment Id, Treatment Number and Rep Number",
         "description": "Returns the relationship betweten Set Entry Id and Treatment",
+        "operationId": "retrieveSetEntryRelationships",
         "tags": [
           "Unit",
           "Treatment",

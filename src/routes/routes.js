@@ -201,6 +201,10 @@ router.get('/experiments/:id/composites/group-experimental-units', (req, res, ne
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/experiments/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, false)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id, false)
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -321,6 +325,10 @@ router.post('/templates/:id/composites/group-experimental-units', (req, res, nex
   .then(value => res.json(value))
   .catch(err => next(err)))
 router.get('/templates/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id, true)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.get('/templates/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

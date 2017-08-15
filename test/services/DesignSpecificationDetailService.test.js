@@ -365,7 +365,38 @@ describe('DesignSpecificationDetailService', () => {
       expect(data).toEqual([{ id: 1, refDesignSpecId: 1, value: 10, experimentId: 1 }])
 
     })
-
   })
 
+  describe('getAdvancedParameters', () => {
+    it('massages the data as expected', () => {
+      target.experimentService.getExperimentById = mockResolve()
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve([{
+        ref_design_spec_id: 3,
+        value: '4',
+      }, {
+        ref_design_spec_id: 5,
+        value: 'test Value'
+      }])
+      db.refDesignSpecification.all = mockResolve([{
+        name: 'test Spec',
+        id: 5,
+      }, {
+        name: 'unused Spec',
+        id: 7,
+      }, {
+        name: 'min Reps',
+        id: 3,
+      }])
+
+      return target.getAdvancedParameters(1, false, testTx).then((result) => {
+        expect(target.experimentService.getExperimentById).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(result).toEqual({
+          minReps: '4',
+          testSpec: 'test Value'
+        })
+      })
+    })
+  })
 })

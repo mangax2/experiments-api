@@ -118,6 +118,24 @@ class DesignSpecificationDetailService {
     }
     return this.batchCreateDesignSpecificationDetails(designSpecificationDetails, context, tx)
   }
+
+  @Transactional('getAdvancedParameters')
+  getAdvancedParameters(experimentId, isTemplate, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+      .then(() => Promise.all([db.refDesignSpecification.all(),
+        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)]))
+      .then((results) => {
+        const mappedDesignSpecs = {}
+        const advancedParameters = {}
+
+        _.forEach(results[0], (ds) => { mappedDesignSpecs[ds.id] = ds.name.replace(/\s/g, '') })
+        _.forEach(results[1], (dsd) => {
+          advancedParameters[mappedDesignSpecs[dsd.ref_design_spec_id]] = dsd.value
+        })
+
+        return advancedParameters
+      })
+  }
 }
 
 module.exports = DesignSpecificationDetailService

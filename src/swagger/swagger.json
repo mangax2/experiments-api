@@ -576,6 +576,62 @@
         }
       }
     },
+    "/experiments/{id}/advanced-parameters": {
+      "get": {
+        "summary": "gets a list of all advanced parameters for a experiment",
+        "description": "This endpoint returns information about the advanced parameters associated with an Experiment",
+        "operationId": "getAdvancedParametersByExperimentId",
+        "tags": [
+          "Advanced Parameters"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Advanced Parameters",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedParameters"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No Template Found For ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experiments/{id}/composites/treatments": {
       "get": {
         "summary": "get all treatments and combination elements for a given experiment id",
@@ -2439,10 +2495,66 @@
         }
       }
     },
+    "/templates/{id}/advanced-parameters": {
+      "get": {
+        "summary": "gets a list of all advanced parameters for a template",
+        "description": "This endpoint returns information about the advanced parameters associated with a Template",
+        "operationId": "getAdvancedParametersByTemplateId",
+        "tags": [
+          "Advanced Parameters"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Advanced Parameters",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedParameters"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No Template Found For ID",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/templates/{id}/composites/treatments": {
       "get": {
         "summary": "get all treatments and combination elements for a given Template id",
-        "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Template",
+        "description": "This endpoint returns information about the treatment and and combination elements entities associated with a Template",
         "operationId": "getComposites_TreatmentsByTemplateId",
         "tags": [
           "Composites"
@@ -2557,7 +2669,7 @@
     "/templates/{id}/composites/group-experimental-units": {
       "get": {
         "summary": "get all Groups, Group Values, and experimental Units for a given Template id",
-        "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with an Template",
+        "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with a Template",
         "operationId": "getComposites_Group-experimental-unitsByTemplateId",
         "tags": [
           "Composites"
@@ -2834,8 +2946,8 @@
     },
     "/templates/{id}/design-specification-details/": {
       "get": {
-        "summary": "Get all design specification details for an Template",
-        "description": "Returns all design specification details for an Template\n",
+        "summary": "Get all design specification details for a Template",
+        "description": "Returns all design specification details for a Template\n",
         "operationId": "getDesign-specification-detailsByTemplateId",
         "tags": [
           "Design Specification Detail"
@@ -2885,7 +2997,7 @@
     "/templates/{id}/experimental-units": {
       "get": {
         "summary": "get all experimental units for a given Template id",
-        "description": "This endpoint returns information about the experimental units entities associated with an Template",
+        "description": "This endpoint returns information about the experimental units entities associated with a Template",
         "operationId": "getexperimentalUnitsByTemplateId",
         "tags": [
           "Experimental Units"
@@ -3094,7 +3206,7 @@
     "/templates/{id}/treatments": {
       "get": {
         "summary": "get all treatments for a given Template id",
-        "description": "This endpoint returns information about the treatment entities associated with an Template",
+        "description": "This endpoint returns information about the treatment entities associated with a Template",
         "operationId": "getTreatmentsByTemplateId",
         "tags": [
           "Treatments"
@@ -3149,8 +3261,8 @@
     },
     "/templates/{id}/unit-specification-details/": {
       "get": {
-        "summary": "Get all unit specification details for an Template",
-        "description": "Returns all unit specification details for an Template\n",
+        "summary": "Get all unit specification details for a Template",
+        "description": "Returns all unit specification details for a Template\n",
         "operationId": "getUnit-specification-detailsByTemplateId",
         "tags": [
           "Unit Specification Detail"
@@ -3718,6 +3830,23 @@
     }
   },
   "definitions": {
+    "AdvancedParameters": {
+      "type": "object",
+      "properties": {
+        "minRep": {
+          "type": "integer",
+          "description": "the minimum number of reps allowed for the experiment"
+        },
+        "repRangeMin": {
+          "type": "integer",
+          "description": "the minimum number of units/entries allowed in a rep"
+        },
+        "repRangeMax": {
+          "type": "integer",
+          "description": "the maximum number of units/entries allowed in a rep"
+        }
+      }
+    },
     "CombinationElementResponse": {
       "type": "object",
       "properties": {

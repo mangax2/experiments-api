@@ -16,29 +16,41 @@ LANGUAGE plpgsql ;
 
 create or replace function factor_level_value_check(value text ,factor_id integer) returns jsonb as
 $$
+
 DECLARE isNumericValue BOOLEAN;
+DECLARE dataSourceId INTEGER;
+DECLARE formulationCatalogId INTEGER;
+DECLARE otherId INTEGER;
+DECLARE labelValue VARCHAR;
+
 begin
+
   isNumericValue = isNumeric($1);
-  if ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND isNumericValue ) then
+  dataSourceId = (select ref_data_source_id from factor where id=$2);
+  formulationCatalogId = (select id from ref_data_source where name = 'Formulation Catalog');
+  otherId = (select id from ref_data_source where name = 'Other');
+  labelValue = (select name from factor where id=$2);
+
+  if ( dataSourceId = formulationCatalogId AND isNumericValue ) then
     return jsonb_build_object(
         'items', jsonb_build_array(
           jsonb_build_object(
-              'label', (select name from factor where id=$2),
-              'propertyTypeId', (select id from ref_data_source where name = 'Formulation Catalog'),
+              'label', labelValue,
+              'propertyTypeId', formulationCatalogId,
               'refId', $1)));
-  elseif ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND NOT isNumericValue ) then
+  elseif ( dataSourceId = formulationCatalogId AND NOT isNumericValue ) then
     return jsonb_build_object(
         'items', jsonb_build_array(
           jsonb_build_object(
-              'label', (select name from factor where id=$2),
-              'propertyTypeId', (select id from ref_data_source where name = 'Formulation Catalog'),
+              'label', labelValue,
+              'propertyTypeId', formulationCatalogId,
               'text', $1)));
   else
     return jsonb_build_object(
         'items', jsonb_build_array(
           jsonb_build_object(
-              'label', (select name from factor where id=$2),
-              'propertyTypeId', (select id from ref_data_source where name = 'Other'),
+              'label', labelValue,
+              'propertyTypeId', otherId,
               'text', $1)));
   END IF;
 end;

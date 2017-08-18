@@ -16,15 +16,17 @@ LANGUAGE plpgsql ;
 
 create or replace function factor_level_value_check(value text ,factor_id integer) returns jsonb as
 $$
+DECLARE isNumericValue BOOLEAN;
 begin
-  if ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND isNumeric($1) ) then
+  isNumericValue = isNumeric($1);
+  if ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND isNumericValue ) then
     return jsonb_build_object(
         'items', jsonb_build_array(
           jsonb_build_object(
               'label', (select name from factor where id=$2),
               'propertyTypeId', (select id from ref_data_source where name = 'Formulation Catalog'),
               'refId', $1)));
-  elseif ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND NOT isNumeric($1) ) then
+  elseif ( (select ref_data_source_id from factor where id=$2)=(select id from ref_data_source where name = 'Formulation Catalog')  AND NOT isNumericValue ) then
     return jsonb_build_object(
         'items', jsonb_build_array(
           jsonb_build_object(

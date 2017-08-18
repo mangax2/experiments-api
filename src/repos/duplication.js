@@ -4,7 +4,8 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS dependent_variable_ids; " +
   "DROP TABLE IF EXISTS new_factors; " +
   "DROP TABLE IF EXISTS mapped_factor_ids; " +
-  "DROP TABLE IF EXISTS factor_level_ids; " +
+  "DROP TABLE IF EXISTS new_factor_levels; " +
+  "DROP TABLE IF EXISTS mapped_factor_levels_ids; " +
   "DROP TABLE IF EXISTS new_treatments; " +
   "DROP TABLE IF EXISTS mapped_treatment_ids; " +
   "DROP TABLE IF EXISTS combination_element_ids; " +
@@ -78,7 +79,7 @@ const duplicateDependentVariableScript =
 
 const duplicateFactorScript =
   "WITH temp_new_factors AS (" +
-    "INSERT INTO factor " +
+    "INSERT INTO factor_new " +
       "SELECT (c).* FROM  (" +
         "SELECT f " +
           "#= hstore('id', nextval(pg_get_serial_sequence('factor', 'id'))::text) " +
@@ -87,8 +88,8 @@ const duplicateFactorScript =
           "#= hstore('created_user_id', $2) " +
           "#= hstore('modified_user_id', $2) " +
           "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-        "AS c FROM factor f " +
-    "WHERE experiment_id = $1 ) sub " +
+        "AS c FROM factor_new f " +
+      "WHERE experiment_id = $1 ) sub " +
     "RETURNING id, name" +
   ")" +
   "SELECT * " +
@@ -98,11 +99,11 @@ const duplicateFactorScript =
 const duplicateFactorLevelScript =
   "SELECT f.id AS old_id, n.id AS new_id " +
   "INTO TEMP mapped_factor_ids " +
-  "FROM factor f " +
+  "FROM factor_new f " +
     "INNER JOIN new_factors n ON f.name = n.name " +
   "WHERE f.experiment_id = $1" +
-  "; WITH temp_factor_level_ids AS (" +
-    "INSERT INTO factor_level " +
+  "; WITH temp_factor_levels AS (" +
+    "INSERT INTO factor_level_new " +
     "SELECT (c).* FROM  (" +
       "SELECT fl " +
         "#= hstore('id', nextval(pg_get_serial_sequence('factor_level', 'id'))::text) " +
@@ -111,13 +112,13 @@ const duplicateFactorLevelScript =
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('factor_id', mfi.new_id::text) AS c " +
-      "FROM factor_level fl " +
+      "FROM factor_level_new fl " +
         "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id ) sub " +
-    "RETURNING id" +
+    "RETURNING id, factor_id, value" +
   ")" +
   "SELECT * " +
-  "INTO TEMP factor_level_ids " +
-  "FROM temp_factor_level_ids;"
+  "INTO TEMP new_factor_levels " +
+  "FROM temp_factor_levels;"
 
 const duplicateTreatmentScript =
   "WITH temp_new_treatments AS (" +
@@ -139,13 +140,19 @@ const duplicateTreatmentScript =
   "FROM temp_new_treatments;"
 
 const duplicateCombinationElementScript =
+  "SELECT fl.id as old_id, n.id as new_id " +
+  "INTO TEMP mapped_factor_level_ids " +
+  "FROM factor_level_new fl " +
+    "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
+    "INNER JOIN new_factor_levels n ON n.factor_id = mfi.new_id AND fl.value = n.value; " +
+
   "SELECT t.id AS old_id, n.id AS new_id " +
   "INTO TEMP mapped_treatment_ids " +
   "FROM treatment t " +
     "INNER JOIN new_treatments n ON t.treatment_number = n.treatment_number " +
   "WHERE t.experiment_id = $1;" +
   "WITH temp_combination_element_ids AS (" +
-    "INSERT INTO combination_element " +
+    "INSERT INTO combination_element_new " +
     "SELECT (c).* FROM (" +
       "SELECT ce " +
         "#= hstore('id', nextval(pg_get_serial_sequence('combination_element', 'id'))::text) " +
@@ -153,9 +160,12 @@ const duplicateCombinationElementScript =
         "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
+        "#= hstore('factor_level_id', mfli.new_id::text) " +
         "#= hstore('treatment_id', mti.new_id::text) AS c " +
-      "FROM combination_element ce " +
-        "INNER JOIN mapped_treatment_ids mti ON ce.treatment_id = mti.old_id ) sub " +
+      "FROM combination_element_new ce " +
+        "INNER JOIN mapped_treatment_ids mti ON ce.treatment_id = mti.old_id " +
+        "INNER JOIN mapped_factor_level_ids mfli ON ce.factor_level_id = mfli.old_id ) " +
+        " sub " +
     "RETURNING id" +
   ")" +
   "SELECT * " +
@@ -200,7 +210,7 @@ const duplicateDesignSpecificationScript =
   "INTO TEMP design_spec_detail_ids " +
   "FROM temp_design_spec_detail_ids;"
 
-const duplicateGroupScript = 
+const duplicateGroupScript =
   "WITH temp_mapped_group_ids AS (" +
     "INSERT INTO public.group " +
     "SELECT (c).* FROM (" +
@@ -228,7 +238,7 @@ const duplicateGroupScript =
 
 const duplicateGroupValueScript =
   "WITH temp_group_value_ids AS (" +
-    "INSERT INTO group_value " +
+    "INSERT INTO group_value_new " +
     "SELECT (c).* FROM (" +
       "SELECT gv " +
         "#= hstore('id', nextval(pg_get_serial_sequence('group_value', 'id'))::text) " +
@@ -237,8 +247,11 @@ const duplicateGroupValueScript =
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('group_id', mgi.new_id::text) " +
-      "AS c FROM group_value gv " +
-        "INNER JOIN mapped_group_ids mgi ON gv.group_id = mgi.old_id) sub " +
+        "#= hstore('factor_level_id', mfli.new_id::text) " +
+      "AS c FROM group_value_new gv " +
+        "INNER JOIN mapped_group_ids mgi ON gv.group_id = mgi.old_id " +
+        "INNER JOIN mapped_factor_level_ids mfli ON gv.factor_level_id = mfli.old_id " +
+        ") sub " +
     "RETURNING id" +
   ")" +
   "SELECT * " +

@@ -5,7 +5,7 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS new_factors; " +
   "DROP TABLE IF EXISTS mapped_factor_ids; " +
   "DROP TABLE IF EXISTS new_factor_levels; " +
-  "DROP TABLE IF EXISTS mapped_factor_levels_ids; " +
+  "DROP TABLE IF EXISTS mapped_factor_level_ids; " +
   "DROP TABLE IF EXISTS new_treatments; " +
   "DROP TABLE IF EXISTS mapped_treatment_ids; " +
   "DROP TABLE IF EXISTS combination_element_ids; " +

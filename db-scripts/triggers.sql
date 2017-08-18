@@ -41,11 +41,42 @@ LANGUAGE plpgsql ;
 
 CREATE OR REPLACE FUNCTION factor_level_value_check(value text ,factor_id integer) RETURNS jsonb AS
 $$
+
+DECLARE isNumericValue BOOLEAN;
+DECLARE dataSourceId INTEGER;
+DECLARE formulationCatalogId INTEGER;
+DECLARE otherId INTEGER;
+DECLARE labelValue VARCHAR;
+
 begin
-  IF  (SELECT ref_data_source_id FROM factor WHERE id=$2)=3  AND isNumeric($1) then
-       return  jsonb_build_object('refId',$1);
-  ELSE
-    return jsonb_build_object('text',$1);
+
+  isNumericValue = isNumeric($1);
+  dataSourceId = (select ref_data_source_id from factor where id=$2);
+  formulationCatalogId = (select id from ref_data_source where name = 'Formulation Catalog');
+  otherId = (select id from ref_data_source where name = 'Other');
+  labelValue = (select name from factor where id=$2);
+
+  if ( dataSourceId = formulationCatalogId AND isNumericValue ) then
+    return jsonb_build_object(
+        'items', jsonb_build_array(
+          jsonb_build_object(
+              'label', labelValue,
+              'propertyTypeId', formulationCatalogId,
+              'refId', $1)));
+  elseif ( dataSourceId = formulationCatalogId AND NOT isNumericValue ) then
+    return jsonb_build_object(
+        'items', jsonb_build_array(
+          jsonb_build_object(
+              'label', labelValue,
+              'propertyTypeId', formulationCatalogId,
+              'text', $1)));
+  else
+    return jsonb_build_object(
+        'items', jsonb_build_array(
+          jsonb_build_object(
+              'label', labelValue,
+              'propertyTypeId', otherId,
+              'text', $1)));
   END IF;
 END;
 $$ LANGUAGE plpgsql;

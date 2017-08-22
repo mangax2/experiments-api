@@ -1,5 +1,4 @@
-const columns = "id,COALESCE(((value->'items')->0)->>'refId', ((value->'items')->0)->>'text') AS" +
-" value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
+const columns = "id,value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
 
 
 module.exports = (rep, pgp) => ({

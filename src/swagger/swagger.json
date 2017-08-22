@@ -4929,6 +4929,42 @@
         }
       }
     },
+    "LevelItem": {
+      "type": "object",
+      "properties": {
+        "propertyTypeId": {
+          "type": "integer",
+          "description": "Indicates what type of property this item is."
+        },
+        "label": {
+          "type": "string",
+          "description": "The name of the property.  In the case of simple factors, this will be the same as the name of the factor.  In the case of complex factors, this will be the name of the property."
+        },
+        "text": {
+          "type": "string",
+          "description": "In the case of a simple factor, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
+        },
+        "refId": {
+          "type": "string",
+          "description": "Used in the case when the property type is catalog.  This is the ID of the referenced item in the catalog."
+        } 
+      }
+    },
+    "Cluster": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the factor level."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LevelItem"
+          }
+        }
+      }
+    },
     "Variable": {
       "type": "object",
       "properties": {
@@ -4940,6 +4976,25 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Levels"
+          }
+        }
+      }
+    },
+    "IndependentVariable": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Id of the factor"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of variable"
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Cluster"
           }
         }
       }
@@ -4973,7 +5028,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Variable"
+            "$ref": "#/definitions/IndependentVariable"
           }
         },
         "exogenous": {

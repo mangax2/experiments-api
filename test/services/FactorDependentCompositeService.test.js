@@ -7,8 +7,40 @@ describe('FactorDependentCompositeService', () => {
   const testContext = {}
   const testTx = { tx: {} }
 
+  let extractLevelsForFactorOriginal
+  let appendLevelIdToLevelOriginal
+  let findFactorTypeOriginal
+  let assembleFactorLevelDTOsOriginal
+  let mapFactorEntitiesToFactorDTOsOriginal
+  let mapDependentVariablesEntitiesToDTOsOriginal
+  let createVariablesObjectOriginal
+  let assembleIndependentAndExogenousOriginal
+  let assembleVariablesObjectOriginal
+
   beforeEach(() => {
     target = new FactorDependentCompositeService()
+
+    extractLevelsForFactorOriginal = FactorDependentCompositeService.extractLevelsForFactor
+    appendLevelIdToLevelOriginal = FactorDependentCompositeService.appendLevelIdToLevel
+    findFactorTypeOriginal = FactorDependentCompositeService.findFactorType
+    assembleFactorLevelDTOsOriginal = FactorDependentCompositeService.assembleFactorLevelDTOs
+    mapFactorEntitiesToFactorDTOsOriginal = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs
+    mapDependentVariablesEntitiesToDTOsOriginal = FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs
+    createVariablesObjectOriginal = FactorDependentCompositeService.createVariablesObject
+    assembleIndependentAndExogenousOriginal = FactorDependentCompositeService.assembleIndependentAndExogenous
+    assembleVariablesObjectOriginal = FactorDependentCompositeService.assembleVariablesObject
+  })
+
+  afterEach(() => {
+    FactorDependentCompositeService.extractLevelsForFactor = extractLevelsForFactorOriginal
+    FactorDependentCompositeService.appendLevelIdToLevel = appendLevelIdToLevelOriginal
+    FactorDependentCompositeService.findFactorType = findFactorTypeOriginal
+    FactorDependentCompositeService.assembleFactorLevelDTOs = assembleFactorLevelDTOsOriginal
+    FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mapFactorEntitiesToFactorDTOsOriginal
+    FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mapDependentVariablesEntitiesToDTOsOriginal
+    FactorDependentCompositeService.createVariablesObject = createVariablesObjectOriginal
+    FactorDependentCompositeService.assembleIndependentAndExogenous = assembleIndependentAndExogenousOriginal
+    FactorDependentCompositeService.assembleVariablesObject = assembleVariablesObjectOriginal
   })
 
   describe('getFactorsWithLevels', () => {
@@ -69,21 +101,244 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
+  describe('extractLevelsForFactor', () => {
+    it('returns empty list when no levels match', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor(
+        {id: 42}, [{factor_id: 1}, {factor_id: 2}])).toEqual([])
+    })
+
+    it('returns empty list when no levels exist', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor(
+        {id: 42}, [])).toEqual([])
+    })
+
+    it('returns levels that match', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor(
+        {id: 42}, [{factor_id: 1}, {factor_id: 42}, {factor_id: 2}, {factor_id: 42}]))
+        .toEqual([{factor_id: 42}, {factor_id: 42}])
+    })
+  })
+
+  describe('appendLevelIdToLevel', () => {
+    it('creates new entity with level id and items', () => {
+      expect(FactorDependentCompositeService.appendLevelIdToLevel({id: 42, value: {items: [1,2,3]}}))
+        .toEqual({id: 42, items: [1,2,3]})
+    })
+  })
+
+  describe('findFactorType', () => {
+    it('returns lower case type name of the factor', () => {
+      expect(FactorDependentCompositeService.findFactorType([
+        {id: 1, type: 'notIt'},
+        {id: 2, type: 'IT'},
+        {id: 3, type: 'notIt'},
+        ], {ref_factor_type_id: 2})).toEqual('it')
+    })
+  })
+
+  describe('assembleFactorLevelDTOs', () => {
+    it('creates empty array when levels are not found.', () => {
+      FactorDependentCompositeService.extractLevelsForFactor = mock([])
+      FactorDependentCompositeService.appendLevelIdToLevel = mock()
+
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs({id: 42}, [7, 8, 9]))
+        .toEqual([])
+
+      expect(FactorDependentCompositeService.extractLevelsForFactor).toHaveBeenCalledWith({id: 42}, [7, 8, 9])
+      expect(FactorDependentCompositeService.appendLevelIdToLevel).not.toHaveBeenCalled()
+    })
+
+    it('creates factor level DTOs', () => {
+      FactorDependentCompositeService.extractLevelsForFactor = mock([1, 2])
+      FactorDependentCompositeService.appendLevelIdToLevel = mock()
+      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 8, items: []})
+      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 9, items: []})
+
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs({id: 42}, [7, 8, 9]))
+        .toEqual([{id: 8, items: []}, {id: 9, items: []}])
+
+      expect(FactorDependentCompositeService.extractLevelsForFactor).toHaveBeenCalledWith({id: 42}, [7, 8, 9])
+      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledTimes(2)
+      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(1)
+      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(2)
+    })
+  })
+
+  describe('mapFactorEntitiesToFactorDTOs', () => {
+    it('returns empty list when no factors are present', () => {
+      FactorDependentCompositeService.findFactorType = mock()
+      FactorDependentCompositeService.assembleFactorLevelDTOs = mock()
+
+      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1,2,3], [{}, {}]))
+        .toEqual([])
+
+      expect(FactorDependentCompositeService.findFactorType).not.toHaveBeenCalled()
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs).not.toHaveBeenCalled()
+    })
+
+    it('returns factor DTOs with data from functions', () => {
+      FactorDependentCompositeService.findFactorType = mock('returnedType')
+      FactorDependentCompositeService.assembleFactorLevelDTOs = mock([9,8,7])
+
+      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
+        [{id: 42, name: 'factorName', tier: 'factorTier'}],
+        [1,2,3],
+        [{}, {}])).toEqual([
+          {
+            id: 42,
+            name: 'factorName',
+            type: 'returnedType',
+            levels: [9, 8, 7],
+            tier: 'factorTier'
+          }
+        ])
+
+      expect(FactorDependentCompositeService.findFactorType).toHaveBeenCalledWith(
+        [{}, {}],
+        {id: 42, name: 'factorName', tier: 'factorTier'})
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs).toHaveBeenCalledWith(
+        {id: 42, name: 'factorName', tier: 'factorTier'},
+        [1,2,3]
+      )
+    })
+  })
+
+  describe('mapDependentVariablesEntitiesToDTOs', () => {
+    it('creates empty array when input is an empty array', () => {
+      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([]))
+        .toEqual([])
+    })
+
+    it('creates dependent variable DTOs', () => {
+      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([
+        {
+          name: 'dvName',
+          required: true,
+          question_code: 42
+        }
+      ])).toEqual([
+        {
+          name: 'dvName',
+          required: true,
+          questionCode: 42
+        }
+      ])
+    })
+  })
+
+  describe('createVariablesObject', () => {
+    it('creates default object with empty arrays when empty object passed in', () => {
+      expect(FactorDependentCompositeService.createVariablesObject({})).toEqual({
+        independent: [],
+        exogenous: [],
+        dependent: []
+      })
+    })
+
+    it('builds object with supplied data', () => {
+      expect(FactorDependentCompositeService.createVariablesObject({
+        independent: [1,2,3],
+        exogenous: [4,5,6],
+      }, [7,8,9])).toEqual({
+        independent: [1,2,3],
+        exogenous: [4,5,6],
+        dependent: [7,8,9]
+      })
+    })
+  })
+
+  describe('assembleIndependentAndExogenous', () => {
+    it('returns empty object when input is empty array', () => {
+      expect(FactorDependentCompositeService.assembleIndependentAndExogenous([]))
+        .toEqual({})
+    })
+
+    it('appends factors to properties named of type and removes type property', () => {
+      expect(FactorDependentCompositeService.assembleIndependentAndExogenous(
+        [
+          {type: 'independent', data: {value: 'A'}},
+          {type: 'independent', data: {value: 'B'}},
+          {type: 'exogenous', data: {value: 'C'}},
+          {type: 'exogenous', data: {value: 'D'}}
+        ]
+      )).toEqual({
+        independent: [
+          {data: {value: 'A'}},
+          {data: {value: 'B'}},
+        ],
+        exogenous: [
+          {data: {value: 'C'}},
+          {data: {value: 'D'}},
+        ]
+      })
+    })
+  })
+
+  describe('assembleVariablesObject', () => {
+    it('builds variable object from results of functions', () => {
+      FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mock(
+        [{name: 'factor1DTO'}, {name: 'factor2DTO'}])
+      FactorDependentCompositeService.assembleIndependentAndExogenous = mock(
+        {independent: [], exogenous: []}
+      )
+      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mock(
+        [{}, {}]
+      )
+      FactorDependentCompositeService.createVariablesObject = mock({name: 'variablesObject'})
+
+      expect(FactorDependentCompositeService.assembleVariablesObject(
+        [{name: 'factor1'}, {name: 'factor2'}],
+        [{name: 'f1l1'}, {name: 'f1l2'}, {name: 'f2l1'}, {name: 'f2l2'}],
+        [{name: 'type1'}, {name: 'type2'}],
+        [{name: 'depVar1'}, {name: 'depVar2'}]
+      )).toEqual({
+        name: 'variablesObject'
+      })
+
+      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs)
+        .toHaveBeenCalledWith(
+          [{name: 'factor1'}, {name: 'factor2'}],
+          [{name: 'f1l1'}, {name: 'f1l2'}, {name: 'f2l1'}, {name: 'f2l2'}],
+          [{name: 'type1'}, {name: 'type2'}]
+        )
+      expect(FactorDependentCompositeService.assembleIndependentAndExogenous)
+        .toHaveBeenCalledWith(
+          [{name: 'factor1DTO'}, {name: 'factor2DTO'}]
+        )
+      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs)
+        .toHaveBeenCalledWith(
+          [{name: 'depVar1'}, {name: 'depVar2'}]
+        )
+      expect(FactorDependentCompositeService.createVariablesObject)
+        .toHaveBeenCalledWith(
+          {independent: [], exogenous: []},
+          [{}, {}]
+        )
+    })
+  })
+
   describe('getAllVariablesByExperimentId', () => {
     it('returns all variables with their levels', () => {
       const factorsWithLevels = {
         factors: [{
-          id: 1,
+          id: 42,
           name: 'testFactor',
           tier: undefined,
           ref_data_source_id: 1,
           ref_factor_type_id: 1,
         }],
-        levels: [{ id: 1, value: 'testValue1', factor_id: 1 }, {
-          id: 2,
-          value: 'testValue2',
-          factor_id: 1,
-        }],
+        levels: [
+          {
+            id: 1,
+            value: {items:[{label: 'testFactor', text: 'testValue1', propertyTypeId: 1}]},
+            factor_id: 42
+          },
+          {
+            id: 2,
+            value: {items:[{label: 'testFactor', text: 'testValue2', propertyTypeId: 1}]},
+            factor_id: 42
+          }
+        ],
       }
       target.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
@@ -96,10 +351,31 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.getDependentVariablesByExperimentId = mockResolve(dependentVariables)
       const expectedReturn = {
         independent: [{
+          id: 42,
           name: 'testFactor',
-          levels: ['testValue1', 'testValue2'],
+          levels: [
+            {
+              id: 1,
+              items: [
+                {
+                  label: 'testFactor',
+                  text: 'testValue1',
+                  propertyTypeId: 1
+                }
+              ]
+            },
+            {
+              id: 2,
+              items: [
+                {
+                  label: 'testFactor',
+                  text: 'testValue2',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          ],
           tier: undefined,
-          refDataSourceId: 1,
         }],
         exogenous: [],
         dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],

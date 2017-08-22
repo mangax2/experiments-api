@@ -39,6 +39,68 @@ class FactorDependentCompositeService {
     )
   }
 
+  static extractLevelsForFactor(factor, allLevelsForAllFactors) {
+    return _.filter(allLevelsForAllFactors, level =>
+      Number(level.factor_id) === Number(factor.id),
+    )
+  }
+
+  static appendLevelIdToLevel(level) {
+    return {
+      id: level.id,
+      items: level.value.items,
+    }
+  }
+
+  static findFactorType(factorTypes, factor) {
+    return _.find(factorTypes, { id: factor.ref_factor_type_id }).type.toLowerCase()
+  }
+
+  static assembleFactorLevelDTOs(factor, allFactorLevels) {
+    return _.map(
+      FactorDependentCompositeService.extractLevelsForFactor(factor, allFactorLevels),
+      level => FactorDependentCompositeService.appendLevelIdToLevel(level))
+  }
+
+  static mapFactorEntitiesToFactorDTOs(factors, allFactorLevels, allFactorTypes) {
+    return _.map(factors, factor => ({
+      id: factor.id,
+      name: factor.name,
+      type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
+      levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factor, allFactorLevels),
+      tier: factor.tier,
+    }))
+  }
+
+  static mapDependentVariablesEntitiesToDTOs(dependentVariableEntities) {
+    return _.map(dependentVariableEntities, dependentVariable => ({
+      name: dependentVariable.name,
+      required: dependentVariable.required,
+      questionCode: dependentVariable.question_code,
+    }))
+  }
+
+  static createVariablesObject({ independent = [], exogenous = [] }, dependent = []) {
+    return { independent, exogenous, dependent }
+  }
+
+  static assembleIndependentAndExogenous(factorDTOs) {
+    return _.mapValues(_.groupBy(factorDTOs, factor => factor.type),
+      factorsOfType => _.map(factorsOfType,
+        factorOfType => _.omit(factorOfType, 'type')))
+  }
+
+  static assembleVariablesObject(
+    factorEntities, allFactorLevels, factorTypes, dependentVariableEntities) {
+    const factorDTOs = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
+      factorEntities, allFactorLevels, factorTypes)
+
+    return FactorDependentCompositeService.createVariablesObject(
+      FactorDependentCompositeService.assembleIndependentAndExogenous(factorDTOs),
+      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs(
+        dependentVariableEntities))
+  }
+
   getAllVariablesByExperimentId(experimentId, isTemplate) {
     return Promise.all(
       [
@@ -46,42 +108,12 @@ class FactorDependentCompositeService {
         this.factorTypeService.getAllFactorTypes(),
         this.dependentVariableService.getDependentVariablesByExperimentId(experimentId, isTemplate),
       ],
-    ).then((value) => {
-      const variablesObject = {
-        independent: [],
-        exogenous: [],
-        dependent: [],
-      }
-
-      const factors = _.map(value[0].factors, (factor) => {
-        const levels = _.filter(value[0].levels, level =>
-          Number(level.factor_id) === Number(factor.id),
-        )
-        const levelValues = _.map(levels, level => level.value)
-
-        const type = _.find(value[1], { id: factor.ref_factor_type_id }).type.toLowerCase()
-        return {
-          name: factor.name,
-          type,
-          levels: levelValues,
-          tier: factor.tier,
-          refDataSourceId: factor.ref_data_source_id,
-        }
-      })
-
-      _.each(factors, (factor) => {
-        const type = factor.type
-        delete factor.type
-        variablesObject[type].push(factor)
-      })
-      variablesObject.dependent = _.map(value[2], dependentVariable => ({
-        name: dependentVariable.name,
-        required: dependentVariable.required,
-        questionCode: dependentVariable.question_code,
-      }))
-
-      return variablesObject
-    })
+    ).then(results => FactorDependentCompositeService.assembleVariablesObject(
+      results[0].factors,
+      results[0].levels,
+      results[1],
+      results[2],
+    ))
   }
 
   /**

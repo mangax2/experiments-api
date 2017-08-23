@@ -250,7 +250,7 @@ const duplicateGroupValueScript =
         "#= hstore('factor_level_id', mfli.new_id::text) " +
       "AS c FROM group_value_new gv " +
         "INNER JOIN mapped_group_ids mgi ON gv.group_id = mgi.old_id " +
-        "INNER JOIN mapped_factor_level_ids mfli ON gv.factor_level_id = mfli.old_id " +
+        "LEFT OUTER JOIN mapped_factor_level_ids mfli ON gv.factor_level_id = mfli.old_id " +
         ") sub " +
     "RETURNING id" +
   ")" +

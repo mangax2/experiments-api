@@ -800,7 +800,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelService.getFactorLevelsByFactorId = mock()
       target.factorLevelService.batchDeleteFactorLevels = mockResolve()
       target.factorService.batchDeleteFactors = mockResolve()
-      target.factorService.batchCreateFactors = mockResolve([99])
+      target.factorService.batchCreateFactors = mockResolve([{id: 99}])
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
@@ -833,7 +833,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('inserts, updated, and deletes factors and levels as appropriate', () => {
+    it('inserts, updates, and deletes factors and levels appropriately', () => {
       const independentVariables = [
         {
           name: 'Density',
@@ -928,7 +928,7 @@ describe('FactorDependentCompositeService', () => {
       })
       target.factorLevelService.batchDeleteFactorLevels = mockResolve()
       target.factorService.batchDeleteFactors = mockResolve()
-      target.factorService.batchCreateFactors = mockResolve([99])
+      target.factorService.batchCreateFactors = mockResolve([{id: 99}])
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()

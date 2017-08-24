@@ -22,7 +22,7 @@ describe('FactorLevelService', () => {
 
       return target.batchCreateFactorLevels([{}], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith(testTx, [{}], testContext)
+        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([])
       })
     })
@@ -34,7 +34,7 @@ describe('FactorLevelService', () => {
 
       return target.batchCreateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith(testTx, [{}], testContext)
+        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

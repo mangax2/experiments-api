@@ -15,8 +15,8 @@ module.exports = (rep, pgp) => ({
   batchCreate: (factorLevels, context, tx = rep) => tx.batch(
     factorLevels.map(
       factorLevel => tx.one(
-        'INSERT INTO factor_level(value, factor_id, created_user_id, created_date, modified_user_id, modified_date) ' +
-        'VALUES($1, $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP) RETURNING id',
+        'INSERT INTO factor_level_new(value, factor_id, created_user_id, created_date, modified_user_id, modified_date) ' +
+        'VALUES($1:json, $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP) RETURNING id',
         [factorLevel.value, factorLevel.factorId, context.userId],
       ),
     ),
@@ -25,8 +25,8 @@ module.exports = (rep, pgp) => ({
   batchUpdate: (factorLevels, context, tx = rep) => tx.batch(
     factorLevels.map(
       factorLevel => tx.oneOrNone(
-        'UPDATE factor_level SET (value, factor_id, modified_user_id, modified_date) = ' +
-        '($1, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4 RETURNING *',
+        'UPDATE factor_level_new SET (value, factor_id, modified_user_id, modified_date) = ' +
+        '($1:json, $2, $3, CURRENT_TIMESTAMP) WHERE id = $4 RETURNING *',
         [factorLevel.value, factorLevel.factorId, context.userId, factorLevel.id],
       ),
     ),
@@ -38,7 +38,7 @@ module.exports = (rep, pgp) => ({
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM factor_level WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM factor_level_new WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
   findByBusinessKey: (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE` +

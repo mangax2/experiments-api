@@ -18,7 +18,7 @@ class FactorLevelService {
   @Transactional('createFactorLevelsTx')
   batchCreateFactorLevels(factorLevels, context, tx) {
     return this.validator.validate(factorLevels, 'POST', tx)
-      .then(() => db.factorLevel.batchCreate(tx, factorLevels, context)
+      .then(() => db.factorLevel.batchCreate(factorLevels, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 

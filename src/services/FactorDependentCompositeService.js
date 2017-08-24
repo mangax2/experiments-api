@@ -254,7 +254,8 @@ class FactorDependentCompositeService {
             factor => _.omit(factor, 'levels'))
 
       return this.factorService.batchCreateFactors(
-        factorInsertsWithoutLevels, context, tx).then((factorIds) => {
+        factorInsertsWithoutLevels, context, tx).then((batchCreateFactorResponse) => {
+          const factorIds = _.map(batchCreateFactorResponse, r => r.id)
           const levelsWithNewFactorIds =
             _.flatten(
               _.zipWith(factorIds, factorInsertsAndFactorDependentLevelInserts,

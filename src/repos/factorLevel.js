@@ -51,7 +51,7 @@ module.exports = (rep, pgp) => ({
       value: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = d.value and (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level_new entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = CAST(d.value as jsonb) and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

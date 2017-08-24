@@ -1,5 +1,5 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
-import AppUtil from '../../src/services/utility/AppUtil'
+// import AppUtil from '../../src/services/utility/AppUtil'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
 
 describe('FactorDependentCompositeService', () => {
@@ -416,286 +416,567 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('mapVariableDTO2DbEntity', () => {
-    it('returns an empty array when variables are undefined, null, or empty', () => {
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(undefined, 1, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(null, 1, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity([], 1, 1)).toEqual([])
-    })
+  // describe('mapVariableDTO2DbEntity', () => {
+  //   it('returns an empty array when variables are undefined, null, or empty', () => {
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(undefined, 1, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(null, 1, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity([], 1, 1)).toEqual([])
+  //   })
+  //
+  //   it('maps variables to database object entity', () => {
+  //     const variables = [{}, {}]
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(variables, 1, 1)).toEqual([{
+  //       refFactorTypeId: 1,
+  //       experimentId: 1,
+  //     }, { refFactorTypeId: 1, experimentId: 1 }])
+  //   })
+  // })
 
-    it('maps variables to database object entity', () => {
-      const variables = [{}, {}]
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity(variables, 1, 1)).toEqual([{
-        refFactorTypeId: 1,
-        experimentId: 1,
-      }, { refFactorTypeId: 1, experimentId: 1 }])
-    })
-  })
+  // describe('mapLevelDTO2DbEntity', () => {
+  //   it('returns empty array when levels are undefined, null, or empty', () => {
+  //     expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(undefined, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(null, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapLevelDTO2DbEntity([], 1)).toEqual([])
+  //   })
+  //
+  //   it('returns mapped levels to db entities', () => {
+  //     expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(['testValue', 'testValue2'], 1)).toEqual([{
+  //       value: 'testValue',
+  //       factorId: 1,
+  //     }, { value: 'testValue2', factorId: 1 }])
+  //   })
+  // })
 
-  describe('mapLevelDTO2DbEntity', () => {
-    it('returns empty array when levels are undefined, null, or empty', () => {
-      expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(undefined, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(null, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapLevelDTO2DbEntity([], 1)).toEqual([])
-    })
+  // describe('mapDependentVariableDTO2DbEntity', () => {
+  //   it('returns empty array when dependentVariables is undefined, null, or empty', () => {
+  //     expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(undefined, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(null, 1)).toEqual([])
+  //     expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([], 1)).toEqual([])
+  //   })
+  //
+  //   it('maps dependent variables to db entities', () => {
+  //     expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([{ name: 'testDependent' }, { name: 'testDependent2' }], 1)).toEqual([{
+  //       name: 'testDependent',
+  //       experimentId: 1,
+  //     }, { name: 'testDependent2', experimentId: 1 }])
+  //   })
+  // })
 
-    it('returns mapped levels to db entities', () => {
-      expect(FactorDependentCompositeService.mapLevelDTO2DbEntity(['testValue', 'testValue2'], 1)).toEqual([{
-        value: 'testValue',
-        factorId: 1,
-      }, { value: 'testValue2', factorId: 1 }])
-    })
-  })
+  // describe('mapIndependentAndExogenousVariableDTO2Entity', () => {
+  //   it('maps independent and exogenous variables to DB entities and concats them together', () => {
+  //     FactorDependentCompositeService.mapVariableDTO2DbEntity = mock([{}])
+  //
+  //     const result = FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(1, [{}], [{}])
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity).toHaveBeenCalledTimes(2)
+  //     expect(result).toEqual([{}, {}])
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity.mock.calls[0]).toEqual([[{}], 1, 1])
+  //     expect(FactorDependentCompositeService.mapVariableDTO2DbEntity.mock.calls[1]).toEqual([[{}], 1, 2])
+  //   })
+  // })
 
-  describe('mapDependentVariableDTO2DbEntity', () => {
-    it('returns empty array when dependentVariables is undefined, null, or empty', () => {
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(undefined, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(null, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([], 1)).toEqual([])
-    })
+  // describe('mapVariablesDTO2LevelsEntity', () => {
+  //   it('returns levels with factorIds', () => {
+  //     FactorDependentCompositeService.mapLevelDTO2DbEntity = mock((factorLevels, id) => [{ factorId: id }])
+  //
+  //     const result = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity([{ levels: [{}] }, { levels: [{}] }], [{ id: 1 }, { id: 2 }])
+  //
+  //     expect(result).toEqual([{ factorId: 1 }, { factorId: 2 }])
+  //   })
+  //
+  //   it('returns an empty array when variables are empty', () => {
+  //     expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity([], [])).toEqual([])
+  //   })
+  // })
 
-    it('maps dependent variables to db entities', () => {
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([{ name: 'testDependent' }, { name: 'testDependent2' }], 1)).toEqual([{
-        name: 'testDependent',
-        experimentId: 1,
-      }, { name: 'testDependent2', experimentId: 1 }])
-    })
-  })
+  // describe('persistVariablesWithLevels', () => {
+  //   it('deletes factors, batchCreates factors, and batchCreates levels', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockResolve()
+  //     target.factorService.batchCreateFactors = mockResolve([1, 2])
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
+  //     target.factorLevelService.batchCreateFactorLevels = mockResolve()
+  //
+  //     return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
+  //       expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{}], testContext, testTx)
+  //     })
+  //   })
+  //
+  //   it('deletes factors, batchCreates, but does not create levels', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockResolve()
+  //     target.factorService.batchCreateFactors = mockResolve([1, 2])
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([])
+  //     target.factorLevelService.batchCreateFactorLevels = mock()
+  //
+  //     return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
+  //       expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+  //     })
+  //   })
+  //
+  //   it('deletes factors only', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockResolve()
+  //     target.factorService.batchCreateFactors = mock()
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+  //     target.factorLevelService.batchCreateFactorLevels = mock()
+  //
+  //     return target.persistVariablesWithLevels(1, [], testContext, false, testTx).then(() => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
+  //       expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+  //     })
+  //   })
+  //
+  //   it('rejects when batchCreateFactorLevels fails', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockResolve()
+  //     target.factorService.batchCreateFactors = mockResolve([1, 2])
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
+  //     target.factorLevelService.batchCreateFactorLevels = mockReject('error')
+  //
+  //     return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
+  //       expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{}], testContext, testTx)
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  //
+  //   it('rejects when batchCreateFactors fails', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockResolve()
+  //     target.factorService.batchCreateFactors = mockReject('error')
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+  //     target.factorLevelService.batchCreateFactorLevels = mock()
+  //
+  //     return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
+  //       expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  //
+  //   it('rejects when deleteFactorsForExperimentId fails', () => {
+  //     target.factorService.deleteFactorsForExperimentId = mockReject('error')
+  //     target.factorService.batchCreateFactors = mock()
+  //     FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
+  //     target.factorLevelService.batchCreateFactorLevels = mock()
+  //
+  //     return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+  //       expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
+  //       expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  // })
 
-  describe('mapIndependentAndExogenousVariableDTO2Entity', () => {
-    it('maps independent and exogenous variables to DB entities and concats them together', () => {
-      FactorDependentCompositeService.mapVariableDTO2DbEntity = mock([{}])
+  // describe('persistVariablesWithoutLevels', () => {
+  //   it('deletes and creates dependent variables', () => {
+  //     target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+  //     target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+  //
+  //     return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {
+  //       expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
+  //     })
+  //   })
+  //
+  //   it('deletes dependent variables, but does not create new ones', () => {
+  //     target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+  //     target.dependentVariableService.batchCreateDependentVariables = mock()
+  //
+  //     return target.persistVariablesWithoutLevels(1, [], testContext, false, testTx).then(() => {
+  //       expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+  //     })
+  //   })
+  //
+  //   it('rejects when batchCreateDependentVariables fails', () => {
+  //     target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+  //     target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
+  //
+  //     return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  //
+  //   it('rejects when deleteDependentVariablesForExperimentId fails', () => {
+  //     target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
+  //     target.dependentVariableService.batchCreateDependentVariables = mock()
+  //
+  //     return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+  //       expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  // })
 
-      const result = FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity(1, [{}], [{}])
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity).toHaveBeenCalledTimes(2)
-      expect(result).toEqual([{}, {}])
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity.mock.calls[0]).toEqual([[{}], 1, 1])
-      expect(FactorDependentCompositeService.mapVariableDTO2DbEntity.mock.calls[1]).toEqual([[{}], 1, 2])
-    })
-  })
+  // describe('persistVariables', () => {
+  //   it('calls persistVariablesWithLevels and persistVariablesWithoutLevels', () => {
+  //     target.persistVariablesWithLevels = mockResolve()
+  //     target.persistVariablesWithoutLevels = mockResolve()
+  //
+  //     return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {
+  //       expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
+  //       expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
+  //     })
+  //   })
+  //
+  //   it('rejects when persistVariablesWithoutLevels fails', () => {
+  //     target.persistVariablesWithLevels = mockResolve()
+  //     target.persistVariablesWithoutLevels = mockReject('error')
+  //
+  //     return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
+  //       expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  //
+  //   it('rejects when persistVariablesWithLevels fails', () => {
+  //     target.persistVariablesWithLevels = mockReject('error')
+  //     target.persistVariablesWithoutLevels = mock()
+  //
+  //     return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
+  //       expect(target.persistVariablesWithoutLevels).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  // })
 
-  describe('mapVariablesDTO2LevelsEntity', () => {
-    it('returns levels with factorIds', () => {
-      FactorDependentCompositeService.mapLevelDTO2DbEntity = mock((factorLevels, id) => [{ factorId: id }])
+  // describe('persistAllVariables', () => {
+  //   it('persists variables, and returns response', () => {
+  //     target.securityService.permissionsCheck = mockResolve()
+  //     target.persistVariables = mockResolve()
+  //     AppUtil.createPostResponse = mock()
+  //     FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
+  //     FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
+  //     const experimentVariables = {
+  //       independent: [{}],
+  //       exogenous: [],
+  //       dependent: [{}, {}],
+  //       experimentId: 1,
+  //     }
+  //
+  //     return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {
+  //       expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+  //       expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, false, testTx)
+  //       expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+  //     })
+  //   })
+  //
+  //   it('rejects when persistVariables fails', () => {
+  //     target.securityService.permissionsCheck = mockResolve()
+  //     target.persistVariables = mockReject('error')
+  //     AppUtil.createPostResponse = mock()
+  //     FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
+  //     FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
+  //     const experimentVariables = {
+  //       independent: [{}],
+  //       exogenous: [],
+  //       dependent: [{}, {}],
+  //       experimentId: 1,
+  //     }
+  //
+  //     return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+  //       expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, false, testTx)
+  //       expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  //
+  // })
 
-      const result = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity([{ levels: [{}] }, { levels: [{}] }], [{ id: 1 }, { id: 2 }])
+  describe('persistIndependentVariables', () => {
+    it('inserts new factor without levels', () => {
+      const independentVariables = [
+        {
+          name: 'Density',
+          levels: []
+        }
+      ]
 
-      expect(result).toEqual([{ factorId: 1 }, { factorId: 2 }])
-    })
-
-    it('returns an empty array when variables are empty', () => {
-      expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity([], [])).toEqual([])
-    })
-  })
-
-  describe('persistVariablesWithLevels', () => {
-    it('deletes factors, batchCreates factors, and batchCreates levels', () => {
-      target.factorService.deleteFactorsForExperimentId = mockResolve()
-      target.factorService.batchCreateFactors = mockResolve([1, 2])
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
+      target.factorService.getFactorsByExperimentId = mockResolve([])
+      target.factorLevelService.getFactorLevelsByFactorId = mock()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([99])
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
 
-      return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
-        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{}], testContext, testTx)
-      })
-    })
-
-    it('deletes factors, batchCreates, but does not create levels', () => {
-      target.factorService.deleteFactorsForExperimentId = mockResolve()
-      target.factorService.batchCreateFactors = mockResolve([1, 2])
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([])
-      target.factorLevelService.batchCreateFactorLevels = mock()
-
-      return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
+      return target.persistIndependentVariables(independentVariables, 42, testContext, false, testTx).then(() => {
+        expect(target.factorLevelService.getFactorLevelsByFactorId).not.toHaveBeenCalled()
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(42, false)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([], testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([], testTx)
+        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{
+          name: 'Density',
+          refFactorTypeId: 1,
+          experimentId: 42,
+          refDataSourceId: -1
+        }], testContext, testTx)
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
       })
     })
 
-    it('deletes factors only', () => {
-      target.factorService.deleteFactorsForExperimentId = mockResolve()
-      target.factorService.batchCreateFactors = mock()
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
-      target.factorLevelService.batchCreateFactorLevels = mock()
+    it('updates existing factor without levels', () => {
+      const independentVariables = [
+        {
+          id: 55,
+          name: 'DensityUpdated',
+          levels: []
+        }
+      ]
 
-      return target.persistVariablesWithLevels(1, [], testContext, false, testTx).then(() => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+      target.factorService.getFactorsByExperimentId = mockResolve([
+        {
+          id: 55,
+          experimentId: 42,
+          name: 'Density',
+          refFactorTypeId: 1,
+          refDataSourceId: 1
+        }
+      ])
+      target.factorLevelService.getFactorLevelsByFactorId = mock([])
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([99])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+
+      return target.persistIndependentVariables(independentVariables, 42, testContext, false, testTx).then(() => {
+        expect(target.factorLevelService.getFactorLevelsByFactorId).toHaveBeenCalledWith(55)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(42, false)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([], testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([], testTx)
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([{
+          id: 55,
+          name: 'DensityUpdated',
+          refFactorTypeId: 1,
+          experimentId: 42,
+          refDataSourceId: -1
+        }], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
       })
     })
 
-    it('rejects when batchCreateFactorLevels fails', () => {
-      target.factorService.deleteFactorsForExperimentId = mockResolve()
-      target.factorService.batchCreateFactors = mockResolve([1, 2])
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock([{}])
-      target.factorLevelService.batchCreateFactorLevels = mockReject('error')
+    it('inserts new factor with level', () => {
+      const independentVariables = [
+        {
+          name: 'Density',
+          levels: [
+            {
+              items: [
+                {
+                  label: 'Density',
+                  propertyTypeId: 1,
+                  text: '1000'
+                }
+              ]
+            }
+          ]
+        }
+      ]
 
-      return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).toHaveBeenCalledWith([{}, {}], [1, 2])
-        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+      target.factorService.getFactorsByExperimentId = mockResolve([])
+      target.factorLevelService.getFactorLevelsByFactorId = mock()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([99])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+
+      return target.persistIndependentVariables(independentVariables, 42, testContext, false, testTx).then(() => {
+        expect(target.factorLevelService.getFactorLevelsByFactorId).not.toHaveBeenCalled()
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(42, false)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([], testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([], testTx)
+        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{
+          name: 'Density',
+          refFactorTypeId: 1,
+          experimentId: 42,
+          refDataSourceId: 1
+        }], testContext, testTx)
+        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{
+          factorId: 99,
+          value: {
+            items: [
+              {
+                label: 'Density',
+                propertyTypeId: 1,
+                text: '1000'
+              }
+            ]
+          }
+        }], testContext, testTx)
+        expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
       })
     })
 
-    it('rejects when batchCreateFactors fails', () => {
-      target.factorService.deleteFactorsForExperimentId = mockResolve()
-      target.factorService.batchCreateFactors = mockReject('error')
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
-      target.factorLevelService.batchCreateFactorLevels = mock()
+    it('inserts, updated, and deletes factors and levels as appropriate', () => {
+      const independentVariables = [
+        {
+          name: 'Density',
+          levels: [
+            {
+              items: [
+                {
+                  label: 'Density',
+                  propertyTypeId: 1,
+                  text: '1000'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 55,
+          name: 'SeedUpdated',
+          levels: [
+            {
+              items: [
+                {
+                  label: 'SeedUpdated',
+                  propertyTypeId: 1,
+                  text: 'ABC'
+                }
+              ]
+            },
+            {
+              id: 66,
+              items: [
+                {
+                  label: 'SeedUpdated',
+                  propertyTypeId: 1,
+                  text: 'DEFUpdated'
+                }
+              ]
+            }
+          ]
+        }
+      ]
 
-      return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{}, {}], testContext, testTx)
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
-        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+      target.factorService.getFactorsByExperimentId = mockResolve([
+        {
+          id: 55,
+          experimentId: 42,
+          name: 'Seed',
+          refFactorTypeId: 1,
+          refDataSourceId: 1
+        },
+        {
+          id: 56,
+          experiment_id: 42,
+          name: 'IShouldBeDeleted',
+          refFactorTypeId: 1,
+          refDataSourceId: 1
+        }
+      ])
+      target.factorLevelService.getFactorLevelsByFactorId = jest.fn((factorId) => {
+        if (factorId === 55) {
+          return Promise.resolve([
+            {
+              id: 66,
+              factorId: 55,
+              value: {
+                items: [
+                  {
+                    label: 'Seed',
+                    propertyTypeId: 1,
+                    text: 'DEF'
+                  }
+                ]
+              }
+            },
+            {
+              id: 67,
+              factorId: 55,
+              value: {
+                items: [
+                  {
+                    label: 'Seed',
+                    propertyTypeId: 1,
+                    text: 'GHI'
+                  }
+                ]
+              }
+            }
+          ])
+        } else {
+          return Promise.resolve([])
+        }
+      })
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorService.batchCreateFactors = mockResolve([99])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+
+      return target.persistIndependentVariables(independentVariables, 42, testContext, false, testTx).then(() => {
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(42, false)
+        expect(target.factorLevelService.getFactorLevelsByFactorId).toHaveBeenCalledWith(55)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([67], testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([56], testTx)
+        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([{
+          name: 'Density',
+          refFactorTypeId: 1,
+          experimentId: 42,
+          refDataSourceId: 1
+        }], testContext, testTx)
+        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([{
+          factorId: 99,
+          value: {
+            items: [
+              {
+                label: 'Density',
+                propertyTypeId: 1,
+                text: '1000'
+              }
+            ]
+          }
+        }], testContext, testTx)
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([{
+          id: 55,
+          experimentId: 42,
+          name: 'SeedUpdated',
+          refFactorTypeId: 1,
+          refDataSourceId: 1
+        }], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([{
+          id: 66,
+          factorId: 55,
+          value: {
+            items: [
+              {
+                label: 'SeedUpdated',
+                propertyTypeId: 1,
+                text: 'DEFUpdated'
+              }
+            ]
+          }
+        }], testContext, testTx)
       })
     })
-
-    it('rejects when deleteFactorsForExperimentId fails', () => {
-      target.factorService.deleteFactorsForExperimentId = mockReject('error')
-      target.factorService.batchCreateFactors = mock()
-      FactorDependentCompositeService.mapVariablesDTO2LevelsEntity = mock()
-      target.factorLevelService.batchCreateFactorLevels = mock()
-
-      return target.persistVariablesWithLevels(1, [{}, {}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.factorService.deleteFactorsForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
-        expect(FactorDependentCompositeService.mapVariablesDTO2LevelsEntity).not.toHaveBeenCalled()
-        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('persistVariablesWithoutLevels', () => {
-    it('deletes and creates dependent variables', () => {
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
-      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
-
-      return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
-      })
-    })
-
-    it('deletes dependent variables, but does not create new ones', () => {
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
-      target.dependentVariableService.batchCreateDependentVariables = mock()
-
-      return target.persistVariablesWithoutLevels(1, [], testContext, false, testTx).then(() => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
-      })
-    })
-
-    it('rejects when batchCreateDependentVariables fails', () => {
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
-      target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
-
-      return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when deleteDependentVariablesForExperimentId fails', () => {
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
-      target.dependentVariableService.batchCreateDependentVariables = mock()
-
-      return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('persistVariables', () => {
-    it('calls persistVariablesWithLevels and persistVariablesWithoutLevels', () => {
-      target.persistVariablesWithLevels = mockResolve()
-      target.persistVariablesWithoutLevels = mockResolve()
-
-      return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {
-        expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
-        expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
-      })
-    })
-
-    it('rejects when persistVariablesWithoutLevels fails', () => {
-      target.persistVariablesWithLevels = mockResolve()
-      target.persistVariablesWithoutLevels = mockReject('error')
-
-      return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
-        expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when persistVariablesWithLevels fails', () => {
-      target.persistVariablesWithLevels = mockReject('error')
-      target.persistVariablesWithoutLevels = mock()
-
-      return target.persistVariables(1, [{}], [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.persistVariablesWithLevels).toHaveBeenCalledWith(1, [{}], testContext, false, testTx)
-        expect(target.persistVariablesWithoutLevels).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('persistAllVariables', () => {
-    it('persists variables, and returns response', () => {
-      target.securityService.permissionsCheck = mockResolve()
-      target.persistVariables = mockResolve()
-      AppUtil.createPostResponse = mock()
-      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
-      const experimentVariables = {
-        independent: [{}],
-        exogenous: [],
-        dependent: [{}, {}],
-        experimentId: 1,
-      }
-
-      return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
-        expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, false, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
-      })
-    })
-
-    it('rejects when persistVariables fails', () => {
-      target.securityService.permissionsCheck = mockResolve()
-      target.persistVariables = mockReject('error')
-      AppUtil.createPostResponse = mock()
-      FactorDependentCompositeService.mapIndependentAndExogenousVariableDTO2Entity = mock([{}])
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{}, {}])
-      const experimentVariables = {
-        independent: [{}],
-        exogenous: [],
-        dependent: [{}, {}],
-        experimentId: 1,
-      }
-
-      return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
-        expect(target.persistVariables).toHaveBeenCalledWith(1, [{}], [{}, {}], testContext, false, testTx)
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-
   })
 })

@@ -138,27 +138,27 @@ describe('FactorLevelService', () => {
   })
 
   describe('batchUpdateFactorLevels', () => {
-    it('calls validate, batchUpdate, and returns put response', () => {
+    it('calls validate, batchUpdate, and returns post response', () => {
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockResolve([])
-      AppUtil.createPutResponse = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
-        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith(testTx, [{}], testContext)
-        expect(AppUtil.createPutResponse).toHaveBeenCalledWith([])
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([])
       })
     })
 
     it('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockReject('error')
-      AppUtil.createPutResponse = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
-        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith(testTx, [{}], testContext)
-        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
@@ -166,12 +166,12 @@ describe('FactorLevelService', () => {
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.factorLevel.batchUpdate = mock()
-      AppUtil.createPutResponse = mock()
+      AppUtil.createPostResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.factorLevel.batchUpdate).not.toHaveBeenCalled()
-        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
@@ -194,6 +194,27 @@ describe('FactorLevelService', () => {
       return target.deleteFactorLevel(1).then(() => {}, () => {
         expect(db.factorLevel.remove).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
+      })
+    })
+  })
+
+  describe('batchDeleteFactorLevels', () => {
+    it('calls factorLevel batchRemove and returns data', () => {
+      db.factorLevel.batchRemove = mockResolve([1,2])
+
+      return target.batchDeleteFactorLevels([1,2], testTx).then((data) => {
+        expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(data).toEqual([1,2])
+      })
+    })
+
+    it('throws an error when remove returns array whose length mismatches input', () => {
+      db.factorLevel.batchRemove = mockResolve([null, 1])
+      AppError.notFound = mock()
+
+      return target.batchDeleteFactorLevels([1,2], testTx).then(() => {}, () => {
+        expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all factor levels requested for delete were found')
       })
     })
   })

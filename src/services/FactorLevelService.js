@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import log4js from 'log4js'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -38,10 +39,11 @@ class FactorLevelService {
       }
     })
 
-  batchUpdateFactorLevels(factorLevels, context) {
-    return this.validator.validate(factorLevels, 'PUT')
-      .then(() => db.factorLevel.repository().tx('updateFactorLevelsTx', t => db.factorLevel.batchUpdate(t, factorLevels, context)
-        .then(data => AppUtil.createPutResponse(data))))
+  @Transactional('batchUpdateFactorLevels')
+  batchUpdateFactorLevels(factorLevels, context, tx) {
+    return this.validator.validate(factorLevels, 'POST', tx)
+      .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
+        .then(data => AppUtil.createPostResponse(data)))
   }
 
   deleteFactorLevel = id => db.factorLevel.remove(id)
@@ -49,6 +51,17 @@ class FactorLevelService {
       if (!data) {
         logger.error(`Factor Level Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Level Not Found for requested id')
+      } else {
+        return data
+      }
+    })
+
+  @Transactional('batchDeleteFactorLevels')
+  batchDeleteFactorLevels = (ids, tx) => db.factorLevel.batchRemove(ids, tx)
+    .then((data) => {
+      if (_.filter(data, element => element !== null).length !== ids.length) {
+        logger.error('Not all factor levels requested for delete were found')
+        throw AppError.notFound('Not all factor levels requested for delete were found')
       } else {
         return data
       }

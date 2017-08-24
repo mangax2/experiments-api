@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import log4js from 'log4js'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -54,6 +55,17 @@ class FactorService {
       if (!data) {
         logger.error(`Factor Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Not Found for requested id')
+      } else {
+        return data
+      }
+    })
+
+  @Transactional('batchDeleteFactors')
+  batchDeleteFactors = (ids, tx) => db.factor.batchRemove(ids, tx)
+    .then((data) => {
+      if (_.filter(data, element => element !== null).length !== ids.length) {
+        logger.error('Not all factors requested for delete were found')
+        throw AppError.notFound('Not all factors requested for delete were found')
       } else {
         return data
       }

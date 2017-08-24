@@ -141,24 +141,24 @@ describe('FactorLevelService', () => {
     it('calls validate, batchUpdate, and returns post response', () => {
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockResolve([])
-      AppUtil.createPostResponse = mock()
+      AppUtil.createPutResponse = mock()
 
       return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([])
+        expect(AppUtil.createPutResponse).toHaveBeenCalledWith([])
       })
     })
 
     it('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockReject('error')
-      AppUtil.createPostResponse = mock()
+      AppUtil.createPutResponse = mock()
 
       return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
@@ -166,12 +166,12 @@ describe('FactorLevelService', () => {
     it('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.factorLevel.batchUpdate = mock()
-      AppUtil.createPostResponse = mock()
+      AppUtil.createPutResponse = mock()
 
       return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+        expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })

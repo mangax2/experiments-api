@@ -41,9 +41,9 @@ class FactorLevelService {
 
   @Transactional('batchUpdateFactorLevels')
   batchUpdateFactorLevels(factorLevels, context, tx) {
-    return this.validator.validate(factorLevels, 'POST', tx)
+    return this.validator.validate(factorLevels, 'PUT', tx)
       .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+        .then(data => AppUtil.createPutResponse(data)))
   }
 
   deleteFactorLevel = id => db.factorLevel.remove(id)

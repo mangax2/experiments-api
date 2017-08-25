@@ -231,6 +231,27 @@ class FactorDependentCompositeService {
     return Promise.resolve()
   }
 
+  static determineIdsOfFactorsToDelete(existingFactors, factorEntitiesFromRequest) {
+    const existingFactorIds =
+      _.map(existingFactors, existingFactorEntity => existingFactorEntity.id)
+    const factorIdsFromRequest =
+      _.chain(factorEntitiesFromRequest)
+        .map(newFactorEntity => newFactorEntity.id)
+        .filter(factorId => !(_.isUndefined(factorId) || _.isNull(factorId)))
+        .value()
+    return _.difference(existingFactorIds, factorIdsFromRequest)
+  }
+
+  static determineIdsOfFactorLevelsToDelete(existingLevels, levelEntitiesFromRequest) {
+    const existingLevelIds = _.map(existingLevels, existingLevel => existingLevel.id)
+    const levelIdsFromRequest =
+      _.chain(levelEntitiesFromRequest)
+        .map(newLevel => newLevel.id)
+        .filter(levelId => !(_.isUndefined(levelId) || _.isNull(levelId)))
+        .value()
+    return _.difference(existingLevelIds, levelIdsFromRequest)
+  }
+
   persistIndependentVariables(independentVariables, experimentId, context, isTemplate, tx) {
     return this.getFactorsWithLevels(experimentId, isTemplate).then((data) => {
       const factorEntitiesFromRequest = _.map(independentVariables, factorDTO => ({
@@ -245,39 +266,36 @@ class FactorDependentCompositeService {
           factorDTO.id, factorDTO.levels),
       }))
 
+      const levelEntitiesFromRequest = _.flatten(
+        _.map(factorEntitiesFromRequest, factorEntityFromRequest => factorEntityFromRequest.levels))
+
+
+      // Determine inserts, updates, and deletes for factors
       const factorInsertsAndFactorDependentLevelInserts = _.filter(factorEntitiesFromRequest,
           factorEntity => _.isNull(factorEntity.id) || _.isUndefined(factorEntity.id))
 
       const factorUpdates = _.filter(factorEntitiesFromRequest,
           factorEntity => !(_.isNull(factorEntity.id) || _.isUndefined(factorEntity.id)))
 
-      const existingFactorIds = _.map(data.factors, existingFactorEntity => existingFactorEntity.id)
-      const factorIdsFromRequest =
-        _.chain(factorEntitiesFromRequest)
-          .map(newFactorEntity => newFactorEntity.id)
-          .filter(factorId => !(_.isUndefined(factorId) || _.isNull(factorId)))
-          .value()
-      const idsOfFactorsToDelete = _.difference(existingFactorIds, factorIdsFromRequest)
+      const idsOfFactorsToDelete =
+        FactorDependentCompositeService.determineIdsOfFactorsToDelete(
+          data.factors, factorEntitiesFromRequest)
 
 
-      const allLevelEntitiesFromRequest = _.flatten(
-        _.map(factorEntitiesFromRequest, factorEntityFromRequest => factorEntityFromRequest.levels))
-
-      const levelUpdates = _.filter(allLevelEntitiesFromRequest,
-          levelEntity => !(_.isNull(levelEntity.id) || _.isUndefined(levelEntity.id)))
-
-      const levelInsertsIndependentOfFactorInserts = _.filter(allLevelEntitiesFromRequest,
+      // Determine inserts, updates, and deletes for factor levels
+      const levelInsertsIndependentOfFactorInserts = _.filter(levelEntitiesFromRequest,
         levelEntity => (_.isNull(levelEntity.id) || _.isUndefined(levelEntity.id))
           && !(_.isNull(levelEntity.factorId) || _.isUndefined(levelEntity.factorId)))
 
-      const existingLevelIds = _.map(data.levels, existingLevel => existingLevel.id)
-      const levelIdsFromRequest =
-        _.chain(allLevelEntitiesFromRequest)
-          .map(newLevel => newLevel.id)
-          .filter(levelId => !(_.isUndefined(levelId) || _.isNull(levelId)))
-          .value()
-      const idsOfLevelsToDelete = _.difference(existingLevelIds, levelIdsFromRequest)
+      const levelUpdates = _.filter(levelEntitiesFromRequest,
+          levelEntity => !(_.isNull(levelEntity.id) || _.isUndefined(levelEntity.id)))
 
+      const idsOfLevelsToDelete =
+        FactorDependentCompositeService.determineIdsOfFactorLevelsToDelete(
+          data.levels, levelEntitiesFromRequest)
+
+
+      // Execute the inserts, updates, and deletes
       return this.factorLevelService.batchDeleteFactorLevels(idsOfLevelsToDelete, tx)
         .then(() => this.factorService.batchDeleteFactors(idsOfFactorsToDelete, tx)
           .then(() => Promise.all([

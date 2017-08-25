@@ -72,6 +72,26 @@ describe('FactorLevelService', () => {
     })
   })
 
+  describe('getFactorLevelsByExperimentIdNoExistenceCheck', () => {
+    it('finds factors by that id', () => {
+      db.factorLevel.findByExperimentId = mockResolve([])
+
+      return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+
+    it('rejects when findByExperimentId fails', () => {
+      db.factorLevel.findByExperimentId = mockReject('error')
+
+      return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('getFactorLevelsByFactorId', () => {
     it('calls getFactorById and findByFactorId', () => {
       target.factorService.getFactorById = mockResolve()

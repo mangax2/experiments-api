@@ -21,24 +21,15 @@ class FactorDependentCompositeService {
     this.variablesValidator = new VariablesValidator()
   }
 
-  getFactorsWithLevels(experimentId, isTemplate) {
-    return this.getFactors(experimentId, isTemplate)
-      .then(factors => this.getFactorLevels(factors)
-        .then(levels => ({
-          factors: _.flatten(factors),
-          levels: _.flatten(levels),
-        })),
-      )
-  }
-
-  getFactors(experimentId, isTemplate) {
-    return this.factorService.getFactorsByExperimentId(experimentId, isTemplate)
-  }
-
-  getFactorLevels(factors) {
-    return Promise.all(_.map(factors, factor =>
-      this.factorLevelService.getFactorLevelsByFactorId(factor.id)),
-    )
+  @Transactional('getFactorsWithLevels')
+  static getFactorsWithLevels(experimentId, tx) {
+    return Promise.all([
+      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
+    ]).then(data => ({
+      factors: data[0],
+      levels: data[1],
+    }))
   }
 
   static extractLevelsForFactor(factor, allLevelsForAllFactors) {
@@ -103,12 +94,14 @@ class FactorDependentCompositeService {
         dependentVariableEntities))
   }
 
-  getAllVariablesByExperimentId(experimentId, isTemplate) {
+  @Transactional('getAllVariablesByExperimentId')
+  getAllVariablesByExperimentId(experimentId, isTemplate, tx) {
     return Promise.all(
       [
-        this.getFactorsWithLevels(experimentId, isTemplate),
-        this.factorTypeService.getAllFactorTypes(),
-        this.dependentVariableService.getDependentVariablesByExperimentId(experimentId, isTemplate),
+        FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
+        this.factorTypeService.getAllFactorTypes(tx),
+        this.dependentVariableService.getDependentVariablesByExperimentId(
+          experimentId, isTemplate, tx),
       ],
     ).then(results => FactorDependentCompositeService.assembleVariablesObject(
       results[0].factors,
@@ -252,8 +245,8 @@ class FactorDependentCompositeService {
     return _.difference(existingLevelIds, levelIdsFromRequest)
   }
 
-  persistIndependentVariables(independentVariables, experimentId, context, isTemplate, tx) {
-    return this.getFactorsWithLevels(experimentId, isTemplate).then((data) => {
+  persistIndependentVariables(independentVariables, experimentId, context, tx) {
+    return FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx).then((data) => {
       const factorEntitiesFromRequest = _.map(independentVariables, factorDTO => ({
         id: factorDTO.id,
         name: factorDTO.name,
@@ -294,7 +287,6 @@ class FactorDependentCompositeService {
         FactorDependentCompositeService.determineIdsOfFactorLevelsToDelete(
           data.levels, levelEntitiesFromRequest)
 
-
       // Execute the inserts, updates, and deletes
       return this.factorLevelService.batchDeleteFactorLevels(idsOfLevelsToDelete, tx)
         .then(() => this.factorService.batchDeleteFactors(idsOfFactorsToDelete, tx)
@@ -324,10 +316,10 @@ class FactorDependentCompositeService {
       .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx)
         .then(() => Promise.all([
           this.persistIndependentVariables(
-            experimentVariables.independent, expId, context, isTemplate, tx),
+            experimentVariables.independent, expId, context, tx),
           this.persistDependentVariables(
-            experimentVariables.dependent, expId, context, isTemplate, tx)]))
-        .then(() => AppUtil.createPostResponse([{ id: expId }])))
+            experimentVariables.dependent, expId, context, isTemplate, tx),
+        ])).then(() => AppUtil.createPostResponse([{ id: expId }])))
   }
 }
 

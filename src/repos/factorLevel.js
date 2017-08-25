@@ -1,4 +1,5 @@
 const columns = "id,value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
+const qualifiedColumns = "fl.id,fl.value,fl.factor_id,fl.created_user_id,fl.created_date,fl.modified_user_id,fl.modified_date"
 
 
 module.exports = (rep, pgp) => ({
@@ -7,6 +8,9 @@ module.exports = (rep, pgp) => ({
   find: (id, tx = rep) => tx.oneOrNone(`SELECT ${columns} FROM factor_level_new WHERE id = $1`, id),
 
   batchFind: (ids, tx = rep) => tx.any(`SELECT ${columns} FROM factor_level_new WHERE id IN ($1:csv)`, [ids]),
+
+  findByExperimentId: (experimentId, tx = rep) =>
+    tx.any(`SELECT ${qualifiedColumns} FROM factor_new f inner join factor_level_new fl on f.id = fl.factor_id WHERE experiment_id=$1`, experimentId),
 
   findByFactorId: factorId => rep.any(`SELECT ${columns} FROM factor_level_new WHERE factor_id = $1`, factorId),
 

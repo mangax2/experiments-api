@@ -31,6 +31,11 @@ class FactorService {
       .then(() => db.factor.findByExperimentId(id, tx))
   }
 
+  @Transactional('getFactorsByExperimentIdNoExistenceCheck')
+  static getFactorsByExperimentIdNoExistenceCheck(id, tx) {
+    return db.factor.findByExperimentId(id, tx)
+  }
+
   @Transactional('getFactorById')
   getFactorById = (id, tx) => db.factor.find(id, tx)
     .then((data) => {

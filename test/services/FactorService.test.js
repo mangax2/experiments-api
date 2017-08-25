@@ -108,6 +108,26 @@ describe('FactorService', () => {
     })
   })
 
+  describe('getFactorsByExperimentIdNoExistenceCheck', () => {
+    it('finds factors by that id', () => {
+      db.factor.findByExperimentId = mockResolve([])
+
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
+        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+
+    it('rejects when findByExperimentId fails', () => {
+      db.factor.findByExperimentId = mockReject('error')
+
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
+        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('getFactorById', () => {
     it('returns factor found by id', () => {
       db.factor.find = mockResolve({})

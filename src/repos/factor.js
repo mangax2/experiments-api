@@ -35,7 +35,7 @@ module.exports = (rep, pgp) => ({
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-      tier: `CAST(${factor.tier} AS numeric)`
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
     }))
     const query = `${pgp.helpers.insert(values, columnSet)} RETURNING id`
     return tx.any(query)
@@ -62,7 +62,7 @@ module.exports = (rep, pgp) => ({
       experiment_id: factor.experimentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-      tier: `CAST(${factor.tier} AS numeric)`
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
     }))
     const query = `${pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
     return tx.any(query)

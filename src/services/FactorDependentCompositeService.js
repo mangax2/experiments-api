@@ -132,80 +132,12 @@ class FactorDependentCompositeService {
     return 2
   }
 
-  // static mapVariableDTO2DbEntity(variables, experimentId, variableTypeId) {
-  //   return _.map(variables, (variable) => {
-  //     variable.refFactorTypeId = variableTypeId
-  //     variable.experimentId = experimentId
-  //     return variable
-  //   })
-  // }
-
-  // static mapLevelDTO2DbEntity(levels, factorId) {
-  //   return _.map(levels, level => ({
-  //     value: level,
-  //     factorId,
-  //   }))
-  // }
-
   static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
     return _.map(dependentVariables, (dependentVariable) => {
       dependentVariable.experimentId = experimentId
       return dependentVariable
     })
   }
-
-  // static mapIndependentAndExogenousVariableDTO2Entity(experimentId,
-  //   independentVariables, exogenousVariables) {
-  //   const independentVariableEntities =
-  //     FactorDependentCompositeService.mapVariableDTO2DbEntity(
-  //       independentVariables,
-  //       experimentId,
-  //       FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID,
-  //     )
-  //
-  //   const exogenousVariableEntities =
-  //     FactorDependentCompositeService.mapVariableDTO2DbEntity(
-  //       exogenousVariables,
-  //       experimentId,
-  //       FactorDependentCompositeService.EXOGENOUS_VARIABLE_TYPE_ID,
-  //     )
-  //
-  //   return _.concat(independentVariableEntities, exogenousVariableEntities)
-  // }
-
-  // static mapVariablesDTO2LevelsEntity(variables, ids) {
-  //   // This produces an array of arrays where each sub array represents levels of a variable
-  //   const factorLevels = _.map(variables, (factor, factorIndex) =>
-  //     FactorDependentCompositeService.mapLevelDTO2DbEntity(factor.levels, ids[factorIndex].id),
-  //   )
-  //   // This returns an array of levels removing the sub array.
-  //   return _.flatten(factorLevels)
-  // }
-
-  // persistVariablesWithLevels(experimentId, independentAndExogenousVariables, context,
-  //   isTemplate, tx) {
-  //   return this.factorService.deleteFactorsForExperimentId(experimentId, isTemplate, tx)
-  //     .then(() => {
-  //       if (independentAndExogenousVariables.length > 0) {
-  //         return this.factorService.batchCreateFactors(independentAndExogenousVariables,
-  //           context, tx)
-  //           .then((ids) => {
-  //             const levelEntities = FactorDependentCompositeService.mapVariablesDTO2LevelsEntity(
-  //               independentAndExogenousVariables,
-  //               ids,
-  //             )
-  //             if (levelEntities.length > 0) {
-  //               return this.factorLevelService.batchCreateFactorLevels(
-  //                 levelEntities,
-  //                 context,
-  //                 tx)
-  //             }
-  //             return Promise.resolve()
-  //           })
-  //       }
-  //       return Promise.resolve()
-  //     })
-  // }
 
   persistVariablesWithoutLevels(experimentId, dependentVariables, context, isTemplate, tx) {
     return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId,
@@ -358,22 +290,6 @@ class FactorDependentCompositeService {
               this.batchUpdateFactorLevels(levelUpdates, context, tx)]))))
     })
   }
-
-  // persistVariables(experimentId,
-  //   independentAndExogenousVariables,
-  //   dependentVariables,
-  //   context, isTemplate,
-  //   tx) {
-  //   return this.persistVariablesWithLevels(
-  //     experimentId,
-  //     independentAndExogenousVariables,
-  //     context,
-  //     isTemplate,
-  //     tx,
-  //   ).then(() =>
-  //     this.persistVariablesWithoutLevels(
-  //       experimentId, dependentVariables, context, isTemplate, tx))
-  // }
 
   persistDependentVariables(dependentVariables, experimentId, context, isTemplate, tx) {
     const dependentVariableEntities =

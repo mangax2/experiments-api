@@ -10,37 +10,63 @@ module.exports = (rep, pgp) => ({
 
   all: (tx = rep) => tx.any('SELECT * FROM factor_new'),
 
-  batchCreate: (factors, context, tx = rep) => tx.batch(
-    factors.map(
-      factor => tx.one(
-        'INSERT INTO factor_new(id, name, ref_factor_type_id, ref_data_source_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) ' +
-        'VALUES(nextval(pg_get_serial_sequence(\'factor\', \'id\')), $1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6) RETURNING id',
-        [factor.name,
-          factor.refFactorTypeId,
-          factor.refDataSourceId,
-          factor.experimentId,
-          context.userId,
-          factor.tier],
-      ),
-    ),
-  ),
+  batchCreate: (factors, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      [
+        'id:raw',
+        'name',
+        'ref_factor_type_id',
+        'ref_data_source_id',
+        'experiment_id',
+        'created_user_id',
+        'created_date:raw',
+        'modified_user_id',
+        'modified_date:raw',
+        'tier:raw'
+      ],
+      {table: 'factor_new'})
+    const values = factors.map(factor => ({
+      id: 'nextval(pg_get_serial_sequence(\'factor\', \'id\'))',
+      name: factor.name,
+      ref_factor_type_id: factor.refFactorTypeId,
+      ref_data_source_id: factor.refDataSourceId,
+      experiment_id: factor.experimentId,
+      created_user_id: context.userId,
+      created_date: 'CURRENT_TIMESTAMP',
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+      tier: `CAST(${factor.tier} AS numeric)`
+    }))
+    const query = `${pgp.helpers.insert(values, columnSet)} RETURNING id`
+    return tx.any(query)
+  },
 
-  batchUpdate: (factors, context, tx = rep) => tx.batch(
-    factors.map(
-      factor => tx.oneOrNone(
-        'UPDATE factor_new SET ' +
-        '(name, ref_factor_type_id, ref_data_source_id, experiment_id, modified_user_id, modified_date,     tier) = ' +
-        '($1,   $2,                 $3,                 $4,            $5,               CURRENT_TIMESTAMP, $7) WHERE id=$6 RETURNING *',
-        [factor.name,
-          factor.refFactorTypeId,
-          factor.refDataSourceId,
-          factor.experimentId,
-          context.userId,
-          factor.id,
-          factor.tier],
-      ),
-    ),
-  ),
+  batchUpdate: (factors, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      [
+        '?id',
+        'name',
+        'ref_factor_type_id',
+        'ref_data_source_id',
+        'experiment_id',
+        'modified_user_id',
+        'modified_date:raw',
+        'tier:raw'
+      ],
+      {table: 'factor_new'})
+    const data = factors.map(factor => ({
+      id: factor.id,
+      name: factor.name,
+      ref_factor_type_id: factor.refFactorTypeId,
+      ref_data_source_id: factor.refDataSourceId,
+      experiment_id: factor.experimentId,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+      tier: `CAST(${factor.tier} AS numeric)`
+    }))
+    const query = `${pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
+    return tx.any(query)
+  },
 
   remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM factor_new WHERE id=$1 RETURNING id', id),
 

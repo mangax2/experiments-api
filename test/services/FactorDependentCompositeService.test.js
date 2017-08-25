@@ -673,6 +673,7 @@ describe('FactorDependentCompositeService', () => {
   describe('persistAllVariables', () => {
     it('persists variables, and returns response', () => {
       target.securityService.permissionsCheck = mockResolve()
+      target.variablesValidator.validate = mockResolve()
       target.persistIndependentVariables = mockResolve()
       target.persistDependentVariables = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -684,6 +685,7 @@ describe('FactorDependentCompositeService', () => {
 
       return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
         expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, false, testTx)
         expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
@@ -692,6 +694,7 @@ describe('FactorDependentCompositeService', () => {
 
     it('rejects when persistIndependentVariables fails', () => {
       target.securityService.permissionsCheck = mockResolve()
+      target.variablesValidator.validate = mockResolve()
       target.persistIndependentVariables = mockReject('error')
       target.persistDependentVariables = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -703,6 +706,7 @@ describe('FactorDependentCompositeService', () => {
 
       return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
         expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, false, testTx)
         expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()

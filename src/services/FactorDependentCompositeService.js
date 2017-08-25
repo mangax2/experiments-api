@@ -7,6 +7,7 @@ import DependentVariableService from './DependentVariableService'
 import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
 import Transactional from '../decorators/transactional'
+import VariablesValidator from '../validations/VariablesValidator'
 
 
 class FactorDependentCompositeService {
@@ -17,6 +18,7 @@ class FactorDependentCompositeService {
     this.dependentVariableService = new DependentVariableService()
     this.factorTypeService = new FactorTypeService()
     this.securityService = new SecurityService()
+    this.variablesValidator = new VariablesValidator()
   }
 
   getFactorsWithLevels(experimentId, isTemplate) {
@@ -385,12 +387,13 @@ class FactorDependentCompositeService {
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
     const expId = Number(experimentId)
     return this.securityService.permissionsCheck(expId, context, isTemplate, tx)
-      .then(() => Promise.all([
-        this.persistIndependentVariables(
-          experimentVariables.independent, expId, context, isTemplate, tx),
-        this.persistDependentVariables(
-          experimentVariables.dependent, expId, context, isTemplate, tx)]))
-      .then(() => AppUtil.createPostResponse([{ id: expId }]))
+      .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx)
+        .then(() => Promise.all([
+          this.persistIndependentVariables(
+            experimentVariables.independent, expId, context, isTemplate, tx),
+          this.persistDependentVariables(
+            experimentVariables.dependent, expId, context, isTemplate, tx)]))
+        .then(() => AppUtil.createPostResponse([{ id: expId }])))
   }
 }
 

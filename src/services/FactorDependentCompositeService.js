@@ -289,16 +289,17 @@ class FactorDependentCompositeService {
           data.levels, levelEntitiesFromRequest)
 
       // Execute the inserts, updates, and deletes
-      return this.factorLevelService.batchDeleteFactorLevels(idsOfLevelsToDelete, tx)
-        .then(() => this.factorService.batchDeleteFactors(idsOfFactorsToDelete, tx)
+      return Promise.all([
+        this.factorLevelService.batchDeleteFactorLevels(idsOfLevelsToDelete, tx),
+        this.factorService.batchDeleteFactors(idsOfFactorsToDelete, tx)])
+        .then(() => Promise.all([
+          this.batchCreateFactorsAndDependentLevels(
+            factorInsertsAndFactorDependentLevelInserts, context, tx),
+          this.batchCreateFactorLevels(
+            levelInsertsIndependentOfFactorInserts, context, tx)])
           .then(() => Promise.all([
-            this.batchCreateFactorsAndDependentLevels(
-              factorInsertsAndFactorDependentLevelInserts, context, tx),
-            this.batchCreateFactorLevels(
-              levelInsertsIndependentOfFactorInserts, context, tx)])
-            .then(() => Promise.all([
-              this.batchUpdateFactors(factorUpdates, context, tx),
-              this.batchUpdateFactorLevels(levelUpdates, context, tx)]))))
+            this.batchUpdateFactors(factorUpdates, context, tx),
+            this.batchUpdateFactorLevels(levelUpdates, context, tx)])))
     })
   }
 

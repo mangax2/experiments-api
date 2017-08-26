@@ -87,6 +87,16 @@ describe('DependentVariableService', () => {
     })
   })
 
+  describe('getDependentVariablesByExperimentIdNoExistenceCheck', () => {
+    it('calls dependentVariable findByExperimentId', () => {
+      db.dependentVariable.findByExperimentId = mockResolve()
+
+      return DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(1, testTx).then(() => {
+        expect(db.dependentVariable.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      })
+    })
+  })
+
   describe('getDependentVariableById', () => {
     it('calls dependentVariable find', () => {
       db.dependentVariable.find = mockResolve({})

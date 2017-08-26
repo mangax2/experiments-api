@@ -3,7 +3,6 @@ import log4js from 'log4js'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
-import ExperimentsService from './ExperimentsService'
 import FactorLevelsValidator from '../validations/FactorLevelsValidator'
 import FactorService from './FactorService'
 import Transactional from '../decorators/transactional'
@@ -13,7 +12,6 @@ const logger = log4js.getLogger('FactorLevelService')
 class FactorLevelService {
   constructor() {
     this.validator = new FactorLevelsValidator()
-    this.experimentsService = new ExperimentsService()
     this.factorService = new FactorService()
   }
 

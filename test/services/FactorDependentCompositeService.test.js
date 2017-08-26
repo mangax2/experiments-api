@@ -1,5 +1,7 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import AppUtil from '../../src/services/utility/AppUtil'
+import DependentVariableService from '../../src/services/DependentVariableService'
+import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
 import FactorService from '../../src/services/FactorService'
 import FactorLevelService from '../../src/services/FactorLevelService'
@@ -9,6 +11,7 @@ describe('FactorDependentCompositeService', () => {
   const testContext = {}
   const testTx = { tx: {} }
 
+  let verifyExperimentExistsOriginal
   let getFactorsByExperimentIdNoExistenceCheckOriginal
   let getFactorLevelsByExperimentIdNoExistenceCheckOriginal
   let getFactorsWithLevelsOriginal
@@ -21,10 +24,12 @@ describe('FactorDependentCompositeService', () => {
   let createVariablesObjectOriginal
   let assembleIndependentAndExogenousOriginal
   let assembleVariablesObjectOriginal
+  let getDependentVariablesByExperimentIdNoExistenceCheckOriginal
 
   beforeEach(() => {
     target = new FactorDependentCompositeService()
 
+    verifyExperimentExistsOriginal = ExperimentsService.verifyExperimentExists
     getFactorsByExperimentIdNoExistenceCheckOriginal = FactorService.getFactorsByExperimentIdNoExistenceCheck
     getFactorLevelsByExperimentIdNoExistenceCheckOriginal = FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck
     getFactorsWithLevelsOriginal = FactorDependentCompositeService.getFactorsWithLevels
@@ -37,9 +42,11 @@ describe('FactorDependentCompositeService', () => {
     createVariablesObjectOriginal = FactorDependentCompositeService.createVariablesObject
     assembleIndependentAndExogenousOriginal = FactorDependentCompositeService.assembleIndependentAndExogenous
     assembleVariablesObjectOriginal = FactorDependentCompositeService.assembleVariablesObject
+    getDependentVariablesByExperimentIdNoExistenceCheckOriginal = DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck
   })
 
   afterEach(() => {
+    ExperimentsService.verifyExperimentExists = verifyExperimentExistsOriginal
     FactorService.getFactorsByExperimentIdNoExistenceCheck = getFactorsByExperimentIdNoExistenceCheckOriginal
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = getFactorLevelsByExperimentIdNoExistenceCheckOriginal
     FactorDependentCompositeService.getFactorsWithLevels = getFactorsWithLevelsOriginal
@@ -52,6 +59,7 @@ describe('FactorDependentCompositeService', () => {
     FactorDependentCompositeService.createVariablesObject = createVariablesObjectOriginal
     FactorDependentCompositeService.assembleIndependentAndExogenous = assembleIndependentAndExogenousOriginal
     FactorDependentCompositeService.assembleVariablesObject = assembleVariablesObjectOriginal
+    DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = getDependentVariablesByExperimentIdNoExistenceCheckOriginal
   })
 
   describe('getFactorsWithLevels', () => {
@@ -328,6 +336,7 @@ describe('FactorDependentCompositeService', () => {
           }
         ],
       }
+      ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
       target.factorTypeService.getAllFactorTypes = mockResolve(factorTypes)
@@ -336,7 +345,7 @@ describe('FactorDependentCompositeService', () => {
         required: true,
         question_code: 'ABC_GDEG',
       }]
-      target.dependentVariableService.getDependentVariablesByExperimentId = mockResolve(dependentVariables)
+      DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockResolve(dependentVariables)
       const expectedReturn = {
         independent: [{
           id: 42,
@@ -370,23 +379,26 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.getAllVariablesByExperimentId(1, false, testTx).then((data) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testTx)
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
 
         expect(data).toEqual(expectedReturn)
       })
     })
 
     it('rejects when a call fails in the Promise all', () => {
+      ExperimentsService.verifyExperimentExists = mockResolve()
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve()
       target.factorTypeService.getAllFactorTypes = mockResolve()
-      target.dependentVariableService.getDependentVariablesByExperimentId = mockReject('error')
+      DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject('error')
 
       return target.getAllVariablesByExperimentId(1, false, testTx).then(() => {}, (err) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testTx)
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(target.dependentVariableService.getDependentVariablesByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })

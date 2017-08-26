@@ -29,6 +29,11 @@ class DependentVariableService {
       .then(() => db.dependentVariable.findByExperimentId(experimentId, tx))
   }
 
+  @Transactional('getDependentVariablesByExperimentIdNoExistenceCheck')
+  static getDependentVariablesByExperimentIdNoExistenceCheck(experimentId, tx) {
+    return db.dependentVariable.findByExperimentId(experimentId, tx)
+  }
+
   getDependentVariableById = id => db.dependentVariable.find(id)
     .then((data) => {
       if (!data) {

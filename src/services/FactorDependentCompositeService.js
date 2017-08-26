@@ -98,16 +98,17 @@ class FactorDependentCompositeService {
   getAllVariablesByExperimentId(experimentId, isTemplate, tx) {
     return Promise.all(
       [
+        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, tx),
         FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
         this.factorTypeService.getAllFactorTypes(tx),
-        this.dependentVariableService.getDependentVariablesByExperimentId(
-          experimentId, isTemplate, tx),
+        DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(
+          experimentId, tx),
       ],
     ).then(results => FactorDependentCompositeService.assembleVariablesObject(
-      results[0].factors,
-      results[0].levels,
-      results[1],
+      results[1].factors,
+      results[1].levels,
       results[2],
+      results[3],
     ))
   }
 

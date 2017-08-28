@@ -28,6 +28,11 @@ class CombinationElementService {
       .then(() => db.combinationElement.findAllByTreatmentId(id, tx))
   }
 
+  @Transactional('getCombinationElementsByExperimentId')
+  getCombinationElementsByExperimentId(experimentId, tx) {
+    return db.combinationElement.findAllByExperimentId(experimentId, tx)
+  }
+
   @Transactional('batchGetCombinationElementsByTreatmentIds')
   batchGetCombinationElementsByTreatmentIds(ids, tx) {
     return this.treatmentService.batchGetTreatmentByIds(ids, tx)

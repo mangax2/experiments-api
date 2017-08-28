@@ -15,6 +15,8 @@ module.exports = (rep, pgp) => ({
 
   findAllByTreatmentId: (treatmentId, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId),
 
+  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT ce.* FROM combination_element_new ce INNER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId),
+
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
     if (!treatmentIds || treatmentIds.length === 0) {
       return Promise.resolve([])

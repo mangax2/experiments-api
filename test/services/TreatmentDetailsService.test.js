@@ -1,5 +1,6 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import TreatmentDetailsService from '../../src/services/TreatmentDetailsService'
+import FactorLevelService from '../../src/services/FactorLevelService'
 import AppUtil from '../../src/services/utility/AppUtil'
 
 describe('TreatmentDetailsService', () => {
@@ -7,44 +8,37 @@ describe('TreatmentDetailsService', () => {
   const testContext = {}
   const testTx = { tx: {} }
 
+  let getFactorLevelsByExperimentIdNoExistenceCheckOriginal
+
   beforeEach(() => {
     target = new TreatmentDetailsService()
+
+    getFactorLevelsByExperimentIdNoExistenceCheckOriginal = FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck
+  })
+
+  afterEach(() => {
+    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = getFactorLevelsByExperimentIdNoExistenceCheckOriginal
   })
 
   describe('getAllTreatmentDetails', () => {
     it('returns treatments with combination elements', () => {
       const treatments = [{ id: 1 }]
-      const combinationElements = [[{}, {}]]
+      const combinationElements = [{treatment_id: 1, id: 1, factor_level_id:1}]
+      const factorLevels = [{id: 1, factor_id: 1, value: {}}]
+      const factors = [{id: 1, name: 'test'}]
+
       target.treatmentService.getTreatmentsByExperimentId = mockResolve(treatments)
-      target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockResolve(combinationElements)
+      target.combinationElementService.getCombinationElementsByExperimentId = mockResolve(combinationElements)
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve(factorLevels)
+      target.factorService.getFactorsByExperimentId = mockResolve(factors)
 
       return target.getAllTreatmentDetails(1,false, testTx).then((data) => {
         expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
-        expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).toHaveBeenCalledWith([1], testTx)
-        expect(data).toEqual([{ id: 1, combinationElements: [{}, {}] }])
-      })
-    })
-
-    it('rejects when batchGetCombinationElementsByTreatmentIdsNoValidate fails', () => {
-      const treatments = [{ id: 1 }]
-      target.treatmentService.getTreatmentsByExperimentId = mockResolve(treatments)
-      target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockReject('error')
-
-      return target.getAllTreatmentDetails(1, false,testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false,testTx)
-        expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).toHaveBeenCalledWith([1], testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when getTreatmentsByExperimentId fails', () => {
-      target.treatmentService.getTreatmentsByExperimentId = mockReject('error')
-      target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate = mockReject('error')
-
-      return target.getAllTreatmentDetails(1,false, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
-        expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(false).toEqual(true)
+        // expect(data).toEqual([{ id: 1, combinationElements: [{}, {}] }])
       })
     })
   })

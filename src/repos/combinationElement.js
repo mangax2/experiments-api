@@ -1,8 +1,8 @@
 import _ from 'lodash'
 
-const columns = "ce.id, f.name, COALESCE(((fl.value->'items')->0)->>'refId', ((fl.value->'items')->0)->>'text') AS" +
-  " value,ce.treatment_id," +
-  " ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date"
+const columns = 'ce.id, f.name, COALESCE(((fl.value->\'items\')->0)->>\'refId\', ((fl.value->\'items\')->0)->>\'text\') AS' +
+  ' value,ce.treatment_id,' +
+  ' ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
 const tables = 'combination_element_new ce INNER JOIN factor_level_new fl ON ce.factor_level_id = fl.id INNER JOIN factor_new f ON fl.factor_id = f.id'
 const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
 
@@ -27,12 +27,11 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['name', 'value', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element' },
+      ['factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      { table: 'combination_element_new' },
     )
     const values = combinationElements.map(ce => ({
-      name: ce.name,
-      value: ce.value,
+      factor_level_id: ce.factorLevelId,
       treatment_id: ce.treatmentId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
@@ -62,16 +61,18 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element WHERE id = $1 RETURNING id', id),
+  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element_new WHERE id = $1' +
+    ' RETURNING id', id),
 
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM combination_element_new WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2', keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element_new' +
+    ' WHERE treatment_id = $1 and factor_level_id = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({

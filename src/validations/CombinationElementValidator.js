@@ -6,14 +6,14 @@ import db from '../db/DbManager'
 class CombinationElementValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-      { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+      { paramName: 'factorLevelId', type: 'numeric', required: true },
+      { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
       { paramName: 'treatmentId', type: 'numeric', required: true },
       { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
       {
         paramName: 'CombinationElement',
         type: 'businessKey',
-        keys: ['treatmentId', 'name'],
+        keys: ['treatmentId', 'factorLevelId'],
         entity: db.combinationElement,
       },
     ]
@@ -41,9 +41,10 @@ class CombinationElementValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames = () => ['treatmentId', 'name']
+  getBusinessKeyPropertyNames = () => ['treatmentId', 'factorLevelId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate name in request payload with same treatmentId'
+  getDuplicateBusinessKeyError = () => 'Duplicate FactorLevel in request payload with same' +
+  ' treatmentId'
 
   preValidate = (combinationElementObj) => {
     if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {

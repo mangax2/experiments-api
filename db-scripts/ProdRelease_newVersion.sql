@@ -118,8 +118,7 @@ CREATE INDEX group_value_new_group_id
 
 
 -- ALTER experiment_summary view
-DROP VIEW experiment_summary;
-CREATE VIEW experiment_summary AS
+CREATE OR REPLACE VIEW experiment_summary AS
 WITH treatment_numbers AS (
   SELECT e.id AS experiment_id, COUNT(*) AS number_of_treatments
   FROM public.experiment e

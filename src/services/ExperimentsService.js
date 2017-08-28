@@ -105,6 +105,18 @@ class ExperimentsService {
       .then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
 
+  @Transactional('verifyExperimentExists')
+  static verifyExperimentExists(id, isTemplate, tx) {
+    return db.experiments.find(id, isTemplate, tx).then((data) => {
+      if (!data) {
+        const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
+          : 'Experiment Not Found for requested experimentId'
+        logger.error(`${errorMessage} = ${id}`)
+        throw AppError.notFound(errorMessage)
+      }
+    })
+  }
+
   @Transactional('getExperimentById')
   getExperimentById(id, isTemplate, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {

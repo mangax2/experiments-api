@@ -452,6 +452,38 @@ describe('ExperimentsService', () => {
 
   })
 
+  describe('verifyExperimentExists', () => {
+    it('resolves when experiment is found', () => {
+      db.experiments.find = mockResolve({})
+      AppError.notFound = mock()
+
+      return ExperimentsService.verifyExperimentExists(1, false, testTx).then((data) => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(AppError.notFound).not.toHaveBeenCalled()
+      })
+    })
+
+    it('rejects when experiment is not found', () => {
+      db.experiments.find = mockResolve()
+      AppError.notFound = mock()
+
+      return ExperimentsService.verifyExperimentExists(1, false, testTx).then(() => {}, () => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId')
+      })
+    })
+
+    it('rejects when template is not found', () => {
+      db.experiments.find = mockResolve()
+      AppError.notFound = mock()
+
+      return ExperimentsService.verifyExperimentExists(1, true, testTx).then(() => {}, () => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId')
+      })
+    })
+  })
+
   describe('getExperimentById', () => {
     it('calls find, getTagsByExperimentId, and returns data', () => {
       db.experiments.find = mockResolve({})

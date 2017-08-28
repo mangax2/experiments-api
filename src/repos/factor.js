@@ -10,43 +10,76 @@ module.exports = (rep, pgp) => ({
 
   all: (tx = rep) => tx.any('SELECT * FROM factor_new'),
 
-  batchCreate: (factors, context, tx = rep) => tx.batch(
-    factors.map(
-      factor => tx.one(
-        'INSERT INTO factor(name, ref_factor_type_id, ref_data_source_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date, tier) ' +
-        'VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6) RETURNING id',
-        [factor.name,
-          factor.refFactorTypeId,
-          factor.refDataSourceId,
-          factor.experimentId,
-          context.userId,
-          factor.tier],
-      ),
-    ),
-  ),
+  batchCreate: (factors, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      [
+        'id:raw',
+        'name',
+        'ref_factor_type_id',
+        'ref_data_source_id',
+        'experiment_id',
+        'created_user_id',
+        'created_date:raw',
+        'modified_user_id',
+        'modified_date:raw',
+        'tier:raw'
+      ],
+      {table: 'factor_new'})
+    const values = factors.map(factor => ({
+      id: 'nextval(pg_get_serial_sequence(\'factor\', \'id\'))',
+      name: factor.name,
+      ref_factor_type_id: factor.refFactorTypeId,
+      ref_data_source_id: factor.refDataSourceId,
+      experiment_id: factor.experimentId,
+      created_user_id: context.userId,
+      created_date: 'CURRENT_TIMESTAMP',
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
+    }))
+    const query = `${pgp.helpers.insert(values, columnSet)} RETURNING id`
+    return tx.any(query)
+  },
 
-  batchUpdate: (factors, context, tx = rep) => tx.batch(
-    factors.map(
-      factor => tx.oneOrNone(
-        'UPDATE factor SET ' +
-        '(name, ref_factor_type_id, ref_data_source_id, experiment_id, modified_user_id, modified_date,     tier) = ' +
-        '($1,   $2,                 $3,                 $4,            $5,               CURRENT_TIMESTAMP, $7) WHERE id=$6 RETURNING *',
-        [factor.name,
-          factor.refFactorTypeId,
-          factor.refDataSourceId,
-          factor.experimentId,
-          context.userId,
-          factor.id,
-          factor.tier],
-      ),
-    ),
-  ),
+  batchUpdate: (factors, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      [
+        '?id',
+        'name',
+        'ref_factor_type_id',
+        'ref_data_source_id',
+        'experiment_id',
+        'modified_user_id',
+        'modified_date:raw',
+        'tier:raw'
+      ],
+      {table: 'factor_new'})
+    const data = factors.map(factor => ({
+      id: factor.id,
+      name: factor.name,
+      ref_factor_type_id: factor.refFactorTypeId,
+      ref_data_source_id: factor.refDataSourceId,
+      experiment_id: factor.experimentId,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
+    }))
+    const query = `${pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
+    return tx.any(query)
+  },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM factor WHERE id=$1 RETURNING id', id),
+  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM factor_new WHERE id=$1 RETURNING id', id),
 
-  removeByExperimentId: (experimentId, tx = rep) => tx.any('DELETE FROM factor WHERE experiment_id = $1 RETURNING id', experimentId),
+  batchRemove: (ids, tx = rep) => {
+    if (!ids || ids.length === 0) {
+      return Promise.resolve([])
+    }
+    return tx.any('DELETE FROM factor_new WHERE id IN ($1:csv) RETURNING id', [ids])
+  },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys),
+  removeByExperimentId: (experimentId, tx = rep) => tx.any('DELETE FROM factor_new WHERE experiment_id = $1 RETURNING id', experimentId),
+
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM factor_new WHERE experiment_id=$1 and name=$2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -54,7 +87,7 @@ module.exports = (rep, pgp) => ({
       name: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(experiment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(experiment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor_new entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

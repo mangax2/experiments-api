@@ -22,7 +22,7 @@ describe('FactorLevelService', () => {
 
       return target.batchCreateFactorLevels([{}], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith(testTx, [{}], testContext)
+        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([])
       })
     })
@@ -34,7 +34,7 @@ describe('FactorLevelService', () => {
 
       return target.batchCreateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith(testTx, [{}], testContext)
+        expect(db.factorLevel.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -67,6 +67,26 @@ describe('FactorLevelService', () => {
       db.factorLevel.all = mockReject('error')
 
       return target.getAllFactorLevels().then(() => {}, (err) => {
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
+  describe('getFactorLevelsByExperimentIdNoExistenceCheck', () => {
+    it('finds factors by that id', () => {
+      db.factorLevel.findByExperimentId = mockResolve([])
+
+      return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+
+    it('rejects when findByExperimentId fails', () => {
+      db.factorLevel.findByExperimentId = mockReject('error')
+
+      return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
     })
@@ -138,14 +158,14 @@ describe('FactorLevelService', () => {
   })
 
   describe('batchUpdateFactorLevels', () => {
-    it('calls validate, batchUpdate, and returns put response', () => {
+    it('calls validate, batchUpdate, and returns post response', () => {
       target.validator.validate = mockResolve()
       db.factorLevel.batchUpdate = mockResolve([])
       AppUtil.createPutResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
-        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith(testTx, [{}], testContext)
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
+        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith([])
       })
     })
@@ -155,9 +175,9 @@ describe('FactorLevelService', () => {
       db.factorLevel.batchUpdate = mockReject('error')
       AppUtil.createPutResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
-        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith(testTx, [{}], testContext)
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
+        expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -168,8 +188,8 @@ describe('FactorLevelService', () => {
       db.factorLevel.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
 
-      return target.batchUpdateFactorLevels([{}], testContext).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+      return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -194,6 +214,27 @@ describe('FactorLevelService', () => {
       return target.deleteFactorLevel(1).then(() => {}, () => {
         expect(db.factorLevel.remove).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
+      })
+    })
+  })
+
+  describe('batchDeleteFactorLevels', () => {
+    it('calls factorLevel batchRemove and returns data', () => {
+      db.factorLevel.batchRemove = mockResolve([1,2])
+
+      return target.batchDeleteFactorLevels([1,2], testTx).then((data) => {
+        expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(data).toEqual([1,2])
+      })
+    })
+
+    it('throws an error when remove returns array whose length mismatches input', () => {
+      db.factorLevel.batchRemove = mockResolve([null, 1])
+      AppError.notFound = mock()
+
+      return target.batchDeleteFactorLevels([1,2], testTx).then(() => {}, () => {
+        expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all factor levels requested for delete were found')
       })
     })
   })

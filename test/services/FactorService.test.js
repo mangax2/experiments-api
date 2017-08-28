@@ -108,6 +108,26 @@ describe('FactorService', () => {
     })
   })
 
+  describe('getFactorsByExperimentIdNoExistenceCheck', () => {
+    it('finds factors by that id', () => {
+      db.factor.findByExperimentId = mockResolve([])
+
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
+        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+
+    it('rejects when findByExperimentId fails', () => {
+      db.factor.findByExperimentId = mockReject('error')
+
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
+        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('getFactorById', () => {
     it('returns factor found by id', () => {
       db.factor.find = mockResolve({})
@@ -202,6 +222,27 @@ describe('FactorService', () => {
       return target.deleteFactor(1, testTx).then(() => {}, (err) => {
         expect(db.factor.remove).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
+      })
+    })
+  })
+
+  describe('batchDeleteFactors', () => {
+    it('calls factor batchRemove and returns data', () => {
+      db.factor.batchRemove = mockResolve([1,2])
+
+      return target.batchDeleteFactors([1,2], testTx).then((data) => {
+        expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(data).toEqual([1,2])
+      })
+    })
+
+    it('throws an error when remove returns array whose length mismatches input', () => {
+      db.factor.batchRemove = mockResolve([null, 1])
+      AppError.notFound = mock()
+
+      return target.batchDeleteFactors([1,2], testTx).then(() => {}, () => {
+        expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all factors requested for delete were found')
       })
     })
   })

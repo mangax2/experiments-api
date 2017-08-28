@@ -16,7 +16,7 @@ describe('FactorLevelsValidator', () => {
       db.factorLevel = {}
 
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
         {
@@ -54,7 +54,7 @@ describe('FactorLevelsValidator', () => {
       db.factorLevel = {}
 
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
         {
@@ -73,7 +73,7 @@ describe('FactorLevelsValidator', () => {
       db.factorLevel = {}
 
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
         {

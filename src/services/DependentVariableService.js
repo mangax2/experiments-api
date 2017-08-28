@@ -23,9 +23,15 @@ class DependentVariableService {
 
   getAllDependentVariables = () => db.dependentVariable.all()
 
-  getDependentVariablesByExperimentId(experimentId, isTemplate) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate)
-      .then(() => db.dependentVariable.findByExperimentId(experimentId))
+  @Transactional('getDependentVariablesByExperimentId')
+  getDependentVariablesByExperimentId(experimentId, isTemplate, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+      .then(() => db.dependentVariable.findByExperimentId(experimentId, tx))
+  }
+
+  @Transactional('getDependentVariablesByExperimentIdNoExistenceCheck')
+  static getDependentVariablesByExperimentIdNoExistenceCheck(experimentId, tx) {
+    return db.dependentVariable.findByExperimentId(experimentId, tx)
   }
 
   getDependentVariableById = id => db.dependentVariable.find(id)

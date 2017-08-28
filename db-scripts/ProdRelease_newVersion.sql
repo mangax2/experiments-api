@@ -117,3 +117,42 @@ CREATE INDEX group_value_new_group_id
   (group_id);
 
 
+-- ALTER experiment_summary view
+CREATE OR REPLACE VIEW experiment_summary AS
+WITH treatment_numbers AS (
+  SELECT e.id AS experiment_id, COUNT(*) AS number_of_treatments
+  FROM public.experiment e
+    INNER JOIN public.treatment t ON t.experiment_id = e.id
+  GROUP BY e.id),
+dependent_variable_numbers AS (
+  SELECT e.id AS experiment_id, COUNT(*) AS number_of_dependent_variables
+  FROM public.experiment e
+  	INNER JOIN public.dependent_variable dv ON dv.experiment_id = e.id
+  GROUP BY e.id),
+factor_numbers AS (
+  SELECT e.id AS experiment_id, COUNT(*) AS number_of_factors
+  FROM public.experiment e
+  	INNER JOIN public.factor_new f ON f.experiment_id = e.id
+  GROUP BY e.id),
+experimental_unit_numbers AS (
+  SELECT e.id AS experiment_id, COUNT(*) AS number_of_experimental_units
+  FROM public.experiment e
+    INNER JOIN public.treatment t ON t.experiment_id = e.id
+    INNER JOIN public.unit u ON u.treatment_id = t.id
+  GROUP BY e.id)
+
+SELECT e.id,
+  e.name,
+  CAST(COALESCE(dv.number_of_dependent_variables, 0) + COALESCE(f.number_of_factors, 0) AS int) AS number_of_variables,
+  CAST(COALESCE(t.number_of_treatments, 0) AS int) AS number_of_treatments,
+  CAST(COALESCE(eu.number_of_experimental_units, 0) AS int) AS number_of_experimental_units
+FROM public.experiment e
+  LEFT OUTER JOIN treatment_numbers t ON t.experiment_id = e.id
+  LEFT OUTER JOIN dependent_variable_numbers dv ON dv.experiment_id = e.id
+  LEFT OUTER JOIN factor_numbers f ON f.experiment_id = e.id
+  LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id;
+
+GRANT SELECT ON TABLE public.experiment_summary TO experiments_ro_user;
+GRANT SELECT ON TABLE public.experiment_summary TO experiments_dev_app_user;
+
+

@@ -76,6 +76,25 @@ describe('CombinationElementService', () => {
     })
   })
 
+  describe('getCombinationElementsByExperimentId', () => {
+    it('calls findAllByExperimentId', () => {
+      db.combinationElement.findAllByExperimentId = mockResolve()
+
+      return target.getCombinationElementsByExperimentId(1, testTx).then(() => {
+        expect(db.combinationElement.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+      })
+    })
+
+    it('rejects when findAllByExperimentId fails', () => {
+      db.combinationElement.findAllByExperimentId = mockReject('error')
+
+      return target.getCombinationElementsByExperimentId(1, testTx).then(() => {}, (err) => {
+        expect(db.combinationElement.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('batchGetCombinationElementByTreatmentIds', () => {
     it('calls combinationElement batchFindAllByTreatmentIds', () => {
       target.treatmentService.batchGetTreatmentByIds = mockResolve()

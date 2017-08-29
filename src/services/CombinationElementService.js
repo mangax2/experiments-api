@@ -29,9 +29,8 @@ class CombinationElementService {
   }
 
   @Transactional('getCombinationElementsByExperimentId')
-  getCombinationElementsByExperimentId(experimentId, tx) {
-    return db.combinationElement.findAllByExperimentId(experimentId, tx)
-  }
+  getCombinationElementsByExperimentId = (experimentId, tx) =>
+    db.combinationElement.findAllByExperimentId(experimentId, tx)
 
   @Transactional('batchGetCombinationElementsByTreatmentIds')
   batchGetCombinationElementsByTreatmentIds(ids, tx) {

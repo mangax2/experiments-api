@@ -634,7 +634,7 @@
     },
     "/experiments/{id}/composites/treatments": {
       "get": {
-        "summary": "get all treatments and combination elements for a given experiment id",
+        "summary": "get all treatment details, including combination elements with factor and level information for an experiment",
         "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
         "operationId": "getComposites_TreatmentsByExperimentId",
         "tags": [
@@ -3600,6 +3600,41 @@
         }
       }
     },
+    "CompositeTreatmentsCombinationElementGET": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "unique id for combination element"
+        },
+        "factorId": {
+          "type": "integer",
+          "description": "Id of the factor this combination element refers to"
+        },
+        "factorName": {
+          "type": "string",
+          "description": "Name of the factor this combination element refers to"
+        },
+        "factorLevel": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Id of the factor level"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array"
+                }
+              },
+              "description": "value of the factor level"
+            }
+          }
+        }
+      }
+    },
     "CompositeTreatmentsResponse": {
       "type": "object",
       "properties": {
@@ -3642,7 +3677,7 @@
         "combinationElements": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CombinationElementResponse"
+            "$ref": "#/definitions/CompositeTreatmentsCombinationElementGET"
           }
         }
       }

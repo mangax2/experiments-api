@@ -8,6 +8,8 @@
     "clean": "rm -rf build && mkdir build",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "eslint": "./node_modules/.bin/eslint src --fix --ext .js; exit 0",
+    "precommit": "eslint src --ext .js",
+    "prepush": "jest --config .jestrc.json",
     "start": "NODE_ENV=production node ./build/app",
     "test": "jest --config .jestrc.json",
     "testCoverage": "jest --config .jestCoveragerc.json",

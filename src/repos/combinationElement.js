@@ -1,10 +1,9 @@
 import _ from 'lodash'
 
-const columns = 'ce.id, f.name, COALESCE(((fl.value->\'items\')->0)->>\'refId\', ((fl.value->\'items\')->0)->>\'text\') AS' +
-  ' value,ce.treatment_id,' +
+const columns = 'ce.id, ce.factor_level_id,'
+  ' ce.treatment_id,' +
   ' ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
-const tables = 'combination_element_new ce INNER JOIN factor_level_new fl ON ce.factor_level_id = fl.id INNER JOIN factor_new f ON fl.factor_id = f.id'
-const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
+const genericSqlStatement = `SELECT ${columns} FROM combination_element_new`
 
 module.exports = (rep, pgp) => ({
   repository: () => rep,
@@ -45,13 +44,12 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'name', 'value', 'treatment_id', 'modified_user_id', 'modified_date'],
+      ['?id', 'factor_level_id', 'treatment_id', 'modified_user_id', 'modified_date'],
       { table: 'combination_element' },
     )
     const data = combinationElements.map(ce => ({
       id: ce.id,
-      name: ce.name,
-      value: ce.value,
+      factor_level_id:ce.factorLevelId,
       treatment_id: ce.treatmentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
@@ -77,10 +75,10 @@ module.exports = (rep, pgp) => ({
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
       treatment_id: obj.keys[0],
-      name: obj.keys[1],
+      factor_level_id: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
+    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import TreatmentService from './TreatmentService'
 import CombinationElementService from './CombinationElementService'
+import FactorLevelService from './FactorLevelService'
+import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 
 import AppUtil from './utility/AppUtil'
@@ -10,22 +12,44 @@ class TreatmentDetailsService {
   constructor() {
     this.treatmentService = new TreatmentService()
     this.combinationElementService = new CombinationElementService()
+    this.factorService = new FactorService()
     this.securityService = new SecurityService()
   }
 
   @Transactional('getAllTreatmentDetails')
   getAllTreatmentDetails(experimentId, isTemplate, tx) {
-    return this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, tx)
-      .then((treatments) => {
-        const treatmentIds = _.map(treatments, t => t.id)
-        return this.combinationElementService.batchGetCombinationElementsByTreatmentIdsNoValidate(
-          treatmentIds,
-          tx)
-          .then(treatmentCombinationElements => _.map(treatments, (treatment, treatmentIndex) => {
-            treatment.combinationElements = treatmentCombinationElements[treatmentIndex]
-            return treatment
-          }))
-      })
+    return Promise.all([
+      this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, tx),
+      this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
+      this.factorService.getFactorsByExperimentId(experimentId, isTemplate, tx),
+    ]).then((fullTreatmentDetails) => {
+      const groupedFactors = _.groupBy(fullTreatmentDetails[3], 'id')
+
+      const groupedFactorLevels = _.groupBy(_.map(fullTreatmentDetails[2], level => ({
+        id: level.id,
+        value: level.value,
+        factor_id: level.factor_id,
+        factor_name: groupedFactors[level.factor_id][0].name,
+      })), 'id')
+
+      const groupedCombinationElements = _.groupBy(
+        _.map(fullTreatmentDetails[1], combinationElement => ({
+          id: combinationElement.id,
+          treatment_id: combinationElement.treatment_id,
+          factor_id: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
+          factor_name: groupedFactorLevels[combinationElement.factor_level_id][0].factor_name,
+          factor_level: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
+        })), 'treatment_id')
+
+      return _.map(fullTreatmentDetails[0], treatment => ({
+        id: treatment.id,
+        treatment_number: treatment.treatment_number,
+        is_control: treatment.is_control,
+        notes: treatment.notes,
+        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id', 'factor_level_id'])),
+      }))
+    })
   }
 
   @Transactional('manageAllTreatmentDetails')

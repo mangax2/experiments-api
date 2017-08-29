@@ -5,7 +5,7 @@ module.exports = (rep, pgp) => ({
 
   batchFind: (ids, tx = rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]),
 
-  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY treatment_number ASC', experimentId),
+  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY treatment_id ASC', experimentId),
 
   batchCreate: (treatments, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(

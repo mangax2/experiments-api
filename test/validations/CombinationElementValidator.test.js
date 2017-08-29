@@ -16,14 +16,14 @@ describe('CombinationElementValidator', () => {
       db.combinationElement = {}
 
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: true },
+        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {
           paramName: 'CombinationElement',
           type: 'businessKey',
-          keys: ['treatmentId', 'name'],
+          keys: ['treatmentId', 'factorLevelId'],
           entity: {},
         },
       ]
@@ -57,14 +57,14 @@ describe('CombinationElementValidator', () => {
       db.combinationElement = {}
 
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: true },
+        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {
           paramName: 'CombinationElement',
           type: 'businessKey',
-          keys: ['treatmentId', 'name'],
+          keys: ['treatmentId', 'factorLevelId'],
           entity: {},
         },
       ]
@@ -77,14 +77,14 @@ describe('CombinationElementValidator', () => {
       db.combinationElement = {}
 
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: true },
+        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {
           paramName: 'CombinationElement',
           type: 'businessKey',
-          keys: ['treatmentId', 'name'],
+          keys: ['treatmentId', 'factorLevelId'],
           entity: {},
         },
         { paramName: 'id', type: 'numeric', required: true },
@@ -104,14 +104,13 @@ describe('CombinationElementValidator', () => {
 
   describe('getBusinessKeyPropertyNames', () => {
     it('returns business keys', () => {
-      expect(target.getBusinessKeyPropertyNames()).toEqual(['treatmentId', 'name'])
+      expect(target.getBusinessKeyPropertyNames()).toEqual(['treatmentId', 'factorLevelId'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
     it('gets duplicate business key error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate name in request payload' +
-        ' with same treatmentId')
+      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate FactorLevel in request payload with same treatmentId')
     })
   })
 
@@ -154,7 +153,7 @@ describe('CombinationElementValidator', () => {
     })
 
     it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {
@@ -163,7 +162,7 @@ describe('CombinationElementValidator', () => {
     })
 
     it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

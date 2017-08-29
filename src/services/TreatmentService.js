@@ -1,6 +1,5 @@
 import log4js from 'log4js'
 import _ from 'lodash'
-// import ctimestamp from 'console-timestamp'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'

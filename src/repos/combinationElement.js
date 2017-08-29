@@ -1,10 +1,9 @@
 import _ from 'lodash'
 
-const columns = "ce.id, f.name, COALESCE(((fl.value->'items')->0)->>'refId', ((fl.value->'items')->0)->>'text') AS" +
-  " value,ce.treatment_id," +
-  " ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date"
-const tables = 'combination_element_new ce INNER JOIN factor_level_new fl ON ce.factor_level_id = fl.id INNER JOIN factor_new f ON fl.factor_id = f.id'
-const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
+const columns = 'ce.id, ce.factor_level_id,'
+  ' ce.treatment_id,' +
+  ' ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
+const genericSqlStatement = `SELECT ${columns} FROM combination_element_new`
 
 module.exports = (rep, pgp) => ({
   repository: () => rep,
@@ -29,12 +28,11 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['name', 'value', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element' },
+      ['factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      { table: 'combination_element_new' },
     )
     const values = combinationElements.map(ce => ({
-      name: ce.name,
-      value: ce.value,
+      factor_level_id: ce.factorLevelId,
       treatment_id: ce.treatmentId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
@@ -48,13 +46,12 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'name', 'value', 'treatment_id', 'modified_user_id', 'modified_date'],
+      ['?id', 'factor_level_id', 'treatment_id', 'modified_user_id', 'modified_date'],
       { table: 'combination_element' },
     )
     const data = combinationElements.map(ce => ({
       id: ce.id,
-      name: ce.name,
-      value: ce.value,
+      factor_level_id:ce.factorLevelId,
       treatment_id: ce.treatmentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
@@ -64,24 +61,26 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element WHERE id = $1 RETURNING id', id),
+  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element_new WHERE id = $1' +
+    ' RETURNING id', id),
 
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM combination_element_new WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element WHERE treatment_id = $1 and name = $2', keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element_new' +
+    ' WHERE treatment_id = $1 and factor_level_id = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
       treatment_id: obj.keys[0],
-      name: obj.keys[1],
+      factor_level_id: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'name', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
+    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.name from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.name = d.name and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

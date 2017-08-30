@@ -1,4 +1,4 @@
-import { mock } from '../jestUtil'
+import { mock, mockResolve } from '../jestUtil'
 import GroupValueValidator from '../../src/validations/GroupValueValidator'
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
@@ -14,17 +14,14 @@ describe('GroupValueValidator', () => {
     it('returns the schema', () => {
       db.group = {}
       db.groupValue = {}
+      db.factorLevel = {}
       const schema = [
         { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
         { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: false },
+        { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
         { paramName: 'groupId', type: 'refData', entity: {} },
-        {
-          paramName: 'GroupValue',
-          type: 'businessKey',
-          keys: ['groupId', 'name'],
-          entity: {},
-        },
       ]
 
       expect(GroupValueValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -50,14 +47,10 @@ describe('GroupValueValidator', () => {
       const schema = [
         { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
         { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: false },
+        { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
         { paramName: 'groupId', type: 'refData', entity: {} },
-        {
-          paramName: 'GroupValue',
-          type: 'businessKey',
-          keys: ['groupId', 'name'],
-          entity: {},
-        },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -69,14 +62,10 @@ describe('GroupValueValidator', () => {
       const schema = [
         { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
         { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        { paramName: 'factorLevelId', type: 'numeric', required: false },
+        { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
         { paramName: 'groupId', type: 'refData', entity: {} },
-        {
-          paramName: 'GroupValue',
-          type: 'businessKey',
-          keys: ['groupId', 'name'],
-          entity: {},
-        },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]
@@ -98,19 +87,6 @@ describe('GroupValueValidator', () => {
     })
   })
 
-  describe('getBusinessKeyPropertyNames', () => {
-    it('returns business key names', () => {
-      expect(target.getBusinessKeyPropertyNames()).toEqual(['groupId', 'name'])
-    })
-  })
-
-  describe('getDuplicateBusinessKeyError', () => {
-    it('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate name and value ' +
-        'in request payload with same groupId')
-    })
-  })
-
   describe('preValidate', () => {
     it('resolves when groupValueObj is a filled array and has name and value filled', () => {
       AppError.badRequest = mock()
@@ -125,7 +101,7 @@ describe('GroupValueValidator', () => {
 
       return target.preValidate([{value: 'testValue'}]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
-          ' value')
+          ' value, or a factor level id')
       })
     })
 
@@ -134,7 +110,7 @@ describe('GroupValueValidator', () => {
 
       return target.preValidate([{name: 'test'}]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
-          ' value')
+          ' value, or a factor level id')
       })
     })
 
@@ -168,8 +144,10 @@ describe('GroupValueValidator', () => {
     })
 
     it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', groupId: 1},{test: 'b', groupId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['groupId', 'test'])
+      const targetObject = [{test: 'a', groupId: 1, factorLevelId: 1},{test: 'b', groupId: 1, factorLevelId: 2}]
+      db.factorLevel = {
+        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 2}])
+      }
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(0)
@@ -177,11 +155,14 @@ describe('GroupValueValidator', () => {
     })
 
     it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', groupId: 1},{test: 'a', groupId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['groupId', 'test'])
+      const targetObject = [{name: 'test', value: 'test', groupId: 2},{test: 'a', groupId: 1, factorLevelId: 1},{test: 'a', groupId: 1, factorLevelId: 2}]
+      db.factorLevel = {
+        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 1}])
+      }
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(1)
+        expect(target.messages[0]).toEqual('Group Value provided with same group id, and either same name and value, or same factor level id as another')
       })
     })
   })

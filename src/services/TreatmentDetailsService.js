@@ -28,7 +28,7 @@ class TreatmentDetailsService {
 
       const groupedFactorLevels = _.groupBy(_.map(fullTreatmentDetails[2], level => ({
         id: level.id,
-        value: level.value,
+        items: level.value ? level.value.items : [],
         factor_id: level.factor_id,
         factor_name: groupedFactors[level.factor_id][0].name,
       })), 'id')

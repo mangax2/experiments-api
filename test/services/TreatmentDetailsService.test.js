@@ -23,9 +23,9 @@ describe('TreatmentDetailsService', () => {
   describe('getAllTreatmentDetails', () => {
     it('returns treatments with combination elements', () => {
       const treatments = [{ id: 1, treatment_number: 1, }]
-      const combinationElements = [{treatment_id: 1, id: 1, factor_level_id: 1, }]
-      const factorLevels = [{id: 1, factor_id: 1, value: {}, }]
-      const factors = [{id: 1, name: 'test', }]
+      const combinationElements = [{treatment_id: 1, id: 1, factor_level_id: 1, }, {treatment_id:1, id: 2, factor_level_id: 2}]
+      const factorLevels = [{id: 1, factor_id: 1, value: { items: [] }, }, {id: 2, factor_id: 2}]
+      const factors = [{id: 1, name: 'test', }, {id: 2, name: 'test2'}]
 
       const expectedData = [
         {
@@ -40,8 +40,17 @@ describe('TreatmentDetailsService', () => {
               factor_name: 'test',
               factor_level: {
                 id: 1,
-                value: {},
+                items: [],
               },
+            },
+            {
+              id: 2,
+              factor_id: 2,
+              factor_name: 'test2',
+              factor_level: {
+                id: 2,
+                items: [],
+              }
             }
           ]
         }

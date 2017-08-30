@@ -154,7 +154,19 @@ describe('GroupValueValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
+    it('adds a message when there are business key errors for same group id and name', () => {
+      const targetObject = [{name: 'test', value: 'test', groupId: 1},{name: 'test', groupId: 1, value: 'test2'}]
+      db.factorLevel = {
+        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 1}])
+      }
+
+      return target.postValidate(targetObject).then(() => {
+        expect(target.messages.length).toEqual(1)
+        expect(target.messages[0]).toEqual('Group Value provided with same group id, and either same name and value, or same factor level id as another')
+      })
+    })
+
+    it('adds a message when there are business key errors for same factor id', () => {
       const targetObject = [{name: 'test', value: 'test', groupId: 2},{test: 'a', groupId: 1, factorLevelId: 1},{test: 'a', groupId: 1, factorLevelId: 2}]
       db.factorLevel = {
         batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 1}])

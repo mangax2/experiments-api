@@ -1,4 +1,4 @@
-const columns = "gv.id, COALESCE(gv.name, f.name) AS name, COALESCE(gv.value, ((fl.value->'items')->0)->>'refId', ((fl.value->'items')->0)->>'text') AS value, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date"
+const columns = "gv.id, COALESCE(gv.name, f.name) AS name, gv.value, fl.value AS factor_level, fl.id AS factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date"
 const tables = 'group_value_new gv LEFT OUTER JOIN factor_level_new fl ON gv.factor_level_id = fl.id LEFT OUTER JOIN factor_new f ON fl.factor_id = f.id'
 const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
 

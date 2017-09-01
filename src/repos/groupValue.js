@@ -20,11 +20,12 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (groupValues, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['name', 'value', 'factor_level_id', 'group_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['id:raw', 'name', 'value', 'factor_level_id', 'group_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'group_value_new' },
     )
 
     const values = groupValues.map(gv => ({
+      id: 'nextval(pg_get_serial_sequence(\'group_value\', \'id\'))',
       name: gv.name,
       value: gv.value,
       factor_level_id: gv.factorLevelId,

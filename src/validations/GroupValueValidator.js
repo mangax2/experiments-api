@@ -60,7 +60,11 @@ class GroupValueValidator extends SchemaValidator {
     if (!this.hasErrors()) {
       const factorLevelIds = _.compact(_.map(targetObject, 'factorLevelId'))
 
-      return db.factorLevel.batchFind(factorLevelIds).then((factorLevels) => {
+      const factorLevelPromise = factorLevelIds.length > 0
+        ? db.factorLevel.batchFind(factorLevelIds)
+        : new Promise(resolve => resolve([]))
+
+      return factorLevelPromise.then((factorLevels) => {
         const groupIdsWithFactorId = _.map(targetObject, (groupValue) => {
           if (groupValue.factorLevelId) {
             return {
@@ -75,7 +79,6 @@ class GroupValueValidator extends SchemaValidator {
             name: groupValue.name,
           }
         })
-
 
         const hasDuplicateBusinessKeys =
           _.uniqWith(groupIdsWithFactorId, _.isEqual).length !== groupIdsWithFactorId.length

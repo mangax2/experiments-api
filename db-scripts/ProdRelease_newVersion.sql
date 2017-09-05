@@ -139,18 +139,33 @@ experimental_unit_numbers AS (
   FROM public.experiment e
     INNER JOIN public.treatment t ON t.experiment_id = e.id
     INNER JOIN public.unit u ON u.treatment_id = t.id
-  GROUP BY e.id)
+  GROUP BY e.id), 
+unit_spec_numbers AS (
+  SELECT e.id AS experiment_id, count(*) AS number_of_unit_specs
+  FROM experiment e
+    INNER JOIN unit_spec_detail usd ON usd.experiment_id = e.id
+  GROUP BY e.id), 
+unit_type_name AS (
+  SELECT DISTINCT e.id AS experiment_id, rut.name AS name_of_unit_type
+  FROM experiment e
+    INNER JOIN unit_spec_detail usd ON usd.experiment_id = e.id
+    INNER JOIN ref_unit_spec rus ON rus.id = usd.ref_unit_spec_id
+    INNER JOIN ref_unit_type rut ON rut.id = rus.ref_unit_type_id)
 
 SELECT e.id,
   e.name,
   CAST(COALESCE(dv.number_of_dependent_variables, 0) + COALESCE(f.number_of_factors, 0) AS int) AS number_of_variables,
   CAST(COALESCE(t.number_of_treatments, 0) AS int) AS number_of_treatments,
-  CAST(COALESCE(eu.number_of_experimental_units, 0) AS int) AS number_of_experimental_units
+  CAST(COALESCE(eu.number_of_experimental_units, 0) AS int) AS number_of_experimental_units,
+  CAST(COALESCE(us.number_of_unit_specs, 0) AS int) AS number_of_unit_specs,
+  utn.name_of_unit_type
 FROM public.experiment e
   LEFT OUTER JOIN treatment_numbers t ON t.experiment_id = e.id
   LEFT OUTER JOIN dependent_variable_numbers dv ON dv.experiment_id = e.id
   LEFT OUTER JOIN factor_numbers f ON f.experiment_id = e.id
-  LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id;
+  LEFT OUTER JOIN experimental_unit_numbers eu ON eu.experiment_id = e.id
+  LEFT OUTER JOIN unit_spec_numbers us ON us.experiment_id = e.id
+  LEFT OUTER JOIN unit_type_name utn ON utn.experiment_id = e.id;
 
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_ro_user;
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_dev_app_user;

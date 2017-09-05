@@ -8,14 +8,10 @@ class GroupValueValidator extends SchemaValidator {
     return [
       { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
       { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+      { paramName: 'factorLevelId', type: 'numeric', required: false },
+      { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
       { paramName: 'groupId', type: 'numeric', required: true },
       { paramName: 'groupId', type: 'refData', entity: db.group },
-      {
-        paramName: 'GroupValue',
-        type: 'businessKey',
-        keys: ['groupId', 'name'],
-        entity: db.groupValue,
-      },
     ]
   }
 
@@ -41,23 +37,19 @@ class GroupValueValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames = () => ['groupId', 'name']
-
-  getDuplicateBusinessKeyError = () => 'Duplicate name and value in request payload with same groupId'
-
   preValidate = (groupValueObj) => {
     if (!_.isArray(groupValueObj) || groupValueObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Group Value request object needs to be an array'))
     }
     if (_.filter(groupValueObj, (gv) => {
-      if (!gv.name || !gv.value) {
+      if ((!gv.name || !gv.value) && !gv.factorLevelId) {
         return gv
       }
       return undefined
     }).length > 0) {
       return Promise.reject(
-        AppError.badRequest('Group Values must have a name and a value'),
+        AppError.badRequest('Group Values must have a name and a value, or a factor level id'),
       )
     }
 
@@ -66,20 +58,38 @@ class GroupValueValidator extends SchemaValidator {
 
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
-      const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
-      const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))
-      const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.groupId))
-      _.forEach(groupByObject, (innerArray) => {
-        const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length !== names.length) {
-          this.messages.push(this.getDuplicateBusinessKeyError())
-          return false
+      const factorLevelIds = _.compact(_.map(targetObject, 'factorLevelId'))
+
+      return db.factorLevel.batchFind(factorLevelIds).then((factorLevels) => {
+        const groupIdsWithFactorId = _.map(targetObject, (groupValue) => {
+          if (groupValue.factorLevelId) {
+            return {
+              groupId: groupValue.groupId,
+              factorId: _.find(factorLevels, fl =>
+                fl.id === groupValue.factorLevelId,
+              ).factor_id,
+            }
+          }
+          return {
+            groupId: groupValue.groupId,
+            name: groupValue.name,
+          }
+        })
+
+
+        const hasDuplicateBusinessKeys =
+          _.uniqWith(groupIdsWithFactorId, _.isEqual).length !== groupIdsWithFactorId.length
+
+        if (hasDuplicateBusinessKeys) {
+          this.messages.push('Group Value provided with same group id, and either same name and value, or same factor level id as another')
         }
-        return true
+
+        return hasDuplicateBusinessKeys
       })
     }
     return Promise.resolve()
   }
 }
 
-module.exports = GroupValueValidator
+module
+  .exports = GroupValueValidator

@@ -22,7 +22,7 @@ CREATE TABLE public.factor_new
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT factor_new_ak_1 UNIQUE (name, experiment_id),
   CONSTRAINT factor_tier_check CHECK (tier > 0::numeric)
-)
+);
 
 
 -- Table: public.factor_level
@@ -42,7 +42,7 @@ CREATE TABLE public.factor_level_new
       REFERENCES public.factor_new (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT factor_level_new_ak_1 UNIQUE (value, factor_id)
-)
+);
 
 -- Table: public.combination_element
 
@@ -65,7 +65,7 @@ CREATE TABLE public.combination_element_new
       REFERENCES public.factor_level_new (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT combination_element_new_ak_1 UNIQUE (factor_level_id, treatment_id)
-)
+);
 
 
 -- Index: public.combination_element_treatment_id
@@ -99,13 +99,13 @@ CREATE TABLE public.group_value_new
   CONSTRAINT group_value_new_factor_level_id_fkey FOREIGN KEY (factor_level_id)
       REFERENCES public.factor_level_new (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE
-  )
+  );
 
 
 CREATE UNIQUE INDEX name_value_factor_level_id_group_id
   ON public.group_value_new
   USING btree
-  (name,value,factor_level_id,group_id)
+  (name,value,factor_level_id,group_id);
 
 -- Index: public.group_value_group_id
 
@@ -139,12 +139,12 @@ experimental_unit_numbers AS (
   FROM public.experiment e
     INNER JOIN public.treatment t ON t.experiment_id = e.id
     INNER JOIN public.unit u ON u.treatment_id = t.id
-  GROUP BY e.id), 
+  GROUP BY e.id),
 unit_spec_numbers AS (
   SELECT e.id AS experiment_id, count(*) AS number_of_unit_specs
   FROM experiment e
     INNER JOIN unit_spec_detail usd ON usd.experiment_id = e.id
-  GROUP BY e.id), 
+  GROUP BY e.id),
 unit_type_name AS (
   SELECT DISTINCT e.id AS experiment_id, rut.name AS name_of_unit_type
   FROM experiment e

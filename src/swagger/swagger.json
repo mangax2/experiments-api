@@ -4644,10 +4644,6 @@
           "type": "string",
           "description": "Value of the entity associated to the group"
         },
-        "factorLevelId": {
-          "type": "integer",
-          "description": "Factor Level Id"
-        },
         "groupId": {
           "type": "integer",
           "description": "Group Id"
@@ -4692,10 +4688,6 @@
         "value": {
           "type": "string",
           "description": "Value of the entity associated to the group"
-        },
-        "factorLevelId": {
-          "type": "integer",
-          "description": "Factor Level Id"
         },
         "groupId": {
           "type": "integer",

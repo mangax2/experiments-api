@@ -1493,6 +1493,61 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Save variables",
+        "description": "Adds or updates the variables belogning to the specified experiment.",
+        "operationId": "postVariables",
+        "tags": [
+          "Variables"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Variables",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/VariablesRequestPayload"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/factors/{id}": {
@@ -3306,6 +3361,61 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Save variables",
+        "description": "Adds or updates the variables belogning to the specified template.",
+        "operationId": "templatePostVariables",
+        "tags": [
+          "Variables"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Variables",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/VariablesRequestPayload"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/treatments/{id}": {
@@ -4931,6 +5041,10 @@
           "items": {
             "$ref": "#/definitions/Cluster"
           }
+        },
+        "tier": {
+          "type": "integer",
+          "description": "the tier of the split that the variable is part of"
         }
       }
     },
@@ -4940,7 +5054,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Variable"
+            "$ref": "#/definitions/IndependentVariable"
           }
         },
         "exogenous": {

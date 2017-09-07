@@ -665,7 +665,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.assignAncestryAndLocation = mock(g => [g])
       const parent = { ancestors: '\nlocNumber::1', locNumber: 1 }
       const group = {
-        groupValues: [{ name: 'spray', value: 'yes' }, { name: 'density', value: '20' }],
+        groupValues: [{ factorLevelId: 1 }, { factorLevelId: 2 }],
         units: [{ rep: 1, treatmentId: 2 }, { rep: 2, treatment_id: 5 }],
       }
 
@@ -673,7 +673,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       expect(target.assignAncestryAndLocation).not.toBeCalled()
       expect(group.locNumber).toBe(1)
-      expect(group.ancestors).toBe('\nlocNumber::1\ndensity::20\tspray::yes')
+      expect(group.ancestors).toBe('\nlocNumber::1\n1\t2')
       expect(group.units[0].group).toBe(group)
       expect(group.units[0].oldGroupId).toBe(undefined)
       expect(group.units[0].hashKey).toBe('1|1|2')

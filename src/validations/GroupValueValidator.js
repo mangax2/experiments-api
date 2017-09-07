@@ -58,7 +58,7 @@ class GroupValueValidator extends SchemaValidator {
 
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
-      const factorLevelIds = _.compact(_.map(targetObject, 'factorLevelId'))
+      const factorLevelIds = _.uniq(_.compact(_.map(targetObject, 'factorLevelId')))
 
       const factorLevelPromise = factorLevelIds.length > 0
         ? db.factorLevel.batchFind(factorLevelIds)
@@ -67,21 +67,18 @@ class GroupValueValidator extends SchemaValidator {
       return factorLevelPromise.then((factorLevels) => {
         const groupIdsWithFactorId = _.map(targetObject, (groupValue) => {
           if (groupValue.factorLevelId) {
-            return {
-              groupId: groupValue.groupId,
-              factorId: _.find(factorLevels, fl =>
-                fl.id === groupValue.factorLevelId,
-              ).factor_id,
-            }
+            const factorId = _.find(factorLevels, fl =>
+              fl.id === groupValue.factorLevelId,
+            ).factor_id
+
+            return `${groupValue.groupId}|${factorId}`
           }
-          return {
-            groupId: groupValue.groupId,
-            name: groupValue.name,
-          }
+
+          return `${groupValue.groupId}|${groupValue.name}`
         })
 
         const hasDuplicateBusinessKeys =
-          _.uniqWith(groupIdsWithFactorId, _.isEqual).length !== groupIdsWithFactorId.length
+          _.uniq(groupIdsWithFactorId).length !== groupIdsWithFactorId.length
 
         if (hasDuplicateBusinessKeys) {
           this.messages.push('Group Value provided with same group id, and either same name and value, or same factor level id as another')

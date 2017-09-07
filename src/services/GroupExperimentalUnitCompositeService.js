@@ -231,7 +231,12 @@ class GroupExperimentalUnitCompositeService {
 
   assignAncestryAndLocation = (group, parent) => {
     const parentAncestors = parent ? parent.ancestors : ''
-    const businessKeys = _.map(group.groupValues, gv => `${gv.name}::${gv.value}`).sort().join('\t')
+    const businessKeys = _.map(group.groupValues, (gv) => {
+      if (gv.factorLevelId) {
+        return `${gv.factorLevelId}`
+      }
+      return `${gv.name}::${gv.value}`
+    }).sort().join('\t')
     group.ancestors = `${parentAncestors}\n${businessKeys}`
 
     if (parent === undefined) {

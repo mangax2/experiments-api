@@ -27,7 +27,7 @@ class GroupValidator extends SchemaValidator {
 
   static get PATCH_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'setEntryId', type: 'numeric', required: true },
+      { paramName: 'setId', type: 'numeric', required: true },
     ]
   }
 

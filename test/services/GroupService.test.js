@@ -195,9 +195,9 @@ describe('GroupService', () => {
       target.validator.validate = mockResolve()
       db.group.partiallyUpdate = mockResolve()
 
-      return target.partiallyUpdateGroup({}, testContext, testTx).then(() => {
+      return target.partiallyUpdateGroup([{}], testContext, testTx).then(() => {
         expect(target.validator.validate).toBeCalledWith([{}], 'PATCH', testTx)
-        expect(db.group.partiallyUpdate).toBeCalledWith({}, testContext, testTx)
+        expect(db.group.partiallyUpdate).toBeCalledWith([{}], testContext, testTx)
       })
     })
   })

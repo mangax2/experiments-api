@@ -262,7 +262,7 @@
       },
       "patch": {
         "summary": "partially update group",
-        "description": "Allows for a group to be partially updated. Currently only allows the update of the setId field.",
+        "description": "Allows for groups to be partially updated. Currently only allows the update of the setId field.",
         "operationId": "patchGroup",
         "tags": [
           "Groups"
@@ -286,7 +286,10 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GroupPayloadForPATCH"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GroupPayloadForPATCH"
+              }
             },
             "description": "The Group to patch"
           }

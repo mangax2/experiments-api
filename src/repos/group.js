@@ -48,17 +48,17 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  partiallyUpdate: (group, context, tx = rep) => {
+  partiallyUpdate: (groups, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['?id', 'set_id', 'modified_user_id', 'modified_date'],
       { table: 'group' },
     )
-    const data = {
+    const data = groups.map(group => ({
       id: group.id,
-      set_id: group.setEntryId,
+      set_id: group.setId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-    }
+    }))
     const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
     return tx.any(query)

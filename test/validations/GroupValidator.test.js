@@ -34,7 +34,7 @@ describe('GroupValidator', () => {
   describe('get PATCH_VALIDATION_SCHEMA', () => {
     it('returns the schema', () => {
       expect(GroupValidator.PATCH_VALIDATION_SCHEMA)
-        .toEqual([{ paramName: 'setEntryId', type: 'numeric', required: true }])
+        .toEqual([{ paramName: 'setId', type: 'numeric', required: true }])
     })
   })
 
@@ -90,7 +90,7 @@ describe('GroupValidator', () => {
     it('returns patch schema', () => {
       db.group = {}
       const schema = [
-        { paramName: 'setEntryId', type: 'numeric', required: true },
+        { paramName: 'setId', type: 'numeric', required: true },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

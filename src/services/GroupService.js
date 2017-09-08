@@ -62,6 +62,11 @@ class GroupService {
   batchUpdateGroupsNoValidate = (groups, context, tx) =>
     db.group.batchUpdate(groups, context, tx)
 
+  @Transactional('partiallyUpdateGroup')
+  partiallyUpdateGroup = (groups, context, tx) =>
+    this.validator.validate(groups, 'PATCH', tx)
+      .then(() => db.group.partiallyUpdate(groups, context, tx))
+
   @Transactional('deleteGroup')
   deleteGroup = (id, tx) => db.group.remove(id, tx)
     .then((data) => {

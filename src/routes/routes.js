@@ -183,6 +183,10 @@ router.get('/experiments/:id/groups', (req, res, next) => new GroupService().get
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
+router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.body, req.context)
+  .then(factors => res.json(factors))
+  .catch(err => next(err)))
+
 router.get('/groups/:id', (req, res, next) => new GroupService().getGroupById(req.params.id)
   .then(factors => res.json(factors))
   .catch(err => next(err)))

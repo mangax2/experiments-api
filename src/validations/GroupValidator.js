@@ -25,6 +25,12 @@ class GroupValidator extends SchemaValidator {
     ]
   }
 
+  static get PATCH_VALIDATION_SCHEMA() {
+    return [
+      { paramName: 'setId', type: 'numeric', required: true },
+    ]
+  }
+
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
@@ -42,6 +48,9 @@ class GroupValidator extends SchemaValidator {
         return GroupValidator.POST_VALIDATION_SCHEMA.concat(
           GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
+      case 'PATCH':
+        return GroupValidator.PATCH_VALIDATION_SCHEMA
+          .concat(GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS)
       default:
         throw AppError.badRequest('Invalid Operation')
     }

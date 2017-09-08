@@ -190,6 +190,18 @@ describe('GroupService', () => {
     })
   })
 
+  describe('partiallyUpdateGroup', () => {
+    it('partially updates a group', () => {
+      target.validator.validate = mockResolve()
+      db.group.partiallyUpdate = mockResolve()
+
+      return target.partiallyUpdateGroup({}, testContext, testTx).then(() => {
+        expect(target.validator.validate).toBeCalledWith([{}], 'PATCH', testTx)
+        expect(db.group.partiallyUpdate).toBeCalledWith({}, testContext, testTx)
+      })
+    })
+  })
+
   describe('deleteGroup', () => {
     it('deletes a group', () => {
       db.group.remove = mockResolve({})

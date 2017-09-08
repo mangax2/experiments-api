@@ -259,6 +259,52 @@
             }
           }
         }
+      },
+      "patch": {
+        "summary": "partially update group",
+        "description": "Allows for a group to be partially updated. Currently only allows the update of the setId field.",
+        "operationId": "patchGroup",
+        "tags": [
+          "Groups"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "Group",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GroupPayloadForPATCH"
+            },
+            "description": "The Group to patch"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group Patch SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     },
     "/experiment-designs": {
@@ -3901,6 +3947,10 @@
             "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
           }
         },
+        "setId": {
+          "type": "integer",
+          "description": "The set id for the group"
+        },
         "childGroups": {
           "type": "array",
           "items": {
@@ -3933,6 +3983,10 @@
           "items": {
             "$ref": "#/definitions/GroupValueResponseWithoutAuditKeys"
           }
+        },
+        "setId": {
+          "type": "integer",
+          "description": "The set id for the group"
         },
         "units": {
           "type": "array",
@@ -4700,6 +4754,10 @@
           "type": "integer",
           "description": "Id of GroupType"
         },
+        "setId": {
+          "type": "integer",
+          "description": "The set id for the group"
+        },
         "createdDate": {
           "type": "string",
           "description": "created timestamp in UTC."
@@ -4715,6 +4773,19 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "GroupPayloadForPATCH": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "id of group to update."
+        },
+        "setId": {
+          "type": "integer",
+          "description": "set id for the group."
         }
       }
     },

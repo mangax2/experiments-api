@@ -31,6 +31,13 @@ describe('GroupValidator', () => {
     })
   })
 
+  describe('get PATCH_VALIDATION_SCHEMA', () => {
+    it('returns the schema', () => {
+      expect(GroupValidator.PATCH_VALIDATION_SCHEMA)
+        .toEqual([{ paramName: 'setEntryId', type: 'numeric', required: true }])
+    })
+  })
+
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     it('gets the schema elements', () => {
       db.group = {}
@@ -80,7 +87,18 @@ describe('GroupValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when POST and PUT are not supplied', () => {
+    it('returns patch schema', () => {
+      db.group = {}
+      const schema = [
+        { paramName: 'setEntryId', type: 'numeric', required: true },
+        { paramName: 'id', type: 'numeric', required: true },
+        { paramName: 'id', type: 'refData', entity: {} },
+      ]
+
+      expect(target.getSchema('PATCH')).toEqual(schema)
+    })
+
+    it('throws an error when PATCH, POST and PUT are not supplied', () => {
       AppError.badRequest = mock('')
 
       expect(() => {target.getSchema('test')}).toThrow()

@@ -5,7 +5,7 @@ module.exports = (rep, pgp) => ({
 
   batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]),
 
-  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
+  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
 
   batchCreate: (groups, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
@@ -43,6 +43,22 @@ module.exports = (rep, pgp) => ({
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
+    const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+
+    return tx.any(query)
+  },
+
+  partiallyUpdate: (group, context, tx = rep) => {
+    const columnSet = new pgp.helpers.ColumnSet(
+      ['?id', 'set_id', 'modified_user_id', 'modified_date'],
+      { table: 'group' },
+    )
+    const data = {
+      id: group.id,
+      set_id: group.setEntryId,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }
     const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
     return tx.any(query)

@@ -544,6 +544,7 @@ describe('FactorDependentCompositeService', () => {
         }
       ]
 
+
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([])
       target.factorLevelService.batchDeleteFactorLevels = mockResolve()
@@ -552,6 +553,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.refDataSourceService.getRefDataSources = mockResolve([{id: 1, name: 'Custom'}])
 
       return target.persistIndependentVariables(independentVariables, 42, testContext, testTx).then(() => {
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
@@ -562,7 +564,7 @@ describe('FactorDependentCompositeService', () => {
           name: 'Density',
           refFactorTypeId: 1,
           experimentId: 42,
-          refDataSourceId: -1
+          refDataSourceId: 1
         }], testContext, testTx)
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
@@ -595,6 +597,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.refDataSourceService.getRefDataSources = mockResolve([{id: 1, name: 'Custom'}])
 
       return target.persistIndependentVariables(independentVariables, 42, testContext, testTx).then(() => {
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
@@ -608,7 +611,7 @@ describe('FactorDependentCompositeService', () => {
           name: 'DensityUpdated',
           refFactorTypeId: 1,
           experimentId: 42,
-          refDataSourceId: -1
+          refDataSourceId: 1
         }], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
       })
@@ -640,6 +643,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.refDataSourceService.getRefDataSources = mockResolve([{id: 1, name: 'Custom'}])
 
       return target.persistIndependentVariables(independentVariables, 42, testContext, testTx).then(() => {
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
@@ -762,6 +766,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.refDataSourceService.getRefDataSources = mockResolve([{id: 1, name: 'Custom'}])
 
       return target.persistIndependentVariables(independentVariables, 42, testContext, testTx).then(() => {
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)

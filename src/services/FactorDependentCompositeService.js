@@ -6,6 +6,7 @@ import FactorService from './FactorService'
 import DependentVariableService from './DependentVariableService'
 import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
+import RefDataSourceService from './RefDataSourceService'
 import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 
@@ -18,6 +19,7 @@ class FactorDependentCompositeService {
     this.dependentVariableService = new DependentVariableService()
     this.factorTypeService = new FactorTypeService()
     this.securityService = new SecurityService()
+    this.refDataSourceService = new RefDataSourceService()
     this.variablesValidator = new VariablesValidator()
   }
 
@@ -148,7 +150,7 @@ class FactorDependentCompositeService {
       })
   }
 
-  static determineDataSourceId(factorLevelDTOs) {
+  static determineDataSourceId(factorLevelDTOs, allDataSources) {
     const maxItemCount =
       _.chain(factorLevelDTOs)
         .map(factorLevelDTO => _.size(factorLevelDTO.items))
@@ -164,7 +166,8 @@ class FactorDependentCompositeService {
         .value()
 
     return _.size(distinctPropertyTypes) === 1 && maxItemCount === 1
-      ? distinctPropertyTypes[0] : -1 // TODO: Add a value for Custom
+      ? distinctPropertyTypes[0] : _.find(allDataSources,
+          dataSource => dataSource.name === 'Custom').id
   }
 
   static mapLevelDTOsToLevelEntities(factorId, levelDTOs) {
@@ -247,7 +250,12 @@ class FactorDependentCompositeService {
   }
 
   persistIndependentVariables(independentVariables, experimentId, context, tx) {
-    return FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx).then((data) => {
+    return Promise.all([
+      this.refDataSourceService.getRefDataSources(),
+      FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
+    ]).then((results) => {
+      const allDataSources = results[0]
+      const data = results[1]
       const factorEntitiesFromRequest = _.map(independentVariables, factorDTO => ({
         id: factorDTO.id,
         name: factorDTO.name,
@@ -255,7 +263,7 @@ class FactorDependentCompositeService {
         experimentId,
         tier: factorDTO.tier,
         refDataSourceId:
-          FactorDependentCompositeService.determineDataSourceId(factorDTO.levels),
+          FactorDependentCompositeService.determineDataSourceId(factorDTO.levels, allDataSources),
         levels: FactorDependentCompositeService.mapLevelDTOsToLevelEntities(
           factorDTO.id, factorDTO.levels),
       }))
@@ -266,10 +274,10 @@ class FactorDependentCompositeService {
 
       // Determine inserts, updates, and deletes for factors
       const factorInsertsAndFactorDependentLevelInserts = _.filter(factorEntitiesFromRequest,
-          factorEntity => _.isNull(factorEntity.id) || _.isUndefined(factorEntity.id))
+        factorEntity => _.isNull(factorEntity.id) || _.isUndefined(factorEntity.id))
 
       const factorUpdates = _.filter(factorEntitiesFromRequest,
-          factorEntity => !(_.isNull(factorEntity.id) || _.isUndefined(factorEntity.id)))
+        factorEntity => !(_.isNull(factorEntity.id) || _.isUndefined(factorEntity.id)))
 
       const idsOfFactorsToDelete =
         FactorDependentCompositeService.determineIdsOfFactorsToDelete(
@@ -282,7 +290,7 @@ class FactorDependentCompositeService {
           && !(_.isNull(levelEntity.factorId) || _.isUndefined(levelEntity.factorId)))
 
       const levelUpdates = _.filter(levelEntitiesFromRequest,
-          levelEntity => !(_.isNull(levelEntity.id) || _.isUndefined(levelEntity.id)))
+        levelEntity => !(_.isNull(levelEntity.id) || _.isUndefined(levelEntity.id)))
 
       const idsOfLevelsToDelete =
         FactorDependentCompositeService.determineIdsOfFactorLevelsToDelete(

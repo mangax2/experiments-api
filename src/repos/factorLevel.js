@@ -7,10 +7,10 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone(`SELECT ${columns} FROM factor_level_new WHERE id = $1`, id),
 
-  batchFind: (ids, tx = rep) => tx.any(`SELECT ${columns} FROM factor_level_new WHERE id IN ($1:csv)`, [ids]),
+  batchFind: (ids, tx = rep) => tx.any(`SELECT ${columns} FROM factor_level_new WHERE id IN ($1:csv) ORDER BY id asc`, [ids]),
 
   findByExperimentId: (experimentId, tx = rep) =>
-    tx.any(`SELECT ${qualifiedColumns} FROM factor_new f inner join factor_level_new fl on f.id = fl.factor_id WHERE experiment_id=$1`, experimentId),
+    tx.any(`SELECT ${qualifiedColumns} FROM factor_new f inner join factor_level_new fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId),
 
   findByFactorId: factorId => rep.any(`SELECT ${columns} FROM factor_level_new WHERE factor_id = $1`, factorId),
 

@@ -19,3 +19,24 @@ insert into ref_data_source(name, ref_data_source_type_id, created_user_id, crea
 values('Composite', getNoDataSourceId(), 'PNWATT', CURRENT_TIMESTAMP, 'PNWATT', CURRENT_TIMESTAMP);
 
 drop function getNoDataSourceId();
+
+
+CREATE INDEX factor_level_new_factor_id
+  ON public.factor_level_new
+  USING btree
+  (factor_id);
+
+CREATE INDEX combination_element_new_factor_level_id
+  ON public.combination_element_new
+  USING btree
+  (factor_level_id);
+
+CREATE INDEX group_value_new_factor_level_id
+  ON public.group_value_new
+  USING btree
+  (factor_level_id);
+
+CREATE INDEX unit_treatment_id
+  ON public.unit
+  USING btree
+  (treatment_id);

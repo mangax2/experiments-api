@@ -4,7 +4,10 @@ const logger = log4js.getLogger('app')
 let config = { vaultConfig: {} }
 
 config.env = process.env.ENV || 'local'
+
 config.port = process.env.PORT || 3001
+config.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
+config.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
 config.node_env = process.env.NODE_ENV || 'local'
 config.admin_group = process.env.ADMIN_GROUP || 'COSMOS-ADMIN'
 if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {

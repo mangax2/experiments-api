@@ -40,3 +40,5 @@ CREATE INDEX unit_treatment_id
   ON public.unit
   USING btree
   (treatment_id);
+
+UPDATE ref_data_source SET name='None' WHERE name='Other';

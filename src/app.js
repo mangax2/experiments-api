@@ -101,6 +101,18 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     return logger.info(`Listening at ${url}`)
   })
 
+  const repPackingMessageConsume = () => {
+    if (config.enableKafka) {
+      try {
+        require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
+      } catch (error) {
+        logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error)
+      }
+    }
+  }
+  repPackingMessageConsume()
+
+
   server.timeout = 300000
 
   module.exports = app

@@ -1,16 +1,17 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-
+const { ENV, PORT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, NODE_ENV, ADMIN_GROUP,ENABLE_KAFKA } = process.env
 let config = { vaultConfig: {} }
 
-config.env = process.env.ENV || 'local'
+config.env = ENV || 'local'
+config.port = PORT || 3001
+config.AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+config.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+config.node_env = NODE_ENV || 'local'
+config.admin_group = ADMIN_GROUP || 'COSMOS-ADMIN'
+config.enableKafka = ENABLE_KAFKA
 
-config.port = process.env.PORT || 3001
-config.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
-config.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
-config.node_env = process.env.NODE_ENV || 'local'
-config.admin_group = process.env.ADMIN_GROUP || 'COSMOS-ADMIN'
-if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {
+if (!config.env.includes('local', 'UNITTEST', 'test')) {
   const cfServices = require('@monsantoit/cloud-foundry').services
   const vaultCfService = cfServices['experimentsVault']
   config.vaultConfig.baseUrl = vaultCfService.baseUrl
@@ -19,6 +20,7 @@ if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env 
   config.vaultConfig.roleId = vaultCfService.roleId
   config.vaultConfig.secretId = vaultCfService.secretId
 }
+
 config.exit = function () {process.exit(1)}
 config.watchUncaughtException = process.on('uncaughtException', function (error) {
   logger.fatal(error)
@@ -27,3 +29,4 @@ config.watchUncaughtException = process.on('uncaughtException', function (error)
 })
 
 module.exports = config
+

@@ -28,6 +28,9 @@ const cfServices = {
       experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api'
     },
   },
+  kafkaTopics:{
+    repPackingTopic:'rsr.field-experiments.test.incoming.json'
+  }
 }
 
 module.exports = cfServices

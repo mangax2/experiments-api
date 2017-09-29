@@ -3,7 +3,11 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id),
 
-  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId),
+  findAllBySetId: (setId, tx = rep) => tx.any('SELECT u.*' +
+    ' FROM  unit u INNER JOIN "group" g ON u.group_id = g.id AND g.set_id = $1 ORDER BY u.id ', setId),
+
+  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE' +
+    ' treatment_id = $1', treatmentId),
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId),
 
@@ -34,7 +38,10 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'group_id', 'treatment_id', 'rep', { name: 'set_entry_id', cast: 'int' }, 'modified_user_id', 'modified_date'],
+      ['?id', 'group_id', 'treatment_id', 'rep', {
+        name: 'set_entry_id',
+        cast: 'int',
+      }, 'modified_user_id', 'modified_date'],
       { table: 'unit' },
     )
     const data = units.map(u => ({

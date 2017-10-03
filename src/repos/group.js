@@ -3,6 +3,9 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM "group" WHERE id = $1', id),
 
+  findRepGroupBySetId:(setId,tx=rep) => tx.any('SELECT g1.* from "group" g1, "group" g2' +
+    ' where g1.parent_id = g2.id and g2.set_id =$1',setId),
+
   batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]),
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),

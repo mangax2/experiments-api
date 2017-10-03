@@ -58,49 +58,88 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.payload) {
       const setId = set.setId
       const unitsFromMessage = set.payload
-      return db.unit.findAllBySetId(setId, tx).then((unitsFromDB) => {
-        const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
-        const groupId = unitsFromDbCamelizeLower[0].groupId
-        const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId'))
-        const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'treatmentId', 'setEntryId')
-        const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
-          unitsToBeCreated),
-          unitsFromDbSlim, _.isEqual)
-        const unitsToBeUpdated = _.forEach(unitsToBeUpdatedSlim, (unitTobeUpdated) => {
-          unitTobeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
-          unitFromDb.treatmentId === unitTobeUpdated.treatmentId
-          && unitFromDb.setEntryId === unitTobeUpdated.setEntryId).id
-        })
-        const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'treatmentId', 'setEntryId'), 'id')
-        const context = { userId: 'TBD' }
-        const promises = []
-        if (unitsToBeCreated.length > 0) {
-          promises.push(db.unit.batchCreate(this.formatBatch(unitsToBeCreated, groupId),
-            context, tx))
-        }
-        if (unitsToBeUpdated.length > 0) {
-          promises.push(db.unit.batchUpdate(this.formatBatch(unitsToBeUpdated, groupId),
-            context, tx))
-        }
-        return Promise.all(promises)
-          .then(() => {
-            if (unitsToBeDeleted.length > 0) {
-              db.unit.batchRemove(unitsToBeDeleted)
-            }
-            return Promise.resolve()
+      return db.group.findRepGroupBySetId(setId, tx).then((groups) => {
+        db.unit.batchFindAllByGroupIds([_.map(groups, 'id')], tx).then((unitsFromDB) => {
+          const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
+
+          _.map(unitsFromMessage, (unitM) => {
+            const group = _.find(groups, g => g.rep === unitM.rep)
+            const groupId = group ? group.id : null
+            unitM.groupId = groupId
           })
+          const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId'))
+          const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'treatmentId', 'setEntryId')
+          const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
+            unitsToBeCreated),
+            unitsFromDbSlim, _.isEqual)
+
+          const unitsToBeUpdated = _.forEach(unitsToBeUpdatedSlim, (unitTobeUpdated) => {
+            unitTobeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
+            unitFromDb.treatmentId === unitTobeUpdated.treatmentId
+            && unitFromDb.setEntryId === unitTobeUpdated.setEntryId).id
+          })
+          const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'treatmentId', 'setEntryId'), 'id')
+          const context = { userId: 'TBD' }
+          const promises = []
+          if (unitsToBeCreated.length > 0) {
+            const units = _.partition(unitsToBeCreated, u => u.groupId === null)
+            const unitsToBeCreatedForNewGroup = units[0]
+            const unitsToBeCreatedForExistingGroup = units[1]
+            promises.push(db.unit.batchCreate(unitsToBeCreatedForExistingGroup,
+              context, tx))
+            promises.concat(ManageRepsAndUnitsListener
+              .getPromisesWhenGroupIsNull(unitsToBeCreatedForNewGroup, groups, context, tx))
+          }
+          if (unitsToBeUpdated.length > 0) {
+            promises.push(db.unit.batchUpdate(unitsToBeUpdated,
+              context, tx))
+          }
+          return Promise.all(promises)
+            .then(() => {
+              if (unitsToBeDeleted.length > 0) {
+                db.unit.batchRemove(unitsToBeDeleted)
+              }
+              return Promise.resolve()
+            })
+        })
       })
     }
+
     return Promise.reject()
   }
 
-  formatBatch = (units, groupId) => _.forEach(units, (unit) => {
-    unit.groupId = groupId
-  })
+  static getPromisesWhenGroupIsNull(unitsToBeCreatedForNewGroup, groups,
+    context, tx) {
+    const newGroupsTobeCreatedPromises = []
+    if (unitsToBeCreatedForNewGroup.length > 0) {
+      const groupedUnits = _.groupBy(unitsToBeCreatedForNewGroup, 'rep')
+      _.keys(_.groupBy(unitsToBeCreatedForNewGroup, 'rep'), (rep) => {
+        const newGroup = _.pick(groups[0], 'experimentId', 'parentId', 'refRandomizationStrategyId', 'refGroupTypeId')
+        newGroup.rep = rep
+        newGroupsTobeCreatedPromises.contact(db.group.batchCreate([newGroup],
+          context, tx).then((groupResp) => {
+            const newGroupValue = {
+              name: 'repNumber',
+              value: rep,
+              groupId: groupResp[0].id,
+            }
+            const unitsC = _.map(groupedUnits[rep], (unit) => {
+              unit.groupId = groupResp[0].id
+              return unit
+            })
+            Promise.all([db.groupValue.batchCreate(newGroupValue, context, tx),
+              db.unit.batchCreate(unitsC, context, tx)])
+          }))
+      })
+    }
+    return newGroupsTobeCreatedPromises
+  }
 
 }
 
 const manageRepsAndUnitsListener = new ManageRepsAndUnitsListener()
 export default manageRepsAndUnitsListener
-export { manageRepsAndUnitsListener }
+export {
+  manageRepsAndUnitsListener,
+}
 

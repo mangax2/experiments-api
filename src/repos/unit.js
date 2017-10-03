@@ -3,9 +3,6 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id),
 
-  findAllBySetId: (setId, tx = rep) => tx.any('SELECT u.*' +
-    ' FROM  unit u INNER JOIN "group" g ON u.group_id = g.id AND g.set_id = $1 ORDER BY u.id ', setId),
-
   findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE' +
     ' treatment_id = $1', treatmentId),
 

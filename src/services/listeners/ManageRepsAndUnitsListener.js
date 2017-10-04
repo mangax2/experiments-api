@@ -6,6 +6,7 @@ import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 import db from '../../db/DbManager'
 import Transactional from '../../decorators/transactional'
+import KafkaProducer from '../kafka/KafkaProducer'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
@@ -98,15 +99,27 @@ class ManageRepsAndUnitsListener {
               return Promise.resolve()
             })
         })
+      }).then(() => {
+        ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
+      }).catch(() => {
+        ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
       })
     }
+    ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
 
     return Promise.reject()
   }
 
+  static sendResponseMessage(setId, isSuccess) {
+    KafkaProducer.publish(cfServices.experimentsKafka.value.topics.repPackingResultTopic, {
+      setId,
+      result: isSuccess ? 'SUCCESS' : 'FAILURE',
+    })
+  }
+
   static getPromisesWhenGroupIsNull(unitsToBeCreatedForNewGroup, groups,
     context, tx) {
-    const newGroupsTobeCreatedPromises = []
+    const newGroupsToBeCreatedPromises = []
     if (unitsToBeCreatedForNewGroup.length > 0) {
       const groupedUnits = _.groupBy(unitsToBeCreatedForNewGroup, 'rep')
       _.forEach(_.keys(groupedUnits), (rep) => {
@@ -126,10 +139,10 @@ class ManageRepsAndUnitsListener {
             Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
               db.unit.batchCreate(unitsC, context, tx)])
           })
-        newGroupsTobeCreatedPromises.push(prms)
+        newGroupsToBeCreatedPromises.push(prms)
       })
     }
-    return newGroupsTobeCreatedPromises
+    return newGroupsToBeCreatedPromises
   }
 
 }
@@ -139,4 +152,3 @@ export default manageRepsAndUnitsListener
 export {
   manageRepsAndUnitsListener,
 }
-

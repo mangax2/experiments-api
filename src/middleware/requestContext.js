@@ -1,12 +1,22 @@
 import _ from 'lodash'
 import AppError from '../services/utility/AppError'
 
+function checkRegexMatches(regexes, url) {
+  return _.compact(_.map(regexes, (r) => {
+    const regExp = new RegExp(r)
+    return regExp.exec(url) !== null
+  })).length > 0
+}
+
 function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping', '/experiments-api/docs/']
+  const whiltelistedUrlRegexes = ['/experiments-api/graphql.*']
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
 
   if (whitelistedUrls.includes(req.url)
-    || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)) {
+    || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)
+    || (req.url && checkRegexMatches(whiltelistedUrlRegexes, req.url))
+  ) {
     next()
   } else {
     if (!req.headers) {

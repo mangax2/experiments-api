@@ -10,9 +10,11 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     require('babel-register')
   }
 
+  const graphqlHTTP = require('express-graphql')
+  const schema = require('./graphql/schema').default
   const express = require('express')
   const _ = require('lodash')
-  const inflector = require('json-inflector')
+  // const inflector = require('json-inflector')
   const bodyParser = require('body-parser')
   const log4js = require('log4js')
   const logger = log4js.getLogger('app')
@@ -38,7 +40,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(requestContext)
   }
 
-  app.use(inflector())
+  // app.use(inflector())
   const pingFunc = (function () {
     const createPingPage = require('@monsantoit/ping-page')
     const pingPage = createPingPage(require('../package.json'))
@@ -67,7 +69,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   // Disabling lint for this app.use, removing 'next' parameter causes the errors to be
   // improperly formatted, but eslint says it is not being used.
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   app.use((err, req, res, next) => {
     const errorLogMessage = ''
     if (err) {
@@ -92,6 +94,11 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     logger.error(errorLogMessage + err)
     return res.status(500).json(err)
   })
+
+  app.use('/experiments-api/graphql', graphqlHTTP({
+    schema,
+    graphiql: true,
+  }))
 
   const port = config.port
 

@@ -15,6 +15,7 @@
   "collectCoverage": true,
   "collectCoverageFrom": [
     "**/src/**/*.{js,jsx}",
+    "!**/graphql/**",
     "!**/src/app.js",
     "!**/src/db/*.js",
     "!**/src/decorators/transactional.js",

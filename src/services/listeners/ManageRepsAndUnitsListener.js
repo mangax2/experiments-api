@@ -99,14 +99,8 @@ class ManageRepsAndUnitsListener {
             .then(() => {
               if (unitsToBeDeleted.length > 0) {
                 db.unit.batchRemove(unitsToBeDeleted).then(() => {
-                  db.unit.getUnitsCountByGroupIds(groupIds, tx).then((unitGs) => {
-                    const groupIdstoBeDeleted = _.compact(_.map(unitGs, (ug) => {
-                      if (ug.count === 0) {
-                        return ug.id
-                      }
-                      return ''
-                    }))
-                    db.group.batchRemove(groupIdstoBeDeleted, tx)
+                  db.unit.getGroupsWithNoUnits(setId, tx).then((groupIdstoBeDeleted) => {
+                    db.group.batchRemove(_.map(groupIdstoBeDeleted, 'id'), tx)
                   })
                 })
               }

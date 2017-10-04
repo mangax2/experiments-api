@@ -69,9 +69,9 @@ class ManageRepsAndUnitsListener {
           })
           const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId'))
           const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'treatmentId', 'setEntryId', 'groupId')
-          const unitsToBeUpdatedSlim = _.differenceBy(_.difference(unitsFromMessage,
+          const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
             unitsToBeCreated),
-            unitsFromDbSlim, 'treatmentId', 'setEntryId', 'groupId')
+            unitsFromDbSlim, _.isEqual)
           const unitsToBeUpdated = _.forEach(unitsToBeUpdatedSlim, (unitTobeUpdated) => {
             unitTobeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
             unitFromDb.treatmentId === unitTobeUpdated.treatmentId

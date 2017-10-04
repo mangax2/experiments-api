@@ -6,6 +6,10 @@ module.exports = (rep, pgp) => ({
   findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE' +
     ' treatment_id = $1', treatmentId),
 
+  getUnitsCountByGroupIds:(groupIds,tx=rep) => tx.any('select g.id,count(u) from "group" g inner' +
+    ' join' +
+    '  unit u on g.id = u.group_id where group_id = $1',[groupIds]),
+
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId),
 
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds]),

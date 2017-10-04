@@ -78,7 +78,7 @@ class ManageRepsAndUnitsListener {
             && unitFromDb.setEntryId === unitTobeUpdated.setEntryId).id
           })
           const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'treatmentId', 'setEntryId', 'groupId'), 'id')
-          const context = { userId: 'TBD' }
+          const context = { userId: 'REP_PACKING' }
           const promises = []
           if (unitsToBeCreated.length > 0) {
             const units = _.partition(unitsToBeCreated, u => u.groupId === null)

@@ -2,30 +2,41 @@ import Kafka from 'no-kafka'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 
-function produce({ topic, message }) {
-  const params = {
-    client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
-    connectionString: cfServices.experimentsKafka.value.host,
-    reconnectionDelay: {
-      min: 100000,
-      max: 100000,
-    },
-    ssl: {
-      cert: VaultUtil.kafkaClientCert,
-      key: VaultUtil.kafkaPrivateKey,
-      passphrase: VaultUtil.kafkaPassword,
-    },
-  }
-  const producer = new Kafka.Producer(params)
+class KafkaProducer {
+  static init = () => {
+    const params = {
+      client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
+      connectionString: cfServices.experimentsKafka.value.host,
+      reconnectionDelay: {
+        min: 100000,
+        max: 100000,
+      },
+      ssl: {
+        cert: VaultUtil.kafkaClientCert,
+        key: VaultUtil.kafkaPrivateKey,
+        passphrase: VaultUtil.kafkaPassword,
+      },
+    }
 
-  const messageToBePublished = {
-    topic,
-    message: {
-      value: JSON.stringify(message),
-    },
+    const producer = new Kafka.Producer(params)
+    this.producerPromise = producer.init().then(() => producer)
   }
 
-  return producer.init().then(() => producer.send(messageToBePublished, {}))
+  static publish = ({ topic, message }) => {
+    if (!this.producerPromise) {
+      this.init()
+    }
+    return this.producerPromise.then((producer) => {
+      const messageToBePublished = {
+        topic,
+        message: {
+          value: JSON.stringify(message),
+        },
+      }
+
+      return producer.send(messageToBePublished, {})
+    })
+  }
 }
 
-module.exports = produce
+export default KafkaProducer

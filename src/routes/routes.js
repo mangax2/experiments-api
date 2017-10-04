@@ -25,7 +25,7 @@ import GroupExperimentalUnitCompositeService from '../services/GroupExperimental
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
-import produce from '../services/kafka/KafkaProducer'
+import KafkaProducer from '../services/kafka/KafkaProducer'
 
 
 const logger = log4js.getLogger('Router')
@@ -374,7 +374,7 @@ router.get('/getDoc/:fileName', (req, res, next) => {
 
 router.post('/kafka-publish', (req, res, next) => {
   const { topic, message } = req.body
-  pt.timeout(produce({ topic, message }), 8000)
+  pt.timeout(KafkaProducer.publish({ topic, message }), 8000)
     .then(result => res.json(result))
     .catch(err => next(err))
 })

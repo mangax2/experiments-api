@@ -4,13 +4,10 @@ import { Tag } from './Tag'
 import { Factor, getFactorsByExperimentId } from './Factor'
 import { Treatment, getTreatmentsByExperimentId } from './Treatment'
 import { UnitSpecificationDetail, getUnitSpecificationDetailsByExperimentId } from './UnitSpecificationDetail'
-import {
-  DesignSpecificationDetail,
-  getDesignSpecificationDetailsByExperimentId,
-} from './DesignSpecificationDetail'
+import { DesignSpecificationDetail, getDesignSpecificationDetailsByExperimentId } from './DesignSpecificationDetail'
 
-const Experiment = new GraphQLObjectType({
-  name: 'Experiment',
+const Template = new GraphQLObjectType({
+  name: 'Template',
   fields: {
     id: {
       type: GraphQLInt,
@@ -33,20 +30,20 @@ const Experiment = new GraphQLObjectType({
     factors: {
       type: new GraphQLList(Factor),
       resolve({ id }) {
-        return getFactorsByExperimentId({ experimentId: id, isTemplate: false })
+        return getFactorsByExperimentId({ experimentId: id, isTemplate: true })
       },
     },
     treatments: {
       type: new GraphQLList(Treatment),
       resolve({ id }) {
-        return getTreatmentsByExperimentId({ experimentId: id, isTemplate: false })
+        return getTreatmentsByExperimentId({ experimentId: id, isTemplate: true })
       },
     },
     unitSpecificationDetails: {
       type: new GraphQLList(UnitSpecificationDetail),
       resolve({ id }) {
         return getUnitSpecificationDetailsByExperimentId(
-          { experimentId: id, isTemplate: false },
+          { experimentId: id, isTemplate: true },
         )
       },
     },
@@ -54,7 +51,7 @@ const Experiment = new GraphQLObjectType({
       type: new GraphQLList(DesignSpecificationDetail),
       resolve({ id }) {
         return getDesignSpecificationDetailsByExperimentId(
-          { experimentId: id, isTemplate: false },
+          { experimentId: id, isTemplate: true },
         )
       },
     },
@@ -63,9 +60,9 @@ const Experiment = new GraphQLObjectType({
   },
 })
 
-const getExperimentById = ({ id, isTemplate = false }) =>
+const getTemplateById = ({ id, isTemplate = true }) =>
   new ExperimentsService().getExperimentById(id, isTemplate)
 
-const getAllExperiments = () => new ExperimentsService().getAllExperiments(false)
+const getAllTemplates = () => new ExperimentsService().getAllExperiments(true)
 
-export { Experiment, getExperimentById, getAllExperiments }
+export { Template, getTemplateById, getAllTemplates }

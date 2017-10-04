@@ -2,55 +2,46 @@ import Kafka from 'no-kafka'
 import log4js from 'log4js'
 import _ from 'lodash'
 import inflector from 'json-inflector'
-import s3Object from '../utility/S3Utils'
-import KafkaConfig from '../utility/KafkaConfig'
+import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 import db from '../../db/DbManager'
 import Transactional from '../../decorators/transactional'
-
-const kafkaCertPromise = s3Object({
-  Bucket: KafkaConfig.s3Path,
-  Key: `${KafkaConfig.certName}.cert`,
-})
-const kafkaKeyPromise = s3Object({ Bucket: KafkaConfig.s3Path, Key: `${KafkaConfig.keyName}.pem` })
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
 
   listen() {
-    return Promise.all([kafkaCertPromise, kafkaKeyPromise]).then(([kafkaCert, kafkaKey]) => {
-      const params = {
-        client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
-        connectionString: KafkaConfig.host,
-        reconnectionDelay: {
-          min: 100000,
-          max: 100000,
-        },
-        ssl: {
-          cert: kafkaCert.Body.toString(),
-          key: kafkaKey.Body.toString(),
-          passphrase: KafkaConfig.kafkaKeyPhrase,
-        },
-      }
-      const dataHandler = (messageSet, topic, partition) => {
-        messageSet.forEach((m) => {
-          const message = m.message.value.toString('utf8')
-          logger.info(topic, partition, m.offset, message)
-          const set = JSON.parse(message)
-          this.adjustExperimentWithRepPackChanges(set).then(() => {
-            consumer.commitOffset({ topic, partition, offset: m.offset, metadata: 'optional' })
-          }).catch((err) => {
-            logger.error('Failed to update experiment with rep packing changes ', message, err)
-          })
+    const params = {
+      client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
+      connectionString: cfServices.experimentsKafka.value.host,
+      reconnectionDelay: {
+        min: 100000,
+        max: 100000,
+      },
+      ssl: {
+        cert: VaultUtil.kafkaClientCert,
+        key: VaultUtil.kafkaPrivateKey,
+        passphrase: VaultUtil.kafkaPassword,
+      },
+    }
+    const dataHandler = (messageSet, topic, partition) => {
+      messageSet.forEach((m) => {
+        const message = m.message.value.toString('utf8')
+        logger.info(topic, partition, m.offset, message)
+        const set = JSON.parse(message)
+        this.adjustExperimentWithRepPackChanges(set).then(() => {
+          consumer.commitOffset({ topic, partition, offset: m.offset, metadata: 'optional' })
+        }).catch((err) => {
+          logger.error('Failed to update experiment with rep packing changes ', message, err)
         })
-      }
-      const consumer = new Kafka.GroupConsumer(params)
-      const strategies = [{
-        subscriptions: [cfServices.kafkaTopics.repPackingTopic],
-        handler: dataHandler,
-      }]
-      consumer.init(strategies)
-    })
+      })
+    }
+    const consumer = new Kafka.GroupConsumer(params)
+    const strategies = [{
+      subscriptions: [cfServices.experimentsKafka.value.topics.repPackingTopic],
+      handler: dataHandler,
+    }]
+    consumer.init(strategies)
   }
 
   @Transactional('ManageRepPacking')

@@ -19,14 +19,14 @@ class KafkaProducer {
     }
 
     const producer = new Kafka.Producer(params)
-    this.producerPromise = producer.init().then(() => producer)
+    KafkaProducer.producerPromise = producer.init().then(() => producer)
   }
 
   static publish = ({ topic, message }) => {
-    if (!this.producerPromise) {
-      this.init()
+    if (!KafkaProducer.producerPromise) {
+      KafkaProducer.init()
     }
-    return this.producerPromise.then((producer) => {
+    return KafkaProducer.producerPromise.then((producer) => {
       const messageToBePublished = {
         topic,
         message: {

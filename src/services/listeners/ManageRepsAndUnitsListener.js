@@ -52,7 +52,7 @@ class ManageRepsAndUnitsListener {
       const unitsFromMessage = set.payload
       return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
         const groupIds = _.map(groups, 'id')
-        db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
+        return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
           const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
           _.forEach(unitsFromMessage, (unitM) => {
             const group = _.find(groups, g => Number(g.rep) === Number(unitM.rep))
@@ -60,16 +60,16 @@ class ManageRepsAndUnitsListener {
             unitM.groupId = groupId
           })
           const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId'))
-          const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'treatmentId', 'setEntryId', 'groupId')
+          const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
+          const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
           const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
             unitsToBeCreated),
             unitsFromDbSlim, _.isEqual)
-          const unitsToBeUpdated = _.forEach(unitsToBeUpdatedSlim, (unitTobeUpdated) => {
-            unitTobeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
-            unitFromDb.treatmentId === unitTobeUpdated.treatmentId
-            && unitFromDb.setEntryId === unitTobeUpdated.setEntryId).id
+          const unitsToBeUpdated = _.map(unitsToBeUpdatedSlim, (unitToBeUpdated) => {
+            unitToBeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
+              unitFromDb.setEntryId === unitToBeUpdated.setEntryId).id
+            return unitToBeUpdated
           })
-          const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'treatmentId', 'setEntryId', 'groupId'), 'id')
           const context = { userId: 'REP_PACKING' }
           const promises = []
           if (unitsToBeCreated.length > 0) {
@@ -110,10 +110,13 @@ class ManageRepsAndUnitsListener {
     return Promise.reject()
   }
 
-  static sendResponseMessage(setId, isSuccess) {
-    KafkaProducer.publish(cfServices.experimentsKafka.value.topics.repPackingResultTopic, {
-      setId,
-      result: isSuccess ? 'SUCCESS' : 'FAILURE',
+  static sendResponseMessage = (setId, isSuccess) => {
+    KafkaProducer.publish({
+      topic: cfServices.experimentsKafka.value.topics.repPackingResultTopic,
+      message: {
+        setId,
+        result: isSuccess ? 'SUCCESS' : 'FAILURE',
+      },
     })
   }
 

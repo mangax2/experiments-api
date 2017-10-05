@@ -16,7 +16,14 @@ class VaultUtil {
 
   static configureDbCredentials(env, vaultConfig) {
     if (env === 'local') {
-      return Promise.resolve()
+      const fs = require('bluebird').promisifyAll(require('fs'))
+      const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
+        .then((data) => { this.kafkaPrivateKey = data })
+      const clientCertPromise = fs.readFileAsync('./src/experiments-api-cosmos.cert', 'utf8')
+        .then((data) => { this.kafkaClientCert = data })
+      this.kafkaPassword = vaultConfig.kafkaPassword
+
+      return Promise.all([privateKeyPromise, clientCertPromise])
     }
     const vaultEnv = env
     const body = {}

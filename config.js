@@ -1,6 +1,6 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-const { ENV, PORT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, NODE_ENV, ADMIN_GROUP,ENABLE_KAFKA } = process.env
+const { ENV, PORT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, NODE_ENV, ADMIN_GROUP, ENABLE_KAFKA, KAFKA_PASSWORD } = process.env
 let config = { vaultConfig: {} }
 
 config.env = ENV || 'local'
@@ -19,6 +19,10 @@ if (!config.env.includes('local', 'UNITTEST', 'test')) {
   config.vaultConfig.secretUri = vaultCfService.secretUri
   config.vaultConfig.roleId = vaultCfService.roleId
   config.vaultConfig.secretId = vaultCfService.secretId
+}
+
+if (config.env !== 'prod' && config.env !== 'np' && config.env !== 'dev') {
+  config.vaultConfig.kafkaPassword = KAFKA_PASSWORD
 }
 
 config.exit = function () {process.exit(1)}

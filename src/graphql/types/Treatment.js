@@ -35,6 +35,6 @@ const Treatment = new GraphQLObjectType({
 const getTreatmentsByExperimentId = ({ experimentId, isTemplate = false }) =>
   new TreatmentService().getTreatmentsByExperimentId(experimentId, isTemplate)
 
-const getTreatmentById = ({ id }) => new TreatmentService().getTreatmentById(id)()
+const getTreatmentById = ({ id }) => new TreatmentService().getTreatmentById(id)
 
 export { Treatment, getTreatmentsByExperimentId, getTreatmentById }

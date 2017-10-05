@@ -29,7 +29,7 @@ const DesignSpecificationDetail = new GraphQLObjectType({
         return experimentId
       },
     },
-    // TODO experiment: {}
+    // TODO experiment? template?
   },
 })
 

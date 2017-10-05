@@ -1,10 +1,11 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import GraphQLJSON from 'graphql-type-json'
 import FactorLevelService from '../../services/FactorLevelService'
+import { Factor, getFactorById } from './Factor'
 
 const FactorLevel = new GraphQLObjectType({
   name: 'FactorLevel',
-  fields: {
+  fields: () => ({
     id: {
       type: GraphQLInt,
     },
@@ -17,8 +18,13 @@ const FactorLevel = new GraphQLObjectType({
         return factorId
       },
     },
-    // TODO factor
-  },
+    factor: {
+      type: Factor,
+      resolve({ factor_id }) {
+        return getFactorById({ id: factor_id })
+      },
+    },
+  }),
 })
 
 const getFactorLevelById = ({ id }) =>

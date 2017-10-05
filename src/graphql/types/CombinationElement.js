@@ -1,10 +1,11 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { FactorLevel, getFactorLevelById } from './FactorLevel'
 import CombinationElementService from '../../services/CombinationElementService'
+import { Treatment, getTreatmentById } from './Treatment'
 
 const CombinationElement = new GraphQLObjectType({
   name: 'CombinationElement',
-  fields: {
+  fields: () => ({
     id: {
       type: GraphQLInt,
     },
@@ -26,11 +27,19 @@ const CombinationElement = new GraphQLObjectType({
         return treatmentId
       },
     },
-    // TODO treatment: {}
-  },
+    treatment: {
+      type: Treatment,
+      resolve({ treatment_id }) {
+        return getTreatmentById({ id: treatment_id })
+      },
+    },
+  }),
 })
 
 const getCombinationElementsByTreatmentId = ({ treatmentId }) =>
   new CombinationElementService().getCombinationElementsByTreatmentId(treatmentId)
 
-export { CombinationElement, getCombinationElementsByTreatmentId }
+const getCombinationElementById = ({ id }) =>
+  new CombinationElementService().getCombinationElementById(id)
+
+export { CombinationElement, getCombinationElementsByTreatmentId, getCombinationElementById }

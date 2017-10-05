@@ -106,6 +106,8 @@ export default new GraphQLSchema({
           return getDesignSpecificationDetailsByExperimentId({ experimentId, isTemplate })
         },
       },
+      // TODO groups
+      // TODO units?
     },
   }),
 })

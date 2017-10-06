@@ -1,13 +1,11 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-const { ENV, PORT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, NODE_ENV, ADMIN_GROUP,
-  ENABLE_KAFKA, KAFKA_PASSWORD, EXPERIMENTS_API_CLIENT_ID } = process.env
+const { ENV, PORT, NODE_ENV, ADMIN_GROUP, ENABLE_KAFKA, KAFKA_PASSWORD,
+  EXPERIMENTS_API_CLIENT_ID } = process.env
 let config = { vaultConfig: {} }
 
 config.env = ENV || 'local'
 config.port = PORT || 3001
-config.AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
-config.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
 config.node_env = NODE_ENV || 'local'
 config.admin_group = ADMIN_GROUP || 'COSMOS-ADMIN'
 config.enableKafka = ENABLE_KAFKA

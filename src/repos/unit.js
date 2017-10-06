@@ -3,7 +3,15 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id),
 
-  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId),
+  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE' +
+    ' treatment_id = $1', treatmentId),
+
+
+  getGroupsWithNoUnits:(setId,tx=rep) => tx.any('select k.id from (select g.* from (select' +
+    '   g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner' +
+    ' join '+
+  'group_value_new gv on gv.group_id = g.id and gv.name = \'repNumber\') k WHERE NOT EXISTS' +
+  '  (SELECT 1 FROM unit  WHERE unit.group_id = k.id)',setId),
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId),
 
@@ -34,7 +42,10 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'group_id', 'treatment_id', 'rep', { name: 'set_entry_id', cast: 'int' }, 'modified_user_id', 'modified_date'],
+      ['?id', 'group_id', 'treatment_id', 'rep', {
+        name: 'set_entry_id',
+        cast: 'int',
+      }, 'modified_user_id', 'modified_date'],
       { table: 'unit' },
     )
     const data = units.map(u => ({

@@ -11,7 +11,7 @@ config.node_env = NODE_ENV || 'local'
 config.admin_group = ADMIN_GROUP || 'COSMOS-ADMIN'
 config.enableKafka = ENABLE_KAFKA
 
-if (!['local', 'UNITTEST', 'test'].includes(config.env)) {
+if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {
   const cfServices = require('@monsantoit/cloud-foundry').services
   const vaultCfService = cfServices['experimentsVault']
   config.vaultConfig.baseUrl = vaultCfService.baseUrl

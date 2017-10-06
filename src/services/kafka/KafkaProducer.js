@@ -18,8 +18,12 @@ class KafkaProducer {
       },
     }
 
-    const producer = new Kafka.Producer(params)
+    const producer = KafkaProducer.createProducer(params)
     KafkaProducer.producerPromise = producer.init().then(() => producer)
+  }
+
+  static createProducer(params) {
+    return new Kafka.Producer(params)
   }
 
   static publish = ({ topic, message }) => {

@@ -15,6 +15,7 @@ describe('KafkaProducer', () => {
       VaultUtil.kafkaClientCert = 'cert'
       VaultUtil.kafkaPrivateKey = 'key'
       VaultUtil.kafkaPassword = 'password'
+      VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
       cfServices.experimentsKafka = { value: { host: 'host' } }
       const producer = { init: jest.fn(() => Promise.resolve()) }
       KafkaProducer.createProducer = jest.fn(() => producer)

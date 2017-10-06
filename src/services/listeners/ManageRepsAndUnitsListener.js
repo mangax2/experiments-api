@@ -12,7 +12,7 @@ const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
   listen() {
     const params = {
-      client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
+      client_id: VaultUtil.clientId,
       connectionString: cfServices.experimentsKafka.value.host,
       reconnectionDelay: {
         min: 100000,

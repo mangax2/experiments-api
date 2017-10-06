@@ -44,6 +44,7 @@ describe('ManageRepsAndUnitsListener', () => {
       VaultUtil.kafkaClientCert = 'cert'
       VaultUtil.kafkaPrivateKey = 'key'
       VaultUtil.kafkaPassword = 'password'
+      VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
       cfServices.experimentsKafka = { value: { host: 'host', topics: { repPackingTopic: 'topic' } } }
       const consumer = { init: jest.fn() }
       ManageRepsAndUnitsListener.createConsumer = jest.fn(() => consumer)

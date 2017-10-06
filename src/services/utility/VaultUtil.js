@@ -9,11 +9,21 @@ class VaultUtil {
     this.cloudFrontKeyPair = ''
     this.cloudFrontPrivateKey = ''
     this.cloudFrontUrl = ''
+    this.kafkaPrivateKey = ''
+    this.kafkaPassword = ''
+    this.kafkaClientCert = ''
   }
 
   static configureDbCredentials(env, vaultConfig) {
     if (env === 'local') {
-      return Promise.resolve()
+      const fs = require('bluebird').promisifyAll(require('fs'))
+      const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
+        .then((data) => { this.kafkaPrivateKey = data })
+      const clientCertPromise = fs.readFileAsync('./src/experiments-api-cosmos.cert', 'utf8')
+        .then((data) => { this.kafkaClientCert = data })
+      this.kafkaPassword = vaultConfig.kafkaPassword
+
+      return Promise.all([privateKeyPromise, clientCertPromise])
     }
     const vaultEnv = env
     const body = {}
@@ -39,7 +49,12 @@ class VaultUtil {
           this.cloudFrontPrivateKey = vaultObj.body.data.privateKey
           this.cloudFrontUrl = vaultObj.body.data.url
         })
-        return Promise.all([dbPromise, clientPromise, cloudFrontPromise])
+        const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+          this.kafkaPrivateKey = new Buffer(vaultObj.body.data.privateKey, 'base64').toString()
+          this.kafkaPassword = vaultObj.body.data.password
+          this.kafkaClientCert = new Buffer(vaultObj.body.data.clientCert, 'base64').toString()
+        })
+        return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

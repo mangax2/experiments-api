@@ -108,6 +108,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       } catch (error) {
         logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error)
       }
+    } else {
+      logger.info('Kafka has been disabled for this session.')
     }
   }
   repPackingMessageConsume()

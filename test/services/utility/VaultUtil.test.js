@@ -1,6 +1,7 @@
 import { mock, mockReject, mockResolve } from '../../jestUtil'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
+import bluebird from 'bluebird'
 
 describe('VaultUtil', () => {
   beforeAll(() => {
@@ -20,14 +21,15 @@ describe('VaultUtil', () => {
 
   describe('configureDbCredentials', () => {
     it('returns a resolved promise when env is local', () => {
+      bluebird.promisifyAll = () => ({ readFileAsync: mockResolve() })
       return VaultUtil.configureDbCredentials('local', {}).then((value) => {
-        expect(value).toBe(undefined)
+        expect(value).toEqual([undefined, undefined])
       })
     })
 
     it('calls HttpUtil and sets dbAppUser and dbAppPassword', () => {
       HttpUtil.post = mockResolve({body: {auth: {client_token: 'testToken'}}})
-      HttpUtil.get = mockResolve({body: {data: {appUser: 'testUser', appUserPassword: 'testPassword'}}})
+      HttpUtil.get = mockResolve({body: {data: {appUser: 'testUser', appUserPassword: 'testPassword', privateKey: '', clientCert: ''}}})
 
       return VaultUtil.configureDbCredentials('np', {roleId: 'id', secretId: 'id'}).then(() => {
         expect(VaultUtil.dbAppPassword).toEqual('testPassword')

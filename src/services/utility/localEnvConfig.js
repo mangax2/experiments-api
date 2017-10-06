@@ -28,8 +28,14 @@ const cfServices = {
       experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api'
     },
   },
-  kafkaTopics:{
-    repPackingTopic:'rsr.field-experiments.test.incoming.json'
+  experimentsKafka:{
+    value: {
+      host: 'kafka.tst.datahub.internal:9093',
+      topics: {
+        repPackingTopic:'rsr.field-experiments.test.incoming.json',
+        repPackingResultTopic: 'rsr.field-experiments.rep-packing-results.outgoing.json'
+      }
+    }
   }
 }
 

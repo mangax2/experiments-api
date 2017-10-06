@@ -665,7 +665,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.assignAncestryAndLocation = mock(g => [g])
       const parent = { ancestors: '\nlocNumber::1', locNumber: 1 }
       const group = {
-        groupValues: [{ factorLevelId: 1 }, { factorLevelId: 2 }],
+        groupValues: [{ factorLevelId: 1 }, { factor_level_id: 2 }],
         units: [{ rep: 1, treatmentId: 2 }, { rep: 2, treatment_id: 5 }],
       }
 

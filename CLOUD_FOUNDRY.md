@@ -20,7 +20,7 @@ In order to build this project, you will need access to the 3GA CloudFoundry usi
 <a name="user"></a>
 ## Add/Edit A User
 
-In order to add/edit a user for a particular space, you must be a Space Manager for that space. For this project, contact Kamaraju Prathi, Jonathan Gorday, Paul Watt, or Kyle McClendon.
+In order to add/edit a user for a particular space, you must be a Space Manager for that space. For this project, contact Kyle McClendon, Jonathan Gorday, Paul Watt, or Tong Lambert.
 
 1. Go To 'Edit User', and check if user exists (using full email). If not, go to step 2, otherwise go to step 3
 2. * Go to Add User.

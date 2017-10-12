@@ -49,9 +49,9 @@ class ManageRepsAndUnitsListener {
 
   @Transactional('ManageRepPacking')
   adjustExperimentWithRepPackChanges = (set, tx) => {
-    if (set.setId && set.payload) {
+    if (set.setId && set.entryChanges) {
       const setId = set.setId
-      const unitsFromMessage = set.payload
+      const unitsFromMessage = set.entryChanges
       return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
         const groupIds = _.map(groups, 'id')
         return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {

@@ -97,7 +97,7 @@ describe('ManageRepsAndUnitsListener', () => {
   describe('adjustExperimentWithRepPackChanges', () => {
     it('publishes a success when successful', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { setId: 5, payload: 'units' }
+      const message = { setId: 5, entryChanges: 'units' }
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups))}
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb'))}
@@ -117,7 +117,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
     it('publishes a failure when on error', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { setId: 5, payload: 'units' }
+      const message = { setId: 5, entryChanges: 'units' }
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups))}
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb'))}

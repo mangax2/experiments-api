@@ -42,3 +42,27 @@ CREATE INDEX unit_treatment_id
   (treatment_id);
 
 UPDATE ref_data_source SET name='None' WHERE name='Other';
+
+-- ******************************* The above statements have been run in NP **********************************
+
+ALTER TABLE public.factor_level_new,
+  ALTER COLUMN id SET DEFAULT nextval('factor_level_id_seq'::regclass);
+
+ALTER TABLE public.factor_new,
+  ALTER COLUMN id SET DEFAULT nextval('factor_id_seq'::regclass);
+
+ALTER TABLE public.combination_element_new,
+  ALTER COLUMN id SET DEFAULT nextval('combination_element_id_seq'::regclass);
+
+ALTER TABLE public.group_value_new,
+  ALTER COLUMN id SET DEFAULT nextval('group_value_id_seq'::regclass);
+
+DROP TABLE public.factor;
+DROP TABLE public.factor_level;
+DROP TABLE public.combination_element;
+DROP TABLE public.group_value
+
+ALTER TABLE public.factor_new RENAME TO factor;
+ALTER TABLE public.factor_level_new RENAME TO factor_level;
+ALTER TABLE public.combination_element_new RENAME TO combination_element;
+ALTER TABLE public.group_value_new RENAME TO group_value;

@@ -97,7 +97,7 @@ describe('ManageRepsAndUnitsListener', () => {
   describe('adjustExperimentWithRepPackChanges', () => {
     it('publishes a success when successful', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { setId: 5, payload: 'units' }
+      const message = { setId: 5, entryChanges: [] }
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups))}
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb'))}
@@ -109,7 +109,7 @@ describe('ManageRepsAndUnitsListener', () => {
       return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
         expect(db.unit.batchFindAllByGroupIds).toBeCalledWith([5], testTx)
-        expect(target.getDbActions).toBeCalledWith('units', 'unitsFromDb', groups)
+        expect(target.getDbActions).toBeCalledWith([], 'unitsFromDb', groups)
         expect(target.saveToDb).toBeCalledWith(5, groups, 'create', 'update', 'delete', testTx)
         expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
       })
@@ -117,7 +117,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
     it('publishes a failure when on error', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { setId: 5, payload: 'units' }
+      const message = { setId: 5, entryChanges: [] }
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups))}
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb'))}
@@ -129,7 +129,7 @@ describe('ManageRepsAndUnitsListener', () => {
       return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
         expect(db.unit.batchFindAllByGroupIds).toBeCalledWith([5], testTx)
-        expect(target.getDbActions).toBeCalledWith('units', 'unitsFromDb', groups)
+        expect(target.getDbActions).toBeCalledWith([], 'unitsFromDb', groups)
         expect(target.saveToDb).toBeCalledWith(5, groups, 'create', 'update', 'delete', testTx)
         expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         expect(err).toBe('test')

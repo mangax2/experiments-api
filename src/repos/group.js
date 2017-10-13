@@ -6,7 +6,7 @@ module.exports = (rep, pgp) => ({
   findRepGroupsBySetId: (setId, tx = rep) => tx.any('select g.*, gv.value as rep from (select' +
     ' g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner' +
     ' join '+
-      'group_value_new gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId),
+      'group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId),
 
   batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]),
 

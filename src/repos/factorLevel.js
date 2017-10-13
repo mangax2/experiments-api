@@ -5,21 +5,20 @@ const qualifiedColumns = "fl.id,fl.value,fl.factor_id,fl.created_user_id,fl.crea
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
-  find: (id, tx = rep) => tx.oneOrNone(`SELECT ${columns} FROM factor_level_new WHERE id = $1`, id),
+  find: (id, tx = rep) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE id = $1`, id),
 
-  batchFind: (ids, tx = rep) => tx.any(`SELECT ${columns} FROM factor_level_new WHERE id IN ($1:csv) ORDER BY id asc`, [ids]),
+  batchFind: (ids, tx = rep) => tx.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]),
 
   findByExperimentId: (experimentId, tx = rep) =>
-    tx.any(`SELECT ${qualifiedColumns} FROM factor_new f inner join factor_level_new fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId),
+    tx.any(`SELECT ${qualifiedColumns} FROM factor f inner join factor_level fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId),
 
-  findByFactorId: factorId => rep.any(`SELECT ${columns} FROM factor_level_new WHERE factor_id = $1`, factorId),
+  findByFactorId: factorId => rep.any(`SELECT ${columns} FROM factor_level WHERE factor_id = $1`, factorId),
 
-  all: () => rep.any('SELECT ${columns} FROM factor_level_new'),
+  all: () => rep.any('SELECT ${columns} FROM factor_level'),
 
   batchCreate: (factorLevels, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       [
-        'id:raw',
         'value:raw',
         'factor_id',
         'created_user_id',
@@ -27,9 +26,8 @@ module.exports = (rep, pgp) => ({
         'modified_user_id',
         'modified_date:raw'
       ],
-      {table: 'factor_level_new'})
+      {table: 'factor_level'})
     const values = factorLevels.map(factorLevel => ({
-      id: 'nextval(pg_get_serial_sequence(\'factor_level\', \'id\'))',
       value: `CAST(${pgp.as.json(factorLevel.value)} AS jsonb)`,
       factor_id: factorLevel.factorId,
       created_user_id: context.userId,
@@ -50,7 +48,7 @@ module.exports = (rep, pgp) => ({
         'modified_user_id',
         'modified_date:raw'
       ],
-      {table: 'factor_level_new'}
+      {table: 'factor_level'}
     )
     const data = factorLevels.map(factorLevel => ({
       id: factorLevel.id,
@@ -63,16 +61,16 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: id => rep.oneOrNone('DELETE FROM factor_level_new WHERE id = $1 RETURNING id', id),
+  remove: id => rep.oneOrNone('DELETE FROM factor_level WHERE id = $1 RETURNING id', id),
 
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM factor_level_new WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM factor_level WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level_new WHERE` +
+  findByBusinessKey: (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE` +
     ' factor_id = $1' +
     ' and value = $2', keys),
 
@@ -82,7 +80,7 @@ module.exports = (rep, pgp) => ({
       value: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level_new entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = CAST(d.value as jsonb) and (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(factor_id, value, id) AS (VALUES ${pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = CAST(d.value as jsonb) and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

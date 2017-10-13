@@ -9,7 +9,7 @@ function checkRegexMatches(regexes, url) {
 }
 
 function requestContextMiddlewareFunction(req, res, next) {
-  const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping', '/experiments-api/docs/']
+  const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping', '/experiments-api/docs/', '/favicon.ico']
   const whiltelistedUrlRegexes = ['/experiments-api/graphql.*']
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
 

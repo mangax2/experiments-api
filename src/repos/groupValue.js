@@ -1,5 +1,5 @@
 const columns = "gv.id, COALESCE(gv.name, f.name) AS name, gv.value, fl.value->'items' AS factor_level_value, fl.id AS factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date"
-const tables = 'group_value_new gv LEFT OUTER JOIN factor_level_new fl ON gv.factor_level_id = fl.id LEFT OUTER JOIN factor_new f ON fl.factor_id = f.id'
+const tables = 'group_value gv LEFT OUTER JOIN factor_level fl ON gv.factor_level_id = fl.id LEFT OUTER JOIN factor f ON fl.factor_id = f.id'
 const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
 
 module.exports = (rep, pgp) => ({
@@ -20,12 +20,11 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (groupValues, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['id:raw', 'name', 'value', 'factor_level_id', 'group_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'group_value_new' },
+      ['name', 'value', 'factor_level_id', 'group_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      { table: 'group_value' },
     )
 
     const values = groupValues.map(gv => ({
-      id: 'nextval(pg_get_serial_sequence(\'group_value\', \'id\'))',
       name: gv.name,
       value: gv.value,
       factor_level_id: gv.factorLevelId,
@@ -43,7 +42,7 @@ module.exports = (rep, pgp) => ({
   batchUpdate: (groupValues, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['?id', 'name', 'value', 'factor_level_id', 'group_id', 'modified_user_id', 'modified_date'],
-      { table: 'group_value_new' },
+      { table: 'group_value' },
     )
 
     const data = groupValues.map(gv => ({
@@ -60,16 +59,16 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM group_value_new WHERE id = $1 RETURNING id', id),
+  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM group_value WHERE id = $1 RETURNING id', id),
 
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM group_value_new WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM group_value WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM group_value_new WHERE group_id = $1 and name = $2', keys),
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM group_value WHERE group_id = $1 and name = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
@@ -77,7 +76,7 @@ module.exports = (rep, pgp) => ({
       group_id: obj.keys[0],
       id: obj.updateId,
     }))
-    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) select gv.group_id, gv.name from public.group_value_new gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))`
+    const query = `WITH d(group_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['group_id', 'name', 'id'])}) select gv.group_id, gv.name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

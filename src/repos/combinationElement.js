@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 const columns = 'ce.id, ce.factor_level_id,ce.treatment_id, ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
-const genericSqlStatement = `SELECT ${columns} FROM combination_element_new ce`
+const genericSqlStatement = `SELECT ${columns} FROM combination_element ce`
 
 module.exports = (rep, pgp) => ({
   repository: () => rep,
@@ -12,7 +12,7 @@ module.exports = (rep, pgp) => ({
 
   findAllByTreatmentId: (treatmentId, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId),
 
-  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT ce.* FROM combination_element_new ce INNER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId),
+  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT ce.* FROM combination_element ce INNER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId),
 
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
     if (!treatmentIds || treatmentIds.length === 0) {
@@ -26,11 +26,10 @@ module.exports = (rep, pgp) => ({
 
   batchCreate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['id:raw','factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element_new' },
+      ['factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      { table: 'combination_element' },
     )
     const values = combinationElements.map(ce => ({
-      id:'nextval(pg_get_serial_sequence(\'combination_element\', \'id\'))',
       factor_level_id: ce.factorLevelId,
       treatment_id: ce.treatmentId,
       created_user_id: context.userId,
@@ -46,7 +45,7 @@ module.exports = (rep, pgp) => ({
   batchUpdate: (combinationElements, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['?id', 'factor_level_id', 'treatment_id', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element_new' },
+      { table: 'combination_element' },
     )
     const data = combinationElements.map(ce => ({
       id: ce.id,
@@ -60,17 +59,17 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element_new WHERE id = $1' +
+  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM combination_element WHERE id = $1' +
     ' RETURNING id', id),
 
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
-    return tx.any('DELETE FROM combination_element_new WHERE id IN ($1:csv) RETURNING id', [ids])
+    return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element_new' +
+  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element' +
     ' WHERE treatment_id = $1 and factor_level_id = $2', keys),
 
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
@@ -79,7 +78,7 @@ module.exports = (rep, pgp) => ({
       factor_level_id: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.factor_level_id from public.combination_element_new ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.factor_level_id =  CAST(d.factor_level_id as integer) and (d.id is null or ce.id != CAST(d.id as integer))`
+    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.factor_level_id from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.factor_level_id =  CAST(d.factor_level_id as integer) and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
   },
 })

@@ -45,13 +45,13 @@ UPDATE ref_data_source SET name='None' WHERE name='Other';
 
 -- ******************************* The above statements have been run in NP **********************************
 ALTER SEQUENCE factor_level_id_seq
-	OWNED BY public.factor_level.id;
+	OWNED BY public.factor_level_new.id;
 ALTER SEQUENCE factor_id_seq
-	OWNED BY public.factor.id;
+	OWNED BY public.factor_new.id;
 ALTER SEQUENCE combination_element_id_seq
-	OWNED BY public.combination_element.id;
+	OWNED BY public.combination_element_new.id;
 ALTER SEQUENCE group_value_id_seq
-	OWNED BY public.group_value.id;
+	OWNED BY public.group_value_new.id;
 
 ALTER TABLE public.factor_level_new
   ALTER COLUMN id SET DEFAULT nextval('factor_level_id_seq'::regclass);

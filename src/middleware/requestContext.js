@@ -10,12 +10,12 @@ function checkRegexMatches(regexes, url) {
 
 function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping', '/experiments-api/docs/', '/favicon.ico']
-  const whiltelistedUrlRegexes = ['/experiments-api/graphql.*']
+  const whitelistedUrlRegexps = ['/experiments-api/graphql.*']
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
 
   if (whitelistedUrls.includes(req.url)
     || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)
-    || (req.url && checkRegexMatches(whiltelistedUrlRegexes, req.url))
+    || (req.url && checkRegexMatches(whitelistedUrlRegexps, req.url))
   ) {
     next()
   } else {

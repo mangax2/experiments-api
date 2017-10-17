@@ -43,7 +43,7 @@ CREATE INDEX unit_treatment_id
 
 UPDATE ref_data_source SET name='None' WHERE name='Other';
 
--- ******************************* The above statements have been run in NP **********************************
+
 ALTER SEQUENCE factor_level_id_seq
 	OWNED BY public.factor_level_new.id;
 ALTER SEQUENCE factor_id_seq
@@ -135,3 +135,5 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE public.experiment_summary TO exper
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_ro_user;
 GRANT ALL ON TABLE public.experiment_summary TO experiments_user_s;
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_dev_app_user;
+
+-- ******************************* The above statements have been run in NP **********************************

@@ -69,26 +69,26 @@ describe('ManageRepsAndUnitsListener', () => {
   describe('dataHandler', () => {
     it('calls commitOffset on success', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { message: { value: { toString: jest.fn(() => '{ "messageValue": "test" }') } }, offset: 3 }
+      const message = { message: { value: { toString: jest.fn(() => '{ "setId": "1234", "entryChanges": [{ "avail": 0 }, { "id": 9886, "repNumber": 1, "value": 246 }] }') } }, offset: 3 }
       const consumer = { commitOffset: jest.fn() }
       target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.resolve())
       target.consumer = consumer
 
       return target.dataHandler([message], 'topic', 'partition').then(() => {
-        expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ messageValue: 'test' })
+        expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ setEntryId: 9886, rep: 1, treatmentId: 246}] })
         expect(consumer.commitOffset).toBeCalledWith({ topic: 'topic', partition: 'partition', offset: 3, metadata: 'optional' })
       })
     })
 
     it('does not call commitOffset on failure', () => {
       const target = new ManageRepsAndUnitsListener()
-      const message = { message: { value: { toString: jest.fn(() => '{ "messageValue": "test" }') } }, offset: 3 }
+      const message = { message: { value: { toString: jest.fn(() => '{ "setId": "1234", "entryChanges": [{ "avail": 0 }, { "id": 9886, "repNumber": 1, "value": 246 }] }') } }, offset: 3 }
       const consumer = { commitOffset: jest.fn() }
       target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.reject())
       target.consumer = consumer
 
       return target.dataHandler([message], 'topic', 'partition').then(() => {
-        expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ messageValue: 'test' })
+        expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ setEntryId: 9886, rep: 1, treatmentId: 246}] })
         expect(consumer.commitOffset).not.toBeCalled()
       })
     })

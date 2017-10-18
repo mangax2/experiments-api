@@ -21,6 +21,7 @@ if (localEnv || testEnv) {
   //eslint-disable-next-line
   services = require('@monsantoit/cloud-foundry').services
   services.experimentsDataSource.user = VaultUtil.dbAppUser
+  console.info(`database user is: ${services.experimentsDataSource.user}`)
   services.experimentsDataSource.password = VaultUtil.dbAppPassword
   services.experimentsDataSource.ssl = true
   services.pingDataSource = {

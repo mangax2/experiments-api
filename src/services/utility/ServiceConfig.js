@@ -1,5 +1,5 @@
-import config from '../../../config'
-import VaultUtil from './VaultUtil'
+const config = require('../../../config')
+const VaultUtil = require('./VaultUtil')
 
 let cfServices
 let services

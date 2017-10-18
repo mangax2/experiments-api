@@ -3,7 +3,6 @@ const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
 const swaggerTools = require('swagger-tools')
 const vaultUtil = require('./services/utility/VaultUtil')
-const serviceConfig = require('./services/utility/ServiceConfig')
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   if (config.node_env !== 'production') {
@@ -11,6 +10,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     require('babel-register')
   }
 
+  const serviceConfig = require('./services/utility/ServiceConfig')
   const express = require('express')
   const _ = require('lodash')
   const inflector = require('json-inflector')

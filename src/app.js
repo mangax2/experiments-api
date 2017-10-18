@@ -3,6 +3,7 @@ const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
 const swaggerTools = require('swagger-tools')
 const vaultUtil = require('./services/utility/VaultUtil')
+const serviceConfig = require('./services/utility/ServiceConfig')
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   if (config.node_env !== 'production') {
@@ -102,7 +103,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   })
 
   const repPackingMessageConsume = () => {
-    if (config.enableKafka) {
+    if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
       try {
         require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
       } catch (error) {

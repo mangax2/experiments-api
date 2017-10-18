@@ -40,6 +40,11 @@ class ManageRepsAndUnitsListener {
     const message = m.message.value.toString('utf8')
     logger.info(topic, partition, m.offset, message)
     const set = JSON.parse(message)
+    set.entryChanges = _.map(_.filter(set.entryChanges, 'id'), entryChange => ({
+      rep: entryChange.repNumber,
+      setEntryId: entryChange.id,
+      treatmentId: entryChange.value,
+    }))
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
       this.consumer.commitOffset({ topic, partition, offset: m.offset, metadata: 'optional' })
     }).catch((err) => {

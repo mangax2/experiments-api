@@ -46,9 +46,10 @@ class ManageRepsAndUnitsListener {
       treatmentId: entryChange.value,
     }))
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
+      logger.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
       this.consumer.commitOffset({ topic, partition, offset: m.offset, metadata: 'optional' })
     }).catch((err) => {
-      logger.error('Failed to update experiment with rep packing changes ', message, err)
+      logger.error(`Failed to update set "${set.setId}" with rep packing changes `, message, err)
     })
   }))
 
@@ -58,6 +59,9 @@ class ManageRepsAndUnitsListener {
       const setId = set.setId
       const unitsFromMessage = set.entryChanges
       return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
+        if (groups.length === 0) {
+          return Promise.reject(`No groups found for setId "${set.setId}".`)
+        }
         const groupIds = _.map(groups, 'id')
         return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
           const { unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated }
@@ -74,7 +78,7 @@ class ManageRepsAndUnitsListener {
     }
     ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
 
-    return Promise.reject()
+    return Promise.reject('The rep pack message was in an invalid format.')
   }
 
   getDbActions = (unitsFromMessage, unitsFromDB, groups) => {

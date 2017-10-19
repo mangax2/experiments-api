@@ -152,7 +152,27 @@ describe('ManageRepsAndUnitsListener', () => {
         expect(target.getDbActions).not.toBeCalled()
         expect(target.saveToDb).not.toBeCalled()
         expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
-        expect(err).toBe(undefined)
+        expect(err).toBe('The rep pack message was in an invalid format.')
+      })
+    })
+    
+    it('publishes a failure when no groups found', () => {
+      const target = new ManageRepsAndUnitsListener()
+      const message = { setId: 5, entryChanges: [] }
+      db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve([]))}
+      db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb'))}
+      target.getDbActions = jest.fn()
+      target.saveToDb = jest.fn()
+      ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
+      const testTx = {}
+
+      return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
+        expect(db.group.findRepGroupsBySetId).toBeCalled()
+        expect(db.unit.batchFindAllByGroupIds).not.toBeCalled()
+        expect(target.getDbActions).not.toBeCalled()
+        expect(target.saveToDb).not.toBeCalled()
+        expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
+        expect(err).toBe('No groups found for setId "5".')
       })
     })
   })

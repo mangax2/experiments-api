@@ -2262,6 +2262,56 @@
       }
     },
     "/set-entries": {
+      "get": {
+        "summary": "Gets all set entries for a set.",
+        "description": "Retrieves all set entries that belong to the given set id.",
+        "operationId": "getSetEntries",
+        "tags": ["Set Entry"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "query",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Set Entry/Treatment/Rep Mapping",
+            "schema": {
+              "$ref": "#/definitions/SetEntryTreatmentRepInfo"
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Set Entries Do Not Exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Returns a mapping of Set Entry Ids to corresponding Treatment Id, Treatment Number and Rep Number",
         "description": "Returns the relationship betweten Set Entry Id and Treatment",

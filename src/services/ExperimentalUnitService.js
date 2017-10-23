@@ -88,22 +88,38 @@ class ExperimentalUnitService {
   getExperimentalUnitsByExperimentIdNoValidate = (id, tx) =>
     db.unit.findAllByExperimentId(id, tx)
 
-  getExperimentalUnitInfoBySetEntryId = (setEntryIds) => {
-    if (setEntryIds) {
-      return db.unit.batchFindAllBySetEntryIds(setEntryIds).then((units) => {
-        const setEntryUnitMap = {}
-        _.forEach(units, (u) => {
-          setEntryUnitMap[u.set_entry_id] = {
-            treatmentId: u.treatment_id,
-            treatmentNumber: u.treatment_number,
-            rep: u.rep,
-          }
-        })
-        return setEntryUnitMap
+  getExperimentalUnitInfoBySetId = (setId) => {
+    if (setId) {
+      return db.unit.batchFindAllBySetId(setId).then((units) => {
+        if (units.length === 0) {
+          throw AppError.notFound('Either the set was not found or no set entries are associated with the set.')
+        }
+        return this.mapUnitsToSetEntryFormat(units)
       })
     }
 
+    throw AppError.badRequest('A setId is required')
+  }
+
+  getExperimentalUnitInfoBySetEntryId = (setEntryIds) => {
+    if (setEntryIds) {
+      return db.unit.batchFindAllBySetEntryIds(setEntryIds)
+        .then(this.mapUnitsToSetEntryFormat)
+    }
+
     throw AppError.badRequest('Body must contain at least one set entry id')
+  }
+
+  mapUnitsToSetEntryFormat = (units) => {
+    const setEntryUnitMap = {}
+    _.forEach(units, (u) => {
+      setEntryUnitMap[u.set_entry_id] = {
+        treatmentId: u.treatment_id,
+        treatmentNumber: u.treatment_number,
+        rep: u.rep,
+      }
+    })
+    return setEntryUnitMap
   }
 
   @Transactional('batchUpdateExperimentalUnits')

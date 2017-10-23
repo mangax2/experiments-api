@@ -259,6 +259,10 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/set-entries', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitInfoBySetId(req.query.setId)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.post('/set-entries', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitInfoBySetEntryId(req.body)
   .then(value => res.json(value))
   .catch(err => next(err)))

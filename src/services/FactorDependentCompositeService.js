@@ -9,6 +9,7 @@ import SecurityService from './SecurityService'
 import RefDataSourceService from './RefDataSourceService'
 import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
+import FactorLevelAssociationService from './FactorLevelAssociationService'
 
 
 class FactorDependentCompositeService {
@@ -75,8 +76,17 @@ class FactorDependentCompositeService {
     }))
   }
 
-  static createVariablesObject({ independent = [], exogenous = [] }, dependent = []) {
-    return { independent, exogenous, dependent }
+  static mapFactorLevelAssociationEntitiesToDTOs(factorLevelAssociationEntities) {
+    return _.map(factorLevelAssociationEntities, factorLevelAssociationEntity => ({
+      id: factorLevelAssociationEntity.id,
+      associatedLevelId: factorLevelAssociationEntity.associated_level_id,
+      nestedLevelId: factorLevelAssociationEntity.nested_level_id,
+    }))
+  }
+
+  static createVariablesObject({ independent = [], exogenous = [] }, dependent = [],
+                               independentAssociations = []) {
+    return { independent, exogenous, dependent, independentAssociations }
   }
 
   static assembleIndependentAndExogenous(factorDTOs) {
@@ -86,14 +96,17 @@ class FactorDependentCompositeService {
   }
 
   static assembleVariablesObject(
-    factorEntities, allFactorLevels, factorTypes, dependentVariableEntities) {
+    factorEntities, allFactorLevels, factorTypes, dependentVariableEntities,
+    factorLevelAssociationEntities) {
     const factorDTOs = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
       factorEntities, allFactorLevels, factorTypes)
 
     return FactorDependentCompositeService.createVariablesObject(
       FactorDependentCompositeService.assembleIndependentAndExogenous(factorDTOs),
       FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs(
-        dependentVariableEntities))
+        dependentVariableEntities),
+      FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs(
+        factorLevelAssociationEntities))
   }
 
   @Transactional('getAllVariablesByExperimentId')
@@ -105,12 +118,15 @@ class FactorDependentCompositeService {
         this.factorTypeService.getAllFactorTypes(tx),
         DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(
           experimentId, tx),
+        FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(
+          experimentId, tx),
       ],
     ).then(results => FactorDependentCompositeService.assembleVariablesObject(
       results[1].factors,
       results[1].levels,
       results[2],
       results[3],
+      results[4],
     ))
   }
 

@@ -5,6 +5,7 @@ import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
 import FactorService from '../../src/services/FactorService'
 import FactorLevelService from '../../src/services/FactorLevelService'
+import FactorLevelAssociationService from '../../src/services/FactorLevelAssociationService'
 
 describe('FactorDependentCompositeService', () => {
   let target
@@ -25,6 +26,7 @@ describe('FactorDependentCompositeService', () => {
   let assembleIndependentAndExogenousOriginal
   let assembleVariablesObjectOriginal
   let getDependentVariablesByExperimentIdNoExistenceCheckOriginal
+  let getFactorLevelAssociationByExperimentIdOriginal
 
   beforeEach(() => {
     target = new FactorDependentCompositeService()
@@ -43,6 +45,7 @@ describe('FactorDependentCompositeService', () => {
     assembleIndependentAndExogenousOriginal = FactorDependentCompositeService.assembleIndependentAndExogenous
     assembleVariablesObjectOriginal = FactorDependentCompositeService.assembleVariablesObject
     getDependentVariablesByExperimentIdNoExistenceCheckOriginal = DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck
+    getFactorLevelAssociationByExperimentIdOriginal = FactorLevelAssociationService.getFactorLevelAssociationByExperimentId
   })
 
   afterEach(() => {
@@ -60,6 +63,7 @@ describe('FactorDependentCompositeService', () => {
     FactorDependentCompositeService.assembleIndependentAndExogenous = assembleIndependentAndExogenousOriginal
     FactorDependentCompositeService.assembleVariablesObject = assembleVariablesObjectOriginal
     DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = getDependentVariablesByExperimentIdNoExistenceCheckOriginal
+    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = getFactorLevelAssociationByExperimentIdOriginal
   })
 
   describe('getFactorsWithLevels', () => {
@@ -316,26 +320,67 @@ describe('FactorDependentCompositeService', () => {
   describe('getAllVariablesByExperimentId', () => {
     it('returns all variables with their levels', () => {
       const factorsWithLevels = {
-        factors: [{
-          id: 42,
-          name: 'testFactor',
-          tier: undefined,
-          ref_data_source_id: 1,
-          ref_factor_type_id: 1,
-        }],
-        levels: [
-          {
-            id: 1,
-            value: {items:[{label: 'testFactor', text: 'testValue1', propertyTypeId: 1}]},
-            factor_id: 42
+          factors: [{
+              id: 42,
+              name: 'GermPlasm',
+              tier: undefined,
+              ref_data_source_id: 1,
+              ref_factor_type_id: 1,
           },
           {
-            id: 2,
-            value: {items:[{label: 'testFactor', text: 'testValue2', propertyTypeId: 1}]},
-            factor_id: 42
+              id: 43,
+              name: 'RM',
+              tier: undefined,
+              ref_data_source_id: 1,
+              ref_factor_type_id: 1,
           }
-        ],
+          ],
+
+          levels: [
+              {
+                  id: 1,
+                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1}]},
+                  factor_id: 42
+              },
+              {
+                  id: 2,
+                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1}]},
+                  factor_id: 42
+              },
+              {
+                  id: 3,
+                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1}]},
+                  factor_id: 42
+              },
+              {
+                  id: 4,
+                  value: {items:[{label: 'RM', text: 'RM1', propertyTypeId: 1}]},
+                  factor_id: 43
+              },
+              {
+                  id: 5,
+                  value: {items:[{label: 'RM', text: 'RM2', propertyTypeId: 1}]},
+                  factor_id: 43
+              }
+          ],
       }
+      const factorLevelAssociations = [
+        {
+          id : 1,
+          associated_level_id : 1,
+          nested_level_id : 4
+        },
+        {
+          id : 2,
+          associated_level_id : 2,
+          nested_level_id : 4
+        },
+        {
+          id : 3,
+          associated_level_id : 3,
+          nested_level_id : 5
+        }
+      ]
       ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
@@ -346,17 +391,24 @@ describe('FactorDependentCompositeService', () => {
         question_code: 'ABC_GDEG',
       }]
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockResolve(dependentVariables)
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve(factorLevelAssociations)
       const expectedReturn = {
         independent: [{
           id: 42,
-          name: 'testFactor',
+          name: 'GermPlasm',
+          nestedFactors: [
+            {
+              id: 43,
+              name: 'RM',
+            },
+          ],
           levels: [
             {
               id: 1,
               items: [
                 {
-                  label: 'testFactor',
-                  text: 'testValue1',
+                  label: 'GermPlasm',
+                  text: 'GermPlasm1',
                   propertyTypeId: 1
                 }
               ]
@@ -365,15 +417,75 @@ describe('FactorDependentCompositeService', () => {
               id: 2,
               items: [
                 {
-                  label: 'testFactor',
-                  text: 'testValue2',
+                  label: 'GermPlasm',
+                  text: 'GermPlasm2',
                   propertyTypeId: 1
                 }
               ]
-            }
+            },
+            {
+              id: 3,
+              items: [
+                {
+                  label: 'GermPlasm',
+                  text: 'GermPlasm3',
+                  propertyTypeId: 1
+                }
+              ]
+            },
+          ],
+          tier: undefined,
+        },
+        {
+          id: 43,
+          name: 'RM',
+          associatedFactors: [
+            {
+              id: 42,
+              name: 'GermPlasm',
+            },
+          ],
+          levels: [
+            {
+              id: 4,
+              items: [
+                {
+                  label: 'RM',
+                  text: 'RM1',
+                  propertyTypeId: 1
+                }
+              ]
+            },
+            {
+              id: 5,
+              items: [
+                {
+                  label: 'RM',
+                  text: 'RM2',
+                  propertyTypeId: 1
+                }
+              ]
+            },
           ],
           tier: undefined,
         }],
+        independentAssociations: [
+          {
+            id : 1,
+            associatedLevelId : 1,
+            nestedLevelId : 4
+          },
+          {
+            id : 2,
+            associatedLevelId : 2,
+            nestedLevelId : 4
+          },
+          {
+            id : 3,
+            associatedLevelId : 3,
+            nestedLevelId : 5
+          },
+        ],
         exogenous: [],
         dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
@@ -383,7 +495,7 @@ describe('FactorDependentCompositeService', () => {
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual(expectedReturn)
       })
     })

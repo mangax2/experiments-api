@@ -52,20 +52,61 @@ class FactorDependentCompositeService {
     return _.find(factorTypes, { id: factor.ref_factor_type_id }).type.toLowerCase()
   }
 
-  static assembleFactorLevelDTOs(factor, allFactorLevels) {
+  static assembleFactorLevelDTOs(factor, factorLevels) {
     return _.map(
-      FactorDependentCompositeService.extractLevelsForFactor(factor, allFactorLevels),
+      factorLevels,
       level => FactorDependentCompositeService.appendLevelIdToLevel(level))
   }
 
-  static mapFactorEntitiesToFactorDTOs(factors, allFactorLevels, allFactorTypes) {
-    return _.map(factors, factor => ({
-      id: factor.id,
-      name: factor.name,
-      type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
-      levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factor, allFactorLevels),
-      tier: factor.tier,
-    }))
+  static mapFactorEntitiesToFactorDTOs(factors, allFactorLevels, allFactorTypes, hashTables) {
+    return _.map(factors, (factor) => {
+      const factorLevels = FactorDependentCompositeService.extractLevelsForFactor(
+        factor, allFactorLevels)
+      const nestedFactorIds = _.uniq(_.compact(_.map(factorLevels,
+        (factorLevel) => {
+          const association =
+            hashTables.associationHashByAssociatedLevelId[factorLevel.id]
+          if (association) {
+            const nestedLevel = hashTables.factorLevelHashById[association.nested_level_id]
+            return nestedLevel.factor_id
+          }
+          return null
+        })))
+      const nestedFactorDTOs = _.map(nestedFactorIds, (factorId) => {
+        const factorMatch = hashTables.factorHashById[factorId]
+        return {
+          id: factorMatch.id,
+          name: factorMatch.name,
+        }
+      })
+      const associatedFactorIds = _.uniq(_.compact(_.map(factorLevels,
+        (factorLevel) => {
+          const association =
+            hashTables.associationHashByNestedLevelId[factorLevel.id]
+          if (association) {
+            const associatedLevel = hashTables.factorLevelHashById[association.associated_level_id]
+            return associatedLevel.factor_id
+          }
+          return null
+        })))
+      const associatedFactorDTOs = _.map(associatedFactorIds, (factorId) => {
+        const factorMatch = hashTables.factorHashById[factorId]
+        return {
+          id: factorMatch.id,
+          name: factorMatch.name,
+        }
+      })
+      return {
+        id: factor.id,
+        name: factor.name,
+        nestedFactors: _.isEmpty(nestedFactorDTOs) ? undefined : nestedFactorDTOs,
+        associatedFactors: _.isEmpty(associatedFactorDTOs) ? undefined : associatedFactorDTOs,
+        type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
+        levels: FactorDependentCompositeService.assembleFactorLevelDTOs(
+          factor, factorLevels),
+        tier: factor.tier,
+      }
+    })
   }
 
   static mapDependentVariablesEntitiesToDTOs(dependentVariableEntities) {
@@ -84,8 +125,10 @@ class FactorDependentCompositeService {
     }))
   }
 
-  static createVariablesObject({ independent = [], exogenous = [] }, dependent = [],
-                               independentAssociations = []) {
+  static createVariablesObject(
+    { independent = [], exogenous = [] },
+    dependent = [],
+    independentAssociations = []) {
     return { independent, exogenous, dependent, independentAssociations }
   }
 
@@ -98,9 +141,17 @@ class FactorDependentCompositeService {
   static assembleVariablesObject(
     factorEntities, allFactorLevels, factorTypes, dependentVariableEntities,
     factorLevelAssociationEntities) {
-    const factorDTOs = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
-      factorEntities, allFactorLevels, factorTypes)
+    const hashTables = {
+      factorHashById: _.keyBy(factorEntities, 'id'),
+      factorLevelHashById: _.keyBy(allFactorLevels, 'id'),
+      associationHashByNestedLevelId:
+        _.keyBy(factorLevelAssociationEntities, 'nested_level_id'),
+      associationHashByAssociatedLevelId:
+        _.keyBy(factorLevelAssociationEntities, 'associated_level_id'),
+    }
 
+    const factorDTOs = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
+      factorEntities, allFactorLevels, factorTypes, hashTables)
     return FactorDependentCompositeService.createVariablesObject(
       FactorDependentCompositeService.assembleIndependentAndExogenous(factorDTOs),
       FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs(

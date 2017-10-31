@@ -691,7 +691,7 @@ class FactorDependentCompositeService {
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
     const expId = Number(experimentId)
     return this.securityService.permissionsCheck(expId, context, isTemplate, tx)
-      // .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx))
+      .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx))
       .then(() => this.overall(
           expId,
           experimentVariables.independent,

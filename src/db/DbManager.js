@@ -80,9 +80,9 @@ if (config.node_env !== 'UNITTEST') {
 
 const pgp = pgPromise(options)
 
-// const monitor = require('pg-monitor')
-// monitor.attach(options)
-// monitor.setTheme('matrix')
+const monitor = require('pg-monitor')
+monitor.attach(options)
+monitor.setTheme('matrix')
 
 // Create the database instance with extensions:
 const db = pgp(dbConfig)

@@ -583,8 +583,8 @@ class FactorDependentCompositeService {
 
   static mapFactorLevelAssociationDTOToEntity(refIdToIdMap, DTOs) {
     return _.map(DTOs, dto => ({
-      associatedLevelId: refIdToIdMap[dto.associatedFactorLevelRefId],
-      nestedLevelId: refIdToIdMap[dto.nestedFactorLevelRefId],
+      associatedLevelId: refIdToIdMap[dto.associatedLevelRefId],
+      nestedLevelId: refIdToIdMap[dto.nestedLevelRefId],
     }))
   }
 

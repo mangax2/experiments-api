@@ -625,10 +625,11 @@ class FactorDependentCompositeService {
   createFactorLevelAssociations = (
     refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs, context, tx) => {
     const C = FactorDependentCompositeService
-    return this.factorLevelAssociationService.batchCreateFactorLevelAssociations(
-      C.determineFactorLevelAssociationEntitiesToCreate(
-        refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs),
-      context,
+    const factorLevelAssociationsToCreate = C.determineFactorLevelAssociationEntitiesToCreate(
+      refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs)
+    return C.batchCreateEntities(factorLevelAssociationsToCreate, context,
+      this.factorLevelAssociationService.batchCreateFactorLevelAssociations
+        .bind(this.factorLevelAssociationService),
       tx)
   }
 

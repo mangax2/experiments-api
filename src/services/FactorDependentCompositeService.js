@@ -662,7 +662,7 @@ class FactorDependentCompositeService {
           _.filter(allLevelDTOsWithParentFactorId, dto => !_.isNil(dto.factorId) && _.isNil(dto.id))
         return this.deleteFactorsAndLevels(
           allDbFactors, allDbLevels, allFactorDTOs, allLevelDTOsWithParentFactorId, tx)
-          .then(this.updateFactorsAndLevels(experimentId, allDbRefDataSources, allFactorDTOs,
+          .then(() => this.updateFactorsAndLevels(experimentId, allDbRefDataSources, allFactorDTOs,
             allLevelDTOsWithParentFactorIdForUpdate, context, tx))
           .then(Promise.all([
             this.createFactorsAndDependentLevels(experimentId, allDbRefDataSources,

@@ -27,9 +27,8 @@ class VariablesValidator extends BaseValidator {
     }
 
     // Check that associations are valid
-    const allAssociationRefIds = _.flatMap(variables.independentAssociations, (association) => {
-      return [association.associatedLevelRefId, association.nestedLevelRefId]
-    })
+    const allAssociationRefIds = _.flatMap(variables.independentAssociations,
+        association => [association.associatedLevelRefId, association.nestedLevelRefId])
     const invalidAssociationRefIds = _.uniq(_.difference(allAssociationRefIds, allRefIds)).sort()
     if (!_.isEmpty(invalidAssociationRefIds)) {
       return Promise.reject(

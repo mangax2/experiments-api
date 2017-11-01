@@ -6,10 +6,10 @@ import db from '../db/DbManager'
 class FactorLevelAssociationValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
-      {paramName: 'associatedLevelId', type: 'numeric', required: true},
-      {paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel},
-      {paramName: 'nestedLevelId', type: 'numeric', required: true},
-      {paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel},
+      { paramName: 'associatedLevelId', type: 'numeric', required: true },
+      { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+      { paramName: 'nestedLevelId', type: 'numeric', required: true },
+      { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
       {
         paramName: 'FactorLevelAssociation',
         type: 'businessKey',

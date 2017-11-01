@@ -246,22 +246,6 @@ class FactorDependentCompositeService {
       experimentId, dependentVariableEntities, context, isTemplate, tx)
   }
 
-  getAllDbRefDataSources() {
-    return this.refDataSourceService.getRefDataSources()
-  }
-
-  static getAllDbFactorsInExperiment(experimentId, tx) {
-    return FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx)
-  }
-
-  static getAllDbLevelsInExperiment(experimentId, tx) {
-    return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx)
-  }
-
-  static getAllFactorLevelAssociationsInExperiment(experimentId, tx) {
-    return FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx)
-  }
-
   static extractIds(sources) {
     return _.compact(_.map(sources, 'id'))
   }
@@ -465,10 +449,10 @@ class FactorDependentCompositeService {
     (experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
       const C = FactorDependentCompositeService
       const getCurrentDbState = Promise.all([
-        this.getAllDbRefDataSources(),
-        C.getAllDbFactorsInExperiment(experimentId, tx),
-        C.getAllDbLevelsInExperiment(experimentId, tx),
-        C.getAllFactorLevelAssociationsInExperiment(experimentId, tx),
+        this.refDataSourceService.getRefDataSources(),
+        FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
+        FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
+        FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),
       ])
       return getCurrentDbState.then(
         ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) => {

@@ -439,17 +439,13 @@ class FactorDependentCompositeService {
     return _.compact(_.map(sources, 'id'))
   }
 
-  deleteLevelsHavingIds(levelIds, tx) {
-    return _.isEmpty(levelIds)
+  deleteLevelsHavingIds = (levelIds, tx) => (_.isEmpty(levelIds)
       ? Promise.resolve([])
-      : this.factorLevelService.batchDeleteFactorLevels(levelIds, tx)
-  }
+      : this.factorLevelService.batchDeleteFactorLevels(levelIds, tx))
 
-  deleteFactorsHavingIds(factorIds, tx) {
-    return _.isEmpty(factorIds)
+  deleteFactorsHavingIds = (factorIds, tx) => (_.isEmpty(factorIds)
       ? Promise.resolve([])
-      : this.factorService.batchDeleteFactors(factorIds, tx)
-  }
+      : this.factorService.batchDeleteFactors(factorIds, tx))
 
   static batchUpdateEntities(entities, context, asyncBatchUpdateFunction, tx) {
     return _.isEmpty(entities)
@@ -466,7 +462,7 @@ class FactorDependentCompositeService {
   static mapFactorLevelDTOsToFactorLevelEntities(allLevelDTOsWithParentFactorId) {
     return _.map(allLevelDTOsWithParentFactorId, level => ({
       id: level.id,
-      value: _.omit(level, 'id'),
+      value: { items: level.items },
       factorId: level.factorId,
     }))
   }
@@ -557,10 +553,10 @@ class FactorDependentCompositeService {
       FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID, allDataSources)
     return C.batchCreateEntities(
       factorEntitiesForCreate, context, this.factorService.batchCreateFactors, tx)
-      .then((factorIds) => {
+      .then((responses) => {
         const levelDTOsWithFactorIdForCreate =
-          _.map(factorDTOsForCreate, (factorDTO, index) =>
-            _.map(factorDTO.levels, level => ({ factorId: factorIds[index], ...level })))
+          _.flatMap(factorDTOsForCreate, (factorDTO, index) =>
+            _.map(factorDTO.levels, level => ({ factorId: responses[index].id, ...level })))
         return this.createFactorLevels(
           experimentId, allDataSources, levelDTOsWithFactorIdForCreate, context, tx)
       })
@@ -591,13 +587,13 @@ class FactorDependentCompositeService {
   static determineFactorLevelAssociationIdsToDelete(
     refIdToIdMap,
     factorLevelAssociationEntities,
-    factorLevelAssociationDTOs){
+    factorLevelAssociationDTOs) {
     const C = FactorDependentCompositeService
     return _.map(_.differenceWith(
       factorLevelAssociationEntities,
       C.mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
-      (a, b) => a.associated_level_id === b.associatedLevelId
-        && a.nested_level_id === b.nestedLevelId), 'id')
+      (a, b) => (a.associated_level_id === b.associatedLevelId
+        && a.nested_level_id === b.nestedLevelId)), 'id')
   }
 
   static determineFactorLevelAssociationEntitiesToCreate(
@@ -612,14 +608,16 @@ class FactorDependentCompositeService {
         && a.nestedLevelId === b.nested_level_id)
   }
 
-
   static deleteFactorLevelAssociations(
     refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs, tx) {
     const C = FactorDependentCompositeService
-    return FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
-      C.determineFactorLevelAssociationIdsToDelete(
-        refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs),
-      tx)
+    const idsToDelete = C.determineFactorLevelAssociationIdsToDelete(
+      refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs)
+    return _.isEmpty(idsToDelete)
+      ? Promise.resolve()
+      : FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
+        idsToDelete,
+        tx)
   }
 
   createFactorLevelAssociations = (
@@ -639,7 +637,8 @@ class FactorDependentCompositeService {
       _.map(idSource, 'id'))
   }
 
-  overall = (experimentId, allFactorDTOs, allFactorLevelAssociationDTOs, context, tx) => {
+  overall = (experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs,
+             allDependentDTOs, isTemplate, context, tx) => {
     const C = FactorDependentCompositeService
     const getCurrentDbState = Promise.all([
       this.getAllDbRefDataSources(),
@@ -651,39 +650,47 @@ class FactorDependentCompositeService {
     return getCurrentDbState.then(
       ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) => {
         const allLevelDTOsWithParentFactorId = C.concatChildArrays(
-          C.appendParentIdToChildren(allFactorDTOs, 'levels', 'factorId'),
+          C.appendParentIdToChildren(allIndependentDTOs, 'levels', 'factorId'),
           'levels')
         const allLevelDTOsWithParentFactorIdForUpdate =
           C.determineDTOsForUpdate(allLevelDTOsWithParentFactorId)
-        const factorDTOsForCreate = C.determineDTOsForCreate(allFactorDTOs)
+        const factorDTOsForCreate = C.determineDTOsForCreate(allIndependentDTOs)
         const factorDependentLevelDTOsForCreate =
           _.filter(allLevelDTOsWithParentFactorId, dto => _.isNil(dto.factorId))
         const factorIndependentLevelDTOsForCreate =
           _.filter(allLevelDTOsWithParentFactorId, dto => !_.isNil(dto.factorId) && _.isNil(dto.id))
-        return this.deleteFactorsAndLevels(
-          allDbFactors, allDbLevels, allFactorDTOs, allLevelDTOsWithParentFactorId, tx)
-          .then(() => this.updateFactorsAndLevels(experimentId, allDbRefDataSources, allFactorDTOs,
-            allLevelDTOsWithParentFactorIdForUpdate, context, tx))
-          .then(Promise.all([
-            this.createFactorsAndDependentLevels(experimentId, allDbRefDataSources,
-              factorDTOsForCreate, context, tx),
-            this.createFactorLevelsHavingParents(experimentId, allDbRefDataSources,
-              factorIndependentLevelDTOsForCreate, context, tx)]))
-          .then(([dependentLevelIds, independentLevelIds]) => {
-            const finalRefIdMap = _.assign(
-              C.createRefIdToIdMap(factorDependentLevelDTOsForCreate, dependentLevelIds),
-              C.createRefIdToIdMap(factorIndependentLevelDTOsForCreate, independentLevelIds),
-              C.createRefIdToIdMap(
-                allLevelDTOsWithParentFactorIdForUpdate,
-                allLevelDTOsWithParentFactorIdForUpdate))
-            return Promise.all([
-              C.deleteFactorLevelAssociations(
-                finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs, tx),
-              this.createFactorLevelAssociations(
-                finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs,
-                context, tx),
-            ])
-          })
+        return Promise.all([
+          this.deleteFactorsAndLevels(
+            allDbFactors, allDbLevels, allIndependentDTOs, allLevelDTOsWithParentFactorId, tx)
+            .then(() => this.updateFactorsAndLevels(
+              experimentId, allDbRefDataSources, allIndependentDTOs,
+              allLevelDTOsWithParentFactorIdForUpdate, context, tx))
+            .then(() => Promise.all([
+              this.createFactorsAndDependentLevels(experimentId, allDbRefDataSources,
+                factorDTOsForCreate, context, tx),
+              this.createFactorLevelsHavingParents(experimentId, allDbRefDataSources,
+                factorIndependentLevelDTOsForCreate, context, tx)]))
+            .then(([dependentLevelResponses, independentLevelResponses]) => {
+              const finalRefIdMap = _.assign(
+                C.createRefIdToIdMap(
+                  factorDependentLevelDTOsForCreate,
+                  dependentLevelResponses),
+                C.createRefIdToIdMap(
+                  factorIndependentLevelDTOsForCreate,
+                  independentLevelResponses),
+                C.createRefIdToIdMap(
+                  allLevelDTOsWithParentFactorIdForUpdate,
+                  allLevelDTOsWithParentFactorIdForUpdate))
+              return Promise.all([
+                C.deleteFactorLevelAssociations(
+                  finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs, tx),
+                this.createFactorLevelAssociations(
+                  finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs,
+                  context, tx),
+              ])
+            }),
+          this.persistDependentVariables(allDependentDTOs, experimentId, context, isTemplate, tx),
+        ])
       })
   }
 
@@ -696,6 +703,8 @@ class FactorDependentCompositeService {
           expId,
           experimentVariables.independent,
           experimentVariables.independentAssociations,
+          experimentVariables.dependent,
+          isTemplate,
           context,
           tx))
       .then(() => AppUtil.createPostResponse([{ id: expId }]))

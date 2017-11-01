@@ -888,49 +888,1726 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('persistAllVariables', () => {
-    it('persists variables, and returns response', () => {
+    beforeEach(() => {
+      target.refDataSourceService.getRefDataSources = mockResolve([{name: 'Other', id: 1}])
       target.securityService.permissionsCheck = mockResolve()
       target.variablesValidator.validate = mockResolve()
-      target.persistIndependentVariables = mockResolve()
-      target.persistDependentVariables = mockResolve()
-      AppUtil.createPostResponse = mock()
+    })
+
+    afterEach(() => {
+      expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalledTimes(1)
+    })
+
+    it('persists new factors and levels without associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
+      target.factorService.batchCreateFactors = mockResolve([{id: 1}, {id: 2}])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve([{id: 11}, {id: 12}, {id: 21}, {id: 22}])
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
       const experimentVariables = {
-        independent: [{}],
-        exogenous: [],
-        dependent: [{}, {}]
+        independent: [
+          {
+            name: 'Factor1',
+            levels: [
+              {
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            name: 'Factor2',
+            levels: [
+              {
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: []
       }
 
-      return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
         expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
-        expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, testTx)
-        expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([
+          {
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([
+          {
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
       })
     })
 
-    it('rejects when persistIndependentVariables fails', () => {
-      target.securityService.permissionsCheck = mockResolve()
-      target.variablesValidator.validate = mockResolve()
-      target.persistIndependentVariables = mockReject('error')
-      target.persistDependentVariables = mockResolve()
-      AppUtil.createPostResponse = mock()
+    it('persists new factors and levels with associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
+      target.factorService.batchCreateFactors = mockResolve([{id: 1}, {id: 2}])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve([{id: 11}, {id: 12}, {id: 21}, {id: 22}])
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
       const experimentVariables = {
-        independent: [{}],
-        exogenous: [],
-        dependent: [{}, {}]
+        independent: [
+          {
+            name: 'Factor1',
+            levels: [
+              {
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            name: 'Factor2',
+            levels: [
+              {
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 1,
+            nestedLevelRefId: 3
+          },
+          {
+            associatedLevelRefId: 2,
+            nestedLevelRefId: 4
+          }
+        ]
       }
 
-      return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
         expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
-        expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, testTx)
-        expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([
+          {
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([
+          {
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
+            {
+              associatedLevelId: 11,
+              nestedLevelId: 21
+            },
+            {
+              associatedLevelId: 12,
+              nestedLevelId: 22
+            }
+          ], testContext, testTx)
+      })
+    })
+
+    it('updates factor and factor levels without associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            id: 2,
+            name: 'Factor2',
+            levels: [
+              {
+                id: 21,
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 22,
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: []
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            id: 2,
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 21,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 22,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('updates factors and levels with associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
+        {
+          id: 91,
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          id: 92,
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            id: 2,
+            name: 'Factor2',
+            levels: [
+              {
+                id: 21,
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 22,
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 1,
+            nestedLevelRefId: 3
+          },
+          {
+            associatedLevelRefId: 2,
+            nestedLevelRefId: 4
+          }
+        ]
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            id: 2,
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 21,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 22,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('deletes factors without associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: []
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([2], testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([21,22], testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('deletes factor levels without associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: []
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([12], testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('handles deleting all independent variables and associations', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
+        {
+          id: 91,
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          id: 92,
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [],
+        dependent: [],
+        independentAssociations: []
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalledWith()
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([1,2], testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([11,12,21,22],testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91,92], testTx)
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('handles adding association to existing set', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
+        {
+          id: 91,
+          associated_level_id: 11,
+          nested_level_id: 21
+        }
+      ])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            id: 2,
+            name: 'Factor2',
+            levels: [
+              {
+                id: 21,
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 22,
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 1,
+            nestedLevelRefId: 3
+          },
+          {
+            associatedLevelRefId: 2,
+            nestedLevelRefId: 4
+          }
+        ]
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            id: 2,
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 21,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 22,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
+          {
+            associatedLevelId: 12,
+            nestedLevelId: 22
+          }
+        ], testContext, testTx)
+      })
+    })
+
+    it('handles removing association from existing set', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
+        {
+          id: 91,
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          id: 92,
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            id: 2,
+            name: 'Factor2',
+            levels: [
+              {
+                id: 21,
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 22,
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 1,
+            nestedLevelRefId: 3
+          }
+        ]
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            id: 2,
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 21,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 22,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([92], testTx)
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
+      })
+    })
+
+    it('handles adding to and removing from association set', () => {
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 1,
+          name: 'Factor1',
+          tier: null
+        },
+        {
+          id: 2,
+          name: 'Factor1',
+          tier: null
+        }
+      ])
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
+        {
+          id: 11
+        },
+        {
+          id: 12
+        },
+        {
+          id: 21
+        },
+        {
+          id: 22
+        }
+      ])
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
+        {
+          id: 91,
+          associated_level_id: 11,
+          nested_level_id: 21
+        }
+      ])
+      target.factorService.batchCreateFactors = mockResolve()
+      target.factorLevelService.batchCreateFactorLevels = mockResolve()
+      target.factorService.batchUpdateFactors = mockResolve()
+      target.factorLevelService.batchUpdateFactorLevels = mockResolve()
+      target.factorService.batchDeleteFactors = mockResolve()
+      target.factorLevelService.batchDeleteFactorLevels = mockResolve()
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
+      target.dependentVariableService.batchCreateDependentVariables = mockResolve()
+      FactorLevelAssociationService.batchDeleteFactorLevelAssociations = mockResolve()
+      target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
+
+      const experimentVariables = {
+        independent: [
+          {
+            id: 1,
+            name: 'Factor1',
+            levels: [
+              {
+                id: 11,
+                _refId: 1,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F11',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 12,
+                _refId: 2,
+                items: [
+                  {
+                    label: 'Factor1',
+                    text: 'F12',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          },
+          {
+            id: 2,
+            name: 'Factor2',
+            levels: [
+              {
+                id: 21,
+                _refId: 3,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F21',
+                    propertyTypeId: 1
+                  }
+                ]
+              },
+              {
+                id: 22,
+                _refId: 4,
+                items: [
+                  {
+                    label: 'Factor2',
+                    text: 'F22',
+                    propertyTypeId: 1
+                  }
+                ]
+              }
+            ],
+            tier: null
+          }
+        ],
+        dependent: [],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 2,
+            nestedLevelRefId: 4
+          }
+        ]
+      }
+
+      return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
+        expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
+          {
+            id: 1,
+            experimentId: 42,
+            name: 'Factor1',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          },
+          {
+            id: 2,
+            experimentId: 42,
+            name: 'Factor2',
+            refDataSourceId: 1,
+            refFactorTypeId: 1,
+            tier: null
+          }
+        ], testContext, testTx)
+        expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
+          {
+            id: 11,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F11',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 12,
+            factorId: 1,
+            value: {
+              items: [
+                {
+                  label: 'Factor1',
+                  text: 'F12',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 21,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F21',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          },
+          {
+            id: 22,
+            factorId: 2,
+            value: {
+              items: [
+                {
+                  label: 'Factor2',
+                  text: 'F22',
+                  propertyTypeId: 1
+                }
+              ]
+            }
+          }
+        ], testContext, testTx)
+        expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
+        expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91], testTx)
+        expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
+          {
+            associatedLevelId: 12,
+            nestedLevelId: 22
+          }
+        ], testContext, testTx)
       })
     })
   })
+
+  // describe('persistAllVariables', () => {
+  //   it('persists variables, and returns response', () => {
+  //     target.securityService.permissionsCheck = mockResolve()
+  //     target.variablesValidator.validate = mockResolve()
+  //     target.persistIndependentVariables = mockResolve()
+  //     target.persistDependentVariables = mockResolve()
+  //     AppUtil.createPostResponse = mock()
+  //     const experimentVariables = {
+  //       independent: [{}],
+  //       exogenous: [],
+  //       dependent: [{}, {}]
+  //     }
+  //
+  //     return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {
+  //       expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+  //       expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+  //       expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, testTx)
+  //       expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
+  //       expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
+  //     })
+  //   })
+  //
+  //   it('rejects when persistIndependentVariables fails', () => {
+  //     target.securityService.permissionsCheck = mockResolve()
+  //     target.variablesValidator.validate = mockResolve()
+  //     target.persistIndependentVariables = mockReject('error')
+  //     target.persistDependentVariables = mockResolve()
+  //     AppUtil.createPostResponse = mock()
+  //     const experimentVariables = {
+  //       independent: [{}],
+  //       exogenous: [],
+  //       dependent: [{}, {}]
+  //     }
+  //
+  //     return target.persistAllVariables(experimentVariables, 1, testContext, false, testTx).then(() => {}, (err) => {
+  //       expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+  //       expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+  //       expect(target.persistIndependentVariables).toHaveBeenCalledWith([{}], 1, testContext, testTx)
+  //       expect(target.persistDependentVariables).toHaveBeenCalledWith([{}, {}], 1, testContext, false, testTx)
+  //       expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
+  //       expect(err).toEqual('error')
+  //     })
+  //   })
+  // })
 
   describe('persistIndependentVariables', () => {
     it('inserts new factor without levels', () => {

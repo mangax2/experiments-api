@@ -77,9 +77,8 @@ class FactorDependentCompositeService {
           const associations =
             hashTables.associationsGroupedByAssociatedLevelId[factorLevel.id]
           if (!_.isEmpty(associations)) {
-            return _.map(associations, (association) => {
-              return hashTables.factorLevelHashById[association.nested_level_id].factor_id
-            })
+            return _.map(associations, association =>
+              hashTables.factorLevelHashById[association.nested_level_id].factor_id)
           }
           return []
         }))
@@ -95,9 +94,8 @@ class FactorDependentCompositeService {
           const associations =
             hashTables.associationsGroupedByNestedLevelId[factorLevel.id]
           if (!_.isEmpty(associations)) {
-            return _.map(associations, (association) => {
-              return hashTables.factorLevelHashById[association.associated_level_id].factor_id
-            })
+            return _.map(associations, association =>
+              hashTables.factorLevelHashById[association.associated_level_id].factor_id)
           }
           return []
         }))
@@ -403,22 +401,6 @@ class FactorDependentCompositeService {
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   getAllDbRefDataSources() {
     return this.refDataSourceService.getRefDataSources()
   }
@@ -538,12 +520,10 @@ class FactorDependentCompositeService {
 
   updateFactorsAndLevels = (
     experimentId, allDataSources, allFactorDTOs,
-    levelDTOsWithParentFactorIdForUpdate, context, tx) => {
-    return Promise.all([
+    levelDTOsWithParentFactorIdForUpdate, context, tx) => Promise.all([
       this.updateFactors(experimentId, allFactorDTOs, allDataSources, context, tx),
       this.updateLevels(levelDTOsWithParentFactorIdForUpdate, context, tx),
     ])
-  }
 
   createFactorsAndDependentLevels = (
     experimentId, allDataSources, factorDTOsForCreate, context, tx) => {
@@ -599,7 +579,7 @@ class FactorDependentCompositeService {
   static determineFactorLevelAssociationEntitiesToCreate(
     refIdToIdMap,
     factorLevelAssociationEntities,
-    factorLevelAssociationDTOs){
+    factorLevelAssociationDTOs) {
     const C = FactorDependentCompositeService
     return _.differenceWith(
       C.mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),

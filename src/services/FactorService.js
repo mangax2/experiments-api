@@ -48,7 +48,7 @@ class FactorService {
     })
 
   @Transactional('batchUpdateFactors')
-  batchUpdateFactors(factors, context, tx) {
+  batchUpdateFactors = (factors, context, tx) => {
     return this.validator.validate(factors, 'PUT', tx)
       .then(() => db.factor.batchUpdate(factors, context, tx)
         .then(data => AppUtil.createPutResponse(data)))

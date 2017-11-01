@@ -19,11 +19,11 @@ class FactorLevelAssociationService {
   }
 
   @Transactional('batchCreateFactorLevelAssociations')
-  batchCreateFactorLevelAssociations(factorLevelAssociations, context, tx) {
-    return this.validator.validate(factorLevelAssociations, 'POST', tx)
-      .then(() => db.factorLevelAssociation.batchCreate(factorLevelAssociations, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
-  }
+  batchCreateFactorLevelAssociations =
+    (factorLevelAssociations, context, tx) =>
+      this.validator.validate(factorLevelAssociations, 'POST', tx)
+        .then(() => db.factorLevelAssociation.batchCreate(factorLevelAssociations, context, tx)
+          .then(data => AppUtil.createPostResponse(data)))
 }
 
 module.exports = FactorLevelAssociationService

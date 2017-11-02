@@ -1,3 +1,5 @@
+import _ from "lodash"
+
 module.exports = (rep, pgp) => ({
     repository: () => rep,
 
@@ -23,7 +25,7 @@ module.exports = (rep, pgp) => ({
                 'modified_date:raw'
             ],
             {table: 'factor_level_association'})
-        const values = factorLevelAssociations.map(factorLevelAssociation => ({
+        const values = _.map(factorLevelAssociations, factorLevelAssociation => ({
             associated_level_id: factorLevelAssociation.associatedLevelId,
             nested_level_id: factorLevelAssociation.nestedLevelId,
             created_user_id: context.userId,
@@ -56,7 +58,7 @@ module.exports = (rep, pgp) => ({
     findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM factor_level_association WHERE associated_level_id=$1 and nested_level_id=$2', keys),
 
     batchFindByBusinessKey: (batchKeys, tx = rep) => {
-        const values = batchKeys.map(obj => ({
+        const values = _.map(batchKeys, obj => ({
             associated_level_id: obj.keys[0],
             nested_level_id: obj.keys[1],
             id: obj.updateId,

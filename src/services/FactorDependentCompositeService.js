@@ -55,7 +55,7 @@ function formDbEntitiesObject(
   [allDbRefDataSources, allDbFactors, allDbLevels,
     allDbFactorLevelAssociations, allFactorTypes]) {
   return {
-    allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations, allFactorTypes
+    allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations, allFactorTypes,
   }
 }
 

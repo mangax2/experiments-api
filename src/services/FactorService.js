@@ -16,7 +16,7 @@ class FactorService {
   }
 
   @Transactional('batchCreateFactors')
-  batchCreateFactors(factors, context, tx) {
+  batchCreateFactors = (factors, context, tx) => {
     return this.validator.validate(factors, 'POST', tx)
       .then(() => db.factor.batchCreate(factors, context, tx)
         .then(data => AppUtil.createPostResponse(data)))

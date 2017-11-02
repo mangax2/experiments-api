@@ -14,15 +14,8 @@ class VariablesValidator extends BaseValidator {
     }
 
     // Common data
-    const allAssociatedRefIds =
-      _.map(variables.independentAssociations, 'associatedLevelRefId')
     const refIdsGroupedByFactor =
       _.map(variables.independent, factor => _.compact(_.map(factor.levels, '_refId')))
-    const levelCountGroupedByFactor =
-      _.map(variables.independent, factor => _.size(factor.levels))
-    const associatedRefIdCountGroupedByFactor =
-      _.map(refIdsGroupedByFactor, refIds =>
-        _.size(_.filter(refIds, refId => _.includes(allAssociatedRefIds, refId))))
     const allRefIds = _.flatten(refIdsGroupedByFactor)
 
     // Check for duplicate ref ids
@@ -75,8 +68,15 @@ class VariablesValidator extends BaseValidator {
     }
 
     // Check for missing association
+    const allNestedRefIds =
+      _.map(variables.independentAssociations, 'nestedLevelRefId')
+    const levelCountGroupedByFactor =
+      _.map(variables.independent, factor => _.size(factor.levels))
+    const nestedRefIdCountGroupedByFactor =
+      _.map(refIdsGroupedByFactor, refIds =>
+        _.size(_.uniq(_.filter(refIds, refId => _.includes(allNestedRefIds, refId)))))
     const levelCountAndRefIdCount =
-      _.zip(levelCountGroupedByFactor, associatedRefIdCountGroupedByFactor)
+      _.zip(levelCountGroupedByFactor, nestedRefIdCountGroupedByFactor)
     if (_.some(levelCountAndRefIdCount, counts => counts[1] !== 0 && counts[0] !== counts[1])) {
       return Promise.reject(
         AppError.badRequest(

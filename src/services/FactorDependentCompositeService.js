@@ -68,9 +68,9 @@ function createCompleteRefIdToIdMap(
     factorDependentLevelDTOsForCreate,
     factorIndependentLevelDTOsForCreate,
     allLevelDTOsWithParentFactorIdForUpdate,
-  },
-  dependentLevelResponses,
-  independentLevelResponses) {
+    dependentLevelResponses,
+    independentLevelResponses,
+  }) {
   return _.assign(
     createRefIdToIdMap(
       factorDependentLevelDTOsForCreate,
@@ -113,9 +113,14 @@ function determineFactorLevelAssociationEntitiesToCreate(
 }
 
 function deleteFactorLevelAssociations(
-  refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs, tx) {
+  {
+    refIdToIdMap,
+    allDbFactorLevelAssociations,
+    allFactorLevelAssociationDTOs,
+    tx,
+  }) {
   const idsToDelete = determineFactorLevelAssociationIdsToDelete(
-    refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs)
+    refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs)
   return _.isEmpty(idsToDelete)
     ? Promise.resolve()
     : FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
@@ -393,7 +398,13 @@ class FactorDependentCompositeService {
   }
 
   deleteFactorsAndLevels =
-    (allDbFactors, allDbLevels, allFactorDTOs, allLevelDTOs, tx) =>
+    ({
+       allDbFactors,
+       allDbLevels,
+       allIndependentDTOs: allFactorDTOs,
+       allLevelDTOsWithParentFactorId: allLevelDTOs,
+       tx,
+    }) =>
       batchDeleteDbEntitiesWithoutMatchingDTO(
         allDbLevels, allLevelDTOs, this.factorLevelService.batchDeleteFactorLevels, tx)
         .then(() => batchDeleteDbEntitiesWithoutMatchingDTO(
@@ -419,18 +430,17 @@ class FactorDependentCompositeService {
       tx)
   }
 
-  updateFactorsAndLevels = (
-    experimentId, allDataSources, allFactorDTOs,
-    levelDTOsWithParentFactorIdForUpdate, context, tx) => Promise.all([
+  updateFactorsAndLevels = ({ experimentId, allDataSources, allIndependentDTOs: allFactorDTOs,
+    allLevelDTOsWithParentFactorIdForUpdate, context, tx }) => Promise.all([
       this.updateFactors(experimentId, allFactorDTOs, allDataSources, context, tx),
-      this.updateLevels(levelDTOsWithParentFactorIdForUpdate, context, tx),
+      this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
     ])
 
   createFactorsAndDependentLevels = (
-    experimentId, allDataSources, factorDTOsForCreate, context, tx) => {
+    { experimentId, allDbRefDataSources, factorDTOsForCreate, context, tx }) => {
     const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
       experimentId, factorDTOsForCreate,
-      FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID, allDataSources)
+      FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID, allDbRefDataSources)
     return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
       this.factorService.batchCreateFactors,
       factorEntitiesForCreate,
@@ -440,36 +450,36 @@ class FactorDependentCompositeService {
         const levelDTOsWithFactorIdForCreate =
           _.flatMap(factorDTOsForCreate, (factorDTO, index) =>
             _.map(factorDTO.levels, level => ({ factorId: responses[index].id, ...level })))
-        return this.createFactorLevels(
-          experimentId, allDataSources, levelDTOsWithFactorIdForCreate, context, tx)
+        return this.createFactorLevels(levelDTOsWithFactorIdForCreate, context, tx)
       })
   }
 
-  createFactorLevelsForPreExistingFactors(
-    experimentId, allDataSources, levelDTOsWithFactorIdForCreate, context, tx) {
-    return this.createFactorLevels(
-      experimentId, allDataSources, levelDTOsWithFactorIdForCreate, context, tx)
-  }
-
-  createFactorLevels = (experimentId, allDataSources, allFactorLevelDTOs, context, tx) => {
-    return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
-      this.factorLevelService.batchCreateFactorLevels,
-      mapFactorLevelDTOsToFactorLevelEntities(determineDTOsForCreate(allFactorLevelDTOs)),
-      context,
-      tx)
-  }
+  createFactorLevels =
+    (allFactorLevelDTOs, context, tx) =>
+      applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+        this.factorLevelService.batchCreateFactorLevels,
+        mapFactorLevelDTOsToFactorLevelEntities(
+          determineDTOsForCreate(allFactorLevelDTOs)),
+        context,
+        tx)
 
   createFactorLevelAssociations = (
-    refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs, context, tx) => {
+    {
+      refIdToIdMap,
+      allDbFactorLevelAssociations,
+      allFactorLevelAssociationDTOs,
+      context,
+      tx,
+    }) => {
     return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
       this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
       determineFactorLevelAssociationEntitiesToCreate(
-        refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs),
+        refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs),
       context,
       tx)
   }
 
-  getCurrentDbEntities = (experimentId, tx) => Promise.all([
+  getCurrentDbEntities = ({ experimentId, tx }) => Promise.all([
     this.refDataSourceService.getRefDataSources(),
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
@@ -494,65 +504,55 @@ class FactorDependentCompositeService {
     }
   }
 
-  createFactorsAndLevels = (
-    experimentId,
-    { allDbRefDataSources }, // DB Entities
-    { factorDTOsForCreate, factorIndependentLevelDTOsForCreate }, // Request Entities
-    context, tx) => Promise.all([
-      this.createFactorsAndDependentLevels(
-        experimentId,
-        allDbRefDataSources,
-        factorDTOsForCreate,
-        context, tx),
-      this.createFactorLevelsForPreExistingFactors(
-        experimentId,
-        allDbRefDataSources,
-        factorIndependentLevelDTOsForCreate,
-        context, tx)])
+  createFactorsAndLevels = params => Promise.all([
+    this.createFactorsAndDependentLevels(params),
+    this.createFactorLevels(
+      params.factorIndependentLevelDTOsForCreate,
+      params.context,
+      params.tx)])
 
-  persistIndependentAndAssociations =
-    (experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
-      return this.getCurrentDbEntities(experimentId, tx).then(
-        (dbEntities) => {
-          const categorizedRequestDTOs = this.categorizeRequestDTOs(allIndependentDTOs)
-          return this.deleteFactorsAndLevels(
-            dbEntities.allDbFactors, dbEntities.allDbLevels,
-            allIndependentDTOs, categorizedRequestDTOs.allLevelDTOsWithParentFactorId,
-            tx)
-            .then(() => this.updateFactorsAndLevels(
-              experimentId,
-              dbEntities.allDbRefDataSources,
-              allIndependentDTOs,
-              categorizedRequestDTOs.allLevelDTOsWithParentFactorIdForUpdate,
-              context, tx))
-            .then(() => this.createFactorsAndLevels(
-              experimentId, dbEntities, categorizedRequestDTOs, context, tx))
-            .then(([dependentLevelResponses, independentLevelResponses]) => {
-              const finalRefIdMap = createCompleteRefIdToIdMap(
-                categorizedRequestDTOs, dependentLevelResponses, independentLevelResponses)
-              return Promise.all([
-                deleteFactorLevelAssociations(
-                  finalRefIdMap,
-                  dbEntities.allDbFactorLevelAssociations,
-                  allFactorLevelAssociationDTOs,
-                  tx),
-                this.createFactorLevelAssociations(
-                  finalRefIdMap,
-                  dbEntities.allDbFactorLevelAssociations,
-                  allFactorLevelAssociationDTOs,
-                  context, tx),
-              ])
-            })
-        })
+  persistIndependentAndAssociations = (
+    experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
+    const requestData = {
+      experimentId,
+      allIndependentDTOs,
+      allFactorLevelAssociationDTOs,
+      context,
+      tx,
     }
+    return this.getCurrentDbEntities(requestData).then(
+      (dbEntities) => {
+        const inputsAndDbEntities = {
+          ...requestData,
+          ...dbEntities,
+          ...this.categorizeRequestDTOs(allIndependentDTOs),
+        }
+        return this.deleteFactorsAndLevels(inputsAndDbEntities)
+          .then(() => this.updateFactorsAndLevels(inputsAndDbEntities))
+          .then(() => this.createFactorsAndLevels(inputsAndDbEntities))
+          .then(([dependentLevelResponses, independentLevelResponses]) => {
+            const refIdToIdMap = createCompleteRefIdToIdMap({
+              ...inputsAndDbEntities,
+              dependentLevelResponses,
+              independentLevelResponses })
+            const inputsAndDbEntitiesWithRefIdToIdMap = {
+              ...inputsAndDbEntities,
+              refIdToIdMap }
+            return Promise.all([
+              deleteFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
+              this.createFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
+            ])
+          })
+      })
+  }
 
   persistIndependentAndDependentVariables = (
-    experimentId, independent, independentAssociations,
-    dependent, context, isTemplate, tx) => Promise.all([
+    experimentId, variables, context, isTemplate, tx) => Promise.all([
       this.persistIndependentAndAssociations(
-        experimentId, independent, independentAssociations, context, tx),
+        experimentId, variables.independent,
+        variables.independentAssociations, context, tx),
       this.persistDependentVariables(
-        dependent, experimentId, context, isTemplate, tx)])
+        variables.dependent, experimentId, context, isTemplate, tx)])
 
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
@@ -560,13 +560,7 @@ class FactorDependentCompositeService {
     return this.securityService.permissionsCheck(expId, context, isTemplate, tx)
       .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx))
       .then(() => this.persistIndependentAndDependentVariables(
-        expId,
-        experimentVariables.independent,
-        experimentVariables.independentAssociations,
-        experimentVariables.dependent,
-        context,
-        isTemplate,
-        tx))
+        expId, experimentVariables, context, isTemplate, tx))
       .then(() => AppUtil.createPostResponse([{ id: expId }]))
   }
 }

@@ -4161,7 +4161,10 @@
               "type": "object",
               "properties": {
                 "items": {
-                  "type": "array"
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
                 }
               },
               "description": "value of the factor level"
@@ -5119,12 +5122,31 @@
         }
       }
     },
-    "Cluster": {
+    "ClusterResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
           "description": "Id of the factor level."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LevelItem"
+          }
+        }
+      }
+    },
+    "ClusterRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the factor level."
+        },
+        "_refId": {
+          "type": "integer",
+          "description": "Reference ID for the level.  This may be references by an independent variable association."
         },
         "items": {
           "type": "array",
@@ -5149,7 +5171,7 @@
         }
       }
     },
-    "IndependentVariable": {
+    "IndependentVariableRequest": {
       "type": "object",
       "properties": {
         "id": {
@@ -5163,12 +5185,103 @@
         "levels": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Cluster"
+            "$ref": "#/definitions/ClusterRequest"
           }
         },
         "tier": {
           "type": "integer",
           "description": "the tier of the split that the variable is part of"
+        }
+      }
+    },
+    "IndependentVariableResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Id of the factor"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of variable"
+        },
+        "associatedFactors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssociatedFactor"
+          }
+        },
+        "nestedFactors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NestedFactor"
+          }
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClusterResponse"
+          }
+        },
+        "tier": {
+          "type": "integer",
+          "description": "the tier of the split that the variable is part of"
+        }
+      }
+    },
+    "AssociatedFactor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the associated factor."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the associated factor."
+        }
+      }
+    },
+    "NestedFactor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the nested factor."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the nested factor."
+        }
+      }
+    },
+    "IndependentAssociationResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the association"
+        },
+        "associatedLevelId": {
+          "type": "integer",
+          "description": "Id of the factor level on the associated side of relationship"
+        },
+        "nestedLevelId": {
+          "type": "integer",
+          "description": "Id of the factor level on the nested side of relationship"
+        }
+      }
+    },
+    "IndependentAssociationRequest": {
+      "type": "object",
+      "properties": {
+        "associatedLevelRefId": {
+          "type": "integer",
+          "description": "RefId of the factor level on the associated side of relationship.  This should reference a _refId defined on a level"
+        },
+        "nestedLevelRefId": {
+          "type": "integer",
+          "description": "RefId of the factor level on the nested side of relationship.  This should reference a _refId defined on a level"
         }
       }
     },
@@ -5178,7 +5291,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariable"
+            "$ref": "#/definitions/IndependentVariableRequest"
           }
         },
         "exogenous": {
@@ -5191,6 +5304,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DependentVariable"
+          }
+        },
+        "independentAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IndependentAssociationRequest"
           }
         }
       }
@@ -5201,7 +5320,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariable"
+            "$ref": "#/definitions/IndependentVariableResponse"
           }
         },
         "exogenous": {
@@ -5214,6 +5333,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DependentVariable"
+          }
+        },
+        "independentAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IndependentAssociationResponse"
           }
         }
       }

@@ -11,6 +11,7 @@ import ExperimentDesign from '../repos/experimentDesign'
 import ExperimentSummary from '../repos/experimentSummary'
 import Factor from '../repos/factor'
 import FactorLevel from '../repos/factorLevel'
+import FactorLevelAssociation from '../repos/factorLevelAssociation'
 import FactorType from '../repos/factorType'
 import Group from '../repos/group'
 import GroupType from '../repos/groupType'
@@ -41,6 +42,7 @@ const options = {
     obj.experimentSummary = new (ExperimentSummary)(obj, pgp)
     obj.factor = new (Factor)(obj, pgp)
     obj.factorLevel = new (FactorLevel)(obj, pgp)
+    obj.factorLevelAssociation = new (FactorLevelAssociation)(obj, pgp)
     obj.factorType = new (FactorType)(obj, pgp)
     obj.group = new (Group)(obj, pgp)
     obj.groupType = new (GroupType)(obj, pgp)

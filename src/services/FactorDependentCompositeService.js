@@ -415,9 +415,10 @@ class FactorDependentCompositeService {
       context,
       tx)
 
-  updateFactorsAndLevels = ({ experimentId, allDataSources, allIndependentDTOs: allFactorDTOs,
+  updateFactorsAndLevels = ({ experimentId, allDbRefDataSources, allIndependentDTOs: allFactorDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx }) => Promise.all([
-      this.updateFactors(experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx),
+      this.updateFactors(
+        experimentId, allFactorDTOs, allDbRefDataSources, allFactorTypes, context, tx),
       this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
     ])
 

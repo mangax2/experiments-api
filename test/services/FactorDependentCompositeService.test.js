@@ -143,27 +143,23 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('assembleFactorLevelDTOs', () => {
-    it.skip('creates empty array when levels are not found.', () => {
-      FactorDependentCompositeService.extractLevelsForFactor = mock([])
+    it('creates empty array when levels are not found.', () => {
       FactorDependentCompositeService.appendLevelIdToLevel = mock()
 
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs({id: 42}, [7, 8, 9]))
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([]))
         .toEqual([])
 
-      expect(FactorDependentCompositeService.extractLevelsForFactor).toHaveBeenCalledWith({id: 42}, [7, 8, 9])
       expect(FactorDependentCompositeService.appendLevelIdToLevel).not.toHaveBeenCalled()
     })
 
-    it.skip('creates factor level DTOs', () => {
-      FactorDependentCompositeService.extractLevelsForFactor = mock([1, 2])
+    it('creates factor level DTOs', () => {
       FactorDependentCompositeService.appendLevelIdToLevel = mock()
       FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 8, items: []})
       FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 9, items: []})
 
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs({id: 42}, [7, 8, 9]))
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([1,2]))
         .toEqual([{id: 8, items: []}, {id: 9, items: []}])
 
-      expect(FactorDependentCompositeService.extractLevelsForFactor).toHaveBeenCalledWith({id: 42}, [7, 8, 9])
       expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledTimes(2)
       expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(1)
       expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(2)
@@ -175,38 +171,11 @@ describe('FactorDependentCompositeService', () => {
       FactorDependentCompositeService.findFactorType = mock()
       FactorDependentCompositeService.assembleFactorLevelDTOs = mock()
 
-      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1,2,3], [{}, {}]))
+      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1,2,3], [{}, {}], []))
         .toEqual([])
 
       expect(FactorDependentCompositeService.findFactorType).not.toHaveBeenCalled()
       expect(FactorDependentCompositeService.assembleFactorLevelDTOs).not.toHaveBeenCalled()
-    })
-
-    it.skip('returns factor DTOs with data from functions', () => {
-      FactorDependentCompositeService.findFactorType = mock('returnedType')
-      FactorDependentCompositeService.assembleFactorLevelDTOs = mock([9,8,7])
-
-      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
-        [{id: 42, name: 'factorName', tier: 'factorTier'}],
-        [1,2,3],
-        [{}, {}],
-        [{name: "association"}])).toEqual([
-          {
-            id: 42,
-            name: 'factorName',
-            type: 'returnedType',
-            levels: [9, 8, 7],
-            tier: 'factorTier'
-          }
-        ])
-
-      expect(FactorDependentCompositeService.findFactorType).toHaveBeenCalledWith(
-        [{}, {}],
-        {id: 42, name: 'factorName', tier: 'factorTier'})
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs).toHaveBeenCalledWith(
-        {id: 42, name: 'factorName', tier: 'factorTier'},
-        [1,2,3]
-      )
     })
   })
 

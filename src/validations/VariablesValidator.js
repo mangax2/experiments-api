@@ -14,9 +14,16 @@ class VariablesValidator extends BaseValidator {
     }
 
     // Common data
+    const allAssociatedRefIds =
+      _.map(variables.independentAssociations, 'associatedLevelRefId')
     const refIdsGroupedByFactor =
-      _.map(variables.independent, factor => _.map(factor.levels, '_refId'))
-    const allRefIds = _.compact(_.flatten(refIdsGroupedByFactor))
+      _.map(variables.independent, factor => _.compact(_.map(factor.levels, '_refId')))
+    const levelCountGroupedByFactor =
+      _.map(variables.independent, factor => _.size(factor.levels))
+    const associatedRefIdCountGroupedByFactor =
+      _.map(refIdsGroupedByFactor, refIds =>
+        _.size(_.filter(refIds, refId => _.includes(allAssociatedRefIds, refId))))
+    const allRefIds = _.flatten(refIdsGroupedByFactor)
 
     // Check for duplicate ref ids
     const duplicateRefIds = _.uniq(this.findDuplicates(allRefIds)).sort()
@@ -65,6 +72,15 @@ class VariablesValidator extends BaseValidator {
       return Promise.reject(
         AppError.badRequest(
           `Nesting levels within a single factor is not allowed.  The following associations violate this: ${invalidNestingAssociationStrings.join(', ')}`))
+    }
+
+    // Check for missing association
+    const levelCountAndRefIdCount =
+      _.zip(levelCountGroupedByFactor, associatedRefIdCountGroupedByFactor)
+    if (_.some(levelCountAndRefIdCount, counts => counts[1] !== 0 && counts[0] !== counts[1])) {
+      return Promise.reject(
+        AppError.badRequest(
+          'An association must exist for all levels of a nested variable.'))
     }
 
     return Promise.resolve()

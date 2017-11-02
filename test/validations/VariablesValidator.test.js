@@ -24,6 +24,46 @@ describe('VariablesValidator', () => {
         })
     })
 
+    it('indicates bad request if not all nested variables have an associated variable', () => {
+      AppError.badRequest = mock()
+
+      return target.preValidate({
+        independent: [
+          {
+            levels: [
+              {
+                _refId: 1
+              },
+              {
+                _refId: 2
+              },
+            ]
+          },
+          {
+            levels: [
+              {
+                _refId: 3
+              },
+              {
+                _refId: 4
+              },
+            ]
+          }
+        ],
+        independentAssociations: [
+          {
+            associatedLevelRefId: 1,
+            nestedLevelRefId: 3,
+          }
+        ]
+      }).then(
+        () => {return TEST_FAILED},
+        () => {
+          expect(AppError.badRequest).toHaveBeenCalledWith(
+            'An association must exist for all levels of a nested variable.')
+        })
+    })
+
     it('indicates bad request if multiple levels within a factor have the same _refId', () => {
       AppError.badRequest = mock()
 

@@ -204,7 +204,7 @@ class FactorDependentCompositeService {
     return _.find(factorTypes, { id: factor.ref_factor_type_id }).type.toLowerCase()
   }
 
-  static assembleFactorLevelDTOs(factor, factorLevels) {
+  static assembleFactorLevelDTOs(factorLevels) {
     return _.map(
       factorLevels,
       level => FactorDependentCompositeService.appendLevelIdToLevel(level))
@@ -263,8 +263,7 @@ class FactorDependentCompositeService {
         nestedFactors: _.isEmpty(nestedFactorDTOs) ? undefined : nestedFactorDTOs,
         associatedFactors: _.isEmpty(associatedFactorDTOs) ? undefined : associatedFactorDTOs,
         type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
-        levels: FactorDependentCompositeService.assembleFactorLevelDTOs(
-          factor, factorLevels),
+        levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factorLevels),
         tier: factor.tier,
       }
     })

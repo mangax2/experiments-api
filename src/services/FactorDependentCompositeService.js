@@ -470,11 +470,17 @@ class FactorDependentCompositeService {
         allLevelDTOsWithParentFactorIdForUpdate))
   }
 
+  static formDbEntitiesObject(
+    [allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) {
+    return { allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations }
+  }
+
   getCurrentDbEntities = (experimentId, tx) => Promise.all([
     this.refDataSourceService.getRefDataSources(),
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx)])
+    .then(FactorDependentCompositeService.formDbEntitiesObject)
 
   categorizeRequestDTOs = (allIndependentDTOs) => {
     const C = FactorDependentCompositeService
@@ -515,21 +521,15 @@ class FactorDependentCompositeService {
     (experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
       const C = FactorDependentCompositeService
       return this.getCurrentDbEntities(experimentId, tx).then(
-        ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) => {
-          const dbEntities = {
-            allDbRefDataSources,
-            allDbFactors,
-            allDbLevels,
-            allDbFactorLevelAssociations,
-          }
+        (dbEntities) => {
           const categorizedRequestDTOs = this.categorizeRequestDTOs(allIndependentDTOs)
           return this.deleteFactorsAndLevels(
-            allDbFactors, allDbLevels,
+            dbEntities.allDbFactors, dbEntities.allDbLevels,
             allIndependentDTOs, categorizedRequestDTOs.allLevelDTOsWithParentFactorId,
             tx)
             .then(() => this.updateFactorsAndLevels(
               experimentId,
-              allDbRefDataSources,
+              dbEntities.allDbRefDataSources,
               allIndependentDTOs,
               categorizedRequestDTOs.allLevelDTOsWithParentFactorIdForUpdate,
               context, tx))
@@ -541,12 +541,12 @@ class FactorDependentCompositeService {
               return Promise.all([
                 C.deleteFactorLevelAssociations(
                   finalRefIdMap,
-                  allDbFactorLevelAssociations,
+                  dbEntities.allDbFactorLevelAssociations,
                   allFactorLevelAssociationDTOs,
                   tx),
                 this.createFactorLevelAssociations(
                   finalRefIdMap,
-                  allDbFactorLevelAssociations,
+                  dbEntities.allDbFactorLevelAssociations,
                   allFactorLevelAssociationDTOs,
                   context, tx),
               ])

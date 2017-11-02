@@ -1292,22 +1292,30 @@ describe('FactorDependentCompositeService', () => {
             levels: [
               {
                 id: 21,
-                _refId: 3,
                 items: [
                   {
-                    label: 'Factor2',
-                    text: 'F21',
+                    label: 'Chem',
+                    text: 'MON123',
+                    propertyTypeId: 2
+                  },
+                  {
+                    label: 'Rate',
+                    text: '1.23',
                     propertyTypeId: 1
                   }
                 ]
               },
               {
                 id: 22,
-                _refId: 4,
                 items: [
                   {
-                    label: 'Factor2',
-                    text: 'F22',
+                    label: 'Chem',
+                    text: 'MON456',
+                    propertyTypeId: 2
+                  },
+                  {
+                    label: 'Rate',
+                    text: '4.56',
                     propertyTypeId: 1
                   }
                 ]
@@ -1341,7 +1349,7 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
+            refDataSourceId: 3,
             refFactorTypeId: 1,
             tier: null
           }
@@ -1379,8 +1387,13 @@ describe('FactorDependentCompositeService', () => {
             value: {
               items: [
                 {
-                  label: 'Factor2',
-                  text: 'F21',
+                  label: 'Chem',
+                  text: 'MON123',
+                  propertyTypeId: 2
+                },
+                {
+                  label: 'Rate',
+                  text: '1.23',
                   propertyTypeId: 1
                 }
               ]
@@ -1392,8 +1405,13 @@ describe('FactorDependentCompositeService', () => {
             value: {
               items: [
                 {
-                  label: 'Factor2',
-                  text: 'F22',
+                  label: 'Chem',
+                  text: 'MON456',
+                  propertyTypeId: 2
+                },
+                {
+                  label: 'Rate',
+                  text: '4.56',
                   propertyTypeId: 1
                 }
               ]

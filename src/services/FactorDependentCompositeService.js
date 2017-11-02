@@ -30,23 +30,16 @@ function determineDTOsForCreate(DTOs) {
   return _.filter(DTOs, dto => _.isNil(dto.id))
 }
 
-function applyAsyncBatchCreateOrUpdateToNonEmptyArray(
-  asyncBatchFunction, entities, context, tx) {
-  return _.isEmpty(entities)
-    ? Promise.resolve([])
-    : asyncBatchFunction(entities, context, tx)
-}
-
-function applyAsyncBatchDeleteToNonEmptyArray(
-  asyncBatchFunction, ids, tx) {
+function applyAsyncBatchToNonEmptyArray(
+  asyncBatchFunction, ids, ...contextAndTx) {
   return _.isEmpty(ids)
     ? Promise.resolve([])
-    : asyncBatchFunction(ids, tx)
+    : asyncBatchFunction(ids, ...contextAndTx)
 }
 
 function batchDeleteDbEntitiesWithoutMatchingDTO(
   dbEntities, DTOs, asyncBatchDeleteFunction, tx) {
-  return applyAsyncBatchDeleteToNonEmptyArray(
+  return applyAsyncBatchToNonEmptyArray(
     asyncBatchDeleteFunction,
     determineIdsToDelete(dbEntities, DTOs),
     tx)
@@ -411,7 +404,7 @@ class FactorDependentCompositeService {
 
   updateFactors =
     (experimentId, allFactorDTOs, allDataSources, context, tx) =>
-      applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+      applyAsyncBatchToNonEmptyArray(
         this.factorService.batchUpdateFactors,
         mapFactorDTOsToFactorEntities(
           experimentId,
@@ -421,7 +414,7 @@ class FactorDependentCompositeService {
         context,
         tx)
 
-  updateLevels = (levelDTOsForUpdate, context, tx) => applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+  updateLevels = (levelDTOsForUpdate, context, tx) => applyAsyncBatchToNonEmptyArray(
       this.factorLevelService.batchUpdateFactorLevels,
       mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate),
       context,
@@ -438,7 +431,7 @@ class FactorDependentCompositeService {
     const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
       experimentId, factorDTOsForCreate,
       FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID, allDbRefDataSources)
-    return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+    return applyAsyncBatchToNonEmptyArray(
       this.factorService.batchCreateFactors,
       factorEntitiesForCreate,
       context,
@@ -453,7 +446,7 @@ class FactorDependentCompositeService {
 
   createFactorLevels =
     (allFactorLevelDTOs, context, tx) =>
-      applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+      applyAsyncBatchToNonEmptyArray(
         this.factorLevelService.batchCreateFactorLevels,
         mapFactorLevelDTOsToFactorLevelEntities(
           determineDTOsForCreate(allFactorLevelDTOs)),
@@ -467,7 +460,7 @@ class FactorDependentCompositeService {
       allFactorLevelAssociationDTOs,
       context,
       tx,
-    }) => applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+    }) => applyAsyncBatchToNonEmptyArray(
       this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
       determineFactorLevelAssociationEntitiesToCreate(
         refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs),

@@ -11,6 +11,12 @@ import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 
+const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
+
+function getIdForFactorType(allFactorTypes, type) {
+  return _.find(allFactorTypes, factorType => factorType.type === type).id
+}
+
 function extractIds(sources) {
   return _.compact(_.map(sources, 'id'))
 }
@@ -46,8 +52,11 @@ function batchDeleteDbEntitiesWithoutMatchingDTO(
 }
 
 function formDbEntitiesObject(
-  [allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) {
-  return { allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations }
+  [allDbRefDataSources, allDbFactors, allDbLevels,
+    allDbFactorLevelAssociations, allFactorTypes]) {
+  return {
+    allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations, allFactorTypes
+  }
 }
 
 function createRefIdToIdMap(refIdSource, idSource) {
@@ -325,20 +334,6 @@ class FactorDependentCompositeService {
     ))
   }
 
-  /**
-   * @return {number}
-   */
-  static get INDEPENDENT_VARIABLE_TYPE_ID() {
-    return 1
-  }
-
-  /**
-   * @return {number}
-   */
-  static get EXOGENOUS_VARIABLE_TYPE_ID() {
-    return 2
-  }
-
   static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
     return _.map(dependentVariables, (dependentVariable) => {
       dependentVariable.experimentId = experimentId
@@ -403,13 +398,13 @@ class FactorDependentCompositeService {
           allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, tx))
 
   updateFactors =
-    (experimentId, allFactorDTOs, allDataSources, context, tx) =>
+    (experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx) =>
       applyAsyncBatchToNonEmptyArray(
         this.factorService.batchUpdateFactors,
         mapFactorDTOsToFactorEntities(
           experimentId,
           determineDTOsForUpdate(allFactorDTOs),
-          FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID,
+          getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE),
           allDataSources),
         context,
         tx)
@@ -421,16 +416,18 @@ class FactorDependentCompositeService {
       tx)
 
   updateFactorsAndLevels = ({ experimentId, allDataSources, allIndependentDTOs: allFactorDTOs,
-    allLevelDTOsWithParentFactorIdForUpdate, context, tx }) => Promise.all([
-      this.updateFactors(experimentId, allFactorDTOs, allDataSources, context, tx),
+    allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx }) => Promise.all([
+      this.updateFactors(experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx),
       this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
     ])
 
   createFactorsAndDependentLevels = (
-    { experimentId, allDbRefDataSources, factorDTOsForCreate, context, tx }) => {
+    { experimentId, allDbRefDataSources, factorDTOsForCreate, allFactorTypes, context, tx }) => {
     const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
-      experimentId, factorDTOsForCreate,
-      FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID, allDbRefDataSources)
+      experimentId,
+      factorDTOsForCreate,
+      getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE),
+      allDbRefDataSources)
     return applyAsyncBatchToNonEmptyArray(
       this.factorService.batchCreateFactors,
       factorEntitiesForCreate,
@@ -471,7 +468,8 @@ class FactorDependentCompositeService {
     this.refDataSourceService.getRefDataSources(),
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx)])
+    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),
+    this.factorTypeService.getAllFactorTypes()])
     .then(formDbEntitiesObject)
 
   categorizeRequestDTOs = (allIndependentDTOs) => {

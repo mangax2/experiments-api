@@ -773,18 +773,6 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('get INDEPENDENT_VARIABLE_TYPE_ID', () => {
-    it('returns type id for independent variable', () => {
-      expect(FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID).toEqual(1)
-    })
-  })
-
-  describe('get EXOGENOUS_VARIABLE_TYPE_ID', () => {
-    it('returns type id for exogenous variable', () => {
-      expect(FactorDependentCompositeService.EXOGENOUS_VARIABLE_TYPE_ID).toEqual(2)
-    })
-  })
-
   describe('mapDependentVariableDTO2DbEntity', () => {
     it('returns empty array when dependentVariables is undefined, null, or empty', () => {
       expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(undefined, 1)).toEqual([])
@@ -861,6 +849,12 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistAllVariables', () => {
     beforeEach(() => {
+      target.factorTypeService.getAllFactorTypes = mockResolve([
+        {
+          id: 1,
+          type: 'Independent'
+        }
+      ])
       target.refDataSourceService.getRefDataSources = mockResolve([
         {name: 'Other', id: 1},
         {name: 'Catalog', id: 2},

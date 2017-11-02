@@ -449,55 +449,79 @@ class FactorDependentCompositeService {
       _.map(idSource, 'id'))
   }
 
+  getCurrentDbEntities = (experimentId, tx) => Promise.all([
+    this.refDataSourceService.getRefDataSources(),
+    FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
+    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
+    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx)])
+
+  categorizeRequestDTOs = (allIndependentDTOs) => {
+    const C = FactorDependentCompositeService
+    const allLevelDTOsWithParentFactorId = C.concatChildArrays(
+      C.appendParentIdToChildren(allIndependentDTOs, 'levels', 'factorId'),
+      'levels')
+    return {
+      allLevelDTOsWithParentFactorId,
+      allLevelDTOsWithParentFactorIdForUpdate:
+        C.determineDTOsForUpdate(allLevelDTOsWithParentFactorId),
+      factorDTOsForCreate: C.determineDTOsForCreate(allIndependentDTOs),
+      factorDependentLevelDTOsForCreate:
+        _.filter(allLevelDTOsWithParentFactorId,
+          dto => _.isNil(dto.factorId)),
+      factorIndependentLevelDTOsForCreate:
+        _.filter(allLevelDTOsWithParentFactorId,
+          dto => !_.isNil(dto.factorId) && _.isNil(dto.id)),
+    }
+  }
+
   persistIndependentAndAssociations =
     (experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
       const C = FactorDependentCompositeService
-      const getCurrentDbState = Promise.all([
-        this.refDataSourceService.getRefDataSources(),
-        FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
-        FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-        FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),
-      ])
-      return getCurrentDbState.then(
+      return this.getCurrentDbEntities(experimentId, tx).then(
         ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations]) => {
-          const allLevelDTOsWithParentFactorId = C.concatChildArrays(
-            C.appendParentIdToChildren(allIndependentDTOs, 'levels', 'factorId'),
-            'levels')
-          const allLevelDTOsWithParentFactorIdForUpdate =
-            C.determineDTOsForUpdate(allLevelDTOsWithParentFactorId)
-          const factorDTOsForCreate = C.determineDTOsForCreate(allIndependentDTOs)
-          const factorDependentLevelDTOsForCreate =
-            _.filter(allLevelDTOsWithParentFactorId,
-                dto => _.isNil(dto.factorId))
-          const factorIndependentLevelDTOsForCreate =
-            _.filter(allLevelDTOsWithParentFactorId,
-                dto => !_.isNil(dto.factorId) && _.isNil(dto.id))
+          const categorizedRequestDTOs = this.categorizeRequestDTOs(allIndependentDTOs)
           return this.deleteFactorsAndLevels(
-            allDbFactors, allDbLevels, allIndependentDTOs, allLevelDTOsWithParentFactorId, tx)
+            allDbFactors, allDbLevels,
+            allIndependentDTOs, categorizedRequestDTOs.allLevelDTOsWithParentFactorId,
+            tx)
             .then(() => this.updateFactorsAndLevels(
-              experimentId, allDbRefDataSources, allIndependentDTOs,
-              allLevelDTOsWithParentFactorIdForUpdate, context, tx))
+              experimentId,
+              allDbRefDataSources,
+              allIndependentDTOs,
+              categorizedRequestDTOs.allLevelDTOsWithParentFactorIdForUpdate,
+              context, tx))
             .then(() => Promise.all([
-              this.createFactorsAndDependentLevels(experimentId, allDbRefDataSources,
-                factorDTOsForCreate, context, tx),
-              this.createFactorLevelsForPreExistingFactors(experimentId, allDbRefDataSources,
-                factorIndependentLevelDTOsForCreate, context, tx)]))
+              this.createFactorsAndDependentLevels(
+                experimentId,
+                allDbRefDataSources,
+                categorizedRequestDTOs.factorDTOsForCreate,
+                context, tx),
+              this.createFactorLevelsForPreExistingFactors(
+                experimentId,
+                allDbRefDataSources,
+                categorizedRequestDTOs.factorIndependentLevelDTOsForCreate,
+                context, tx)]))
             .then(([dependentLevelResponses, independentLevelResponses]) => {
               const finalRefIdMap = _.assign(
                 C.createRefIdToIdMap(
-                  factorDependentLevelDTOsForCreate,
+                  categorizedRequestDTOs.factorDependentLevelDTOsForCreate,
                   dependentLevelResponses),
                 C.createRefIdToIdMap(
-                  factorIndependentLevelDTOsForCreate,
+                  categorizedRequestDTOs.factorIndependentLevelDTOsForCreate,
                   independentLevelResponses),
                 C.createRefIdToIdMap(
-                  allLevelDTOsWithParentFactorIdForUpdate,
-                  allLevelDTOsWithParentFactorIdForUpdate))
+                  categorizedRequestDTOs.allLevelDTOsWithParentFactorIdForUpdate,
+                  categorizedRequestDTOs.allLevelDTOsWithParentFactorIdForUpdate))
               return Promise.all([
                 C.deleteFactorLevelAssociations(
-                  finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs, tx),
+                  finalRefIdMap,
+                  allDbFactorLevelAssociations,
+                  allFactorLevelAssociationDTOs,
+                  tx),
                 this.createFactorLevelAssociations(
-                  finalRefIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs,
+                  finalRefIdMap,
+                  allDbFactorLevelAssociations,
+                  allFactorLevelAssociationDTOs,
                   context, tx),
               ])
             })

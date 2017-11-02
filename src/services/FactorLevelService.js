@@ -16,11 +16,9 @@ class FactorLevelService {
   }
 
   @Transactional('createFactorLevelsTx')
-  batchCreateFactorLevels = (factorLevels, context, tx) => {
-    return this.validator.validate(factorLevels, 'POST', tx)
+  batchCreateFactorLevels = (factorLevels, context, tx) => this.validator.validate(factorLevels, 'POST', tx)
       .then(() => db.factorLevel.batchCreate(factorLevels, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
-  }
 
   getAllFactorLevels = () => db.factorLevel.all()
 
@@ -45,11 +43,9 @@ class FactorLevelService {
     })
 
   @Transactional('batchUpdateFactorLevels')
-  batchUpdateFactorLevels = (factorLevels, context, tx) => {
-    return this.validator.validate(factorLevels, 'PUT', tx)
+  batchUpdateFactorLevels = (factorLevels, context, tx) => this.validator.validate(factorLevels, 'PUT', tx)
       .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
-  }
 
   deleteFactorLevel = id => db.factorLevel.remove(id)
     .then((data) => {

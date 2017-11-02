@@ -409,25 +409,23 @@ class FactorDependentCompositeService {
         .then(() => batchDeleteDbEntitiesWithoutMatchingDTO(
           allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, tx))
 
-  updateFactors = (experimentId, allFactorDTOs, allDataSources, context, tx) => {
-    return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
-      this.factorService.batchUpdateFactors,
-      mapFactorDTOsToFactorEntities(
-        experimentId,
-        determineDTOsForUpdate(allFactorDTOs),
-        FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID,
-        allDataSources),
-      context,
-      tx)
-  }
+  updateFactors =
+    (experimentId, allFactorDTOs, allDataSources, context, tx) =>
+      applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+        this.factorService.batchUpdateFactors,
+        mapFactorDTOsToFactorEntities(
+          experimentId,
+          determineDTOsForUpdate(allFactorDTOs),
+          FactorDependentCompositeService.INDEPENDENT_VARIABLE_TYPE_ID,
+          allDataSources),
+        context,
+        tx)
 
-  updateLevels = (levelDTOsForUpdate, context, tx) => {
-    return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+  updateLevels = (levelDTOsForUpdate, context, tx) => applyAsyncBatchCreateOrUpdateToNonEmptyArray(
       this.factorLevelService.batchUpdateFactorLevels,
       mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate),
       context,
       tx)
-  }
 
   updateFactorsAndLevels = ({ experimentId, allDataSources, allIndependentDTOs: allFactorDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, context, tx }) => Promise.all([
@@ -469,14 +467,12 @@ class FactorDependentCompositeService {
       allFactorLevelAssociationDTOs,
       context,
       tx,
-    }) => {
-    return applyAsyncBatchCreateOrUpdateToNonEmptyArray(
+    }) => applyAsyncBatchCreateOrUpdateToNonEmptyArray(
       this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
       determineFactorLevelAssociationEntitiesToCreate(
         refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs),
       context,
       tx)
-  }
 
   getCurrentDbEntities = ({ experimentId, tx }) => Promise.all([
     this.refDataSourceService.getRefDataSources(),

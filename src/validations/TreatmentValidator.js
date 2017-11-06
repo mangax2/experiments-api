@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociationEntityUtil'
+import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
@@ -51,7 +53,75 @@ class TreatmentValidator extends SchemaValidator {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array'))
     }
-    return Promise.resolve()
+
+    const treatmentsGroupedByExperimentId = _.groupBy(treatmentObj, 'experimentId')
+    const experimentIds = _.map(_.keys(treatmentsGroupedByExperimentId), Number)
+    const levelsForEachExperimentPromise =
+      Promise.all(
+        _.map(experimentIds, experimentId =>
+          db.factorLevel.findByExperimentId(experimentId)))
+    const associationsForEachExperimentPromise =
+      Promise.all(
+        _.map(experimentIds, experimentId =>
+          db.factorLevelAssociation.findByExperimentId(experimentId)))
+    return Promise.all([
+      levelsForEachExperimentPromise,
+      associationsForEachExperimentPromise,
+    ]).then(([levelsGroupedByExperiment, associationsGroupedByExperiment]) => {
+      const nestedFactorValidityArrayForAllCombinationsInAllExperiments =
+        _.flatMap(levelsGroupedByExperiment, (levelsInCurExperiment, experimentIndex) => {
+          const curExperimentId = experimentIds[experimentIndex]
+          const treatmentDTOsForCurrentExperiment =
+            _.filter(treatmentObj, treatment => treatment.experimentId === curExperimentId)
+          const factorLevelHashById =
+            FactorLevelEntityUtil.assembleFactorLevelHashById(levelsInCurExperiment)
+          const associationsInCurExperiment = associationsGroupedByExperiment[experimentIndex]
+          const associationsGroupedByAssociatedLevelId =
+            FactorLevelAssociationEntityUtil
+              .assembleAssociationsGroupByAssociatedLevelId(associationsInCurExperiment)
+          const levelsInCurExperimentGroupedByFactorId = _.groupBy(levelsInCurExperiment, 'factor_id')
+          const nestedFactorIdsInCurExperimentGroupedByFactorId =
+            _.mapValues(levelsInCurExperimentGroupedByFactorId,
+                levels => FactorLevelAssociationEntityUtil.getNestedFactorIds(
+                  levels, associationsGroupedByAssociatedLevelId, factorLevelHashById))
+          const levelIdsToFactorIDMap = _.zipObject(
+            _.map(levelsInCurExperiment, 'id'),
+            _.map(levelsInCurExperiment, 'factor_id'))
+          const nestedFactorValidityArrayForAllCombinationsInAllTreatments =
+            _.flatMap(treatmentDTOsForCurrentExperiment, (treatmentDTO) => {
+              const factorIdToCombinationElementLevelIdMap =
+                _.zipObject(
+                  _.map(treatmentDTO.combinationElements,
+                      combinationElement =>
+                        levelIdsToFactorIDMap[combinationElement.factorLevelId]),
+                  _.map(treatmentDTO.combinationElements, 'factorLevelId'))
+              const nestedFactorValidityArrayForAllCombinationsInTreatment =
+                _.flatMap(factorIdToCombinationElementLevelIdMap,
+                  (associatedFactorLevelId, factorId) => {
+                    const nestedLevelIdsForAssociatedFactorLevelId =
+                      _.map(associationsGroupedByAssociatedLevelId[associatedFactorLevelId],
+                        'nested_level_id')
+                    const nestedFactorIds =
+                      nestedFactorIdsInCurExperimentGroupedByFactorId[factorId]
+                    const nestedFactorValidityArrayForCombination =
+                      _.map(nestedFactorIds, (nestedFactorId) => {
+                        const nestedFactorLevelId =
+                          factorIdToCombinationElementLevelIdMap[nestedFactorId]
+                        return _.includes(
+                          nestedLevelIdsForAssociatedFactorLevelId,
+                          nestedFactorLevelId)
+                      })
+                    return nestedFactorValidityArrayForCombination
+                  })
+              return nestedFactorValidityArrayForAllCombinationsInTreatment
+            })
+          return nestedFactorValidityArrayForAllCombinationsInAllTreatments
+        })
+
+      return _.every(nestedFactorValidityArrayForAllCombinationsInAllExperiments, Boolean)
+        ? Promise.resolve()
+        : Promise.reject('Not all nestings are valid.')
+    })
   }
 
   postValidate = (targetObject) => {

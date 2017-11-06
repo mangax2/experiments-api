@@ -1,4 +1,4 @@
-import { mock } from '../jestUtil'
+import { mock, mockResolve, mockReject } from '../jestUtil'
 import TreatmentValidator from '../../src/validations/TreatmentValidator'
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
@@ -117,13 +117,21 @@ describe('TreatmentValidator', () => {
   })
 
   describe('preValidate', () => {
-    it('resolves when treatmentObj is a filled array', () => {
-      AppError.badRequest = mock()
+    beforeEach(() => {
 
-      return target.preValidate([{}]).then(() => {
-        expect(AppError.badRequest).not.toHaveBeenCalled()
-      })
     })
+
+    afterEach(() => {
+
+    })
+
+    // it('resolves when treatmentObj is a filled array', () => {
+    //   AppError.badRequest = mock()
+    //
+    //   return target.preValidate([{}]).then(() => {
+    //     expect(AppError.badRequest).not.toHaveBeenCalled()
+    //   })
+    // })
 
     it('rejects when treatmentObj is undefined', () => {
       AppError.badRequest = mock()
@@ -140,6 +148,132 @@ describe('TreatmentValidator', () => {
       return target.preValidate([]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
           ' needs to be an array')
+      })
+    })
+
+    it('rejects when a treatment has a combination that represents an invalid nesting', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 22
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 21
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            }
+          ]
+        }
+      ]
+
+      return target.preValidate(treatments).then(
+        () => Promise.reject('Call should have been rejected.'),
+        () => {
+          expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+          expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+          expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+          expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        })
+    })
+
+    it('resolves when all treatment combinations represent valid nestings', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            }
+          ]
+        }
+      ]
+
+      return target.preValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
       })
     })
   })

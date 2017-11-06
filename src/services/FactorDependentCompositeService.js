@@ -4,6 +4,8 @@ import ExperimentsService from './ExperimentsService'
 import FactorLevelService from './FactorLevelService'
 import FactorService from './FactorService'
 import DependentVariableService from './DependentVariableService'
+import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociationEntityUtil'
+import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
 import RefDataSourceService from './RefDataSourceService'
@@ -214,46 +216,33 @@ class FactorDependentCompositeService {
 
   static mapFactorEntitiesToFactorDTOs(
     factors, allFactorLevels, allFactorTypes, factorLevelAssociationEntities) {
-    const hashTables = {
-      factorHashById: _.keyBy(factors, 'id'),
-      factorLevelHashById: _.keyBy(allFactorLevels, 'id'),
-      associationsGroupedByNestedLevelId:
-        _.groupBy(factorLevelAssociationEntities, 'nested_level_id'),
-      associationsGroupedByAssociatedLevelId:
-        _.groupBy(factorLevelAssociationEntities, 'associated_level_id'),
-    }
+    const factorHashById = _.keyBy(factors, 'id')
+    const factorLevelHashById =
+      FactorLevelEntityUtil.assembleFactorLevelHashById(allFactorLevels)
     return _.map(factors, (factor) => {
       const factorLevels = FactorDependentCompositeService.extractLevelsForFactor(
         factor, allFactorLevels)
-      const nestedFactorIds = _.uniq(_.flatMap(factorLevels,
-        (factorLevel) => {
-          const associations =
-            hashTables.associationsGroupedByAssociatedLevelId[factorLevel.id]
-          if (!_.isEmpty(associations)) {
-            return _.map(associations, association =>
-              hashTables.factorLevelHashById[association.nested_level_id].factor_id)
-          }
-          return []
-        }))
+      const nestedFactorIds =
+        FactorLevelAssociationEntityUtil.getNestedFactorIds(
+          factorLevels,
+          FactorLevelAssociationEntityUtil.assembleAssociationsGroupByAssociatedLevelId(
+            factorLevelAssociationEntities),
+          factorLevelHashById)
       const nestedFactorDTOs = _.map(nestedFactorIds, (factorId) => {
-        const factorMatch = hashTables.factorHashById[factorId]
+        const factorMatch = factorHashById[factorId]
         return {
           id: factorMatch.id,
           name: factorMatch.name,
         }
       })
-      const associatedFactorIds = _.uniq(_.flatMap(factorLevels,
-        (factorLevel) => {
-          const associations =
-            hashTables.associationsGroupedByNestedLevelId[factorLevel.id]
-          if (!_.isEmpty(associations)) {
-            return _.map(associations, association =>
-              hashTables.factorLevelHashById[association.associated_level_id].factor_id)
-          }
-          return []
-        }))
+      const associatedFactorIds =
+        FactorLevelAssociationEntityUtil.getAssociatedFactorIds(
+          factorLevels,
+          FactorLevelAssociationEntityUtil.assembleAssociationsGroupedByNestedLevelId(
+            factorLevelAssociationEntities),
+          factorLevelHashById)
       const associatedFactorDTOs = _.map(associatedFactorIds, (factorId) => {
-        const factorMatch = hashTables.factorHashById[factorId]
+        const factorMatch = factorHashById[factorId]
         return {
           id: factorMatch.id,
           name: factorMatch.name,

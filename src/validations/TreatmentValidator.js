@@ -129,33 +129,26 @@ class TreatmentValidator extends SchemaValidator {
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
-  validateNestedRelationshipsInExperiments = (
-    distinctExperimentIds,
-    treatmentDTOs,
-    levelsGroupedByExperiment,
-    associationsGroupedByExperiment) =>
-    _.flatMap(levelsGroupedByExperiment, (levelsInCurExperiment, experimentIndex) => {
-      const curExperimentId = distinctExperimentIds[experimentIndex]
-      const treatmentDTOsForCurrentExperiment =
-        _.filter(treatmentDTOs, treatment => treatment.experimentId === curExperimentId)
-      const associationsInCurExperiment = associationsGroupedByExperiment[experimentIndex]
-      return this.validateAllNestedRelationshipsInExperimentTreatments(
-        treatmentDTOsForCurrentExperiment, levelsInCurExperiment, associationsInCurExperiment)
-    })
-
-  validateNestedFactorsInTreatmentDTOs = (treatmentDTOs) => {
+  validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest) => {
     const distinctExperimentIds =
-      this.getDistinctExperimentIdsFromDTOs(treatmentDTOs)
+      this.getDistinctExperimentIdsFromDTOs(treatmentDTOsFromRequest)
+    const treatmentDTOsForEachExperiment = _.map(distinctExperimentIds, (experimentId) => {
+      return _.filter(treatmentDTOsFromRequest, dto => dto.experimentId === experimentId)
+    })
     return Promise.all([
       this.getLevelsForExperiments(distinctExperimentIds),
       this.getAssociationsForExperiments(distinctExperimentIds),
-    ]).then(([levelsForEachExperiment, associationsForEachExperiment]) =>
-      this.validateNestedRelationshipsInExperiments(
-        distinctExperimentIds,
-        treatmentDTOs,
+    ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => {
+      const dataGroupedByExperiment = _.zip(
         levelsForEachExperiment,
-        associationsForEachExperiment),
-    ).then(validityArray => (_.every(validityArray, Boolean)
+        associationsForEachExperiment,
+        treatmentDTOsForEachExperiment,
+      )
+      return _.flatMap(dataGroupedByExperiment,
+        ([levels, associations, treatmentDTOs]) =>
+          this.validateAllNestedRelationshipsInExperimentTreatments(
+            treatmentDTOs, levels, associations))
+    }).then(validityArray => (_.every(validityArray, Boolean)
         ? Promise.resolve()
         : Promise.reject('Not all nestings are valid.')))
   }

@@ -70,16 +70,15 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   // improperly formatted, but eslint says it is not being used.
   //eslint-disable-next-line
   app.use((err, req, res, next) => {
-    const errorLogMessage = ''
     if (err) {
       if (_.isArray(err)) {
-        logger.error(errorLogMessage + JSON.stringify(err))
+        logger.error(err.stack)
         return res.status(400).json(err)
       } else if (err.status) {
-        logger.error(errorLogMessage + err)
+        logger.error(err.stack)
         return res.status(err.status).json(err)
       }
-      logger.error(errorLogMessage + err)
+      logger.error(err.stack)
       if (Object.hasOwnProperty.call(err, 'table') && Object.hasOwnProperty.call(err, 'schema')) {
         const pgerror = {
           status: 500,
@@ -90,7 +89,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       }
       return res.status(500).json(err)
     }
-    logger.error(errorLogMessage + err)
+    logger.error(err.stack)
     return res.status(500).json(err)
   })
 
@@ -107,7 +106,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       try {
         require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
       } catch (error) {
-        logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error)
+        logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
       }
     } else {
       logger.info('Kafka has been disabled for this session.')

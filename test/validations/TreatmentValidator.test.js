@@ -112,7 +112,7 @@ describe('TreatmentValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     it('gets duplicate business key error mesasge', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate treatment name in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate treatment number in request payload with same experiment id')
     })
   })
 
@@ -124,14 +124,6 @@ describe('TreatmentValidator', () => {
     afterEach(() => {
 
     })
-
-    // it('resolves when treatmentObj is a filled array', () => {
-    //   AppError.badRequest = mock()
-    //
-    //   return target.preValidate([{}]).then(() => {
-    //     expect(AppError.badRequest).not.toHaveBeenCalled()
-    //   })
-    // })
 
     it('rejects when treatmentObj is undefined', () => {
       AppError.badRequest = mock()
@@ -148,6 +140,43 @@ describe('TreatmentValidator', () => {
       return target.preValidate([]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
           ' needs to be an array')
+      })
+    })
+
+    it('resolves when treatmentObj is a filled array', () => {
+      AppError.badRequest = mock()
+
+      return target.preValidate([{}]).then(() => {
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('postValidate', () => {
+    it('resolves if there are errors', () => {
+      target.hasErrors = mock(true)
+      target.getBusinessKeyPropertyNames = mock()
+
+      return target.postValidate({}).then(() => {
+        expect(target.getBusinessKeyPropertyNames).not.toHaveBeenCalled()
+      })
+    })
+
+    it('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
+      target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
+
+      return target.postValidate(targetObject).then(() => {
+        expect(target.messages.length).toEqual(0)
+      })
+    })
+
+    it('adds a message when there are business key errors', () => {
+      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
+      target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
+
+      return target.postValidate(targetObject).then(() => {
+        expect(target.messages.length).toEqual(1)
       })
     })
 
@@ -182,6 +211,7 @@ describe('TreatmentValidator', () => {
       ])
       const treatments = [
         {
+          treatmentNumber: 1,
           experimentId: 41,
           combinationElements: [
             {
@@ -193,6 +223,7 @@ describe('TreatmentValidator', () => {
           ]
         },
         {
+          treatmentNumber: 2,
           experimentId: 41,
           combinationElements: [
             {
@@ -205,14 +236,16 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.preValidate(treatments).then(
-        () => Promise.reject('Call should have been rejected.'),
-        () => {
-          expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-          expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
-          expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-          expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
-        })
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([
+          "Treatment number: 1 has the following invalid level id combinations: Associated Level Id: 11, Nested Level Id: 21",
+          "Treatment number: 2 has the following invalid level id combinations: Associated Level Id: 12, Nested Level Id: 22",
+        ])
+      })
     })
 
     it('resolves when all treatment combinations represent valid nestings', () => {
@@ -247,6 +280,7 @@ describe('TreatmentValidator', () => {
       const treatments = [
         {
           experimentId: 41,
+          treatmentNumber: 1,
           combinationElements: [
             {
               factorLevelId: 11
@@ -258,6 +292,7 @@ describe('TreatmentValidator', () => {
         },
         {
           experimentId: 41,
+          treatmentNumber: 2,
           combinationElements: [
             {
               factorLevelId: 12
@@ -269,40 +304,12 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.preValidate(treatments).then(() => {
+      return target.postValidate(treatments).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
-      })
-    })
-  })
-
-  describe('postValidate', () => {
-    it('resolves if there are errors', () => {
-      target.hasErrors = mock(true)
-      target.getBusinessKeyPropertyNames = mock()
-
-      return target.postValidate({}).then(() => {
-        expect(target.getBusinessKeyPropertyNames).not.toHaveBeenCalled()
-      })
-    })
-
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
-
-      return target.postValidate(targetObject).then(() => {
-        expect(target.messages.length).toEqual(0)
-      })
-    })
-
-    it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
-      target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
-
-      return target.postValidate(targetObject).then(() => {
-        expect(target.messages.length).toEqual(1)
+        expect(target.messages).toEqual([])
       })
     })
   })

@@ -42,37 +42,66 @@ function createFactorIdToCombinationElementLevelMap(
     _.map(combinationElementDTOs, 'factorLevelId'))
 }
 
-function validateNestedRelationshipsForSingleAssociatedFactor(
+function findInvalidNestedRelationshipsForSingleAssociatedFactor(
   nestedFactorIds,
   validNestedLevelIds,
   factorIdToLevelIdMap) {
-  return _.map(nestedFactorIds, nestedFactorId =>
-    _.includes(validNestedLevelIds, factorIdToLevelIdMap[nestedFactorId]))
+  return _.compact(_.map(nestedFactorIds, (nestedFactorId) => {
+    const nestedLevelId = factorIdToLevelIdMap[nestedFactorId]
+    if (!_.includes(validNestedLevelIds, nestedLevelId)) {
+      return nestedLevelId
+    }
+    return null
+  }))
 }
 
-function validateAllNestedRelationshipsInTreatmentCombination(
+function findInvalidNestedRelationshipsInTreatmentCombination(
   factorIdToLevelIdMap,
   associationDbEntitiesGroupedByAssociatedLevelId,
   nestedFactorIdsGroupedByFactorId) {
   return _.flatMap(factorIdToLevelIdMap,
-    (associatedFactorLevelId, associatedFactorId) =>
-      validateNestedRelationshipsForSingleAssociatedFactor(
+    (associatedFactorLevelId, associatedFactorId) => {
+      const invalidNestedLevelIds = findInvalidNestedRelationshipsForSingleAssociatedFactor(
         nestedFactorIdsGroupedByFactorId[associatedFactorId],
         _.map(associationDbEntitiesGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
-        factorIdToLevelIdMap))
+        factorIdToLevelIdMap)
+      return _.map(invalidNestedLevelIds,
+          invalidNestedLevelId => ({
+            associatedLevelId: associatedFactorLevelId,
+            nestedLevelId: invalidNestedLevelId,
+          }))
+    })
 }
 
-function validateNestedRelationshipsInTreatments(
+function findInvalidNestedRelationshipsInTreatments(
   treatmentDTOs,
   levelIdToFactorIDMap,
   associationDbEntitiesGroupedByAssociatedLevelId,
   nestedFactorIdsGroupedByAssociatedFactorId) {
-  return _.flatMap(treatmentDTOs,
-    treatmentDTO => validateAllNestedRelationshipsInTreatmentCombination(
-      createFactorIdToCombinationElementLevelMap(
-        treatmentDTO.combinationElements, levelIdToFactorIDMap),
+  return _.compact(_.map(treatmentDTOs, (treatmentDTO) => {
+    const invalidNestedRelationships =
+      findInvalidNestedRelationshipsInTreatmentCombination(
+        createFactorIdToCombinationElementLevelMap(
+          treatmentDTO.combinationElements, levelIdToFactorIDMap),
       associationDbEntitiesGroupedByAssociatedLevelId,
-      nestedFactorIdsGroupedByAssociatedFactorId))
+      nestedFactorIdsGroupedByAssociatedFactorId)
+    if (_.isEmpty(invalidNestedRelationships)) {
+      return null
+    }
+    return {
+      treatmentDTO,
+      invalidNestedRelationships,
+    }
+  }))
+}
+
+function formatInvalidNestedRelationships(invalidNestedRelationships) {
+  return _.map(invalidNestedRelationships, invalidRelationship => `Associated Level Id: ${invalidRelationship.associatedLevelId}, Nested Level Id: ${invalidRelationship.nestedLevelId}`).join(', ')
+}
+
+function formatInvalidRelationshipsErrorMessage(invalidRelationships) {
+  return _.map(invalidRelationships, invalidRelationship =>
+    `Treatment number: ${invalidRelationship.treatmentDTO.treatmentNumber} has the following invalid level id combinations: ${formatInvalidNestedRelationships(invalidRelationship.invalidNestedRelationships)}`)
 }
 
 class TreatmentValidator extends SchemaValidator {
@@ -116,7 +145,7 @@ class TreatmentValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'treatmentNumber']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate treatment name in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => 'Duplicate treatment number in request payload with same experiment id'
 
   getLevelsForExperiments = experimentIds => Promise.all(
     _.map(experimentIds,
@@ -150,15 +179,19 @@ class TreatmentValidator extends SchemaValidator {
         ([levels, associations, treatmentDTOsForExperiment]) => {
           const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
             factorIdToNestedFactorIdMap } = createLookupMaps(levels, associations)
-          return validateNestedRelationshipsInTreatments(
+          return findInvalidNestedRelationshipsInTreatments(
             treatmentDTOsForExperiment,
             levelIdToFactorIdMap,
             associatedLevelIdToAssociationsMap,
             factorIdToNestedFactorIdMap)
         }))
-      .then(validityArray => (_.every(validityArray, Boolean)
-        ? Promise.resolve()
-        : Promise.reject('Not all nestings are valid.')))
+      .then((invalidRelationships) => {
+        if (!_.isEmpty(invalidRelationships)) {
+          _.forEach(formatInvalidRelationshipsErrorMessage(invalidRelationships),
+              errorMessage => this.messages.push(errorMessage))
+        }
+        return Promise.resolve()
+      })
   }
 
   preValidate = (treatmentDTOs) => {
@@ -166,13 +199,13 @@ class TreatmentValidator extends SchemaValidator {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array'))
     }
-    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
+    return Promise.resolve()
   }
 
-  postValidate = (targetObject) => {
+  postValidate = (treatmentDTOs) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
-      const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))
+      const businessKeyArray = _.map(treatmentDTOs, obj => _.pick(obj, businessKeyPropertyNames))
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
       _.forEach(groupByObject, (innerArray) => {
         const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
@@ -182,6 +215,7 @@ class TreatmentValidator extends SchemaValidator {
         }
         return true
       })
+      return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
     }
     return Promise.resolve()
   }

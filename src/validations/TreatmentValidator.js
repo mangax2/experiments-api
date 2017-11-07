@@ -148,34 +148,34 @@ class TreatmentValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'Duplicate treatment number in request payload with same experiment id'
 
-  getLevelsForExperiments = experimentIds => Promise.all(
+  getLevelsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
-        experimentId => db.factorLevel.findByExperimentId(experimentId)))
+        experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
 
-  getAssociationsForExperiments = experimentIds => Promise.all(
+  getAssociationsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
-        experimentId => db.factorLevelAssociation.findByExperimentId(experimentId)))
+        experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
 
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
-  getDataForEachExperiment = (experimentIds, treatmentDTOs) => {
+  getDataForEachExperiment = (experimentIds, treatmentDTOs, tx) => {
     const treatmentDTOsForEachExperiment =
       _.map(experimentIds, experimentId =>
         _.filter(treatmentDTOs, dto => dto.experimentId === experimentId))
     return Promise.all([
-      this.getLevelsForExperiments(experimentIds),
-      this.getAssociationsForExperiments(experimentIds),
+      this.getLevelsForExperiments(experimentIds, tx),
+      this.getAssociationsForExperiments(experimentIds, tx),
     ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => _.zip(
         levelsForEachExperiment,
         associationsForEachExperiment,
         treatmentDTOsForEachExperiment))
   }
 
-  validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest) => {
+  validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest, tx) => {
     const distinctExperimentIds =
       this.getDistinctExperimentIdsFromDTOs(treatmentDTOsFromRequest)
-    return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest)
+    return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest, tx)
       .then(dataGroupedByExperiment => _.flatMap(dataGroupedByExperiment,
         ([levels, associations, treatmentDTOsForExperiment]) => {
           const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
@@ -217,12 +217,12 @@ class TreatmentValidator extends SchemaValidator {
     })
   }
 
-  postValidate = (treatmentDTOs) => {
+  postValidate = (treatmentDTOs, context, tx) => {
     if (this.hasErrors()) {
       return Promise.resolve()
     }
     this.checkForDuplicateBusinessKeys(treatmentDTOs)
-    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
+    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs, tx)
   }
 }
 

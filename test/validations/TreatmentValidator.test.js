@@ -4,6 +4,7 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('TreatmentValidator', () => {
+  const testTx = { tx: {} }
   let target
 
   beforeEach(() => {
@@ -236,11 +237,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
           "Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }",
         ])
@@ -303,11 +304,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
           "Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }",
           "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 12, Nested Level Id: 22 }",
@@ -371,11 +372,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([])
       })
     })
@@ -480,11 +481,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([])
       })
     })
@@ -597,11 +598,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
           "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 22, Nested Level Id: 31 }",
           "Treatment number: 3 has the following invalid level id combinations: { Associated Level Id: 21, Nested Level Id: 32 }",
@@ -687,11 +688,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([])
       })
     })
@@ -804,11 +805,11 @@ describe('TreatmentValidator', () => {
         }
       ]
 
-      return target.postValidate(treatments).then(() => {
+      return target.postValidate(treatments, {}, testTx).then(() => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
           "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 32 }",
           "Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }",

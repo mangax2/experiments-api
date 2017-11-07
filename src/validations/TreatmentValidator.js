@@ -65,24 +65,22 @@ class TreatmentValidator extends SchemaValidator {
           levels, associationsGroupedByAssociatedLevelId, factorLevelHashById))
   }
 
-  validateAllNestedRelationshipsInExperimentTreatments = (
-    treatmentDTOsForCurrentExperiment,
-    levelsInCurExperiment,
-    associationsInCurExperiment,
-  ) => {
-    const associationsGroupedByAssociatedLevelId =
+  createLookupMaps = (levelsInCurExperiment, associationsInCurExperiment) => {
+    const associatedLevelIdToAssociationsMap =
       FactorLevelAssociationEntityUtil
         .assembleAssociationsGroupByAssociatedLevelId(associationsInCurExperiment)
-    return this.validateAllNestedRelationshipsInTreatments(
-      treatmentDTOsForCurrentExperiment,
-      this.createLevelIdToFactorIdMap(levelsInCurExperiment),
-      associationsGroupedByAssociatedLevelId,
-      this.createFactorIdToNestedFactorIdMap(
-        levelsInCurExperiment,
-        associationsGroupedByAssociatedLevelId))
+    const levelIdToFactorIdMap = this.createLevelIdToFactorIdMap(levelsInCurExperiment)
+    const factorIdToNestedFactorIdMap = this.createFactorIdToNestedFactorIdMap(
+      levelsInCurExperiment,
+      associatedLevelIdToAssociationsMap)
+    return {
+      associatedLevelIdToAssociationsMap,
+      levelIdToFactorIdMap,
+      factorIdToNestedFactorIdMap,
+    }
   }
 
-  validateAllNestedRelationshipsInTreatments = (
+  validateNestedRelationshipsInTreatments = (
     treatmentDTOs,
     levelIdToFactorIDMap,
     associationsGroupedByAssociatedLevelId,
@@ -145,9 +143,15 @@ class TreatmentValidator extends SchemaValidator {
         treatmentDTOsForEachExperiment,
       )
       return _.flatMap(dataGroupedByExperiment,
-        ([levels, associations, treatmentDTOs]) =>
-          this.validateAllNestedRelationshipsInExperimentTreatments(
-            treatmentDTOs, levels, associations))
+        ([levels, associations, treatmentDTOs]) => {
+          const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
+            factorIdToNestedFactorIdMap } = this.createLookupMaps(levels, associations)
+          return this.validateNestedRelationshipsInTreatments(
+            treatmentDTOs,
+            levelIdToFactorIdMap,
+            associatedLevelIdToAssociationsMap,
+            factorIdToNestedFactorIdMap)
+        })
     }).then(validityArray => (_.every(validityArray, Boolean)
         ? Promise.resolve()
         : Promise.reject('Not all nestings are valid.')))

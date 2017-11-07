@@ -5,6 +5,76 @@ import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 
+function createLevelIdToFactorIdMap(levelDbEntities) {
+  return _.zipObject(
+    _.map(levelDbEntities, 'id'),
+    _.map(levelDbEntities, 'factor_id'))
+}
+
+function createFactorIdToNestedFactorIdMap(
+  levelDbEntities,
+  associationDbEntitiesGroupedByAssociatedLevelId) {
+  const factorLevelHashById =
+    FactorLevelEntityUtil.assembleFactorLevelHashById(levelDbEntities)
+  return _.mapValues(_.groupBy(levelDbEntities, 'factor_id'),
+    levelsInFactor => FactorLevelAssociationEntityUtil.getNestedFactorIds(
+      levelsInFactor, associationDbEntitiesGroupedByAssociatedLevelId, factorLevelHashById))
+}
+
+function createLookupMaps(levelDbEntities, associationDbEntities) {
+  const associatedLevelIdToAssociationsMap =
+    FactorLevelAssociationEntityUtil
+      .assembleAssociationsGroupByAssociatedLevelId(associationDbEntities)
+  return {
+    associatedLevelIdToAssociationsMap,
+    levelIdToFactorIdMap: createLevelIdToFactorIdMap(levelDbEntities),
+    factorIdToNestedFactorIdMap: createFactorIdToNestedFactorIdMap(
+      levelDbEntities, associatedLevelIdToAssociationsMap),
+  }
+}
+
+function createFactorIdToCombinationElementLevelMap(
+  combinationElementDTOs, levelIdToFactorIDMap) {
+  return _.zipObject(
+    _.map(combinationElementDTOs,
+      combinationElementDTO =>
+        levelIdToFactorIDMap[combinationElementDTO.factorLevelId]),
+    _.map(combinationElementDTOs, 'factorLevelId'))
+}
+
+function validateNestedRelationshipsForSingleAssociatedFactor(
+  nestedFactorIds,
+  validNestedLevelIds,
+  factorIdToLevelIdMap) {
+  return _.map(nestedFactorIds, nestedFactorId =>
+    _.includes(validNestedLevelIds, factorIdToLevelIdMap[nestedFactorId]))
+}
+
+function validateAllNestedRelationshipsInTreatmentCombination(
+  factorIdToLevelIdMap,
+  associationDbEntitiesGroupedByAssociatedLevelId,
+  nestedFactorIdsGroupedByFactorId) {
+  return _.flatMap(factorIdToLevelIdMap,
+    (associatedFactorLevelId, associatedFactorId) =>
+      validateNestedRelationshipsForSingleAssociatedFactor(
+        nestedFactorIdsGroupedByFactorId[associatedFactorId],
+        _.map(associationDbEntitiesGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
+        factorIdToLevelIdMap))
+}
+
+function validateNestedRelationshipsInTreatments(
+  treatmentDTOs,
+  levelIdToFactorIDMap,
+  associationDbEntitiesGroupedByAssociatedLevelId,
+  nestedFactorIdsGroupedByAssociatedFactorId) {
+  return _.flatMap(treatmentDTOs,
+    treatmentDTO => validateAllNestedRelationshipsInTreatmentCombination(
+      createFactorIdToCombinationElementLevelMap(
+        treatmentDTO.combinationElements, levelIdToFactorIDMap),
+      associationDbEntitiesGroupedByAssociatedLevelId,
+      nestedFactorIdsGroupedByAssociatedFactorId))
+}
+
 class TreatmentValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -48,75 +118,6 @@ class TreatmentValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'Duplicate treatment name in request payload with same experiment id'
 
-  createLevelIdToFactorIdMap =
-    levelDbEntities => _.zipObject(
-      _.map(levelDbEntities, 'id'),
-      _.map(levelDbEntities, 'factor_id'))
-
-  createFactorIdToNestedFactorIdMap = (
-    levelsInCurExperiment,
-    associationsGroupedByAssociatedLevelId,
-  ) => {
-    const factorLevelHashById =
-      FactorLevelEntityUtil.assembleFactorLevelHashById(levelsInCurExperiment)
-    const levelsInCurExperimentGroupedByFactorId = _.groupBy(levelsInCurExperiment, 'factor_id')
-    return _.mapValues(levelsInCurExperimentGroupedByFactorId,
-        levels => FactorLevelAssociationEntityUtil.getNestedFactorIds(
-          levels, associationsGroupedByAssociatedLevelId, factorLevelHashById))
-  }
-
-  createLookupMaps = (levelsInCurExperiment, associationsInCurExperiment) => {
-    const associatedLevelIdToAssociationsMap =
-      FactorLevelAssociationEntityUtil
-        .assembleAssociationsGroupByAssociatedLevelId(associationsInCurExperiment)
-    const levelIdToFactorIdMap = this.createLevelIdToFactorIdMap(levelsInCurExperiment)
-    const factorIdToNestedFactorIdMap = this.createFactorIdToNestedFactorIdMap(
-      levelsInCurExperiment,
-      associatedLevelIdToAssociationsMap)
-    return {
-      associatedLevelIdToAssociationsMap,
-      levelIdToFactorIdMap,
-      factorIdToNestedFactorIdMap,
-    }
-  }
-
-  createFactorIdToCombinationElementLevelMap =
-    (combinationElements, levelIdToFactorIDMap) => _.zipObject(
-      _.map(combinationElements,
-        combinationElement =>
-          levelIdToFactorIDMap[combinationElement.factorLevelId]),
-      _.map(combinationElements, 'factorLevelId'))
-
-  validateNestedRelationshipsInTreatments = (
-    treatmentDTOs,
-    levelIdToFactorIDMap,
-    associationsGroupedByAssociatedLevelId,
-    nestedFactorIdsGroupedByAssociatedFactorId,
-  ) => _.flatMap(treatmentDTOs,
-    treatmentDTO => this.validateAllNestedRelationshipsInTreatmentCombination(
-      this.createFactorIdToCombinationElementLevelMap(
-        treatmentDTO.combinationElements, levelIdToFactorIDMap),
-      associationsGroupedByAssociatedLevelId,
-      nestedFactorIdsGroupedByAssociatedFactorId))
-
-  validateAllNestedRelationshipsInTreatmentCombination = (
-    factorIdToLevelIdMap,
-    associationsGroupedByAssociatedLevelId,
-    nestedFactorIdsInCurExperimentGroupedByFactorId) =>
-    _.flatMap(factorIdToLevelIdMap,
-      (associatedFactorLevelId, associatedFactorId) =>
-        this.validateNestedRelationshipsForSingleAssociatedFactor(
-          nestedFactorIdsInCurExperimentGroupedByFactorId[associatedFactorId],
-          _.map(associationsGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
-          factorIdToLevelIdMap))
-
-  validateNestedRelationshipsForSingleAssociatedFactor = (
-    nestedFactorIds,
-    validNestedLevelIds,
-    factorIdToLevelIdMap) =>
-      _.map(nestedFactorIds, nestedFactorId =>
-        _.includes(validNestedLevelIds, factorIdToLevelIdMap[nestedFactorId]))
-
   getLevelsForExperiments = experimentIds => Promise.all(
     _.map(experimentIds,
         experimentId => db.factorLevel.findByExperimentId(experimentId)))
@@ -148,8 +149,8 @@ class TreatmentValidator extends SchemaValidator {
       .then(dataGroupedByExperiment => _.flatMap(dataGroupedByExperiment,
         ([levels, associations, treatmentDTOsForExperiment]) => {
           const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
-            factorIdToNestedFactorIdMap } = this.createLookupMaps(levels, associations)
-          return this.validateNestedRelationshipsInTreatments(
+            factorIdToNestedFactorIdMap } = createLookupMaps(levels, associations)
+          return validateNestedRelationshipsInTreatments(
             treatmentDTOsForExperiment,
             levelIdToFactorIdMap,
             associatedLevelIdToAssociationsMap,

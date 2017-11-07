@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
-function assembleFactorLevelHashById(factorLevels) {
-  return _.keyBy(factorLevels, 'id')
+function assembleFactorLevelHashById(factorLevelDbEntities) {
+  return _.keyBy(factorLevelDbEntities, 'id')
 }
 
 module.exports = {

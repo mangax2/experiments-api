@@ -33,7 +33,7 @@ function createLookupMaps(levelDbEntities, associationDbEntities) {
   }
 }
 
-function createFactorIdToCombinationElementLevelMap(
+function createFactorIdToCombinationElementLevelIdMap(
   combinationElementDTOs, levelIdToFactorIDMap) {
   return _.zipObject(
     _.map(combinationElementDTOs,
@@ -42,7 +42,7 @@ function createFactorIdToCombinationElementLevelMap(
     _.map(combinationElementDTOs, 'factorLevelId'))
 }
 
-function findInvalidNestedRelationshipsForSingleAssociatedFactor(
+function findInvalidNestedRelationshipsForSingleAssociatedFactorLevelInTreatmentCombination(
   nestedFactorIds,
   validNestedLevelIds,
   factorIdToLevelIdMap) {
@@ -56,15 +56,16 @@ function findInvalidNestedRelationshipsForSingleAssociatedFactor(
 }
 
 function findInvalidNestedRelationshipsInTreatmentCombination(
-  factorIdToLevelIdMap,
+  factorIdToCombinationLevelIdMap,
   associationDbEntitiesGroupedByAssociatedLevelId,
   nestedFactorIdsGroupedByFactorId) {
-  return _.flatMap(factorIdToLevelIdMap,
+  return _.flatMap(factorIdToCombinationLevelIdMap,
     (associatedFactorLevelId, associatedFactorId) => {
-      const invalidNestedLevelIds = findInvalidNestedRelationshipsForSingleAssociatedFactor(
-        nestedFactorIdsGroupedByFactorId[associatedFactorId],
-        _.map(associationDbEntitiesGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
-        factorIdToLevelIdMap)
+      const invalidNestedLevelIds =
+        findInvalidNestedRelationshipsForSingleAssociatedFactorLevelInTreatmentCombination(
+          nestedFactorIdsGroupedByFactorId[associatedFactorId],
+          _.map(associationDbEntitiesGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
+          factorIdToCombinationLevelIdMap)
       return _.map(invalidNestedLevelIds,
           invalidNestedLevelId => ({
             associatedLevelId: associatedFactorLevelId,
@@ -81,7 +82,7 @@ function findInvalidNestedRelationshipsInTreatments(
   return _.compact(_.map(treatmentDTOs, (treatmentDTO) => {
     const invalidNestedRelationships =
       findInvalidNestedRelationshipsInTreatmentCombination(
-        createFactorIdToCombinationElementLevelMap(
+        createFactorIdToCombinationElementLevelIdMap(
           treatmentDTO.combinationElements, levelIdToFactorIDMap),
       associationDbEntitiesGroupedByAssociatedLevelId,
       nestedFactorIdsGroupedByAssociatedFactorId)
@@ -202,22 +203,26 @@ class TreatmentValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
+  checkForDuplicateBusinessKeys = (treatmentDTOs) => {
+    const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
+    const businessKeyArray = _.map(treatmentDTOs, obj => _.pick(obj, businessKeyPropertyNames))
+    const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
+    _.forEach(groupByObject, (innerArray) => {
+      const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
+      if (_.uniq(names).length !== names.length) {
+        this.messages.push(this.getDuplicateBusinessKeyError())
+        return false
+      }
+      return true
+    })
+  }
+
   postValidate = (treatmentDTOs) => {
-    if (!this.hasErrors()) {
-      const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
-      const businessKeyArray = _.map(treatmentDTOs, obj => _.pick(obj, businessKeyPropertyNames))
-      const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.experimentId))
-      _.forEach(groupByObject, (innerArray) => {
-        const names = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(names).length !== names.length) {
-          this.messages.push(this.getDuplicateBusinessKeyError())
-          return false
-        }
-        return true
-      })
-      return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
+    if (this.hasErrors()) {
+      return Promise.resolve()
     }
-    return Promise.resolve()
+    this.checkForDuplicateBusinessKeys(treatmentDTOs)
+    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
   }
 }
 

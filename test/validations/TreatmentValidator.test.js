@@ -1,4 +1,4 @@
-import { mock, mockResolve, mockReject } from '../jestUtil'
+import { mock, mockResolve } from '../jestUtil'
 import TreatmentValidator from '../../src/validations/TreatmentValidator'
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'

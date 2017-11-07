@@ -72,7 +72,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use((err, req, res, next) => {
     if (err) {
       if (_.isArray(err)) {
-        logger.error(err)
+        logError(err)
         return res.status(400).json(err)
       } else if (err.status) {
         logError(err)
@@ -92,7 +92,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       return res.status(500).json(err)
     }
 
-    logError(err)
+    logger.error(err)
     return res.status(500).json(err)
   })
 

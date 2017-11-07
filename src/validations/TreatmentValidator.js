@@ -159,9 +159,9 @@ class TreatmentValidator extends SchemaValidator {
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
   getDataForEachExperiment = (experimentIds, treatmentDTOs) => {
-    const treatmentDTOsForEachExperiment = _.map(experimentIds, (experimentId) => {
-      return _.filter(treatmentDTOs, dto => dto.experimentId === experimentId)
-    })
+    const treatmentDTOsForEachExperiment =
+      _.map(experimentIds, experimentId =>
+        _.filter(treatmentDTOs, dto => dto.experimentId === experimentId))
     return Promise.all([
       this.getLevelsForExperiments(experimentIds),
       this.getAssociationsForExperiments(experimentIds),

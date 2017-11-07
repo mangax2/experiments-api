@@ -180,7 +180,74 @@ describe('TreatmentValidator', () => {
       })
     })
 
-    it('rejects when a treatment has a combination that represents an invalid nesting', () => {
+    it('creates error message when a treatment has a combination that represents an invalid nesting', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 22
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      const treatments = [
+        {
+          treatmentNumber: 1,
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            }
+          ]
+        },
+        {
+          treatmentNumber: 2,
+          experimentId: 41,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            }
+          ]
+        }
+      ]
+
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([
+          "Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }",
+        ])
+      })
+    })
+
+    it('creates error messages when a multiple treatments have combinations that represents invalid nestings', () => {
       db.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
@@ -242,13 +309,13 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([
-          "Treatment number: 1 has the following invalid level id combinations: Associated Level Id: 11, Nested Level Id: 21",
-          "Treatment number: 2 has the following invalid level id combinations: Associated Level Id: 12, Nested Level Id: 22",
+          "Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }",
+          "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 12, Nested Level Id: 22 }",
         ])
       })
     })
 
-    it('resolves when all treatment combinations represent valid nestings', () => {
+    it('does not create error messages when all treatment combinations are valid nestings', () => {
       db.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
@@ -310,6 +377,442 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([])
+      })
+    })
+
+    it('does not create error messages when all treatment combinations are valid and not all factors are in a relationship', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        },
+        {
+          id: 31,
+          factor_id: 3
+        },
+        {
+          id: 32,
+          factor_id: 3
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 2,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 3,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 4,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        }
+      ]
+
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([])
+      })
+    })
+
+    it('Creates error messages when their are invalid treatment combinations in a multi-tiered nested relationship', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        },
+        {
+          id: 31,
+          factor_id: 3
+        },
+        {
+          id: 32,
+          factor_id: 3
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        },
+        {
+          associated_level_id: 21,
+          nested_level_id: 31
+        },
+        {
+          associated_level_id: 22,
+          nested_level_id: 32
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 2,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 3,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 4,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        }
+      ]
+
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([
+          "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 22, Nested Level Id: 31 }",
+          "Treatment number: 3 has the following invalid level id combinations: { Associated Level Id: 21, Nested Level Id: 32 }",
+        ])
+      })
+    })
+
+    it('Creates no error messages for associated factor with multiple nestings when all combinations are valid.', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        },
+        {
+          id: 31,
+          factor_id: 3
+        },
+        {
+          id: 32,
+          factor_id: 3
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        },
+        {
+          associated_level_id: 11,
+          nested_level_id: 31
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 32
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 2,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        }
+      ]
+
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([])
+      })
+    })
+
+    it('Creates error messages for associated factor with multiple nestings when multiple combinations within a treatment are invalid.', () => {
+      db.factorLevel.findByExperimentId = mockResolve([
+        {
+          id: 11,
+          factor_id: 1
+        },
+        {
+          id: 12,
+          factor_id: 1
+        },
+        {
+          id: 21,
+          factor_id: 2
+        },
+        {
+          id: 22,
+          factor_id: 2
+        },
+        {
+          id: 31,
+          factor_id: 3
+        },
+        {
+          id: 32,
+          factor_id: 3
+        }
+      ])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([
+        {
+          associated_level_id: 11,
+          nested_level_id: 21
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 22
+        },
+        {
+          associated_level_id: 11,
+          nested_level_id: 31
+        },
+        {
+          associated_level_id: 12,
+          nested_level_id: 32
+        }
+      ])
+      const treatments = [
+        {
+          experimentId: 41,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 31
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 2,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 21
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 3,
+          combinationElements: [
+            {
+              factorLevelId: 12
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        },
+        {
+          experimentId: 41,
+          treatmentNumber: 4,
+          combinationElements: [
+            {
+              factorLevelId: 11
+            },
+            {
+              factorLevelId: 22
+            },
+            {
+              factorLevelId: 32
+            }
+          ]
+        }
+      ]
+
+      return target.postValidate(treatments).then(() => {
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(target.messages).toEqual([
+          "Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 32 }",
+          "Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }",
+        ])
       })
     })
   })

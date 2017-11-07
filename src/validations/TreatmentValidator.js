@@ -96,7 +96,7 @@ function findInvalidNestedRelationshipsInTreatments(
 }
 
 function formatInvalidNestedRelationships(invalidNestedRelationships) {
-  return _.map(invalidNestedRelationships, invalidRelationship => `Associated Level Id: ${invalidRelationship.associatedLevelId}, Nested Level Id: ${invalidRelationship.nestedLevelId}`).join(', ')
+  return _.map(invalidNestedRelationships, invalidRelationship => `{ Associated Level Id: ${invalidRelationship.associatedLevelId}, Nested Level Id: ${invalidRelationship.nestedLevelId} }`).join(', ')
 }
 
 function formatInvalidRelationshipsErrorMessage(invalidRelationships) {

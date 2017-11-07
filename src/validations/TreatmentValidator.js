@@ -80,23 +80,24 @@ class TreatmentValidator extends SchemaValidator {
     }
   }
 
+  createFactorIdToCombinationElementLevelMap =
+    (combinationElements, levelIdToFactorIDMap) => _.zipObject(
+      _.map(combinationElements,
+        combinationElement =>
+          levelIdToFactorIDMap[combinationElement.factorLevelId]),
+      _.map(combinationElements, 'factorLevelId'))
+
   validateNestedRelationshipsInTreatments = (
     treatmentDTOs,
     levelIdToFactorIDMap,
     associationsGroupedByAssociatedLevelId,
     nestedFactorIdsGroupedByAssociatedFactorId,
-  ) => _.flatMap(treatmentDTOs, (treatmentDTO) => {
-    const factorIdToCombinationElementLevelIdMap =
-      _.zipObject(
-        _.map(treatmentDTO.combinationElements,
-          combinationElement =>
-            levelIdToFactorIDMap[combinationElement.factorLevelId]),
-        _.map(treatmentDTO.combinationElements, 'factorLevelId'))
-    return this.validateAllNestedRelationshipsInTreatmentCombination(
-      factorIdToCombinationElementLevelIdMap,
+  ) => _.flatMap(treatmentDTOs,
+    treatmentDTO => this.validateAllNestedRelationshipsInTreatmentCombination(
+      this.createFactorIdToCombinationElementLevelMap(
+        treatmentDTO.combinationElements, levelIdToFactorIDMap),
       associationsGroupedByAssociatedLevelId,
-      nestedFactorIdsGroupedByAssociatedFactorId)
-  })
+      nestedFactorIdsGroupedByAssociatedFactorId))
 
   validateAllNestedRelationshipsInTreatmentCombination = (
     factorIdToLevelIdMap,
@@ -127,32 +128,34 @@ class TreatmentValidator extends SchemaValidator {
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
+  getDataForEachExperiment = (experimentIds, treatmentDTOs) => {
+    const treatmentDTOsForEachExperiment = _.map(experimentIds, (experimentId) => {
+      return _.filter(treatmentDTOs, dto => dto.experimentId === experimentId)
+    })
+    return Promise.all([
+      this.getLevelsForExperiments(experimentIds),
+      this.getAssociationsForExperiments(experimentIds),
+    ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => _.zip(
+        levelsForEachExperiment,
+        associationsForEachExperiment,
+        treatmentDTOsForEachExperiment))
+  }
+
   validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest) => {
     const distinctExperimentIds =
       this.getDistinctExperimentIdsFromDTOs(treatmentDTOsFromRequest)
-    const treatmentDTOsForEachExperiment = _.map(distinctExperimentIds, (experimentId) => {
-      return _.filter(treatmentDTOsFromRequest, dto => dto.experimentId === experimentId)
-    })
-    return Promise.all([
-      this.getLevelsForExperiments(distinctExperimentIds),
-      this.getAssociationsForExperiments(distinctExperimentIds),
-    ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => {
-      const dataGroupedByExperiment = _.zip(
-        levelsForEachExperiment,
-        associationsForEachExperiment,
-        treatmentDTOsForEachExperiment,
-      )
-      return _.flatMap(dataGroupedByExperiment,
-        ([levels, associations, treatmentDTOs]) => {
+    return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest)
+      .then(dataGroupedByExperiment => _.flatMap(dataGroupedByExperiment,
+        ([levels, associations, treatmentDTOsForExperiment]) => {
           const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
             factorIdToNestedFactorIdMap } = this.createLookupMaps(levels, associations)
           return this.validateNestedRelationshipsInTreatments(
-            treatmentDTOs,
+            treatmentDTOsForExperiment,
             levelIdToFactorIdMap,
             associatedLevelIdToAssociationsMap,
             factorIdToNestedFactorIdMap)
-        })
-    }).then(validityArray => (_.every(validityArray, Boolean)
+        }))
+      .then(validityArray => (_.every(validityArray, Boolean)
         ? Promise.resolve()
         : Promise.reject('Not all nestings are valid.')))
   }

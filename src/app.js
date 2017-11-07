@@ -72,13 +72,15 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use((err, req, res, next) => {
     if (err) {
       if (_.isArray(err)) {
-        logger.error(err.stack)
+        logger.error(err)
         return res.status(400).json(err)
       } else if (err.status) {
-        logger.error(err.stack)
+        logError(err)
         return res.status(err.status).json(err)
       }
-      logger.error(err.stack)
+
+      logError(err)
+
       if (Object.hasOwnProperty.call(err, 'table') && Object.hasOwnProperty.call(err, 'schema')) {
         const pgerror = {
           status: 500,
@@ -89,7 +91,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       }
       return res.status(500).json(err)
     }
-    logger.error(err.stack)
+
+    logError(err)
     return res.status(500).json(err)
   })
 
@@ -100,6 +103,14 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     const url = `http://${address.host || 'localhost'}:${port}`
     return logger.info(`Listening at ${url}`)
   })
+
+  const logError = (err) => {
+    if (err.stack) {
+      logger.error(err.stack)
+    } else {
+      logger.error(err)
+    }
+  }
 
   const repPackingMessageConsume = () => {
     if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {

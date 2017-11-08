@@ -118,13 +118,6 @@ describe('TreatmentValidator', () => {
   })
 
   describe('preValidate', () => {
-    beforeEach(() => {
-
-    })
-
-    afterEach(() => {
-
-    })
 
     it('rejects when treatmentObj is undefined', () => {
       AppError.badRequest = mock()
@@ -164,6 +157,8 @@ describe('TreatmentValidator', () => {
     })
 
     it('does not add a message if there are not any business key errors', () => {
+      db.factorLevel.findByExperimentId = mockResolve([])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([])
       const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
@@ -173,6 +168,8 @@ describe('TreatmentValidator', () => {
     })
 
     it('adds a message when there are business key errors', () => {
+      db.factorLevel.findByExperimentId = mockResolve([])
+      db.factorLevelAssociation.findByExperimentId = mockResolve([])
       const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 

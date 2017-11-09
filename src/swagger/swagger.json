@@ -4693,6 +4693,14 @@
         "nameOfUnitType": {
           "type": "string",
           "description": "Name of experimental unit associated with the experiment."
+        },
+        "numberOfIndependentVariables": {
+          "type": "integer",
+          "description": "the number of independent variables associated with the experiment."
+        },
+        "numberOfDependentVariables": {
+          "type": "integer",
+          "description": "the number of dependent variables associated with the experiment."
         }
       }
     },

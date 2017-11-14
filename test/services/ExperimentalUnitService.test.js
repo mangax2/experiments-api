@@ -175,7 +175,54 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
+  describe('getExperimentalUnitInfoBySetId', () => {
+    let originalMap
+
+    beforeAll(() => {
+      originalMap = target.mapUnitsToSetEntryFormat
+    })
+
+    it('throws an error when setId is undefined', () => {
+      AppError.badRequest = mock('')
+
+      expect(() => target.getExperimentalUnitInfoBySetId()).toThrow()
+      expect(AppError.badRequest).toBeCalledWith('A setId is required')
+    })
+
+    it('throws an error when no results found', (done) => {
+      db.unit.batchFindAllBySetId = mockResolve([])
+      AppError.notFound = mock('')
+
+      return target.getExperimentalUnitInfoBySetId(5).catch(() => {
+        expect(AppError.notFound).toBeCalledWith('Either the set was not found or no set entries are associated with the set.')
+        done()
+      })
+    })
+
+    it('returns the result from the map function when data found', () => {
+      const mockResult = { 1: {} }
+      const repoResult = [{ set_entry_id: 1 }]
+      db.unit.batchFindAllBySetId = mockResolve(repoResult)
+      target.mapUnitsToSetEntryFormat = mock(mockResult)
+
+      return target.getExperimentalUnitInfoBySetId(5).then((result) => {
+        expect(target.mapUnitsToSetEntryFormat).toBeCalledWith(repoResult)
+        expect(result).toEqual(mockResult)
+      })
+    })
+
+    afterAll(() => {
+      target.mapUnitsToSetEntryFormat= originalMap
+    })
+  })
+
   describe('getExperimentalUnitInfoBySetEntryId', () => {
+    let originalMap
+
+    beforeAll(() => {
+      originalMap = target.mapUnitsToSetEntryFormat
+    })
+
     it('throws an error when setEntryIds are not defined', () => {
       db.unit.batchFindAllBySetEntryIds = mock()
       AppError.badRequest = mock('')
@@ -183,8 +230,32 @@ describe('ExperimentalUnitService', () => {
       expect(() => target.getExperimentalUnitInfoBySetEntryId()).toThrow()
     })
 
-    it('returns a map of Set Entry Ids to treatmentId and rep number', () => {
-      const result = [
+    it('returns an empty map of Set Entry Ids', () => {
+      const result = []
+      const expectedMap = {}
+      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
+      target.mapUnitsToSetEntryFormat = mock(expectedMap)
+
+      return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
+        expect(target.mapUnitsToSetEntryFormat).toBeCalledWith(result)
+        expect(data).toEqual(expectedMap)
+      })
+    })
+
+    afterAll(() => {
+      target.mapUnitsToSetEntryFormat= originalMap
+    })
+  })
+
+  describe('mapUnitsToSetEntryFormat', () => {
+    it('returns an empty object when given an empty array', () => {
+      const result = target.mapUnitsToSetEntryFormat([])
+
+      expect(result).toEqual({})
+    })
+
+    it('returns a properly structure object when given a populated array', () => {
+      const data = [
         {
           set_entry_id: 1,
           treatment_id: 1,
@@ -199,21 +270,10 @@ describe('ExperimentalUnitService', () => {
           rep: 1,
         }
       }
-      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
 
-      return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
-        expect(data).toEqual(expectedMap)
-      })
-    })
+      const result = target.mapUnitsToSetEntryFormat(data)
 
-    it('returns an empty map of Set Entry Ids', () => {
-      const result = []
-      const expectedMap = {}
-      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
-
-      return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
-        expect(data).toEqual(expectedMap)
-      })
+      expect(result).toEqual(expectedMap)
     })
   })
 

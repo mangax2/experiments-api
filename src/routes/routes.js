@@ -1,5 +1,6 @@
 import express from 'express'
 import log4js from 'log4js'
+import pt from 'promise-timeout'
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
@@ -24,6 +25,8 @@ import GroupExperimentalUnitCompositeService from '../services/GroupExperimental
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
+import KafkaProducer from '../services/kafka/KafkaProducer'
+
 
 const logger = log4js.getLogger('Router')
 const router = express.Router()
@@ -256,6 +259,10 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.get('/set-entries', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitInfoBySetId(req.query.setId)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
 router.post('/set-entries', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitInfoBySetEntryId(req.body)
   .then(value => res.json(value))
   .catch(err => next(err)))
@@ -367,6 +374,13 @@ router.get('/getDoc/:fileName', (req, res, next) => {
     res.set('Content-Type', 'text/markdown')
     res.send(data.text)
   }).catch(err => next(err))
+})
+
+router.post('/kafka-publish', (req, res, next) => {
+  const { topic, message } = req.body
+  pt.timeout(KafkaProducer.publish({ topic, message }), 8000)
+    .then(result => res.json(result))
+    .catch(err => next(err))
 })
 
 module.exports = router

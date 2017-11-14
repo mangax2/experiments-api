@@ -3,13 +3,22 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id),
 
-  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId),
+  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any('SELECT * FROM unit WHERE' +
+    ' treatment_id = $1', treatmentId),
+
+
+  getGroupsWithNoUnits:(setId,tx=rep) => tx.any('select k.id from (select g.* from (select' +
+    '   g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner' +
+    ' join '+
+  'group_value gv on gv.group_id = g.id and gv.name = \'repNumber\') k WHERE NOT EXISTS' +
+  '  (SELECT 1 FROM unit  WHERE unit.group_id = k.id)',setId),
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId),
 
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds]),
   batchFindAllByGroupIds: (groupIds, tx = rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds]),
-  batchFindAllBySetEntryIds: (setEntryIds, tx = rep) => tx.any('SELECT treatment.treatment_number, unit.treatment_id, unit.rep, unit.set_entry_id FROM unit INNER JOIN treatment ON unit.treatment_id = treatment.id WHERE set_entry_id IN ($1:csv)', [setEntryIds]),
+  batchFindAllBySetId: (setId, tx = rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId),
+  batchFindAllBySetEntryIds: (setEntryIds, tx = rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds]),
   batchCreate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
@@ -34,7 +43,10 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'group_id', 'treatment_id', 'rep', { name: 'set_entry_id', cast: 'int' }, 'modified_user_id', 'modified_date'],
+      ['?id', 'group_id', 'treatment_id', 'rep', {
+        name: 'set_entry_id',
+        cast: 'int',
+      }, 'modified_user_id', 'modified_date'],
       { table: 'unit' },
     )
     const data = units.map(u => ({

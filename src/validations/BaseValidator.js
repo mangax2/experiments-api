@@ -37,7 +37,7 @@ class BaseValidator {
   validate(targetObject, operationName, optionalTransaction, context) {
     return this.preValidate(targetObject)
       .then(() => this.validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction)
-        .then(() => this.postValidate(targetObject, context))
+        .then(() => this.postValidate(targetObject, context, optionalTransaction))
         .then(() => this.check()))
   }
 

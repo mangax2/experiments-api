@@ -3,6 +3,11 @@ module.exports = (rep, pgp) => ({
 
   find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM "group" WHERE id = $1', id),
 
+  findRepGroupsBySetId: (setId, tx = rep) => tx.any('select g.*, gv.value as rep from (select' +
+    ' g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner' +
+    ' join '+
+      'group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId),
+
   batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]),
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
@@ -31,7 +36,13 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (groups, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['?id', 'experiment_id', { name: 'parent_id', cast: 'int' }, { name: 'ref_randomization_strategy_id', cast: 'int' }, 'ref_group_type_id', 'modified_user_id', 'modified_date'],
+      ['?id', 'experiment_id', {
+        name: 'parent_id',
+        cast: 'int',
+      }, {
+        name: 'ref_randomization_strategy_id',
+        cast: 'int',
+      }, 'ref_group_type_id', 'modified_user_id', 'modified_date'],
       { table: 'group' },
     )
     const data = groups.map(u => ({

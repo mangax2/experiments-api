@@ -23,11 +23,21 @@ const cfServices = {
   experimentsExternalAPIUrls: {
     value: {
       capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
-      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer-v3/v3',
+      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer/v3',
       profileAPIUrl: 'https://profile.velocity-np.ag/v2',
       experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api'
     },
   },
+  experimentsKafka:{
+    value: {
+      enableKafka: 'false',
+      host: 'kafka.tst.datahub.internal:9093',
+      topics: {
+        repPackingTopic:'rsr.field-experiments.test.incoming.json',
+        repPackingResultTopic: 'rsr.field-experiments.rep-packing-results.outgoing.json'
+      }
+    }
+  }
 }
 
 module.exports = cfServices

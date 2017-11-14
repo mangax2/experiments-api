@@ -2262,6 +2262,56 @@
       }
     },
     "/set-entries": {
+      "get": {
+        "summary": "Gets all set entries for a set.",
+        "description": "Retrieves all set entries that belong to the given set id.",
+        "operationId": "getSetEntries",
+        "tags": ["Set Entry"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "query",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Set Entry/Treatment/Rep Mapping",
+            "schema": {
+              "$ref": "#/definitions/SetEntryTreatmentRepInfo"
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Set Entries Do Not Exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Returns a mapping of Set Entry Ids to corresponding Treatment Id, Treatment Number and Rep Number",
         "description": "Returns the relationship betweten Set Entry Id and Treatment",
@@ -4111,7 +4161,10 @@
               "type": "object",
               "properties": {
                 "items": {
-                  "type": "array"
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
                 }
               },
               "description": "value of the factor level"
@@ -4640,6 +4693,14 @@
         "nameOfUnitType": {
           "type": "string",
           "description": "Name of experimental unit associated with the experiment."
+        },
+        "numberOfIndependentVariables": {
+          "type": "integer",
+          "description": "the number of independent variables associated with the experiment."
+        },
+        "numberOfDependentVariables": {
+          "type": "integer",
+          "description": "the number of dependent variables associated with the experiment."
         }
       }
     },
@@ -5069,12 +5130,31 @@
         }
       }
     },
-    "Cluster": {
+    "ClusterResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
           "description": "Id of the factor level."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LevelItem"
+          }
+        }
+      }
+    },
+    "ClusterRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the factor level."
+        },
+        "_refId": {
+          "type": "integer",
+          "description": "Reference ID for the level.  This may be references by an independent variable association."
         },
         "items": {
           "type": "array",
@@ -5099,7 +5179,7 @@
         }
       }
     },
-    "IndependentVariable": {
+    "IndependentVariableRequest": {
       "type": "object",
       "properties": {
         "id": {
@@ -5113,12 +5193,103 @@
         "levels": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Cluster"
+            "$ref": "#/definitions/ClusterRequest"
           }
         },
         "tier": {
           "type": "integer",
           "description": "the tier of the split that the variable is part of"
+        }
+      }
+    },
+    "IndependentVariableResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Id of the factor"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of variable"
+        },
+        "associatedFactors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssociatedFactor"
+          }
+        },
+        "nestedFactors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NestedFactor"
+          }
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClusterResponse"
+          }
+        },
+        "tier": {
+          "type": "integer",
+          "description": "the tier of the split that the variable is part of"
+        }
+      }
+    },
+    "AssociatedFactor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the associated factor."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the associated factor."
+        }
+      }
+    },
+    "NestedFactor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the nested factor."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the nested factor."
+        }
+      }
+    },
+    "IndependentAssociationResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the association"
+        },
+        "associatedLevelId": {
+          "type": "integer",
+          "description": "Id of the factor level on the associated side of relationship"
+        },
+        "nestedLevelId": {
+          "type": "integer",
+          "description": "Id of the factor level on the nested side of relationship"
+        }
+      }
+    },
+    "IndependentAssociationRequest": {
+      "type": "object",
+      "properties": {
+        "associatedLevelRefId": {
+          "type": "integer",
+          "description": "RefId of the factor level on the associated side of relationship.  This should reference a _refId defined on a level"
+        },
+        "nestedLevelRefId": {
+          "type": "integer",
+          "description": "RefId of the factor level on the nested side of relationship.  This should reference a _refId defined on a level"
         }
       }
     },
@@ -5128,7 +5299,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariable"
+            "$ref": "#/definitions/IndependentVariableRequest"
           }
         },
         "exogenous": {
@@ -5141,6 +5312,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DependentVariable"
+          }
+        },
+        "independentAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IndependentAssociationRequest"
           }
         }
       }
@@ -5151,7 +5328,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariable"
+            "$ref": "#/definitions/IndependentVariableResponse"
           }
         },
         "exogenous": {
@@ -5164,6 +5341,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DependentVariable"
+          }
+        },
+        "independentAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IndependentAssociationResponse"
           }
         }
       }

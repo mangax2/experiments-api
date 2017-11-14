@@ -1,12 +1,13 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-
+const { ENV, PORT, NODE_ENV, ADMIN_GROUP, KAFKA_PASSWORD, EXPERIMENTS_API_CLIENT_ID } = process.env
 let config = { vaultConfig: {} }
 
-config.env = process.env.ENV || 'local'
-config.port = process.env.PORT || 3001
-config.node_env = process.env.NODE_ENV || 'local'
-config.admin_group = process.env.ADMIN_GROUP || 'COSMOS-ADMIN'
+config.env = ENV || 'local'
+config.port = PORT || 3001
+config.node_env = NODE_ENV || 'local'
+config.admin_group = ADMIN_GROUP || 'COSMOS-ADMIN'
+
 if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {
   const cfServices = require('@monsantoit/cloud-foundry').services
   const vaultCfService = cfServices['experimentsVault']
@@ -16,6 +17,12 @@ if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env 
   config.vaultConfig.roleId = vaultCfService.roleId
   config.vaultConfig.secretId = vaultCfService.secretId
 }
+
+if (config.env !== 'prod' && config.env !== 'np' && config.env !== 'dev') {
+  config.vaultConfig.kafkaPassword = KAFKA_PASSWORD
+  config.vaultConfig.clientId = EXPERIMENTS_API_CLIENT_ID
+}
+
 config.exit = function () {process.exit(1)}
 config.watchUncaughtException = process.on('uncaughtException', function (error) {
   logger.fatal(error)
@@ -24,3 +31,4 @@ config.watchUncaughtException = process.on('uncaughtException', function (error)
 })
 
 module.exports = config
+

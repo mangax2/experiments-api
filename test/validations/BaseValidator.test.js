@@ -97,7 +97,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
         expect(target.check).toHaveBeenCalled()
       })
     })
@@ -111,7 +111,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
         expect(target.check).toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -126,7 +126,7 @@ describe('BaseValidator', () => {
       return target.validate([], 'POST', testTx).then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
         expect(target.check).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

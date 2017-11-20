@@ -122,6 +122,32 @@ class ExperimentalUnitService {
     return setEntryUnitMap
   }
 
+  getTreatmentDetailsBySetId = (setId) => {
+    if (setId) {
+      return db.unit.batchFindAllBySetId(setId).then((units) => {
+        const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
+
+        return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds)
+          .then(this.mapTreatmentLevelsToOutputFormat)
+      })
+    }
+
+    throw AppError.badRequest('A setId is required')
+  }
+
+  mapTreatmentLevelsToOutputFormat = (response) => {
+    const treatmentLevelsMap = {}
+    _.forEach(response, (tL) => {
+      if (!treatmentLevelsMap[tL.treatment_id]) {
+        treatmentLevelsMap[tL.treatment_id] = []
+      }
+
+      treatmentLevelsMap[tL.treatment_id].push(tL.value)
+    })
+
+    return treatmentLevelsMap
+  }
+
   @Transactional('batchUpdateExperimentalUnits')
   batchUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PUT', tx)

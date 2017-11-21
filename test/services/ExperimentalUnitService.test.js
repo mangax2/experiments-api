@@ -355,34 +355,58 @@ describe('ExperimentalUnitService', () => {
       const data = [
         {
           treatment_id: 1,
+          name: '1',
           value: {id: 1},
         },
         {
           treatment_id: 1,
+          name: '2',
           value: {id: 2},
         },
         {
           treatment_id: 2,
+          name: '3',
           value: {id: 3},
         },
         {
           treatment_id: 2,
+          name: '4',
           value: {id: 4},
         },
       ]
 
       const target = new ExperimentalUnitService()
 
-      expect(target.mapTreatmentLevelsToOutputFormat(data)).toEqual({
-        1: [
-          { id: 1 },
-          { id: 2 },
-        ],
-        2: [
-          { id: 3 },
-          { id: 4 },
+      expect(target.mapTreatmentLevelsToOutputFormat(data)).toEqual(
+        [
+          {
+            treatmentId: 1,
+            factorLevels: [
+              {
+                factorName: '1',
+                value: { id: 1 },
+              },
+              {
+                factorName: '2',
+                value: { id: 2 },
+              }
+            ]
+          },
+          {
+            treatmentId: 2,
+            factorLevels: [
+              {
+                factorName: '3',
+                value: { id: 3 },
+              },
+              {
+                factorName: '4',
+                value: { id: 4 },
+              }
+            ]
+          }
         ]
-      })
+      )
     })
   })
 

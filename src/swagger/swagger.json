@@ -2388,7 +2388,10 @@
           "200": {
             "description": "Mapping of treatment ids to level information",
             "schema": {
-              "$ref": "#/definitions/TreatmentLevelDetails"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TreatmentLevelDetails"
+              }
             }
           },
           "400": {
@@ -5602,9 +5605,20 @@
       "type": "object",
       "properties": {
         "treatmentId": {
+          "type": "integer"
+        },
+        "factorLevels": {
           "type": "array",
           "items": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+              "factorName": {
+                "type": "integer"
+              },
+              "value": {
+                "type": "object"
+              }
+            }
           }
         }
       }

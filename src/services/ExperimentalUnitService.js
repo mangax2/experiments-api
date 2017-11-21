@@ -136,16 +136,15 @@ class ExperimentalUnitService {
   }
 
   mapTreatmentLevelsToOutputFormat = (response) => {
-    const treatmentLevelsMap = {}
-    _.forEach(response, (tL) => {
-      if (!treatmentLevelsMap[tL.treatment_id]) {
-        treatmentLevelsMap[tL.treatment_id] = []
-      }
+    const groupedValues = _.groupBy(response, 'treatment_id')
 
-      treatmentLevelsMap[tL.treatment_id].push(tL.value)
-    })
-
-    return treatmentLevelsMap
+    return _.map(groupedValues, (treatmentDetails, treatmentId) => (
+      {
+        treatmentId: Number(treatmentId),
+        factorLevels: _.map(treatmentDetails, detail => ({
+          value: detail.value, factorName: detail.name,
+        })),
+      }))
   }
 
   @Transactional('batchUpdateExperimentalUnits')

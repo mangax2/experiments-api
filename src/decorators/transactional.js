@@ -22,55 +22,38 @@ import db from '../db/DbManager'
  */
 function transactional(transactionName) {
   return function (target, property, descriptor) {
+    const wrappingFunction = (bindingFunction => function () {
+      const lastParameter = arguments.length > 0 ? arguments[arguments.length - 1] : undefined
+      if (lastParameter === undefined) {
+        // Fat arrow necessary to preserve this
+        return db.tx(transactionName, tx => bindingFunction(this, [tx]))
+      }
+      if (lastParameter.tx) {
+        return bindingFunction(this, arguments)
+      }
+      // Fat arrow necessary to preserve this
+      return db.tx(transactionName, (tx) => {
+        const newArguments = []
+        for (let i = 0; i < arguments.length; i += 1) {
+          newArguments.push(arguments[i])
+        }
+        newArguments.push(tx)
+        return bindingFunction(this, newArguments)
+      })
+    })
+
     if (descriptor.value) {
       // This section handles traditional javascript functions [function (arg) { //logic }]
       const wrappedFunction = descriptor.value
-      descriptor.value = function () {
-        const lastParameter = arguments.length > 0 ? arguments[arguments.length - 1] : undefined
-        if (lastParameter === undefined) {
-          // Fat arrow necessary to preserve this
-          return db.tx(transactionName, tx => wrappedFunction.apply(this, [tx]))
-        }
-        if (lastParameter.tx) {
-          return wrappedFunction.apply(this, arguments)
-        }
-        // Fat arrow necessary to preserve this
-        return db.tx(transactionName, (tx) => {
-          const newArguments = []
-          for (let i = 0; i < arguments.length; i += 1) {
-            newArguments.push(arguments[i])
-          }
-          newArguments.push(tx)
-          return wrappedFunction.apply(this, newArguments)
-        })
-      }
+      const bindingFunction = (thisRef, args) => wrappedFunction.apply(thisRef, args)
+      descriptor.value = wrappingFunction(bindingFunction)
     } else {
       // This section handles arrow functions [(arg) => { //logic }]
       const originalInitializer = descriptor.initializer
-      const initializerWrappingFunction = function (thisToUse, functionToWrap) {
-        return function () {
-          const lastParameter = arguments.length > 0 ? arguments[arguments.length - 1] : undefined
-          if (lastParameter === undefined) {
-            // Fat arrow necessary to preserve this
-            return db.tx(transactionName, tx => functionToWrap.apply(thisToUse, [tx]))
-          }
-          if (lastParameter.tx) {
-            return thisToUse[`_${property}`](...arguments)
-          }
-          // Fat arrow necessary to preserve this
-          return db.tx(transactionName, (tx) => {
-            const newArguments = []
-            for (let i = 0; i < arguments.length; i += 1) {
-              newArguments.push(arguments[i])
-            }
-            newArguments.push(tx)
-            return thisToUse[property](...newArguments)
-          })
-        }
-      }
       descriptor.initializer = function () {
-        this[`_${property}`] = originalInitializer.call(this)
-        return initializerWrappingFunction(this, originalInitializer())
+        const functionToWrap = originalInitializer.call(this)
+        const bindingFunction = (thisRef, args) => functionToWrap(...args)
+        return wrappingFunction(bindingFunction)
       }
     }
 

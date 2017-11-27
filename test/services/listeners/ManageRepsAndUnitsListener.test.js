@@ -104,7 +104,7 @@ describe('ManageRepsAndUnitsListener', () => {
       target.getDbActions = jest.fn(() => ({ unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update'}))
       target.saveToDb = jest.fn(() => Promise.resolve())
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
-      const testTx = {}
+      const testTx = { tx: {} }
 
       return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
@@ -124,7 +124,7 @@ describe('ManageRepsAndUnitsListener', () => {
       target.getDbActions = jest.fn(() => ({ unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update'}))
       target.saveToDb = jest.fn(() => Promise.reject('test'))
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
-      const testTx = {}
+      const testTx = { tx: {} }
 
       return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
@@ -144,7 +144,7 @@ describe('ManageRepsAndUnitsListener', () => {
       target.getDbActions = jest.fn()
       target.saveToDb = jest.fn()
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
-      const testTx = {}
+      const testTx = { tx: {} }
 
       return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
         expect(db.group.findRepGroupsBySetId).not.toBeCalled()
@@ -164,7 +164,7 @@ describe('ManageRepsAndUnitsListener', () => {
       target.getDbActions = jest.fn()
       target.saveToDb = jest.fn()
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
-      const testTx = {}
+      const testTx = { tx: {} }
 
       return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
         expect(db.group.findRepGroupsBySetId).toBeCalled()

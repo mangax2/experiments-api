@@ -311,9 +311,9 @@ describe('ExperimentalUnitService', () => {
       const target = new ExperimentalUnitService()
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1).then(() => {
-        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2])
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2], testTx)
         expect(target.mapTreatmentLevelsToOutputFormat).toHaveBeenCalledWith(treatmentLevelDetails)
       })
     })
@@ -326,9 +326,9 @@ describe('ExperimentalUnitService', () => {
       const target = new ExperimentalUnitService()
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1).then(() => {}, (err) => {
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, (err) => {
         expect(err).toEqual('error')
-        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1)
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
         expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
       })
@@ -342,9 +342,9 @@ describe('ExperimentalUnitService', () => {
       const target = new ExperimentalUnitService()
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1).then(() => {}, () => {
-        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2])
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, () => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2], testTx)
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
       })
     })

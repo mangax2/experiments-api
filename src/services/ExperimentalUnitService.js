@@ -122,12 +122,13 @@ class ExperimentalUnitService {
     return setEntryUnitMap
   }
 
-  getTreatmentDetailsBySetId = (setId) => {
+  @Transactional('getTreatmentDetailsBySetId')
+  getTreatmentDetailsBySetId = (setId, tx) => {
     if (setId) {
-      return db.unit.batchFindAllBySetId(setId).then((units) => {
+      return db.unit.batchFindAllBySetId(setId, tx).then((units) => {
         const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
 
-        return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds)
+        return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
           .then(this.mapTreatmentLevelsToOutputFormat)
       })
     }

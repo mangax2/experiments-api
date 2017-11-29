@@ -31,7 +31,7 @@ module.exports = (rep, pgp) => ({
 
   batchUpdate: (unitSpecificationDetails, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
-      ['id', 'value', '?uom_id', 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
+      ['id', 'value', 'uom_id', 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
       { table: 'unit_spec_detail' },
     )
 

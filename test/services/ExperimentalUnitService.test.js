@@ -348,6 +348,23 @@ describe('ExperimentalUnitService', () => {
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
       })
     })
+
+    it('throws an error when no treatments are found', () => {
+      db.unit.batchFindAllBySetId = mockResolve([])
+
+      db.treatment.batchFindAllTreatmentLevelDetails = mock()
+      AppError.badRequest = mock('')
+
+      const target = new ExperimentalUnitService()
+      target.mapTreatmentLevelsToOutputFormat = mock()
+
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, () => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
+        expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
+    })
   })
 
   describe('mapTreatmentLevelsToOutputFormat', () => {
@@ -356,22 +373,22 @@ describe('ExperimentalUnitService', () => {
         {
           treatment_id: 1,
           name: '1',
-          value: {id: 1},
+          value: {items:[{id: 1}]},
         },
         {
           treatment_id: 1,
           name: '2',
-          value: {id: 2},
+          value: {items: [{id: 2}]},
         },
         {
           treatment_id: 2,
           name: '3',
-          value: {id: 3},
+          value: {items: [{id: 3}]},
         },
         {
           treatment_id: 2,
           name: '4',
-          value: {id: 4},
+          value: {items:[{id: 4}]},
         },
       ]
 
@@ -384,11 +401,11 @@ describe('ExperimentalUnitService', () => {
             factorLevels: [
               {
                 factorName: '1',
-                value: { id: 1 },
+                items: [{ id: 1 }],
               },
               {
                 factorName: '2',
-                value: { id: 2 },
+                items: [{ id: 2 }],
               }
             ]
           },
@@ -397,11 +414,11 @@ describe('ExperimentalUnitService', () => {
             factorLevels: [
               {
                 factorName: '3',
-                value: { id: 3 },
+                items: [{ id: 3 }],
               },
               {
                 factorName: '4',
-                value: { id: 4 },
+                items: [{ id: 4 }],
               }
             ]
           }

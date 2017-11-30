@@ -128,8 +128,12 @@ class ExperimentalUnitService {
       return db.unit.batchFindAllBySetId(setId, tx).then((units) => {
         const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
 
-        return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
-          .then(this.mapTreatmentLevelsToOutputFormat)
+        if (treatmentIds && treatmentIds.length > 0) {
+          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
+            .then(this.mapTreatmentLevelsToOutputFormat)
+        }
+
+        throw AppError.badRequest(`No treatments found for set id: ${setId}.`)
       })
     }
 
@@ -143,7 +147,7 @@ class ExperimentalUnitService {
       {
         treatmentId: Number(treatmentId),
         factorLevels: _.map(treatmentDetails, detail => ({
-          value: detail.value, factorName: detail.name,
+          items: detail.value.items, factorName: detail.name,
         })),
       }))
   }

@@ -277,7 +277,157 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('getExperimentalUnitbyId', () => {
+  describe('getTreatmentDetailsBySetId', () => {
+    it('throws an error when a setId is not supplied', () => {
+      db.unit.batchFindAllBySetId = mock()
+      AppError.badRequest = mock('')
+
+      expect(() => target.getTreatmentDetailsBySetId()).toThrow()
+    })
+
+    it('calls batchFindAllBySetId and batchFindAllTreatmentLevelDetails and mapTreatmentLevelsToOutputFormat', () => {
+      db.unit.batchFindAllBySetId = mockResolve([{treatment_id: 1}, {treatment_id: 2}])
+
+      const treatmentLevelDetails = [
+        {
+          treatment_id: 1,
+          value: {id: 1},
+        },
+        {
+          treatment_id: 1,
+          value: {id: 2},
+        },
+        {
+          treatment_id: 2,
+          value: {id: 3},
+        },
+        {
+          treatment_id: 2,
+          value: {id: 4},
+        },
+      ]
+      db.treatment.batchFindAllTreatmentLevelDetails = mockResolve(treatmentLevelDetails)
+
+      const target = new ExperimentalUnitService()
+      target.mapTreatmentLevelsToOutputFormat = mock()
+
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2], testTx)
+        expect(target.mapTreatmentLevelsToOutputFormat).toHaveBeenCalledWith(treatmentLevelDetails)
+      })
+    })
+
+    it('rejects when batchFindAllBySetId fails', () => {
+      db.unit.batchFindAllBySetId = mockReject('error')
+
+      db.treatment.batchFindAllTreatmentLevelDetails = mock()
+
+      const target = new ExperimentalUnitService()
+      target.mapTreatmentLevelsToOutputFormat = mock()
+
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, (err) => {
+        expect(err).toEqual('error')
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
+        expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
+      })
+    })
+
+    it('rejects when batchFindAllTreatmentLevelDetails fails', () => {
+      db.unit.batchFindAllBySetId = mockResolve([{treatment_id: 1}, {treatment_id: 2}])
+
+      db.treatment.batchFindAllTreatmentLevelDetails = mockReject('error')
+
+      const target = new ExperimentalUnitService()
+      target.mapTreatmentLevelsToOutputFormat = mock()
+
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, () => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1,2], testTx)
+        expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
+      })
+    })
+
+    it('throws an error when no treatments are found', () => {
+      db.unit.batchFindAllBySetId = mockResolve([])
+
+      db.treatment.batchFindAllTreatmentLevelDetails = mock()
+      AppError.badRequest = mock('')
+
+      const target = new ExperimentalUnitService()
+      target.mapTreatmentLevelsToOutputFormat = mock()
+
+      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, () => {
+        expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
+        expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('mapTreatmentLevelsToOutputFormat', () => {
+    it('adds levels to the treatmentLevelsMap in the correct places', () => {
+      const data = [
+        {
+          treatment_id: 1,
+          name: '1',
+          value: {items:[{id: 1}]},
+        },
+        {
+          treatment_id: 1,
+          name: '2',
+          value: {items: [{id: 2}]},
+        },
+        {
+          treatment_id: 2,
+          name: '3',
+          value: {items: [{id: 3}]},
+        },
+        {
+          treatment_id: 2,
+          name: '4',
+          value: {items:[{id: 4}]},
+        },
+      ]
+
+      const target = new ExperimentalUnitService()
+
+      expect(target.mapTreatmentLevelsToOutputFormat(data)).toEqual(
+        [
+          {
+            treatmentId: 1,
+            factorLevels: [
+              {
+                factorName: '1',
+                items: [{ id: 1 }],
+              },
+              {
+                factorName: '2',
+                items: [{ id: 2 }],
+              }
+            ]
+          },
+          {
+            treatmentId: 2,
+            factorLevels: [
+              {
+                factorName: '3',
+                items: [{ id: 3 }],
+              },
+              {
+                factorName: '4',
+                items: [{ id: 4 }],
+              }
+            ]
+          }
+        ]
+      )
+    })
+  })
+
+  describe('getExperimentalUnitById', () => {
     it('calls find and returns data', () => {
       db.unit.find = mockResolve({})
 

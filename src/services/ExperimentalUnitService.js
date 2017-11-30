@@ -122,6 +122,37 @@ class ExperimentalUnitService {
     return setEntryUnitMap
   }
 
+  @Transactional('getTreatmentDetailsBySetId')
+  getTreatmentDetailsBySetId = (setId, tx) => {
+    if (setId) {
+      return db.unit.batchFindAllBySetId(setId, tx).then((units) => {
+        const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
+
+        if (treatmentIds && treatmentIds.length > 0) {
+          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
+            .then(this.mapTreatmentLevelsToOutputFormat)
+        }
+
+        throw AppError.badRequest(`No treatments found for set id: ${setId}.`)
+      })
+    }
+
+    throw AppError.badRequest('A setId is required')
+  }
+
+  mapTreatmentLevelsToOutputFormat = (response) => {
+    const groupedValues = _.groupBy(response, 'treatment_id')
+
+    return _.map(groupedValues, (treatmentDetails, treatmentId) => (
+      {
+        treatmentId: Number(treatmentId),
+        factorLevels: _.map(treatmentDetails, detail => ({
+          items: detail.value.items,
+          factorName: detail.name,
+        })),
+      }))
+  }
+
   @Transactional('batchUpdateExperimentalUnits')
   batchUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PUT', tx)

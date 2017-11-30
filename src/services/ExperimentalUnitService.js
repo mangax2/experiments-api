@@ -147,7 +147,8 @@ class ExperimentalUnitService {
       {
         treatmentId: Number(treatmentId),
         factorLevels: _.map(treatmentDetails, detail => ({
-          items: detail.value.items, factorName: detail.name,
+          items: detail.value.items,
+          factorName: detail.name,
         })),
       }))
   }

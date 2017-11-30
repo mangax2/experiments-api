@@ -2409,12 +2409,6 @@
               "$ref": "#/definitions/Error"
             }
           },
-          "404": {
-            "description": "Set Does Not Exist",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -5615,8 +5609,11 @@
               "factorName": {
                 "type": "integer"
               },
-              "value": {
-                "type": "object"
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
               }
             }
           }

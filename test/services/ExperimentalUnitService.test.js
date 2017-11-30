@@ -282,7 +282,7 @@ describe('ExperimentalUnitService', () => {
       db.unit.batchFindAllBySetId = mock()
       AppError.badRequest = mock('')
 
-      expect(() => target.getTreatmentDetailsBySetId()).toThrow()
+      expect(() => target.getTreatmentDetailsBySetId(undefined, testTx)).toThrow()
     })
 
     it('calls batchFindAllBySetId and batchFindAllTreatmentLevelDetails and mapTreatmentLevelsToOutputFormat', () => {

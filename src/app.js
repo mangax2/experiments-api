@@ -16,9 +16,12 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const inflector = require('json-inflector')
   const bodyParser = require('body-parser')
   const log4js = require('log4js')
+  const promMetrics = require('@monsantoit/prom-metrics')
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
   const app = express()
+
+  promMetrics(app)
 
   const requestContext = require('./middleware/requestContext')
 

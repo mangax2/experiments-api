@@ -2369,6 +2369,55 @@
         }
       }
     },
+    "/sets/{setId}/treatment-details": {
+      "get": {
+        "summary": "Gets all levels for each treatment in a set",
+        "description": "Retrieves each treatment and their levels for a given set id",
+        "operationId": "getTreatmentDetails",
+        "tags": ["Set Entry"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mapping of treatment ids to level information",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TreatmentLevelDetails"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/templates": {
       "get": {
         "summary": "get all Template entities",
@@ -5543,6 +5592,31 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "TreatmentLevelDetails": {
+      "type": "object",
+      "properties": {
+        "treatmentId": {
+          "type": "integer"
+        },
+        "factorLevels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "factorName": {
+                "type": "integer"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     }

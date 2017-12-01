@@ -60,6 +60,8 @@ module.exports = (rep, pgp) => ({
 
   findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2', keys),
 
+  batchFindAllTreatmentLevelDetails: (treatmentIds, tx = rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds]),
+
   batchFindByBusinessKey: (batchKeys, tx = rep) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],

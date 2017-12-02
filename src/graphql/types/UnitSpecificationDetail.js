@@ -1,10 +1,12 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import UnitSpecificationDetailService from '../../services/UnitSpecificationDetailService'
 import { getUnitSpecificationById, UnitSpecification } from './reference/UnitSpecification'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const UnitSpecificationDetail = new GraphQLObjectType({
   name: 'UnitSpecificationDetail',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -23,16 +25,24 @@ const UnitSpecificationDetail = new GraphQLObjectType({
         return refUnitSpecId
       },
     },
-    unitSpecification: {
-      type: UnitSpecification,
-      resolve({ ref_unit_spec_id }) {
-        return getUnitSpecificationById({ id: ref_unit_spec_id })
-      },
-    },
     experimentId: {
       type: GraphQLInt,
       resolve({ experiment_id: experimentId }) {
         return experimentId
+      },
+    },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+
+    // direct relationships
+    unitSpecification: {
+      type: UnitSpecification,
+      resolve({ ref_unit_spec_id }) {
+        return getUnitSpecificationById({ id: ref_unit_spec_id })
       },
     },
     // TODO experiment? template?

@@ -1,10 +1,12 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import DesignSpecificationDetailService from '../../services/DesignSpecificationDetailService'
 import { DesignSpecification, getDesignSpecificationById } from './reference/DesignSpecification'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const DesignSpecificationDetail = new GraphQLObjectType({
   name: 'DesignSpecificationDetail',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -17,16 +19,24 @@ const DesignSpecificationDetail = new GraphQLObjectType({
         return refDesignSpecId
       },
     },
-    designSpecification: {
-      type: DesignSpecification,
-      resolve({ ref_design_spec_id }) {
-        return getDesignSpecificationById({ id: ref_design_spec_id })
-      },
-    },
     experimentId: {
       type: GraphQLInt,
       resolve({ experiment_id: experimentId }) {
         return experimentId
+      },
+    },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+
+    // direct relationships
+    designSpecification: {
+      type: DesignSpecification,
+      resolve({ ref_design_spec_id }) {
+        return getDesignSpecificationById({ id: ref_design_spec_id })
       },
     },
     // TODO experiment? template?

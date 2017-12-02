@@ -2,10 +2,12 @@ import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { FactorLevel, getFactorLevelById } from './FactorLevel'
 import CombinationElementService from '../../services/CombinationElementService'
 import { Treatment, getTreatmentById } from './Treatment'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const CombinationElement = new GraphQLObjectType({
   name: 'CombinationElement',
   fields: () => ({
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -15,16 +17,24 @@ const CombinationElement = new GraphQLObjectType({
         return isControl
       },
     },
-    factorLevel: {
-      type: FactorLevel,
-      resolve({ factor_level_id }) {
-        return getFactorLevelById({ id: factor_level_id })
-      },
-    },
     treatmentId: {
       type: GraphQLInt,
       resolve({ treatment_id: treatmentId }) {
         return treatmentId
+      },
+    },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+
+    // direct relationships
+    factorLevel: {
+      type: FactorLevel,
+      resolve({ factor_level_id }) {
+        return getFactorLevelById({ id: factor_level_id })
       },
     },
     treatment: {

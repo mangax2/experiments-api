@@ -1,12 +1,20 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
 import TreatmentService from '../../services/TreatmentService'
 import { CombinationElement, getCombinationElementsByTreatmentId } from './CombinationElement'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const Treatment = new GraphQLObjectType({
   name: 'Treatment',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
+    },
+    experimentId: {
+      type: GraphQLInt,
+      resolve({ experiment_id: experimentId }) {
+        return experimentId
+      },
     },
     isControl: {
       type: GraphQLString,
@@ -23,12 +31,24 @@ const Treatment = new GraphQLObjectType({
     notes: {
       type: GraphQLString,
     },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+    // direct relationships
+    // TODO experiment/template: {} ?
     combinationElements: {
       type: new GraphQLList(CombinationElement),
       resolve({ id }) {
         return getCombinationElementsByTreatmentId({ treatmentId: id })
       },
     },
+    // TODO units: {} ?
+
+    // indirect relationships:
+    // TODO factorLevels: {} ?
   },
 })
 

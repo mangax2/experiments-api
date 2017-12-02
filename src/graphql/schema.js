@@ -10,7 +10,8 @@ import {
   DesignSpecificationDetail,
   getDesignSpecificationDetailsByExperimentId,
 } from './types/DesignSpecificationDetail'
-import { getAllTemplates, getTemplateById, Template } from './types/Template'
+import { Template, getAllTemplates, getTemplateById } from './types/Template'
+import { Group, getGroupsByExperimentId } from './types/Group'
 
 export default new GraphQLSchema({
   query: new GraphQLObjectType({
@@ -106,8 +107,23 @@ export default new GraphQLSchema({
           return getDesignSpecificationDetailsByExperimentId({ experimentId, isTemplate })
         },
       },
-      // TODO groups
-      // TODO units?
+      groups: {
+        type: new GraphQLList(Group),
+        args: {
+          experimentId: {
+            type: new GraphQLNonNull(GraphQLInt),
+          },
+          isTemplate: {
+            type: GraphQLBoolean,
+          },
+        },
+        resolve(_, { experimentId, isTemplate = false }) {
+          return getGroupsByExperimentId({ experimentId, isTemplate })
+        },
+      },
+      // TODO units: {} ?
+      // TODO set: {} ?
+      // TODO setEntries: {} ?
     },
   }),
 })

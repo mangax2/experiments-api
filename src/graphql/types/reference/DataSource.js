@@ -5,6 +5,7 @@ import { DataSourceType, getDataSourceTypeById } from './DataSourceType'
 const DataSource = new GraphQLObjectType({
   name: 'DataSource',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -17,6 +18,8 @@ const DataSource = new GraphQLObjectType({
         return refDataSourceTypeId
       },
     },
+
+    // direct relationships
     dataSourceType: {
       type: DataSourceType,
       resolve({ ref_data_source_type_id }) {

@@ -2,16 +2,20 @@ import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graph
 import ExperimentsService from '../../services/ExperimentsService'
 import { Tag } from './Tag'
 import { Factor, getFactorsByExperimentId } from './Factor'
+import { DependentVariable, getDependentVariablesByExperimentId } from './DependentVariable'
 import { Treatment, getTreatmentsByExperimentId } from './Treatment'
 import { UnitSpecificationDetail, getUnitSpecificationDetailsByExperimentId } from './UnitSpecificationDetail'
 import {
   DesignSpecificationDetail,
   getDesignSpecificationDetailsByExperimentId,
 } from './DesignSpecificationDetail'
+import { Group, getGroupsByExperimentId } from './Group'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const Experiment = new GraphQLObjectType({
   name: 'Experiment',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -21,19 +25,33 @@ const Experiment = new GraphQLObjectType({
     description: {
       type: GraphQLString,
     },
+    status: {
+      type: GraphQLString,
+    },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+
+    // direct relationships
     owners: {
       type: new GraphQLList(GraphQLString),
     },
     ownerGroups: {
       type: new GraphQLList(GraphQLString),
     },
-    tags: {
-      type: new GraphQLList(Tag),
-    },
     factors: {
       type: new GraphQLList(Factor),
       resolve({ id }) {
         return getFactorsByExperimentId({ experimentId: id, isTemplate: false })
+      },
+    },
+    dependentVariables: {
+      type: new GraphQLList(DependentVariable),
+      resolve({ id }) {
+        return getDependentVariablesByExperimentId({ experimentId: id, isTemplate: false })
       },
     },
     treatments: {
@@ -58,8 +76,22 @@ const Experiment = new GraphQLObjectType({
         )
       },
     },
-    // TODO groups: {} ?
+    groups: {
+      type: new GraphQLList(Group),
+      resolve({ id }) {
+        return getGroupsByExperimentId(
+          { experimentId: id, isTemplate: false },
+        )
+      },
+    },
+    tags: {
+      type: new GraphQLList(Tag),
+    },
+    // TODO experimentDesign: {} ?
+
+    // indirect relationships
     // TODO units: {} ?
+    // TODO summary: {} ?
   },
 })
 

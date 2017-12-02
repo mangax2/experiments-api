@@ -5,6 +5,7 @@ import { getUnitTypeById, UnitType } from './UnitType'
 const UnitSpecification = new GraphQLObjectType({
   name: 'UnitSpecification',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
@@ -23,6 +24,8 @@ const UnitSpecification = new GraphQLObjectType({
         return refUnitTypeId
       },
     },
+
+    // direct relationships
     unitType: {
       type: UnitType,
       resolve({ ref_unit_type_id }) {

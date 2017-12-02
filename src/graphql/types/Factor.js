@@ -3,27 +3,17 @@ import FactorService from '../../services/FactorService'
 import { FactorLevel, getFactorLevelsByFactorId } from './FactorLevel'
 import { FactorType, getFactorTypeById } from './reference/FactorType'
 import { DataSource, getDataSourceById } from './reference/DataSource'
+import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const Factor = new GraphQLObjectType({
   name: 'Factor',
   fields: {
+    // properties
     id: {
       type: GraphQLInt,
     },
     name: {
       type: GraphQLString,
-    },
-    refFactorTypeId: {
-      type: GraphQLInt,
-      resolve({ ref_factor_type_id: refFactorTypeId }) {
-        return refFactorTypeId
-      },
-    },
-    factorType: {
-      type: FactorType,
-      resolve({ ref_factor_type_id }) {
-        return getFactorTypeById({ id: ref_factor_type_id })
-      },
     },
     experimentId: {
       type: GraphQLInt,
@@ -31,7 +21,12 @@ const Factor = new GraphQLObjectType({
         return experimentId
       },
     },
-    // TODO experiment? template?
+    refFactorTypeId: {
+      type: GraphQLInt,
+      resolve({ ref_factor_type_id: refFactorTypeId }) {
+        return refFactorTypeId
+      },
+    },
     tier: {
       type: GraphQLInt,
     },
@@ -47,12 +42,29 @@ const Factor = new GraphQLObjectType({
         return getDataSourceById({ id: ref_data_source_id })
       },
     },
+    auditInfo: {
+      type: AuditInfo,
+      resolve(_) {
+        return getAuditInfo(_)
+      },
+    },
+
+    // direct relationships
+    // TODO experiment? template?
+    factorType: {
+      type: FactorType,
+      resolve({ ref_factor_type_id }) {
+        return getFactorTypeById({ id: ref_factor_type_id })
+      },
+    },
     factorLevels: {
       type: new GraphQLList(FactorLevel),
       resolve({ id }) {
         return getFactorLevelsByFactorId({ factorId: id })
       },
     },
+
+    // indirect relationships
   },
 })
 

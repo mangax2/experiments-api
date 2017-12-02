@@ -24,8 +24,6 @@ class GroupValueService {
 
   @Transactional('getGroupValuesByGroupId')
   getGroupValuesByGroupId(id, tx) {
-    // console.log("id:")
-    // console.log(id)
     return this.groupService.getGroupById(id, tx)
       .then(() => db.groupValue.findAllByGroupId(id, tx))
   }

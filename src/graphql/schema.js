@@ -12,6 +12,7 @@ import {
 } from './types/DesignSpecificationDetail'
 import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group, getGroupsByExperimentId } from './types/Group'
+import { ExperimentalUnit, getExperimentalUnitsByExperimentId } from './types/ExperimentalUnit'
 
 export default new GraphQLSchema({
   query: new GraphQLObjectType({
@@ -121,7 +122,20 @@ export default new GraphQLSchema({
           return getGroupsByExperimentId({ experimentId, isTemplate })
         },
       },
-      // TODO units: {} ?
+      units: {
+        type: new GraphQLList(ExperimentalUnit),
+        args: {
+          experimentId: {
+            type: new GraphQLNonNull(GraphQLInt),
+          },
+          isTemplate: {
+            type: GraphQLBoolean,
+          },
+        },
+        resolve(_, { experimentId, isTemplate = false }) {
+          return getExperimentalUnitsByExperimentId({ experimentId, isTemplate })
+        },
+      },
       // TODO set: {} ?
       // TODO setEntries: {} ?
     },

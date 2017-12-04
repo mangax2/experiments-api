@@ -1,13 +1,13 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
 import GroupValueService from '../../services/GroupValueService'
 import { FactorLevel, getFactorLevelById } from './FactorLevel'
-// import { Group, getGroupById } from './Group'
+import { Group, getGroupById } from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 
 const GroupValue = new GraphQLObjectType({
   name: 'GroupValue',
-  fields: {
+  fields: () => ({
     // properties
     id: {
       type: GraphQLInt,
@@ -44,14 +44,13 @@ const GroupValue = new GraphQLObjectType({
         return getFactorLevelById({ id: factor_level_id })
       },
     },
-    // vvv recursion issue vvv
-    // group: {
-    //   type: Group,
-    //   resolve({ group_id }) {
-    //     return getGroupById({ id: group_id })
-    //   },
-    // },
-  },
+    group: {
+      type: Group,
+      resolve({ group_id }) {
+        return getGroupById({ id: group_id })
+      },
+    },
+  }),
 })
 
 const getGroupValuesByGroupId = ({ groupId }) =>

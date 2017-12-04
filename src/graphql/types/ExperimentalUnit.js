@@ -1,12 +1,12 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
-// import { getGroupById } from './Group'
+import { Group, getGroupById } from './Group'
 import { Treatment, getTreatmentById } from './Treatment'
 import ExperimentalUnitService from '../../services/ExperimentalUnitService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const ExperimentalUnit = new GraphQLObjectType({
   name: 'ExperimentalUnit',
-  fields: {
+  fields: () => ({
     // properties
     id: {
       type: GraphQLInt,
@@ -40,13 +40,12 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
 
     // direct relationships
-    // vvv recursive issue vvv
-    // group: {
-    //   type: Group,
-    //   resolve({ group_id }) {
-    //     return getGroupById(group_id)
-    //   },
-    // },
+    group: {
+      type: Group,
+      resolve({ group_id }) {
+        return getGroupById({ id: group_id })
+      },
+    },
     treatment: {
       type: Treatment,
       resolve({ treatment_id }) {
@@ -56,10 +55,13 @@ const ExperimentalUnit = new GraphQLObjectType({
 
     // indirect relationships
     // TODO factorLevels: {} ?
-  },
+  }),
 })
 
 const getExperimentalUnitsByGroupId = ({ groupId }) =>
   new ExperimentalUnitService().batchGetExperimentalUnitsByGroupIdsNoValidate([groupId])
 
-export { ExperimentalUnit, getExperimentalUnitsByGroupId }
+const getExperimentalUnitsByExperimentId = ({ experimentId }) =>
+  new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(experimentId)
+
+export { ExperimentalUnit, getExperimentalUnitsByGroupId, getExperimentalUnitsByExperimentId }

@@ -8,7 +8,7 @@ import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const Group = new GraphQLObjectType({
   name: 'Group',
-  fields: {
+  fields: () => ({
     // properties
     id: {
       type: GraphQLInt,
@@ -51,11 +51,18 @@ const Group = new GraphQLObjectType({
     },
 
     // direct relationships
-    // vvv recursive issue vvv
-    // parent: {
-    //   type: Group,
-    //   resolve({ parentId }) {
-    //     // get group by id
+    parent: {
+      type: Group,
+      resolve({ parent_id }) {
+        return getGroupById({ id: parent_id })
+      },
+    },
+    // TODO children:
+    // children: {
+    //   type: new GraphQLList(Group),
+    //   resolve({ id }) {
+    //     console.log(id)
+    //     // get groups by parent id
     //   },
     // },
     groupType: {
@@ -76,12 +83,13 @@ const Group = new GraphQLObjectType({
         return getExperimentalUnitsByGroupId({ groupId: id })
       },
     },
-
-  },
+  }),
 })
 
 const getGroupById = ({ id }) =>
-  new GroupService().getGroupById(id)
+  (id !== null
+    ? new GroupService().getGroupById(id)
+    : null)
 
 const getGroupsByExperimentId = ({ experimentId, isTemplate }) =>
   new GroupService().getGroupsByExperimentId(experimentId, isTemplate)

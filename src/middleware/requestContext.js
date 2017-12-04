@@ -7,7 +7,7 @@ function requestContextMiddlewareFunction(req, res, next) {
 
   if (whitelistedUrls.includes(req.url)
     || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)
-    || (_.includes(['GET', 'OPTIONS', 'HEAD'], req.method))) {
+    || (_.includes(['GET'], req.method))) {
     next()
   } else {
     if (!req.headers) {

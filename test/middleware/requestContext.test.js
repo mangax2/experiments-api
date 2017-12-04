@@ -43,22 +43,6 @@ describe('requestContextMiddlewareFunction', () => {
     expect(nextFunc).toHaveBeenCalled()
   })
 
-  it('calls next if url request is an OPTIONS call', () => {
-    const nextFunc = mock()
-    const req = { url: '/experiments-api/experiment', method: 'OPTIONS' }
-
-    requestContextMiddlewareFunction(req, null, nextFunc)
-    expect(nextFunc).toHaveBeenCalled()
-  })
-
-  it('calls next if url request is a HEAD call', () => {
-    const nextFunc = mock()
-    const req = { url: '/experiments-api/experiment', method: 'HEAD' }
-
-    requestContextMiddlewareFunction(req, null, nextFunc)
-    expect(nextFunc).toHaveBeenCalled()
-  })
-
   it('throws an error when headers are null', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
@@ -67,8 +51,6 @@ describe('requestContextMiddlewareFunction', () => {
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo headers is null.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
-
-
 
   it('throws an error when oauth_resourceownerinfo header not found', () => {
     const nextFunc = mock()

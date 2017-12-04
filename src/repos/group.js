@@ -12,6 +12,8 @@ module.exports = (rep, pgp) => ({
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
 
+  findAllByParentId: (parentId, tx = rep) => tx.any('SELECT * FROM "group" WHERE parent_id=$1', parentId),
+
   batchCreate: (groups, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'ref_group_type_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],

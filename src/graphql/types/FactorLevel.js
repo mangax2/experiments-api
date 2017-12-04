@@ -1,8 +1,9 @@
-import { GraphQLObjectType, GraphQLInt } from 'graphql'
+import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import GraphQLJSON from 'graphql-type-json'
 import FactorLevelService from '../../services/FactorLevelService'
 import { Factor, getFactorById } from './Factor'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import db from '../../db/DbManager'
 
 const FactorLevel = new GraphQLObjectType({
   name: 'FactorLevel',
@@ -34,8 +35,18 @@ const FactorLevel = new GraphQLObjectType({
         return getFactorById({ id: factor_id })
       },
     },
-    // TODO nestedLevels: {}
-    // TODO associatedLevels: {}
+    nestedLevels: {
+      type: new GraphQLList(FactorLevel),
+      resolve({ id }) {
+        return getNestedLevels({ id })
+      },
+    },
+    associatedLevels: {
+      type: new GraphQLList(FactorLevel),
+      resolve({ id }) {
+        return getAssociatedLevels({ id })
+      },
+    },
     // TODO combinationElements: {} ?
     // TODO groupValues: {} ?
 
@@ -50,5 +61,11 @@ const getFactorLevelById = ({ id }) =>
 
 const getFactorLevelsByFactorId = ({ factorId }) =>
   new FactorLevelService().getFactorLevelsByFactorId(factorId)
+
+const getNestedLevels = ({ id }) =>
+  db.factorLevelAssociation.findNestedLevels(id)
+
+const getAssociatedLevels = ({ id }) =>
+  db.factorLevelAssociation.findAssociatedLevels(id)
 
 export { FactorLevel, getFactorLevelById, getFactorLevelsByFactorId }

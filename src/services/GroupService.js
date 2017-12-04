@@ -51,6 +51,10 @@ class GroupService {
       }
     })
 
+  @Transactional('getGroupsByParentId')
+  getGroupsbyParentId = (id, tx) => db.group.findAllByParentId(id, tx)
+    .then(data => data)
+
   @Transactional('batchUpdateGroups')
   batchUpdateGroups(groups, context, tx) {
     return this.validator.validate(groups, 'PUT', tx)

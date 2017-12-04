@@ -57,14 +57,12 @@ const Group = new GraphQLObjectType({
         return getGroupById({ id: parent_id })
       },
     },
-    // TODO children:
-    // children: {
-    //   type: new GraphQLList(Group),
-    //   resolve({ id }) {
-    //     console.log(id)
-    //     // get groups by parent id
-    //   },
-    // },
+    children: {
+      type: new GraphQLList(Group),
+      resolve({ id }) {
+        return getChildGroups({ parentId: id })
+      },
+    },
     groupType: {
       type: GroupType,
       resolve({ ref_group_type_id }) {
@@ -93,5 +91,10 @@ const getGroupById = ({ id }) =>
 
 const getGroupsByExperimentId = ({ experimentId, isTemplate }) =>
   new GroupService().getGroupsByExperimentId(experimentId, isTemplate)
+
+const getChildGroups = ({ parentId }) =>
+  (parentId !== null
+    ? new GroupService().getGroupsbyParentId(parentId)
+    : [])
 
 export { Group, getGroupById, getGroupsByExperimentId }

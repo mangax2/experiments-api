@@ -35,11 +35,19 @@ describe('requestContextMiddlewareFunction', () => {
     expect(nextFunc).toHaveBeenCalled()
   })
 
+  it('calls next if url request is a GET call', () => {
+    const nextFunc = mock()
+    const req = { url: '/experiments-api/experiment', method: 'GET' }
+
+    requestContextMiddlewareFunction(req, null, nextFunc)
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
   it('throws an error when headers are null', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({}, null, nextFunc) }).toThrow()
+    expect(() => { requestContextMiddlewareFunction({ method: 'POST' }, null, nextFunc) }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo headers is null.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
@@ -48,7 +56,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => {requestContextMiddlewareFunction({ headers: {} }, null, nextFunc)}).toThrow()
+    expect(() => {requestContextMiddlewareFunction({ headers: {}, method: 'POST' }, null, nextFunc)}).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header not found.')
     expect(nextFunc).not.toHaveBeenCalled()
   })
@@ -63,6 +71,7 @@ describe('requestContextMiddlewareFunction', () => {
           header1: 'blah',
           'header2': 'blah2',
         },
+        method: 'POST',
       }, null, nextFunc)
     }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header not found.')
@@ -73,7 +82,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'notUserId=blah' } }, null, nextFunc)}).toThrow()
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'notUserId=blah' }, method: 'POST' }, null, nextFunc)}).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('username not found within' +
       ' oauth_resourceownerinfo.')
     expect(nextFunc).not.toHaveBeenCalled()
@@ -83,7 +92,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username' } }, null, nextFunc)}).toThrow()
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username' }, method: 'POST' }, null, nextFunc)}).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo' +
       ' does not represent key=value pair.')
     expect(nextFunc).not.toHaveBeenCalled()
@@ -93,7 +102,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=' } }, null, nextFunc)}).toThrow()
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=' }, method: 'POST' }, null, nextFunc)}).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo is' +
       ' empty string.')
     expect(nextFunc).not.toHaveBeenCalled()
@@ -103,7 +112,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock({})
 
-    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username= ' } }, null, nextFunc)}).toThrow()
+    expect(() => { requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username= ' }, method: 'POST' }, null, nextFunc)}).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('username within oauth_resourceownerinfo is' +
       ' empty string.')
     expect(nextFunc).not.toHaveBeenCalled()
@@ -113,7 +122,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    const req = { headers: { oauth_resourceownerinfo: 'username=testUser' } }
+    const req = { headers: { oauth_resourceownerinfo: 'username=testUser' }, method: 'POST' }
     requestContextMiddlewareFunction(req, null, nextFunc)
     expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
@@ -124,7 +133,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    const req = { headers: { oauth_resourceownerinfo: 'notMe=wrongValue,username=testUser,another=value' } }
+    const req = { headers: { oauth_resourceownerinfo: 'notMe=wrongValue,username=testUser,another=value' }, method: 'POST' }
     requestContextMiddlewareFunction(req, null, nextFunc)
     expect(req.context.userId).toEqual('TESTUSER')
     expect(nextFunc).toHaveBeenCalledTimes(1)
@@ -135,7 +144,7 @@ describe('requestContextMiddlewareFunction', () => {
     const nextFunc = mock()
     AppError.badRequest = mock()
 
-    requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=test' } }, null, nextFunc)
+    requestContextMiddlewareFunction({ headers: { oauth_resourceownerinfo: 'username=test' }, method: 'POST' }, null, nextFunc)
     expect(AppError.badRequest).not.toHaveBeenCalled()
     expect(nextFunc).toHaveBeenCalled()
   })

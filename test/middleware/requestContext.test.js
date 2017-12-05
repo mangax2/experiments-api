@@ -3,6 +3,13 @@ import AppError from '../../src/services/utility/AppError'
 import requestContextMiddlewareFunction from '../../src/middleware/requestContext'
 
 describe('requestContextMiddlewareFunction', () => {
+  it('sets the context and calls next when url is permissions and has valid headers', () => {
+    const nextFunc = mock()
+    const req = { url: '/permissions', headers: { oauth_resourceownerinfo: 'username=KMCCL'}}
+
+    requestContextMiddlewareFunction(req, null, nextFunc)
+    expect(nextFunc).toHaveBeenCalled()
+  })
   it('calls next if a url is in the whitelisted urls', () => {
     const nextFunc = mock()
     const req = { url: '/experiments-api/api-docs' }

@@ -106,12 +106,12 @@ class ExperimentsService {
   }
 
   @Transactional('verifyExperimentExists')
-  static verifyExperimentExists(id, isTemplate, tx) {
+  static verifyExperimentExists(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       }
     })
@@ -123,13 +123,13 @@ class ExperimentsService {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       } else {
         return Promise.all(
           [
             this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, isTemplate),
+            this.tagService.getTagsByExperimentId(id, isTemplate, context),
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
@@ -152,7 +152,7 @@ class ExperimentsService {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
-              logger.error(`${errorMessage} = ${id}`)
+              logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage)
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
@@ -185,7 +185,7 @@ class ExperimentsService {
       .then(() => db.experiments.remove(id, isTemplate)
         .then((data) => {
           if (!data) {
-            logger.error(`Experiment Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.transactionId}]] Experiment Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Not Found for requested experimentId')
           } else {
             return this.tagService.deleteTagsForExperimentId(id).then(() => data)

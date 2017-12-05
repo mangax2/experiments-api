@@ -24,7 +24,7 @@ class GroupValueService {
 
   @Transactional('getGroupValuesByGroupId')
   getGroupValuesByGroupId(id, tx) {
-    return this.groupService.getGroupById(id, tx)
+    return this.groupService.getGroupById(id, context, tx)
       .then(() => db.groupValue.findAllByGroupId(id, tx))
   }
 
@@ -33,10 +33,10 @@ class GroupValueService {
     db.groupValue.batchFindAllByExperimentId(id, tx)
 
   @Transactional('getGroupValueById')
-  getGroupValueById = (id, tx) => db.groupValue.find(id, tx)
+  getGroupValueById = (id, context, tx) => db.groupValue.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Group Value Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Group Value Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Value Not Found for requested id')
       } else {
         return data
@@ -54,7 +54,7 @@ class GroupValueService {
   deleteGroupValue = (id, tx) => db.groupValue.remove(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Group Value Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Group Value Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Value Not Found for requested id')
       } else {
         return data
@@ -65,7 +65,7 @@ class GroupValueService {
   batchDeleteGroupValues = (ids, tx) => db.groupValue.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all group values requested for delete were found')
+        logger.error(`[[${context.transactionId}]] Not all group values requested for delete were found`)
         throw AppError.notFound('Not all group values requested for delete were found')
       } else {
         return data

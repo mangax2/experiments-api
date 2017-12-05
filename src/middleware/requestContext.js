@@ -1,9 +1,15 @@
 import _ from 'lodash'
+import uuid from 'uuid/v4'
 import AppError from '../services/utility/AppError'
 
 function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedUrls = ['/experiments-api/api-docs', '/metrics', '/experiments-api/ping', '/ping', '/experiments-api/docs/']
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
+
+  req.context = {
+    transactionId: (req.headers ? req.headers.transactionId : null) || uuid(),
+  }
+  res.set('transactionId', req.context.transactionId)
 
   if (whitelistedUrls.includes(req.url)
     || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)
@@ -30,9 +36,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     if (userId.trim().length === 0) {
       throw AppError.badRequest('username within oauth_resourceownerinfo is empty string.')
     }
-    req.context = {
-      userId: userId.toUpperCase(),
-    }
+    req.context.userId = userId.toUpperCase()
     next()
   }
 }

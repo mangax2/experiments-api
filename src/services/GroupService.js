@@ -29,22 +29,11 @@ class GroupService {
       .then(() => db.group.findAllByExperimentId(id, tx))
   }
 
-  @Transactional('getGroupsByIds')
-  batchGetGroupsByIds = (ids, tx) => db.group.batchFind(ids, tx)
-    .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Group not found for all requested ids.')
-        throw AppError.notFound('Group not found for all requested ids.')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('getGroupsById')
-  getGroupById = (id, tx) => db.group.find(id, tx)
+  getGroupById = (id, context, tx) => db.group.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Group Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Group Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Not Found for requested id')
       } else {
         return data
@@ -71,7 +60,7 @@ class GroupService {
   deleteGroup = (id, tx) => db.group.remove(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Group Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Group Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Not Found for requested id')
       } else {
         return data
@@ -79,10 +68,10 @@ class GroupService {
     })
 
   @Transactional('batchDeleteGroups')
-  batchDeleteGroups = (ids, tx) => db.group.batchRemove(ids, tx)
+  batchDeleteGroups = (ids, context, tx) => db.group.batchRemove(ids, tx)
     .then((data) => {
       if (_.compact(data).length !== ids.length) {
-        logger.error('Not all groups requested for delete were found')
+        logger.error(`[[${context.transactionId}]] Not all groups requested for delete were found`)
         throw AppError.notFound('Not all groups requested for delete were found')
       } else {
         return data

@@ -10,7 +10,7 @@ class RefDataSourceService {
   getRefDataSourceById = id => db.refDataSource.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Ref Data Source Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Ref Data Source Not Found for requested id = ${id}`)
         throw AppError.notFound('Ref Data Source Not Found for requested id')
       } else {
         return data
@@ -22,7 +22,7 @@ class RefDataSourceService {
   getCompleteRefDataSourceById = id => db.refDataSource.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Ref Data Source Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Ref Data Source Not Found for requested id = ${id}`)
         throw AppError.notFound('Ref Data Source Not Found for requested id')
       } else {
         return db.refDataSourceType.find(data.ref_data_source_type_id).then((refDataSourceType) => {

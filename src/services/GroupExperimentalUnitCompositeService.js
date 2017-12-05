@@ -53,8 +53,8 @@ class GroupExperimentalUnitCompositeService {
               this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx),
               this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
               this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
-              this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
-            .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, tx))
+              this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, context, tx)]))
+            .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, context, tx))
             .then(() => AppUtil.createCompositePostResponse())
         })
       })
@@ -69,16 +69,16 @@ class GroupExperimentalUnitCompositeService {
     ? this.experimentalUnitService.batchUpdateExperimentalUnits(unitUpdates, context, tx)
     : Promise.resolve())
 
-  batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
-    ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), tx)
+  batchDeleteExperimentalUnits = (unitDeletes, context, tx) => (unitDeletes.length > 0
+    ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), context, tx)
     : Promise.resolve())
 
   batchUpdateGroups = (groupUpdates, context, tx) => (groupUpdates.length > 0
     ? this.groupService.batchUpdateGroupsNoValidate(groupUpdates, context, tx)
     : Promise.resolve())
 
-  batchDeleteGroups = (groupDeletes, tx) => (groupDeletes.length > 0
-    ? this.groupService.batchDeleteGroups(_.map(groupDeletes, 'id'), tx)
+  batchDeleteGroups = (groupDeletes, context, tx) => (groupDeletes.length > 0
+    ? this.groupService.batchDeleteGroups(_.map(groupDeletes, 'id'), context, tx)
     : Promise.resolve())
 
   recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx) {

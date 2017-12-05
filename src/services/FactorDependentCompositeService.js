@@ -46,10 +46,11 @@ function applyAsyncBatchToNonEmptyArray(
 }
 
 function batchDeleteDbEntitiesWithoutMatchingDTO(
-  dbEntities, DTOs, asyncBatchDeleteFunction, tx) {
+  dbEntities, DTOs, asyncBatchDeleteFunction, context, tx) {
   return applyAsyncBatchToNonEmptyArray(
     asyncBatchDeleteFunction,
     determineIdsToDelete(dbEntities, DTOs),
+    context,
     tx)
 }
 
@@ -303,10 +304,10 @@ class FactorDependentCompositeService {
   }
 
   @Transactional('getAllVariablesByExperimentId')
-  getAllVariablesByExperimentId(experimentId, isTemplate, tx) {
+  getAllVariablesByExperimentId(experimentId, isTemplate, context, tx) {
     return Promise.all(
       [
-        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, tx),
+        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context, tx),
         FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
         this.factorTypeService.getAllFactorTypes(tx),
         DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(
@@ -332,7 +333,7 @@ class FactorDependentCompositeService {
 
   persistVariablesWithoutLevels(experimentId, dependentVariables, context, isTemplate, tx) {
     return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId,
-      isTemplate, tx)
+      isTemplate, context, tx)
       .then(() => {
         if (dependentVariables.length > 0) {
           return this.dependentVariableService.batchCreateDependentVariables(
@@ -380,11 +381,12 @@ class FactorDependentCompositeService {
        allIndependentDTOs: allFactorDTOs,
        allLevelDTOsWithParentFactorId: allLevelDTOs,
        tx,
+       context,
     }) =>
       batchDeleteDbEntitiesWithoutMatchingDTO(
-        allDbLevels, allLevelDTOs, this.factorLevelService.batchDeleteFactorLevels, tx)
+        allDbLevels, allLevelDTOs, this.factorLevelService.batchDeleteFactorLevels, context, tx)
         .then(() => batchDeleteDbEntitiesWithoutMatchingDTO(
-          allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, tx))
+          allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, context, tx))
 
   updateFactors =
     (experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx) =>
@@ -502,6 +504,7 @@ class FactorDependentCompositeService {
           ...requestData,
           ...dbEntities,
           ...this.categorizeRequestDTOs(allIndependentDTOs),
+          context,
         }
         return this.deleteFactorsAndLevels(inputsAndDbEntities)
           .then(() => this.updateFactorsAndLevels(inputsAndDbEntities))

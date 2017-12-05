@@ -57,7 +57,7 @@ class TreatmentDetailsService {
     return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.updates, experimentId)
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.adds, experimentId)
-      return this.deleteTreatments(treatmentDetailsObj.deletes, tx)
+      return this.deleteTreatments(treatmentDetailsObj.deletes, context, tx)
         .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
           .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
             .then(() => AppUtil.createCompositePostResponse())))
@@ -70,11 +70,11 @@ class TreatmentDetailsService {
     })
   }
 
-  deleteTreatments(treatmentIdsToDelete, tx) {
+  deleteTreatments(treatmentIdsToDelete, context, tx) {
     if (_.compact(treatmentIdsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, tx)
+    return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, context, tx)
   }
 
   createTreatments(treatmentAdds, context, tx) {
@@ -120,25 +120,26 @@ class TreatmentDetailsService {
       return Promise.resolve()
     }
     return this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
-      .then(() => this.deleteCombinationElements(treatmentUpdates, tx)
+      .then(() => this.deleteCombinationElements(treatmentUpdates, context, tx)
         .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
   }
 
-  deleteCombinationElements(treatmentUpdates, tx) {
-    return this.identifyCombinationElementIdsForDelete(treatmentUpdates, tx)
+  deleteCombinationElements(treatmentUpdates, context, tx) {
+    return this.identifyCombinationElementIdsForDelete(treatmentUpdates, context, tx)
       .then((idsForDeletion) => {
         if (idsForDeletion.length === 0) {
           return Promise.resolve()
         }
-        return this.combinationElementService.batchDeleteCombinationElements(idsForDeletion, tx)
+        return this.combinationElementService.batchDeleteCombinationElements(idsForDeletion,
+          context, tx)
       })
   }
 
-  identifyCombinationElementIdsForDelete(treatments, tx) {
+  identifyCombinationElementIdsForDelete(treatments, context, tx) {
     const treatmentIds = _.map(treatments, treatment => treatment.id)
 
     return this.combinationElementService.batchGetCombinationElementsByTreatmentIds(
-      treatmentIds, tx)
+      treatmentIds, context, tx)
       .then(currentCombinationElementsByTreatment =>
         _.flatMap(currentCombinationElementsByTreatment, (curCombinationElements, index) => {
           const currentCombinationElements = _.map(curCombinationElements, curCombinationElement =>

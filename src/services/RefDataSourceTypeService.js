@@ -16,7 +16,7 @@ class RefDataSourceTypeService {
   getRefDataSourceTypeById = id => db.refDataSourceType.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Ref Data Source Type Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Ref Data Source Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Ref Data Source Type Not Found for requested id')
       } else {
         return data

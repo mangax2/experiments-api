@@ -23,8 +23,8 @@ class CombinationElementService {
   }
 
   @Transactional('getCombinationElementsByTreatmentId')
-  getCombinationElementsByTreatmentId(id, tx) {
-    return this.treatmentService.getTreatmentById(id, tx)
+  getCombinationElementsByTreatmentId(id, context, tx) {
+    return this.treatmentService.getTreatmentById(id, context, tx)
       .then(() => db.combinationElement.findAllByTreatmentId(id, tx))
   }
 
@@ -43,10 +43,10 @@ class CombinationElementService {
     db.combinationElement.batchFindAllByTreatmentIds(ids, tx)
 
   @Transactional('getCombinationElementById')
-  getCombinationElementById = (id, tx) => db.combinationElement.find(id, tx)
+  getCombinationElementById = (id, context, tx) => db.combinationElement.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Combination Element Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Combination Element Not Found for requested id = ${id}`)
         throw AppError.notFound('Combination Element Not Found for requested id')
       } else {
         return data
@@ -64,7 +64,7 @@ class CombinationElementService {
   deleteCombinationElement = (id, tx) => db.combinationElement.remove(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Combination Element Not Found for requested id = ${id}`)
+        logger.error(`[[${context.transactionId}]] Combination Element Not Found for requested id = ${id}`)
         throw AppError.notFound('Combination Element Not Found for requested id')
       } else {
         return data
@@ -72,10 +72,10 @@ class CombinationElementService {
     })
 
   @Transactional('batchDeleteCombinationElements')
-  batchDeleteCombinationElements = (ids, tx) => db.combinationElement.batchRemove(ids, tx)
+  batchDeleteCombinationElements = (ids, context, tx) => db.combinationElement.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all combination elements requested for delete were found')
+        logger.error(`[[${context.transactionId}]]Not all combination elements requested for delete were found`)
         throw AppError.notFound('Not all combination elements requested for delete were found')
       } else {
         return data

@@ -59,7 +59,7 @@ class ExperimentalUnitService {
   getExperimentalUnitById = (id, context, tx) => db.unit.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Experimental Unit Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Experimental Unit Not Found for requested id = ${id}`)
         throw AppError.notFound('Experimental Unit Not Found for requested id')
       } else {
         return data
@@ -152,7 +152,7 @@ class ExperimentalUnitService {
   batchDeleteExperimentalUnits = (ids, context, tx) => db.unit.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Not all experimental units requested for delete were found`)
+        logger.error(`[[${context.requestId}]] Not all experimental units requested for delete were found`)
         throw AppError.notFound('Not all experimental units requested for delete were found')
       } else {
         return data

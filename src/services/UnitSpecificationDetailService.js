@@ -27,7 +27,7 @@ class UnitSpecificationDetailService {
   getUnitSpecificationDetailById = (id, context, tx) => db.unitSpecificationDetail.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Unit Specification Detail Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Unit Specification Detail Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Specification Detail Not Found for requested id')
       } else {
         return data
@@ -73,7 +73,7 @@ class UnitSpecificationDetailService {
     return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
         if (_.compact(data).length !== idsToDelete.length) {
-          logger.error(`[[${context.transactionId}]] Not all unit specification detail ids requested for delete were found`)
+          logger.error(`[[${context.requestId}]] Not all unit specification detail ids requested for delete were found`)
           throw AppError.notFound(
             'Not all unit specification detail ids requested for delete were found')
         } else {

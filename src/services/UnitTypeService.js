@@ -8,7 +8,7 @@ class UnitTypeService {
   getUnitTypeById = (id, context) => db.unitType.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Unit Type Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Unit Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Type Not Found for requested id')
       } else {
         return data

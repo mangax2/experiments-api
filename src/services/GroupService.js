@@ -33,7 +33,7 @@ class GroupService {
   getGroupById = (id, context, tx) => db.group.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Group Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Group Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Not Found for requested id')
       } else {
         return data
@@ -60,7 +60,7 @@ class GroupService {
   batchDeleteGroups = (ids, context, tx) => db.group.batchRemove(ids, tx)
     .then((data) => {
       if (_.compact(data).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Not all groups requested for delete were found`)
+        logger.error(`[[${context.requestId}]] Not all groups requested for delete were found`)
         throw AppError.notFound('Not all groups requested for delete were found')
       } else {
         return data

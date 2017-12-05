@@ -46,7 +46,7 @@ class CombinationElementService {
   getCombinationElementById = (id, context, tx) => db.combinationElement.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Combination Element Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Combination Element Not Found for requested id = ${id}`)
         throw AppError.notFound('Combination Element Not Found for requested id')
       } else {
         return data
@@ -64,7 +64,7 @@ class CombinationElementService {
   batchDeleteCombinationElements = (ids, context, tx) => db.combinationElement.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]]Not all combination elements requested for delete were found`)
+        logger.error(`[[${context.requestId}]]Not all combination elements requested for delete were found`)
         throw AppError.notFound('Not all combination elements requested for delete were found')
       } else {
         return data

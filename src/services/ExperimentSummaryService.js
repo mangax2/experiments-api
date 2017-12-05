@@ -17,7 +17,7 @@ class ExperimentSummaryService {
       .then(() => db.experimentSummary.find(id, tx)
         .then((data) => {
           if (!data) {
-            logger.error(`[[${context.transactionId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Summary Not Found for requested experimentId')
           } else {
             return data

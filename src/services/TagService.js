@@ -23,7 +23,7 @@ class TagService {
         const experimentIds = _.uniq(_.map(tags, 'experimentId'))
         const tagsRequest = this.createTagRequest(tags, experimentIds, isTemplate)
         return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(`[[${context.transactionId}]] An error occurred while creating the tags.`, err)
+          logger.error(`[[${context.requestId}]] An error occurred while creating the tags.`, err)
           return Promise.reject(err)
         })
       }))
@@ -47,7 +47,7 @@ class TagService {
         })
         const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
         return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${experimentId}`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(`[[${context.transactionId}]] An error occurred while saving the tags.`, err)
+          logger.error(`[[${context.requestId}]] An error occurred while saving the tags.`, err)
           return Promise.reject(err)
         })
       }))
@@ -57,7 +57,7 @@ class TagService {
     if (err.status === 404) {
       return Promise.resolve([])
     }
-    logger.error(`[[${context.transactionId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
+    logger.error(`[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
     return Promise.reject(err)
   }),
   )
@@ -76,7 +76,7 @@ class TagService {
     })
 
   getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate, context) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
-    logger.error(`[[${context.transactionId}]] An error occured while gettings tags by filters.`, err)
+    logger.error(`[[${context.requestId}]] An error occured while gettings tags by filters.`, err)
     return Promise.reject(err)
   }),
   )

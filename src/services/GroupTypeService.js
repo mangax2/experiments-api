@@ -8,7 +8,7 @@ class GroupTypeService {
   getGroupTypeById = (id, context) => db.groupType.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Group Type Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Group Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Type Not Found for requested id')
       } else {
         return data

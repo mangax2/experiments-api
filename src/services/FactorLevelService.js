@@ -35,7 +35,7 @@ class FactorLevelService {
   getFactorLevelById = (id, context) => db.factorLevel.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Factor Level Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Factor Level Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Level Not Found for requested id')
       } else {
         return data
@@ -51,7 +51,7 @@ class FactorLevelService {
   batchDeleteFactorLevels = (ids, context, tx) => db.factorLevel.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Not all factor levels requested for delete were found`)
+        logger.error(`[[${context.requestId}]] Not all factor levels requested for delete were found`)
         throw AppError.notFound('Not all factor levels requested for delete were found')
       } else {
         return data

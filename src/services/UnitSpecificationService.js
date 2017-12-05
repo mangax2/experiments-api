@@ -8,7 +8,7 @@ class UnitSpecificationService {
   getUnitSpecificationById = (id, context) => db.unitSpecification.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Unit Specification Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Unit Specification Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Specification Not Found for requested id')
       } else {
         return data

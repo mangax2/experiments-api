@@ -7,9 +7,9 @@ function requestContextMiddlewareFunction(req, res, next) {
   const whitelistedExtensions = ['.png', '.jpg', '.md', '.js', '.css']
 
   req.context = {
-    transactionId: (req.headers ? req.headers.transactionId : null) || uuid(),
+    requestId: (req.headers ? req.headers['X-Request-Id'] : null) || uuid(),
   }
-  res.set('transactionId', req.context.transactionId)
+  res.set('X-Request-Id', req.context.requestId)
 
   if (whitelistedUrls.includes(req.url)
     || (req.url && _.filter(whitelistedExtensions, ext => req.url.endsWith(ext)).length > 0)

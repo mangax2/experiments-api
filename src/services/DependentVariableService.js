@@ -37,7 +37,7 @@ class DependentVariableService {
   getDependentVariableById = (id, context) => db.dependentVariable.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Dependent Variable Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Dependent Variable Not Found for requested id = ${id}`)
         throw AppError.notFound('Dependent Variable Not Found for requested id')
       } else {
         return data

@@ -29,7 +29,7 @@ class GroupValueService {
   getGroupValueById = (id, context, tx) => db.groupValue.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Group Value Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Group Value Not Found for requested id = ${id}`)
         throw AppError.notFound('Group Value Not Found for requested id')
       } else {
         return data

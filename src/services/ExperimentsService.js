@@ -111,7 +111,7 @@ class ExperimentsService {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       }
     })
@@ -123,7 +123,7 @@ class ExperimentsService {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       } else {
         return Promise.all(
@@ -152,7 +152,7 @@ class ExperimentsService {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
-              logger.error(`[[${context.transactionId}]] ${errorMessage} = ${id}`)
+              logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage)
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
@@ -185,7 +185,7 @@ class ExperimentsService {
       .then(() => db.experiments.remove(id, isTemplate)
         .then((data) => {
           if (!data) {
-            logger.error(`[[${context.transactionId}]] Experiment Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Not Found for requested experimentId')
           } else {
             return this.tagService.deleteTagsForExperimentId(id).then(() => data)

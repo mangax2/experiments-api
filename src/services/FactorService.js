@@ -38,7 +38,7 @@ class FactorService {
   getFactorById = (id, context, tx) => db.factor.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] Factor Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Factor Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Not Found for requested id')
       } else {
         return data
@@ -54,7 +54,7 @@ class FactorService {
   batchDeleteFactors = (ids, context, tx) => db.factor.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Not all factors requested for delete were found`)
+        logger.error(`[[${context.requestId}]] Not all factors requested for delete were found`)
         throw AppError.notFound('Not all factors requested for delete were found')
       } else {
         return data

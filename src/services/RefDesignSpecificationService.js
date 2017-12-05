@@ -8,7 +8,7 @@ class RefDesignSpecificationService {
   getDesignSpecById = (id, context) => db.refDesignSpecification.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`[[${context.transactionId}]] RefDesignSpec Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] RefDesignSpec Not Found for requested id = ${id}`)
         throw AppError.notFound('RefDesignSpec Not Found for requested id')
       } else {
         return data

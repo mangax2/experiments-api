@@ -34,18 +34,6 @@ class DesignSpecificationDetailService {
       }
     })
 
-  @Transactional('batchGetDesignSpecificationDetailsByIds')
-  batchGetDesignSpecificationDetailsByIds = (ids, tx) =>
-    db.designSpecificationDetail.batchFind(ids, tx)
-      .then((data) => {
-        if (data.length !== ids.length) {
-          logger.error(`[[${context.transactionId}]] Design Specification Detail not found for all requested ids.`)
-          throw AppError.notFound('Design Specification Detail not found for all requested ids.')
-        } else {
-          return data
-        }
-      })
-
   @Transactional('batchCreateDesignSpecificationDetails')
   batchCreateDesignSpecificationDetails(specificationDetails, context, tx) {
     return this.validator.validate(specificationDetails, 'POST', tx)

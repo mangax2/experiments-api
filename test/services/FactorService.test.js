@@ -132,7 +132,7 @@ describe('FactorService', () => {
     it('returns factor found by id', () => {
       db.factor.find = mockResolve({})
 
-      return target.getFactorById(1, testTx).then((data) => {
+      return target.getFactorById(1, {}, testTx).then((data) => {
         expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -142,7 +142,7 @@ describe('FactorService', () => {
       db.factor.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getFactorById(1, testTx).then(() => {}, () => {
+      return target.getFactorById(1, {}, testTx).then(() => {}, () => {
         expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Factor Not Found for requested id')
       })
@@ -152,7 +152,7 @@ describe('FactorService', () => {
       db.factor.find = mockReject('error')
       AppError.notFound = mock()
 
-      return target.getFactorById(1, testTx).then(() => {}, (err) => {
+      return target.getFactorById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -196,41 +196,11 @@ describe('FactorService', () => {
     })
   })
 
-  describe('deleteFactor', () => {
-    it('returns data when factor is deleted', () => {
-      db.factor.remove = mockResolve(1)
-
-      return target.deleteFactor(1, testTx).then((data) => {
-        expect(db.factor.remove).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual(1)
-      })
-    })
-
-    it('throws an error when no factor was found to delete', () => {
-      db.factor.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteFactor(1, testTx).then(() => {}, () => {
-        expect(db.factor.remove).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Not Found for requested id')
-      })
-    })
-
-    it('rejects when factor remove fails', () => {
-      db.factor.remove = mockReject('error')
-
-      return target.deleteFactor(1, testTx).then(() => {}, (err) => {
-        expect(db.factor.remove).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
   describe('batchDeleteFactors', () => {
     it('calls factor batchRemove and returns data', () => {
       db.factor.batchRemove = mockResolve([1,2])
 
-      return target.batchDeleteFactors([1,2], testTx).then((data) => {
+      return target.batchDeleteFactors([1,2], {}, testTx).then((data) => {
         expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
         expect(data).toEqual([1,2])
       })
@@ -240,7 +210,7 @@ describe('FactorService', () => {
       db.factor.batchRemove = mockResolve([null, 1])
       AppError.notFound = mock()
 
-      return target.batchDeleteFactors([1,2], testTx).then(() => {}, () => {
+      return target.batchDeleteFactors([1,2], {}, testTx).then(() => {}, () => {
         expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all factors requested for delete were found')
       })

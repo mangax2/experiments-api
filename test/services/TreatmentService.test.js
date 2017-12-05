@@ -88,7 +88,7 @@ describe('TreatmentService', () => {
     it('gets a treatment', () => {
       db.treatment.find = mockResolve({})
 
-      return target.getTreatmentById(1, testTx).then((data) => {
+      return target.getTreatmentById(1, {}, testTx).then((data) => {
         expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -98,7 +98,7 @@ describe('TreatmentService', () => {
       db.treatment.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getTreatmentById(1, testTx).then(() => {}, () => {
+      return target.getTreatmentById(1, {}, testTx).then(() => {}, () => {
         expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Treatment Not Found for requested id')
       })
@@ -107,7 +107,7 @@ describe('TreatmentService', () => {
     it('rejects when find fails', () => {
       db.treatment.find = mockReject('error')
 
-      return target.getTreatmentById(1, testTx).then(() => {}, (err) => {
+      return target.getTreatmentById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -118,7 +118,7 @@ describe('TreatmentService', () => {
     it('gets treatments', () => {
       db.treatment.batchFind = mockResolve([{}, {}])
 
-      return target.batchGetTreatmentByIds([1, 2], testTx).then((data) => {
+      return target.batchGetTreatmentByIds([1, 2], {}, testTx).then((data) => {
         expect(db.treatment.batchFind).toHaveBeenCalledWith([1, 2], testTx)
         expect(data).toEqual([{}, {}])
       })
@@ -128,7 +128,7 @@ describe('TreatmentService', () => {
       db.treatment.batchFind = mockResolve([{}])
       AppError.notFound = mock()
 
-      return target.batchGetTreatmentByIds([1, 2], testTx).then(() => {}, () => {
+      return target.batchGetTreatmentByIds([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.treatment.batchFind).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Treatment not found for all requested ids.')
       })
@@ -137,7 +137,7 @@ describe('TreatmentService', () => {
     it('rejects when batchFind fails', () => {
       db.treatment.batchFind = mockReject('error')
 
-      return target.batchGetTreatmentByIds([1, 2], testTx).then(() => {}, (err) => {
+      return target.batchGetTreatmentByIds([1, 2], {}, testTx).then(() => {}, (err) => {
         expect(db.treatment.batchFind).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
@@ -180,41 +180,11 @@ describe('TreatmentService', () => {
     })
   })
 
-  describe('deleteTreatment', () => {
-    it('deletes a treatment', () => {
-      db.treatment.remove = mockResolve(1)
-
-      return target.deleteTreatment(1, testTx).then((data) => {
-        expect(db.treatment.remove).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual(1)
-      })
-    })
-
-    it('throws an error when treatment not found to delete', () => {
-      db.treatment.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteTreatment(1, testTx).then(() => {}, () => {
-        expect(db.treatment.remove).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Treatment Not Found for requested id')
-      })
-    })
-
-    it('rejects when remove fails', () => {
-      db.treatment.remove = mockReject('error')
-
-      return target.deleteTreatment(1, testTx).then(() => {}, (err) => {
-        expect(db.treatment.remove).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
   describe('batchDeleteTreatments', () => {
     it('deletes treatments', () => {
       db.treatment.batchRemove = mockResolve([1, 2])
 
-      return target.batchDeleteTreatments([1, 2], testTx).then((data) => {
+      return target.batchDeleteTreatments([1, 2], {}, testTx).then((data) => {
         expect(db.treatment.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(data).toEqual([1, 2])
       })
@@ -224,7 +194,7 @@ describe('TreatmentService', () => {
       db.treatment.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
-      return target.batchDeleteTreatments([1, 2], testTx).then(() => {}, () => {
+      return target.batchDeleteTreatments([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.treatment.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all treatments requested for delete' +
           ' were found')
@@ -234,7 +204,7 @@ describe('TreatmentService', () => {
     it('rejects when batchRemove fails', () => {
       db.treatment.batchRemove = mockReject('error')
 
-      return target.batchDeleteTreatments([1, 2], testTx).then(() => {}, (err) => {
+      return target.batchDeleteTreatments([1, 2], {}, testTx).then(() => {}, (err) => {
         expect(db.treatment.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })

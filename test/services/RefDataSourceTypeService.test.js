@@ -30,37 +30,6 @@ describe('RefDataSourceTypeService', () => {
     })
   })
 
-  describe('getRefDataSourceTypeById', () => {
-    it('returns ref data source type', () => {
-      db.refDataSourceType.find = mockResolve({})
-
-      return target.getRefDataSourceTypeById(1).then((data) => {
-        expect(db.refDataSourceType.find).toHaveBeenCalledWith(1)
-        expect(data).toEqual({})
-      })
-    })
-
-    it('throws an error when get returns empty', () => {
-      db.refDataSourceType.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getRefDataSourceTypeById(1).then(() => {}, () => {
-        expect(db.refDataSourceType.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Ref Data Source Type Not Found for' +
-          ' requested id')
-      })
-    })
-
-    it('rejects when find fails', () => {
-      db.refDataSourceType.find = mockReject('error')
-
-      return target.getRefDataSourceTypeById(1).then(() => {}, (err) => {
-        expect(db.refDataSourceType.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
   describe('getRefDataSourceTypesWithDataSources', () => {
     it('returns data source types with respective data sources', () => {
       const dataSources = [{ ref_data_source_type_id: 1 }, { ref_data_source_type_id: 1 }, { ref_data_source_type_id: 2 }]

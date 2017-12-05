@@ -457,7 +457,7 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve({})
       AppError.notFound = mock()
 
-      return ExperimentsService.verifyExperimentExists(1, false, testTx).then((data) => {
+      return ExperimentsService.verifyExperimentExists(1, false, {}, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(AppError.notFound).not.toHaveBeenCalled()
       })
@@ -467,7 +467,7 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve()
       AppError.notFound = mock()
 
-      return ExperimentsService.verifyExperimentExists(1, false, testTx).then(() => {}, () => {
+      return ExperimentsService.verifyExperimentExists(1, false, {}, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId')
       })
@@ -477,7 +477,7 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve()
       AppError.notFound = mock()
 
-      return ExperimentsService.verifyExperimentExists(1, true, testTx).then(() => {}, () => {
+      return ExperimentsService.verifyExperimentExists(1, true, {}, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId')
       })

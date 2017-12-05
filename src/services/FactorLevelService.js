@@ -47,16 +47,6 @@ class FactorLevelService {
       .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
 
-  deleteFactorLevel = id => db.factorLevel.remove(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Factor Level Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Level Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteFactorLevels')
   batchDeleteFactorLevels = (ids, context, tx) => db.factorLevel.batchRemove(ids, tx)
     .then((data) => {

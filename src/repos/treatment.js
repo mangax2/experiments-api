@@ -47,8 +47,6 @@ module.exports = (rep, pgp) => ({
   },
   getDistinctExperimentIds: (ids, tx = rep) => tx.any('SELECT DISTINCT(experiment_id) FROM treatment WHERE id IN ($1:csv)', [ids]),
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM treatment WHERE id=$1 RETURNING id', id),
-
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])

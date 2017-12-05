@@ -203,7 +203,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     it('does not call experimentalUnitService if no units passed in', () => {
       target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
 
-      return target.batchDeleteExperimentalUnits([], testTx).then(() => {
+      return target.batchDeleteExperimentalUnits([], {}, testTx).then(() => {
         expect(target.experimentalUnitService.batchDeleteExperimentalUnits).not.toBeCalled()
       })
     })
@@ -211,8 +211,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
     it('does call experimentalUnitService if units are passed in', () => {
       target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
 
-      return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
-        expect(target.experimentalUnitService.batchDeleteExperimentalUnits).toBeCalledWith([5], testTx)
+      return target.batchDeleteExperimentalUnits([{ id: 5 }], {}, testTx).then(() => {
+        expect(target.experimentalUnitService.batchDeleteExperimentalUnits).toBeCalledWith([5], {}, testTx)
       })
     })
   })
@@ -239,7 +239,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     it('does not call groupService if no groups passed in', () => {
       target.groupService = { batchDeleteGroups: mockResolve() }
 
-      return target.batchDeleteGroups([], testTx).then(() => {
+      return target.batchDeleteGroups([], {}, testTx).then(() => {
         expect(target.groupService.batchDeleteGroups).not.toBeCalled()
       })
     })
@@ -247,8 +247,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
     it('does call group Service if groups are passed in', () => {
       target.groupService = { batchDeleteGroups: mockResolve() }
 
-      return target.batchDeleteGroups([{ id: 5 }], testTx).then(() => {
-        expect(target.groupService.batchDeleteGroups).toBeCalledWith([5], testTx)
+      return target.batchDeleteGroups([{ id: 5 }], {}, testTx).then(() => {
+        expect(target.groupService.batchDeleteGroups).toBeCalledWith([5], {}, testTx)
       })
     })
   })

@@ -50,17 +50,6 @@ class FactorService {
       .then(() => db.factor.batchUpdate(factors, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
 
-  @Transactional('deleteFactor')
-  deleteFactor = (id, tx) => db.factor.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Factor Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteFactors')
   batchDeleteFactors = (ids, context, tx) => db.factor.batchRemove(ids, tx)
     .then((data) => {

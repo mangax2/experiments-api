@@ -24,22 +24,11 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('getUnitSpecificationDetailById')
-  getUnitSpecificationDetailById = (id, tx) => db.unitSpecificationDetail.find(id, tx)
+  getUnitSpecificationDetailById = (id, context, tx) => db.unitSpecificationDetail.find(id, tx)
     .then((data) => {
       if (!data) {
         logger.error(`[[${context.transactionId}]] Unit Specification Detail Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Specification Detail Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
-  @Transactional('getUnitSpecificationDetailsByIds')
-  batchGetUnitSpecificationDetailsByIds = (ids, tx) => db.unitSpecificationDetail.batchFind(ids, tx)
-    .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Unit Specification Detail not found for all requested ids.`)
-        throw AppError.notFound('Unit Specification Detail not found for all requested ids.')
       } else {
         return data
       }

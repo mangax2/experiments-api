@@ -57,17 +57,6 @@ class TreatmentService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @Transactional('deleteTreatment')
-  deleteTreatment = (id, tx) => db.treatment.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Treatment Not Found for requested id = ${id}`)
-        throw AppError.notFound('Treatment Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteTreatments')
   batchDeleteTreatments = (ids, context, tx) => db.treatment.batchRemove(ids, tx)
     .then((data) => {

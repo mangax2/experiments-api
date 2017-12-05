@@ -51,12 +51,6 @@ class ExperimentalUnitService {
       .then(() => db.unit.findAllByTreatmentId(id, tx))
   }
 
-  @Transactional('batchGetExperimentalUnitByTreatmentIds')
-  batchGetExperimentalUnitsByTreatmentIds(ids, tx) {
-    return this.treatmentService.batchGetTreatmentByIds(ids, context, tx)
-      .then(() => db.unit.batchFindAllByTreatmentIds(ids, tx))
-  }
-
   @Transactional('batchGetExperimentalUnitByGroupIdsNoValidate')
   batchGetExperimentalUnitsByGroupIdsNoValidate = (ids, tx) =>
     db.unit.batchFindAllByGroupIds(ids, tx)
@@ -153,17 +147,6 @@ class ExperimentalUnitService {
       .then(() => db.unit.batchUpdate(experimentalUnits, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
-
-  @Transactional('deleteExperimentalUnit')
-  deleteExperimentalUnit = (id, tx) => db.unit.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Experimental Unit Not Found for requested id = ${id}`)
-        throw AppError.notFound('Experimental Unit Not Found for requested id')
-      } else {
-        return data
-      }
-    })
 
   @Transactional('batchDeleteExperimentalUnits')
   batchDeleteExperimentalUnits = (ids, context, tx) => db.unit.batchRemove(ids, tx)

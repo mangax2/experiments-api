@@ -16,7 +16,7 @@ describe('ExperimentSummaryService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.experimentSummary.find = mockResolve({})
 
-      return target.getExperimentSummaryById(1, false, testTx).then((data) => {
+      return target.getExperimentSummaryById(1, false, {}, testTx).then((data) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.experimentSummary.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
@@ -28,7 +28,7 @@ describe('ExperimentSummaryService', () => {
       db.experimentSummary.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getExperimentSummaryById(1, false, testTx).then(() => {}, () => {
+      return target.getExperimentSummaryById(1, false, {}, testTx).then(() => {}, () => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.experimentSummary.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Summary Not Found for' +
@@ -40,7 +40,7 @@ describe('ExperimentSummaryService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.experimentSummary.find = mockReject('error')
 
-      return target.getExperimentSummaryById(1, false, testTx).then(() => {}, (err) => {
+      return target.getExperimentSummaryById(1, false, {}, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.experimentSummary.find).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
@@ -51,7 +51,7 @@ describe('ExperimentSummaryService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.experimentSummary.find = mock()
 
-      return target.getExperimentSummaryById(1, false, testTx).then(() => {}, (err) => {
+      return target.getExperimentSummaryById(1, false, {}, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
         expect(db.experimentSummary.find).not.toHaveBeenCalled()
         expect(err).toEqual('error')

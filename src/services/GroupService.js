@@ -56,17 +56,6 @@ class GroupService {
     this.validator.validate(groups, 'PATCH', tx)
       .then(() => db.group.partiallyUpdate(groups, context, tx))
 
-  @Transactional('deleteGroup')
-  deleteGroup = (id, tx) => db.group.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Group Not Found for requested id = ${id}`)
-        throw AppError.notFound('Group Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteGroups')
   batchDeleteGroups = (ids, context, tx) => db.group.batchRemove(ids, tx)
     .then((data) => {

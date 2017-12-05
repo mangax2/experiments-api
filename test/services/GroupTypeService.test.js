@@ -24,9 +24,9 @@ describe('GroupTypeService', () => {
       db.groupType.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getGroupTypeById(1).then(() => {}, () => {
+      return target.getGroupTypeById(1, { transactionId: 5 }).then(() => {}, () => {
         expect(db.groupType.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Group Type Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] Group Type Not Found for requested id')
       })
     })
 

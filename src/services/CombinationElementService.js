@@ -33,8 +33,8 @@ class CombinationElementService {
     db.combinationElement.findAllByExperimentId(experimentId, tx)
 
   @Transactional('batchGetCombinationElementsByTreatmentIds')
-  batchGetCombinationElementsByTreatmentIds(ids, tx) {
-    return this.treatmentService.batchGetTreatmentByIds(ids, tx)
+  batchGetCombinationElementsByTreatmentIds(ids, context, tx) {
+    return this.treatmentService.batchGetTreatmentByIds(ids, context, tx)
       .then(() => db.combinationElement.batchFindAllByTreatmentIds(ids, tx))
   }
 
@@ -59,17 +59,6 @@ class CombinationElementService {
       .then(() => db.combinationElement.batchUpdate(combinationElements, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
-
-  @Transactional('deleteCombinationElement')
-  deleteCombinationElement = (id, tx) => db.combinationElement.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Combination Element Not Found for requested id = ${id}`)
-        throw AppError.notFound('Combination Element Not Found for requested id')
-      } else {
-        return data
-      }
-    })
 
   @Transactional('batchDeleteCombinationElements')
   batchDeleteCombinationElements = (ids, context, tx) => db.combinationElement.batchRemove(ids, tx)

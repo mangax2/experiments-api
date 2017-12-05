@@ -50,7 +50,7 @@ describe('UnitSpecificationDetailService', () => {
     it('gets a unit specification detail', () => {
       db.unitSpecificationDetail.find = mockResolve({})
 
-      return target.getUnitSpecificationDetailById(1, testTx).then((data) => {
+      return target.getUnitSpecificationDetailById(1, testContext, testTx).then((data) => {
         expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -60,7 +60,7 @@ describe('UnitSpecificationDetailService', () => {
       db.unitSpecificationDetail.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getUnitSpecificationDetailById(1, testTx).then(() => {}, () => {
+      return target.getUnitSpecificationDetailById(1, testContext, testTx).then(() => {}, () => {
         expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Detail Not Found for' +
           ' requested id')
@@ -70,39 +70,8 @@ describe('UnitSpecificationDetailService', () => {
     it('rejects when find fails', () => {
       db.unitSpecificationDetail.find = mockReject('error')
 
-      return target.getUnitSpecificationDetailById(1, testTx).then(() => {}, (err) => {
+      return target.getUnitSpecificationDetailById(1, testContext, testTx).then(() => {}, (err) => {
         expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetUnitSpecificationDetailsByIds', () => {
-    it('gets unit specification details', () => {
-      db.unitSpecificationDetail.batchFind = mockResolve([{}])
-
-      return target.batchGetUnitSpecificationDetailsByIds([1], testTx).then((data) => {
-        expect(db.unitSpecificationDetail.batchFind).toHaveBeenCalledWith([1], testTx)
-        expect(data).toEqual([{}])
-      })
-    })
-
-    it('throws an error when not all requested ids are returned', () => {
-      db.unitSpecificationDetail.batchFind = mockResolve([{}])
-      AppError.notFound = mock()
-
-      return target.batchGetUnitSpecificationDetailsByIds([1, 2], testTx).then(() => {}, () => {
-        expect(db.unitSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Detail not found for' +
-          ' all requested ids.')
-      })
-    })
-
-    it('rejects when batchFind fails', () => {
-      db.unitSpecificationDetail.batchFind = mockReject('error')
-
-      return target.batchGetUnitSpecificationDetailsByIds([1, 2], testTx).then(() => {}, (err) => {
-        expect(db.unitSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
     })
@@ -264,7 +233,7 @@ describe('UnitSpecificationDetailService', () => {
   describe('deleteUnitSpecificationDetails', () => {
     it('deletes unit specification details', () => {
       db.unitSpecificationDetail.batchRemove = mockResolve([1])
-      return target.deleteUnitSpecificationDetails([1], testTx).then((data) => {
+      return target.deleteUnitSpecificationDetails([1], testContext, testTx).then((data) => {
         expect(db.unitSpecificationDetail.batchRemove).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([1])
       })
@@ -281,7 +250,7 @@ describe('UnitSpecificationDetailService', () => {
       db.unitSpecificationDetail.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
-      return target.deleteUnitSpecificationDetails([1, 2], testTx).then(() => {}, () => {
+      return target.deleteUnitSpecificationDetails([1, 2], testContext, testTx).then(() => {}, () => {
         expect(db.unitSpecificationDetail.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all unit specification detail ids' +
           ' requested for delete were found')

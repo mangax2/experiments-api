@@ -50,16 +50,6 @@ class DependentVariableService {
         .then(data => AppUtil.createPutResponse(data))))
   }
 
-  deleteDependentVariable = id => db.dependentVariable.remove(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Dependent Variable Not Found for requested id = ${id}`)
-        throw AppError.notFound('Dependent Variable Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('deleteDependentVariablesForExperimentId')
   deleteDependentVariablesForExperimentId(experimentId, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(experimentId, isTemplate, tx)

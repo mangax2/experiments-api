@@ -73,9 +73,9 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
-  getExperiments(queryString, isTemplate) {
+  getExperiments(queryString, isTemplate, context) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString, isTemplate)
+      return this.getExperimentsByFilters(queryString, isTemplate, context)
         .then(data => this.populateOwners(data))
     }
     return this.getAllExperiments(isTemplate)
@@ -192,12 +192,12 @@ class ExperimentsService {
           }
         }))
 
-  getExperimentsByFilters(queryString, isTemplate) {
+  getExperimentsByFilters(queryString, isTemplate, context) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
       return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories,
-        lowerCaseTagValues, isTemplate)
+        lowerCaseTagValues, isTemplate, context)
         .then((eTags) => {
           if (eTags.length === 0) {
             return []

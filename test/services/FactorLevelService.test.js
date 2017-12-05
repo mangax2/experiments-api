@@ -97,8 +97,8 @@ describe('FactorLevelService', () => {
       target.factorService.getFactorById = mockResolve()
       db.factorLevel.findByFactorId = mockResolve([{}])
 
-      return target.getFactorLevelsByFactorId(1).then((data) => {
-        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1)
+      return target.getFactorLevelsByFactorId(1, {}).then((data) => {
+        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1, {})
         expect(db.factorLevel.findByFactorId).toHaveBeenCalledWith(1)
         expect(data).toEqual([{}])
       })
@@ -108,8 +108,8 @@ describe('FactorLevelService', () => {
       target.factorService.getFactorById = mockResolve()
       db.factorLevel.findByFactorId = mockReject('error')
 
-      return target.getFactorLevelsByFactorId(1).then(() => {}, (err) => {
-        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1)
+      return target.getFactorLevelsByFactorId(1, {}).then(() => {}, (err) => {
+        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1, {})
         expect(db.factorLevel.findByFactorId).toHaveBeenCalledWith(1)
         expect(err).toEqual('error')
       })
@@ -119,8 +119,8 @@ describe('FactorLevelService', () => {
       target.factorService.getFactorById = mockReject('error')
       db.factorLevel.findByFactorId = mock()
 
-      return target.getFactorLevelsByFactorId(1).then(() => {}, (err) => {
-        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1)
+      return target.getFactorLevelsByFactorId(1, {}).then(() => {}, (err) => {
+        expect(target.factorService.getFactorById).toHaveBeenCalledWith(1, {})
         expect(db.factorLevel.findByFactorId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -141,9 +141,9 @@ describe('FactorLevelService', () => {
       db.factorLevel.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getFactorLevelById(1).then(() => {}, () => {
+      return target.getFactorLevelById(1, { transactionId: 5 }).then(() => {}, () => {
         expect(db.factorLevel.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] Factor Level Not Found for requested id')
       })
     })
 
@@ -197,32 +197,11 @@ describe('FactorLevelService', () => {
     })
   })
 
-  describe('deleteFactorLevel', () => {
-    it('calls factorLevel remove and returns data', () => {
-      db.factorLevel.remove = mockResolve([])
-
-      return target.deleteFactorLevel(1).then((data) => {
-        expect(db.factorLevel.remove).toHaveBeenCalledWith(1)
-        expect(data).toEqual([])
-      })
-    })
-
-    it('throws an error when remove returns no data', () => {
-      db.factorLevel.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteFactorLevel(1).then(() => {}, () => {
-        expect(db.factorLevel.remove).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
-      })
-    })
-  })
-
   describe('batchDeleteFactorLevels', () => {
     it('calls factorLevel batchRemove and returns data', () => {
       db.factorLevel.batchRemove = mockResolve([1,2])
 
-      return target.batchDeleteFactorLevels([1,2], testTx).then((data) => {
+      return target.batchDeleteFactorLevels([1,2], {}, testTx).then((data) => {
         expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
         expect(data).toEqual([1,2])
       })
@@ -232,7 +211,7 @@ describe('FactorLevelService', () => {
       db.factorLevel.batchRemove = mockResolve([null, 1])
       AppError.notFound = mock()
 
-      return target.batchDeleteFactorLevels([1,2], testTx).then(() => {}, () => {
+      return target.batchDeleteFactorLevels([1,2], {}, testTx).then(() => {}, () => {
         expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1,2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all factor levels requested for delete were found')
       })

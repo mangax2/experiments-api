@@ -1,5 +1,4 @@
 import log4js from 'log4js'
-import _ from 'lodash'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -20,12 +19,6 @@ class GroupValueService {
     return this.validator.validate(groupValues, 'POST', tx)
       .then(() => db.groupValue.batchCreate(groupValues, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
-  }
-
-  @Transactional('getGroupValuesByGroupId')
-  getGroupValuesByGroupId(id, tx) {
-    return this.groupService.getGroupById(id, context, tx)
-      .then(() => db.groupValue.findAllByGroupId(id, tx))
   }
 
   @Transactional('batchGetGroupValuesByExperimentId')
@@ -49,28 +42,6 @@ class GroupValueService {
       .then(() => db.groupValue.batchUpdate(groupValues, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
-
-  @Transactional('deleteGroupValue')
-  deleteGroupValue = (id, tx) => db.groupValue.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.transactionId}]] Group Value Not Found for requested id = ${id}`)
-        throw AppError.notFound('Group Value Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
-  @Transactional('batchDeleteGroupValues')
-  batchDeleteGroupValues = (ids, tx) => db.groupValue.batchRemove(ids, tx)
-    .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.transactionId}]] Not all group values requested for delete were found`)
-        throw AppError.notFound('Not all group values requested for delete were found')
-      } else {
-        return data
-      }
-    })
 }
 
 module.exports = GroupValueService

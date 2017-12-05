@@ -50,7 +50,7 @@ describe('DesignSpecificationDetailService', () => {
     it('gets a design specification detail', () => {
       db.designSpecificationDetail.find = mockResolve({})
 
-      return target.getDesignSpecificationDetailById(1, testTx).then((data) => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then((data) => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -60,7 +60,7 @@ describe('DesignSpecificationDetailService', () => {
       db.designSpecificationDetail.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getDesignSpecificationDetailById(1, testTx).then(() => {}, () => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, () => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail Not Found for' +
           ' requested id')
@@ -70,75 +70,8 @@ describe('DesignSpecificationDetailService', () => {
     it('rejects when find fails', () => {
       db.designSpecificationDetail.find = mockReject('error')
 
-      return target.getDesignSpecificationDetailById(1, testTx).then(() => {}, (err) => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetDesignSpecificationDetailsByIds', () => {
-    it('gets design specification details', () => {
-      db.designSpecificationDetail.batchFind = mockResolve([{}])
-
-      return target.batchGetDesignSpecificationDetailsByIds([1], testTx).then((data) => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1], testTx)
-        expect(data).toEqual([{}])
-      })
-    })
-
-    it('throws an error when not all requested ids are returned', () => {
-      db.designSpecificationDetail.batchFind = mockResolve([{}])
-      AppError.notFound = mock()
-
-      return target.batchGetDesignSpecificationDetailsByIds([1, 2], testTx).then(() => {}, () => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail not found for' +
-          ' all requested ids.')
-      })
-    })
-
-    it('rejects when batchFind fails', () => {
-      db.designSpecificationDetail.batchFind = mockReject('error')
-
-      return target.batchGetDesignSpecificationDetailsByIds([1, 2], testTx).then(() => {}, (err) => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchCreateDesignSpecificationDetails', () => {
-    it('creates design specification details', () => {
-      target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchCreate = mockResolve([{}])
-      AppUtil.createPostResponse = mock()
-
-      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{}])
-      })
-    })
-
-    it('rejects when batchCreate fails', () => {
-      target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchCreate = mockReject('error')
-
-      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.designSpecificationDetail.batchCreate = mockReject('error')
-
-      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })

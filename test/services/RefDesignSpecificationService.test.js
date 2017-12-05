@@ -25,9 +25,9 @@ describe('RefDesignSpecificationService', () => {
       db.refDesignSpecification.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getDesignSpecById(1).then(() => {}, () =>  {
+      return target.getDesignSpecById(1, { transactionId: 5 }).then(() => {}, () =>  {
         expect(db.refDesignSpecification.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('RefDesignSpec Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] RefDesignSpec Not Found for requested id')
 
       })
     })

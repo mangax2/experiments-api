@@ -22,19 +22,20 @@ describe('SecurityService', () => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
         expect(HttpUtil.get).toBeCalled()
         expect(data.length).toBe(0)
+        HttpUtil.get.mockReset()
+        HttpUtil.get.mockClear()
       })
-      HttpUtil.get.mockReset()
-      HttpUtil.get.mockClear()
     })
     it('Calls The PingUtil and returns groupIds', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }, { id: 'group2' }] } })
-      return target.getGroupsByUserId('kprat1')
-      expect(PingUtil.getMonsantoHeader).toBeCalled()
-      expect(HttpUtil.get).toBeCalled()
-      expect(response.length).toBe(2)
-      HttpUtil.get.mockReset()
-      HttpUtil.get.mockClear()
+      return target.getGroupsByUserId('kprat1').then((response) => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.get).toBeCalled()
+        expect(response.length).toBe(2)
+        HttpUtil.get.mockReset()
+        HttpUtil.get.mockClear()
+      })
     })
 
   })
@@ -160,9 +161,8 @@ describe('SecurityService', () => {
     })
 
 
-    it('Doesnot call getUserPermissionsForExperiment and throws error when we are trying check' +
-      ' for an' +
-      ' invalid experimentId', () => {
+    it('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
+      ' for an invalid experimentId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
@@ -175,11 +175,8 @@ describe('SecurityService', () => {
       })
     })
 
-
-
-    it('Doesnot call getUserPermissionsForExperiment and throws error when we are trying check' +
-      ' for an' +
-      ' invalid TemplateId', () => {
+    it('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
+      ' for an invalid TemplateId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
@@ -192,6 +189,14 @@ describe('SecurityService', () => {
       })
     })
 
+    it('throws an error when userId is not set', () => {
+      AppError.badRequest = mock('')
+      db.experiments.find = mock()
+
+      expect(() => target.permissionsCheck(1, {}, true, testTx)).toThrow()
+      expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+      expect(db.experiments.find).not.toHaveBeenCalled()
+    })
   })
 
   describe('permissionsCheckForExperiments', () => {

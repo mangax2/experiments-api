@@ -18,23 +18,27 @@ class SecurityService {
 
   @Transactional('permissionsCheck')
   permissionsCheck(id, context, isTemplate, tx) {
-    return db.experiments.find(id, isTemplate, tx)
-      .then((data) => {
-        if (!data) {
-          const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
-            : 'Experiment Not Found for requested experimentId'
-          logger.error(`${errorMessage} = ${id}`)
-          throw AppError.notFound(errorMessage)
-        } else {
-          return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
-            if (result.length === 0) {
-              logger.error(`Access denied for ${context.userId} on experimentId ${id}`)
-              throw AppError.unauthorized('Access denied')
-            }
-            return result
-          })
-        }
-      })
+    if (context.userId) {
+      return db.experiments.find(id, isTemplate, tx)
+        .then((data) => {
+          if (!data) {
+            const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
+              : 'Experiment Not Found for requested experimentId'
+            logger.error(`${errorMessage} = ${id}`)
+            throw AppError.notFound(errorMessage)
+          } else {
+            return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
+              if (result.length === 0) {
+                logger.error(`Access denied for ${context.userId} on experimentId ${id}`)
+                throw AppError.unauthorized('Access denied')
+              }
+              return result
+            })
+          }
+        })
+    }
+
+    throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
   }
 
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()

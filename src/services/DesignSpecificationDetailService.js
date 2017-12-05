@@ -18,8 +18,8 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getDesignSpecificationDetailsByExperimentId')
-  getDesignSpecificationDetailsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getDesignSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
@@ -107,8 +107,8 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getAdvancedParameters')
-  getAdvancedParameters(experimentId, isTemplate, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+  getAdvancedParameters(experimentId, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
       .then(() => Promise.all([db.refDesignSpecification.all(),
         db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)]))
       .then((results) => {

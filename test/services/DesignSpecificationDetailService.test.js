@@ -18,7 +18,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{}])
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then((data) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then((data) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -28,7 +28,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockReject('error')
 
-      return target.getDesignSpecificationDetailsByExperimentId(1,false, testTx).then(() => {}, (err) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -38,8 +38,8 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.designSpecificationDetail.findAllByExperimentId = mock()
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

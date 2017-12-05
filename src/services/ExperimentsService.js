@@ -118,7 +118,7 @@ class ExperimentsService {
   }
 
   @Transactional('getExperimentById')
-  getExperimentById(id, isTemplate, tx) {
+  getExperimentById(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
@@ -251,14 +251,15 @@ class ExperimentsService {
                   value: String(requestBody.id),
                   experimentId,
                 }
-                tagsPromise.push(this.getExperimentById(experimentId, false, tx).then((result) => {
-                  const tags = _.map(result.tags, (tag) => {
-                    tag.experimentId = experimentId
-                    return tag
-                  })
-                  tags.push(newTag)
-                  return this.tagService.saveTags(tags, experimentId, context, false)
-                }))
+                tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                  .then((result) => {
+                    const tags = _.map(result.tags, (tag) => {
+                      tag.experimentId = experimentId
+                      return tag
+                    })
+                    tags.push(newTag)
+                    return this.tagService.saveTags(tags, experimentId, context, false)
+                  }))
               })
               return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),

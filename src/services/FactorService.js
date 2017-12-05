@@ -24,8 +24,8 @@ class FactorService {
   getAllFactors = tx => db.factor.all(tx)
 
   @Transactional('getFactorsByExperimentId')
-  getFactorsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getFactorsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.factor.findByExperimentId(id, tx))
   }
 
@@ -60,12 +60,6 @@ class FactorService {
         return data
       }
     })
-
-  @Transactional('deleteFactorsForExperimentId')
-  deleteFactorsForExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
-      .then(() => db.factor.removeByExperimentId(id, tx))
-  }
 }
 
 module.exports = FactorService

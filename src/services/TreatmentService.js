@@ -23,8 +23,8 @@ class TreatmentService {
   }
 
   @Transactional('getTreatmentsByExperimentId')
-  getTreatmentsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getTreatmentsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
@@ -67,12 +67,6 @@ class TreatmentService {
         return data
       }
     })
-
-  @Transactional('deleteTreatmentsForExperimentId')
-  deleteTreatmentsForExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
-      .then(() => db.treatment.removeByExperimentId(id, tx))
-  }
 }
 
 module.exports = TreatmentService

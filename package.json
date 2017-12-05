@@ -40,6 +40,7 @@
     "promise-timeout": "^1.1.1",
     "superagent": "3.4.4",
     "swagger-tools": "0.10.1",
+    "uuid": "3.1.0",
     "validator": "6.2.1"
   },
   "devDependencies": {

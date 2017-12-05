@@ -386,8 +386,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -396,8 +396,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unit.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

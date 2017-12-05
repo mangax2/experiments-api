@@ -18,8 +18,8 @@ class UnitSpecificationDetailService {
   }
 
   @Transactional('getUnitSpecificationDetailsByExperimentId')
-  getUnitSpecificationDetailsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getUnitSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
   }
 

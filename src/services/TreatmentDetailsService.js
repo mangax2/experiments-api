@@ -17,12 +17,12 @@ class TreatmentDetailsService {
   }
 
   @Transactional('getAllTreatmentDetails')
-  getAllTreatmentDetails(experimentId, isTemplate, tx) {
+  getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
     return Promise.all([
-      this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, tx),
+      this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, context, tx),
       this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-      this.factorService.getFactorsByExperimentId(experimentId, isTemplate, tx),
+      this.factorService.getFactorsByExperimentId(experimentId, isTemplate, context, tx),
     ]).then((fullTreatmentDetails) => {
       const groupedFactors = _.groupBy(fullTreatmentDetails[3], 'id')
 

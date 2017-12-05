@@ -26,7 +26,7 @@ describe('UnitSpecificationService', () => {
 
       return target.getUnitSpecificationById(1, { transactionId: 5 }).then(() => {}, () => {
         expect(db.unitSpecification.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] Unit Specification Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Not Found for requested id')
       })
     })
 

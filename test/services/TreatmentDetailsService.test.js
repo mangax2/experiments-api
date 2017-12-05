@@ -61,11 +61,11 @@ describe('TreatmentDetailsService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve(factorLevels)
       target.factorService.getFactorsByExperimentId = mockResolve(factors)
 
-      return target.getAllTreatmentDetails(1,false, testTx).then((data) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
+      return target.getAllTreatmentDetails(1, false, testContext, testTx).then((data) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(data).toEqual(expectedData)
       })
     })
@@ -76,11 +76,11 @@ describe('TreatmentDetailsService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
 
-      return target.getAllTreatmentDetails(1,false,testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
+      return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(err).toEqual('error')
       })
     })
@@ -91,11 +91,11 @@ describe('TreatmentDetailsService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
 
-      return target.getAllTreatmentDetails(1,false,testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
+      return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(err).toEqual('error')
       })
     })
@@ -106,11 +106,11 @@ describe('TreatmentDetailsService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject('error')
       target.factorService.getFactorsByExperimentId = mockResolve()
 
-      return target.getAllTreatmentDetails(1,false,testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
+      return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(err).toEqual('error')
       })
     })
@@ -121,11 +121,11 @@ describe('TreatmentDetailsService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockReject('error')
 
-      return target.getAllTreatmentDetails(1,false,testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1,false, testTx)
+      return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(err).toEqual('error')
       })
     })

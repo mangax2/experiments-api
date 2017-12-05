@@ -13,7 +13,7 @@ class ExperimentSummaryService {
 
   @Transactional('getExperimentSummaryById')
   getExperimentSummaryById(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.experimentSummary.find(id, tx)
         .then((data) => {
           if (!data) {

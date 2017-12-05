@@ -200,7 +200,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockReject('error')
 
-      return target.getEntityTagsByTagFilters(['tag1'], ['val1'], { transactionId: 5 }).then(() => {}, (err) => {
+      return target.getEntityTagsByTagFilters(['tag1'], ['val1'], false, { transactionId: 5 }).then(() => {}, (err) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
         expect(err).toEqual('error')
       })

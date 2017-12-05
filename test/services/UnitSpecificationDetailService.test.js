@@ -18,7 +18,7 @@ describe('UnitSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unitSpecificationDetail.findAllByExperimentId = mockResolve([{}])
 
-      return target.getUnitSpecificationDetailsByExperimentId(1, false, testTx).then((data) => {
+      return target.getUnitSpecificationDetailsByExperimentId(1, false, testContext, testTx).then((data) => {
         expect(db.unitSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -28,7 +28,7 @@ describe('UnitSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unitSpecificationDetail.findAllByExperimentId = mockReject('error')
 
-      return target.getUnitSpecificationDetailsByExperimentId(1, false, testTx).then(() => {}, (err) => {
+      return target.getUnitSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.unitSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -38,8 +38,8 @@ describe('UnitSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.unitSpecificationDetail.findAllByExperimentId = mock()
 
-      return target.getUnitSpecificationDetailsByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getUnitSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unitSpecificationDetail.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -162,7 +162,7 @@ describe('UnitSpecificationDetailService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {
-        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }], testContext, testTx)
         expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }, { 'experimentId': -1 }], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
@@ -181,7 +181,7 @@ describe('UnitSpecificationDetailService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }], testContext, testTx)
         expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }, { 'experimentId': -1 }], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
@@ -201,7 +201,7 @@ describe('UnitSpecificationDetailService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ experimentId: -1 }], testContext, testTx)
         expect(target.createUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
@@ -221,7 +221,7 @@ describe('UnitSpecificationDetailService', () => {
         updates: [{}],
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testTx)
+        expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
         expect(target.updateUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(target.createUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()

@@ -143,7 +143,7 @@ describe('FactorLevelService', () => {
 
       return target.getFactorLevelById(1, { transactionId: 5 }).then(() => {}, () => {
         expect(db.factorLevel.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] Factor Level Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
       })
     })
 

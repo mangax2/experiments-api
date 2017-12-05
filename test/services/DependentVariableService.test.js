@@ -69,8 +69,8 @@ describe('DependentVariableService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.dependentVariable.findByExperimentId = mockResolve()
 
-      return target.getDependentVariablesByExperimentId(1,false, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDependentVariablesByExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.findByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -79,8 +79,8 @@ describe('DependentVariableService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.dependentVariable.findByExperimentId = mock()
 
-      return target.getDependentVariablesByExperimentId(1,false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDependentVariablesByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.findByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -112,7 +112,7 @@ describe('DependentVariableService', () => {
 
       return target.getDependentVariableById(1, { transactionId: 5 }).then(() => {}, () => {
         expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('[[5]] Dependent Variable Not Found for' +
+        expect(AppError.notFound).toHaveBeenCalledWith('Dependent Variable Not Found for' +
           ' requested id')
       })
     })
@@ -174,8 +174,8 @@ describe('DependentVariableService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.dependentVariable.removeByExperimentId = mockResolve()
 
-      return target.deleteDependentVariablesForExperimentId(1, false, {}, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.deleteDependentVariablesForExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.removeByExperimentId).toHaveBeenCalledWith(testTx, 1)
       })
     })
@@ -184,8 +184,8 @@ describe('DependentVariableService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.dependentVariable.removeByExperimentId = mock()
 
-      return target.deleteDependentVariablesForExperimentId(1, false, {}, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.deleteDependentVariablesForExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.removeByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

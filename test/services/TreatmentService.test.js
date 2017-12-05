@@ -54,8 +54,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockResolve([{}])
 
-      return target.getTreatmentsByExperimentId(1, false, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then((data) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -65,8 +65,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockReject('error')
 
-      return target.getTreatmentsByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -76,8 +76,8 @@ describe('TreatmentService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.treatment.findAllByExperimentId = mockReject('error')
 
-      return target.getTreatmentsByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -206,41 +206,6 @@ describe('TreatmentService', () => {
 
       return target.batchDeleteTreatments([1, 2], {}, testTx).then(() => {}, (err) => {
         expect(db.treatment.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('deleteTreatmentsForExperimentId', () => {
-    it('deletes treatments', () => {
-      target.experimentService.getExperimentById = mockResolve()
-      db.treatment.removeByExperimentId = mockResolve([1])
-
-      return target.deleteTreatmentsForExperimentId(1, false, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.treatment.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual([1])
-      })
-    })
-
-    it('rejects when removeByExperimentId fails', () => {
-      target.experimentService.getExperimentById = mockResolve()
-      db.treatment.removeByExperimentId = mockReject('error')
-
-      return target.deleteTreatmentsForExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.treatment.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when getExperimentById fails', () => {
-      target.experimentService.getExperimentById = mockReject('error')
-      db.treatment.removeByExperimentId = mockReject('error')
-
-      return target.deleteTreatmentsForExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.treatment.removeByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })

@@ -77,6 +77,42 @@ describe('DesignSpecificationDetailService', () => {
     })
   })
 
+  describe('batchCreateDesignSpecificationDetails', () => {
+    it('creates design specification details', () => {
+      target.validator.validate = mockResolve()
+      db.designSpecificationDetail.batchCreate = mockResolve([{}])
+      AppUtil.createPostResponse = mock()
+
+      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{}])
+      })
+    })
+
+    it('rejects when batchCreate fails', () => {
+      target.validator.validate = mockResolve()
+      db.designSpecificationDetail.batchCreate = mockReject('error')
+
+      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(err).toEqual('error')
+      })
+    })
+
+    it('rejects when validate fails', () => {
+      target.validator.validate = mockReject('error')
+      db.designSpecificationDetail.batchCreate = mockReject('error')
+
+      return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
+        expect(db.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
+        expect(err).toEqual('error')
+      })
+    })
+  })
+
   describe('batchUpdateDesignSpecificationDetails', () => {
     it('updates design specification details', () => {
       target.validator.validate = mockResolve()

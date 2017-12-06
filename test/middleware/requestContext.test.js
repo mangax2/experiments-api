@@ -20,6 +20,16 @@ describe('requestContextMiddlewareFunction', () => {
     expect(nextFunc).toHaveBeenCalled()
   })
 
+  it('returns the given request id if one is provided', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=kmccl', 'X-Request-Id': '25' } }
+    const res = { set: mock() }
+
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalledWith('X-Request-Id', '25')
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
   it('calls next if headers are valid and is a PUT call', () => {
     const nextFunc = mock()
     const req = { method: 'PUT', headers: validHeaders }

@@ -141,7 +141,7 @@ describe('FactorLevelService', () => {
       db.factorLevel.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getFactorLevelById(1, { transactionId: 5 }).then(() => {}, () => {
+      return target.getFactorLevelById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.factorLevel.find).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
       })

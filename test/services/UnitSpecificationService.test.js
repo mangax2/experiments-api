@@ -24,7 +24,7 @@ describe('UnitSpecificationService', () => {
       db.unitSpecification.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getUnitSpecificationById(1, { transactionId: 5 }).then(() => {}, () => {
+      return target.getUnitSpecificationById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.unitSpecification.find).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Not Found for requested id')
       })

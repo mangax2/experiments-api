@@ -24,7 +24,7 @@ describe('UnitTypeService', () => {
       db.unitType.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getUnitTypeById(1, { transactionId: 5 }).then(() => {}, () => {
+      return target.getUnitTypeById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.unitType.find).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Unit Type Not Found for requested id')
       })

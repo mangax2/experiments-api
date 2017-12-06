@@ -118,7 +118,27 @@ const duplicateFactorLevelScript =
   ")" +
   "SELECT * " +
   "INTO TEMP new_factor_levels " +
-  "FROM temp_factor_levels;"
+  "FROM temp_factor_levels;";
+
+const duplicateFactorLevelAssociationScript =
+  "SELECT fl.id as old_id, n.id as new_id " +
+  "INTO TEMP mapped_factor_level_ids " +
+  "FROM factor_level fl " +
+    "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
+    "INNER JOIN new_factor_levels n ON n.factor_id = mfi.new_id AND fl.value = n.value; " +
+  "INSERT INTO factor_level_association " +
+  "SELECT (c).* FROM (" +
+    "SELECT fla " +
+      "#= hstore('id', nextval(pg_get_serial_sequence('factor_level_association', 'id'))::text) " +
+      "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
+      "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
+      "#= hstore('created_user_id', $2) " +
+      "#= hstore('modified_user_id', $2) " +
+      "#= hstore('associated_level_id', mflia.new_id::text) " +
+      "#= hstore('nested_level_id', mflin.new_id::text) AS c " +
+    "FROM factor_level_association fla " +
+      "INNER JOIN mapped_factor_level_ids mflia ON fla.associated_level_id = mflia.old_id " +
+      "INNER JOIN mapped_factor_level_ids mflin ON fla.nested_level_id = mflin.old_id) sub;"
 
 const duplicateTreatmentScript =
   "WITH temp_new_treatments AS (" +
@@ -140,12 +160,6 @@ const duplicateTreatmentScript =
   "FROM temp_new_treatments;"
 
 const duplicateCombinationElementScript =
-  "SELECT fl.id as old_id, n.id as new_id " +
-  "INTO TEMP mapped_factor_level_ids " +
-  "FROM factor_level fl " +
-    "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
-    "INNER JOIN new_factor_levels n ON n.factor_id = mfi.new_id AND fl.value = n.value; " +
-
   "SELECT t.id AS old_id, n.id AS new_id " +
   "INTO TEMP mapped_treatment_ids " +
   "FROM treatment t " +
@@ -289,6 +303,7 @@ module.exports = (rep, pgp) => ({
         duplicateOwnersScript +
         duplicateFactorScript +
         duplicateFactorLevelScript +
+        duplicateFactorLevelAssociationScript +
         duplicateDependentVariableScript +
         duplicateTreatmentScript +
         duplicateCombinationElementScript +

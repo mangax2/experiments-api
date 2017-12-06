@@ -24,12 +24,12 @@ class SecurityService {
           if (!data) {
             const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
               : 'Experiment Not Found for requested experimentId'
-            logger.error(`${errorMessage} = ${id}`)
+            logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
             throw AppError.notFound(errorMessage)
           } else {
             return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
               if (result.length === 0) {
-                logger.error(`[[${context.requestId}]] Access denied for ${context.userId} on experimentId ${id}`)
+                logger.error(`Access denied for ${context.userId} on id ${id}`)
                 throw AppError.unauthorized('Access denied')
               }
               return result

@@ -75,14 +75,14 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use((err, req, res, next) => {
     if (err) {
       if (_.isArray(err)) {
-        logError(err)
+        logError(err, req.context)
         return res.status(400).json(err)
       } else if (err.status) {
-        logError(err)
+        logError(err, req.context)
         return res.status(err.status).json(err)
       }
 
-      logError(err)
+      logError(err, req.context)
 
       if (Object.hasOwnProperty.call(err, 'table') && Object.hasOwnProperty.call(err, 'schema')) {
         const pgerror = {
@@ -95,7 +95,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       return res.status(500).json(err)
     }
 
-    logger.error(err)
+    logger.error(err, req.context)
     return res.status(500).json(err)
   })
 
@@ -107,11 +107,11 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     return logger.info(`Listening at ${url}`)
   })
 
-  const logError = (err) => {
+  const logError = (err, context) => {
     if (err.stack) {
-      logger.error(err.stack)
+      logger.error(`[[${context.requestId}]] ${err.stack}`)
     } else {
-      logger.error(err)
+      logger.error(`[[${context.requestId}]] ${err}`)
     }
   }
 

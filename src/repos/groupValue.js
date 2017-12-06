@@ -9,8 +9,6 @@ module.exports = (rep, pgp) => ({
 
   batchFind: (ids, tx = rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids]),
 
-  findAllByGroupId: (groupId, tx = rep) => tx.any(`${genericSqlStatement} WHERE gv.group_id = $1`, groupId),
-
   batchFindAllByExperimentId: (experimentId, tx = rep) => {
     if (!experimentId) {
       return Promise.reject('Invalid or missing experiment id.')
@@ -57,15 +55,6 @@ module.exports = (rep, pgp) => ({
     const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
     return tx.any(query)
-  },
-
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM group_value WHERE id = $1 RETURNING id', id),
-
-  batchRemove: (ids, tx = rep) => {
-    if (!ids || ids.length === 0) {
-      return Promise.resolve([])
-    }
-    return tx.any('DELETE FROM group_value WHERE id IN ($1:csv) RETURNING id', [ids])
   },
 
   findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM group_value WHERE group_id = $1 and name = $2', keys),

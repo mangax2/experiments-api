@@ -29,7 +29,7 @@ class SecurityService {
           } else {
             return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
               if (result.length === 0) {
-                logger.error(`Access denied for ${context.userId} on experimentId ${id}`)
+                logger.error(`[[${context.requestId}]] Access denied for ${context.userId} on experimentId ${id}`)
                 throw AppError.unauthorized('Access denied')
               }
               return result

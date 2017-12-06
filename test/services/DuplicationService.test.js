@@ -17,8 +17,8 @@ describe('DuplicationService', () => {
       target.duplicateTagsForExperiments = jest.fn(() => Promise.resolve())
 
       return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext,'copy', testTx).then(() => {
-        expect(target.getAllTagsToDuplicate).toBeCalledWith([1],false)
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false,testContext,testTx)
+        expect(target.getAllTagsToDuplicate).toBeCalledWith([1], false, testContext)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false, testContext, testTx)
         expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext,false)
       })
     })
@@ -30,9 +30,9 @@ describe('DuplicationService', () => {
       target.duplicateTagsForExperiments = jest.fn(() => Promise.resolve())
 
       return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 ,isTemplate:true}, testContext,'conversion', testTx).then(() => {
-        expect(target.getAllTagsToDuplicate).toBeCalledWith([1],false)
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, true,testContext,testTx)
-        expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext,true)
+        expect(target.getAllTagsToDuplicate).toBeCalledWith([1], false, testContext)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, true, testContext, testTx)
+        expect(target.duplicateTagsForExperiments).toBeCalledWith({tags: null}, {ids: null}, testContext, true)
       })
     })
 
@@ -87,11 +87,11 @@ describe('DuplicationService', () => {
       const target = new DuplicationService()
       target.tagService = { getTagsByExperimentId: jest.fn(() => Promise.resolve()) }
 
-      return target.getAllTagsToDuplicate([3, 5, 7],false).then(() => {
+      return target.getAllTagsToDuplicate([3, 5, 7], false, {}).then(() => {
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledTimes(3)
-        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(3,false)
-        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(5,false)
-        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(7,false)
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(3, false, {})
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(5, false, {})
+        expect(target.tagService.getTagsByExperimentId).toBeCalledWith(7, false, {})
       })
     })
 

@@ -34,7 +34,7 @@ const cfServices = {
       host: 'kafka.tst.datahub.internal:9093',
       topics: {
         repPackingTopic:'rsr.field-experiments.test.incoming.json',
-        repPackingResultTopic: 'rsr.field-experiments.rep-packing-results.outgoing.json'
+        repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json'
       }
     }
   }

@@ -5,10 +5,10 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('RefDesignSpecService')
 
 class RefDesignSpecificationService {
-  getDesignSpecById = id => db.refDesignSpecification.find(id)
+  getDesignSpecById = (id, context) => db.refDesignSpecification.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`RefDesignSpec Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] RefDesignSpec Not Found for requested id = ${id}`)
         throw AppError.notFound('RefDesignSpec Not Found for requested id')
       } else {
         return data

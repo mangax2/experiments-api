@@ -23,16 +23,16 @@ class TreatmentService {
   }
 
   @Transactional('getTreatmentsByExperimentId')
-  getTreatmentsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getTreatmentsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
   @Transactional('getTreatmentById')
-  getTreatmentById = (id, tx) => db.treatment.find(id, tx)
+  getTreatmentById = (id, context, tx) => db.treatment.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Treatment Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Treatment Not Found for requested id = ${id}`)
         throw AppError.notFound('Treatment Not Found for requested id')
       } else {
         return data
@@ -40,10 +40,10 @@ class TreatmentService {
     })
 
   @Transactional('getTreatmentById')
-  batchGetTreatmentByIds = (ids, tx) => db.treatment.batchFind(ids, tx)
+  batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Treatment not found for all requested ids.')
+        logger.error(`[[${context.requestId}]] Treatment not found for all requested ids.`)
         throw AppError.notFound('Treatment not found for all requested ids.')
       } else {
         return data
@@ -57,33 +57,16 @@ class TreatmentService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @Transactional('deleteTreatment')
-  deleteTreatment = (id, tx) => db.treatment.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Treatment Not Found for requested id = ${id}`)
-        throw AppError.notFound('Treatment Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteTreatments')
-  batchDeleteTreatments = (ids, tx) => db.treatment.batchRemove(ids, tx)
+  batchDeleteTreatments = (ids, context, tx) => db.treatment.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all treatments requested for delete were found')
+        logger.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
         throw AppError.notFound('Not all treatments requested for delete were found')
       } else {
         return data
       }
     })
-
-  @Transactional('deleteTreatmentsForExperimentId')
-  deleteTreatmentsForExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
-      .then(() => db.treatment.removeByExperimentId(id, tx))
-  }
 }
 
 module.exports = TreatmentService

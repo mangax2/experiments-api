@@ -5,10 +5,10 @@ import AppError from './utility/AppError'
 const logger = log4js.getLogger('UnitTypeService')
 
 class UnitTypeService {
-  getUnitTypeById = id => db.unitType.find(id)
+  getUnitTypeById = (id, context) => db.unitType.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Unit Type Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Unit Type Not Found for requested id = ${id}`)
         throw AppError.notFound('Unit Type Not Found for requested id')
       } else {
         return data

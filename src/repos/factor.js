@@ -66,16 +66,12 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM factor WHERE id=$1 RETURNING id', id),
-
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM factor WHERE id IN ($1:csv) RETURNING id', [ids])
   },
-
-  removeByExperimentId: (experimentId, tx = rep) => tx.any('DELETE FROM factor WHERE experiment_id = $1 RETURNING id', experimentId),
 
   findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys),
 

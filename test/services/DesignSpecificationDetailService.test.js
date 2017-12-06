@@ -18,7 +18,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{}])
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then((data) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then((data) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
@@ -28,7 +28,7 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockReject('error')
 
-      return target.getDesignSpecificationDetailsByExperimentId(1,false, testTx).then(() => {}, (err) => {
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -38,8 +38,8 @@ describe('DesignSpecificationDetailService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.designSpecificationDetail.findAllByExperimentId = mock()
 
-      return target.getDesignSpecificationDetailsByExperimentId(1, false,testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -50,7 +50,7 @@ describe('DesignSpecificationDetailService', () => {
     it('gets a design specification detail', () => {
       db.designSpecificationDetail.find = mockResolve({})
 
-      return target.getDesignSpecificationDetailById(1, testTx).then((data) => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then((data) => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -60,7 +60,7 @@ describe('DesignSpecificationDetailService', () => {
       db.designSpecificationDetail.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getDesignSpecificationDetailById(1, testTx).then(() => {}, () => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, () => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail Not Found for' +
           ' requested id')
@@ -70,39 +70,8 @@ describe('DesignSpecificationDetailService', () => {
     it('rejects when find fails', () => {
       db.designSpecificationDetail.find = mockReject('error')
 
-      return target.getDesignSpecificationDetailById(1, testTx).then(() => {}, (err) => {
+      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetDesignSpecificationDetailsByIds', () => {
-    it('gets design specification details', () => {
-      db.designSpecificationDetail.batchFind = mockResolve([{}])
-
-      return target.batchGetDesignSpecificationDetailsByIds([1], testTx).then((data) => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1], testTx)
-        expect(data).toEqual([{}])
-      })
-    })
-
-    it('throws an error when not all requested ids are returned', () => {
-      db.designSpecificationDetail.batchFind = mockResolve([{}])
-      AppError.notFound = mock()
-
-      return target.batchGetDesignSpecificationDetailsByIds([1, 2], testTx).then(() => {}, () => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail not found for' +
-          ' all requested ids.')
-      })
-    })
-
-    it('rejects when batchFind fails', () => {
-      db.designSpecificationDetail.batchFind = mockReject('error')
-
-      return target.batchGetDesignSpecificationDetailsByIds([1, 2], testTx).then(() => {}, (err) => {
-        expect(db.designSpecificationDetail.batchFind).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
     })

@@ -73,9 +73,9 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
-  getExperiments(queryString, isTemplate) {
+  getExperiments(queryString, isTemplate, context) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString, isTemplate)
+      return this.getExperimentsByFilters(queryString, isTemplate, context)
         .then(data => this.populateOwners(data))
     }
     return this.getAllExperiments(isTemplate)
@@ -106,30 +106,30 @@ class ExperimentsService {
   }
 
   @Transactional('verifyExperimentExists')
-  static verifyExperimentExists(id, isTemplate, tx) {
+  static verifyExperimentExists(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       }
     })
   }
 
   @Transactional('getExperimentById')
-  getExperimentById(id, isTemplate, tx) {
+  getExperimentById(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       } else {
         return Promise.all(
           [
             this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, isTemplate),
+            this.tagService.getTagsByExperimentId(id, isTemplate, context),
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
@@ -152,7 +152,7 @@ class ExperimentsService {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
-              logger.error(`${errorMessage} = ${id}`)
+              logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage)
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
@@ -185,19 +185,19 @@ class ExperimentsService {
       .then(() => db.experiments.remove(id, isTemplate)
         .then((data) => {
           if (!data) {
-            logger.error(`Experiment Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Not Found for requested experimentId')
           } else {
             return this.tagService.deleteTagsForExperimentId(id).then(() => data)
           }
         }))
 
-  getExperimentsByFilters(queryString, isTemplate) {
+  getExperimentsByFilters(queryString, isTemplate, context) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
       return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories,
-        lowerCaseTagValues, isTemplate)
+        lowerCaseTagValues, isTemplate, context)
         .then((eTags) => {
           if (eTags.length === 0) {
             return []
@@ -251,14 +251,15 @@ class ExperimentsService {
                   value: String(requestBody.id),
                   experimentId,
                 }
-                tagsPromise.push(this.getExperimentById(experimentId, false, tx).then((result) => {
-                  const tags = _.map(result.tags, (tag) => {
-                    tag.experimentId = experimentId
-                    return tag
-                  })
-                  tags.push(newTag)
-                  return this.tagService.saveTags(tags, experimentId, context, false)
-                }))
+                tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                  .then((result) => {
+                    const tags = _.map(result.tags, (tag) => {
+                      tag.experimentId = experimentId
+                      return tag
+                    })
+                    tags.push(newTag)
+                    return this.tagService.saveTags(tags, experimentId, context, false)
+                  }))
               })
               return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),

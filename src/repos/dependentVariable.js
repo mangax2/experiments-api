@@ -19,8 +19,6 @@ module.exports = (rep, pgp) => ({
     ' id=$5 RETURNING *', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.id, dependentVariable.questionCode]),
   )),
 
-  remove: id => rep.oneOrNone('delete from dependent_variable where id=$1 RETURNING id', id),
-
   removeByExperimentId: (tx, experimentId) => tx.any('DELETE FROM dependent_variable where experiment_id=$1 RETURNING id', experimentId),
 
   findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM dependent_variable where experiment_id=$1 and name= $2', keys),

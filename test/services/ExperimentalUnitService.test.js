@@ -58,8 +58,8 @@ describe('ExperimentalUnitService', () => {
       target.treatmentService.getTreatmentById = mockResolve()
       db.unit.findAllByTreatmentId = mockResolve()
 
-      return target.getExperimentalUnitsByTreatmentId(1, testTx).then(() => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {
+        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.unit.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -68,8 +68,8 @@ describe('ExperimentalUnitService', () => {
       target.treatmentService.getTreatmentById = mockResolve()
       db.unit.findAllByTreatmentId = mockReject('error')
 
-      return target.getExperimentalUnitsByTreatmentId(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.unit.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -79,77 +79,9 @@ describe('ExperimentalUnitService', () => {
       target.treatmentService.getTreatmentById = mockReject('error')
       db.unit.findAllByTreatmentId = mock()
 
-      return target.getExperimentalUnitsByTreatmentId(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
+        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.unit.findAllByTreatmentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetExperimentalUnitsByTreatmentIds', () => {
-    it('calls batchGetTreatmentByIds and batchFindAllByTreatmentIds', () => {
-      target.treatmentService.batchGetTreatmentByIds = mockResolve()
-      db.unit.batchFindAllByTreatmentIds = mockResolve()
-
-      return target.batchGetExperimentalUnitsByTreatmentIds([1], testTx).then(() => {
-        expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith([1], testTx)
-        expect(db.unit.batchFindAllByTreatmentIds).toHaveBeenCalledWith([1], testTx)
-      })
-    })
-
-    it('rejects when call to batchFindAllByTreatmentIds fails', () => {
-      target.treatmentService.batchGetTreatmentByIds = mockResolve()
-      db.unit.batchFindAllByTreatmentIds = mockReject('error')
-
-      return target.batchGetExperimentalUnitsByTreatmentIds(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith(1, testTx)
-        expect(db.unit.batchFindAllByTreatmentIds).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when call to batchGetTreatmentByIds fails', () => {
-      target.treatmentService.batchGetTreatmentByIds = mockReject('error')
-      db.unit.batchFindAllByTreatmentIds = mock()
-
-      return target.batchGetExperimentalUnitsByTreatmentIds(1, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith(1, testTx)
-        expect(db.unit.batchFindAllByTreatmentIds).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchGetExperimentalUnitsByGroupIds', () => {
-    it('calls batchGetGroupsByIds and batchFindAllByGroupIds', () => {
-      target.groupService.batchGetGroupsByIds = mockResolve()
-      db.unit.batchFindAllByGroupIds = mockResolve()
-
-      return target.batchGetExperimentalUnitsByGroupIds([1], testTx).then(() => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith([1], testTx)
-        expect(db.unit.batchFindAllByGroupIds).toHaveBeenCalledWith([1], testTx)
-      })
-    })
-
-    it('rejects when call to batchGetGroupsByIds fails', () => {
-      target.groupService.batchGetGroupsByIds = mockResolve()
-      db.unit.batchFindAllByGroupIds = mockReject('error')
-
-      return target.batchGetExperimentalUnitsByGroupIds(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith(1, testTx)
-        expect(db.unit.batchFindAllByGroupIds).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when call to batchFindAllByGroupIds fails', () => {
-      target.groupService.batchGetGroupsByIds = mockReject('error')
-      db.unit.batchFindAllByGroupIds = mock()
-
-      return target.batchGetExperimentalUnitsByGroupIds(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.batchGetGroupsByIds).toHaveBeenCalledWith(1, testTx)
-        expect(db.unit.batchFindAllByGroupIds).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
@@ -431,7 +363,7 @@ describe('ExperimentalUnitService', () => {
     it('calls find and returns data', () => {
       db.unit.find = mockResolve({})
 
-      return target.getExperimentalUnitById(1, testTx).then((data) => {
+      return target.getExperimentalUnitById(1, {}, testTx).then((data) => {
         expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -441,7 +373,7 @@ describe('ExperimentalUnitService', () => {
       db.unit.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getExperimentalUnitById(1, testTx).then(() => {}, () => {
+      return target.getExperimentalUnitById(1, {}, testTx).then(() => {}, () => {
         expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for' +
           ' requested id')
@@ -454,8 +386,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -464,8 +396,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.unit.findAllByExperimentId = mock()
 
-      return target.getExperimentalUnitsByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testTx)
+      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unit.findAllByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -552,32 +484,11 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('deleteExperimentalUnit', () => {
-    it('deletes and returns data', () => {
-      db.unit.remove = mockResolve({})
-
-      return target.deleteExperimentalUnit(1, testTx).then(() => {
-        expect(db.unit.remove).toHaveBeenCalledWith(1, testTx)
-      })
-    })
-
-    it('throws an error when returned data is undefined', () => {
-      db.unit.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteExperimentalUnit(1, testTx).then(() => {}, () => {
-        expect(db.unit.remove).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for' +
-          ' requested id')
-      })
-    })
-  })
-
   describe('batchDeleteExperimentalUnits', () => {
     it('successfully calls batchRemove and returns data', () => {
       db.unit.batchRemove = mockResolve([1])
 
-      return target.batchDeleteExperimentalUnits([1], testTx).then((data) => {
+      return target.batchDeleteExperimentalUnits([1], {}, testTx).then((data) => {
         expect(db.unit.batchRemove).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([1])
       })
@@ -587,7 +498,7 @@ describe('ExperimentalUnitService', () => {
       db.unit.batchRemove = mockResolve([null])
       AppError.notFound = mock()
 
-      return target.batchDeleteExperimentalUnits([1], testTx).then(() => {}, () => {
+      return target.batchDeleteExperimentalUnits([1], {}, testTx).then(() => {}, () => {
         expect(db.unit.batchRemove).toHaveBeenCalledWith([1], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for' +
           ' delete were found')
@@ -598,7 +509,7 @@ describe('ExperimentalUnitService', () => {
       db.unit.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
-      return target.batchDeleteExperimentalUnits([1, 2], testTx).then(() => {}, () => {
+      return target.batchDeleteExperimentalUnits([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.unit.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for' +
           ' delete were found')

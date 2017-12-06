@@ -13,77 +13,105 @@ describe('requestContextMiddlewareFunction', () => {
   it('calls next if headers are valid and is a POST call', () => {
     const nextFunc = mock()
     const req = { method: 'POST', headers: validHeaders }
+    const res = { set: mock() }
 
-    requestContextMiddlewareFunction(req, null, nextFunc)
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalled()
+    expect(nextFunc).toHaveBeenCalled()
+  })
+
+  it('returns the given request id if one is provided', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=kmccl', 'X-Request-Id': '25' } }
+    const res = { set: mock() }
+
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalledWith('X-Request-Id', '25')
     expect(nextFunc).toHaveBeenCalled()
   })
 
   it('calls next if headers are valid and is a PUT call', () => {
     const nextFunc = mock()
     const req = { method: 'PUT', headers: validHeaders }
+    const res = { set: mock() }
 
-    requestContextMiddlewareFunction(req, null, nextFunc)
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).toHaveBeenCalled()
   })
 
   it('calls next if headers are valid and is a PATCH call', () => {
     const nextFunc = mock()
     const req = { method: 'PATCH', headers: validHeaders }
+    const res = { set: mock() }
 
-    requestContextMiddlewareFunction(req, null, nextFunc)
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).toHaveBeenCalled()
   })
 
   it('calls next if headers are valid and is a DELETE call', () => {
     const nextFunc = mock()
     const req = { method: 'DELETE', headers: validHeaders }
+    const res = { set: mock() }
 
-    requestContextMiddlewareFunction(req, null, nextFunc)
+    requestContextMiddlewareFunction(req, res, nextFunc)
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).toHaveBeenCalled()
   })
 
   it('throws an error when called with undefined headers', () => {
       const nextFunc = mock()
       AppError.badRequest = mock('')
+      const res = { set: mock() }
 
-      expect(() => { requestContextMiddlewareFunction(invalidRequest1, null, nextFunc) }).toThrow()
+      expect(() => { requestContextMiddlewareFunction(invalidRequest1, res, nextFunc) }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+      expect(res.set).toHaveBeenCalled()
       expect(nextFunc).not.toHaveBeenCalled()
   })
 
   it('throws an error when called with empty headers', () => {
     const nextFunc = mock()
     AppError.badRequest = mock('')
+    const res = { set: mock() }
 
-    expect(() => { requestContextMiddlewareFunction(invalidRequest2, null, nextFunc) }).toThrow()
+    expect(() => { requestContextMiddlewareFunction(invalidRequest2, res, nextFunc) }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
   it('throws an error when called with invalid oauth_resourceownerinfo header', () => {
     const nextFunc = mock()
     AppError.badRequest = mock('')
+    const res = { set: mock() }
 
-    expect(() => { requestContextMiddlewareFunction(invalidRequest3, null, nextFunc) }).toThrow()
+    expect(() => { requestContextMiddlewareFunction(invalidRequest3, res, nextFunc) }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
   it('throws an error when called with no userId', () => {
     const nextFunc = mock()
     AppError.badRequest = mock('')
+    const res = { set: mock() }
 
-    expect(() => { requestContextMiddlewareFunction(invalidRequest4, null, nextFunc) }).toThrow()
+    expect(() => { requestContextMiddlewareFunction(invalidRequest4, res, nextFunc) }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).not.toHaveBeenCalled()
   })
 
   it('throws an error when called with empty userId', () => {
     const nextFunc = mock()
     AppError.badRequest = mock('')
+    const res = { set: mock() }
 
-    expect(() => { requestContextMiddlewareFunction(invalidRequest5, null, nextFunc) }).toThrow()
+    expect(() => { requestContextMiddlewareFunction(invalidRequest5, res, nextFunc) }).toThrow()
     expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+    expect(res.set).toHaveBeenCalled()
     expect(nextFunc).not.toHaveBeenCalled()
   })
 })

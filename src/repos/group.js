@@ -75,8 +75,6 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM "group" WHERE id=$1 RETURNING id', id),
-
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])

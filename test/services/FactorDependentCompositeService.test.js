@@ -478,8 +478,8 @@ describe('FactorDependentCompositeService', () => {
         dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
-      return target.getAllVariablesByExperimentId(1, false, testTx).then((data) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testTx)
+      return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
@@ -745,8 +745,8 @@ describe('FactorDependentCompositeService', () => {
         dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
-      return target.getAllVariablesByExperimentId(1, false, testTx).then((data) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testTx)
+      return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
@@ -762,8 +762,8 @@ describe('FactorDependentCompositeService', () => {
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject('error')
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve()
 
-      return target.getAllVariablesByExperimentId(1, false, testTx).then(() => {}, (err) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testTx)
+      return target.getAllVariablesByExperimentId(1, false, {}, testTx).then(() => {}, (err) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
@@ -794,7 +794,7 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.batchCreateDependentVariables = mockResolve()
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
       })
     })
@@ -804,7 +804,7 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
       return target.persistVariablesWithoutLevels(1, [], testContext, false, testTx).then(() => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
       })
     })
@@ -814,7 +814,7 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(err).toEqual('error')
       })
@@ -825,7 +825,7 @@ describe('FactorDependentCompositeService', () => {
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -1034,7 +1034,7 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1200,7 +1200,7 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
@@ -1420,7 +1420,7 @@ describe('FactorDependentCompositeService', () => {
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1633,7 +1633,7 @@ describe('FactorDependentCompositeService', () => {
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1761,9 +1761,9 @@ describe('FactorDependentCompositeService', () => {
             }
           }
         ], testContext, testTx)
-        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([2], testTx)
-        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([21,22], testTx)
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([2], {}, testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([21,22], {}, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1857,8 +1857,8 @@ describe('FactorDependentCompositeService', () => {
           }
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
-        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([12], testTx)
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([12], {}, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1931,9 +1931,9 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalledWith()
-        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([1,2], testTx)
-        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([11,12,21,22],testTx)
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([1,2], {}, testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([11,12,21,22], {}, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91,92], testTx)
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -2141,7 +2141,7 @@ describe('FactorDependentCompositeService', () => {
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
@@ -2355,7 +2355,7 @@ describe('FactorDependentCompositeService', () => {
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([92], testTx)
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
@@ -2559,7 +2559,7 @@ describe('FactorDependentCompositeService', () => {
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
-        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, testTx)
+        expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91], testTx)
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([

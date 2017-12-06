@@ -23,7 +23,7 @@ class TagService {
         const experimentIds = _.uniq(_.map(tags, 'experimentId'))
         const tagsRequest = this.createTagRequest(tags, experimentIds, isTemplate)
         return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(err)
+          logger.error(`[[${context.requestId}]] An error occurred while creating the tags.`, err)
           return Promise.reject(err)
         })
       }))
@@ -47,23 +47,23 @@ class TagService {
         })
         const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
         return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${experimentId}`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(err)
+          logger.error(`[[${context.requestId}]] An error occurred while saving the tags.`, err)
           return Promise.reject(err)
         })
       }))
   }
 
-  getTagsByExperimentId = (id, isTemplate) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header).then(result => result.body.tags).catch((err) => {
+  getTagsByExperimentId = (id, isTemplate, context) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header).then(result => result.body.tags).catch((err) => {
     if (err.status === 404) {
       return Promise.resolve([])
     }
-    logger.error(err)
+    logger.error(`[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
     return Promise.reject(err)
   }),
   )
 
   copyTags = (sourceExperimentId, targetExperimentId, context, isTemplate) =>
-    this.getTagsByExperimentId(sourceExperimentId, isTemplate).then((data) => {
+    this.getTagsByExperimentId(sourceExperimentId, isTemplate, context).then((data) => {
       const tags = _.map(data, t => ({
         category: t.category,
         value: t.value,
@@ -75,8 +75,8 @@ class TagService {
       return Promise.resolve()
     })
 
-  getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
-    logger.error(err)
+  getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate, context) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
+    logger.error(`[[${context.requestId}]] An error occured while gettings tags by filters.`, err)
     return Promise.reject(err)
   }),
   )

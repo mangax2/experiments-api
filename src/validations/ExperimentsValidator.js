@@ -6,7 +6,9 @@ import db from '../db/DbManager'
 class ExperimentsValidator extends SchemaValidator {
   static get POST_AND_PUT_SCHEMA_ELEMENTS() {
     return [
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true },
+      {
+        paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
+      },
       {
         paramName: 'description',
         type: 'text',

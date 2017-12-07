@@ -11,12 +11,14 @@ describe('UnitSpecificationDetailValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('gets the schema', () => {
+    test('gets the schema', () => {
       db.experiments = {}
       db.unitSpecification = {}
       db.unitSpecificationDetail = {}
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
+        },
         { paramName: 'uomId', type: 'numeric', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
@@ -35,7 +37,7 @@ describe('UnitSpecificationDetailValidator', () => {
   })
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    it('gets the elements', () => {
+    test('gets the elements', () => {
       db.unitSpecificationDetail = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -47,18 +49,20 @@ describe('UnitSpecificationDetailValidator', () => {
   })
 
   describe('getEntityName', () => {
-    it('gets name', () => {
+    test('gets name', () => {
       expect(target.getEntityName()).toEqual('UnitSpecificationDetail')
     })
   })
 
   describe('getSchema', () => {
-    it('gets post schema', () => {
+    test('gets post schema', () => {
       db.experiments = {}
       db.unitSpecification = {}
       db.unitSpecificationDetail = {}
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
+        },
         { paramName: 'uomId', type: 'numeric', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
@@ -75,12 +79,14 @@ describe('UnitSpecificationDetailValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('gets put schema', () => {
+    test('gets put schema', () => {
       db.experiments = {}
       db.unitSpecification = {}
       db.unitSpecificationDetail = {}
       const schema = [
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
+        },
         { paramName: 'uomId', type: 'numeric', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
@@ -99,28 +105,28 @@ describe('UnitSpecificationDetailValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('error to be thrown when neither POST nor PUT are supplied', () => {
+    test('error to be thrown when neither POST nor PUT are supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('gets business keys', () => {
+    test('gets business keys', () => {
       expect(target.getBusinessKeyPropertyNames()).toEqual(['experimentId', 'refUnitSpecId'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('gets duplicate business keys error message', () => {
+    test('gets duplicate business keys error message', () => {
       expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate unit specification id in request payload with same experiment id')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when unitSpecificationDetailObj is a filled array', () => {
+    test('resolves when unitSpecificationDetailObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -128,7 +134,7 @@ describe('UnitSpecificationDetailValidator', () => {
       })
     })
 
-    it('rejects when unitSpecificationDetailObj is undefined', () => {
+    test('rejects when unitSpecificationDetailObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -137,7 +143,7 @@ describe('UnitSpecificationDetailValidator', () => {
       })
     })
 
-    it('rejects when unitSpecificationDetailObj is an empty array', () => {
+    test('rejects when unitSpecificationDetailObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -148,7 +154,7 @@ describe('UnitSpecificationDetailValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -157,8 +163,8 @@ describe('UnitSpecificationDetailValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
+    test('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {
@@ -166,8 +172,8 @@ describe('UnitSpecificationDetailValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
+    test('adds a message when there are business key errors', () => {
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

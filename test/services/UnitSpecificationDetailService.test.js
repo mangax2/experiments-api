@@ -14,7 +14,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('getUnitSpecificationDetailsByExperimentId', () => {
-    it('gets unit specification details', () => {
+    test('gets unit specification details', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unitSpecificationDetail.findAllByExperimentId = mockResolve([{}])
 
@@ -24,7 +24,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when findAllByExperimentId fails', () => {
+    test('rejects when findAllByExperimentId fails', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.unitSpecificationDetail.findAllByExperimentId = mockReject('error')
 
@@ -34,7 +34,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.unitSpecificationDetail.findAllByExperimentId = mock()
 
@@ -47,7 +47,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('getUnitSpecificationDetailById', () => {
-    it('gets a unit specification detail', () => {
+    test('gets a unit specification detail', () => {
       db.unitSpecificationDetail.find = mockResolve({})
 
       return target.getUnitSpecificationDetailById(1, testContext, testTx).then((data) => {
@@ -56,7 +56,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('throws an error when find returns empty', () => {
+    test('throws an error when find returns empty', () => {
       db.unitSpecificationDetail.find = mockResolve()
       AppError.notFound = mock()
 
@@ -67,7 +67,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.unitSpecificationDetail.find = mockReject('error')
 
       return target.getUnitSpecificationDetailById(1, testContext, testTx).then(() => {}, (err) => {
@@ -78,7 +78,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('batchCreateUnitSpecificationDetails', () => {
-    it('creates unit specification details', () => {
+    test('creates unit specification details', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -90,7 +90,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchCreate = mockReject('error')
 
@@ -101,7 +101,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.unitSpecificationDetail.batchCreate = mockReject('error')
 
@@ -114,7 +114,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('batchUpdateUnitSpecificationDetails', () => {
-    it('updates unit specification details', () => {
+    test('updates unit specification details', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -126,7 +126,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchUpdate = mockReject('error')
 
@@ -137,7 +137,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.unitSpecificationDetail.batchUpdate = mockReject('error')
 
@@ -150,7 +150,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('manageAllUnitSpecificationDetails', () => {
-    it('manages delete, update, and create unit specification details call', () => {
+    test('manages delete, update, and create unit specification details call', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.deleteUnitSpecificationDetails = mockResolve()
       target.updateUnitSpecificationDetails = mockResolve()
@@ -163,13 +163,13 @@ describe('UnitSpecificationDetailService', () => {
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {
         expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
-        expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }], testContext, testTx)
-        expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }, { 'experimentId': -1 }], testContext, testTx)
+        expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ experimentId: -1 }], testContext, testTx)
+        expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ experimentId: -1 }, { experimentId: -1 }], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
 
-    it('rejects when create fails', () => {
+    test('rejects when create fails', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.deleteUnitSpecificationDetails = mockResolve()
       target.updateUnitSpecificationDetails = mockResolve()
@@ -182,14 +182,14 @@ describe('UnitSpecificationDetailService', () => {
         adds: [{}, {}],
       }, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.deleteUnitSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
-        expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }], testContext, testTx)
-        expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ 'experimentId': -1 }, { 'experimentId': -1 }], testContext, testTx)
+        expect(target.updateUnitSpecificationDetails).toHaveBeenCalledWith([{ experimentId: -1 }], testContext, testTx)
+        expect(target.createUnitSpecificationDetails).toHaveBeenCalledWith([{ experimentId: -1 }, { experimentId: -1 }], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
 
-    it('rejects when update fails', () => {
+    test('rejects when update fails', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.deleteUnitSpecificationDetails = mockResolve()
       target.updateUnitSpecificationDetails = mockReject('error')
@@ -209,7 +209,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('rejects when delete fails', () => {
+    test('rejects when delete fails', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.deleteUnitSpecificationDetails = mockReject('error')
       target.updateUnitSpecificationDetails = mockReject('error')
@@ -231,7 +231,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('deleteUnitSpecificationDetails', () => {
-    it('deletes unit specification details', () => {
+    test('deletes unit specification details', () => {
       db.unitSpecificationDetail.batchRemove = mockResolve([1])
       return target.deleteUnitSpecificationDetails([1], testContext, testTx).then((data) => {
         expect(db.unitSpecificationDetail.batchRemove).toHaveBeenCalledWith([1], testTx)
@@ -239,14 +239,14 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('resolves when no ids are passed in for delete', () => {
+    test('resolves when no ids are passed in for delete', () => {
       db.unitSpecificationDetail.batchRemove = mock()
       return target.deleteUnitSpecificationDetails([], testContext, testTx).then(() => {
         expect(db.unitSpecificationDetail.batchRemove).not.toHaveBeenCalled()
       })
     })
 
-    it('throws an error when not all unit specification details are found for delete', () => {
+    test('throws an error when not all unit specification details are found for delete', () => {
       db.unitSpecificationDetail.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
@@ -259,7 +259,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('updateUnitSpecificationDetails', () => {
-    it('updates unit specification details', () => {
+    test('updates unit specification details', () => {
       target.batchUpdateUnitSpecificationDetails = mockResolve([{}])
 
       return target.updateUnitSpecificationDetails([{ experimentId: 1 }], testContext, testTx).then((data) => {
@@ -268,7 +268,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('does not update units when none are passed in', () => {
+    test('does not update units when none are passed in', () => {
       target.batchUpdateUnitSpecificationDetails = mock()
 
       return target.updateUnitSpecificationDetails([], testTx).then(() => {
@@ -278,7 +278,7 @@ describe('UnitSpecificationDetailService', () => {
   })
 
   describe('createUnitSpecificationDetails', () => {
-    it('creates unit specification details', () => {
+    test('creates unit specification details', () => {
       target.batchCreateUnitSpecificationDetails = mockResolve([{}])
 
       return target.createUnitSpecificationDetails([{ experimentId: 1 }], testContext, testTx).then((data) => {
@@ -287,7 +287,7 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
 
-    it('does not create unit specification details', () => {
+    test('does not create unit specification details', () => {
       target.batchCreateUnitSpecificationDetails = mock()
 
       return target.createUnitSpecificationDetails([], testTx).then(() => {

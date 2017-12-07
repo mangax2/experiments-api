@@ -11,7 +11,7 @@ describe('GroupTypeService', () => {
   })
 
   describe('getGroupTypeById', () => {
-    it('returns a group type', () => {
+    test('returns a group type', () => {
       db.groupType.find = mockResolve({})
 
       return target.getGroupTypeById(1).then((data) => {
@@ -20,7 +20,7 @@ describe('GroupTypeService', () => {
       })
     })
 
-    it('throws an error when find returns empty', () => {
+    test('throws an error when find returns empty', () => {
       db.groupType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -30,7 +30,7 @@ describe('GroupTypeService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.groupType.find = mockReject('error')
 
       return target.getGroupTypeById(1).then(() => {}, (err) => {
@@ -41,7 +41,7 @@ describe('GroupTypeService', () => {
   })
 
   describe('getAllGroupTypes', () => {
-    it('gets all group types', () => {
+    test('gets all group types', () => {
       db.groupType.all = mockResolve([{}])
 
       return target.getAllGroupTypes().then((data) => {
@@ -50,7 +50,7 @@ describe('GroupTypeService', () => {
       })
     })
 
-    it('rejects when get all fails', () => {
+    test('rejects when get all fails', () => {
       db.groupType.all = mockReject('error')
 
       return target.getAllGroupTypes().then(() => {}, (err) => {

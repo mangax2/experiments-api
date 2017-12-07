@@ -14,7 +14,7 @@ describe('FactorService', () => {
   })
 
   describe('batchCreateFactors', () => {
-    it('validates, calls batchCreate, and returns postResponse', () => {
+    test('validates, calls batchCreate, and returns postResponse', () => {
       target.validator.validate = mockResolve()
       db.factor.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -26,7 +26,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.factor.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -39,7 +39,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.factor.batchCreate = mock()
       AppUtil.createPostResponse = mock()
@@ -54,7 +54,7 @@ describe('FactorService', () => {
   })
 
   describe('getAllFactors', () => {
-    it('returns factors', () => {
+    test('returns factors', () => {
       db.factor.all = mockResolve([{}])
 
       return target.getAllFactors(testTx).then((data) => {
@@ -63,7 +63,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when get all call fails', () => {
+    test('rejects when get all call fails', () => {
       db.factor.all = mockReject('error')
 
       return target.getAllFactors(testTx).then(() => {}, (err) => {
@@ -74,7 +74,7 @@ describe('FactorService', () => {
   })
 
   describe('getFactorsByExperimentId', () => {
-    it('gets an experiment, and finds factors by that id', () => {
+    test('gets an experiment, and finds factors by that id', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.factor.findByExperimentId = mockResolve([])
 
@@ -85,7 +85,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when findByExperimentId fails', () => {
+    test('rejects when findByExperimentId fails', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.factor.findByExperimentId = mockReject('error')
 
@@ -96,7 +96,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.factor.findByExperimentId = mockReject('error')
 
@@ -109,7 +109,7 @@ describe('FactorService', () => {
   })
 
   describe('getFactorsByExperimentIdNoExistenceCheck', () => {
-    it('finds factors by that id', () => {
+    test('finds factors by that id', () => {
       db.factor.findByExperimentId = mockResolve([])
 
       return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
@@ -118,7 +118,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when findByExperimentId fails', () => {
+    test('rejects when findByExperimentId fails', () => {
       db.factor.findByExperimentId = mockReject('error')
 
       return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
@@ -129,7 +129,7 @@ describe('FactorService', () => {
   })
 
   describe('getFactorById', () => {
-    it('returns factor found by id', () => {
+    test('returns factor found by id', () => {
       db.factor.find = mockResolve({})
 
       return target.getFactorById(1, {}, testTx).then((data) => {
@@ -138,7 +138,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('throws an error when no data is returned', () => {
+    test('throws an error when no data is returned', () => {
       db.factor.find = mockResolve()
       AppError.notFound = mock()
 
@@ -148,7 +148,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when factor find fails', () => {
+    test('rejects when factor find fails', () => {
       db.factor.find = mockReject('error')
       AppError.notFound = mock()
 
@@ -161,7 +161,7 @@ describe('FactorService', () => {
   })
 
   describe('batchUpdateFactors', () => {
-    it('validates, batchUpdates and returns put resposne', () => {
+    test('validates, batchUpdates and returns put resposne', () => {
       target.validator.validate = mockResolve()
       db.factor.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -173,7 +173,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.factor.batchUpdate = mockReject('error')
 
@@ -184,7 +184,7 @@ describe('FactorService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.factor.batchUpdate = mockReject('error')
 
@@ -197,21 +197,21 @@ describe('FactorService', () => {
   })
 
   describe('batchDeleteFactors', () => {
-    it('calls factor batchRemove and returns data', () => {
-      db.factor.batchRemove = mockResolve([1,2])
+    test('calls factor batchRemove and returns data', () => {
+      db.factor.batchRemove = mockResolve([1, 2])
 
-      return target.batchDeleteFactors([1,2], {}, testTx).then((data) => {
-        expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
-        expect(data).toEqual([1,2])
+      return target.batchDeleteFactors([1, 2], {}, testTx).then((data) => {
+        expect(db.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(data).toEqual([1, 2])
       })
     })
 
-    it('throws an error when remove returns array whose length mismatches input', () => {
+    test('throws an error when remove returns array whose length mismatches input', () => {
       db.factor.batchRemove = mockResolve([null, 1])
       AppError.notFound = mock()
 
-      return target.batchDeleteFactors([1,2], {}, testTx).then(() => {}, () => {
-        expect(db.factor.batchRemove).toHaveBeenCalledWith([1,2], testTx)
+      return target.batchDeleteFactors([1, 2], {}, testTx).then(() => {}, () => {
+        expect(db.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all factors requested for delete were found')
       })
     })

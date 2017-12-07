@@ -11,7 +11,7 @@ describe('CombinationElementValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('gets the schema', () => {
+    test('gets the schema', () => {
       db.treatment = {}
       db.combinationElement = {}
 
@@ -33,7 +33,7 @@ describe('CombinationElementValidator', () => {
   })
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    it('gets the schema', () => {
+    test('gets the schema', () => {
       db.combinationElement = {}
 
       const schema = [
@@ -46,13 +46,13 @@ describe('CombinationElementValidator', () => {
   })
 
   describe('getEntityName', () => {
-    it('gets the name', () => {
+    test('gets the name', () => {
       expect(target.getEntityName()).toEqual('CombinationElement')
     })
   })
 
   describe('getSchema', () => {
-    it('gets the post schema', () => {
+    test('gets the post schema', () => {
       db.treatment = {}
       db.combinationElement = {}
 
@@ -72,7 +72,7 @@ describe('CombinationElementValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('gets the put schema', () => {
+    test('gets the put schema', () => {
       db.treatment = {}
       db.combinationElement = {}
 
@@ -94,28 +94,28 @@ describe('CombinationElementValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when neither POST nor PUT are supplied', () => {
+    test('throws an error when neither POST nor PUT are supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('returns business keys', () => {
+    test('returns business keys', () => {
       expect(target.getBusinessKeyPropertyNames()).toEqual(['treatmentId', 'factorLevelId'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('gets duplicate business key error message', () => {
+    test('gets duplicate business key error message', () => {
       expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate FactorLevel in request payload with same treatmentId')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when combinationElementObj is a filled array', () => {
+    test('resolves when combinationElementObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -123,7 +123,7 @@ describe('CombinationElementValidator', () => {
       })
     })
 
-    it('rejects when combinationElementObj is undefined', () => {
+    test('rejects when combinationElementObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -132,7 +132,7 @@ describe('CombinationElementValidator', () => {
       })
     })
 
-    it('rejects when combinationElementObj is an empty array', () => {
+    test('rejects when combinationElementObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -143,7 +143,7 @@ describe('CombinationElementValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -152,7 +152,7 @@ describe('CombinationElementValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
+    test('does not add a message if there are not any business key errors', () => {
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
@@ -161,7 +161,7 @@ describe('CombinationElementValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
+    test('adds a message when there are business key errors', () => {
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 

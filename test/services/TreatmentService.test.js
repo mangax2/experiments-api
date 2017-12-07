@@ -14,7 +14,7 @@ describe('TreatmentService', () => {
   })
 
   describe('batchCreateTreatments', () => {
-    it('creates treatments', () => {
+    test('creates treatments', () => {
       target.validator.validate = mockResolve()
       db.treatment.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -26,7 +26,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.treatment.batchCreate = mockReject('error')
 
@@ -37,7 +37,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.treatment.batchCreate = mockReject('error')
 
@@ -50,7 +50,7 @@ describe('TreatmentService', () => {
   })
 
   describe('getTreatmentsByExperimentId', () => {
-    it('finds all treatments for an experiment', () => {
+    test('finds all treatments for an experiment', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockResolve([{}])
 
@@ -61,7 +61,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when findAllByExperimentId fails', () => {
+    test('rejects when findAllByExperimentId fails', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockReject('error')
 
@@ -72,7 +72,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.treatment.findAllByExperimentId = mockReject('error')
 
@@ -85,7 +85,7 @@ describe('TreatmentService', () => {
   })
 
   describe('getTreatmentById', () => {
-    it('gets a treatment', () => {
+    test('gets a treatment', () => {
       db.treatment.find = mockResolve({})
 
       return target.getTreatmentById(1, {}, testTx).then((data) => {
@@ -94,7 +94,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('throws an error when treatment is empty', () => {
+    test('throws an error when treatment is empty', () => {
       db.treatment.find = mockResolve()
       AppError.notFound = mock()
 
@@ -104,7 +104,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.treatment.find = mockReject('error')
 
       return target.getTreatmentById(1, {}, testTx).then(() => {}, (err) => {
@@ -115,7 +115,7 @@ describe('TreatmentService', () => {
   })
 
   describe('batchGetTreatmentByIds', () => {
-    it('gets treatments', () => {
+    test('gets treatments', () => {
       db.treatment.batchFind = mockResolve([{}, {}])
 
       return target.batchGetTreatmentByIds([1, 2], {}, testTx).then((data) => {
@@ -124,7 +124,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('throws an error when number of returned treatments is not equal to requested', () => {
+    test('throws an error when number of returned treatments is not equal to requested', () => {
       db.treatment.batchFind = mockResolve([{}])
       AppError.notFound = mock()
 
@@ -134,7 +134,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when batchFind fails', () => {
+    test('rejects when batchFind fails', () => {
       db.treatment.batchFind = mockReject('error')
 
       return target.batchGetTreatmentByIds([1, 2], {}, testTx).then(() => {}, (err) => {
@@ -145,7 +145,7 @@ describe('TreatmentService', () => {
   })
 
   describe('batchUpdateTreatments', () => {
-    it('updates treatments', () => {
+    test('updates treatments', () => {
       target.validator.validate = mockResolve()
       db.treatment.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -157,7 +157,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.treatment.batchUpdate = mockReject('error')
 
@@ -168,7 +168,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.treatment.batchUpdate = mockReject('error')
 
@@ -181,7 +181,7 @@ describe('TreatmentService', () => {
   })
 
   describe('batchDeleteTreatments', () => {
-    it('deletes treatments', () => {
+    test('deletes treatments', () => {
       db.treatment.batchRemove = mockResolve([1, 2])
 
       return target.batchDeleteTreatments([1, 2], {}, testTx).then((data) => {
@@ -190,7 +190,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('throws an error when not all treatments are deleted', () => {
+    test('throws an error when not all treatments are deleted', () => {
       db.treatment.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
@@ -201,7 +201,7 @@ describe('TreatmentService', () => {
       })
     })
 
-    it('rejects when batchRemove fails', () => {
+    test('rejects when batchRemove fails', () => {
       db.treatment.batchRemove = mockReject('error')
 
       return target.batchDeleteTreatments([1, 2], {}, testTx).then(() => {}, (err) => {

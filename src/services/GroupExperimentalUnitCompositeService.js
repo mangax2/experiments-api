@@ -23,8 +23,8 @@ class GroupExperimentalUnitCompositeService {
   saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context,
     isTemplate, tx) {
     if (designSpecsAndGroupAndUnitDetails) {
-      const designSpecifications = designSpecsAndGroupAndUnitDetails.designSpecifications
-      const groupAndUnitDetails = designSpecsAndGroupAndUnitDetails.groupAndUnitDetails
+      const { designSpecifications } = designSpecsAndGroupAndUnitDetails
+      const { groupAndUnitDetails } = designSpecsAndGroupAndUnitDetails
       return Promise.all([
         this.saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, isTemplate, tx),
         this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
@@ -165,9 +165,9 @@ class GroupExperimentalUnitCompositeService {
   @Transactional('getGroupAndUnitDetails')
   getGroupAndUnitDetails(experimentId, isTemplate, context, tx) {
     return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate,
-        context, tx),
-      this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
-      this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
+      context, tx),
+    this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
+    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
       .then((groupValuesAndUnits) => {
         const groups = groupValuesAndUnits[0]
         const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)

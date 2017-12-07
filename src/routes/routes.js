@@ -40,7 +40,7 @@ router.get('/experiment-designs', (req, res, next) => new ExperimentDesignServic
   .then(r => res.json(r))
   .catch(err => next(err)))
 router.get('/experiment-designs/:id', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   return new ExperimentDesignService().getExperimentDesignById(id)
     .then(design => res.json(design))
     .catch(err => next(err))
@@ -53,7 +53,7 @@ router.post('/experiments', (req, res, next) => {
     .catch(err => next(err))
 })
 router.put('/experiments/:id', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   const experiment = req.body
   return new ExperimentsService().updateExperiment(id, experiment, req.context, false)
     .then(value => res.json(value))
@@ -80,14 +80,14 @@ router.get('/factor-types', (req, res, next) => new FactorTypeService().getAllFa
   .then(r => res.json(r))
   .catch(err => next(err)))
 router.get('/factor-types/:id', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   return new FactorTypeService().getFactorTypeById(id)
     .then(r => res.json(r))
     .catch(err => next(err))
 })
 
 router.get('/experiments/:id/dependent-variables', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   return new DependentVariableService().getDependentVariablesByExperimentId(id, false, req.context)
     .then(dependentVariables => res.json(dependentVariables))
     .catch(err => next(err))
@@ -285,7 +285,7 @@ router.get('/templates/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 router.put('/templates/:id', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   const experiment = req.body
   return new ExperimentsService().updateExperiment(id, experiment, req.context, true)
     .then(value => res.json(value))
@@ -299,7 +299,7 @@ router.get('/templates/:id/permissions', (req, res, next) => {
 })
 
 router.get('/templates/:id/dependent-variables', (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
   return new DependentVariableService().getDependentVariablesByExperimentId(id, true, req.context)
     .then(dependentVariables => res.json(dependentVariables))
     .catch(err => next(err))

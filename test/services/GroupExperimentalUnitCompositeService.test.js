@@ -14,7 +14,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('saveDesignSpecsAndGroupUnitDetails', () => {
-    it('saves design specifications, groups, and units', () => {
+    test('saves design specifications, groups, and units', () => {
       target.designSpecificationDetailService = {
         manageAllDesignSpecificationDetails: mockResolve(),
       }
@@ -26,14 +26,14 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, false, testTx).then(() => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
 
-    it('rejects when group and units call fails', () => {
+    test('rejects when group and units call fails', () => {
       target.designSpecificationDetailService = {
         manageAllDesignSpecificationDetails: mockResolve(),
       }
@@ -45,15 +45,15 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {}, (err) => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
 
-    it('rejects when design specification call fails', () => {
+    test('rejects when design specification call fails', () => {
       target.designSpecificationDetailService = {
         manageAllDesignSpecificationDetails: mockReject('error'),
       }
@@ -65,15 +65,15 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groupAndUnitDetails: [],
       }
 
-      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext,false, testTx).then(() => {}, (err) => {
-        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext,false, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext,false, testTx)
+      return target.saveDesignSpecsAndGroupUnitDetails(1, designSpecsAndGroupAndUnitDetails, testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.saveGroupAndUnitDetails).toHaveBeenCalledWith(1, [], testContext, false, testTx)
+        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
     })
 
-    it('throws a bad request when passed in object is null', () => {
+    test('throws a bad request when passed in object is null', () => {
       AppError.badRequest = mock('')
 
       const designSpecsAndGroupAndUnitDetails = null
@@ -82,7 +82,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('saveGroupAndUnitDetails', () => {
-    it('saves groups and units', () => {
+    test('saves groups and units', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock(undefined)
       target.groupService.deleteGroupsForExperimentId = mockResolve()
@@ -115,7 +115,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when recursiveBatchCreate fails', () => {
+    test('rejects when recursiveBatchCreate fails', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock(undefined)
       target.groupService.deleteGroupsForExperimentId = mockResolve()
@@ -146,7 +146,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('throws an error when there are group validation errors', () => {
+    test('throws an error when there are group validation errors', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.validateGroups = mock('error!')
       AppError.badRequest = mock('')
@@ -159,12 +159,11 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.groupService.deleteGroupsForExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('')
       })
-
     })
   })
 
   describe('createGroupValues', () => {
-    it('does not call groupValueService if no groups passed in', () => {
+    test('does not call groupValueService if no groups passed in', () => {
       target.groupValueService = { batchCreateGroupValues: mockResolve() }
 
       return target.createGroupValues([], testContext, testTx).then(() => {
@@ -172,7 +171,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('does call groupValueService if groups are passed in', () => {
+    test('does call groupValueService if groups are passed in', () => {
       target.groupValueService = { batchCreateGroupValues: mockResolve() }
 
       return target.createGroupValues([{ groupValues: [] }], testContext, testTx).then(() => {
@@ -182,7 +181,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('batchUpdateExperimentalUnits', () => {
-    it('does not call experimentalUnitService if no units passed in', () => {
+    test('does not call experimentalUnitService if no units passed in', () => {
       target.experimentalUnitService = { batchUpdateExperimentalUnits: mockResolve() }
 
       return target.batchUpdateExperimentalUnits([], testContext, testTx).then(() => {
@@ -190,7 +189,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('does call experimentalUnitService if units are passed in', () => {
+    test('does call experimentalUnitService if units are passed in', () => {
       target.experimentalUnitService = { batchUpdateExperimentalUnits: mockResolve() }
 
       return target.batchUpdateExperimentalUnits([{}], testContext, testTx).then(() => {
@@ -200,7 +199,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('batchDeleteExperimentalUnits', () => {
-    it('does not call experimentalUnitService if no units passed in', () => {
+    test('does not call experimentalUnitService if no units passed in', () => {
       target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
 
       return target.batchDeleteExperimentalUnits([], {}, testTx).then(() => {
@@ -208,7 +207,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('does call experimentalUnitService if units are passed in', () => {
+    test('does call experimentalUnitService if units are passed in', () => {
       target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
 
       return target.batchDeleteExperimentalUnits([{ id: 5 }], {}, testTx).then(() => {
@@ -218,7 +217,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('batchUpdateGroups', () => {
-    it('does not call groupService if no groups passed in', () => {
+    test('does not call groupService if no groups passed in', () => {
       target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
 
       return target.batchUpdateGroups([], testContext, testTx).then(() => {
@@ -226,7 +225,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('does call groupService if groups are passed in', () => {
+    test('does call groupService if groups are passed in', () => {
       target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
 
       return target.batchUpdateGroups([{}], testContext, testTx).then(() => {
@@ -236,7 +235,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('batchDeleteGroups', () => {
-    it('does not call groupService if no groups passed in', () => {
+    test('does not call groupService if no groups passed in', () => {
       target.groupService = { batchDeleteGroups: mockResolve() }
 
       return target.batchDeleteGroups([], {}, testTx).then(() => {
@@ -244,7 +243,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('does call group Service if groups are passed in', () => {
+    test('does call group Service if groups are passed in', () => {
       target.groupService = { batchDeleteGroups: mockResolve() }
 
       return target.batchDeleteGroups([{ id: 5 }], {}, testTx).then(() => {
@@ -254,7 +253,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('recursiveBatchCreate', () => {
-    it('does not call batchCreateGroups if all groups have ids', () => {
+    test('does not call batchCreateGroups if all groups have ids', () => {
       const groupUnitDetails = [{ id: 1 }, { id: 2 }]
       target.groupService.batchCreateGroups = mockResolve([{}, {}, {}])
       target.createGroupValuesUnitsAndChildGroups = mockResolve()
@@ -268,7 +267,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('calls batchCreateGroups and createGroupValuesUnitsAndChildGroups', () => {
+    test('calls batchCreateGroups and createGroupValuesUnitsAndChildGroups', () => {
       const groupUnitDetails = [{}, {}]
       target.groupService.batchCreateGroups = mockResolve([{}, {}, {}])
       target.createGroupValuesUnitsAndChildGroups = mockResolve()
@@ -279,7 +278,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when createGroupValuesUnitsAndChildGroups fails', () => {
+    test('rejects when createGroupValuesUnitsAndChildGroups fails', () => {
       const groupUnitDetails = [{}, {}]
       target.groupService.batchCreateGroups = mockResolve([{}, {}, {}])
       target.createGroupValuesUnitsAndChildGroups = mockReject('error')
@@ -291,7 +290,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when batchCreateGroups fails', () => {
+    test('rejects when batchCreateGroups fails', () => {
       const groupUnitDetails = [{}, {}]
       target.groupService.batchCreateGroups = mockReject('error')
       target.createGroupValuesUnitsAndChildGroups = mockReject('error')
@@ -305,7 +304,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('createGroupValuesUnitsAndChildGroups', () => {
-    it('rejects when recursiveBatchCreate fails', () => {
+    test('rejects when recursiveBatchCreate fails', () => {
       target.getUnitsAndGroupValues = mock({ groupValues: [{}], units: [{}], childGroups: [{}] })
       target.recursiveBatchCreate = mockReject('error')
 
@@ -315,7 +314,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('only calls recursiveBatchCreate', () => {
+    test('only calls recursiveBatchCreate', () => {
       target.groupValueService.batchCreateGroupValues = mockResolve()
       target.recursiveBatchCreate = mockResolve()
 
@@ -327,7 +326,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('createExperimentalUnits', () => {
-    it('does nothing if no units are passed in', () => {
+    test('does nothing if no units are passed in', () => {
       db.treatment.getDistinctExperimentIds = mockResolve()
       target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve()
 
@@ -338,7 +337,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('batch creates experimental units', () => {
+    test('batch creates experimental units', () => {
       db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }])
       target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
 
@@ -349,7 +348,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }])
       target.experimentalUnitService.batchCreateExperimentalUnits = mockReject('error')
 
@@ -360,7 +359,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when getDistinctExperimentIds fails', () => {
+    test('rejects when getDistinctExperimentIds fails', () => {
       db.treatment.getDistinctExperimentIds = mockReject('error')
       target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
 
@@ -371,7 +370,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('throws an error when there are multiple experiment ids returned', () => {
+    test('throws an error when there are multiple experiment ids returned', () => {
       db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }, { experiment_id: 2 }])
       target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
       AppError.badRequest = mock()
@@ -384,7 +383,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('throws an error when there are returned distinct experiment id does not match passed in', () => {
+    test('throws an error when there are returned distinct experiment id does not match passed in', () => {
       db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 2 }])
       target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
       AppError.badRequest = mock()
@@ -399,16 +398,16 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('validateGroups', () => {
-    it('returns undefined when no groups are passed in', () => {
+    test('returns undefined when no groups are passed in', () => {
       expect(target.validateGroups([])).toEqual(undefined)
     })
 
-    it('returns undefined when groups have no issues', () => {
+    test('returns undefined when groups have no issues', () => {
       target.validateGroup = mock()
       expect(target.validateGroups([{}])).toEqual(undefined)
     })
 
-    it('calls validateGroup only once for multiple groups when an earlier one has an error', () => {
+    test('calls validateGroup only once for multiple groups when an earlier one has an error', () => {
       target.validateGroup = mock('error!')
       expect(target.validateGroups([{}, {}])).toEqual('error!')
       expect(target.validateGroup).toHaveBeenCalledTimes(1)
@@ -416,7 +415,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('validateGroup', () => {
-    it('returns undefined when no errors are in the group', () => {
+    test('returns undefined when no errors are in the group', () => {
       const group = { units: [], childGroups: [{}] }
       target.validateGroups = mock()
 
@@ -424,7 +423,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.validateGroups).toHaveBeenCalledWith([{}])
     })
 
-    it('returns an error from validateGroups', () => {
+    test('returns an error from validateGroups', () => {
       const group = { units: [], childGroups: [{}] }
       target.validateGroups = mock('error!')
 
@@ -432,7 +431,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.validateGroups).toHaveBeenCalledWith([{}])
     })
 
-    it('returns an error due to units and childGroups being empty', () => {
+    test('returns an error due to units and childGroups being empty', () => {
       const group = { units: [], childGroups: [] }
       target.validateGroups = mock()
 
@@ -441,7 +440,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
-    it('returns an error when units and child groups are populated', () => {
+    test('returns an error when units and child groups are populated', () => {
       const group = { units: [{}], childGroups: [{}] }
       target.validateGroups = mock()
 
@@ -449,7 +448,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
-    it('returns no error when there are just units', () => {
+    test('returns no error when there are just units', () => {
       const group = { units: [{}], childGroups: [] }
       target.validateGroups = mock()
 
@@ -457,7 +456,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
-    it('defaults units and child groups to empty arrays if they are not present', () => {
+    test('defaults units and child groups to empty arrays if they are not present', () => {
       const group = {}
       target.validateGroups = mock()
 
@@ -468,7 +467,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('assignGroupIdToGroupValuesAndUnits', () => {
-    it('returns group and unit details', () => {
+    test('returns group and unit details', () => {
       const groupAndUnitDetails = [{ groupValues: [{}], units: [{}], childGroups: [{}] }]
       const expectedResult = [{
         groupValues: [{ groupId: 1 }],
@@ -479,7 +478,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.assignGroupIdToGroupValuesAndUnits(groupAndUnitDetails, [1])).toEqual(expectedResult)
     })
 
-    it('returns group and unit details for multiple groups', () => {
+    test('returns group and unit details for multiple groups', () => {
       const groupAndUnitDetails = [
         { groupValues: [{}], units: [{}], childGroups: [{}] },
         { groupValues: [{}], units: [{}], childGroups: [{}] },
@@ -500,7 +499,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('getGroupAndUnitDetails', () => {
-    it('returns an empty array if groupIds are empty', () => {
+    test('returns an empty array if groupIds are empty', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([])
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve([])
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
@@ -513,7 +512,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('returns a list of groups with groupValues and units', () => {
+    test('returns a list of groups with groupValues and units', () => {
       const groups = [{ id: 1 }, { id: 2 }]
       const groupValues = [{ group_id: 1, value: 'testValue' }, {
         group_id: 2,
@@ -537,7 +536,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when getExperimentalUnitsByExperimentIdNoValidate fails', () => {
+    test('rejects when getExperimentalUnitsByExperimentIdNoValidate fails', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockReject('error')
@@ -550,7 +549,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when batchGetGroupValuesByExperimentId fails', () => {
+    test('rejects when batchGetGroupValuesByExperimentId fails', () => {
       target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
       target.groupValueService.batchGetGroupValuesByExperimentId = mockReject('error')
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
@@ -563,7 +562,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
-    it('rejects when getGroupsByExperimentId fails', () => {
+    test('rejects when getGroupsByExperimentId fails', () => {
       target.groupService.getGroupsByExperimentId = mockReject('error')
       target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
@@ -578,7 +577,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('getGroupTree', () => {
-    it('correctly structures the group response', () => {
+    test('correctly structures the group response', () => {
       const parentGroup = { id: 2 }
       const firstChildGroup = { id: 1, parent_id: 2 }
       const secondChildGroup = { id: 5, parent_id: 2 }
@@ -592,7 +591,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('compareGroupTrees', () => {
-    it('properly calls everything', () => {
+    test('properly calls everything', () => {
       const additionalLogicFuncs = []
       const testGroup = { id: 5, units: [{}] }
       target.assignAncestryAndLocation = mock([{ units: [{}] }])
@@ -618,8 +617,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('findMatchingEntity', () => {
-    it('assigns the id, marks the entity used, and calls the additional logic on match', () => {
-      const hashedEntities = { '5': [{ id: 3, used: true }, { id: 7 }] }
+    test('assigns the id, marks the entity used, and calls the additional logic on match', () => {
+      const hashedEntities = { 5: [{ id: 3, used: true }, { id: 7 }] }
       const entity = { value: '5' }
       const mockLogic = mock()
 
@@ -630,7 +629,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(entity.id).toBe(7)
     })
 
-    it('assigns undefined to the id if no match found', () => {
+    test('assigns undefined to the id if no match found', () => {
       const entity = { id: 2, value: '5' }
       const mockLogic = mock()
 
@@ -642,7 +641,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('assignAncestryAndLocation', () => {
-    it('handles location groups with children', () => {
+    test('handles location groups with children', () => {
       const functionToTest = target.assignAncestryAndLocation
       target.assignAncestryAndLocation = mock(g => [g])
       const group = {
@@ -660,7 +659,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(result).toEqual([group.childGroups[0], group.childGroups[1], group])
     })
 
-    it('handles regular groups with units', () => {
+    test('handles regular groups with units', () => {
       const functionToTest = target.assignAncestryAndLocation
       target.assignAncestryAndLocation = mock(g => [g])
       const parent = { ancestors: '\nlocNumber::1', locNumber: 1 }
@@ -669,7 +668,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         units: [{ rep: 1, treatmentId: 2 }, { rep: 2, treatment_id: 5 }],
       }
 
-      const result = functionToTest(group, parent)
+      functionToTest(group, parent)
 
       expect(target.assignAncestryAndLocation).not.toBeCalled()
       expect(group.locNumber).toBe(1)
@@ -684,7 +683,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('formatComparisonResults', () => {
-    it('properly categorizes all results', () => {
+    test('properly categorizes all results', () => {
       const oldGroups = [{ id: 3, used: true }, { id: 5 }]
       const newGroups = [{
         id: 3,

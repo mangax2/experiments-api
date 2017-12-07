@@ -6,8 +6,12 @@ import db from '../db/DbManager'
 class GroupValueValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
-      { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+      {
+        paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false,
+      },
+      {
+        paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
+      },
       { paramName: 'factorLevelId', type: 'numeric', required: false },
       { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
       { paramName: 'groupId', type: 'numeric', required: true },

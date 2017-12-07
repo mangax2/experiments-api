@@ -7,7 +7,9 @@ class DependentVariablesValidator extends SchemaValidator {
   getSchema = (operationName) => {
     const schema = [
       { paramName: 'required', type: 'boolean', required: true },
-      { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+      {
+        paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+      },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
       {

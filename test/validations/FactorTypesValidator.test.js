@@ -11,7 +11,7 @@ describe('FactorTypesValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns schema', () => {
+    test('returns schema', () => {
       db.factorType = {}
 
       const schema = [
@@ -21,20 +21,22 @@ describe('FactorTypesValidator', () => {
           lengthRange: { min: 1, max: 50 },
           required: true,
         },
-        { paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: {} },]
+        {
+          paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: {},
+        }]
 
       expect(target.getSchema()).toEqual(schema)
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('FactorType')
     })
   })
 
   describe('preValidate', () => {
-    it('rejects when factorObj is not an array', () => {
+    test('rejects when factorObj is not an array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
@@ -43,7 +45,7 @@ describe('FactorTypesValidator', () => {
       })
     })
 
-    it('resolves when factorObj is empty array', () => {
+    test('resolves when factorObj is empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -52,7 +54,7 @@ describe('FactorTypesValidator', () => {
       })
     })
 
-    it('resolves when factorObj is filled array', () => {
+    test('resolves when factorObj is filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -62,8 +64,6 @@ describe('FactorTypesValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves', () => {
-      return target.postValidate().then(() => {})
-    })
+    test('resolves', () => target.postValidate().then(() => {}))
   })
 })

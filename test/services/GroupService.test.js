@@ -14,7 +14,7 @@ describe('GroupService', () => {
   })
 
   describe('batchCreateGroups', () => {
-    it('validates, and creates groups', () => {
+    test('validates, and creates groups', () => {
       target.validator.validate = mockResolve()
       db.group.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -26,7 +26,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.group.batchCreate = mockReject('error')
 
@@ -37,7 +37,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.group.batchCreate = mockReject('error')
 
@@ -50,7 +50,7 @@ describe('GroupService', () => {
   })
 
   describe('getGroupsByExperimentId', () => {
-    it('returns groups for an experiment', () => {
+    test('returns groups for an experiment', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockResolve([{}])
 
@@ -61,7 +61,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when findAllByExperimentId fails', () => {
+    test('rejects when findAllByExperimentId fails', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.group.findAllByExperimentId = mockReject('error')
 
@@ -72,7 +72,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.group.findAllByExperimentId = mockReject('error')
 
@@ -85,7 +85,7 @@ describe('GroupService', () => {
   })
 
   describe('getGroupById', () => {
-    it('returns a group', () => {
+    test('returns a group', () => {
       db.group.find = mockResolve({})
 
       return target.getGroupById(1, {}, testTx).then((data) => {
@@ -94,7 +94,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('throws an error when group is not found', () => {
+    test('throws an error when group is not found', () => {
       db.group.find = mockResolve()
       AppError.notFound = mock()
 
@@ -104,7 +104,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.group.find = mockReject('error')
 
       return target.getGroupById(1, {}, testTx).then(() => {}, (err) => {
@@ -115,7 +115,7 @@ describe('GroupService', () => {
   })
 
   describe('batchUpdateGroups', () => {
-    it('updates groups', () => {
+    test('updates groups', () => {
       target.validator.validate = mockResolve()
       db.group.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -127,7 +127,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.group.batchUpdate = mockReject('error')
 
@@ -138,7 +138,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.group.batchUpdate = mockReject('error')
 
@@ -151,7 +151,7 @@ describe('GroupService', () => {
   })
 
   describe('batchUpdateGroupsNoValidate', () => {
-    it('updates groups', () => {
+    test('updates groups', () => {
       db.group.batchUpdate = mockResolve([{}])
 
       return target.batchUpdateGroupsNoValidate([{}], testContext, testTx).then(() => {
@@ -161,7 +161,7 @@ describe('GroupService', () => {
   })
 
   describe('partiallyUpdateGroup', () => {
-    it('partially updates a group', () => {
+    test('partially updates a group', () => {
       target.validator.validate = mockResolve()
       db.group.partiallyUpdate = mockResolve()
 
@@ -173,7 +173,7 @@ describe('GroupService', () => {
   })
 
   describe('batchDeleteGroups', () => {
-    it('successfully calls batchRemove and returns data', () => {
+    test('successfully calls batchRemove and returns data', () => {
       db.group.batchRemove = mockResolve([1])
 
       return target.batchDeleteGroups([1], {}, testTx).then((data) => {
@@ -182,7 +182,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('throws an error when no elements due to nulls', () => {
+    test('throws an error when no elements due to nulls', () => {
       db.group.batchRemove = mockResolve([null])
       AppError.notFound = mock()
 
@@ -192,7 +192,7 @@ describe('GroupService', () => {
       })
     })
 
-    it('throws an error when not all elements are deleted', () => {
+    test('throws an error when not all elements are deleted', () => {
       db.group.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 

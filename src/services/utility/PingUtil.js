@@ -15,7 +15,7 @@ class PingUtil {
       url: cfServices.pingDataSource.url,
     }
     const startTime = new Date().getTime()
-    return oauthPing.httpGetToken(params).then((token) => {
+    return oauthPing.httpGetToken(params)().then((token) => {
       HttpUtil.logExternalTime(startTime, 10000, 'oauth-ping', 'GET')
       return [
         { headerName: 'authorization', headerValue: `Bearer ${token}` },

@@ -28,7 +28,7 @@ class VariablesValidator extends BaseValidator {
 
     // Check that associations are valid
     const allAssociationRefIds = _.flatMap(variables.independentAssociations,
-        association => [association.associatedLevelRefId, association.nestedLevelRefId])
+      association => [association.associatedLevelRefId, association.nestedLevelRefId])
     const invalidAssociationRefIds = _.uniq(_.difference(allAssociationRefIds, allRefIds)).sort()
     if (!_.isEmpty(invalidAssociationRefIds)) {
       return Promise.reject(
@@ -39,7 +39,7 @@ class VariablesValidator extends BaseValidator {
     // Check that associations have no duplicates
     const associationStrings =
       _.map(variables.independentAssociations,
-          association => `{associatedLevelRefId: ${association.associatedLevelRefId}, nestedLevelRefId: ${association.nestedLevelRefId}}`)
+        association => `{associatedLevelRefId: ${association.associatedLevelRefId}, nestedLevelRefId: ${association.nestedLevelRefId}}`)
     const duplicateAssociations = _.uniq(this.findDuplicates(associationStrings)).sort()
     if (!_.isEmpty(duplicateAssociations)) {
       return Promise.reject(
@@ -52,10 +52,10 @@ class VariablesValidator extends BaseValidator {
       _.compact(_.map(variables.independentAssociations, (association) => {
         const associatedFactorIndex =
           _.findIndex(refIdsGroupedByFactor,
-              factorRefIds => _.includes(factorRefIds, association.associatedLevelRefId))
+            factorRefIds => _.includes(factorRefIds, association.associatedLevelRefId))
         const nestedFactorIndex =
           _.findIndex(refIdsGroupedByFactor,
-              factorRefIds => _.includes(factorRefIds, association.nestedLevelRefId))
+            factorRefIds => _.includes(factorRefIds, association.nestedLevelRefId))
         return (associatedFactorIndex === nestedFactorIndex) ? association : null
       })).sort()
     if (!_.isEmpty(invalidNestingAssociations)) {

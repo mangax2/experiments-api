@@ -17,8 +17,8 @@ class FactorService {
 
   @Transactional('batchCreateFactors')
   batchCreateFactors = (factors, context, tx) => this.validator.validate(factors, 'POST', tx)
-      .then(() => db.factor.batchCreate(factors, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+    .then(() => db.factor.batchCreate(factors, context, tx)
+      .then(data => AppUtil.createPostResponse(data)))
 
   @Transactional('getAllFactors')
   getAllFactors = tx => db.factor.all(tx)
@@ -47,8 +47,8 @@ class FactorService {
 
   @Transactional('batchUpdateFactors')
   batchUpdateFactors = (factors, context, tx) => this.validator.validate(factors, 'PUT', tx)
-      .then(() => db.factor.batchUpdate(factors, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
+    .then(() => db.factor.batchUpdate(factors, context, tx)
+      .then(data => AppUtil.createPutResponse(data)))
 
   @Transactional('batchDeleteFactors')
   batchDeleteFactors = (ids, context, tx) => db.factor.batchRemove(ids, tx)

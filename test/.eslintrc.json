@@ -1,0 +1,65 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jest": true,
+    "node": true
+  },
+  "extends": "airbnb-base",
+  "globals": {
+    "velocity": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    },
+    "sourceType": "module"
+  },
+  "plugins": [
+    "jest",
+    "jest-async"
+  ],
+  "parser": "babel-eslint",
+  "rules": {
+    "import/first": [
+      0
+    ],
+    "import/no-named-as-default": [
+      0
+    ],
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "jest/valid-expect": "error",
+    "jest-async/expect-return": "error",
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "global-require": "off",
+    "max-len": [
+      0
+    ],
+    "new-cap": [
+      0
+    ],
+    "no-underscore-dangle": [
+      0
+    ],
+    "no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used"
+      }
+    ],
+    "no-console": [
+      "error"
+    ],
+    "no-param-reassign": "off",
+    "semi": [
+      "error",
+      "never"
+    ]
+  }
+}

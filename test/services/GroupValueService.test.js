@@ -14,7 +14,7 @@ describe('GroupValueService', () => {
   })
 
   describe('batchCreateGroupValues', () => {
-    it('create group values', () => {
+    test('create group values', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -26,7 +26,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchCreate = mockReject('error')
 
@@ -37,7 +37,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.groupValue.batchCreate = mockReject('error')
 
@@ -50,7 +50,7 @@ describe('GroupValueService', () => {
   })
 
   describe('batchGetGroupValuesByExperimentId', () => {
-    it('calls ', () => {
+    test('calls ', () => {
       db.groupValue.batchFindAllByExperimentId = mockResolve()
 
       return target.batchGetGroupValuesByExperimentId(1, testTx).then(() => {
@@ -60,7 +60,7 @@ describe('GroupValueService', () => {
   })
 
   describe('getGroupValueById', () => {
-    it('returns a group value', () => {
+    test('returns a group value', () => {
       db.groupValue.find = mockResolve({})
 
       return target.getGroupValueById(1, {}, testTx).then((data) => {
@@ -69,7 +69,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('throws an error when find returns empty', () => {
+    test('throws an error when find returns empty', () => {
       db.groupValue.find = mockResolve()
       AppError.notFound = mock()
 
@@ -79,7 +79,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.groupValue.find = mockReject('error')
 
       return target.getGroupValueById(1, {}, testTx).then(() => {}, (err) => {
@@ -90,7 +90,7 @@ describe('GroupValueService', () => {
   })
 
   describe('batchUpdateGroupValues', () => {
-    it('updates group values', () => {
+    test('updates group values', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -102,7 +102,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchUpdate = mockReject('error')
 
@@ -113,7 +113,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.groupValue.batchUpdate = mockReject('error')
 

@@ -26,6 +26,7 @@
         "no-param-reassign": "off",
         "no-use-before-define": "off",
         "prefer-rest-params": "off",
-        "func-names": "off"
+        "func-names": "off",
+        "function-paren-newline": "off"
     }
 }

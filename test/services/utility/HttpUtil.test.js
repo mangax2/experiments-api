@@ -3,15 +3,14 @@ import agent from 'superagent'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
 describe('HttpUtil', () => {
-
   describe('setHeaders', () => {
-    it('sets headers of the httpCall', () => {
-      const httpCall = {set: mock()}
+    test('sets headers of the httpCall', () => {
+      const httpCall = { set: mock() }
 
       HttpUtil.setHeaders(httpCall, [
-        {headerName: 'testHeader', headerValue: 'testValue'},
-        {headerName: 'testHeader2', headerValue: 'testValue2'}
-        ])
+        { headerName: 'testHeader', headerValue: 'testValue' },
+        { headerName: 'testHeader2', headerValue: 'testValue2' },
+      ])
 
       expect(httpCall.set).toHaveBeenCalledTimes(2)
       expect(httpCall.set).lastCalledWith('testHeader2', 'testValue2')
@@ -19,7 +18,7 @@ describe('HttpUtil', () => {
   })
 
   describe('get', () => {
-    it('calls setHeaders and agent.get', () => {
+    test('calls setHeaders and agent.get', () => {
       HttpUtil.setHeaders = mockResolve()
       agent.get = mock({})
 
@@ -31,35 +30,32 @@ describe('HttpUtil', () => {
   })
 
   describe('getWithRetry', () => {
-    it('calls setHeaders and agent.get', () => {
+    test('calls setHeaders and agent.get', () => {
       HttpUtil.setHeaders = mockResolve()
       agent.get = mock({})
 
-     return HttpUtil.getWithRetry('testUrl', []).then(()=>{
+      return HttpUtil.getWithRetry('testUrl', []).then(() => {
         expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
         expect(agent.get).toHaveBeenCalledWith('testUrl')
-
       })
-
     })
 
-    it('calls setHeaders 3 times in case of error', () => {
+    test('calls setHeaders 3 times in case of error', () => {
       HttpUtil.setHeaders = mockReject('error')
       agent.get = mock({})
 
-    return HttpUtil.getWithRetry('testUrl', []).then(() => {}, (error) =>{
+      return HttpUtil.getWithRetry('testUrl', []).then(() => {}, (error) => {
         expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
         expect(agent.get).toHaveBeenCalledWith('testUrl')
         expect(agent.get.mock.calls.length).toBe(3)
         expect(error).toBe('error')
       })
-
     })
   })
 
   describe('post', () => {
-    it('calls setHeaders and agent.post', () => {
-      const httpCall = {send: mockResolve()}
+    test('calls setHeaders and agent.post', () => {
+      const httpCall = { send: mockResolve() }
       HttpUtil.setHeaders = mock(httpCall)
       agent.post = mock({})
 
@@ -72,8 +68,8 @@ describe('HttpUtil', () => {
   })
 
   describe('put', () => {
-    it('calls setHeaders and agent.put', () => {
-      const httpCall = {send: mockResolve()}
+    test('calls setHeaders and agent.put', () => {
+      const httpCall = { send: mockResolve() }
       HttpUtil.setHeaders = mock(httpCall)
       agent.put = mock({})
 
@@ -86,8 +82,8 @@ describe('HttpUtil', () => {
   })
 
   describe('delete', () => {
-    it('calls setHeaders and agent.put', () => {
-      const httpCall = {send: mock()}
+    test('calls setHeaders and agent.put', () => {
+      const httpCall = { send: mock() }
       HttpUtil.setHeaders = mockResolve(httpCall)
       agent.delete = mock({})
 
@@ -99,29 +95,29 @@ describe('HttpUtil', () => {
   })
 
   describe('getErrorMessageForLogs', () => {
-    it('returns Unauthorized if status is 401', () => {
-      expect(HttpUtil.getErrorMessageForLogs({status: 401})).toEqual('Unauthorized')
+    test('returns Unauthorized if status is 401', () => {
+      expect(HttpUtil.getErrorMessageForLogs({ status: 401 })).toEqual('Unauthorized')
     })
 
-    it('returns Unable to retrieve error message if err is not defined', () => {
+    test('returns Unable to retrieve error message if err is not defined', () => {
       expect(HttpUtil.getErrorMessageForLogs()).toEqual('Unable to retrieve error message.')
     })
 
-    it('returns an array of error messages', () => {
-      const err = {response: {text: '[{"errorMessage": "test"},{"errorMessage": "test2"}]'}}
+    test('returns an array of error messages', () => {
+      const err = { response: { text: '[{"errorMessage": "test"},{"errorMessage": "test2"}]' } }
 
       expect(HttpUtil.getErrorMessageForLogs(err)).toEqual('test,test2')
     })
 
-    it('returns errorMessage', () => {
-      expect(HttpUtil.getErrorMessageForLogs({response: {text: '{"errorMessage": "test"}'}})).toEqual('test')
+    test('returns errorMessage', () => {
+      expect(HttpUtil.getErrorMessageForLogs({ response: { text: '{"errorMessage": "test"}' } })).toEqual('test')
     })
 
-    it('returns default if error is not array, nor is errorMessage defined', () => {
-      expect(HttpUtil.getErrorMessageForLogs({response: {text: '{}'}})).toEqual('Unable to retrieve error message.')
+    test('returns default if error is not array, nor is errorMessage defined', () => {
+      expect(HttpUtil.getErrorMessageForLogs({ response: { text: '{}' } })).toEqual('Unable to retrieve error message.')
     })
 
-    it('returns default if error has no response', () => {
+    test('returns default if error has no response', () => {
       expect(HttpUtil.getErrorMessageForLogs({})).toEqual('Unable to retrieve error message.')
     })
   })

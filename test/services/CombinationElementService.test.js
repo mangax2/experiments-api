@@ -8,14 +8,14 @@ describe('CombinationElementService', () => {
   const testContext = {}
   const testTx = { tx: {} }
   let target
-  db.combinationElement.respository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
+  db.combinationElement.respository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
     target = new CombinationElementService()
   })
 
   describe('batchCreateCombinationElements', () => {
-    it('calls combinationElement batchCreate', () => {
+    test('calls combinationElement batchCreate', () => {
       target.validator.validate = mockResolve()
       db.combinationElement.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -27,7 +27,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when combinationElement db call fails', () => {
+    test('rejects when combinationElement db call fails', () => {
       target.validator.validate = mockResolve()
       db.combinationElement.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -40,7 +40,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.combinationElement.batchCreate = mock()
 
@@ -54,7 +54,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('getCombinationElementsByTreatmentId', () => {
-    it('calls combinationElement findAllByTreatmentId', () => {
+    test('calls combinationElement findAllByTreatmentId', () => {
       target.treatmentService.getTreatmentById = mockResolve()
       db.combinationElement.findAllByTreatmentId = mock()
 
@@ -64,7 +64,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when treatmentService fails', () => {
+    test('rejects when treatmentService fails', () => {
       target.treatmentService.getTreatmentById = mockReject('error')
       db.combinationElement.findAllByTreatmentId = mock()
 
@@ -77,7 +77,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('getCombinationElementsByExperimentId', () => {
-    it('calls findAllByExperimentId', () => {
+    test('calls findAllByExperimentId', () => {
       db.combinationElement.findAllByExperimentId = mockResolve()
 
       return target.getCombinationElementsByExperimentId(1, testTx).then(() => {
@@ -85,7 +85,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when findAllByExperimentId fails', () => {
+    test('rejects when findAllByExperimentId fails', () => {
       db.combinationElement.findAllByExperimentId = mockReject('error')
 
       return target.getCombinationElementsByExperimentId(1, testTx).then(() => {}, (err) => {
@@ -96,7 +96,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('batchGetCombinationElementByTreatmentIds', () => {
-    it('calls combinationElement batchFindAllByTreatmentIds', () => {
+    test('calls combinationElement batchFindAllByTreatmentIds', () => {
       target.treatmentService.batchGetTreatmentByIds = mockResolve()
       db.combinationElement.batchFindAllByTreatmentIds = mock()
 
@@ -106,7 +106,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when treatmentService call fails', () => {
+    test('rejects when treatmentService call fails', () => {
       target.treatmentService.batchGetTreatmentByIds = mockReject('error')
       db.combinationElement.batchFindAllByTreatmentIds = mock()
 
@@ -119,7 +119,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('batchGetCombinationElementsByTreatmentIdsNoValidate', () => {
-    it('calls combinationElement batchFindAllByTreatmentIds without calling treatmentService', () => {
+    test('calls combinationElement batchFindAllByTreatmentIds without calling treatmentService', () => {
       target.treatmentService.batchGetTreatmentByIds = mock()
       db.combinationElement.batchFindAllByTreatmentIds = mock()
 
@@ -130,7 +130,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('getCombinationElementById', () => {
-    it('returns data when call returns data', () => {
+    test('returns data when call returns data', () => {
       db.combinationElement.find = mockResolve({})
 
       target.getCombinationElementById(1, testTx).then((data) => {
@@ -139,16 +139,16 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('throws an error when call returns no data', () => {
+    test('throws an error when call returns no data', () => {
       db.combinationElement.find = mockResolve()
-      AppError.notFound = jest.fn(() => { return {} })
+      AppError.notFound = jest.fn(() => ({}))
 
       return target.getCombinationElementById(1, testTx).then(() => {}, () => {
         expect(AppError.notFound).toHaveBeenCalledWith('Combination Element Not Found for requested id')
       })
     })
 
-    it('rejects when combinationElement find fails', () => {
+    test('rejects when combinationElement find fails', () => {
       db.combinationElement.find = mockReject('error')
 
       return target.getCombinationElementById(1, testTx).then(() => {}, (err) => {
@@ -158,7 +158,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('batchUpdateCombinationElements', () => {
-    it('calls createPutResponse when validated and updated', () => {
+    test('calls createPutResponse when validated and updated', () => {
       target.validator.validate = mockResolve()
       db.combinationElement.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
@@ -170,7 +170,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when batchUpdate call fails', () => {
+    test('rejects when batchUpdate call fails', () => {
       target.validator.validate = mockResolve()
       db.combinationElement.batchUpdate = mockReject('error')
       AppUtil.createPutResponse = mock()
@@ -183,7 +183,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('rejects when validate call fails', () => {
+    test('rejects when validate call fails', () => {
       target.validator.validate = mockReject('error')
       db.combinationElement.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
@@ -198,7 +198,7 @@ describe('CombinationElementService', () => {
   })
 
   describe('batchDeleteCombinationElements', () => {
-    it('returns data when batchRemove succeeds', () => {
+    test('returns data when batchRemove succeeds', () => {
       db.combinationElement.batchRemove = mockResolve([1])
 
       return target.batchDeleteCombinationElements([1], {}, testTx).then((data) => {
@@ -207,7 +207,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('throws an error when there are only null elements', () => {
+    test('throws an error when there are only null elements', () => {
       db.combinationElement.batchRemove = mockResolve([null])
       AppError.notFound = jest.fn()
 
@@ -218,7 +218,7 @@ describe('CombinationElementService', () => {
       })
     })
 
-    it('throws an error when returned data does not match input data', () => {
+    test('throws an error when returned data does not match input data', () => {
       db.combinationElement.batchRemove = mockResolve([1])
       AppError.notFound = jest.fn()
 

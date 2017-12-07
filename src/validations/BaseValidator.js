@@ -21,11 +21,11 @@ class BaseValidator {
       _.map(objectArray, element =>
         this.validateEntity(element, operationName, optionalTransaction),
       )).then(() => {
-        if (!this.hasErrors()) {
-          return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
-        }
-        return Promise.resolve()
-      })
+      if (!this.hasErrors()) {
+        return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+      }
+      return Promise.resolve()
+    })
   }
 
   validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
@@ -47,12 +47,12 @@ class BaseValidator {
 
   validateEntity = (targetObject) => {
     logger.error(`validateEntity validation method not implemented to validate ${targetObject}`)
-    return Promise.reject('Server error, please contact support')
+    return Promise.reject(AppError.internalServerError('Server error, please contact support'))
   }
 
   validateBatchForRI = () => {
     logger.error('validateBatchForRI validation method not implemented to validate')
-    return Promise.reject('Server error, please contact support')
+    return Promise.reject(AppError.internalServerError('Server error, please contact support'))
   }
 
   checkLength(value, lengthRange, name) {
@@ -130,7 +130,7 @@ class BaseValidator {
       return Promise.resolve()
     }
 
-    const entity = groupSet[0].entity
+    const { entity } = groupSet[0]
     const ids = this.getDistinctIds(groupSet)
     if (ids.length > 0) {
       // Note: ids list is assumed to have no duplicates before calling this function
@@ -161,10 +161,10 @@ class BaseValidator {
       businessKeyObjects,
       entity,
       optionalTransaction).then((data) => {
-        if (data && data.length > 0) {
-          this.messages.push(`${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`)
-        }
-      })
+      if (data && data.length > 0) {
+        this.messages.push(`${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`)
+      }
+    })
   }
 
   getIdDifference = (ids, data) => {

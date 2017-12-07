@@ -30,7 +30,7 @@ const cfServices = {
   },
   experimentsKafka:{
     value: {
-      enableKafka: 'false',
+      enableKafka: 'true',
       host: 'kafka.tst.datahub.internal:9093',
       topics: {
         repPackingTopic:'rsr.field-experiments.test.incoming.json',

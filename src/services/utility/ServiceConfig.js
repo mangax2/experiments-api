@@ -10,15 +10,15 @@ const localEnv = config.env !== 'prod' && config.env !== 'np' && config.env !== 
 // disabled eslint's are because we want to conditionally load files
 if (localEnv || testEnv) {
   console.info('environment is local')
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   cfServices = require('./localEnvConfig')
 } else if (automationSpecEnv) {
   console.info('environment is aws nonprod')
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   cfServices = require('./automationTestDBConfig')
 } else {
   console.info('environment is aws cf')
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   services = require('@monsantoit/cloud-foundry').services
   services.experimentsDataSource.user = VaultUtil.dbAppUser
   services.experimentsDataSource.password = VaultUtil.dbAppPassword

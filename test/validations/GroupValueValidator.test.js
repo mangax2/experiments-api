@@ -11,13 +11,17 @@ describe('GroupValueValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('returns the schema', () => {
+    test('returns the schema', () => {
       db.group = {}
       db.groupValue = {}
       db.factorLevel = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false,
+        },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
+        },
         { paramName: 'factorLevelId', type: 'numeric', required: false },
         { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
@@ -29,7 +33,7 @@ describe('GroupValueValidator', () => {
   })
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    it('returns the elements', () =>{
+    test('returns the elements', () => {
       db.groupValue = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -41,12 +45,16 @@ describe('GroupValueValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns post schema', () => {
+    test('returns post schema', () => {
       db.group = {}
       db.groupValue = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false,
+        },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
+        },
         { paramName: 'factorLevelId', type: 'numeric', required: false },
         { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
@@ -56,12 +64,16 @@ describe('GroupValueValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('returns put schema', () => {
+    test('returns put schema', () => {
       db.group = {}
       db.groupValue = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false },
-        { paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: false,
+        },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
+        },
         { paramName: 'factorLevelId', type: 'numeric', required: false },
         { paramName: 'factorLevelId', type: 'refData', entity: {} },
         { paramName: 'groupId', type: 'numeric', required: true },
@@ -73,48 +85,48 @@ describe('GroupValueValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when POST and PUT are not supplied', () => {
+    test('throws an error when POST and PUT are not supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('GroupValue')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when groupValueObj is a filled array and has name and value filled', () => {
+    test('resolves when groupValueObj is a filled array and has name and value filled', () => {
       AppError.badRequest = mock()
 
-      return target.preValidate([{name: 'test', value: 'testValue'}]).then(() => {
+      return target.preValidate([{ name: 'test', value: 'testValue' }]).then(() => {
         expect(AppError.badRequest).not.toHaveBeenCalled()
       })
     })
 
-    it('rejects when groupValueObj is missing name', () => {
+    test('rejects when groupValueObj is missing name', () => {
       AppError.badRequest = mock()
 
-      return target.preValidate([{value: 'testValue'}]).then(() => {}, () => {
+      return target.preValidate([{ value: 'testValue' }]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
           ' value, or a factor level id')
       })
     })
 
-    it('rejects when groupValueObj is missing value', () => {
+    test('rejects when groupValueObj is missing value', () => {
       AppError.badRequest = mock()
 
-      return target.preValidate([{name: 'test'}]).then(() => {}, () => {
+      return target.preValidate([{ name: 'test' }]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
           ' value, or a factor level id')
       })
     })
 
-    it('rejects when groupValueObj is undefined', () => {
+    test('rejects when groupValueObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -123,7 +135,7 @@ describe('GroupValueValidator', () => {
       })
     })
 
-    it('rejects when groupValueObj is an empty array', () => {
+    test('rejects when groupValueObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -134,7 +146,7 @@ describe('GroupValueValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -143,10 +155,10 @@ describe('GroupValueValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', groupId: 1, factorLevelId: 1},{test: 'b', groupId: 1, factorLevelId: 2}]
+    test('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{ test: 'a', groupId: 1, factorLevelId: 1 }, { test: 'b', groupId: 1, factorLevelId: 2 }]
       db.factorLevel = {
-        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 2}])
+        batchFind: mockResolve([{ id: 1, factor_id: 1 }, { id: 2, factor_id: 2 }]),
       }
 
       return target.postValidate(targetObject).then(() => {
@@ -154,10 +166,10 @@ describe('GroupValueValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors for same group id and name', () => {
-      const targetObject = [{name: 'test', value: 'test', groupId: 1},{name: 'test', groupId: 1, value: 'test2'}]
+    test('adds a message when there are business key errors for same group id and name', () => {
+      const targetObject = [{ name: 'test', value: 'test', groupId: 1 }, { name: 'test', groupId: 1, value: 'test2' }]
       db.factorLevel = {
-        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 1}])
+        batchFind: mockResolve([{ id: 1, factor_id: 1 }, { id: 2, factor_id: 1 }]),
       }
 
       return target.postValidate(targetObject).then(() => {
@@ -166,10 +178,10 @@ describe('GroupValueValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors for same factor id', () => {
-      const targetObject = [{name: 'test', value: 'test', groupId: 2},{test: 'a', groupId: 1, factorLevelId: 1},{test: 'a', groupId: 1, factorLevelId: 2}]
+    test('adds a message when there are business key errors for same factor id', () => {
+      const targetObject = [{ name: 'test', value: 'test', groupId: 2 }, { test: 'a', groupId: 1, factorLevelId: 1 }, { test: 'a', groupId: 1, factorLevelId: 2 }]
       db.factorLevel = {
-        batchFind: mockResolve([{id: 1, factor_id: 1},{id: 2, factor_id: 1}])
+        batchFind: mockResolve([{ id: 1, factor_id: 1 }, { id: 2, factor_id: 1 }]),
       }
 
       return target.postValidate(targetObject).then(() => {

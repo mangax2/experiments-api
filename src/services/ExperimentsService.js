@@ -169,10 +169,10 @@ class ExperimentsService {
                   const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
                     return this.tagService.saveTags(tags, id, context, isTemplate)
-                        .then(() => data)
+                      .then(() => data)
                   }
                   return this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
-                      .then(() => data)
+                    .then(() => data)
                 },
                 )
             }
@@ -213,7 +213,7 @@ class ExperimentsService {
 
   assignExperimentIdToTags = experiments => _.compact(
     _.flatMap(experiments, (exp) => {
-      const tags = exp.tags
+      const { tags } = exp
       if (tags && tags.length > 0) {
         _.forEach(tags, (tag) => {
           tag.experimentId = exp.id
@@ -232,50 +232,50 @@ class ExperimentsService {
 
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {
-    const source = queryString.source
+    const { source } = queryString
     let experimentPromise
     switch (source) {
-      case undefined :
+      case undefined:
         experimentPromise = this.batchCreateExperiments(requestBody, context, false, tx)
         break
-      case 'template' : {
+      case 'template': {
         const numberOfCopies = requestBody.numberOfCopies || 1
         experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
           context, false, tx).then((data) => {
-            if (data && _.isArray(data)) {
-              const tagsPromise = []
-              _.forEach(_.range(numberOfCopies), (t) => {
-                const experimentId = data[t].id
-                const newTag = {
-                  category: 'FROM TEMPLATE',
-                  value: String(requestBody.id),
-                  experimentId,
-                }
-                tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
-                  .then((result) => {
-                    const tags = _.map(result.tags, (tag) => {
-                      tag.experimentId = experimentId
-                      return tag
-                    })
-                    tags.push(newTag)
-                    return this.tagService.saveTags(tags, experimentId, context, false)
-                  }))
-              })
-              return Promise.all(tagsPromise).then(() =>
+          if (data && _.isArray(data)) {
+            const tagsPromise = []
+            _.forEach(_.range(numberOfCopies), (t) => {
+              const experimentId = data[t].id
+              const newTag = {
+                category: 'FROM TEMPLATE',
+                value: String(requestBody.id),
+                experimentId,
+              }
+              tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                .then((result) => {
+                  const tags = _.map(result.tags, (tag) => {
+                    tag.experimentId = experimentId
+                    return tag
+                  })
+                  tags.push(newTag)
+                  return this.tagService.saveTags(tags, experimentId, context, false)
+                }))
+            })
+            return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),
             )
-            }
-            return Promise.reject('Create Experiment From Template Failed')
-          })
+          }
+          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed'))
+        })
         break
       }
-      case 'experiment' : {
+      case 'experiment': {
         experimentPromise = this.copyEntities(requestBody.ids,
           requestBody.numberOfCopies,
           context, false, tx)
         break
       }
-      default :
+      default:
         experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
         break
     }
@@ -284,25 +284,25 @@ class ExperimentsService {
 
   @Transactional('manageTemplates')
   manageTemplates(requestBody, queryString, context, tx) {
-    const source = queryString.source
+    const { source } = queryString
     let templatePromise
     switch (source) {
-      case undefined :
+      case undefined:
         templatePromise = this.batchCreateTemplates(requestBody, context, tx)
         break
-      case 'template' : {
+      case 'template': {
         templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
           context, true, tx)
         break
       }
-      case 'experiment' : {
+      case 'experiment': {
         const numberOfCopies = requestBody.numberOfCopies || 1
         templatePromise = this.createEntity(requestBody.id,
           numberOfCopies,
           context, true, tx)
         break
       }
-      default :
+      default:
         templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
         break
     }

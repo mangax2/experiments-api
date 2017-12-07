@@ -1,6 +1,3 @@
-//TODO update for experiments local db
-const config = require('../../../config')
-
 const cfServices = {
   experimentsDataSource: {
     alias: 'experimentsDataSource',
@@ -30,7 +27,7 @@ const cfServices = {
   },
   experimentsKafka:{
     value: {
-      enableKafka: 'true',
+      enableKafka: 'false',
       host: 'kafka.tst.datahub.internal:9093',
       topics: {
         repPackingTopic:'rsr.field-experiments.test.incoming.json',

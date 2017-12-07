@@ -202,6 +202,7 @@ class FactorDependentCompositeService {
     return {
       id: level.id,
       items: level.value.items,
+      objectType: level.value.objectType
     }
   }
 

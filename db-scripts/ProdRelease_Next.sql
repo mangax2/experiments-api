@@ -62,7 +62,7 @@ drop function setObjectTypeComposite(jsonb);
 
 
 -- Create function to aid in adding objectType to objects in clusters.
-create or replace function setItemTypesInObjects(objectArray jsonb, propertyTypeName varchar, objectType jsonb)
+create or replace function setItemTypesInObjects(objectArray jsonb, propertyTypeName varchar, propKey text[], propValue jsonb)
   returns jsonb language plpgsql as $$
 declare
   currentObject jsonb;
@@ -74,7 +74,7 @@ begin
   for currentObject in select * from jsonb_array_elements(objectArray)
   loop
     if currentObject ? 'propertyTypeId' and (currentObject ->> 'propertyTypeId')::int = propertyTypeId then
-      newObjectArray = newObjectArray || jsonb_set(currentObject, '{objectType}', objectType);
+      newObjectArray = newObjectArray || jsonb_set(currentObject, propKey, propValue);
     else
       newObjectArray = newObjectArray || currentObject;
     end if;
@@ -84,16 +84,19 @@ end;
 $$;
 
 -- Set object type of other
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'None', '"Other"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'None', '{objectType}'::text[], '"Other"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Set object type of catalog
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'Formulation Catalog', '"Catalog"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'Formulation Catalog', '{objectType}'::text[], '"Catalog"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
+-- Set catalog
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"Formulation Catalog"'))
+WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Create function to aid in adding objectType to objects in composites.
-create or replace function setItemTypesInCompositeObjects(clusterArray jsonb, propertyTypeName varchar, objectType jsonb)
+create or replace function setItemTypesInCompositeObjects(clusterArray jsonb, propertyTypeName varchar, propKey text[], propValue jsonb)
   returns jsonb language plpgsql as $$
 declare
   currentComposite jsonb;
@@ -103,7 +106,7 @@ begin
   for currentComposite in select * from jsonb_array_elements(clusterArray)
   loop
     if currentComposite ? 'items' then
-      newClusterArray = newClusterArray || jsonb_set(currentComposite, '{items}', setItemTypesInObjects(currentComposite -> 'items', propertyTypeName, objectType));
+      newClusterArray = newClusterArray || jsonb_set(currentComposite, '{items}', setItemTypesInObjects(currentComposite -> 'items', propertyTypeName, propKey, propValue));
     else
       newClusterArray = newClusterArray || currentComposite;
     end if;
@@ -113,9 +116,16 @@ end;
 $$;
 
 -- Set object type of other
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'None', '"Other"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'None', '{objectType}'::text[], '"Other"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Set object type of catalog
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'Formulation Catalog', '"Catalog"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'Formulation Catalog', '{objectType}'::text[], '"Catalog"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
+
+-- Set catalog
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"Formulation Catalog"'))
+WHERE jsonb_typeof(value -> 'items') = 'array';
+
+drop function setItemTypesInCompositeObjects(jsonb, varchar, text[], jsonb);
+drop function setItemTypesInObjects(jsonb, varchar, text[], jsonb);

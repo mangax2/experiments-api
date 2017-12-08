@@ -11,7 +11,7 @@ describe('UnitSpecificationService', () => {
   })
 
   describe('getUnitSpecificationById', () => {
-    it('returns a unit specification', () => {
+    test('returns a unit specification', () => {
       db.unitSpecification.find = mockResolve({})
 
       return target.getUnitSpecificationById(1).then((data) => {
@@ -20,7 +20,7 @@ describe('UnitSpecificationService', () => {
       })
     })
 
-    it('throws an error when find returns empty', () => {
+    test('throws an error when find returns empty', () => {
       db.unitSpecification.find = mockResolve()
       AppError.notFound = mock()
 
@@ -30,7 +30,7 @@ describe('UnitSpecificationService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.unitSpecification.find = mockReject('error')
 
       return target.getUnitSpecificationById(1).then(() => {}, (err) => {
@@ -41,7 +41,7 @@ describe('UnitSpecificationService', () => {
   })
 
   describe('getAllUnitSpecifications', () => {
-    it('gets all unit specifications', () => {
+    test('gets all unit specifications', () => {
       db.unitSpecification.all = mockResolve([{}])
 
       return target.getAllUnitSpecifications().then((data) => {
@@ -50,7 +50,7 @@ describe('UnitSpecificationService', () => {
       })
     })
 
-    it('rejects when find all fails', () => {
+    test('rejects when find all fails', () => {
       db.unitSpecification.all = mockReject('error')
 
       return target.getAllUnitSpecifications().then(() => {}, (err) => {

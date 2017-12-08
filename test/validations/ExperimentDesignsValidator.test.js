@@ -11,11 +11,13 @@ describe('ExperimentDesignsValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns schema', () => {
+    test('returns schema', () => {
       db.experimentDesign = {}
 
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 50 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 50 }, required: true,
+        },
         {
           paramName: 'ExperimentDesign',
           type: 'businessKey',
@@ -29,13 +31,13 @@ describe('ExperimentDesignsValidator', () => {
   })
 
   describe('getEntityName', () => {
-    it('returns the name', () => {
+    test('returns the name', () => {
       expect(target.getEntityName()).toEqual('ExperimentDesign')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when designObj is a filled array', () => {
+    test('resolves when designObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -43,7 +45,7 @@ describe('ExperimentDesignsValidator', () => {
       })
     })
 
-    it('rejects when designObj is not an array', () => {
+    test('rejects when designObj is not an array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
@@ -52,7 +54,7 @@ describe('ExperimentDesignsValidator', () => {
       })
     })
 
-    it('rejects when designObj is an empty array', () => {
+    test('rejects when designObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -63,8 +65,6 @@ describe('ExperimentDesignsValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves', () => {
-      return target.postValidate().then(() => {})
-    })
+    test('resolves', () => target.postValidate().then(() => {}))
   })
 })

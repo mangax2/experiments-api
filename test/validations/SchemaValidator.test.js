@@ -11,7 +11,7 @@ describe('SchemaValidator', () => {
   })
 
   describe('schemaCheck', () => {
-    it('resolves and checks schema element when the value is null', () => {
+    test('resolves and checks schema element when the value is null', () => {
       target.schemaElementCheck = mockResolve()
 
       return target.schemaCheck({ test: 'b' }, [{ paramName: 'a' }], testTx).then(() => {
@@ -19,7 +19,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('rejects when schema element check fails for null', () => {
+    test('rejects when schema element check fails for null', () => {
       target.schemaElementCheck = mockReject('error')
 
       return target.schemaCheck({ test: 'b' }, [{ paramName: 'a' }], testTx).then(() => {}, (err) => {
@@ -28,7 +28,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('resolves and checks schema element for found value', () => {
+    test('resolves and checks schema element for found value', () => {
       target.schemaElementCheck = mockResolve()
 
       return target.schemaCheck({ test: 'b' }, [{ paramName: 'test' }], testTx).then(() => {
@@ -36,7 +36,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('rejects when schema element check fails', () => {
+    test('rejects when schema element check fails', () => {
       target.schemaElementCheck = mockReject('error')
 
       return target.schemaCheck({ test: 'b' }, [{ paramName: 'test' }], testTx).then(() => {}, (err) => {
@@ -47,7 +47,7 @@ describe('SchemaValidator', () => {
   })
 
   describe('schemaElementCheck', () => {
-    it('does nothing when element is not a literal', () => {
+    test('does nothing when element is not a literal', () => {
       target.literalCheck = mock(false)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -69,7 +69,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('only checks literal when value is not required and null', () => {
+    test('only checks literal when value is not required and null', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -91,7 +91,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks only literal and required when value is undefined', () => {
+    test('checks only literal and required when value is undefined', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -116,7 +116,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks only literal and required when value is null', () => {
+    test('checks only literal and required when value is null', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -138,7 +138,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks literal, required, numeric, not numeric range', () => {
+    test('checks literal, required, numeric, not numeric range', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -164,7 +164,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('check literal, required, numeric, and numeric range', () => {
+    test('check literal, required, numeric, and numeric range', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -191,7 +191,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('check literal, required, and text', () => {
+    test('check literal, required, and text', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -218,7 +218,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks literal, required, and constant', () => {
+    test('checks literal, required, and constant', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -245,7 +245,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks literal, required, and boolean', () => {
+    test('checks literal, required, and boolean', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -271,7 +271,7 @@ describe('SchemaValidator', () => {
       })
     })
 
-    it('checks literal, required, and array', () => {
+    test('checks literal, required, and array', () => {
       target.literalCheck = mock(true)
       target.checkRequired = mock()
       target.checkNumeric = mock()
@@ -285,7 +285,7 @@ describe('SchemaValidator', () => {
         required: true,
         type: 'array',
         paramName: 'test',
-        entityCount: {}
+        entityCount: {},
       }).then(() => {
         expect(target.literalCheck).toHaveBeenCalledWith([], 'test', 'array')
         expect(target.checkRequired).toHaveBeenCalledWith([], 'test')
@@ -300,7 +300,7 @@ describe('SchemaValidator', () => {
   })
 
   describe('validateEntity', () => {
-    it('calls schemaCheck', () => {
+    test('calls schemaCheck', () => {
       target.schemaCheck = mock()
       target.getSchema = mock([])
 
@@ -311,86 +311,98 @@ describe('SchemaValidator', () => {
   })
 
   describe('validateBatchForRI', () => {
-    it('resolves when there is no RI to check', () => {
+    test('resolves when there is no RI to check', () => {
       target.getSchema = mock([])
       target.checkRIBatch = mock()
-      const batchPayload = [{id: 1, test: 'a'}]
-
-      return target.validateBatchForRI(batchPayload,'POST', testTx).then(() => {
-        expect(target.checkRIBatch).not.toHaveBeenCalled()
-      })
-    })
-
-    it('calls checkRIBatch for Ref Data', () => {
-      target.getSchema = mock([{type: 'refData', paramName: 'test', entity: {}}])
-      target.checkRIBatch = mockResolve()
-      const batchPayload = [{id: 1, test: 'a'}]
-
-      return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
-        expect(target.checkRIBatch).toHaveBeenCalledWith([[{entity: {}, id: 'a', paramName: 'test', updateId: 1}]], testTx)
-      })
-    })
-
-    it('calls checkRIBatch for Business Keys', () => {
-      target.getSchema = mock([{type: 'businessKey', paramName: 'test', entity: {}, keys: ['test']}])
-      target.checkRIBatch = mockResolve()
-      const batchPayload = [{id: 1, test: 'a'}]
-
-      return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
-        expect(target.checkRIBatch).toHaveBeenCalledWith([[{entity: {}, keys: ['a'], paramName: 'test', updateId: 1}]], testTx)
-      })
-    })
-
-    it('does not call checkRIBatch when nothing found to check based on schema', () => {
-      target.getSchema = mock([{type: 'refData', paramName: 'test', entity: {}, keys: ['test']}])
-      target.checkRIBatch = mockResolve()
-      const batchPayload = [{id: 1, test2: 'a'}]
+      const batchPayload = [{ id: 1, test: 'a' }]
 
       return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
         expect(target.checkRIBatch).not.toHaveBeenCalled()
       })
     })
 
-    it('rejects when checkRIBatch fails', () => {
-      target.getSchema = mock([{type: 'businessKey', paramName: 'test', entity: {}, keys: ['test']}])
+    test('calls checkRIBatch for Ref Data', () => {
+      target.getSchema = mock([{ type: 'refData', paramName: 'test', entity: {} }])
+      target.checkRIBatch = mockResolve()
+      const batchPayload = [{ id: 1, test: 'a' }]
+
+      return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
+        expect(target.checkRIBatch).toHaveBeenCalledWith([[{
+          entity: {}, id: 'a', paramName: 'test', updateId: 1,
+        }]], testTx)
+      })
+    })
+
+    test('calls checkRIBatch for Business Keys', () => {
+      target.getSchema = mock([{
+        type: 'businessKey', paramName: 'test', entity: {}, keys: ['test'],
+      }])
+      target.checkRIBatch = mockResolve()
+      const batchPayload = [{ id: 1, test: 'a' }]
+
+      return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
+        expect(target.checkRIBatch).toHaveBeenCalledWith([[{
+          entity: {}, keys: ['a'], paramName: 'test', updateId: 1,
+        }]], testTx)
+      })
+    })
+
+    test('does not call checkRIBatch when nothing found to check based on schema', () => {
+      target.getSchema = mock([{
+        type: 'refData', paramName: 'test', entity: {}, keys: ['test'],
+      }])
+      target.checkRIBatch = mockResolve()
+      const batchPayload = [{ id: 1, test2: 'a' }]
+
+      return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {
+        expect(target.checkRIBatch).not.toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when checkRIBatch fails', () => {
+      target.getSchema = mock([{
+        type: 'businessKey', paramName: 'test', entity: {}, keys: ['test'],
+      }])
       target.checkRIBatch = mockReject('error')
-      const batchPayload = [{id: 1, test: 'a'}]
+      const batchPayload = [{ id: 1, test: 'a' }]
 
       return target.validateBatchForRI(batchPayload, 'POST', testTx).then(() => {}, (err) => {
-        expect(target.checkRIBatch).toHaveBeenCalledWith([[{entity: {}, keys: ['a'], paramName: 'test', updateId: 1}]], testTx)
+        expect(target.checkRIBatch).toHaveBeenCalledWith([[{
+          entity: {}, keys: ['a'], paramName: 'test', updateId: 1,
+        }]], testTx)
         expect(err).toEqual('error')
       })
     })
   })
 
   describe('postValidate', () => {
-    it('checks business keys when there are no errors', () => {
+    test('checks business keys when there are no errors', () => {
       target.hasErrors = mock()
       target.getBusinessKeyPropertyNames = mock(['test1', 'test2'])
       AppError.badRequest = mock()
 
-      return target.postValidate([{ 'test1': 'v', 'test2': 'v2' }]).then(() => {
+      return target.postValidate([{ test1: 'v', test2: 'v2' }]).then(() => {
         expect(target.getBusinessKeyPropertyNames).toHaveBeenCalled()
         expect(AppError.badRequest).not.toHaveBeenCalled()
       })
     })
 
-    it('throws an error when duplicate business keys exist', () => {
+    test('throws an error when duplicate business keys exist', () => {
       target.hasErrors = mock()
       target.getBusinessKeyPropertyNames = mock(['test1', 'test2'])
       AppError.badRequest = mock()
       target.getDuplicateBusinessKeyError = mock('business key error!')
 
-      return target.postValidate([{ 'test1': 'v', 'test2': 'v2' }, {
-        'test1': 'v',
-        'test2': 'v2',
+      return target.postValidate([{ test1: 'v', test2: 'v2' }, {
+        test1: 'v',
+        test2: 'v2',
       }]).then(() => {}, () => {
         expect(target.getBusinessKeyPropertyNames).toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('business key error!')
       })
     })
 
-    it('does not check business keys if there are errors present', () => {
+    test('does not check business keys if there are errors present', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -401,7 +413,7 @@ describe('SchemaValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('throws an error', () => {
+    test('throws an error', () => {
       expect(() => {
         target.getSchema()
       }).toThrow()
@@ -409,7 +421,7 @@ describe('SchemaValidator', () => {
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('throws an error', () => {
+    test('throws an error', () => {
       expect(() => {
         target.getBusinessKeyPropertyNames()
       }).toThrow()
@@ -417,11 +429,10 @@ describe('SchemaValidator', () => {
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('throws an error', () => {
+    test('throws an error', () => {
       expect(() => {
         target.getDuplicateBusinessKeyError()
       }).toThrow()
     })
   })
-
 })

@@ -1,6 +1,5 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { mockReject, mockResolve } from '../jestUtil'
 import RefDataSourceService from '../../src/services/RefDataSourceService'
-import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('RefDataSourceService', () => {
@@ -11,7 +10,7 @@ describe('RefDataSourceService', () => {
   })
 
   describe('getRefDataSources', () => {
-    it('returns ref data sources', () => {
+    test('returns ref data sources', () => {
       db.refDataSource.all = mockResolve([{}])
 
       return target.getRefDataSources().then((data) => {
@@ -20,7 +19,7 @@ describe('RefDataSourceService', () => {
       })
     })
 
-    it('rejects when get all fails', () => {
+    test('rejects when get all fails', () => {
       db.refDataSource.all = mockReject('error')
 
       return target.getRefDataSources().then(() => {}, (err) => {
@@ -31,7 +30,7 @@ describe('RefDataSourceService', () => {
   })
 
   describe('getRefDataSourcesByRefDataSourceTypeId', () => {
-    it('returns data sources for a type', () => {
+    test('returns data sources for a type', () => {
       db.refDataSource.findByTypeId = mockResolve([{}])
 
       return target.getRefDataSourcesByRefDataSourceTypeId(1).then((data) => {
@@ -40,7 +39,7 @@ describe('RefDataSourceService', () => {
       })
     })
 
-    it('rejects when findByTypeId fails', () => {
+    test('rejects when findByTypeId fails', () => {
       db.refDataSource.findByTypeId = mockReject('error')
 
       return target.getRefDataSourcesByRefDataSourceTypeId(1).then(() => {}, (err) => {

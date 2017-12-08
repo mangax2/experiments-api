@@ -6,20 +6,20 @@ import PingUtil from '../../src/services/utility/PingUtil'
 
 describe('CapacityRequestService', () => {
   describe('associateExperimentToCapacityRequest', () => {
-    const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;'}]
+    const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
     const capacityRequest = { id: 5, protocol_number: 7 }
     let originalFunction
 
     beforeAll(() => {
       cfServices.experimentsExternalAPIUrls = {
         value: {
-          capacityRequestAPIUrl: 'test'
-        }
+          capacityRequestAPIUrl: 'test',
+        },
       }
       originalFunction = CapacityRequestService.handleCapacityRequestError
     })
 
-    it('resolves if nothing goes wrong', () => {
+    test('resolves if nothing goes wrong', () => {
       PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: capacityRequest }))
       HttpUtil.put = jest.fn(() => Promise.resolve())
@@ -29,8 +29,8 @@ describe('CapacityRequestService', () => {
         id: 100,
         request: {
           id: 53,
-          type: 'ce'
-        }
+          type: 'ce',
+        },
       }
 
       return CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
@@ -43,8 +43,8 @@ describe('CapacityRequestService', () => {
         })
     })
 
-    it('rejects if something goes wrong', (done) => {
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject('err'))
+    test('rejects if something goes wrong', (done) => {
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(new Error('err')))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: capacityRequest }))
       HttpUtil.put = jest.fn(() => Promise.resolve())
       CapacityRequestService.handleCapacityRequestError = jest.fn(() => 'err')
@@ -53,13 +53,12 @@ describe('CapacityRequestService', () => {
         id: 100,
         request: {
           id: 53,
-          type: 'ce'
-        }
+          type: 'ce',
+        },
       }
 
       CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
-        .catch((error) => {
-          expect(error).toBe('err')
+        .catch(() => {
           expect(PingUtil.getMonsantoHeader).toBeCalled()
           expect(HttpUtil.get).not.toBeCalled()
           expect(HttpUtil.put).not.toBeCalledWith()
@@ -80,12 +79,12 @@ describe('CapacityRequestService', () => {
       originalFunction = CapacityRequestService.associateExperimentToCapacityRequest
     })
 
-    it('calls associateExperimentToCapacityRequest once for each experiment with an associated request', () => {
+    test('calls associateExperimentToCapacityRequest once for each experiment with an associated request', () => {
       CapacityRequestService.associateExperimentToCapacityRequest = jest.fn(() => Promise.resolve())
       const experiments = [
         { request: {} },
         {},
-        { owners: [], request: {} }
+        { owners: [], request: {} },
       ]
 
       const result = CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments, {})
@@ -95,7 +94,7 @@ describe('CapacityRequestService', () => {
       expect(CapacityRequestService.associateExperimentToCapacityRequest).toBeCalledWith(experiments[2], {})
     })
 
-    it('returns an array with a single promise if no experiments have an associated request', () => {
+    test('returns an array with a single promise if no experiments have an associated request', () => {
       CapacityRequestService.associateExperimentToCapacityRequest = jest.fn()
 
       const result = CapacityRequestService.batchAssociateExperimentsToCapacityRequests([], {})
@@ -111,7 +110,7 @@ describe('CapacityRequestService', () => {
   })
 
   describe('handleCapacityRequestError', () => {
-    it('calls AppError.badRequest on 400', () => {
+    test('calls AppError.badRequest on 400', () => {
       AppError.badRequest = jest.fn()
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
@@ -123,7 +122,7 @@ describe('CapacityRequestService', () => {
       expect(AppError.forbidden).not.toBeCalled()
     })
 
-    it('calls AppError.badRequest on 404', () => {
+    test('calls AppError.badRequest on 404', () => {
       AppError.badRequest = jest.fn()
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
@@ -135,7 +134,7 @@ describe('CapacityRequestService', () => {
       expect(AppError.forbidden).not.toBeCalled()
     })
 
-    it('calls AppError.unauthorized on 401', () => {
+    test('calls AppError.unauthorized on 401', () => {
       AppError.badRequest = jest.fn()
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
@@ -147,7 +146,7 @@ describe('CapacityRequestService', () => {
       expect(AppError.forbidden).not.toBeCalled()
     })
 
-    it('calls AppError.forbidden on 403', () => {
+    test('calls AppError.forbidden on 403', () => {
       AppError.badRequest = jest.fn()
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
@@ -159,7 +158,7 @@ describe('CapacityRequestService', () => {
       expect(AppError.unauthorized).not.toBeCalled()
     })
 
-    it('does not call AppError on 500', () => {
+    test('does not call AppError on 500', () => {
       AppError.badRequest = jest.fn()
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
@@ -172,7 +171,7 @@ describe('CapacityRequestService', () => {
       expect(response).toEqual({
         status: 500,
         code: 'Internal Server Error',
-        message: 'Error received from Capacity Request API: testText'
+        message: 'Error received from Capacity Request API: testText',
       })
     })
   })

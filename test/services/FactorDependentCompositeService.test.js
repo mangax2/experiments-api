@@ -1,5 +1,4 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
-import AppUtil from '../../src/services/utility/AppUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
@@ -73,7 +72,7 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('getFactorsWithLevels', () => {
-    it('returns factors and levels object', () => {
+    test('returns factors and levels object', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([{}, {}])
 
@@ -84,7 +83,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when getFactorLevelsByExperimentIdNoExistenceCheck fails', () => {
+    test('rejects when getFactorLevelsByExperimentIdNoExistenceCheck fails', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject('error')
 
@@ -95,7 +94,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when getFactorsByExperimentIdNoExistenceCheck fails', () => {
+    test('rejects when getFactorsByExperimentIdNoExistenceCheck fails', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockReject('error')
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mock()
 
@@ -108,42 +107,39 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('extractLevelsForFactor', () => {
-    it('returns empty list when no levels match', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor(
-        {id: 42}, [{factor_id: 1}, {factor_id: 2}])).toEqual([])
+    test('returns empty list when no levels match', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 2 }])).toEqual([])
     })
 
-    it('returns empty list when no levels exist', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor(
-        {id: 42}, [])).toEqual([])
+    test('returns empty list when no levels exist', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [])).toEqual([])
     })
 
-    it('returns levels that match', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor(
-        {id: 42}, [{factor_id: 1}, {factor_id: 42}, {factor_id: 2}, {factor_id: 42}]))
-        .toEqual([{factor_id: 42}, {factor_id: 42}])
+    test('returns levels that match', () => {
+      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 42 }, { factor_id: 2 }, { factor_id: 42 }]))
+        .toEqual([{ factor_id: 42 }, { factor_id: 42 }])
     })
   })
 
   describe('appendLevelIdToLevel', () => {
-    it('creates new entity with level id and items', () => {
-      expect(FactorDependentCompositeService.appendLevelIdToLevel({id: 42, value: {items: [1,2,3]}}))
-        .toEqual({id: 42, items: [1,2,3]})
+    test('creates new entity with level id and items', () => {
+      expect(FactorDependentCompositeService.appendLevelIdToLevel({ id: 42, value: { items: [1, 2, 3] } }))
+        .toEqual({ id: 42, items: [1, 2, 3] })
     })
   })
 
   describe('findFactorType', () => {
-    it('returns lower case type name of the factor', () => {
+    test('returns lower case type name of the factor', () => {
       expect(FactorDependentCompositeService.findFactorType([
-        {id: 1, type: 'notIt'},
-        {id: 2, type: 'IT'},
-        {id: 3, type: 'notIt'},
-        ], {ref_factor_type_id: 2})).toEqual('it')
+        { id: 1, type: 'notIt' },
+        { id: 2, type: 'IT' },
+        { id: 3, type: 'notIt' },
+      ], { ref_factor_type_id: 2 })).toEqual('it')
     })
   })
 
   describe('assembleFactorLevelDTOs', () => {
-    it('creates empty array when levels are not found.', () => {
+    test('creates empty array when levels are not found.', () => {
       FactorDependentCompositeService.appendLevelIdToLevel = mock()
 
       expect(FactorDependentCompositeService.assembleFactorLevelDTOs([]))
@@ -152,13 +148,13 @@ describe('FactorDependentCompositeService', () => {
       expect(FactorDependentCompositeService.appendLevelIdToLevel).not.toHaveBeenCalled()
     })
 
-    it('creates factor level DTOs', () => {
+    test('creates factor level DTOs', () => {
       FactorDependentCompositeService.appendLevelIdToLevel = mock()
-      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 8, items: []})
-      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({id: 9, items: []})
+      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({ id: 8, items: [] })
+      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({ id: 9, items: [] })
 
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([1,2]))
-        .toEqual([{id: 8, items: []}, {id: 9, items: []}])
+      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([1, 2]))
+        .toEqual([{ id: 8, items: [] }, { id: 9, items: [] }])
 
       expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledTimes(2)
       expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(1)
@@ -167,11 +163,11 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('mapFactorEntitiesToFactorDTOs', () => {
-    it('returns empty list when no factors are present', () => {
+    test('returns empty list when no factors are present', () => {
       FactorDependentCompositeService.findFactorType = mock()
       FactorDependentCompositeService.assembleFactorLevelDTOs = mock()
 
-      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1,2,3], [{}, {}], []))
+      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1, 2, 3], [{}, {}], []))
         .toEqual([])
 
       expect(FactorDependentCompositeService.findFactorType).not.toHaveBeenCalled()
@@ -180,194 +176,179 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('mapDependentVariablesEntitiesToDTOs', () => {
-    it('creates empty array when input is an empty array', () => {
+    test('creates empty array when input is an empty array', () => {
       expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([]))
         .toEqual([])
     })
 
-    it('creates dependent variable DTOs', () => {
+    test('creates dependent variable DTOs', () => {
       expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([
         {
           name: 'dvName',
           required: true,
-          question_code: 42
-        }
+          question_code: 42,
+        },
       ])).toEqual([
         {
           name: 'dvName',
           required: true,
-          questionCode: 42
-        }
+          questionCode: 42,
+        },
       ])
     })
   })
 
   describe('createVariablesObject', () => {
-    it('creates default object with empty arrays when empty object passed in', () => {
+    test('creates default object with empty arrays when empty object passed in', () => {
       expect(FactorDependentCompositeService.createVariablesObject({})).toEqual({
         independent: [],
         exogenous: [],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       })
     })
 
-    it('builds object with supplied data', () => {
+    test('builds object with supplied data', () => {
       expect(FactorDependentCompositeService.createVariablesObject({
-        independent: [1,2,3],
-        exogenous: [4,5,6],
-      }, [7,8,9], [10,11,12])).toEqual({
-        independent: [1,2,3],
-        exogenous: [4,5,6],
-        dependent: [7,8,9],
-        independentAssociations: [10,11,12]
+        independent: [1, 2, 3],
+        exogenous: [4, 5, 6],
+      }, [7, 8, 9], [10, 11, 12])).toEqual({
+        independent: [1, 2, 3],
+        exogenous: [4, 5, 6],
+        dependent: [7, 8, 9],
+        independentAssociations: [10, 11, 12],
       })
     })
   })
 
   describe('assembleIndependentAndExogenous', () => {
-    it('returns empty object when input is empty array', () => {
+    test('returns empty object when input is empty array', () => {
       expect(FactorDependentCompositeService.assembleIndependentAndExogenous([]))
         .toEqual({})
     })
 
-    it('appends factors to properties named of type and removes type property', () => {
-      expect(FactorDependentCompositeService.assembleIndependentAndExogenous(
-        [
-          {type: 'independent', data: {value: 'A'}},
-          {type: 'independent', data: {value: 'B'}},
-          {type: 'exogenous', data: {value: 'C'}},
-          {type: 'exogenous', data: {value: 'D'}}
-        ]
-      )).toEqual({
+    test('appends factors to properties named of type and removes type property', () => {
+      expect(FactorDependentCompositeService.assembleIndependentAndExogenous([
+        { type: 'independent', data: { value: 'A' } },
+        { type: 'independent', data: { value: 'B' } },
+        { type: 'exogenous', data: { value: 'C' } },
+        { type: 'exogenous', data: { value: 'D' } },
+      ])).toEqual({
         independent: [
-          {data: {value: 'A'}},
-          {data: {value: 'B'}},
+          { data: { value: 'A' } },
+          { data: { value: 'B' } },
         ],
         exogenous: [
-          {data: {value: 'C'}},
-          {data: {value: 'D'}},
-        ]
+          { data: { value: 'C' } },
+          { data: { value: 'D' } },
+        ],
       })
     })
   })
 
   describe('assembleVariablesObject', () => {
-    it('builds variable object from results of functions', () => {
-      FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mock(
-        [{name: 'factor1DTO'}, {name: 'factor2DTO'}])
-      FactorDependentCompositeService.assembleIndependentAndExogenous = mock(
-        {independent: [], exogenous: []}
-      )
-      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mock(
-        [{}, {}]
-      )
-      FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs = mock(
-        [{name: 'associationDTO'}]
-      )
-      FactorDependentCompositeService.createVariablesObject = mock({name: 'variablesObject'})
+    test('builds variable object from results of functions', () => {
+      FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mock([{ name: 'factor1DTO' }, { name: 'factor2DTO' }])
+      FactorDependentCompositeService.assembleIndependentAndExogenous = mock({ independent: [], exogenous: [] })
+      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mock([{}, {}])
+      FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs = mock([{ name: 'associationDTO' }])
+      FactorDependentCompositeService.createVariablesObject = mock({ name: 'variablesObject' })
 
       expect(FactorDependentCompositeService.assembleVariablesObject(
-        [{name: 'factor1'}, {name: 'factor2'}],
-        [{name: 'f1l1'}, {name: 'f1l2'}, {name: 'f2l1'}, {name: 'f2l2'}],
-        [{name: 'type1'}, {name: 'type2'}],
-        [{name: 'depVar1'}, {name: 'depVar2'}],
-        [{name: 'association'}]
+        [{ name: 'factor1' }, { name: 'factor2' }],
+        [{ name: 'f1l1' }, { name: 'f1l2' }, { name: 'f2l1' }, { name: 'f2l2' }],
+        [{ name: 'type1' }, { name: 'type2' }],
+        [{ name: 'depVar1' }, { name: 'depVar2' }],
+        [{ name: 'association' }],
       )).toEqual({
-        name: 'variablesObject'
+        name: 'variablesObject',
       })
 
       expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs)
         .toHaveBeenCalledWith(
-          [{name: 'factor1'}, {name: 'factor2'}],
-          [{name: 'f1l1'}, {name: 'f1l2'}, {name: 'f2l1'}, {name: 'f2l2'}],
-          [{name: 'type1'}, {name: 'type2'}],
-          [{name: 'association'}]
+          [{ name: 'factor1' }, { name: 'factor2' }],
+          [{ name: 'f1l1' }, { name: 'f1l2' }, { name: 'f2l1' }, { name: 'f2l2' }],
+          [{ name: 'type1' }, { name: 'type2' }],
+          [{ name: 'association' }],
         )
       expect(FactorDependentCompositeService.assembleIndependentAndExogenous)
-        .toHaveBeenCalledWith(
-          [{name: 'factor1DTO'}, {name: 'factor2DTO'}]
-        )
+        .toHaveBeenCalledWith([{ name: 'factor1DTO' }, { name: 'factor2DTO' }])
       expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs)
-        .toHaveBeenCalledWith(
-          [{name: 'depVar1'}, {name: 'depVar2'}]
-        )
+        .toHaveBeenCalledWith([{ name: 'depVar1' }, { name: 'depVar2' }])
       expect(FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs)
-        .toHaveBeenCalledWith(
-          [{name: 'association'}]
-        )
+        .toHaveBeenCalledWith([{ name: 'association' }])
       expect(FactorDependentCompositeService.createVariablesObject)
         .toHaveBeenCalledWith(
-          {independent: [], exogenous: []},
+          { independent: [], exogenous: [] },
           [{}, {}],
-          [{name: 'associationDTO'}]
+          [{ name: 'associationDTO' }],
         )
     })
   })
 
   describe('getAllVariablesByExperimentId', () => {
-    it('returns all variables with their levels', () => {
+    test('returns all variables with their levels', () => {
       const factorsWithLevels = {
-          factors: [{
-              id: 42,
-              name: 'GermPlasm',
-              tier: undefined,
-              ref_data_source_id: 1,
-              ref_factor_type_id: 1,
+        factors: [{
+          id: 42,
+          name: 'GermPlasm',
+          tier: undefined,
+          ref_data_source_id: 1,
+          ref_factor_type_id: 1,
+        },
+        {
+          id: 43,
+          name: 'RM',
+          tier: undefined,
+          ref_data_source_id: 1,
+          ref_factor_type_id: 1,
+        },
+        ],
+
+        levels: [
+          {
+            id: 1,
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1 }] },
+            factor_id: 42,
           },
           {
-              id: 43,
-              name: 'RM',
-              tier: undefined,
-              ref_data_source_id: 1,
-              ref_factor_type_id: 1,
-          }
-          ],
-
-          levels: [
-              {
-                  id: 1,
-                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1}]},
-                  factor_id: 42
-              },
-              {
-                  id: 2,
-                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1}]},
-                  factor_id: 42
-              },
-              {
-                  id: 3,
-                  value: {items:[{label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1}]},
-                  factor_id: 42
-              },
-              {
-                  id: 4,
-                  value: {items:[{label: 'RM', text: 'RM1', propertyTypeId: 1}]},
-                  factor_id: 43
-              },
-              {
-                  id: 5,
-                  value: {items:[{label: 'RM', text: 'RM2', propertyTypeId: 1}]},
-                  factor_id: 43
-              }
-          ],
+            id: 2,
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1 }] },
+            factor_id: 42,
+          },
+          {
+            id: 3,
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1 }] },
+            factor_id: 42,
+          },
+          {
+            id: 4,
+            value: { items: [{ label: 'RM', text: 'RM1', propertyTypeId: 1 }] },
+            factor_id: 43,
+          },
+          {
+            id: 5,
+            value: { items: [{ label: 'RM', text: 'RM2', propertyTypeId: 1 }] },
+            factor_id: 43,
+          },
+        ],
       }
       const factorLevelAssociations = [
         {
-          id : 1,
-          associated_level_id : 1,
-          nested_level_id : 4
+          id: 1,
+          associated_level_id: 1,
+          nested_level_id: 4,
         },
         {
-          id : 2,
-          associated_level_id : 2,
-          nested_level_id : 4
+          id: 2,
+          associated_level_id: 2,
+          nested_level_id: 4,
         },
         {
-          id : 3,
-          associated_level_id : 3,
-          nested_level_id : 5
-        }
+          id: 3,
+          associated_level_id: 3,
+          nested_level_id: 5,
+        },
       ]
       ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
@@ -397,9 +378,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm1',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
             {
               id: 2,
@@ -407,9 +388,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm2',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
             {
               id: 3,
@@ -417,9 +398,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm3',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
           ],
           tier: undefined,
@@ -440,9 +421,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'RM',
                   text: 'RM1',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
             {
               id: 5,
@@ -450,28 +431,28 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'RM',
                   text: 'RM2',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
           ],
           tier: undefined,
         }],
         independentAssociations: [
           {
-            id : 1,
-            associatedLevelId : 1,
-            nestedLevelId : 4
+            id: 1,
+            associatedLevelId: 1,
+            nestedLevelId: 4,
           },
           {
-            id : 2,
-            associatedLevelId : 2,
-            nestedLevelId : 4
+            id: 2,
+            associatedLevelId: 2,
+            nestedLevelId: 4,
           },
           {
-            id : 3,
-            associatedLevelId : 3,
-            nestedLevelId : 5
+            id: 3,
+            associatedLevelId: 3,
+            nestedLevelId: 5,
           },
         ],
         exogenous: [],
@@ -488,7 +469,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('returns all variables with their levels and multiple nested vars', () => {
+    test('returns all variables with their levels and multiple nested vars', () => {
       const factorsWithLevels = {
         factors: [
           {
@@ -511,78 +492,78 @@ describe('FactorDependentCompositeService', () => {
             tier: undefined,
             ref_data_source_id: 1,
             ref_factor_type_id: 1,
-          }
+          },
         ],
 
         levels: [
           {
             id: 1,
-            value: {items:[{label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1}]},
-            factor_id: 42
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1 }] },
+            factor_id: 42,
           },
           {
             id: 2,
-            value: {items:[{label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1}]},
-            factor_id: 42
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1 }] },
+            factor_id: 42,
           },
           {
             id: 3,
-            value: {items:[{label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1}]},
-            factor_id: 42
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1 }] },
+            factor_id: 42,
           },
           {
             id: 4,
-            value: {items:[{label: 'RM', text: 'RM1', propertyTypeId: 1}]},
-            factor_id: 43
+            value: { items: [{ label: 'RM', text: 'RM1', propertyTypeId: 1 }] },
+            factor_id: 43,
           },
           {
             id: 5,
-            value: {items:[{label: 'RM', text: 'RM2', propertyTypeId: 1}]},
-            factor_id: 43
+            value: { items: [{ label: 'RM', text: 'RM2', propertyTypeId: 1 }] },
+            factor_id: 43,
           },
           {
             id: 6,
-            value: {items:[{label: 'PlantHeight', text: 'Tall', propertyTypeId: 1}]},
-            factor_id: 44
+            value: { items: [{ label: 'PlantHeight', text: 'Tall', propertyTypeId: 1 }] },
+            factor_id: 44,
           },
           {
             id: 7,
-            value: {items:[{label: 'PlantHeight', text: 'Dwarf', propertyTypeId: 1}]},
-            factor_id: 44
-          }
+            value: { items: [{ label: 'PlantHeight', text: 'Dwarf', propertyTypeId: 1 }] },
+            factor_id: 44,
+          },
         ],
       }
       const factorLevelAssociations = [
         {
-          id : 1,
-          associated_level_id : 1,
-          nested_level_id : 4
+          id: 1,
+          associated_level_id: 1,
+          nested_level_id: 4,
         },
         {
-          id : 2,
-          associated_level_id : 2,
-          nested_level_id : 4
+          id: 2,
+          associated_level_id: 2,
+          nested_level_id: 4,
         },
         {
-          id : 3,
-          associated_level_id : 3,
-          nested_level_id : 5
+          id: 3,
+          associated_level_id: 3,
+          nested_level_id: 5,
         },
         {
-          id : 4,
-          associated_level_id : 1,
-          nested_level_id : 6
+          id: 4,
+          associated_level_id: 1,
+          nested_level_id: 6,
         },
         {
-          id : 5,
-          associated_level_id : 2,
-          nested_level_id : 7
+          id: 5,
+          associated_level_id: 2,
+          nested_level_id: 7,
         },
         {
-          id : 6,
-          associated_level_id : 3,
-          nested_level_id : 7
-        }
+          id: 6,
+          associated_level_id: 3,
+          nested_level_id: 7,
+        },
       ]
       ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
@@ -607,7 +588,7 @@ describe('FactorDependentCompositeService', () => {
             {
               id: 44,
               name: 'PlantHeight',
-            }
+            },
           ],
           levels: [
             {
@@ -616,9 +597,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm1',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
             {
               id: 2,
@@ -626,9 +607,9 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm2',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
             {
               id: 3,
@@ -636,110 +617,110 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm3',
-                  propertyTypeId: 1
-                }
-              ]
+                  propertyTypeId: 1,
+                },
+              ],
             },
           ],
           tier: undefined,
         },
-          {
-            id: 43,
-            name: 'RM',
-            associatedFactors: [
-              {
-                id: 42,
-                name: 'GermPlasm',
-              },
-            ],
-            levels: [
-              {
-                id: 4,
-                items: [
-                  {
-                    label: 'RM',
-                    text: 'RM1',
-                    propertyTypeId: 1
-                  }
-                ]
-              },
-              {
-                id: 5,
-                items: [
-                  {
-                    label: 'RM',
-                    text: 'RM2',
-                    propertyTypeId: 1
-                  }
-                ]
-              },
-            ],
-            tier: undefined,
-          },
-          {
-            id: 44,
-            name: 'PlantHeight',
-            associatedFactors: [
-              {
-                id: 42,
-                name: 'GermPlasm',
-              },
-            ],
-            levels: [
-              {
-                id: 6,
-                items: [
-                  {
-                    label: 'PlantHeight',
-                    text: 'Tall',
-                    propertyTypeId: 1
-                  }
-                ]
-              },
-              {
-                id: 7,
-                items: [
-                  {
-                    label: 'PlantHeight',
-                    text: 'Dwarf',
-                    propertyTypeId: 1
-                  }
-                ]
-              },
-            ],
-            tier: undefined,
-          }],
+        {
+          id: 43,
+          name: 'RM',
+          associatedFactors: [
+            {
+              id: 42,
+              name: 'GermPlasm',
+            },
+          ],
+          levels: [
+            {
+              id: 4,
+              items: [
+                {
+                  label: 'RM',
+                  text: 'RM1',
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+            {
+              id: 5,
+              items: [
+                {
+                  label: 'RM',
+                  text: 'RM2',
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          ],
+          tier: undefined,
+        },
+        {
+          id: 44,
+          name: 'PlantHeight',
+          associatedFactors: [
+            {
+              id: 42,
+              name: 'GermPlasm',
+            },
+          ],
+          levels: [
+            {
+              id: 6,
+              items: [
+                {
+                  label: 'PlantHeight',
+                  text: 'Tall',
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+            {
+              id: 7,
+              items: [
+                {
+                  label: 'PlantHeight',
+                  text: 'Dwarf',
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          ],
+          tier: undefined,
+        }],
         independentAssociations: [
           {
-            id : 1,
-            associatedLevelId : 1,
-            nestedLevelId : 4
+            id: 1,
+            associatedLevelId: 1,
+            nestedLevelId: 4,
           },
           {
-            id : 2,
-            associatedLevelId : 2,
-            nestedLevelId : 4
+            id: 2,
+            associatedLevelId: 2,
+            nestedLevelId: 4,
           },
           {
-            id : 3,
-            associatedLevelId : 3,
-            nestedLevelId : 5
+            id: 3,
+            associatedLevelId: 3,
+            nestedLevelId: 5,
           },
           {
-            id : 4,
-            associatedLevelId : 1,
-            nestedLevelId : 6
+            id: 4,
+            associatedLevelId: 1,
+            nestedLevelId: 6,
           },
           {
-            id : 5,
-            associatedLevelId : 2,
-            nestedLevelId : 7
+            id: 5,
+            associatedLevelId: 2,
+            nestedLevelId: 7,
           },
           {
-            id : 6,
-            associatedLevelId : 3,
-            nestedLevelId : 7
-          }
+            id: 6,
+            associatedLevelId: 3,
+            nestedLevelId: 7,
+          },
         ],
         exogenous: [],
         dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
@@ -755,7 +736,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when a call fails in the Promise all', () => {
+    test('rejects when a call fails in the Promise all', () => {
       ExperimentsService.verifyExperimentExists = mockResolve()
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve()
       target.factorTypeService.getAllFactorTypes = mockResolve()
@@ -774,13 +755,13 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('mapDependentVariableDTO2DbEntity', () => {
-    it('returns empty array when dependentVariables is undefined, null, or empty', () => {
+    test('returns empty array when dependentVariables is undefined, null, or empty', () => {
       expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(undefined, 1)).toEqual([])
       expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(null, 1)).toEqual([])
       expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([], 1)).toEqual([])
     })
 
-    it('maps dependent variables to db entities', () => {
+    test('maps dependent variables to db entities', () => {
       expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([{ name: 'testDependent' }, { name: 'testDependent2' }], 1)).toEqual([{
         name: 'testDependent',
         experimentId: 1,
@@ -789,7 +770,7 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('persistVariablesWithoutLevels', () => {
-    it('deletes and creates dependent variables', () => {
+    test('deletes and creates dependent variables', () => {
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mockResolve()
 
@@ -799,7 +780,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('deletes dependent variables, but does not create new ones', () => {
+    test('deletes dependent variables, but does not create new ones', () => {
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
@@ -809,7 +790,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when batchCreateDependentVariables fails', () => {
+    test('rejects when batchCreateDependentVariables fails', () => {
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
       target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
 
@@ -820,7 +801,7 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('rejects when deleteDependentVariablesForExperimentId fails', () => {
+    test('rejects when deleteDependentVariablesForExperimentId fails', () => {
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
@@ -833,16 +814,15 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('persistDependentVariables', () => {
-    it('maps DTOs to entities and calls persist method', () => {
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{entity: true}])
+    test('maps DTOs to entities and calls persist method', () => {
+      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{ entity: true }])
       target.persistVariablesWithoutLevels = mockResolve()
 
       return target.persistDependentVariables([{}], 42, testContext, false, testTx)
         .then(() => {
           expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity)
             .toHaveBeenCalledWith([{}], 42)
-          expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(
-            42, [{entity: true}], testContext, false, testTx)
+          expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(42, [{ entity: true }], testContext, false, testTx)
         })
     })
   })
@@ -852,13 +832,13 @@ describe('FactorDependentCompositeService', () => {
       target.factorTypeService.getAllFactorTypes = mockResolve([
         {
           id: 1,
-          type: 'Independent'
-        }
+          type: 'Independent',
+        },
       ])
       target.refDataSourceService.getRefDataSources = mockResolve([
-        {name: 'Other', id: 1},
-        {name: 'Catalog', id: 2},
-        {name: 'Custom', id: 3},
+        { name: 'Other', id: 1 },
+        { name: 'Catalog', id: 2 },
+        { name: 'Custom', id: 3 },
       ])
       target.securityService.permissionsCheck = mockResolve()
       target.variablesValidator.validate = mockResolve()
@@ -868,12 +848,12 @@ describe('FactorDependentCompositeService', () => {
       expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalledTimes(1)
     })
 
-    it('persists new factors and levels without associations', () => {
+    test('persists new factors and levels without associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
-      target.factorService.batchCreateFactors = mockResolve([{id: 1}, {id: 2}])
-      target.factorLevelService.batchCreateFactorLevels = mockResolve([{id: 11}, {id: 12}, {id: 21}, {id: 22}])
+      target.factorService.batchCreateFactors = mockResolve([{ id: 1 }, { id: 2 }])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve([{ id: 11 }, { id: 12 }, { id: 21 }, { id: 22 }])
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
       target.factorService.batchDeleteFactors = mockResolve()
@@ -893,21 +873,21 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 items: [
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             name: 'Factor2',
@@ -917,35 +897,35 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
-                    propertyTypeId: 2
+                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 items: [
                   {
                     label: 'Chem',
                     text: 'MON456',
-                    propertyTypeId: 2
+                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -960,15 +940,15 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             experimentId: 42,
             name: 'Factor2',
             refDataSourceId: 3,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([
           {
@@ -978,10 +958,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 1,
@@ -990,10 +970,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 2,
@@ -1002,15 +982,15 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
-                  propertyTypeId: 2
+                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 2,
@@ -1019,16 +999,16 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
-                  propertyTypeId: 2
+                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
@@ -1041,12 +1021,12 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('persists new factors and levels with associations', () => {
+    test('persists new factors and levels with associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
-      target.factorService.batchCreateFactors = mockResolve([{id: 1}, {id: 2}])
-      target.factorLevelService.batchCreateFactorLevels = mockResolve([{id: 11}, {id: 12}, {id: 21}, {id: 22}])
+      target.factorService.batchCreateFactors = mockResolve([{ id: 1 }, { id: 2 }])
+      target.factorLevelService.batchCreateFactorLevels = mockResolve([{ id: 11 }, { id: 12 }, { id: 21 }, { id: 22 }])
       target.factorService.batchUpdateFactors = mockResolve()
       target.factorLevelService.batchUpdateFactorLevels = mockResolve()
       target.factorService.batchDeleteFactors = mockResolve()
@@ -1067,9 +1047,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 _refId: 2,
@@ -1077,12 +1057,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             name: 'Factor2',
@@ -1093,9 +1073,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 _refId: 4,
@@ -1103,25 +1083,25 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
         independentAssociations: [
           {
             associatedLevelRefId: 1,
-            nestedLevelRefId: 3
+            nestedLevelRefId: 3,
           },
           {
             associatedLevelRefId: 2,
-            nestedLevelRefId: 4
-          }
-        ]
+            nestedLevelRefId: 4,
+          },
+        ],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1136,15 +1116,15 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             experimentId: 42,
             name: 'Factor2',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchCreateFactorLevels).toHaveBeenCalledWith([
           {
@@ -1154,10 +1134,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 1,
@@ -1166,10 +1146,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 2,
@@ -1178,10 +1158,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             factorId: 2,
@@ -1190,11 +1170,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalled()
@@ -1204,44 +1184,44 @@ describe('FactorDependentCompositeService', () => {
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
-            {
-              associatedLevelId: 11,
-              nestedLevelId: 21
-            },
-            {
-              associatedLevelId: 12,
-              nestedLevelId: 22
-            }
-          ], testContext, testTx)
+          {
+            associatedLevelId: 11,
+            nestedLevelId: 21,
+          },
+          {
+            associatedLevelId: 12,
+            nestedLevelId: 22,
+          },
+        ], testContext, testTx)
       })
     })
 
-    it('updates factor and factor levels without associations', () => {
+    test('updates factor and factor levels without associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
       target.factorService.batchCreateFactors = mockResolve()
@@ -1268,9 +1248,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -1279,12 +1259,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -1296,14 +1276,14 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
-                    propertyTypeId: 2
+                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 22,
@@ -1311,21 +1291,21 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON456',
-                    propertyTypeId: 2
+                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1343,7 +1323,7 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -1351,8 +1331,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor2',
             refDataSourceId: 3,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -1363,10 +1343,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -1376,10 +1356,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 21,
@@ -1389,15 +1369,15 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
-                  propertyTypeId: 2
+                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 22,
@@ -1407,16 +1387,16 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
-                  propertyTypeId: 2
+                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
@@ -1427,44 +1407,44 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('updates factors and levels with associations', () => {
+    test('updates factors and levels with associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
         {
           id: 91,
           associated_level_id: 11,
-          nested_level_id: 21
+          nested_level_id: 21,
         },
         {
           id: 92,
           associated_level_id: 12,
-          nested_level_id: 22
-        }
+          nested_level_id: 22,
+        },
       ])
       target.factorService.batchCreateFactors = mockResolve()
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
@@ -1490,9 +1470,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -1501,12 +1481,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -1519,9 +1499,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 22,
@@ -1530,25 +1510,25 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
         independentAssociations: [
           {
             associatedLevelRefId: 1,
-            nestedLevelRefId: 3
+            nestedLevelRefId: 3,
           },
           {
             associatedLevelRefId: 2,
-            nestedLevelRefId: 4
-          }
-        ]
+            nestedLevelRefId: 4,
+          },
+        ],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1566,7 +1546,7 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -1574,8 +1554,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor2',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -1586,10 +1566,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -1599,10 +1579,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 21,
@@ -1612,10 +1592,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 22,
@@ -1625,11 +1605,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
@@ -1640,32 +1620,32 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('deletes factors without associations', () => {
+    test('deletes factors without associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
       target.factorService.batchCreateFactors = mockResolve()
@@ -1692,9 +1672,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -1703,16 +1683,16 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1730,8 +1710,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -1742,10 +1722,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -1755,14 +1735,14 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([2], {}, testTx)
-        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([21,22], {}, testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([21, 22], {}, testTx)
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
         expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).not.toHaveBeenCalled()
@@ -1770,21 +1750,21 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('deletes factor levels without associations', () => {
+    test('deletes factor levels without associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
-        }
+          id: 12,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
       target.factorService.batchCreateFactors = mockResolve()
@@ -1811,16 +1791,16 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1838,8 +1818,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -1850,11 +1830,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([12], {}, testTx)
@@ -1865,44 +1845,44 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('handles deleting all independent variables and associations', () => {
+    test('handles deleting all independent variables and associations', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
         {
           id: 91,
           associated_level_id: 11,
-          nested_level_id: 21
+          nested_level_id: 21,
         },
         {
           id: 92,
           associated_level_id: 12,
-          nested_level_id: 22
-        }
+          nested_level_id: 22,
+        },
       ])
       target.factorService.batchCreateFactors = mockResolve()
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
@@ -1918,7 +1898,7 @@ describe('FactorDependentCompositeService', () => {
       const experimentVariables = {
         independent: [],
         dependent: [],
-        independentAssociations: []
+        independentAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1931,48 +1911,48 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchUpdateFactorLevels).not.toHaveBeenCalledWith()
-        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([1,2], {}, testTx)
-        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([11,12,21,22], {}, testTx)
+        expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([1, 2], {}, testTx)
+        expect(target.factorLevelService.batchDeleteFactorLevels).toHaveBeenCalledWith([11, 12, 21, 22], {}, testTx)
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(42, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
-        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91,92], testTx)
+        expect(FactorLevelAssociationService.batchDeleteFactorLevelAssociations).toHaveBeenCalledWith([91, 92], testTx)
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).not.toHaveBeenCalled()
       })
     })
 
-    it('handles adding association to existing set', () => {
+    test('handles adding association to existing set', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
         {
           id: 91,
           associated_level_id: 11,
-          nested_level_id: 21
-        }
+          nested_level_id: 21,
+        },
       ])
       target.factorService.batchCreateFactors = mockResolve()
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
@@ -1998,9 +1978,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -2009,12 +1989,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2027,9 +2007,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 22,
@@ -2038,25 +2018,25 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
         independentAssociations: [
           {
             associatedLevelRefId: 1,
-            nestedLevelRefId: 3
+            nestedLevelRefId: 3,
           },
           {
             associatedLevelRefId: 2,
-            nestedLevelRefId: 4
-          }
-        ]
+            nestedLevelRefId: 4,
+          },
+        ],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -2074,7 +2054,7 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2082,8 +2062,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor2',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -2094,10 +2074,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -2107,10 +2087,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 21,
@@ -2120,10 +2100,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 22,
@@ -2133,11 +2113,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
@@ -2147,50 +2127,50 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
           {
             associatedLevelId: 12,
-            nestedLevelId: 22
-          }
+            nestedLevelId: 22,
+          },
         ], testContext, testTx)
       })
     })
 
-    it('handles removing association from existing set', () => {
+    test('handles removing association from existing set', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
         {
           id: 91,
           associated_level_id: 11,
-          nested_level_id: 21
+          nested_level_id: 21,
         },
         {
           id: 92,
           associated_level_id: 12,
-          nested_level_id: 22
-        }
+          nested_level_id: 22,
+        },
       ])
       target.factorService.batchCreateFactors = mockResolve()
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
@@ -2216,9 +2196,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -2227,12 +2207,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2245,9 +2225,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 22,
@@ -2256,21 +2236,21 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
         independentAssociations: [
           {
             associatedLevelRefId: 1,
-            nestedLevelRefId: 3
-          }
-        ]
+            nestedLevelRefId: 3,
+          },
+        ],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -2288,7 +2268,7 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2296,8 +2276,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor2',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -2308,10 +2288,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -2321,10 +2301,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 21,
@@ -2334,10 +2314,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 22,
@@ -2347,11 +2327,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
@@ -2362,39 +2342,39 @@ describe('FactorDependentCompositeService', () => {
       })
     })
 
-    it('handles adding to and removing from association set', () => {
+    test('handles adding to and removing from association set', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 1,
           name: 'Factor1',
-          tier: null
+          tier: null,
         },
         {
           id: 2,
           name: 'Factor1',
-          tier: null
-        }
+          tier: null,
+        },
       ])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
-          id: 11
+          id: 11,
         },
         {
-          id: 12
+          id: 12,
         },
         {
-          id: 21
+          id: 21,
         },
         {
-          id: 22
-        }
+          id: 22,
+        },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([
         {
           id: 91,
           associated_level_id: 11,
-          nested_level_id: 21
-        }
+          nested_level_id: 21,
+        },
       ])
       target.factorService.batchCreateFactors = mockResolve()
       target.factorLevelService.batchCreateFactorLevels = mockResolve()
@@ -2420,9 +2400,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 12,
@@ -2431,12 +2411,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2449,9 +2429,9 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1
-                  }
-                ]
+                    propertyTypeId: 1,
+                  },
+                ],
               },
               {
                 id: 22,
@@ -2460,21 +2440,21 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1
-                  }
-                ]
-              }
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
             ],
-            tier: null
-          }
+            tier: null,
+          },
         ],
         dependent: [],
         independentAssociations: [
           {
             associatedLevelRefId: 2,
-            nestedLevelRefId: 4
-          }
-        ]
+            nestedLevelRefId: 4,
+          },
+        ],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -2492,7 +2472,7 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor1',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
+            tier: null,
           },
           {
             id: 2,
@@ -2500,8 +2480,8 @@ describe('FactorDependentCompositeService', () => {
             name: 'Factor2',
             refDataSourceId: 1,
             refFactorTypeId: 1,
-            tier: null
-          }
+            tier: null,
+          },
         ], testContext, testTx)
         expect(target.factorLevelService.batchUpdateFactorLevels).toHaveBeenCalledWith([
           {
@@ -2512,10 +2492,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 12,
@@ -2525,10 +2505,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 21,
@@ -2538,10 +2518,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1
-                }
-              ]
-            }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
           },
           {
             id: 22,
@@ -2551,11 +2531,11 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1
-                }
-              ]
-            }
-          }
+                  propertyTypeId: 1,
+                },
+              ],
+            },
+          },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchDeleteFactorLevels).not.toHaveBeenCalled()
@@ -2565,8 +2545,8 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorLevelAssociationService.batchCreateFactorLevelAssociations).toHaveBeenCalledWith([
           {
             associatedLevelId: 12,
-            nestedLevelId: 22
-          }
+            nestedLevelId: 22,
+          },
         ], testContext, testTx)
       })
     })

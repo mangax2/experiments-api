@@ -5,8 +5,12 @@ import AppError from '../services/utility/AppError'
 class TagValidator extends SchemaValidator {
   static get VALIDATION_SCHEMA() {
     return [
-      { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-      { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+      {
+        paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+      },
+      {
+        paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+      },
       { paramName: 'experimentId', type: 'numeric', required: true },
     ]
   }

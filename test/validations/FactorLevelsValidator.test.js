@@ -11,7 +11,7 @@ describe('FactorLevelsValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('returns post schema', () => {
+    test('returns post schema', () => {
       db.factor = {}
       db.factorLevel = {}
 
@@ -30,7 +30,7 @@ describe('FactorLevelsValidator', () => {
       expect(FactorLevelsValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
     })
 
-    it('returns put schema', () => {
+    test('returns put schema', () => {
       db.factorLevel = {}
 
       const schema = [
@@ -43,13 +43,13 @@ describe('FactorLevelsValidator', () => {
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('FactorLevel')
     })
   })
 
   describe('getSchema', () => {
-    it('returns POST schema when POST is supplied', () => {
+    test('returns POST schema when POST is supplied', () => {
       db.factor = {}
       db.factorLevel = {}
 
@@ -68,7 +68,7 @@ describe('FactorLevelsValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('returns POST and PUT schemas when PUT is supplied', () => {
+    test('returns POST and PUT schemas when PUT is supplied', () => {
       db.factor = {}
       db.factorLevel = {}
 
@@ -89,28 +89,28 @@ describe('FactorLevelsValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when POST or PUT is not given', () => {
+    test('throws an error when POST or PUT is not given', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('returns business keys', () => {
+    test('returns business keys', () => {
       expect(target.getBusinessKeyPropertyNames()).toEqual(['factorId', 'value'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('returns the duplicate business key error message', () => {
+    test('returns the duplicate business key error message', () => {
       expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate factor level value in request payload with same factor id')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when factorLevelObj is a filled array', () => {
+    test('resolves when factorLevelObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -118,7 +118,7 @@ describe('FactorLevelsValidator', () => {
       })
     })
 
-    it('rejects when factorLevelObj is undefined', () => {
+    test('rejects when factorLevelObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -127,7 +127,7 @@ describe('FactorLevelsValidator', () => {
       })
     })
 
-    it('rejects when factorLevelObj is an empty array', () => {
+    test('rejects when factorLevelObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -138,7 +138,7 @@ describe('FactorLevelsValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -147,8 +147,8 @@ describe('FactorLevelsValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', factorId: 1},{test: 'b', factorId: 1}]
+    test('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{ test: 'a', factorId: 1 }, { test: 'b', factorId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['factorId', 'test'])
 
       return target.postValidate(targetObject).then(() => {
@@ -156,8 +156,8 @@ describe('FactorLevelsValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', factorId: 1},{test: 'a', factorId: 1}]
+    test('adds a message when there are business key errors', () => {
+      const targetObject = [{ test: 'a', factorId: 1 }, { test: 'a', factorId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['factorId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

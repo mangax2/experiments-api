@@ -10,7 +10,7 @@ describe('ReferentialIntegrityService', () => {
   })
 
   describe('getById', () => {
-    it('calls entity find', () => {
+    test('calls entity find', () => {
       const entity = { find: mock() }
 
       target.getById(1, entity, testTx)
@@ -19,7 +19,7 @@ describe('ReferentialIntegrityService', () => {
   })
 
   describe('getByBusinessKey', () => {
-    it('calls findByBusinessKey', () => {
+    test('calls findByBusinessKey', () => {
       const entity = { findByBusinessKey: mock() }
 
       target.getByBusinessKey(['key1', 'key2'], entity, testTx)
@@ -28,7 +28,7 @@ describe('ReferentialIntegrityService', () => {
   })
 
   describe('getEntitiesByKeys', () => {
-    it('gets entities by BusinessKey', () => {
+    test('gets entities by BusinessKey', () => {
       const entity = { batchFindByBusinessKey: mock() }
 
       target.getEntitiesByKeys([{}], entity, testTx)
@@ -37,7 +37,7 @@ describe('ReferentialIntegrityService', () => {
   })
 
   describe('getEntitiesByIds', () => {
-    it('gets entities by ids', () => {
+    test('gets entities by ids', () => {
       const entity = { batchFind: mock() }
 
       target.getEntitiesByIds([1, 2], entity, testTx)

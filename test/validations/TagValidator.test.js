@@ -13,51 +13,57 @@ describe('TagValidator', () => {
   describe('get VALIDATION_SCHEMA', () => {
     db.experiments = {}
     const schema = [
-      { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-      { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-      { paramName: 'experimentId', type: 'numeric', required: true }
-      ]
+      {
+        paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+      },
+      {
+        paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+      },
+      { paramName: 'experimentId', type: 'numeric', required: true },
+    ]
 
     expect(TagValidator.VALIDATION_SCHEMA).toEqual(schema)
   })
 
 
   describe('getSchema', () => {
-    it('returns schema', () => {
+    test('returns schema', () => {
       db.experiments = {}
       const schema = [
-        { paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
-        { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        {
+          paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+        },
+        {
+          paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+        },
         { paramName: 'experimentId', type: 'numeric', required: true },
       ]
 
       expect(target.getSchema()).toEqual(schema)
     })
-
-
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('Tag')
     })
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('returns business key names', () => {
+    test('returns business key names', () => {
       expect(target.getBusinessKeyPropertyNames()).toEqual(['category', 'value', 'experimentId'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('returns duplicate business key error', () => {
+    test('returns duplicate business key error', () => {
       expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate Tag in' +
         ' request payload with same experiment id')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when dependentObj is a filled array', () => {
+    test('resolves when dependentObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -65,7 +71,7 @@ describe('TagValidator', () => {
       })
     })
 
-    it('rejects when dependentObj is undefined', () => {
+    test('rejects when dependentObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -74,7 +80,7 @@ describe('TagValidator', () => {
       })
     })
 
-    it('rejects when dependentObj is an empty array', () => {
+    test('rejects when dependentObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -85,7 +91,7 @@ describe('TagValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -94,8 +100,8 @@ describe('TagValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{category: 'a', value: 1, experimentId: 1},{category: 'b', value: 2, experimentId: 1}]
+    test('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{ category: 'a', value: 1, experimentId: 1 }, { category: 'b', value: 2, experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['category', 'value', 'experimentId'])
 
       return target.postValidate(targetObject).then(() => {
@@ -103,8 +109,8 @@ describe('TagValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
-      const targetObject = [{category: 'a', value: 1, experimentId: 1},{category: 'a', value: 1, experimentId: 1}]
+    test('adds a message when there are business key errors', () => {
+      const targetObject = [{ category: 'a', value: 1, experimentId: 1 }, { category: 'a', value: 1, experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['category', 'value', 'experimentId'])
 
       return target.postValidate(targetObject).then(() => {

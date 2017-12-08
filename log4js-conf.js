@@ -6,8 +6,8 @@ module.exports = () => {
   if (isRunningInCloudFoundry()) {
     const vcapApplication = JSON.parse(process.env.VCAP_APPLICATION)
     const config = {
-      appenders: [
-        {
+      appenders: {
+        out: {
           type: 'console',
           layout: {
             type: 'pattern',
@@ -20,9 +20,9 @@ module.exports = () => {
             },
           },
         },
-      ],
-      levels: {
-        '[all]': logLevel,
+      },
+      categories: {
+        default: { appenders: ['out'], level: logLevel },
       },
     }
 
@@ -30,13 +30,11 @@ module.exports = () => {
   }
 
   const config = {
-    appenders: [
-      {
-        type: 'console',
-      },
-    ],
-    levels: {
-      '[all]': logLevel,
+    appenders: {
+      out: { type: 'console' },
+    },
+    categories: {
+      default: { appenders: ['out'], level: logLevel },
     },
   }
 

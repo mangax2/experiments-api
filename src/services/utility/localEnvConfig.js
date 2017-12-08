@@ -1,6 +1,3 @@
-//TODO update for experiments local db
-const config = require('../../../config')
-
 const cfServices = {
   experimentsDataSource: {
     alias: 'experimentsDataSource',

@@ -5,13 +5,13 @@ import cfServices from '../../../src/services/utility/ServiceConfig'
 
 describe('KafkaProducer', () => {
   describe('createProducer', () => {
-    it('creates a Kafka.Producer object', () => {
+    test('creates a Kafka.Producer object', () => {
       expect(KafkaProducer.createProducer() instanceof Kafka.Producer).toBe(true)
     })
   })
 
   describe('init', () => {
-    it('calls things correctly', () => {
+    test('calls things correctly', () => {
       VaultUtil.kafkaClientCert = 'cert'
       VaultUtil.kafkaPrivateKey = 'key'
       VaultUtil.kafkaPassword = 'password'
@@ -21,11 +21,11 @@ describe('KafkaProducer', () => {
       KafkaProducer.createProducer = jest.fn(() => producer)
 
       KafkaProducer.init()
-      
+
       expect(producer.init).toBeCalled()
-      return(KafkaProducer.producerPromise).then((result) => {
+      return (KafkaProducer.producerPromise).then((result) => {
         expect(result).toBe(producer)
-        
+
         expect(KafkaProducer.createProducer).toBeCalledWith({
           client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
           connectionString: 'host',
@@ -33,18 +33,18 @@ describe('KafkaProducer', () => {
           ssl: {
             cert: 'cert',
             key: 'key',
-            passphrase: 'password'
-          }
+            passphrase: 'password',
+          },
         })
       })
     })
   })
 
   describe('publish', () => {
-    it('calls init if KafkaProducer is not initialized', () => {
+    test('calls init if KafkaProducer is not initialized', () => {
       KafkaProducer.producerPromise = undefined
       const producer = {
-        send: jest.fn()
+        send: jest.fn(),
       }
       KafkaProducer.init = jest.fn(() => { KafkaProducer.producerPromise = Promise.resolve(producer) })
 
@@ -54,9 +54,9 @@ describe('KafkaProducer', () => {
       })
     })
 
-    it('does not call init if KafkaProducer is initialized', () => {
+    test('does not call init if KafkaProducer is initialized', () => {
       const producer = {
-        send: jest.fn()
+        send: jest.fn(),
       }
       KafkaProducer.producerPromise = Promise.resolve(producer)
       KafkaProducer.init = jest.fn()

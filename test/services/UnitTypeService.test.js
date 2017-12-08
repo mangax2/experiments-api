@@ -11,7 +11,7 @@ describe('UnitTypeService', () => {
   })
 
   describe('getUnitTypeById', () => {
-    it('gets a unitType', () => {
+    test('gets a unitType', () => {
       db.unitType.find = mockResolve({})
 
       return target.getUnitTypeById(1).then((data) => {
@@ -20,7 +20,7 @@ describe('UnitTypeService', () => {
       })
     })
 
-    it('throws an error when nothing is returned', () => {
+    test('throws an error when nothing is returned', () => {
       db.unitType.find = mockResolve()
       AppError.notFound = mock()
 
@@ -30,7 +30,7 @@ describe('UnitTypeService', () => {
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.unitType.find = mockReject('error')
 
       return target.getUnitTypeById(1).then(() => {}, (err) => {
@@ -41,7 +41,7 @@ describe('UnitTypeService', () => {
   })
 
   describe('getAllUnitTypes', () => {
-    it('gets unit types', () => {
+    test('gets unit types', () => {
       db.unitType.all = mockResolve([{}])
 
       return target.getAllUnitTypes().then((data) => {
@@ -50,7 +50,7 @@ describe('UnitTypeService', () => {
       })
     })
 
-    it('rejects when find all fails', () => {
+    test('rejects when find all fails', () => {
       db.unitType.all = mockReject('error')
 
       return target.getAllUnitTypes().then(() => {}, (err) => {

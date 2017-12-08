@@ -13,7 +13,7 @@ describe('GroupValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('gets the schema', () => {
+    test('gets the schema', () => {
       db.experiments = {}
       db.group = {}
       db.groupType = {}
@@ -32,14 +32,14 @@ describe('GroupValidator', () => {
   })
 
   describe('get PATCH_VALIDATION_SCHEMA', () => {
-    it('returns the schema', () => {
+    test('returns the schema', () => {
       expect(GroupValidator.PATCH_VALIDATION_SCHEMA)
         .toEqual([{ paramName: 'setId', type: 'numeric', required: true }])
     })
   })
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    it('gets the schema elements', () => {
+    test('gets the schema elements', () => {
       db.group = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -51,7 +51,7 @@ describe('GroupValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns post schema', () => {
+    test('returns post schema', () => {
       db.experiments = {}
       db.group = {}
       db.groupType = {}
@@ -68,7 +68,7 @@ describe('GroupValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('returns put schema', () => {
+    test('returns put schema', () => {
       db.experiments = {}
       db.group = {}
       db.groupType = {}
@@ -87,7 +87,7 @@ describe('GroupValidator', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('returns patch schema', () => {
+    test('returns patch schema', () => {
       db.group = {}
       const schema = [
         { paramName: 'setId', type: 'numeric', required: true },
@@ -98,22 +98,22 @@ describe('GroupValidator', () => {
       expect(target.getSchema('PATCH')).toEqual(schema)
     })
 
-    it('throws an error when PATCH, POST and PUT are not supplied', () => {
+    test('throws an error when PATCH, POST and PUT are not supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('Group')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when groupObj is a filled array', () => {
+    test('resolves when groupObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -121,7 +121,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when groupObj is undefined', () => {
+    test('rejects when groupObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -130,7 +130,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when groupObj is an empty array', () => {
+    test('rejects when groupObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -141,7 +141,7 @@ describe('GroupValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('does not call getValidRandomization and calls validateRandomizationStrategyIds', () => {
+    test('does not call getValidRandomization and calls validateRandomizationStrategyIds', () => {
       target.strategyRetrievalPromise = Promise.resolve()
       target.getValidRandomizationIds = mock()
       target.validateRandomizationStrategyIds = mock()
@@ -152,8 +152,8 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('calls getValidRandomization and calls validateRandomizationStrategyIds', () => {
-      target.getValidRandomizationIds = mock(() => {target.strategyRetrievalPromise = Promise.resolve()})
+    test('calls getValidRandomization and calls validateRandomizationStrategyIds', () => {
+      target.getValidRandomizationIds = mock(() => { target.strategyRetrievalPromise = Promise.resolve() })
       target.validateRandomizationStrategyIds = mock()
 
       return target.postValidate([{}]).then(() => {
@@ -162,7 +162,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when strategyRetrievalPromise fails', () => {
+    test('rejects when strategyRetrievalPromise fails', () => {
       target.strategyRetrievalPromise = Promise.resolve('error')
       target.validateRandomizationStrategyIds = mock()
 
@@ -174,9 +174,9 @@ describe('GroupValidator', () => {
   })
 
   describe('validateRandomizationStrategyIds', () => {
-    it('resolves when there are no invalid randomization ids', () => {
+    test('resolves when there are no invalid randomization ids', () => {
       target.validRandomizationIds = [1]
-      const groupObj = [{refRandomizationStrategyId: 1}]
+      const groupObj = [{ refRandomizationStrategyId: 1 }]
       AppError.badRequest = mock()
 
       return target.validateRandomizationStrategyIds(groupObj).then(() => {
@@ -184,9 +184,9 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when there are invalid randomization ids', () => {
+    test('rejects when there are invalid randomization ids', () => {
       target.validRandomizationIds = [2]
-      const groupObj = [{refRandomizationStrategyId: 1}]
+      const groupObj = [{ refRandomizationStrategyId: 1 }]
       AppError.badRequest = mock()
 
       return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
@@ -194,9 +194,9 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when there are multiple invalid randomization ids', () => {
+    test('rejects when there are multiple invalid randomization ids', () => {
       target.validRandomizationIds = [2]
-      const groupObj = [{refRandomizationStrategyId: 1}, {refRandomizationStrategyId: 2}, {refRandomizationStrategyId: 3}]
+      const groupObj = [{ refRandomizationStrategyId: 1 }, { refRandomizationStrategyId: 2 }, { refRandomizationStrategyId: 3 }]
       AppError.badRequest = mock()
 
       return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
@@ -206,16 +206,16 @@ describe('GroupValidator', () => {
   })
 
   describe('getValidRandomizationIds', () => {
-    it('calls ping and then randomization strategy service', () => {
+    test('calls ping and then randomization strategy service', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.getWithRetry = mockResolve({body: [{id: 1}]})
+      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 1 }] })
 
       return target.getValidRandomizationIds().then(() => {
         expect(target.validRandomizationIds).toEqual([1])
       })
     })
 
-    it('does not set any valid ids when result is undefined', () => {
+    test('does not set any valid ids when result is undefined', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.getWithRetry = mockResolve()
 
@@ -224,7 +224,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('does not set any valid ids when result has no body', () => {
+    test('does not set any valid ids when result has no body', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.getWithRetry = mockResolve({})
 
@@ -233,7 +233,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when HttpUtil get fails', () => {
+    test('rejects when HttpUtil get fails', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.getWithRetry = mockReject('error')
       AppError.badRequest = mock()
@@ -245,7 +245,7 @@ describe('GroupValidator', () => {
         expect(target.strategyRetrievalPromise).toEqual(undefined)
         return strategyPromise.then(() => {
           expect(true).toBe(false)
-        }, (err) => {
+        }, () => {
           expect(target.validRandomizationIds).toEqual(undefined)
           expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
             ' strategy ids.')
@@ -253,7 +253,7 @@ describe('GroupValidator', () => {
       })
     })
 
-    it('rejects when PingUtil getMonsantoHeader fails', () => {
+    test('rejects when PingUtil getMonsantoHeader fails', () => {
       PingUtil.getMonsantoHeader = mockReject('error')
       HttpUtil.getWithRetry = mockReject('error')
       AppError.badRequest = mock()
@@ -265,7 +265,7 @@ describe('GroupValidator', () => {
         expect(target.strategyRetrievalPromise).toEqual(undefined)
         return strategyPromise.then(() => {
           expect(true).toBe(false)
-        }, (err) => {
+        }, () => {
           expect(target.validRandomizationIds).toEqual(undefined)
           expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
             ' strategy ids.')

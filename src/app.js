@@ -6,7 +6,7 @@ const vaultUtil = require('./services/utility/VaultUtil')
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   if (config.node_env !== 'production') {
-    //eslint-disable-next-line
+    // eslint-disable-next-line
     require('babel-register')
   }
 
@@ -71,7 +71,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   // Disabling lint for this app.use, removing 'next' parameter causes the errors to be
   // improperly formatted, but eslint says it is not being used.
-  //eslint-disable-next-line
+  // eslint-disable-next-line
   app.use((err, req, res, next) => {
     if (err) {
       if (_.isArray(err)) {
@@ -99,7 +99,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     return res.status(500).json(err)
   })
 
-  const port = config.port
+  const { port } = config
 
   const server = app.listen(port, () => {
     const address = server.address()

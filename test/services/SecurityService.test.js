@@ -15,10 +15,10 @@ describe('SecurityService', () => {
   })
 
   describe('getGroupsByUserId', () => {
-    it('returns empty Array profile api returns empty groups', () => {
+    test('returns empty Array profile api returns empty groups', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: {} })
-     return target.getGroupsByUserId('kprat1').then((data) => {
+      return target.getGroupsByUserId('kprat1').then((data) => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
         expect(HttpUtil.get).toBeCalled()
         expect(data.length).toBe(0)
@@ -26,7 +26,7 @@ describe('SecurityService', () => {
         HttpUtil.get.mockClear()
       })
     })
-    it('Calls The PingUtil and returns groupIds', () => {
+    test('Calls The PingUtil and returns groupIds', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }, { id: 'group2' }] } })
       return target.getGroupsByUserId('kprat1').then((response) => {
@@ -37,17 +37,14 @@ describe('SecurityService', () => {
         HttpUtil.get.mockClear()
       })
     })
-
   })
 
   describe('getUserPermissionsForExperiment', () => {
-    it('returns user permissions array ignoringCase', () => {
+    test('returns user permissions array ignoringCase', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
       })
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
       return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
@@ -55,14 +52,12 @@ describe('SecurityService', () => {
       })
     })
 
-    it('returns user permissions array , when user is part of the group', () => {
+    test('returns user permissions array , when user is part of the group', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
-        group_ids:['group_1']
+        group_ids: ['group_1'],
       })
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
       return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).then((data) => {
@@ -70,41 +65,37 @@ describe('SecurityService', () => {
       })
     })
 
-    it('returns error when owner service fails', () => {
+    test('returns error when owner service fails', () => {
       target.ownerService.getOwnersByExperimentId = mockReject({
-       error:'error'
+        error: 'error',
       })
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
 
       return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
-        expect(data).toEqual({"error": "error"})
+        expect(data).toEqual({ error: 'error' })
       })
     })
 
-    it('returns error when getGroupsByUserIdfails', () => {
+    test('returns error when getGroupsByUserIdfails', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
-        group_ids:['group_1']
+        group_ids: ['group_1'],
       })
-      target.getGroupsByUserId= mockReject({
-        error:'error'
+      target.getGroupsByUserId = mockReject({
+        error: 'error',
       })
 
       return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
-        expect(data).toEqual({"error": "error"})
+        expect(data).toEqual({ error: 'error' })
       })
     })
 
 
-    it('returns user permissions array when more than one owner exists', () => {
+    test('returns user permissions array when more than one owner exists', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['AK', 'ky'],
       })
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
       return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
@@ -112,13 +103,11 @@ describe('SecurityService', () => {
       })
     })
 
-    it('returns empty permissions array when user not matched', () => {
+    test('returns empty permissions array when user not matched', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['AK'],
       })
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = []
 
       return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
@@ -126,70 +115,67 @@ describe('SecurityService', () => {
       })
     })
 
-    it('returns empty permissions array when db query returns null', () => {
+    test('returns empty permissions array when db query returns null', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve(null)
       const expectedResult = []
-      target.getGroupsByUserId = jest.fn(()=>{
-        return ['group_1','group_2']
-      })
+      target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
-
   })
 
   describe('permissionsCheck', () => {
-    it('calls getUserPermissionsForExperiment and returns resolved promise when user has access', () => {
+    test('calls getUserPermissionsForExperiment and returns resolved promise when user has access', () => {
       target.getUserPermissionsForExperiment = mockResolve(['write'])
       db.experiments.find = mockResolve({})
-      return target.permissionsCheck(1, testContext,false, testTx).then(() => {
+      return target.permissionsCheck(1, testContext, false, testTx).then(() => {
         expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
       })
     })
 
-    it('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
+    test('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve({})
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext,false, testTx).then(() => {}, (err) => {
+      return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(err).toBe('')
       })
     })
 
 
-    it('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
+    test('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
       ' for an invalid experimentId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext,false, testTx).then(() => {}, (err) => {
+      return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
-        expect(  db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
           ' experimentId')
       })
     })
 
-    it('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
+    test('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
       ' for an invalid TemplateId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext,true, testTx).then(() => {}, (err) => {
+      return target.permissionsCheck(1, testContext, true, testTx).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
-        expect(  db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested' +
           ' templateId')
       })
     })
 
-    it('throws an error when userId is not set', () => {
+    test('throws an error when userId is not set', () => {
       AppError.badRequest = mock('')
       db.experiments.find = mock()
 
@@ -200,17 +186,14 @@ describe('SecurityService', () => {
   })
 
   describe('permissionsCheckForExperiments', () => {
-    it('calls permissionsCheck for each experiment', () => {
+    test('calls permissionsCheck for each experiment', () => {
       target.permissionsCheck = mockResolve()
       db.experiments.find = mockResolve({})
       return target.permissionsCheckForExperiments([1, 2], testContext, testTx).then(() => {
         expect(target.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
         expect(target.permissionsCheck).toHaveBeenLastCalledWith(2, testContext, testTx)
         expect(target.permissionsCheck).toHaveBeenCalledTimes(2)
-
       })
     })
-
   })
-
 })

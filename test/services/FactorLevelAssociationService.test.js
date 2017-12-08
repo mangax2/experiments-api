@@ -6,14 +6,14 @@ import FactorLevelAssociationService from '../../src/services/FactorLevelAssocia
 describe('FactorLevelAssociationService', () => {
   let target
   const testContext = {}
-  const testTx = {tx: {}}
+  const testTx = { tx: {} }
 
   beforeEach(() => {
     target = new FactorLevelAssociationService()
   })
 
   describe('getFactorLevelAssociationByExperimentId', () => {
-    it('returns all factor level associations', () => {
+    test('returns all factor level associations', () => {
       db.factorLevelAssociation.findByExperimentId = mockResolve([{}])
 
       return FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(1, testTx).then((data) => {
@@ -24,7 +24,7 @@ describe('FactorLevelAssociationService', () => {
   })
 
   describe('batchDeleteFactorLevelAssociations', () => {
-    it('calls factorLevelAssociation batchRemove and returns data', () => {
+    test('calls factorLevelAssociation batchRemove and returns data', () => {
       db.factorLevelAssociation.batchRemove = mockResolve([1, 2])
 
       return FactorLevelAssociationService.batchDeleteFactorLevelAssociations([1, 2], testTx).then((data) => {
@@ -35,7 +35,7 @@ describe('FactorLevelAssociationService', () => {
   })
 
   describe('batchCreateFactorLevelAssociations', () => {
-    it('validates, calls batchCreate, and returns postResponse', () => {
+    test('validates, calls batchCreate, and returns postResponse', () => {
       target.validator.validate = mockResolve()
       db.factorLevelAssociation.batchCreate = mockResolve([])
       AppUtil.createPostResponse = mock()

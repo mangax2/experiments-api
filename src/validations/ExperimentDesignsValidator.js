@@ -5,7 +5,9 @@ import db from '../db/DbManager'
 
 class ExperimentDesignsValidator extends SchemaValidator {
   getSchema = () => [
-    { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 50 }, required: true },
+    {
+      paramName: 'name', type: 'text', lengthRange: { min: 1, max: 50 }, required: true,
+    },
     {
       paramName: 'ExperimentDesign',
       type: 'businessKey',

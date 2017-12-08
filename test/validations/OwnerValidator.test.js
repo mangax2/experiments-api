@@ -16,7 +16,7 @@ describe('OwnerValidator', () => {
   })
 
   describe('POST_VALIDATION_SCHEMA', () => {
-    it('returns the schema', () => {
+    test('returns the schema', () => {
       const schema = [
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: db.experiments },
@@ -39,13 +39,13 @@ describe('OwnerValidator', () => {
   })
 
   describe('PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
-    it('returns additional schema elements', () => {
+    test('returns additional schema elements', () => {
       expect(OwnerValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS).toEqual([])
     })
   })
 
   describe('getEntityName', () => {
-    it('gets the name of the schema', () => {
+    test('gets the name of the schema', () => {
       expect(target.getEntityName()).toEqual('Owner')
     })
   })
@@ -68,24 +68,24 @@ describe('OwnerValidator', () => {
       },
     ]
 
-    it('gets the POST schema when POST is supplied', () => {
+    test('gets the POST schema when POST is supplied', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('gets the POST and PUT combined schema when PUT is supplied', () => {
+    test('gets the POST and PUT combined schema when PUT is supplied', () => {
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when POST and PUT are not supplied', () => {
+    test('throws an error when POST and PUT are not supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('preValidate', () => {
-    it('rejects when the object is not an array', () => {
+    test('rejects when the object is not an array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
@@ -94,7 +94,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when the object is an empty array', () => {
+    test('rejects when the object is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -103,7 +103,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('resolves when the object is a populated array', () => {
+    test('resolves when the object is a populated array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([1]).then(() => {
@@ -113,7 +113,7 @@ describe('OwnerValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves when there are errors', () => {
+    test('resolves when there are errors', () => {
       target.hasErrors = mock(true)
       target.requiredOwnerCheck = mock()
       target.validateUserIds = mock()
@@ -124,7 +124,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('calls validateUserIds and resolves', () => {
+    test('calls validateUserIds and resolves', () => {
       target.hasErrors = mock(false)
       target.requiredOwnerCheck = mockResolve()
       target.validateUserIds = mockResolve()
@@ -136,7 +136,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('calls validateGroupIds and resolves', () => {
+    test('calls validateGroupIds and resolves', () => {
       target.hasErrors = mock(false)
       target.requiredOwnerCheck = mockResolve()
       target.validateUserIds = mockResolve()
@@ -145,11 +145,10 @@ describe('OwnerValidator', () => {
 
       return target.postValidate([{ groupIds: ['group1'] }], testContext).then(() => {
         expect(target.validateGroupIds).toHaveBeenCalledWith(['group1'])
-
       })
     })
 
-    it('rejects when validateUserIds fails', () => {
+    test('rejects when validateUserIds fails', () => {
       target.hasErrors = mock(false)
       target.validateUserIds = mockReject('error')
 
@@ -161,23 +160,21 @@ describe('OwnerValidator', () => {
   })
 
   describe('requiredOwnerCheck', () => {
-    it('resolves when  userIds is present', () => {
+    test('resolves when  userIds is present', () => {
       AppError.badRequest = mock()
       return target.requiredOwnerCheck([], ['user1', 'user2']).then(() => {
         expect(AppError.badRequest).not.toHaveBeenCalled()
-
       })
     })
 
-    it('resolves when  groupIds is present', () => {
+    test('resolves when  groupIds is present', () => {
       AppError.badRequest = mock()
       return target.requiredOwnerCheck(['user1', 'user2'], []).then(() => {
         expect(AppError.badRequest).not.toHaveBeenCalled()
-
       })
     })
 
-    it('rejects when both userIds and groupIds are empty', () => {
+    test('rejects when both userIds and groupIds are empty', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
       AppError.badRequest = mock()
@@ -186,18 +183,17 @@ describe('OwnerValidator', () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Owner is required in request')
       })
     })
-
   })
 
   describe('validateUserIds', () => {
-    it('Resolves  when userIds is empty', () => {
+    test('Resolves  when userIds is empty', () => {
       AppError.badRequest = mock()
       return target.validateUserIds([]).then(() => {
         expect(AppError.badRequest).not.toHaveBeenCalledWith()
       })
     })
 
-    it('resolves when all user ids are valid, and the user enacting the call is present in the' +
+    test('resolves when all user ids are valid, and the user enacting the call is present in the' +
       ' list', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
@@ -208,7 +204,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when the not all users are valid', () => {
+    test('rejects when the not all users are valid', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
       AppError.badRequest = mock()
@@ -222,7 +218,7 @@ describe('OwnerValidator', () => {
   })
 
   describe('validateGroupIds', () => {
-    it('resolves when groupIds is empty', () => {
+    test('resolves when groupIds is empty', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
 
@@ -231,7 +227,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('resolves when all group ids are valid, and the user enacting the call is present in' +
+    test('resolves when all group ids are valid, and the user enacting the call is present in' +
       ' the' +
       ' list', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
@@ -243,7 +239,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when the not all groups are valid', () => {
+    test('rejects when the not all groups are valid', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
       AppError.badRequest = mock()
@@ -254,11 +250,10 @@ describe('OwnerValidator', () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Some groups listed are invalid: group2')
       })
     })
-
   })
 
   describe('userOwnershipCheck', () => {
-    it('resolves when userId is present in userIds', () => {
+    test('resolves when userId is present in userIds', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
 
@@ -267,7 +262,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when userId is not the owner', () => {
+    test('rejects when userId is not the owner', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
       AppError.badRequest = mock()
@@ -278,7 +273,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('Promise Resolves when userId is in group', () => {
+    test('Promise Resolves when userId is in group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
       AppError.badRequest = mock()
@@ -286,11 +281,10 @@ describe('OwnerValidator', () => {
       return target.userOwnershipCheck(['group2'], ['user1'], 'user2').then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`, {})
-
       })
     })
 
-    it('resolves when user is in the admin group', () => {
+    test('resolves when user is in the admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'COSMOS-ADMIN' }] } })
 
@@ -300,7 +294,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when userId is not the owner and not in group or admin group', () => {
+    test('rejects when userId is not the owner and not in group or admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
       AppError.badRequest = mock()
@@ -313,7 +307,7 @@ describe('OwnerValidator', () => {
       })
     })
 
-    it('rejects when no userIds or groupIds have been specified, and not in admin group', () => {
+    test('rejects when no userIds or groupIds have been specified, and not in admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
       AppError.badRequest = mock()

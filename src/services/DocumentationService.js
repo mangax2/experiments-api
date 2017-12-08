@@ -53,7 +53,7 @@ class DocumentationService {
     if (config.env === 'local') {
       options.privateKeyPath = `./src/pk-${keyPairId}.pem`
     } else {
-      const b = new Buffer(VaultUtil.cloudFrontPrivateKey, 'base64')
+      const b = Buffer.from(VaultUtil.cloudFrontPrivateKey, 'base64')
       options.privateKeyString = b.toString()
     }
 

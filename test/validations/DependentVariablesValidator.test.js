@@ -11,12 +11,14 @@ describe('DependentVariablesValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns post schema', () => {
+    test('returns post schema', () => {
       db.experiments = {}
       db.dependentVariable = {}
       const schema = [
         { paramName: 'required', type: 'boolean', required: true },
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+        },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
         {
@@ -30,12 +32,14 @@ describe('DependentVariablesValidator', () => {
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('returns put schema', () => {
+    test('returns put schema', () => {
       db.experiments = {}
       db.dependentVariable = {}
       const schema = [
         { paramName: 'required', type: 'boolean', required: true },
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
+        },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
         {
@@ -45,40 +49,40 @@ describe('DependentVariablesValidator', () => {
           entity: {},
         },
         { paramName: 'id', type: 'numeric', required: true },
-        { paramName: 'id', type: 'refData', entity: {} }
+        { paramName: 'id', type: 'refData', entity: {} },
       ]
 
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('throws an error when POST and PUT are not supplied', () => {
+    test('throws an error when POST and PUT are not supplied', () => {
       AppError.badRequest = mock('')
 
-      expect(() => {target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('DependentVariable')
     })
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('returns business key names', () => {
+    test('returns business key names', () => {
       expect(target.getBusinessKeyPropertyNames()).toEqual(['experimentId', 'name'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('returns duplicate business key error', () => {
+    test('returns duplicate business key error', () => {
       expect(target.getDuplicateBusinessKeyError()).toEqual('duplicate dependent variable name in request payload with same experiment id')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when dependentObj is a filled array', () => {
+    test('resolves when dependentObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -86,7 +90,7 @@ describe('DependentVariablesValidator', () => {
       })
     })
 
-    it('rejects when dependentObj is undefined', () => {
+    test('rejects when dependentObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -95,7 +99,7 @@ describe('DependentVariablesValidator', () => {
       })
     })
 
-    it('rejects when dependentObj is an empty array', () => {
+    test('rejects when dependentObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -106,7 +110,7 @@ describe('DependentVariablesValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves if there are errors', () => {
+    test('resolves if there are errors', () => {
       target.hasErrors = mock(true)
       target.getBusinessKeyPropertyNames = mock()
 
@@ -115,8 +119,8 @@ describe('DependentVariablesValidator', () => {
       })
     })
 
-    it('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'b', experimentId: 1}]
+    test('does not add a message if there are not any business key errors', () => {
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {
@@ -124,8 +128,8 @@ describe('DependentVariablesValidator', () => {
       })
     })
 
-    it('adds a message when there are business key errors', () => {
-      const targetObject = [{test: 'a', experimentId: 1},{test: 'a', experimentId: 1}]
+    test('adds a message when there are business key errors', () => {
+      const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

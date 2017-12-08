@@ -5,8 +5,12 @@ import db from '../db/DbManager'
 
 class FactorTypesValidator extends SchemaValidator {
   getSchema = () => [
-    { paramName: 'type', type: 'text', lengthRange: { min: 1, max: 50 }, required: true },
-    { paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: db.factorType },
+    {
+      paramName: 'type', type: 'text', lengthRange: { min: 1, max: 50 }, required: true,
+    },
+    {
+      paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: db.factorType,
+    },
   ]
 
   getEntityName = () => 'FactorType'

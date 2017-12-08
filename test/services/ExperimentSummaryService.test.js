@@ -12,7 +12,7 @@ describe('ExperimentSummaryService', () => {
   })
 
   describe('getExperimentSummaryById', () => {
-    it('returns summary data', () => {
+    test('returns summary data', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.experimentSummary.find = mockResolve({})
 
@@ -23,7 +23,7 @@ describe('ExperimentSummaryService', () => {
       })
     })
 
-    it('throws an error when summary is not found', () => {
+    test('throws an error when summary is not found', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.experimentSummary.find = mockResolve()
       AppError.notFound = mock()
@@ -36,7 +36,7 @@ describe('ExperimentSummaryService', () => {
       })
     })
 
-    it('rejects when experimentSummary find fails', () => {
+    test('rejects when experimentSummary find fails', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.experimentSummary.find = mockReject('error')
 
@@ -47,7 +47,7 @@ describe('ExperimentSummaryService', () => {
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.experimentSummary.find = mock()
 

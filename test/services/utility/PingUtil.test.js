@@ -5,7 +5,7 @@ import PingUtil from '../../../src/services/utility/PingUtil'
 describe('PingUtil', () => {
   describe('getMonsantoHeader', () => {
     test('calls oauth and returns headers', () => {
-      oauthPing.httpGetToken = mock(() => function tokenFunc() { return Promise.resolve('token') })
+      oauthPing.httpGetToken = mock(() => () => Promise.resolve('token'))
 
       return PingUtil.getMonsantoHeader().then((data) => {
         expect(oauthPing.httpGetToken).toHaveBeenCalled()
@@ -16,7 +16,7 @@ describe('PingUtil', () => {
     })
 
     test('rejects if oauth call fails', () => {
-      oauthPing.httpGetToken = mock(() => function tokenFunc() { return Promise.reject() })
+      oauthPing.httpGetToken = mock(() => () => Promise.reject())
 
       return PingUtil.getMonsantoHeader().then(() => {}, (err) => {
         expect(oauthPing.httpGetToken).toHaveBeenCalled()

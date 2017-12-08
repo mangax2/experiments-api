@@ -136,7 +136,7 @@ function deleteFactorLevelAssociations(
 function mapFactorLevelDTOsToFactorLevelEntities(allLevelDTOsWithParentFactorId) {
   return _.map(allLevelDTOsWithParentFactorId, level => ({
     id: level.id,
-    value: { items: level.items },
+    value: { items: level.items, objectType: level.objectType },
     factorId: level.factorId,
   }))
 }
@@ -202,7 +202,7 @@ class FactorDependentCompositeService {
     return {
       id: level.id,
       items: level.value.items,
-      objectType: level.value.objectType
+      objectType: level.value.objectType,
     }
   }
 

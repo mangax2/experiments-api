@@ -13,7 +13,6 @@ create table ref_level_object_type
 ALTER TABLE public.ref_level_object_type OWNER TO experiments_user_s;
 GRANT ALL ON TABLE public.ref_level_object_type TO experiments_user_s;
 GRANT SELECT ON TABLE public.ref_level_object_type TO experiments_ro_user;
-GRANT SELECT ON TABLE public.ref_level_object_type TO experiments_dev_app_user;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE public.ref_level_object_type TO experiments_dev_app_user;
 
 -- Populate the table

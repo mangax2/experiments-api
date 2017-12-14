@@ -15,21 +15,25 @@ insert into ref_level_object_type(name, created_user_id, created_date, modified_
 insert into ref_level_object_type(name, created_user_id, created_date, modified_user_id, modified_date) values('Cluster', 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 insert into ref_level_object_type(name, created_user_id, created_date, modified_user_id, modified_date) values('Composite', 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
+-- Add ref_id to ref_data_source table
+alter table ref_data_source add column ref_id varchar;
+alter table ref_data_source add constraint ref_data_source_ak_2 unique(ref_id);
+
 -- Add new catalogs to ref_data_source
-insert into ref_data_source(name, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
-values('Chemical', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
+insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
+values('Chemical Catalog', 'CHEMICAL', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
-insert into ref_data_source(name, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
-values('Plant Tissue', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
+insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
+values('Plant Sample Catalog', 'PLANT_SAMPLE', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
-insert into ref_data_source(name, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
-values('Protein', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
+insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
+values('Protein Catalog', 'PROTEIN', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
-insert into ref_data_source(name, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
-values('Container', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
+insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
+values('Container Catalog', 'CONTAINER', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
-insert into ref_data_source(name, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
-values('Internal Seed', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
+insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
+values('Internal Seed Catalog', 'INTERNAL_SEED', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
 -- Add objectType of Cluster to the root value objects
 update factor_level set value = jsonb_set(value, '{objectType}', '"Cluster"')

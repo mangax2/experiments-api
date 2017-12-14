@@ -5026,6 +5026,10 @@
           "type": "string",
           "description": "name of the data source"
         },
+        "refId": {
+          "type": "string",
+          "description": "optional reference Id for the data source"
+        },
         "refDataSourceTypeId": {
           "type": "integer"
         },

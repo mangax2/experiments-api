@@ -5184,6 +5184,10 @@
         "refId": {
           "type": "string",
           "description": "Used in the case when the property type is catalog.  This is the ID of the referenced item in the catalog."
+        },
+        "catalogType": {
+          "type": "string",
+          "description": "Indicates the which source the catalog is referencing.  Catalog sources may be found here: https://inventory-api.velocity-np.ag/types/"
         }
       }
     },
@@ -5203,7 +5207,7 @@
         "objectType": {
           "type": "string",
           "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
-        },
+        }
       }
     },
     "ClusterRequest": {
@@ -5226,7 +5230,7 @@
         "objectType": {
           "type": "string",
           "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
-        },
+        }
       }
     },
     "Variable": {

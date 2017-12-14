@@ -5167,7 +5167,11 @@
       "properties": {
         "propertyTypeId": {
           "type": "integer",
-          "description": "Indicates what type of property this item is."
+          "description": "DEPRECATED: This will be removed in a future version.  Indicates what type of property this item is."
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"
         },
         "label": {
           "type": "string",
@@ -5195,7 +5199,11 @@
           "items": {
             "$ref": "#/definitions/LevelItem"
           }
-        }
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
+        },
       }
     },
     "ClusterRequest": {
@@ -5214,7 +5222,11 @@
           "items": {
             "$ref": "#/definitions/LevelItem"
           }
-        }
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
+        },
       }
     },
     "Variable": {

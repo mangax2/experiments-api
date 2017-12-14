@@ -35,6 +35,8 @@ values('Container Catalog', 'CONTAINER', (select id from ref_data_source_type wh
 insert into ref_data_source(name, ref_id, ref_data_source_type_id, created_user_id, created_date, modified_user_id, modified_date)
 values('Internal Seed Catalog', 'INTERNAL_SEED', (select id from ref_data_source_type where type = 'Catalog'), 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 
+update ref_data_source set ref_id = 'FORMULATION_CATALOG' where id in (select id from ref_data_source where name = 'Formulation Catalog');
+
 -- Add objectType of Cluster to the root value objects
 update factor_level set value = jsonb_set(value, '{objectType}', '"Cluster"')
 where id in (select id from factor_level where (value ? 'items'));
@@ -96,7 +98,7 @@ update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObject
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Set catalog
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"Formulation Catalog"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"FORMULATION_CATALOG"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Create function to aid in adding objectType to objects in composites.
@@ -128,7 +130,7 @@ update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompos
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 -- Set catalog
-update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"Formulation Catalog"'))
+update factor_level set value = jsonb_set(value, '{items}', setItemTypesInCompositeObjects(value -> 'items', 'Formulation Catalog', '{catalogType}'::text[], '"FORMULATION_CATALOG"'))
 WHERE jsonb_typeof(value -> 'items') = 'array';
 
 drop function setItemTypesInCompositeObjects(jsonb, varchar, text[], jsonb);

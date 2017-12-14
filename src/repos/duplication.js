@@ -236,6 +236,7 @@ const duplicateGroupScript =
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('parent_id', g.id::text) " +
         "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
+        "#= hstore('set_id', null) " +
       "AS c FROM public.group g " +
     "WHERE experiment_id = $1) sub " +
     "RETURNING id AS new_id, parent_id AS old_id" +

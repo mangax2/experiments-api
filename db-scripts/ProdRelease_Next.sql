@@ -9,6 +9,13 @@ create table ref_level_object_type
     modified_date timestamp with time zone not null
 );
 
+-- Set permissions to the new table
+ALTER TABLE public.ref_level_object_type OWNER TO experiments_user_s;
+GRANT ALL ON TABLE public.ref_level_object_type TO experiments_user_s;
+GRANT SELECT ON TABLE public.ref_level_object_type TO experiments_ro_user;
+GRANT SELECT ON TABLE public.ref_level_object_type TO experiments_dev_app_user;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE public.ref_level_object_type TO experiments_dev_app_user;
+
 -- Populate the table
 insert into ref_level_object_type(name, created_user_id, created_date, modified_user_id, modified_date) values('Catalog', 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);
 insert into ref_level_object_type(name, created_user_id, created_date, modified_user_id, modified_date) values('Other', 'PNWATT', current_timestamp, 'PNWATT', current_timestamp);

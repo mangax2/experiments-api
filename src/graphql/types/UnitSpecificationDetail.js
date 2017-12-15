@@ -2,6 +2,7 @@ import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import UnitSpecificationDetailService from '../../services/UnitSpecificationDetailService'
 import { getUnitSpecificationById, UnitSpecification } from './reference/UnitSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const UnitSpecificationDetail = new GraphQLObjectType({
   name: 'UnitSpecificationDetail',
@@ -41,9 +42,7 @@ const UnitSpecificationDetail = new GraphQLObjectType({
     // direct relationships
     unitSpecification: {
       type: UnitSpecification,
-      resolve({ ref_unit_spec_id }) {
-        return getUnitSpecificationById({ id: ref_unit_spec_id })
-      },
+      resolve: Resolvers.refUnitSpecForUnitSpecificationDetailBatchResolver,
     },
     // TODO experiment? template?
   },

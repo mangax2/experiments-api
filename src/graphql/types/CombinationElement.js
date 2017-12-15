@@ -3,6 +3,7 @@ import { FactorLevel, getFactorLevelById } from './FactorLevel'
 import CombinationElementService from '../../services/CombinationElementService'
 import { Treatment, getTreatmentById } from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const CombinationElement = new GraphQLObjectType({
   name: 'CombinationElement',
@@ -33,15 +34,11 @@ const CombinationElement = new GraphQLObjectType({
     // direct relationships
     factorLevel: {
       type: FactorLevel,
-      resolve({ factor_level_id }) {
-        return getFactorLevelById({ id: factor_level_id })
-      },
+      resolve: Resolvers.factorLevelForCombinationElementBatchResolver,
     },
     treatment: {
       type: Treatment,
-      resolve({ treatment_id }) {
-        return getTreatmentById({ id: treatment_id })
-      },
+      resolve: Resolvers.treatmentForCombinationElementBatchResolver,
     },
   }),
 })

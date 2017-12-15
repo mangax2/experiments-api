@@ -4,6 +4,7 @@ import GroupService from '../../services/GroupService'
 import { GroupValue, getGroupValuesByGroupId } from './GroupValue'
 import { ExperimentalUnit, getExperimentalUnitsByGroupId } from './ExperimentalUnit'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 
 const Group = new GraphQLObjectType({
@@ -53,33 +54,23 @@ const Group = new GraphQLObjectType({
     // direct relationships
     parent: {
       type: Group,
-      resolve({ parent_id }) {
-        return getGroupById({ id: parent_id })
-      },
+      resolve: Resolvers.parentGroupBatchResolver,
     },
     children: {
       type: new GraphQLList(Group),
-      resolve({ id }) {
-        return getChildGroups({ parentId: id })
-      },
+      resolve: Resolvers.childGroupsBatchResolver,
     },
     groupType: {
       type: GroupType,
-      resolve({ ref_group_type_id }) {
-        return getGroupTypeById({ id: ref_group_type_id })
-      },
+      resolve: Resolvers.refGroupTypeBatchResolver,
     },
     groupValues: {
       type: new GraphQLList(GroupValue),
-      resolve({ id }) {
-        return getGroupValuesByGroupId({ groupId: id })
-      },
+      resolve: Resolvers.groupValueBatchResolver,
     },
     units: {
       type: new GraphQLList(ExperimentalUnit),
-      resolve({ id }) {
-        return getExperimentalUnitsByGroupId({ groupId: id })
-      },
+      resolve: Resolvers.unitBatchResolver,
     },
   }),
 })

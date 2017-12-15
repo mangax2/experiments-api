@@ -2,6 +2,7 @@ import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import DesignSpecificationDetailService from '../../services/DesignSpecificationDetailService'
 import { DesignSpecification, getDesignSpecificationById } from './reference/DesignSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const DesignSpecificationDetail = new GraphQLObjectType({
   name: 'DesignSpecificationDetail',
@@ -35,9 +36,7 @@ const DesignSpecificationDetail = new GraphQLObjectType({
     // direct relationships
     designSpecification: {
       type: DesignSpecification,
-      resolve({ ref_design_spec_id }) {
-        return getDesignSpecificationById({ id: ref_design_spec_id })
-      },
+      resolve: Resolvers.refDesignSpecForDesignSpecDetailBatchResolver,
     },
     // TODO experiment? template?
   },

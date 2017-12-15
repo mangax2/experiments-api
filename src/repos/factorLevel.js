@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 const columns = "id,value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
 const qualifiedColumns = "fl.id,fl.value,fl.factor_id,fl.created_user_id,fl.created_date,fl.modified_user_id,fl.modified_date"
 
@@ -13,6 +15,11 @@ module.exports = (rep, pgp) => ({
     tx.any(`SELECT ${qualifiedColumns} FROM factor f inner join factor_level fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId),
 
   findByFactorId: factorId => rep.any(`SELECT ${columns} FROM factor_level WHERE factor_id = $1`, factorId),
+
+  batchFindByFactorId: (factorIds, tx = rep) => {
+    return tx.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
+      .then(data => _.map(factorIds, factorId => _.filter(data, row => row.factor_id === factorId)))
+  },
 
   all: () => rep.any('SELECT ${columns} FROM factor_level'),
 

@@ -9,9 +9,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     //eslint-disable-next-line
     require('babel-register')
   }
-
-  const graphqlHTTP = require('express-graphql')
-  const schema = require('./graphql/schema').default
   const serviceConfig = require('./services/utility/ServiceConfig')
   const express = require('express')
   const _ = require('lodash')
@@ -98,10 +95,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     return res.status(500).json(err)
   })
 
-  app.use('/experiments-api/graphql', graphqlHTTP({
-    schema,
-    graphiql: true,
-  }))
+  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
 
   const port = config.port
 

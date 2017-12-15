@@ -1,6 +1,8 @@
 module.exports = rep => ({
   repository: () => rep,
 
+  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]),
+
   findByExperimentId: (experimentId, tx = rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
     ' owner WHERE' +
     ' experiment_id = $1', experimentId),

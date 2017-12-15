@@ -8,8 +8,7 @@ module.exports = rep => ({
 
   batchFindExperimentOrTemplate: (ids,isTemplate, tx = rep) => tx.any('SELECT * FROM experiment' +
   ' WHERE id' +
-  ' IN ($1:csv) AND is_template=$2' [ids,isTemplate]),
-
+  ' IN ($1:csv) AND is_template=$2', [ids,isTemplate]),
 
   all: (isTemplate) => rep.any('SELECT * FROM experiment where is_template = $1', isTemplate),
 

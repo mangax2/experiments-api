@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
@@ -7,6 +9,11 @@ module.exports = (rep, pgp) => ({
   all: () => rep.any('SELECT * FROM dependent_variable'),
 
   findByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM dependent_variable where experiment_id=$1', experimentId),
+
+  batchFindByExperimentId: (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM dependent_variable where experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  },
 
   batchCreate: (t, dependentVariables, context) => t.batch(dependentVariables.map(dependentVariable => t.one('insert into dependent_variable(required, name, experiment_id, created_user_id, created_date,' +
     'modified_user_id, modified_date, question_code) values($1, $2, $3, $4, CURRENT_TIMESTAMP,' +

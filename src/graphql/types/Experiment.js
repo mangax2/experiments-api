@@ -11,6 +11,7 @@ import {
 } from './DesignSpecificationDetail'
 import { Group, getGroupsByExperimentId } from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const Experiment = new GraphQLObjectType({
   name: 'Experiment',
@@ -35,58 +36,53 @@ const Experiment = new GraphQLObjectType({
       },
     },
 
+    // This was removed because experiment is no longer retrieved
+    // using ExperimentService.  This can be added back once a
+    // loader is set up for it.
     // direct relationships
-    owners: {
-      type: new GraphQLList(GraphQLString),
-    },
-    ownerGroups: {
-      type: new GraphQLList(GraphQLString),
-    },
+    // owners: {
+    //   type: new GraphQLList(GraphQLString),
+    // },
+
+    // This was removed because experiment is no longer retrieved
+    // using ExperimentService.  This can be added back once a
+    // loader is set up for it.
+    // ownerGroups: {
+    //   type: new GraphQLList(GraphQLString),
+    // },
+
     factors: {
       type: new GraphQLList(Factor),
-      resolve({ id }) {
-        return getFactorsByExperimentId({ experimentId: id, isTemplate: false })
-      },
+      resolve: Resolvers.factorByExperimentIdsBatchResolver,
     },
     dependentVariables: {
       type: new GraphQLList(DependentVariable),
-      resolve({ id }) {
-        return getDependentVariablesByExperimentId({ experimentId: id, isTemplate: false })
-      },
+      resolve: Resolvers.dependentVariableForExperimentBatchResolver,
     },
     treatments: {
       type: new GraphQLList(Treatment),
-      resolve({ id }) {
-        return getTreatmentsByExperimentId({ experimentId: id, isTemplate: false })
-      },
+      resolve: Resolvers.treatmentsForExperimentBatchResolver,
     },
     unitSpecificationDetails: {
       type: new GraphQLList(UnitSpecificationDetail),
-      resolve({ id }) {
-        return getUnitSpecificationDetailsByExperimentId(
-          { experimentId: id, isTemplate: false },
-        )
-      },
+      resolve: Resolvers.unitSpecDetailForExperimentBatchResolver,
     },
     designSpecifications: {
       type: new GraphQLList(DesignSpecificationDetail),
-      resolve({ id }) {
-        return getDesignSpecificationDetailsByExperimentId(
-          { experimentId: id, isTemplate: false },
-        )
-      },
+      resolve: Resolvers.designSpecDetailForExperimentBatchResolver,
     },
     groups: {
       type: new GraphQLList(Group),
-      resolve({ id }) {
-        return getGroupsByExperimentId(
-          { experimentId: id, isTemplate: false },
-        )
-      },
+      resolve: Resolvers.groupsForExperimentBatchResolver,
     },
-    tags: {
-      type: new GraphQLList(Tag),
-    },
+
+    // This was removed because experiment is no longer retrieved
+    // using ExperimentService.  This can be added back once a
+    // loader is set up for it.
+    // tags: {
+    //   type: new GraphQLList(Tag),
+    // },
+
     // TODO experimentDesign: {} ?
 
     // indirect relationships

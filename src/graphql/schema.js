@@ -13,6 +13,7 @@ import {
 import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group, getGroupsByExperimentId } from './types/Group'
 import { ExperimentalUnit, getExperimentalUnitsByExperimentId } from './types/ExperimentalUnit'
+import Resolvers from './resolvers'
 
 export default new GraphQLSchema({
   query: new GraphQLObjectType({
@@ -25,9 +26,7 @@ export default new GraphQLSchema({
             type: new GraphQLNonNull(GraphQLInt),
           },
         },
-        resolve(_, { id }) {
-          return getExperimentById({ id })
-        },
+        resolve: Resolvers.experimentBatchResolver,
       },
       template: {
         type: Template,

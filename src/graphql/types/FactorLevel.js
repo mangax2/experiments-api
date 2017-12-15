@@ -1,5 +1,6 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import GraphQLJSON from 'graphql-type-json'
+import Resolvers from '../resolvers'
 import FactorLevelService from '../../services/FactorLevelService'
 import { Factor, getFactorById } from './Factor'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
@@ -31,21 +32,15 @@ const FactorLevel = new GraphQLObjectType({
     // direct relationships
     factor: {
       type: Factor,
-      resolve({ factor_id }) {
-        return getFactorById({ id: factor_id })
-      },
+      resolve: Resolvers.factorBatchResolver,
     },
     nestedLevels: {
       type: new GraphQLList(FactorLevel),
-      resolve({ id }) {
-        return getNestedLevels({ id })
-      },
+      resolve: Resolvers.nestedFactorLevelForFactorLevelResolver,
     },
     associatedLevels: {
       type: new GraphQLList(FactorLevel),
-      resolve({ id }) {
-        return getAssociatedLevels({ id })
-      },
+      resolve: Resolvers.associatedFactorLevelForFactorLevelResolver,
     },
     // TODO combinationElements: {} ?
     // TODO groupValues: {} ?

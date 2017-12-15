@@ -3,6 +3,7 @@ import { Group, getGroupById } from './Group'
 import { Treatment, getTreatmentById } from './Treatment'
 import ExperimentalUnitService from '../../services/ExperimentalUnitService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const ExperimentalUnit = new GraphQLObjectType({
   name: 'ExperimentalUnit',
@@ -48,9 +49,7 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
     treatment: {
       type: Treatment,
-      resolve({ treatment_id }) {
-        return getTreatmentById({ id: treatment_id })
-      },
+      resolve: Resolvers.treatmentForExperimentalUnitBatchResolver,
     },
 
     // indirect relationships

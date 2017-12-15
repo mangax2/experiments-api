@@ -2,6 +2,7 @@ import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graph
 import TreatmentService from '../../services/TreatmentService'
 import { CombinationElement, getCombinationElementsByTreatmentId } from './CombinationElement'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
+import Resolvers from '../resolvers'
 
 const Treatment = new GraphQLObjectType({
   name: 'Treatment',
@@ -41,9 +42,7 @@ const Treatment = new GraphQLObjectType({
     // TODO experiment/template: {} ?
     combinationElements: {
       type: new GraphQLList(CombinationElement),
-      resolve({ id }) {
-        return getCombinationElementsByTreatmentId({ treatmentId: id })
-      },
+      resolve: Resolvers.combinationElementForTreatmentBatchResolver,
     },
     // TODO units: {} ?
 

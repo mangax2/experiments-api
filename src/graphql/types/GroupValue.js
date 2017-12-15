@@ -3,7 +3,7 @@ import GroupValueService from '../../services/GroupValueService'
 import { FactorLevel, getFactorLevelById } from './FactorLevel'
 import { Group, getGroupById } from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
-
+import Resolvers from '../resolvers'
 
 const GroupValue = new GraphQLObjectType({
   name: 'GroupValue',
@@ -40,15 +40,11 @@ const GroupValue = new GraphQLObjectType({
     // direct relationships
     factorLevel: {
       type: FactorLevel,
-      resolve({ factor_level_id }) {
-        return getFactorLevelById({ id: factor_level_id })
-      },
+      resolve: Resolvers.factorLevelForGroupValueBatchResolver,
     },
     group: {
       type: Group,
-      resolve({ group_id }) {
-        return getGroupById({ id: group_id })
-      },
+      resolve: Resolvers.groupForGroupValueBatchResolver,
     },
   }),
 })

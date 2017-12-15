@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
@@ -7,6 +9,11 @@ module.exports = (rep, pgp) => ({
 
   findByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM factor WHERE' +
     ' experiment_id=$1', experimentId),
+
+  batchFindByExperimentId: (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  },
 
   all: (tx = rep) => tx.any('SELECT * FROM factor'),
 

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 module.exports = (rep, pgp) => ({
   repository: () => rep,
 
@@ -12,7 +14,17 @@ module.exports = (rep, pgp) => ({
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
 
+  batchFindAllByExperimentId: (experimentIds, tx = rep) => {
+    return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  },
+
   findAllByParentId: (parentId, tx = rep) => tx.any('SELECT * FROM "group" WHERE parent_id=$1', parentId),
+
+  batchFindAllByParentId: (parentIds, tx = rep) => {
+    return tx.any('SELECT * FROM "group" WHERE parent_id in ($1:csv)', [parentIds])
+      .then(data => _.map(parentIds, parentId => _.filter(data, row => row.parent_id === parentId)))
+  },
 
   batchCreate: (groups, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(

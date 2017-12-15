@@ -1,4 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
+import Resolvers from '../resolvers'
 import FactorService from '../../services/FactorService'
 import { FactorLevel, getFactorLevelsByFactorId } from './FactorLevel'
 import { FactorType, getFactorTypeById } from './reference/FactorType'
@@ -38,9 +39,7 @@ const Factor = new GraphQLObjectType({
     },
     dataSource: {
       type: DataSource,
-      resolve({ ref_data_source_id }) {
-        return getDataSourceById({ id: ref_data_source_id })
-      },
+      resolve: Resolvers.refDataSourceBatchResolver,
     },
     auditInfo: {
       type: AuditInfo,
@@ -53,15 +52,11 @@ const Factor = new GraphQLObjectType({
     // TODO experiment? template?
     factorType: {
       type: FactorType,
-      resolve({ ref_factor_type_id }) {
-        return getFactorTypeById({ id: ref_factor_type_id })
-      },
+      resolve: Resolvers.refFactorTypeBatchResolver,
     },
     factorLevels: {
       type: new GraphQLList(FactorLevel),
-      resolve({ id }) {
-        return getFactorLevelsByFactorId({ factorId: id })
-      },
+      resolve: Resolvers.factorLevelByFactorIdsBatchResolver,
     },
 
     // indirect relationships

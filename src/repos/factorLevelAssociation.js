@@ -15,7 +15,17 @@ module.exports = (rep, pgp) => ({
 
   findNestedLevels: (associatedLevelId, tx = rep) => tx.any('SELECT fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.nested_level_id WHERE fla.associated_level_id=$1', associatedLevelId),
 
+  batchFindNestedLevels: (associatedLevelIds, tx = rep) => {
+    return tx.any('SELECT fla.associated_level_id, fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.nested_level_id WHERE fla.associated_level_id IN ($1:csv)', [associatedLevelIds])
+      .then(data => _.map(associatedLevelIds, associatedLevelId => _.map(_.filter(data, row => row.associated_level_id === associatedLevelId), row => _.omit(row, ['associated_level_id']))))
+  },
+
   findAssociatedLevels: (nestedLevelId, tx = rep) => tx.any('SELECT fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.associated_level_id WHERE fla.nested_level_id=$1', nestedLevelId),
+
+  batchFindAssociatedLevels: (nestedLevelIds, tx = rep) => {
+    return tx.any('SELECT fla.nested_level_id, fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.associated_level_id WHERE fla.nested_level_id IN ($1:csv)', [nestedLevelIds])
+      .then(data => _.map(nestedLevelIds, nestedLevelId => _.map(_.filter(data, row => row.nested_level_id === nestedLevelId), row => _.omit(row, ['nested_level_id']))))
+  },
 
   batchCreate: (factorLevelAssociations, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(

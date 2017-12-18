@@ -536,11 +536,11 @@ class FactorDependentCompositeService {
 
   persistIndependentAndDependentVariables = (
     experimentId, variables, context, isTemplate, tx) => Promise.all([
-    this.persistIndependentAndAssociations(
-      experimentId, variables.independent,
-      variables.independentAssociations, context, tx),
-    this.persistDependentVariables(
-      variables.dependent, experimentId, context, isTemplate, tx)])
+      this.persistIndependentAndAssociations(
+        experimentId, variables.independent,
+        variables.independentAssociations, context, tx),
+      this.persistDependentVariables(
+        variables.dependent, experimentId, context, isTemplate, tx)])
 
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {

@@ -158,18 +158,18 @@ class ManageRepsAndUnitsListener {
         newGroup.rep = rep
         const prms = db.group.batchCreate([newGroup],
           context, tx).then((groupResp) => {
-          const newGroupValue = {
-            name: 'repNumber',
-            value: rep,
-            groupId: groupResp[0].id,
-          }
-          const unitsC = _.map(groupedUnits[rep], (unit) => {
-            unit.groupId = groupResp[0].id
-            return unit
+            const newGroupValue = {
+              name: 'repNumber',
+              value: rep,
+              groupId: groupResp[0].id,
+            }
+            const unitsC = _.map(groupedUnits[rep], (unit) => {
+              unit.groupId = groupResp[0].id
+              return unit
+            })
+            return Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
+              db.unit.batchCreate(unitsC, context, tx)])
           })
-          return Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
-            db.unit.batchCreate(unitsC, context, tx)])
-        })
         newGroupsToBeCreatedPromises.push(prms)
       })
     }

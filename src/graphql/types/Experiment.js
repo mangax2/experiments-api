@@ -1,15 +1,12 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graphql'
 import ExperimentsService from '../../services/ExperimentsService'
-import { Tag } from './Tag'
-import { Factor, getFactorsByExperimentId } from './Factor'
-import { DependentVariable, getDependentVariablesByExperimentId } from './DependentVariable'
-import { Treatment, getTreatmentsByExperimentId } from './Treatment'
-import { UnitSpecificationDetail, getUnitSpecificationDetailsByExperimentId } from './UnitSpecificationDetail'
-import {
-  DesignSpecificationDetail,
-  getDesignSpecificationDetailsByExperimentId,
-} from './DesignSpecificationDetail'
-import { Group, getGroupsByExperimentId } from './Group'
+// import { Tag } from './Tag'
+import { Factor } from './Factor'
+import { DependentVariable } from './DependentVariable'
+import { Treatment } from './Treatment'
+import { UnitSpecificationDetail } from './UnitSpecificationDetail'
+import { DesignSpecificationDetail } from './DesignSpecificationDetail'
+import { Group } from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -91,9 +88,6 @@ const Experiment = new GraphQLObjectType({
   },
 })
 
-const getExperimentById = ({ id, isTemplate = false }) =>
-  new ExperimentsService().getExperimentById(id, isTemplate)
-
 const getAllExperiments = () => new ExperimentsService().getAllExperiments(false)
 
-export { Experiment, getExperimentById, getAllExperiments }
+export { Experiment, getAllExperiments }

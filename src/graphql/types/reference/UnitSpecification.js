@@ -1,4 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
+import { property } from 'lodash'
 import UnitSpecificationService from '../../../services/UnitSpecificationService'
 import { getUnitTypeById, UnitType } from './UnitType'
 
@@ -14,15 +15,11 @@ const UnitSpecification = new GraphQLObjectType({
     },
     uomType: {
       type: GraphQLInt,
-      resolve({ uom_type: uomType }) {
-        return uomType
-      },
+      resolve: property('uom_type'),
     },
     refUnitTypeId: {
       type: GraphQLInt,
-      resolve({ ref_unit_type_id: refUnitTypeId }) {
-        return refUnitTypeId
-      },
+      resolve: property('ref_unit_type_id'),
     },
 
     // direct relationships

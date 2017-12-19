@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
+import { property } from 'lodash'
 import DesignSpecificationDetailService from '../../services/DesignSpecificationDetailService'
-import { DesignSpecification, getDesignSpecificationById } from './reference/DesignSpecification'
+import { DesignSpecification } from './reference/DesignSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -16,15 +17,11 @@ const DesignSpecificationDetail = new GraphQLObjectType({
     },
     refDesignSpecId: {
       type: GraphQLInt,
-      resolve({ ref_design_spec_id: refDesignSpecId }) {
-        return refDesignSpecId
-      },
+      resolve: property('ref_design_spec_id'),
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     auditInfo: {
       type: AuditInfo,

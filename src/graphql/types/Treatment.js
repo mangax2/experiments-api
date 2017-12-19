@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
+import { property } from 'lodash'
 import TreatmentService from '../../services/TreatmentService'
-import { CombinationElement, getCombinationElementsByTreatmentId } from './CombinationElement'
+import { CombinationElement } from './CombinationElement'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -13,21 +14,15 @@ const Treatment = new GraphQLObjectType({
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     isControl: {
       type: GraphQLString,
-      resolve({ is_control: isControl }) {
-        return isControl
-      },
+      resolve: property('is_control'),
     },
     treatmentNumber: {
       type: GraphQLInt,
-      resolve({ treatment_number: treatmentNumber }) {
-        return treatmentNumber
-      },
+      resolve: property('treatment_number'),
     },
     notes: {
       type: GraphQLString,

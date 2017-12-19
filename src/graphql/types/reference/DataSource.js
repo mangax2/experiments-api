@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
-import RefDataSourceService from '../../../services/RefDataSourceService'
+import { property } from 'lodash'
 import { DataSourceType, getDataSourceTypeById } from './DataSourceType'
 
 const DataSource = new GraphQLObjectType({
@@ -14,9 +14,7 @@ const DataSource = new GraphQLObjectType({
     },
     refDataSourceTypeId: {
       type: GraphQLInt,
-      resolve({ ref_data_source_type_id: refDataSourceTypeId }) {
-        return refDataSourceTypeId
-      },
+      resolve: property('ref_data_source_type_id'),
     },
 
     // direct relationships
@@ -29,7 +27,4 @@ const DataSource = new GraphQLObjectType({
   },
 })
 
-const getDataSourceById = ({ id }) =>
-  new RefDataSourceService().getRefDataSourceById(id)
-
-export { DataSource, getDataSourceById }
+export default DataSource

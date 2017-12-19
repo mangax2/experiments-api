@@ -1,9 +1,10 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
+import { property } from 'lodash'
 import Resolvers from '../resolvers'
 import FactorService from '../../services/FactorService'
-import { FactorLevel, getFactorLevelsByFactorId } from './FactorLevel'
-import { FactorType, getFactorTypeById } from './reference/FactorType'
-import { DataSource, getDataSourceById } from './reference/DataSource'
+import { FactorLevel } from './FactorLevel'
+import { FactorType } from './reference/FactorType'
+import DataSource from './reference/DataSource'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const Factor = new GraphQLObjectType({
@@ -18,24 +19,18 @@ const Factor = new GraphQLObjectType({
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     refFactorTypeId: {
       type: GraphQLInt,
-      resolve({ ref_factor_type_id: refFactorTypeId }) {
-        return refFactorTypeId
-      },
+      resolve: property('ref_factor_type_id'),
     },
     tier: {
       type: GraphQLInt,
     },
     refDataSourceId: {
       type: GraphQLInt,
-      resolve({ ref_data_source_id: refDataSourceId }) {
-        return refDataSourceId
-      },
+      resolve: property('ref_data_source_id'),
     },
     dataSource: {
       type: DataSource,

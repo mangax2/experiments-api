@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
+import { property } from 'lodash'
 import { Group, getGroupById } from './Group'
-import { Treatment, getTreatmentById } from './Treatment'
+import { Treatment } from './Treatment'
 import ExperimentalUnitService from '../../services/ExperimentalUnitService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
@@ -14,24 +15,18 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
     groupId: {
       type: GraphQLInt,
-      resolve({ group_id: groupId }) {
-        return groupId
-      },
+      resolve: property('group_id'),
     },
     treatmentId: {
       type: GraphQLInt,
-      resolve({ treatment_id: treatmentId }) {
-        return treatmentId
-      },
+      resolve: property('treatment_id'),
     },
     rep: {
       type: GraphQLInt,
     },
     setEntryId: {
       type: GraphQLInt,
-      resolve({ set_entry_id: setEntryId }) {
-        return setEntryId
-      },
+      resolve: property('set_entry_id'),
     },
     auditInfo: {
       type: AuditInfo,
@@ -57,10 +52,7 @@ const ExperimentalUnit = new GraphQLObjectType({
   }),
 })
 
-const getExperimentalUnitsByGroupId = ({ groupId }) =>
-  new ExperimentalUnitService().batchGetExperimentalUnitsByGroupIdsNoValidate([groupId])
-
 const getExperimentalUnitsByExperimentId = ({ experimentId }) =>
   new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(experimentId)
 
-export { ExperimentalUnit, getExperimentalUnitsByGroupId, getExperimentalUnitsByExperimentId }
+export { ExperimentalUnit, getExperimentalUnitsByExperimentId }

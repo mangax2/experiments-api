@@ -1,8 +1,9 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
-import { getGroupTypeById, GroupType } from './reference/GroupType'
+import { property } from 'lodash'
+import { GroupType } from './reference/GroupType'
 import GroupService from '../../services/GroupService'
-import { GroupValue, getGroupValuesByGroupId } from './GroupValue'
-import { ExperimentalUnit, getExperimentalUnitsByGroupId } from './ExperimentalUnit'
+import { GroupValue } from './GroupValue'
+import { ExperimentalUnit } from './ExperimentalUnit'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -16,33 +17,23 @@ const Group = new GraphQLObjectType({
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     parentId: {
       type: GraphQLInt,
-      resolve({ parent_id: parentId }) {
-        return parentId
-      },
+      resolve: property('parent_id'),
     },
     refRandomizationStrategyId: {
       type: GraphQLInt,
-      resolve({ ref_randomization_strategy_id: refRandomizationStrategyId }) {
-        return refRandomizationStrategyId
-      },
+      resolve: property('ref_randomization_strategy_id'),
     },
     refGroupTypeId: {
       type: GraphQLInt,
-      resolve({ ref_group_type_id: refGroupTypeId }) {
-        return refGroupTypeId
-      },
+      resolve: property('ref_group_type_id'),
     },
     setId: {
       type: GraphQLInt,
-      resolve({ set_id: setId }) {
-        return setId
-      },
+      resolve: property('set_id'),
     },
     auditInfo: {
       type: AuditInfo,
@@ -83,9 +74,9 @@ const getGroupById = ({ id }) =>
 const getGroupsByExperimentId = ({ experimentId, isTemplate }) =>
   new GroupService().getGroupsByExperimentId(experimentId, isTemplate)
 
-const getChildGroups = ({ parentId }) =>
-  (parentId !== null
-    ? new GroupService().getGroupsbyParentId(parentId)
-    : [])
+// const getChildGroups = ({ parentId }) =>
+//   (parentId !== null
+//     ? new GroupService().getGroupsbyParentId(parentId)
+//     : [])
 
 export { Group, getGroupById, getGroupsByExperimentId }

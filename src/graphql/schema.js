@@ -1,5 +1,5 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLList } from 'graphql'
-import { Experiment, getExperimentById, getAllExperiments } from './types/Experiment'
+import { Experiment, getAllExperiments } from './types/Experiment'
 import { Factor, getFactorsByExperimentId } from './types/Factor'
 import { Treatment, getTreatmentsByExperimentId } from './types/Treatment'
 import {

@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
+import { property } from 'lodash'
 import UnitSpecificationDetailService from '../../services/UnitSpecificationDetailService'
-import { getUnitSpecificationById, UnitSpecification } from './reference/UnitSpecification'
+import { UnitSpecification } from './reference/UnitSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -16,21 +17,15 @@ const UnitSpecificationDetail = new GraphQLObjectType({
     },
     uomId: {
       type: GraphQLInt,
-      resolve({ uom_id: uomId }) {
-        return uomId
-      },
+      resolve: property('uom_id'),
     },
     refUnitSpecID: {
       type: GraphQLInt,
-      resolve({ ref_unit_spec_id: refUnitSpecId }) {
-        return refUnitSpecId
-      },
+      resolve: property('ref_unit_spec_id'),
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     auditInfo: {
       type: AuditInfo,

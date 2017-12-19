@@ -1,4 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLBoolean } from 'graphql'
+import { property } from 'lodash'
 import DependentVariableService from '../../services/DependentVariableService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
@@ -16,15 +17,11 @@ const DependentVariable = new GraphQLObjectType({
     },
     questionCode: {
       type: GraphQLString,
-      resolve({ question_code: questionCode }) {
-        return questionCode
-      },
+      resolve: property('question_code'),
     },
     experimentId: {
       type: GraphQLInt,
-      resolve({ experiment_id: experimentId }) {
-        return experimentId
-      },
+      resolve: property('experiment_id'),
     },
     auditInfo: {
       type: AuditInfo,

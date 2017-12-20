@@ -242,31 +242,31 @@ class ExperimentsService {
         const numberOfCopies = requestBody.numberOfCopies || 1
         experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
           context, false, tx).then((data) => {
-            if (data && _.isArray(data)) {
-              const tagsPromise = []
-              _.forEach(_.range(numberOfCopies), (t) => {
-                const experimentId = data[t].id
-                const newTag = {
-                  category: 'FROM TEMPLATE',
-                  value: String(requestBody.id),
-                  experimentId,
-                }
-                tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
-                  .then((result) => {
-                    const tags = _.map(result.tags, (tag) => {
-                      tag.experimentId = experimentId
-                      return tag
-                    })
-                    tags.push(newTag)
-                    return this.tagService.saveTags(tags, experimentId, context, false)
-                  }))
-              })
-              return Promise.all(tagsPromise).then(() =>
-                AppUtil.createPostResponse(data),
-              )
-            }
-            return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed'))
-          })
+          if (data && _.isArray(data)) {
+            const tagsPromise = []
+            _.forEach(_.range(numberOfCopies), (t) => {
+              const experimentId = data[t].id
+              const newTag = {
+                category: 'FROM TEMPLATE',
+                value: String(requestBody.id),
+                experimentId,
+              }
+              tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                .then((result) => {
+                  const tags = _.map(result.tags, (tag) => {
+                    tag.experimentId = experimentId
+                    return tag
+                  })
+                  tags.push(newTag)
+                  return this.tagService.saveTags(tags, experimentId, context, false)
+                }))
+            })
+            return Promise.all(tagsPromise).then(() =>
+              AppUtil.createPostResponse(data),
+            )
+          }
+          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed'))
+        })
         break
       }
       case 'experiment': {

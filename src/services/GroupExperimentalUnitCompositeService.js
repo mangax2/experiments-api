@@ -166,18 +166,18 @@ class GroupExperimentalUnitCompositeService {
   getGroupAndUnitDetails(experimentId, isTemplate, context, tx) {
     return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate,
       context, tx),
-      this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
-      this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
-        .then((groupValuesAndUnits) => {
-          const groups = groupValuesAndUnits[0]
-          const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
-          const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
-          return _.map(groups, (group) => {
-            group.groupValues = groupValuesGroupByGroupId[group.id]
-            group.units = unitsGroupByGroupId[group.id]
-            return group
-          })
+    this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
+    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
+      .then((groupValuesAndUnits) => {
+        const groups = groupValuesAndUnits[0]
+        const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
+        const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
+        return _.map(groups, (group) => {
+          group.groupValues = groupValuesGroupByGroupId[group.id]
+          group.units = unitsGroupByGroupId[group.id]
+          return group
         })
+      })
   }
 
   @Transactional('getGroupTree')

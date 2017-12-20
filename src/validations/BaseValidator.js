@@ -21,11 +21,11 @@ class BaseValidator {
       _.map(objectArray, element =>
         this.validateEntity(element, operationName, optionalTransaction),
       )).then(() => {
-        if (!this.hasErrors()) {
-          return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
-        }
-        return Promise.resolve()
-      })
+      if (!this.hasErrors()) {
+        return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+      }
+      return Promise.resolve()
+    })
   }
 
   validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
@@ -161,10 +161,10 @@ class BaseValidator {
       businessKeyObjects,
       entity,
       optionalTransaction).then((data) => {
-        if (data && data.length > 0) {
-          this.messages.push(`${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`)
-        }
-      })
+      if (data && data.length > 0) {
+        this.messages.push(`${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`)
+      }
+    })
   }
 
   getIdDifference = (ids, data) => {

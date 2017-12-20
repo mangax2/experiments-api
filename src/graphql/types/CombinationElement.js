@@ -15,7 +15,7 @@ const CombinationElement = new GraphQLObjectType({
     },
     factorLevelId: {
       type: GraphQLInt,
-      resolve: property('is_control'),
+      resolve: property('factor_level_id'),
     },
     treatmentId: {
       type: GraphQLInt,

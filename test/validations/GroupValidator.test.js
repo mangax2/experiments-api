@@ -22,7 +22,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
       ]
@@ -60,7 +60,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
       ]
@@ -77,7 +77,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
         { paramName: 'id', type: 'numeric', required: true },

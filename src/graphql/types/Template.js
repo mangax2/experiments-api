@@ -37,31 +37,31 @@ const Template = new GraphQLObjectType({
 
     // direct relationships
     owners: {
-      type: new GraphQLList(GraphQLString),
+      type: GraphQLList(GraphQLString),
     },
     ownerGroups: {
-      type: new GraphQLList(GraphQLString),
+      type: GraphQLList(GraphQLString),
     },
     factors: {
-      type: new GraphQLList(Factor),
+      type: GraphQLList(Factor),
       resolve({ id }) {
         return getFactorsByExperimentId({ experimentId: id, isTemplate: true })
       },
     },
     dependentVariables: {
-      type: new GraphQLList(DependentVariable),
+      type: GraphQLList(DependentVariable),
       resolve({ id }) {
         return getDependentVariablesByExperimentId({ experimentId: id, isTemplate: true })
       },
     },
     treatments: {
-      type: new GraphQLList(Treatment),
+      type: GraphQLList(Treatment),
       resolve({ id }) {
         return getTreatmentsByExperimentId({ experimentId: id, isTemplate: true })
       },
     },
     unitSpecificationDetails: {
-      type: new GraphQLList(UnitSpecificationDetail),
+      type: GraphQLList(UnitSpecificationDetail),
       resolve({ id }) {
         return getUnitSpecificationDetailsByExperimentId(
           { experimentId: id, isTemplate: true },
@@ -69,7 +69,7 @@ const Template = new GraphQLObjectType({
       },
     },
     designSpecifications: {
-      type: new GraphQLList(DesignSpecificationDetail),
+      type: GraphQLList(DesignSpecificationDetail),
       resolve({ id }) {
         return getDesignSpecificationDetailsByExperimentId(
           { experimentId: id, isTemplate: true },
@@ -77,7 +77,7 @@ const Template = new GraphQLObjectType({
       },
     },
     groups: {
-      type: new GraphQLList(Group),
+      type: GraphQLList(Group),
       resolve({ id }) {
         return getGroupsByExperimentId(
           { experimentId: id, isTemplate: true },
@@ -85,7 +85,7 @@ const Template = new GraphQLObjectType({
       },
     },
     tags: {
-      type: new GraphQLList(Tag),
+      type: GraphQLList(Tag),
     },
     // TODO experimentDesign: {} ?
 

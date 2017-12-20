@@ -36,7 +36,7 @@ const Treatment = new GraphQLObjectType({
     // direct relationships
     // TODO experiment/template: {} ?
     combinationElements: {
-      type: new GraphQLList(CombinationElement),
+      type: GraphQLList(CombinationElement),
       resolve: Resolvers.combinationElementForTreatmentBatchResolver,
     },
     // TODO units: {} ?

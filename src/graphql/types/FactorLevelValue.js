@@ -5,7 +5,7 @@ const FactorLevelValue = new GraphQLObjectType({
   fields: () => ({
     // properties
     items: {
-      type: new GraphQLList(ClusterComposite),
+      type: GraphQLList(ClusterComposite),
     },
     objectType: {
       type: GraphQLString,
@@ -27,9 +27,9 @@ const ClusterComposite = new GraphQLObjectType({
       type: GraphQLString,
     },
     items: {
-      type: new GraphQLList(ClusterComposite),
+      type: GraphQLList(ClusterComposite),
     },
   }),
 })
 
-export { FactorLevelValue as default }
+export default FactorLevelValue

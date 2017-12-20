@@ -38,38 +38,38 @@ const Experiment = new GraphQLObjectType({
     // loader is set up for it.
     // direct relationships
     // owners: {
-    //   type: new GraphQLList(GraphQLString),
+    //   type: GraphQLList(GraphQLString),
     // },
 
     // This was removed because experiment is no longer retrieved
     // using ExperimentService.  This can be added back once a
     // loader is set up for it.
     // ownerGroups: {
-    //   type: new GraphQLList(GraphQLString),
+    //   type: GraphQLList(GraphQLString),
     // },
 
     factors: {
-      type: new GraphQLList(Factor),
+      type: GraphQLList(Factor),
       resolve: Resolvers.factorByExperimentIdsBatchResolver,
     },
     dependentVariables: {
-      type: new GraphQLList(DependentVariable),
+      type: GraphQLList(DependentVariable),
       resolve: Resolvers.dependentVariableForExperimentBatchResolver,
     },
     treatments: {
-      type: new GraphQLList(Treatment),
+      type: GraphQLList(Treatment),
       resolve: Resolvers.treatmentsForExperimentBatchResolver,
     },
     unitSpecificationDetails: {
-      type: new GraphQLList(UnitSpecificationDetail),
+      type: GraphQLList(UnitSpecificationDetail),
       resolve: Resolvers.unitSpecDetailForExperimentBatchResolver,
     },
     designSpecifications: {
-      type: new GraphQLList(DesignSpecificationDetail),
+      type: GraphQLList(DesignSpecificationDetail),
       resolve: Resolvers.designSpecDetailForExperimentBatchResolver,
     },
     groups: {
-      type: new GraphQLList(Group),
+      type: GraphQLList(Group),
       resolve: Resolvers.groupsForExperimentBatchResolver,
     },
 

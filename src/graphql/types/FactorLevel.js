@@ -38,11 +38,11 @@ const FactorLevel = new GraphQLObjectType({
       resolve: Resolvers.factorBatchResolver,
     },
     nestedLevels: {
-      type: new GraphQLList(FactorLevel),
+      type: GraphQLList(FactorLevel),
       resolve: Resolvers.nestedFactorLevelForFactorLevelResolver,
     },
     associatedLevels: {
-      type: new GraphQLList(FactorLevel),
+      type: GraphQLList(FactorLevel),
       resolve: Resolvers.associatedFactorLevelForFactorLevelResolver,
     },
     // TODO combinationElements: {} ?

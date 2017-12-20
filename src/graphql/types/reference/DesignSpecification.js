@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
-import RefDesignSpecificationService from '../../../services/RefDesignSpecificationService'
 
 const DesignSpecification = new GraphQLObjectType({
   name: 'DesignSpecification',
@@ -13,7 +12,4 @@ const DesignSpecification = new GraphQLObjectType({
   },
 })
 
-const getDesignSpecificationById = ({ id }) =>
-  new RefDesignSpecificationService().getDesignSpecById(id)
-
-export { DesignSpecification, getDesignSpecificationById }
+export default DesignSpecification

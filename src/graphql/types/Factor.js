@@ -50,7 +50,7 @@ const Factor = new GraphQLObjectType({
       resolve: Resolvers.refFactorTypeBatchResolver,
     },
     factorLevels: {
-      type: new GraphQLList(FactorLevel),
+      type: GraphQLList(FactorLevel),
       resolve: Resolvers.factorLevelByFactorIdsBatchResolver,
     },
 

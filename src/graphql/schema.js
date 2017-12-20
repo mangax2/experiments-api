@@ -23,7 +23,7 @@ export default new GraphQLSchema({
         type: Experiment,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
         },
         resolve: Resolvers.experimentBatchResolver,
@@ -32,7 +32,7 @@ export default new GraphQLSchema({
         type: Template,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
         },
         resolve(_, { id }) {
@@ -40,22 +40,22 @@ export default new GraphQLSchema({
         },
       },
       experiments: {
-        type: new GraphQLList(Experiment),
+        type: GraphQLList(Experiment),
         resolve() {
           return getAllExperiments()
         },
       },
       templates: {
-        type: new GraphQLList(Template),
+        type: GraphQLList(Template),
         resolve() {
           return getAllTemplates()
         },
       },
       factors: {
-        type: new GraphQLList(Factor),
+        type: GraphQLList(Factor),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,
@@ -66,10 +66,10 @@ export default new GraphQLSchema({
         },
       },
       treatments: {
-        type: new GraphQLList(Treatment),
+        type: GraphQLList(Treatment),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,
@@ -80,10 +80,10 @@ export default new GraphQLSchema({
         },
       },
       unitSpecificationDetails: {
-        type: new GraphQLList(UnitSpecificationDetail),
+        type: GraphQLList(UnitSpecificationDetail),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,
@@ -94,10 +94,10 @@ export default new GraphQLSchema({
         },
       },
       designSpecificationDetails: {
-        type: new GraphQLList(DesignSpecificationDetail),
+        type: GraphQLList(DesignSpecificationDetail),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,
@@ -108,10 +108,10 @@ export default new GraphQLSchema({
         },
       },
       groups: {
-        type: new GraphQLList(Group),
+        type: GraphQLList(Group),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,
@@ -122,10 +122,10 @@ export default new GraphQLSchema({
         },
       },
       units: {
-        type: new GraphQLList(ExperimentalUnit),
+        type: GraphQLList(ExperimentalUnit),
         args: {
           experimentId: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: GraphQLNonNull(GraphQLInt),
           },
           isTemplate: {
             type: GraphQLBoolean,

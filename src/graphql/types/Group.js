@@ -48,7 +48,7 @@ const Group = new GraphQLObjectType({
       resolve: Resolvers.parentGroupBatchResolver,
     },
     children: {
-      type: new GraphQLList(Group),
+      type: GraphQLList(Group),
       resolve: Resolvers.childGroupsBatchResolver,
     },
     groupType: {
@@ -56,11 +56,11 @@ const Group = new GraphQLObjectType({
       resolve: Resolvers.refGroupTypeBatchResolver,
     },
     groupValues: {
-      type: new GraphQLList(GroupValue),
+      type: GraphQLList(GroupValue),
       resolve: Resolvers.groupValueBatchResolver,
     },
     units: {
-      type: new GraphQLList(ExperimentalUnit),
+      type: GraphQLList(ExperimentalUnit),
       resolve: Resolvers.unitBatchResolver,
     },
   }),

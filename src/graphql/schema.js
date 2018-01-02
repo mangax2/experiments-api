@@ -13,6 +13,7 @@ import {
 import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group, getGroupsByExperimentId } from './types/Group'
 import { ExperimentalUnit, getExperimentalUnitsByExperimentId } from './types/ExperimentalUnit'
+import { ExperimentalSet, getSetBySetId } from './types/ExperimentalSet'
 import Resolvers from './resolvers'
 
 export default new GraphQLSchema({
@@ -135,7 +136,17 @@ export default new GraphQLSchema({
           return getExperimentalUnitsByExperimentId({ experimentId, isTemplate })
         },
       },
-      // TODO set: {} ?
+      set: {
+        type: ExperimentalSet,
+        args: {
+          setId: {
+            type: GraphQLNonNull(GraphQLInt),
+          },
+        },
+        resolve(_, { setId }) {
+          return getSetBySetId({ setId })
+        },
+      },
       // TODO setEntries: {} ?
     },
   }),

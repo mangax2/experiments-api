@@ -79,3 +79,21 @@ ref_randomization_strategy AS (
 INSERT INTO design_spec_detail (value, ref_design_spec_id, experiment_id, created_user_id, modified_user_id, created_date, modified_date)
 SELECT rrs.ref_randomization_strategy_id, rs.id, rrs.experiment_id, 'JGORD1', 'JGORD1', current_timestamp, current_timestamp
 FROM randomization_spec rs, ref_randomization_strategy rrs;
+
+
+WITH reps_design_spec AS (
+    SELECT id FROM ref_design_spec
+    WHERE name = 'Reps'
+),
+min_reps_design_spec AS (
+    SELECT id FROM ref_design_spec
+    WHERE name = 'Min Rep'
+),
+experiments_with_min_reps AS (
+    SELECT experiment_id
+    FROM design_spec_detail dsd
+        INNER JOIN min_reps_design_spec mrds ON dsd.ref_design_spec_id = mrds.id
+)
+DELETE FROM design_spec_detail
+WHERE experiment_id IN (SELECT experiment_id FROM experiments_with_min_reps)
+    AND ref_design_spec_id IN (SELECT id FROM reps_design_spec)

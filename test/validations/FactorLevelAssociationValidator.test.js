@@ -11,12 +11,12 @@ describe('FactorLevelAssociationValidator', () => {
   })
 
   describe('get POST_VALIDATION_SCHEMA', () => {
-    it('returns validation schema', () => {
+    test('returns validation schema', () => {
       expect(FactorLevelAssociationValidator.POST_VALIDATION_SCHEMA).toEqual([
-        {paramName: 'associatedLevelId', type: 'numeric', required: true},
-        {paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel},
-        {paramName: 'nestedLevelId', type: 'numeric', required: true},
-        {paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel},
+        { paramName: 'associatedLevelId', type: 'numeric', required: true },
+        { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'nestedLevelId', type: 'numeric', required: true },
+        { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
         {
           paramName: 'FactorLevelAssociation',
           type: 'businessKey',
@@ -28,12 +28,12 @@ describe('FactorLevelAssociationValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns POST schema for POST operation', () => {
+    test('returns POST schema for POST operation', () => {
       expect(target.getSchema('POST')).toEqual([
-        {paramName: 'associatedLevelId', type: 'numeric', required: true},
-        {paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel},
-        {paramName: 'nestedLevelId', type: 'numeric', required: true},
-        {paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel},
+        { paramName: 'associatedLevelId', type: 'numeric', required: true },
+        { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'nestedLevelId', type: 'numeric', required: true },
+        { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
         {
           paramName: 'FactorLevelAssociation',
           type: 'businessKey',
@@ -43,7 +43,7 @@ describe('FactorLevelAssociationValidator', () => {
       ])
     })
 
-    it('throws exception when operation is not POST', () => {
+    test('throws exception when operation is not POST', () => {
       AppError.badRequest = mock('')
       expect(() => { target.getSchema('NOT POST') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
@@ -51,28 +51,28 @@ describe('FactorLevelAssociationValidator', () => {
   })
 
   describe('getBusinessKeyPropertyNames', () => {
-    it('returns business key names', () => {
+    test('returns business key names', () => {
       expect(target.getBusinessKeyPropertyNames())
         .toEqual(['associatedLevelId', 'nestedLevelId'])
     })
   })
 
   describe('getDuplicateBusinessKeyError', () => {
-    it('returns duplicate business key error', () => {
+    test('returns duplicate business key error', () => {
       expect(target.getDuplicateBusinessKeyError())
         .toEqual('Duplicate association in request payload')
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName())
         .toEqual('FactorLevelAssociation')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when parameter is a filled array', () => {
+    test('resolves when parameter is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -80,21 +80,19 @@ describe('FactorLevelAssociationValidator', () => {
       })
     })
 
-    it('rejects when parameter is undefined', () => {
+    test('rejects when parameter is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith(
-          'FactorLevelAssociation request object needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array')
       })
     })
 
-    it('rejects when parameter is an empty array', () => {
+    test('rejects when parameter is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith(
-          'FactorLevelAssociation request object needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array')
       })
     })
   })

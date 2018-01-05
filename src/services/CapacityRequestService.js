@@ -23,7 +23,7 @@ class CapacityRequestService {
           return HttpUtil.put(capacityRequestUri, headers, putBody)
         }))
       .catch((err) => {
-        logger.error('Error received from Capacity Request API.', err)
+        logger.error(`[[${context.requestId}]] Error received from Capacity Request API.`, err)
         throw CapacityRequestService.handleCapacityRequestError(err)
       })
   }

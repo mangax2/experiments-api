@@ -11,10 +11,12 @@ describe('ExperimentsValidator', () => {
   })
 
   describe('get POST_AND_PUT_SCHEMA_ELEMENTS', () => {
-    it('gets schema', () => {
+    test('gets schema', () => {
       db.experimentDesign = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
+        },
         {
           paramName: 'description',
           type: 'text',
@@ -22,8 +24,8 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
-        {paramName: "is_template", type: "boolean"},
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'is_template', type: 'boolean' },
       ]
 
       expect(ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS).toEqual(schema)
@@ -31,7 +33,7 @@ describe('ExperimentsValidator', () => {
   })
 
   describe('get FILTER_SCHEMA_ELEMENTS', () => {
-    it('gets schema', () => {
+    test('gets schema', () => {
       const schema = [
         {
           paramName: 'tags.category',
@@ -52,10 +54,12 @@ describe('ExperimentsValidator', () => {
   })
 
   describe('getSchema', () => {
-    it('returns POST+AND_PUT schema when POST is supplied', () => {
+    test('returns POST+AND_PUT schema when POST is supplied', () => {
       db.experimentDesign = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
+        },
         {
           paramName: 'description',
           type: 'text',
@@ -63,17 +67,19 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
-        {paramName: "is_template", type: "boolean"},
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'is_template', type: 'boolean' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
     })
 
-    it('returns POST_AND_PUT schema when POST is supplied', () => {
+    test('returns POST_AND_PUT schema when POST is supplied', () => {
       db.experimentDesign = {}
       const schema = [
-        { paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true },
+        {
+          paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
+        },
         {
           paramName: 'description',
           type: 'text',
@@ -81,14 +87,14 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE']  },
-        {paramName: "is_template", type: "boolean"},
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'is_template', type: 'boolean' },
       ]
 
       expect(target.getSchema('PUT')).toEqual(schema)
     })
 
-    it('returns FILTER schema when FILTER is supplied', () => {
+    test('returns FILTER schema when FILTER is supplied', () => {
       const schema = [
         {
           paramName: 'tags.category',
@@ -107,22 +113,22 @@ describe('ExperimentsValidator', () => {
       expect(target.getSchema('FILTER')).toEqual(schema)
     })
 
-    it('throws an error when passed in operation is not POST, PUT, or FILTER', () => {
+    test('throws an error when passed in operation is not POST, PUT, or FILTER', () => {
       AppError.badRequest = mock('')
 
-      expect(() => { target.getSchema('test')}).toThrow()
+      expect(() => { target.getSchema('test') }).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
     })
   })
 
   describe('getEntityName', () => {
-    it('returns name', () => {
+    test('returns name', () => {
       expect(target.getEntityName()).toEqual('Experiment')
     })
   })
 
   describe('preValidate', () => {
-    it('resolves when experimentObj is a filled array', () => {
+    test('resolves when experimentObj is a filled array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{}]).then(() => {
@@ -130,7 +136,7 @@ describe('ExperimentsValidator', () => {
       })
     })
 
-    it('rejects when experimentObj is undefined', () => {
+    test('rejects when experimentObj is undefined', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
@@ -139,7 +145,7 @@ describe('ExperimentsValidator', () => {
       })
     })
 
-    it('rejects when experimentObj is an empty array', () => {
+    test('rejects when experimentObj is an empty array', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
@@ -147,10 +153,10 @@ describe('ExperimentsValidator', () => {
           ' an array')
       })
     })
-    it('rejects when experimentObj is not an array with Istemplate True', () => {
+    test('rejects when experimentObj is not an array with Istemplate True', () => {
       AppError.badRequest = mock()
 
-      return target.preValidate({isTemplate:true}).then(() => {}, () => {
+      return target.preValidate({ isTemplate: true }).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Templates request object needs to be' +
           ' an array')
       })
@@ -158,8 +164,6 @@ describe('ExperimentsValidator', () => {
   })
 
   describe('postValidate', () => {
-    it('resolves', () => {
-      return target.postValidate().then(() => {})
-    })
+    test('resolves', () => target.postValidate().then(() => {}))
   })
 })

@@ -16,7 +16,7 @@ class DuplicationService {
     if (body && body.ids && body.ids.length > 0 && parsedCopyNum > 0 && parsedCopyNum % 1 === 0) {
       const isTemplate = body.isTemplate || false
       const updateFlag = source === 'conversion' ? !isTemplate : isTemplate
-      const getTagsPromise = this.getAllTagsToDuplicate(body.ids, updateFlag)
+      const getTagsPromise = this.getAllTagsToDuplicate(body.ids, updateFlag, context)
       const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies,
         isTemplate, context, tx)
 
@@ -27,9 +27,10 @@ class DuplicationService {
     throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
   }
 
-  getAllTagsToDuplicate = (ids, isTemplate) => {
+  getAllTagsToDuplicate = (ids, isTemplate, context) => {
     const tagsToDuplicate = {}
-    return Promise.all(_.map(ids, id => this.tagService.getTagsByExperimentId(id, isTemplate)
+    return Promise.all(_.map(ids, id => this.tagService.getTagsByExperimentId(id, isTemplate,
+      context)
       .then((tags) => { tagsToDuplicate[id] = tags })))
       .then(() => tagsToDuplicate)
   }

@@ -20,24 +20,30 @@ describe('VaultUtil', () => {
   })
 
   describe('configureDbCredentials', () => {
-    it('returns a resolved promise when env is local', () => {
+    test('returns a resolved promise when env is local', () => {
       bluebird.promisifyAll = () => ({ readFileAsync: mockResolve() })
       return VaultUtil.configureDbCredentials('local', {}).then((value) => {
         expect(value).toEqual([undefined, undefined])
       })
     })
 
-    it('calls HttpUtil and sets dbAppUser and dbAppPassword', () => {
-      HttpUtil.post = mockResolve({body: {auth: {client_token: 'testToken'}}})
-      HttpUtil.get = mockResolve({body: {data: {appUser: 'testUser', appUserPassword: 'testPassword', privateKey: '', clientCert: ''}}})
+    test('calls HttpUtil and sets dbAppUser and dbAppPassword', () => {
+      HttpUtil.post = mockResolve({ body: { auth: { client_token: 'testToken' } } })
+      HttpUtil.get = mockResolve({
+        body: {
+          data: {
+            appUser: 'testUser', appUserPassword: 'testPassword', privateKey: '', clientCert: '',
+          },
+        },
+      })
 
-      return VaultUtil.configureDbCredentials('np', {roleId: 'id', secretId: 'id'}).then(() => {
+      return VaultUtil.configureDbCredentials('np', { roleId: 'id', secretId: 'id' }).then(() => {
         expect(VaultUtil.dbAppPassword).toEqual('testPassword')
         expect(VaultUtil.dbAppUser).toEqual('testUser')
       })
     })
 
-    it('rejects when the post to HttpUtil fails', () => {
+    test('rejects when the post to HttpUtil fails', () => {
       HttpUtil.post = mockReject('error')
       HttpUtil.get = mock()
 
@@ -46,14 +52,14 @@ describe('VaultUtil', () => {
       })
     })
 
-    it('rejects when the get to HttpUtil fails', () => {
-      HttpUtil.post = mockResolve({body: {auth: {client_token: 'testToken'}}})
+    test('rejects when the get to HttpUtil fails', () => {
+      HttpUtil.post = mockResolve({ body: { auth: { client_token: 'testToken' } } })
       HttpUtil.get = mock()
 
-      return VaultUtil.configureDbCredentials('prod', {baseUrl: 'localhost/', secretUri: 'vault'}).then(() => {}, () => {
+      return VaultUtil.configureDbCredentials('prod', { baseUrl: 'localhost/', secretUri: 'vault' }).then(() => {}, () => {
         expect(HttpUtil.get).toHaveBeenCalledWith(
           'localhost/vault/prod/db',
-          [{headerName: 'X-Vault-Token', headerValue: 'testToken'}]
+          [{ headerName: 'X-Vault-Token', headerValue: 'testToken' }],
         )
       })
     })

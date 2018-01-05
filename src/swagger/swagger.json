@@ -5026,6 +5026,10 @@
           "type": "string",
           "description": "name of the data source"
         },
+        "refId": {
+          "type": "string",
+          "description": "optional reference Id for the data source"
+        },
         "refDataSourceTypeId": {
           "type": "integer"
         },
@@ -5163,7 +5167,11 @@
       "properties": {
         "propertyTypeId": {
           "type": "integer",
-          "description": "Indicates what type of property this item is."
+          "description": "DEPRECATED: This will be removed in a future version.  Indicates what type of property this item is."
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"
         },
         "label": {
           "type": "string",
@@ -5176,6 +5184,10 @@
         "refId": {
           "type": "string",
           "description": "Used in the case when the property type is catalog.  This is the ID of the referenced item in the catalog."
+        },
+        "catalogType": {
+          "type": "string",
+          "description": "Indicates the which source the catalog is referencing.  Catalog sources may be found here: https://inventory-api.velocity-np.ag/types/"
         }
       }
     },
@@ -5191,6 +5203,10 @@
           "items": {
             "$ref": "#/definitions/LevelItem"
           }
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
         }
       }
     },
@@ -5210,6 +5226,10 @@
           "items": {
             "$ref": "#/definitions/LevelItem"
           }
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
         }
       }
     },

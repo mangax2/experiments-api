@@ -6,7 +6,9 @@ import db from '../db/DbManager'
 class ExperimentalUnitValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true },
+      {
+        paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true,
+      },
       { paramName: 'groupId', type: 'refData', entity: db.group },
       { paramName: 'treatmentId', type: 'numeric', required: true },
       { paramName: 'treatmentId', type: 'refData', entity: db.treatment },

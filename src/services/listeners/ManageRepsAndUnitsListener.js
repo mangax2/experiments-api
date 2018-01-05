@@ -7,6 +7,7 @@ import cfServices from '../utility/ServiceConfig'
 import db from '../../db/DbManager'
 import Transactional from '../../decorators/transactional'
 import KafkaProducer from '../kafka/KafkaProducer'
+import AppError from '../utility/AppError'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
@@ -47,7 +48,9 @@ class ManageRepsAndUnitsListener {
     }))
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
       logger.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
-      this.consumer.commitOffset({ topic, partition, offset: m.offset, metadata: 'optional' })
+      this.consumer.commitOffset({
+        topic, partition, offset: m.offset, metadata: 'optional',
+      })
     }).catch((err) => {
       logger.error(`Failed to update set "${set.setId}" with rep packing changes `, message, err)
     })
@@ -56,11 +59,11 @@ class ManageRepsAndUnitsListener {
   @Transactional('ManageRepPacking')
   adjustExperimentWithRepPackChanges = (set, tx) => {
     if (set.setId && set.entryChanges) {
-      const setId = set.setId
+      const { setId } = set
       const unitsFromMessage = set.entryChanges
       return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
         if (groups.length === 0) {
-          return Promise.reject(`No groups found for setId "${set.setId}".`)
+          return Promise.reject(AppError.notFound(`No groups found for setId "${set.setId}".`))
         }
         const groupIds = _.map(groups, 'id')
         return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
@@ -78,22 +81,21 @@ class ManageRepsAndUnitsListener {
     }
     ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
 
-    return Promise.reject('The rep pack message was in an invalid format.')
+    return Promise.reject(AppError.badRequest('The rep pack message was in an invalid format.'))
   }
 
   getDbActions = (unitsFromMessage, unitsFromDB, groups) => {
     const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
     _.forEach(unitsFromMessage, (unitM) => {
       const group = _.find(groups, g => Number(g.rep) === Number(unitM.rep))
-      const groupId = group ? group.id : null
-      unitM.groupId = groupId
+      unitM.groupId = group ? group.id : null
     })
     const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId'))
     const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
     const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
     const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
       unitsToBeCreated),
-      unitsFromDbSlim, _.isEqual)
+    unitsFromDbSlim, _.isEqual)
     const unitsToBeUpdated = _.map(unitsToBeUpdatedSlim, (unitToBeUpdated) => {
       unitToBeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
         unitFromDb.setEntryId === unitToBeUpdated.setEntryId).id
@@ -156,24 +158,23 @@ class ManageRepsAndUnitsListener {
         newGroup.rep = rep
         const prms = db.group.batchCreate([newGroup],
           context, tx).then((groupResp) => {
-            const newGroupValue = {
-              name: 'repNumber',
-              value: rep,
-              groupId: groupResp[0].id,
-            }
-            const unitsC = _.map(groupedUnits[rep], (unit) => {
-              unit.groupId = groupResp[0].id
-              return unit
-            })
-            return Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
-              db.unit.batchCreate(unitsC, context, tx)])
+          const newGroupValue = {
+            name: 'repNumber',
+            value: rep,
+            groupId: groupResp[0].id,
+          }
+          const unitsC = _.map(groupedUnits[rep], (unit) => {
+            unit.groupId = groupResp[0].id
+            return unit
           })
+          return Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
+            db.unit.batchCreate(unitsC, context, tx)])
+        })
         newGroupsToBeCreatedPromises.push(prms)
       })
     }
     return newGroupsToBeCreatedPromises
   }
-
 }
 
 const manageRepsAndUnitsListener = new ManageRepsAndUnitsListener()

@@ -17,8 +17,8 @@ class FactorLevelService {
 
   @Transactional('createFactorLevelsTx')
   batchCreateFactorLevels = (factorLevels, context, tx) => this.validator.validate(factorLevels, 'POST', tx)
-      .then(() => db.factorLevel.batchCreate(factorLevels, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+    .then(() => db.factorLevel.batchCreate(factorLevels, context, tx)
+      .then(data => AppUtil.createPostResponse(data)))
 
   getAllFactorLevels = () => db.factorLevel.all()
 
@@ -27,15 +27,15 @@ class FactorLevelService {
     return db.factorLevel.findByExperimentId(id, tx)
   }
 
-  getFactorLevelsByFactorId(id) {
-    return this.factorService.getFactorById(id)
+  getFactorLevelsByFactorId(id, context) {
+    return this.factorService.getFactorById(id, context)
       .then(() => db.factorLevel.findByFactorId(id))
   }
 
-  getFactorLevelById = id => db.factorLevel.find(id)
+  getFactorLevelById = (id, context) => db.factorLevel.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Factor Level Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Factor Level Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Level Not Found for requested id')
       } else {
         return data
@@ -44,24 +44,14 @@ class FactorLevelService {
 
   @Transactional('batchUpdateFactorLevels')
   batchUpdateFactorLevels = (factorLevels, context, tx) => this.validator.validate(factorLevels, 'PUT', tx)
-      .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
-
-  deleteFactorLevel = id => db.factorLevel.remove(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Factor Level Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Level Not Found for requested id')
-      } else {
-        return data
-      }
-    })
+    .then(() => db.factorLevel.batchUpdate(factorLevels, context, tx)
+      .then(data => AppUtil.createPutResponse(data)))
 
   @Transactional('batchDeleteFactorLevels')
-  batchDeleteFactorLevels = (ids, tx) => db.factorLevel.batchRemove(ids, tx)
+  batchDeleteFactorLevels = (ids, context, tx) => db.factorLevel.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all factor levels requested for delete were found')
+        logger.error(`[[${context.requestId}]] Not all factor levels requested for delete were found`)
         throw AppError.notFound('Not all factor levels requested for delete were found')
       } else {
         return data

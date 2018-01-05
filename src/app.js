@@ -6,7 +6,7 @@ const vaultUtil = require('./services/utility/VaultUtil')
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   if (config.node_env !== 'production') {
-    //eslint-disable-next-line
+    // eslint-disable-next-line
     require('babel-register')
   }
 
@@ -24,9 +24,12 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   // const inflector = require('json-inflector')
   const bodyParser = require('body-parser')
   const log4js = require('log4js')
+  const promMetrics = require('@monsantoit/prom-metrics')
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
   const app = express()
+
+  promMetrics(app)
 
   const requestContext = require('./middleware/requestContext')
 
@@ -80,14 +83,14 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use((err, req, res, next) => {
     if (err) {
       if (_.isArray(err)) {
-        logError(err)
+        logError(err, req.context)
         return res.status(400).json(err)
       } else if (err.status) {
-        logError(err)
+        logError(err, req.context)
         return res.status(err.status).json(err)
       }
 
-      logError(err)
+      logError(err, req.context)
 
       if (Object.hasOwnProperty.call(err, 'table') && Object.hasOwnProperty.call(err, 'schema')) {
         const pgerror = {
@@ -100,13 +103,13 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       return res.status(500).json(err)
     }
 
-    logger.error(err)
+    logger.error(err, req.context)
     return res.status(500).json(err)
   })
 
   app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
 
-  const port = config.port
+  const { port } = config
 
   const server = app.listen(port, () => {
     const address = server.address()
@@ -114,11 +117,11 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     return logger.info(`Listening at ${url}`)
   })
 
-  const logError = (err) => {
+  const logError = (err, context) => {
     if (err.stack) {
-      logger.error(err.stack)
+      logger.error(`[[${context.requestId}]] ${err.stack}`)
     } else {
-      logger.error(err)
+      logger.error(`[[${context.requestId}]] ${err}`)
     }
   }
 

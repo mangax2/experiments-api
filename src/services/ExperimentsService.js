@@ -73,9 +73,9 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
-  getExperiments(queryString, isTemplate) {
+  getExperiments(queryString, isTemplate, context) {
     if (this.isFilterRequest(queryString) === true) {
-      return this.getExperimentsByFilters(queryString, isTemplate)
+      return this.getExperimentsByFilters(queryString, isTemplate, context)
         .then(data => this.populateOwners(data))
     }
     return this.getAllExperiments(isTemplate)
@@ -106,30 +106,30 @@ class ExperimentsService {
   }
 
   @Transactional('verifyExperimentExists')
-  static verifyExperimentExists(id, isTemplate, tx) {
+  static verifyExperimentExists(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       }
     })
   }
 
   @Transactional('getExperimentById')
-  getExperimentById(id, isTemplate, tx) {
+  getExperimentById(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`${errorMessage} = ${id}`)
+        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage)
       } else {
         return Promise.all(
           [
             this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, isTemplate),
+            this.tagService.getTagsByExperimentId(id, isTemplate, context),
           ],
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
@@ -152,7 +152,7 @@ class ExperimentsService {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
-              logger.error(`${errorMessage} = ${id}`)
+              logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage)
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
@@ -169,10 +169,10 @@ class ExperimentsService {
                   const tags = this.assignExperimentIdToTags([experiment])
                   if (tags.length > 0) {
                     return this.tagService.saveTags(tags, id, context, isTemplate)
-                        .then(() => data)
+                      .then(() => data)
                   }
                   return this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
-                      .then(() => data)
+                    .then(() => data)
                 },
                 )
             }
@@ -185,19 +185,19 @@ class ExperimentsService {
       .then(() => db.experiments.remove(id, isTemplate)
         .then((data) => {
           if (!data) {
-            logger.error(`Experiment Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Not Found for requested experimentId')
           } else {
             return this.tagService.deleteTagsForExperimentId(id).then(() => data)
           }
         }))
 
-  getExperimentsByFilters(queryString, isTemplate) {
+  getExperimentsByFilters(queryString, isTemplate, context) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
       const lowerCaseTagValues = _.toLower(queryString['tags.value'])
       return this.tagService.getEntityTagsByTagFilters(lowerCaseTagCategories,
-        lowerCaseTagValues, isTemplate)
+        lowerCaseTagValues, isTemplate, context)
         .then((eTags) => {
           if (eTags.length === 0) {
             return []
@@ -213,7 +213,7 @@ class ExperimentsService {
 
   assignExperimentIdToTags = experiments => _.compact(
     _.flatMap(experiments, (exp) => {
-      const tags = exp.tags
+      const { tags } = exp
       if (tags && tags.length > 0) {
         _.forEach(tags, (tag) => {
           tag.experimentId = exp.id
@@ -232,26 +232,27 @@ class ExperimentsService {
 
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {
-    const source = queryString.source
+    const { source } = queryString
     let experimentPromise
     switch (source) {
-      case undefined :
+      case undefined:
         experimentPromise = this.batchCreateExperiments(requestBody, context, false, tx)
         break
-      case 'template' : {
+      case 'template': {
         const numberOfCopies = requestBody.numberOfCopies || 1
         experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
           context, false, tx).then((data) => {
-            if (data && _.isArray(data)) {
-              const tagsPromise = []
-              _.forEach(_.range(numberOfCopies), (t) => {
-                const experimentId = data[t].id
-                const newTag = {
-                  category: 'FROM TEMPLATE',
-                  value: String(requestBody.id),
-                  experimentId,
-                }
-                tagsPromise.push(this.getExperimentById(experimentId, false, tx).then((result) => {
+          if (data && _.isArray(data)) {
+            const tagsPromise = []
+            _.forEach(_.range(numberOfCopies), (t) => {
+              const experimentId = data[t].id
+              const newTag = {
+                category: 'FROM TEMPLATE',
+                value: String(requestBody.id),
+                experimentId,
+              }
+              tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                .then((result) => {
                   const tags = _.map(result.tags, (tag) => {
                     tag.experimentId = experimentId
                     return tag
@@ -259,22 +260,22 @@ class ExperimentsService {
                   tags.push(newTag)
                   return this.tagService.saveTags(tags, experimentId, context, false)
                 }))
-              })
-              return Promise.all(tagsPromise).then(() =>
+            })
+            return Promise.all(tagsPromise).then(() =>
               AppUtil.createPostResponse(data),
             )
-            }
-            return Promise.reject('Create Experiment From Template Failed')
-          })
+          }
+          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed'))
+        })
         break
       }
-      case 'experiment' : {
+      case 'experiment': {
         experimentPromise = this.copyEntities(requestBody.ids,
           requestBody.numberOfCopies,
           context, false, tx)
         break
       }
-      default :
+      default:
         experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
         break
     }
@@ -283,25 +284,25 @@ class ExperimentsService {
 
   @Transactional('manageTemplates')
   manageTemplates(requestBody, queryString, context, tx) {
-    const source = queryString.source
+    const { source } = queryString
     let templatePromise
     switch (source) {
-      case undefined :
+      case undefined:
         templatePromise = this.batchCreateTemplates(requestBody, context, tx)
         break
-      case 'template' : {
+      case 'template': {
         templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
           context, true, tx)
         break
       }
-      case 'experiment' : {
+      case 'experiment': {
         const numberOfCopies = requestBody.numberOfCopies || 1
         templatePromise = this.createEntity(requestBody.id,
           numberOfCopies,
           context, true, tx)
         break
       }
-      default :
+      default:
         templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
         break
     }

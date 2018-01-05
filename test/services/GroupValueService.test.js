@@ -14,7 +14,7 @@ describe('GroupValueService', () => {
   })
 
   describe('batchCreateGroupValues', () => {
-    it('create group values', () => {
+    test('create group values', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
@@ -26,7 +26,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchCreate = mockReject('error')
 
@@ -37,7 +37,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.groupValue.batchCreate = mockReject('error')
 
@@ -49,43 +49,8 @@ describe('GroupValueService', () => {
     })
   })
 
-  describe('getGroupValuesByGroupId', () => {
-    it('returns group values', () => {
-      target.groupService.getGroupById = mockResolve()
-      db.groupValue.findAllByGroupId = mockResolve([{}])
-
-      return target.getGroupValuesByGroupId(1, testTx).then((data) => {
-        expect(target.groupService.getGroupById).toHaveBeenCalledWith(1, testTx)
-        expect(db.groupValue.findAllByGroupId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual([{}])
-      })
-    })
-
-    it('rejects when findAllByGroupId fails', () => {
-      target.groupService.getGroupById = mockResolve()
-      db.groupValue.findAllByGroupId = mockReject('error')
-
-      return target.getGroupValuesByGroupId(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupById).toHaveBeenCalledWith(1, testTx)
-        expect(db.groupValue.findAllByGroupId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-
-    it('rejects when getGroupById fails', () => {
-      target.groupService.getGroupById = mockReject('error')
-      db.groupValue.findAllByGroupId = mockReject('error')
-
-      return target.getGroupValuesByGroupId(1, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupById).toHaveBeenCalledWith(1, testTx)
-        expect(db.groupValue.findAllByGroupId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
   describe('batchGetGroupValuesByExperimentId', () => {
-    it('calls ', () => {
+    test('calls ', () => {
       db.groupValue.batchFindAllByExperimentId = mockResolve()
 
       return target.batchGetGroupValuesByExperimentId(1, testTx).then(() => {
@@ -95,29 +60,29 @@ describe('GroupValueService', () => {
   })
 
   describe('getGroupValueById', () => {
-    it('returns a group value', () => {
+    test('returns a group value', () => {
       db.groupValue.find = mockResolve({})
 
-      return target.getGroupValueById(1, testTx).then((data) => {
+      return target.getGroupValueById(1, {}, testTx).then((data) => {
         expect(db.groupValue.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
     })
 
-    it('throws an error when find returns empty', () => {
+    test('throws an error when find returns empty', () => {
       db.groupValue.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getGroupValueById(1, testTx).then(() => {}, () => {
+      return target.getGroupValueById(1, {}, testTx).then(() => {}, () => {
         expect(db.groupValue.find).toHaveBeenCalledWith(1, testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Group Value Not Found for requested id')
       })
     })
 
-    it('rejects when find fails', () => {
+    test('rejects when find fails', () => {
       db.groupValue.find = mockReject('error')
 
-      return target.getGroupValueById(1, testTx).then(() => {}, (err) => {
+      return target.getGroupValueById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.groupValue.find).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual('error')
       })
@@ -125,7 +90,7 @@ describe('GroupValueService', () => {
   })
 
   describe('batchUpdateGroupValues', () => {
-    it('updates group values', () => {
+    test('updates group values', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
@@ -137,7 +102,7 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.groupValue.batchUpdate = mockReject('error')
 
@@ -148,74 +113,13 @@ describe('GroupValueService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.groupValue.batchUpdate = mockReject('error')
 
       return target.batchUpdateGroupValues([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.groupValue.batchUpdate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('deleteGroupValue', () => {
-    it('deletes a group value', () => {
-      db.groupValue.remove = mockResolve({})
-
-      return target.deleteGroupValue(1, testTx).then((data) => {
-        expect(db.groupValue.remove).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    it('throws an error when no data is returned', () => {
-      db.groupValue.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteGroupValue(1, testTx).then(() => {}, () => {
-        expect(db.groupValue.remove).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Group Value Not Found for requested id')
-      })
-    })
-
-    it('rejects when remove fails', () => {
-      db.groupValue.remove = mockReject('error')
-
-      return target.deleteGroupValue(1, testTx).then(() => {}, (err) => {
-        expect(db.groupValue.remove).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('batchDeleteGroupValues', () => {
-    it('deletes group values', () => {
-      db.groupValue.batchRemove = mockResolve([1, 2])
-
-      return target.batchDeleteGroupValues([1, 2], testTx).then((data) => {
-        expect(db.groupValue.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(data).toEqual([1, 2])
-      })
-    })
-
-    it('throws an error when not all group values were found to delete', () => {
-      db.groupValue.batchRemove = mockResolve([1])
-      AppError.notFound = mock()
-
-      return target.batchDeleteGroupValues([1, 2], testTx).then(() => {}, () => {
-        expect(db.groupValue.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all group values requested for' +
-          ' delete were found')
-      })
-    })
-
-    it('rejects when batchRemove fails', () => {
-      db.groupValue.batchRemove = mockReject('error')
-
-      return target.batchDeleteGroupValues([1, 2], testTx).then(() => {}, (err) => {
-        expect(db.groupValue.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
     })

@@ -67,10 +67,10 @@ function findInvalidNestedRelationshipsInTreatmentCombination(
           _.map(associationDbEntitiesGroupedByAssociatedLevelId[associatedFactorLevelId], 'nested_level_id'),
           factorIdToCombinationLevelIdMap)
       return _.map(invalidNestedLevelIds,
-          invalidNestedLevelId => ({
-            associatedLevelId: associatedFactorLevelId,
-            nestedLevelId: invalidNestedLevelId,
-          }))
+        invalidNestedLevelId => ({
+          associatedLevelId: associatedFactorLevelId,
+          nestedLevelId: invalidNestedLevelId,
+        }))
     })
 }
 
@@ -84,8 +84,8 @@ function findInvalidNestedRelationshipsInTreatments(
       findInvalidNestedRelationshipsInTreatmentCombination(
         createFactorIdToCombinationElementLevelIdMap(
           treatmentDTO.combinationElements, levelIdToFactorIDMap),
-      associationDbEntitiesGroupedByAssociatedLevelId,
-      nestedFactorIdsGroupedByAssociatedFactorId)
+        associationDbEntitiesGroupedByAssociatedLevelId,
+        nestedFactorIdsGroupedByAssociatedFactorId)
     if (_.isEmpty(invalidNestedRelationships)) {
       return null
     }
@@ -110,7 +110,9 @@ class TreatmentValidator extends SchemaValidator {
     return [
       { paramName: 'isControl', type: 'boolean', required: true },
       { paramName: 'treatmentNumber', type: 'numeric', required: true },
-      { paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false },
+      {
+        paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
+      },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
       {
@@ -150,11 +152,11 @@ class TreatmentValidator extends SchemaValidator {
 
   getLevelsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
-        experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
+      experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
 
   getAssociationsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
-        experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
+      experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
 
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
@@ -167,9 +169,9 @@ class TreatmentValidator extends SchemaValidator {
       this.getLevelsForExperiments(experimentIds, tx),
       this.getAssociationsForExperiments(experimentIds, tx),
     ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => _.zip(
-        levelsForEachExperiment,
-        associationsForEachExperiment,
-        treatmentDTOsForEachExperiment))
+      levelsForEachExperiment,
+      associationsForEachExperiment,
+      treatmentDTOsForEachExperiment))
   }
 
   validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest, tx) => {
@@ -178,8 +180,10 @@ class TreatmentValidator extends SchemaValidator {
     return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest, tx)
       .then(dataGroupedByExperiment => _.flatMap(dataGroupedByExperiment,
         ([levels, associations, treatmentDTOsForExperiment]) => {
-          const { levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
-            factorIdToNestedFactorIdMap } = createLookupMaps(levels, associations)
+          const {
+            levelIdToFactorIdMap, associatedLevelIdToAssociationsMap,
+            factorIdToNestedFactorIdMap,
+          } = createLookupMaps(levels, associations)
           return findInvalidNestedRelationshipsInTreatments(
             treatmentDTOsForExperiment,
             levelIdToFactorIdMap,
@@ -189,7 +193,7 @@ class TreatmentValidator extends SchemaValidator {
       .then((invalidRelationships) => {
         if (!_.isEmpty(invalidRelationships)) {
           _.forEach(formatInvalidRelationshipsErrorMessage(invalidRelationships),
-              errorMessage => this.messages.push(errorMessage))
+            errorMessage => this.messages.push(errorMessage))
         }
         return Promise.resolve()
       })

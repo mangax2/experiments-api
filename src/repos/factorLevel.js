@@ -68,8 +68,6 @@ module.exports = (rep, pgp) => ({
     return tx.any(query)
   },
 
-  remove: id => rep.oneOrNone('DELETE FROM factor_level WHERE id = $1 RETURNING id', id),
-
   batchRemove: (ids, tx = rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])

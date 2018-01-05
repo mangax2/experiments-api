@@ -12,12 +12,12 @@ class ExperimentSummaryService {
   }
 
   @Transactional('getExperimentSummaryById')
-  getExperimentSummaryById(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getExperimentSummaryById(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.experimentSummary.find(id, tx)
         .then((data) => {
           if (!data) {
-            logger.error(`Experiment Summary Not Found for requested experimentId = ${id}`)
+            logger.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Summary Not Found for requested experimentId')
           } else {
             return data

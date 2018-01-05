@@ -17,15 +17,15 @@ class FactorService {
 
   @Transactional('batchCreateFactors')
   batchCreateFactors = (factors, context, tx) => this.validator.validate(factors, 'POST', tx)
-      .then(() => db.factor.batchCreate(factors, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+    .then(() => db.factor.batchCreate(factors, context, tx)
+      .then(data => AppUtil.createPostResponse(data)))
 
   @Transactional('getAllFactors')
   getAllFactors = tx => db.factor.all(tx)
 
   @Transactional('getFactorsByExperimentId')
-  getFactorsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getFactorsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.factor.findByExperimentId(id, tx))
   }
 
@@ -35,10 +35,10 @@ class FactorService {
   }
 
   @Transactional('getFactorById')
-  getFactorById = (id, tx) => db.factor.find(id, tx)
+  getFactorById = (id, context, tx) => db.factor.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Factor Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Factor Not Found for requested id = ${id}`)
         throw AppError.notFound('Factor Not Found for requested id')
       } else {
         return data
@@ -47,36 +47,19 @@ class FactorService {
 
   @Transactional('batchUpdateFactors')
   batchUpdateFactors = (factors, context, tx) => this.validator.validate(factors, 'PUT', tx)
-      .then(() => db.factor.batchUpdate(factors, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
-
-  @Transactional('deleteFactor')
-  deleteFactor = (id, tx) => db.factor.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Factor Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Not Found for requested id')
-      } else {
-        return data
-      }
-    })
+    .then(() => db.factor.batchUpdate(factors, context, tx)
+      .then(data => AppUtil.createPutResponse(data)))
 
   @Transactional('batchDeleteFactors')
-  batchDeleteFactors = (ids, tx) => db.factor.batchRemove(ids, tx)
+  batchDeleteFactors = (ids, context, tx) => db.factor.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all factors requested for delete were found')
+        logger.error(`[[${context.requestId}]] Not all factors requested for delete were found`)
         throw AppError.notFound('Not all factors requested for delete were found')
       } else {
         return data
       }
     })
-
-  @Transactional('deleteFactorsForExperimentId')
-  deleteFactorsForExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
-      .then(() => db.factor.removeByExperimentId(id, tx))
-  }
 }
 
 module.exports = FactorService

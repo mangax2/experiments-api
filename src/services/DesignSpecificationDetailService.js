@@ -18,33 +18,21 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getDesignSpecificationDetailsByExperimentId')
-  getDesignSpecificationDetailsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getDesignSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
   @Transactional('getDesignSpecificationDetailById')
-  getDesignSpecificationDetailById = (id, tx) => db.designSpecificationDetail.find(id, tx)
+  getDesignSpecificationDetailById = (id, context, tx) => db.designSpecificationDetail.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Design Specification Detail Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Design Specification Detail Not Found for requested id = ${id}`)
         throw AppError.notFound('Design Specification Detail Not Found for requested id')
       } else {
         return data
       }
     })
-
-  @Transactional('batchGetDesignSpecificationDetailsByIds')
-  batchGetDesignSpecificationDetailsByIds = (ids, tx) =>
-    db.designSpecificationDetail.batchFind(ids, tx)
-      .then((data) => {
-        if (data.length !== ids.length) {
-          logger.error('Design Specification Detail not found for all requested ids.')
-          throw AppError.notFound('Design Specification Detail not found for all requested ids.')
-        } else {
-          return data
-        }
-      })
 
   @Transactional('batchCreateDesignSpecificationDetails')
   batchCreateDesignSpecificationDetails(specificationDetails, context, tx) {
@@ -95,8 +83,7 @@ class DesignSpecificationDetailService {
     return db.designSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
         if (data.length !== idsToDelete.length) {
-          logger.error('Not all design specification detail ids requested for delete were' +
-            ' found')
+          logger.error(`[[${context.requestId}]] Not all design specification detail ids requested for delete were found`)
           throw AppError.notFound(
             'Not all design specification detail ids requested for delete were found')
         } else {
@@ -120,8 +107,8 @@ class DesignSpecificationDetailService {
   }
 
   @Transactional('getAdvancedParameters')
-  getAdvancedParameters(experimentId, isTemplate, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+  getAdvancedParameters(experimentId, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
       .then(() => Promise.all([db.refDesignSpecification.all(),
         db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)]))
       .then((results) => {

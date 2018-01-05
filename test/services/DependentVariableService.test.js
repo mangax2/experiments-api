@@ -8,14 +8,14 @@ describe('DependentVariableService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
-  db.dependentVariable.repository = mock({ tx: function (transactionName, callback) {return callback(testTx)} })
+  db.dependentVariable.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
     target = new DependentVariableService()
   })
 
   describe('batchCreateDependentVariables', () => {
-    it('calls validate, batchCreate, and AppUtil on success', () => {
+    test('calls validate, batchCreate, and AppUtil on success', () => {
       target.validator.validate = mockResolve()
       db.dependentVariable.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -27,7 +27,7 @@ describe('DependentVariableService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.dependentVariable.batchCreate = mockReject('error')
       AppUtil.createPostResponse = mock()
@@ -40,7 +40,7 @@ describe('DependentVariableService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.dependentVariable.batchCreate = mock()
       AppUtil.createPostResponse = mock()
@@ -55,7 +55,7 @@ describe('DependentVariableService', () => {
   })
 
   describe('getAllDependentVariables', () => {
-    it('calls dependentVariable all', () => {
+    test('calls dependentVariable all', () => {
       db.dependentVariable.all = mockResolve()
 
       return target.getAllDependentVariables().then(() => {
@@ -65,22 +65,22 @@ describe('DependentVariableService', () => {
   })
 
   describe('getDependentVariablesByExperimentId', () => {
-    it('calls getExperimentById and findByExperimentId', () => {
+    test('calls getExperimentById and findByExperimentId', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.dependentVariable.findByExperimentId = mockResolve()
 
-      return target.getDependentVariablesByExperimentId(1,false, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDependentVariablesByExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.findByExperimentId).toHaveBeenCalledWith(1, testTx)
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.dependentVariable.findByExperimentId = mock()
 
-      return target.getDependentVariablesByExperimentId(1,false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.getDependentVariablesByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.findByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -88,7 +88,7 @@ describe('DependentVariableService', () => {
   })
 
   describe('getDependentVariablesByExperimentIdNoExistenceCheck', () => {
-    it('calls dependentVariable findByExperimentId', () => {
+    test('calls dependentVariable findByExperimentId', () => {
       db.dependentVariable.findByExperimentId = mockResolve()
 
       return DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(1, testTx).then(() => {
@@ -98,7 +98,7 @@ describe('DependentVariableService', () => {
   })
 
   describe('getDependentVariableById', () => {
-    it('calls dependentVariable find', () => {
+    test('calls dependentVariable find', () => {
       db.dependentVariable.find = mockResolve({})
 
       return target.getDependentVariableById(1).then(() => {
@@ -106,18 +106,18 @@ describe('DependentVariableService', () => {
       })
     })
 
-    it('throws an error when data is undefined', () => {
+    test('throws an error when data is undefined', () => {
       db.dependentVariable.find = mockResolve()
       AppError.notFound = mock()
 
-      return target.getDependentVariableById(1).then(() => {}, () => {
+      return target.getDependentVariableById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
         expect(AppError.notFound).toHaveBeenCalledWith('Dependent Variable Not Found for' +
           ' requested id')
       })
     })
 
-    it('rejects when dependentVariable find fails', () => {
+    test('rejects when dependentVariable find fails', () => {
       db.dependentVariable.find = mockReject('error')
       AppError.notFound = mock()
 
@@ -130,7 +130,7 @@ describe('DependentVariableService', () => {
   })
 
   describe('batchUpdateDependentVariables', () => {
-    it('calls validate, batchUpdate, and createPutResponse', () => {
+    test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()
       db.dependentVariable.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
@@ -142,7 +142,7 @@ describe('DependentVariableService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.dependentVariable.batchUpdate = mockReject('error')
       AppUtil.createPutResponse = mock()
@@ -155,7 +155,7 @@ describe('DependentVariableService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.dependentVariable.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
@@ -169,55 +169,23 @@ describe('DependentVariableService', () => {
     })
   })
 
-  describe('deleteDependentVariable', () => {
-    it('successfully calls remove', () => {
-      db.dependentVariable.remove = mockResolve({})
-
-      return target.deleteDependentVariable(1).then((data) => {
-        expect(data).toEqual({})
-        expect(db.dependentVariable.remove).toHaveBeenCalledWith(1)
-      })
-    })
-
-    it('throws an error when data is undefined after removing', () => {
-      db.dependentVariable.remove = mockResolve()
-      AppError.notFound = mock()
-
-      return target.deleteDependentVariable(1).then(() => {}, () => {
-        expect(db.dependentVariable.remove).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Dependent Variable Not Found for' +
-          ' requested id')
-      })
-    })
-
-    it('rejects when remove call fails', () => {
-      db.dependentVariable.remove = mockReject('error')
-      AppError.notFound = mock()
-
-      return target.deleteDependentVariable(1).then(() => {}, (err) => {
-        expect(db.dependentVariable.remove).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
   describe('deleteDependentVariablesForExperimentId', () => {
-    it('calls removeByExperimentId', () => {
+    test('calls removeByExperimentId', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.dependentVariable.removeByExperimentId = mockResolve()
 
-      return target.deleteDependentVariablesForExperimentId(1,false, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.deleteDependentVariablesForExperimentId(1, false, testContext, testTx).then(() => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.removeByExperimentId).toHaveBeenCalledWith(testTx, 1)
       })
     })
 
-    it('rejects when getExperimentById fails', () => {
+    test('rejects when getExperimentById fails', () => {
       target.experimentService.getExperimentById = mockReject('error')
       db.dependentVariable.removeByExperimentId = mock()
 
-      return target.deleteDependentVariablesForExperimentId(1,false, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1,false, testTx)
+      return target.deleteDependentVariablesForExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.dependentVariable.removeByExperimentId).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })

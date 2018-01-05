@@ -46,21 +46,9 @@ class ExperimentalUnitService {
   }
 
   @Transactional('getExperimentalUnitsByTreatmentId')
-  getExperimentalUnitsByTreatmentId(id, tx) {
-    return this.treatmentService.getTreatmentById(id, tx)
+  getExperimentalUnitsByTreatmentId(id, context, tx) {
+    return this.treatmentService.getTreatmentById(id, context, tx)
       .then(() => db.unit.findAllByTreatmentId(id, tx))
-  }
-
-  @Transactional('batchGetExperimentalUnitByTreatmentIds')
-  batchGetExperimentalUnitsByTreatmentIds(ids, tx) {
-    return this.treatmentService.batchGetTreatmentByIds(ids, tx)
-      .then(() => db.unit.batchFindAllByTreatmentIds(ids, tx))
-  }
-
-  @Transactional('batchGetExperimentalUnitByGroupIds')
-  batchGetExperimentalUnitsByGroupIds(ids, tx) {
-    return this.groupService.batchGetGroupsByIds(ids, tx)
-      .then(() => db.unit.batchFindAllByGroupIds(ids, tx))
   }
 
   @Transactional('batchGetExperimentalUnitByGroupIdsNoValidate')
@@ -68,10 +56,10 @@ class ExperimentalUnitService {
     db.unit.batchFindAllByGroupIds(ids, tx)
 
   @Transactional('getExperimentalUnitById')
-  getExperimentalUnitById = (id, tx) => db.unit.find(id, tx)
+  getExperimentalUnitById = (id, context, tx) => db.unit.find(id, tx)
     .then((data) => {
       if (!data) {
-        logger.error(`Experimental Unit Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Experimental Unit Not Found for requested id = ${id}`)
         throw AppError.notFound('Experimental Unit Not Found for requested id')
       } else {
         return data
@@ -79,8 +67,8 @@ class ExperimentalUnitService {
     })
 
   @Transactional('getExperimentalUnitsByExperimentId')
-  getExperimentalUnitsByExperimentId(id, isTemplate, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, tx)
+  getExperimentalUnitsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.unit.findAllByExperimentId(id, tx))
   }
 
@@ -160,22 +148,11 @@ class ExperimentalUnitService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @Transactional('deleteExperimentalUnit')
-  deleteExperimentalUnit = (id, tx) => db.unit.remove(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Experimental Unit Not Found for requested id = ${id}`)
-        throw AppError.notFound('Experimental Unit Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('batchDeleteExperimentalUnits')
-  batchDeleteExperimentalUnits = (ids, tx) => db.unit.batchRemove(ids, tx)
+  batchDeleteExperimentalUnits = (ids, context, tx) => db.unit.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error('Not all experimental units requested for delete were found')
+        logger.error(`[[${context.requestId}]] Not all experimental units requested for delete were found`)
         throw AppError.notFound('Not all experimental units requested for delete were found')
       } else {
         return data

@@ -5,7 +5,7 @@ import db from '../../src/db/DbManager'
 
 describe('OwnerService', () => {
   let target
-  const testTx = {tx: {}}
+  const testTx = { tx: {} }
   const testContext = {}
 
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe('OwnerService', () => {
   })
 
   describe('batchCreateOwners', () => {
-    it('calls batchCreate and succeeds', () => {
+    test('calls batchCreate and succeeds', () => {
       target.validator.validate = mockResolve()
       db.owner.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
@@ -25,7 +25,7 @@ describe('OwnerService', () => {
       })
     })
 
-    it('rejects when batchCreate fails', () => {
+    test('rejects when batchCreate fails', () => {
       target.validator.validate = mockResolve()
       db.owner.batchCreate = mockReject('error')
 
@@ -36,7 +36,7 @@ describe('OwnerService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.owner.batchCreate = mock()
 
@@ -49,7 +49,7 @@ describe('OwnerService', () => {
   })
 
   describe('getOwnersByExperimentId', () => {
-    it('returns owners for an experimentId', () => {
+    test('returns owners for an experimentId', () => {
       db.owner.findByExperimentId = mockResolve(['test'])
 
       return target.getOwnersByExperimentId(1, testTx).then((data) => {
@@ -58,7 +58,7 @@ describe('OwnerService', () => {
       })
     })
 
-    it('rejects when findByExperimentId fails', () => {
+    test('rejects when findByExperimentId fails', () => {
       db.owner.findByExperimentId = mockReject('error')
 
       return target.getOwnersByExperimentId(1, testTx).then(() => {}, (err) => {
@@ -69,26 +69,26 @@ describe('OwnerService', () => {
   })
 
   describe('getOwnersByExperimentIds', () => {
-    it('returns owners for passed in ids', () => {
+    test('returns owners for passed in ids', () => {
       db.owner.batchFindByExperimentIds = mockResolve([])
 
-      return target.getOwnersByExperimentIds([1,2], testTx).then(() => {
-        expect(db.owner.batchFindByExperimentIds).toHaveBeenCalledWith([1,2], testTx)
+      return target.getOwnersByExperimentIds([1, 2], testTx).then(() => {
+        expect(db.owner.batchFindByExperimentIds).toHaveBeenCalledWith([1, 2], testTx)
       })
     })
 
-    it('rejects when batchFindByExperimentIds fails', () => {
+    test('rejects when batchFindByExperimentIds fails', () => {
       db.owner.batchFindByExperimentIds = mockReject('error')
 
-      return target.getOwnersByExperimentIds([1,2], testTx).then(() => {}, (err) => {
-        expect(db.owner.batchFindByExperimentIds).toHaveBeenCalledWith([1,2], testTx)
+      return target.getOwnersByExperimentIds([1, 2], testTx).then(() => {}, (err) => {
+        expect(db.owner.batchFindByExperimentIds).toHaveBeenCalledWith([1, 2], testTx)
         expect(err).toEqual('error')
       })
     })
   })
 
   describe('batchUpdateOwners', () => {
-    it('updates owners for experiments', () => {
+    test('updates owners for experiments', () => {
       target.validator.validate = mockResolve()
       db.owner.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
@@ -100,7 +100,7 @@ describe('OwnerService', () => {
       })
     })
 
-    it('rejects when batchUpdate fails', () => {
+    test('rejects when batchUpdate fails', () => {
       target.validator.validate = mockResolve()
       db.owner.batchUpdate = mockReject('error')
 
@@ -111,7 +111,7 @@ describe('OwnerService', () => {
       })
     })
 
-    it('rejects when validate fails', () => {
+    test('rejects when validate fails', () => {
       target.validator.validate = mockReject('error')
       db.owner.batchUpdate = mock()
 

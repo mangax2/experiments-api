@@ -24,8 +24,8 @@ class DependentVariableService {
   getAllDependentVariables = () => db.dependentVariable.all()
 
   @Transactional('getDependentVariablesByExperimentId')
-  getDependentVariablesByExperimentId(experimentId, isTemplate, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+  getDependentVariablesByExperimentId(experimentId, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
       .then(() => db.dependentVariable.findByExperimentId(experimentId, tx))
   }
 
@@ -34,10 +34,10 @@ class DependentVariableService {
     return db.dependentVariable.findByExperimentId(experimentId, tx)
   }
 
-  getDependentVariableById = id => db.dependentVariable.find(id)
+  getDependentVariableById = (id, context) => db.dependentVariable.find(id)
     .then((data) => {
       if (!data) {
-        logger.error(`Dependent Variable Not Found for requested id = ${id}`)
+        logger.error(`[[${context.requestId}]] Dependent Variable Not Found for requested id = ${id}`)
         throw AppError.notFound('Dependent Variable Not Found for requested id')
       } else {
         return data
@@ -50,19 +50,9 @@ class DependentVariableService {
         .then(data => AppUtil.createPutResponse(data))))
   }
 
-  deleteDependentVariable = id => db.dependentVariable.remove(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Dependent Variable Not Found for requested id = ${id}`)
-        throw AppError.notFound('Dependent Variable Not Found for requested id')
-      } else {
-        return data
-      }
-    })
-
   @Transactional('deleteDependentVariablesForExperimentId')
-  deleteDependentVariablesForExperimentId(experimentId, isTemplate, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, tx)
+  deleteDependentVariablesForExperimentId(experimentId, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
       .then(() => db.dependentVariable.removeByExperimentId(tx, experimentId))
   }
 }

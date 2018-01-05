@@ -1,10 +1,6 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import db from '../db/DbManager'
-import AppError from './utility/AppError'
 import RefDataSourceService from './RefDataSourceService'
-
-const logger = log4js.getLogger('RefDataSourceTypeService')
 
 class RefDataSourceTypeService {
   constructor() {
@@ -12,16 +8,6 @@ class RefDataSourceTypeService {
   }
 
   getRefDataSourceTypes = () => db.refDataSourceType.all()
-
-  getRefDataSourceTypeById = id => db.refDataSourceType.find(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`Ref Data Source Type Not Found for requested id = ${id}`)
-        throw AppError.notFound('Ref Data Source Type Not Found for requested id')
-      } else {
-        return data
-      }
-    })
 
   getRefDataSourceTypesWithDataSources() {
     return db.refDataSourceType.all()

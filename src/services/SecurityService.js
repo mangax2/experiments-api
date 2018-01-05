@@ -18,23 +18,27 @@ class SecurityService {
 
   @Transactional('permissionsCheck')
   permissionsCheck(id, context, isTemplate, tx) {
-    return db.experiments.find(id, isTemplate, tx)
-      .then((data) => {
-        if (!data) {
-          const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
-            : 'Experiment Not Found for requested experimentId'
-          logger.error(`${errorMessage} = ${id}`)
-          throw AppError.notFound(errorMessage)
-        } else {
-          return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
-            if (result.length === 0) {
-              logger.error(`Access denied for ${context.userId} on experimentId ${id}`)
-              throw AppError.unauthorized('Access denied')
-            }
-            return result
-          })
-        }
-      })
+    if (context.userId) {
+      return db.experiments.find(id, isTemplate, tx)
+        .then((data) => {
+          if (!data) {
+            const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
+              : 'Experiment Not Found for requested experimentId'
+            logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+            throw AppError.notFound(errorMessage)
+          } else {
+            return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
+              if (result.length === 0) {
+                logger.error(`Access denied for ${context.userId} on id ${id}`)
+                throw AppError.unauthorized('Access denied')
+              }
+              return result
+            })
+          }
+        })
+    }
+
+    throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
   }
 
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
@@ -57,18 +61,18 @@ class SecurityService {
     return Promise.all([
       this.ownerService.getOwnersByExperimentId(id, tx),
       this.getGroupsByUserId(context.userId)]).then((data) => {
-        if (data[0] && data[1]) {
-          const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)
-          const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
-          const userGroupIds = data[1]
-          if (upperCaseUserIds.includes(context.userId) ||
-          _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
-            return ['write']
-          }
-          return []
+      if (data[0] && data[1]) {
+        const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)
+        const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
+        const userGroupIds = data[1]
+        if (upperCaseUserIds.includes(context.userId) ||
+            _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
+          return ['write']
         }
         return []
-      })
+      }
+      return []
+    })
   }
 }
 

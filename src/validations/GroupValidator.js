@@ -19,7 +19,7 @@ class GroupValidator extends SchemaValidator {
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
       { paramName: 'parentId', type: 'numeric', required: false },
       { paramName: 'parentId', type: 'refData', entity: db.group },
-      { paramName: 'refRandomizationStrategyId', type: 'numeric' },
+      { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
       { paramName: 'refGroupTypeId', type: 'numeric', required: true },
       { paramName: 'refGroupTypeId', type: 'refData', entity: db.groupType },
     ]

@@ -24,6 +24,7 @@ module.exports = (rep, pgp) => ({
       .then(data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)))
   },
   batchFindAllBySetId: (setId, tx = rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId),
+  batchFindAllBySetIdRaw: (setId, tx = rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT u.* FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId),
   batchFindAllBySetEntryIds: (setEntryIds, tx = rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds]),
   batchCreate: (units, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(

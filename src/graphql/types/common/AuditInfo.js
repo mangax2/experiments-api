@@ -19,7 +19,9 @@ const AuditInfo = new GraphQLObjectType({
   }),
 })
 
-const getAuditInfo = ({ created_user_id, modified_user_id, created_date, modified_date }) => ({
+const getAuditInfo = ({
+  created_user_id, modified_user_id, created_date, modified_date,
+}) => ({
   createdUserId: created_user_id,
   modifiedUserId: modified_user_id,
   createdDate: created_date,

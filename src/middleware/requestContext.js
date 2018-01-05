@@ -2,13 +2,6 @@ import _ from 'lodash'
 import uuid from 'uuid/v4'
 import AppError from '../services/utility/AppError'
 
-function checkRegexMatches(regexes, url) {
-  return _.compact(_.map(regexes, (r) => {
-    const regExp = new RegExp(r)
-    return regExp.exec(url) !== null
-  })).length > 0
-}
-
 function getUserIdFromOauthHeader(headers) {
   if (headers && headers.oauth_resourceownerinfo) {
     const header = headers.oauth_resourceownerinfo
@@ -37,9 +30,7 @@ function requestContextMiddlewareFunction(req, res, next) {
   }
   res.set('X-Request-Id', req.context.requestId)
 
-  const whitelistedUrlRegexps = ['/experiments-api/graphql.*']
-
-  if (!checkRegexMatches(whitelistedUrlRegexps, req.url) || (_.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method) && userId === undefined)) {
+  if (_.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method) && !_.startsWith(req.url, '/experiments-api/graphql') && userId === undefined) {
     throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
   }
 

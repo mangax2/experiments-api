@@ -46,6 +46,10 @@ function factorByExperimentIdsBatchResolver(entity, args, context) {
   return context.loaders.factorByExperimentIds.load(entity.id)
 }
 
+function factorByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.factorByExperimentIds.load(args.experimentId)
+}
+
 function factorLevelBatchResolver(entity, args, context) {
   return context.loaders.factorLevel.load(entity.id)
 }
@@ -191,6 +195,7 @@ module.exports = {
   experimentsBatchResolver,
   factorBatchResolver,
   factorByExperimentIdsBatchResolver,
+  factorByExperimentIdParameterBatchResolver,
   factorLevelBatchResolver,
   factorLevelForCombinationElementBatchResolver,
   factorLevelForGroupValueBatchResolver,

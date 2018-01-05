@@ -56,13 +56,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getFactorsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.factorByExperimentIdParameterBatchResolver,
       },
       treatments: {
         type: GraphQLList(Treatment),

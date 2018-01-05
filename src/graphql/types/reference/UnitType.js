@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
-import UnitTypeService from '../../../services/UnitTypeService'
 
 const UnitType = new GraphQLObjectType({
   name: 'UnitType',
@@ -13,7 +12,4 @@ const UnitType = new GraphQLObjectType({
   },
 })
 
-const getUnitTypeById = ({ id }) =>
-  new UnitTypeService().getUnitTypeById(id)
-
-export { UnitType, getUnitTypeById }
+export default UnitType

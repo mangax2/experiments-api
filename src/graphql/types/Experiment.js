@@ -1,8 +1,8 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graphql'
-import ExperimentsService from '../../services/ExperimentsService'
+// import ExperimentsService from '../../services/ExperimentsService'
 // import { Tag } from './Tag'
 import { Factor } from './Factor'
-import { DependentVariable } from './DependentVariable'
+import DependentVariable from './DependentVariable'
 import { Treatment } from './Treatment'
 import { UnitSpecificationDetail } from './UnitSpecificationDetail'
 import { DesignSpecificationDetail } from './DesignSpecificationDetail'
@@ -88,6 +88,5 @@ const Experiment = new GraphQLObjectType({
   },
 })
 
-const getAllExperiments = () => new ExperimentsService().getAllExperiments(false)
 
-export { Experiment, getAllExperiments }
+export default Experiment

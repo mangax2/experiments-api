@@ -1,6 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLBoolean } from 'graphql'
 import { property } from 'lodash'
-import DependentVariableService from '../../services/DependentVariableService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 
 const DependentVariable = new GraphQLObjectType({
@@ -32,10 +31,4 @@ const DependentVariable = new GraphQLObjectType({
   },
 })
 
-const getDependentVariableById = ({ id }) =>
-  new DependentVariableService().getDependentVariableById(id)
-
-const getDependentVariablesByExperimentId = ({ experimentId, isTemplate }) =>
-  new DependentVariableService().getDependentVariablesByExperimentId(experimentId, isTemplate)
-
-export { DependentVariable, getDependentVariableById, getDependentVariablesByExperimentId }
+export default DependentVariable

@@ -1,7 +1,6 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
 import { FactorLevel } from './FactorLevel'
-import CombinationElementService from '../../services/CombinationElementService'
 import { Treatment } from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
@@ -40,10 +39,4 @@ const CombinationElement = new GraphQLObjectType({
   }),
 })
 
-const getCombinationElementsByTreatmentId = ({ treatmentId }) =>
-  new CombinationElementService().getCombinationElementsByTreatmentId(treatmentId)
-
-const getCombinationElementById = ({ id }) =>
-  new CombinationElementService().getCombinationElementById(id)
-
-export { CombinationElement, getCombinationElementsByTreatmentId, getCombinationElementById }
+export default CombinationElement

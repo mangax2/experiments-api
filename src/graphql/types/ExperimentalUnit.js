@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import { Group, getGroupById } from './Group'
+import { Group } from './Group'
 import { Treatment } from './Treatment'
 import ExperimentalUnitService from '../../services/ExperimentalUnitService'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
@@ -38,9 +38,7 @@ const ExperimentalUnit = new GraphQLObjectType({
     // direct relationships
     group: {
       type: Group,
-      resolve({ group_id }) {
-        return getGroupById({ id: group_id })
-      },
+      resolve: Resolvers.groupForExperimentalUnitBatchResolver,
     },
     treatment: {
       type: Treatment,

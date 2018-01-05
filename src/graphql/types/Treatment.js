@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
 import TreatmentService from '../../services/TreatmentService'
-import { CombinationElement } from './CombinationElement'
+import CombinationElement from './CombinationElement'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 

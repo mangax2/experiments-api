@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
-import GroupTypeService from '../../../services/GroupTypeService'
 
 const GroupType = new GraphQLObjectType({
   name: 'GroupType',
@@ -13,7 +12,4 @@ const GroupType = new GraphQLObjectType({
   },
 })
 
-const getGroupTypeById = ({ id }) =>
-  new GroupTypeService().getGroupTypeById(id)
-
-export { GroupType, getGroupTypeById }
+export default GroupType

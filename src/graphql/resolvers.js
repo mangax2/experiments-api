@@ -34,6 +34,10 @@ function experimentBatchResolver(entity, args, context) {
   return context.loaders.experiment.load(args.id)
 }
 
+function experimentsBatchResolver(entity, args, context) {
+  return context.loaders.experiments.load()
+}
+
 function factorBatchResolver(entity, args, context) {
   return context.loaders.factor.load(entity.factor_id)
 }
@@ -74,8 +78,16 @@ function groupForGroupValueBatchResolver(entity, args, context) {
   return context.loaders.group.load(entity.group_id)
 }
 
+function groupForExperimentalUnitBatchResolver(entity, args, context) {
+  return context.loaders.group.load(entity.group_id)
+}
+
 function parentGroupBatchResolver(entity, args, context) {
-  return context.loaders.group.load(entity.parent_id)
+  if (entity.parent_id) {
+    return context.loaders.group.load(entity.parent_id)
+  }
+
+  return Promise.resolve(null)
 }
 
 function childGroupsBatchResolver(entity, args, context) {
@@ -99,7 +111,7 @@ function refDataSourceBatchResolver(entity, args, context) {
 }
 
 function refDataSourceTypeBatchResolver(entity, args, context) {
-  return context.loaders.refDataSourceType.load(entity.id)
+  return context.loaders.refDataSourceType.load(entity.ref_data_source_type_id)
 }
 
 function refDesignSpecBatchResolver(entity, args, context) {
@@ -130,9 +142,13 @@ function refUnitSpecForUnitSpecificationDetailBatchResolver(entity, args, contex
   return context.loaders.refUnitSpec.load(entity.ref_unit_spec_id)
 }
 
-function refUnitTypeBatchResolver(entity, args, context) {
-  return context.loaders.refUnitType.load(entity.id)
+function refUnitTypeForUnitSpecificationBatchResolver(entity, args, context) {
+  return context.loaders.refUnitType.load(entity.ref_unit_type_id)
 }
+
+// function setEntryBatchResolver(entity, args, context) {
+//   return context.loaders.unitsBySetId.load(entity.set_id)
+// }
 
 function treatmentBatchResolver(entity, args, context) {
   return context.loaders.treatment.load(entity.id)
@@ -172,6 +188,7 @@ module.exports = {
   designSpecDetailBatchResolver,
   designSpecDetailForExperimentBatchResolver,
   experimentBatchResolver,
+  experimentsBatchResolver,
   factorBatchResolver,
   factorByExperimentIdsBatchResolver,
   factorLevelBatchResolver,
@@ -182,6 +199,7 @@ module.exports = {
   groupBatchResolver,
   groupsForExperimentBatchResolver,
   groupForGroupValueBatchResolver,
+  groupForExperimentalUnitBatchResolver,
   parentGroupBatchResolver,
   childGroupsBatchResolver,
   groupValueBatchResolver,
@@ -196,7 +214,8 @@ module.exports = {
   refGroupTypeBatchResolver,
   refUnitSpecBatchResolver,
   refUnitSpecForUnitSpecificationDetailBatchResolver,
-  refUnitTypeBatchResolver,
+  // setEntryBatchResolver,
+  refUnitTypeForUnitSpecificationBatchResolver,
   treatmentBatchResolver,
   treatmentsForExperimentBatchResolver,
   treatmentForExperimentalUnitBatchResolver,

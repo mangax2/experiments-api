@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
 import UnitSpecificationDetailService from '../../services/UnitSpecificationDetailService'
-import { UnitSpecification } from './reference/UnitSpecification'
+import UnitSpecification from './reference/UnitSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 

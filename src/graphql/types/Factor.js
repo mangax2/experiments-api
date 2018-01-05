@@ -3,7 +3,7 @@ import { property } from 'lodash'
 import Resolvers from '../resolvers'
 import FactorService from '../../services/FactorService'
 import { FactorLevel } from './FactorLevel'
-import { FactorType } from './reference/FactorType'
+import FactorType from './reference/FactorType'
 import DataSource from './reference/DataSource'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 

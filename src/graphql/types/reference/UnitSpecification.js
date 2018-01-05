@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import UnitSpecificationService from '../../../services/UnitSpecificationService'
-import { getUnitTypeById, UnitType } from './UnitType'
+import UnitType from './UnitType'
+import Resolvers from '../../resolvers'
 
 const UnitSpecification = new GraphQLObjectType({
   name: 'UnitSpecification',
@@ -14,7 +14,7 @@ const UnitSpecification = new GraphQLObjectType({
       type: GraphQLString,
     },
     uomType: {
-      type: GraphQLInt,
+      type: GraphQLString,
       resolve: property('uom_type'),
     },
     refUnitTypeId: {
@@ -25,14 +25,9 @@ const UnitSpecification = new GraphQLObjectType({
     // direct relationships
     unitType: {
       type: UnitType,
-      resolve({ ref_unit_type_id }) {
-        return getUnitTypeById({ id: ref_unit_type_id })
-      },
+      resolver: Resolvers.refUnitTypeForUnitSpecificationBatchResolver,
     },
   },
 })
 
-const getUnitSpecificationById = ({ id }) =>
-  new UnitSpecificationService().getUnitSpecificationById(id)
-
-export { UnitSpecification, getUnitSpecificationById }
+export default UnitSpecification

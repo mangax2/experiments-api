@@ -46,10 +46,7 @@ const GroupValue = new GraphQLObjectType({
   }),
 })
 
-const getGroupValuesByGroupId = ({ groupId }) =>
-  new GroupValueService().getGroupValuesByGroupId(groupId)
-
 const getGroupValueById = ({ id }) =>
   new GroupValueService().getGroupValueById(id)
 
-export { GroupValue, getGroupValuesByGroupId, getGroupValueById }
+export { GroupValue, getGroupValueById }

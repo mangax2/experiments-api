@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import { DataSourceType, getDataSourceTypeById } from './DataSourceType'
+import Resolvers from '../../resolvers'
+import DataSourceType from './DataSourceType'
 
 const DataSource = new GraphQLObjectType({
   name: 'DataSource',
@@ -20,9 +21,7 @@ const DataSource = new GraphQLObjectType({
     // direct relationships
     dataSourceType: {
       type: DataSourceType,
-      resolve({ ref_data_source_type_id }) {
-        return getDataSourceTypeById({ id: ref_data_source_type_id })
-      },
+      resolve: Resolvers.refDataSourceTypeBatchResolver,
     },
   },
 })

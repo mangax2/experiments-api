@@ -1,5 +1,5 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLList } from 'graphql'
-import { Experiment, getAllExperiments } from './types/Experiment'
+import Experiment from './types/Experiment'
 import { Factor, getFactorsByExperimentId } from './types/Factor'
 import { Treatment, getTreatmentsByExperimentId } from './types/Treatment'
 import {
@@ -10,7 +10,7 @@ import {
   DesignSpecificationDetail,
   getDesignSpecificationDetailsByExperimentId,
 } from './types/DesignSpecificationDetail'
-import { Template, getAllTemplates, getTemplateById } from './types/Template'
+// import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group, getGroupsByExperimentId } from './types/Group'
 import { ExperimentalUnit, getExperimentalUnitsByExperimentId } from './types/ExperimentalUnit'
 import { ExperimentalSet, getSetBySetId } from './types/ExperimentalSet'
@@ -29,29 +29,27 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.experimentBatchResolver,
       },
-      template: {
-        type: Template,
-        args: {
-          id: {
-            type: GraphQLNonNull(GraphQLInt),
-          },
-        },
-        resolve(_, { id }) {
-          return getTemplateById(id)
-        },
-      },
+      // template: {
+      //   type: Template,
+      //   args: {
+      //     id: {
+      //       type: GraphQLNonNull(GraphQLInt),
+      //     },
+      //   },
+      //   resolve(_, { id }) {
+      //     return getTemplateById(id)
+      //   },
+      // },
       experiments: {
         type: GraphQLList(Experiment),
-        resolve() {
-          return getAllExperiments()
-        },
+        resolve: Resolvers.experimentsBatchResolver,
       },
-      templates: {
-        type: GraphQLList(Template),
-        resolve() {
-          return getAllTemplates()
-        },
-      },
+      // templates: {
+      //   type: GraphQLList(Template),
+      //   resolve() {
+      //     return getAllTemplates()
+      //   },
+      // },
       factors: {
         type: GraphQLList(Factor),
         args: {

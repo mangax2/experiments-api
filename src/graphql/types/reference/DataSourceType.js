@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
-import RefDataSourceTypeService from '../../../services/RefDataSourceTypeService'
 
 const DataSourceType = new GraphQLObjectType({
   name: 'DataSourceType',
@@ -13,7 +12,4 @@ const DataSourceType = new GraphQLObjectType({
   },
 })
 
-const getDataSourceTypeById = ({ id }) =>
-  new RefDataSourceTypeService().getRefDataSourceTypeById(id)
-
-export { DataSourceType, getDataSourceTypeById }
+export default DataSourceType

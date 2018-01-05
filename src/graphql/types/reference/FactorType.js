@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
-import FactorTypeService from '../../../services/FactorTypeService'
 
 const FactorType = new GraphQLObjectType({
   name: 'FactorType',
@@ -13,7 +12,4 @@ const FactorType = new GraphQLObjectType({
   },
 })
 
-const getFactorTypeById = ({ id }) =>
-  new FactorTypeService().getFactorTypeById(id)
-
-export { FactorType, getFactorTypeById }
+export default FactorType

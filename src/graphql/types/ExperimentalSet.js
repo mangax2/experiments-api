@@ -1,12 +1,11 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
-import { GroupType } from './reference/GroupType'
+import GroupType from './reference/GroupType'
 import { Group } from './Group'
 import { GroupValue } from './GroupValue'
-import { ExperimentalUnit } from './ExperimentalUnit'
+// import { ExperimentalUnit } from './ExperimentalUnit'
 import db from '../../db/DbManager'
 import Resolvers from '../resolvers'
-
 
 const ExperimentalSet = new GraphQLObjectType({
   name: 'ExperimentalSet',
@@ -46,12 +45,11 @@ const ExperimentalSet = new GraphQLObjectType({
       type: GraphQLList(GroupValue),
       resolve: Resolvers.groupValueBatchResolver,
     },
-    setEntries: {
-      type: GraphQLList(ExperimentalUnit),
-      resolve({ set_id }) {
-        return db.unit.batchFindAllBySetIdRaw(set_id)
-      },
-    },
+    // TODO
+    // setEntries: {
+    //   type: GraphQLList(ExperimentalUnit),
+    //   resolve: Resolvers.setEntryBatchResolver,
+    // },
   }),
 })
 

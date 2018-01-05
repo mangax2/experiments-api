@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
-import { GroupType } from './reference/GroupType'
+import GroupType from './reference/GroupType'
 import GroupService from '../../services/GroupService'
 import { GroupValue } from './GroupValue'
 import { ExperimentalUnit } from './ExperimentalUnit'

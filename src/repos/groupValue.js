@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-const columns = "gv.id, COALESCE(gv.name, f.name) AS name, gv.value, fl.value->'items' AS factor_level_value, fl.id AS factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date"
+const columns = 'gv.id, COALESCE(gv.name, f.name) AS name, gv.value, fl.value->\'items\' AS factor_level_value, fl.id AS factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date'
 const tables = 'group_value gv LEFT OUTER JOIN factor_level fl ON gv.factor_level_id = fl.id LEFT OUTER JOIN factor f ON fl.factor_id = f.id'
 const genericSqlStatement = `SELECT ${columns} FROM ${tables}`
 
@@ -15,7 +15,9 @@ module.exports = (rep, pgp) => ({
 
   batchFindAllByGroupId: (groupIds, tx = rep) => {
     return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, groupIds)
-      .then(data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)))
+      .then(
+        data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)),
+      )
   },
 
   batchFindAllByExperimentId: (experimentId, tx = rep) => {
@@ -28,7 +30,7 @@ module.exports = (rep, pgp) => ({
   batchCreate: (groupValues, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['name', 'value', 'factor_level_id', 'group_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'group_value' },
+      {table: 'group_value'},
     )
 
     const values = groupValues.map(gv => ({
@@ -49,7 +51,7 @@ module.exports = (rep, pgp) => ({
   batchUpdate: (groupValues, context, tx = rep) => {
     const columnSet = new pgp.helpers.ColumnSet(
       ['?id', 'name', 'value', 'factor_level_id', 'group_id', 'modified_user_id', 'modified_date'],
-      { table: 'group_value' },
+      {table: 'group_value'},
     )
 
     const data = groupValues.map(gv => ({

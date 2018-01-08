@@ -26,6 +26,10 @@ function designSpecDetailBatchResolver(entity, args, context) {
   return context.loaders.designSpecDetail.load(entity.id)
 }
 
+function designSpecDetailByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.designSpecDetailByExperimentIds.load(args.experimentId)
+}
+
 function designSpecDetailForExperimentBatchResolver(entity, args, context) {
   return context.loaders.designSpecDetailByExperimentIds.load(entity.id)
 }
@@ -72,6 +76,10 @@ function factorLevelAssociationBatchResolver(entity, args, context) {
 
 function groupBatchResolver(entity, args, context) {
   return context.loaders.group.load(entity.id)
+}
+
+function groupByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.groupsByExperimentIds.load(args.experimentId)
 }
 
 function groupsForExperimentBatchResolver(entity, args, context) {
@@ -150,12 +158,21 @@ function refUnitTypeForUnitSpecificationBatchResolver(entity, args, context) {
   return context.loaders.refUnitType.load(entity.ref_unit_type_id)
 }
 
+function setBySetIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.setBySetIds.load(args.setId)
+}
+
+
 // function setEntryBatchResolver(entity, args, context) {
 //   return context.loaders.unitsBySetId.load(entity.set_id)
 // }
 
 function treatmentBatchResolver(entity, args, context) {
   return context.loaders.treatment.load(entity.id)
+}
+
+function treatmentByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.treatmentByExperimentIds.load(args.experimentId)
 }
 
 function treatmentForCombinationElementBatchResolver(entity, args, context) {
@@ -174,8 +191,16 @@ function unitBatchResolver(entity, args, context) {
   return context.loaders.unit.load(entity.id)
 }
 
+function unitByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.unitByExperimentIds.load(args.experimentId)
+}
+
 function unitSpecDetailBatchResolver(entity, args, context) {
   return context.loaders.unitSpecDetail.load(entity.id)
+}
+
+function unitSpecDetailByExperimentIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.unitSpecDetailByExperimentIds.load(args.experimentId)
 }
 
 function unitSpecDetailForExperimentBatchResolver(entity, args, context) {
@@ -190,6 +215,7 @@ module.exports = {
   dependentVariableForExperimentBatchResolver,
   dependentVariableByExperimentIdsBatchResolver,
   designSpecDetailBatchResolver,
+  designSpecDetailByExperimentIdParameterBatchResolver,
   designSpecDetailForExperimentBatchResolver,
   experimentBatchResolver,
   experimentsBatchResolver,
@@ -202,6 +228,7 @@ module.exports = {
   factorLevelByFactorIdsBatchResolver,
   factorLevelAssociationBatchResolver,
   groupBatchResolver,
+  groupByExperimentIdParameterBatchResolver,
   groupsForExperimentBatchResolver,
   groupForGroupValueBatchResolver,
   groupForExperimentalUnitBatchResolver,
@@ -219,13 +246,17 @@ module.exports = {
   refGroupTypeBatchResolver,
   refUnitSpecBatchResolver,
   refUnitSpecForUnitSpecificationDetailBatchResolver,
+  setBySetIdParameterBatchResolver,
   // setEntryBatchResolver,
   refUnitTypeForUnitSpecificationBatchResolver,
   treatmentBatchResolver,
+  treatmentByExperimentIdParameterBatchResolver,
   treatmentsForExperimentBatchResolver,
   treatmentForExperimentalUnitBatchResolver,
   treatmentForCombinationElementBatchResolver,
   unitBatchResolver,
+  unitByExperimentIdParameterBatchResolver,
   unitSpecDetailBatchResolver,
+  unitSpecDetailByExperimentIdParameterBatchResolver,
   unitSpecDetailForExperimentBatchResolver,
 }

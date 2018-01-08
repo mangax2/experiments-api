@@ -25,7 +25,7 @@ const UnitSpecification = new GraphQLObjectType({
     // direct relationships
     unitType: {
       type: UnitType,
-      resolver: Resolvers.refUnitTypeForUnitSpecificationBatchResolver,
+      resolve: Resolvers.refUnitTypeForUnitSpecificationBatchResolver,
     },
   },
 })

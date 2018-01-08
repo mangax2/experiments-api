@@ -1,3 +1,5 @@
+import _ from "lodash"
+
 module.exports = rep => ({
   repository: () => rep,
 
@@ -5,5 +7,6 @@ module.exports = rep => ({
 
   all: () => rep.any('SELECT * FROM ref_unit_type'),
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids]),
+  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids])
+    .then(data => _.map(ids, id => _.filter(data, row => row.id === id))),
 })

@@ -1,19 +1,13 @@
-import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLList } from 'graphql'
+import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLNonNull, GraphQLList } from 'graphql'
 import Experiment from './types/Experiment'
-import { Factor, getFactorsByExperimentId } from './types/Factor'
-import { Treatment, getTreatmentsByExperimentId } from './types/Treatment'
-import {
-  getUnitSpecificationDetailsByExperimentId,
-  UnitSpecificationDetail,
-} from './types/UnitSpecificationDetail'
-import {
-  DesignSpecificationDetail,
-  getDesignSpecificationDetailsByExperimentId,
-} from './types/DesignSpecificationDetail'
+import { Factor } from './types/Factor'
+import { Treatment } from './types/Treatment'
+import { UnitSpecificationDetail } from './types/UnitSpecificationDetail'
+import { DesignSpecificationDetail } from './types/DesignSpecificationDetail'
 // import { Template, getAllTemplates, getTemplateById } from './types/Template'
-import { Group, getGroupsByExperimentId } from './types/Group'
-import { ExperimentalUnit, getExperimentalUnitsByExperimentId } from './types/ExperimentalUnit'
-import { ExperimentalSet, getSetBySetId } from './types/ExperimentalSet'
+import { Group } from './types/Group'
+import { ExperimentalUnit } from './types/ExperimentalUnit'
+import { ExperimentalSet } from './types/ExperimentalSet'
 import Resolvers from './resolvers'
 
 export default new GraphQLSchema({
@@ -29,7 +23,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.experimentBatchResolver,
       },
-      // template: {
+      // TODO template: {
       //   type: Template,
       //   args: {
       //     id: {
@@ -44,7 +38,7 @@ export default new GraphQLSchema({
         type: GraphQLList(Experiment),
         resolve: Resolvers.experimentsBatchResolver,
       },
-      // templates: {
+      // TODO templates: {
       //   type: GraphQLList(Template),
       //   resolve() {
       //     return getAllTemplates()
@@ -65,13 +59,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getTreatmentsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.treatmentByExperimentIdParameterBatchResolver,
       },
       unitSpecificationDetails: {
         type: GraphQLList(UnitSpecificationDetail),
@@ -79,13 +68,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getUnitSpecificationDetailsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.unitSpecDetailByExperimentIdParameterBatchResolver,
       },
       designSpecificationDetails: {
         type: GraphQLList(DesignSpecificationDetail),
@@ -93,13 +77,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getDesignSpecificationDetailsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.designSpecDetailByExperimentIdParameterBatchResolver,
       },
       groups: {
         type: GraphQLList(Group),
@@ -107,13 +86,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getGroupsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.groupByExperimentIdParameterBatchResolver,
       },
       units: {
         type: GraphQLList(ExperimentalUnit),
@@ -121,13 +95,8 @@ export default new GraphQLSchema({
           experimentId: {
             type: GraphQLNonNull(GraphQLInt),
           },
-          isTemplate: {
-            type: GraphQLBoolean,
-          },
         },
-        resolve(_, { experimentId, isTemplate = false }) {
-          return getExperimentalUnitsByExperimentId({ experimentId, isTemplate })
-        },
+        resolve: Resolvers.unitByExperimentIdParameterBatchResolver,
       },
       set: {
         type: ExperimentalSet,
@@ -136,9 +105,7 @@ export default new GraphQLSchema({
             type: GraphQLNonNull(GraphQLInt),
           },
         },
-        resolve(_, { setId }) {
-          return getSetBySetId({ setId })
-        },
+        resolve: Resolvers.setBySetIdParameterBatchResolver,
       },
       // TODO setEntries: {} ?
     },

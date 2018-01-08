@@ -17,6 +17,17 @@ module.exports = (rep, pgp) => ({
 
   findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId),
 
+  /*
+
+  batchFindByExperimentId: (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  },
+   */
+
+  batchfindAllByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT u.*, t.experiment_id FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id IN ($1:csv)', experimentIds)
+    .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId))),
+
   batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds]),
   batchFindAllByGroupIds: (groupIds, tx = rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds]),
   batchFindAllByGroupIdsAndGroupByGroupId: (groupIds, tx = rep) => {

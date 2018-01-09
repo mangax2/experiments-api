@@ -4486,6 +4486,9 @@
         "code": {
           "type": "string"
         },
+        "errorCode": {
+          "type": "string"
+        }
         "errorMessage": {
           "type": "string"
         }

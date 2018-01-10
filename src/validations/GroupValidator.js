@@ -6,7 +6,9 @@ import db from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('GroupValidator')
 

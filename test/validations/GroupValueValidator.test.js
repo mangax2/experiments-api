@@ -89,7 +89,7 @@ describe('GroupValueValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3C1001')
     })
   })
 
@@ -112,8 +112,7 @@ describe('GroupValueValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{ value: 'testValue' }]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
-          ' value, or a factor level id')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a value, or a factor level id', undefined, '3C2002')
       })
     })
 
@@ -121,8 +120,7 @@ describe('GroupValueValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([{ name: 'test' }]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a' +
-          ' value, or a factor level id')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group Values must have a name and a value, or a factor level id', undefined, '3C2002')
       })
     })
 
@@ -130,8 +128,7 @@ describe('GroupValueValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group Value request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group Value request object needs to be an array', undefined, '3C2001')
       })
     })
 
@@ -139,8 +136,7 @@ describe('GroupValueValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group Value request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group Value request object needs to be an array', undefined, '3C2001')
       })
     })
   })

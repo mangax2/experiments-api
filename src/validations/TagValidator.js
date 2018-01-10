@@ -1,7 +1,9 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3EXXXX
 class TagValidator extends SchemaValidator {

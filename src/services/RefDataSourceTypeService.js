@@ -1,7 +1,9 @@
 import _ from 'lodash'
 import db from '../db/DbManager'
 import RefDataSourceService from './RefDataSourceService'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 // Error Codes 1LXXXX
 class RefDataSourceTypeService {

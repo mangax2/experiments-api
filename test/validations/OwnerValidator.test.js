@@ -80,7 +80,7 @@ describe('OwnerValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3D1001')
     })
   })
 
@@ -89,8 +89,7 @@ describe('OwnerValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Owner request object needs to be a' +
-          ' populated array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Owner request object needs to be a populated array', undefined, '3D2001')
       })
     })
 
@@ -98,8 +97,7 @@ describe('OwnerValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Owner request object needs to be a' +
-          ' populated array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Owner request object needs to be a populated array', undefined, '3D2001')
       })
     })
 
@@ -149,12 +147,13 @@ describe('OwnerValidator', () => {
     })
 
     test('rejects when validateUserIds fails', () => {
+      const error = { message: 'error' }
       target.hasErrors = mock(false)
-      target.validateUserIds = mockReject('error')
+      target.validateUserIds = mockReject(error)
 
       return target.postValidate([{ userIds: ['KMCCL'] }], testContext).then(() => {}, (err) => {
         expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -180,7 +179,7 @@ describe('OwnerValidator', () => {
       AppError.badRequest = mock()
 
       return target.requiredOwnerCheck([], []).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Owner is required in request')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Owner is required in request', undefined, '3D4001')
       })
     })
   })
@@ -212,7 +211,7 @@ describe('OwnerValidator', () => {
       return target.validateUserIds(['KMCCL', 'JGORD1']).then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Some users listed are invalid: JGORD1')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Some users listed are invalid: JGORD1', undefined, '3D5001')
       })
     })
   })
@@ -247,7 +246,7 @@ describe('OwnerValidator', () => {
       return target.validateGroupIds(['group1', 'group2']).then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Some groups listed are invalid: group2')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Some groups listed are invalid: group2', undefined, '3D6001')
       })
     })
   })

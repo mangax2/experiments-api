@@ -7,7 +7,9 @@ import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
 import Transactional from '../decorators/transactional'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('DesignSpecificationDetailService')
 

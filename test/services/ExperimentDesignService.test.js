@@ -26,13 +26,14 @@ describe('ExperimentDesignService', () => {
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.experimentDesign.create = mock()
 
       return target.createExperimentDesign({}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.experimentDesign.create).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -64,7 +65,7 @@ describe('ExperimentDesignService', () => {
 
       return target.getExperimentDesignById(1).then(() => {}, () => {
         expect(db.experimentDesign.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found', undefined, '183001')
       })
     })
   })
@@ -89,25 +90,27 @@ describe('ExperimentDesignService', () => {
       return target.updateExperimentDesign(1, {}, testContext).then(() => {}, () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.experimentDesign.update).toHaveBeenCalledWith(1, {}, testContext)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found', undefined, '184001')
       })
     })
 
     test('rejects when update fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.experimentDesign.update = mockReject('error')
+      db.experimentDesign.update = mockReject(error)
       AppError.notFound = mock()
 
       return target.updateExperimentDesign(1, {}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.experimentDesign.update).toHaveBeenCalledWith(1, {}, testContext)
         expect(AppError.notFound).not.toHaveBeenCalledWith()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.experimentDesign.update = mock()
       AppError.notFound = mock()
 
@@ -115,7 +118,7 @@ describe('ExperimentDesignService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.experimentDesign.update).not.toHaveBeenCalled()
         expect(AppError.notFound).not.toHaveBeenCalledWith()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -136,7 +139,7 @@ describe('ExperimentDesignService', () => {
 
       return target.deleteExperimentDesign(1).then(() => {}, () => {
         expect(db.experimentDesign.delete).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Design Not Found', undefined, '185001')
       })
     })
   })

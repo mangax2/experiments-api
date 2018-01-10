@@ -20,11 +20,12 @@ describe('RefDataSourceTypeService', () => {
     })
 
     test('rejects when get all fails', () => {
-      db.refDataSourceType.all = mockReject('error')
+      const error = { message: 'error' }
+      db.refDataSourceType.all = mockReject(error)
 
       return target.getRefDataSourceTypes().then(() => {}, (err) => {
         expect(db.refDataSourceType.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -53,23 +54,25 @@ describe('RefDataSourceTypeService', () => {
 
     test('rejects when getRefDataSources fails', () => {
       db.refDataSourceType.all = mockResolve([])
-      target.refDataSourceService.getRefDataSources = mockReject('error')
+      const error = { message: 'error' }
+      target.refDataSourceService.getRefDataSources = mockReject(error)
 
       return target.getRefDataSourceTypesWithDataSources().then(() => {}, (err) => {
         expect(db.refDataSourceType.all).toHaveBeenCalled()
         expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when get all ref data source types fails', () => {
-      db.refDataSourceType.all = mockReject('error')
-      target.refDataSourceService.getRefDataSources = mockReject('error')
+      const error = { message: 'error' }
+      db.refDataSourceType.all = mockReject(error)
+      target.refDataSourceService.getRefDataSources = mockReject(error)
 
       return target.getRefDataSourceTypesWithDataSources().then(() => {}, (err) => {
         expect(db.refDataSourceType.all).toHaveBeenCalled()
         expect(target.refDataSourceService.getRefDataSources).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

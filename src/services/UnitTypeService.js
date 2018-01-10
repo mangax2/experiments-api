@@ -1,7 +1,9 @@
 import log4js from 'log4js'
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('UnitTypeService')
 

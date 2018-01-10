@@ -4,7 +4,9 @@ import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import Transactional from '../decorators/transactional'
 import TagService from './TagService'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 15XXXX
 class DuplicationService {

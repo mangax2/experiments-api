@@ -106,7 +106,7 @@ describe('TreatmentValidator', () => {
         AppError.badRequest = mock('')
 
         expect(() => { target.getSchema('test') }).toThrow()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3F1001')
       })
     })
   })
@@ -128,8 +128,7 @@ describe('TreatmentValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object needs to be an array', undefined, '3F2001')
       })
     })
 
@@ -137,8 +136,7 @@ describe('TreatmentValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object needs to be an array', undefined, '3F2001')
       })
     })
 

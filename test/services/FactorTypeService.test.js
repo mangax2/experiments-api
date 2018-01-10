@@ -26,24 +26,26 @@ describe('factorTypeService', () => {
     })
 
     test('rejects when factorType create fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factorType.create = mockReject('error')
+      db.factorType.create = mockReject(error)
 
       return target.createFactorType({}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.factorType.create).toHaveBeenCalledWith(testTx, {}, testContext)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.factorType.create = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
+      db.factorType.create = mockReject(error)
 
       return target.createFactorType({}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.factorType.create).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -59,11 +61,12 @@ describe('factorTypeService', () => {
     })
 
     test('rejects when get all fails', () => {
-      db.factorType.all = mockReject('error')
+      const error = { message: 'error' }
+      db.factorType.all = mockReject(error)
 
       return target.getAllFactorTypes().then(() => {}, (err) => {
         expect(db.factorType.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -84,16 +87,17 @@ describe('factorTypeService', () => {
 
       return target.getFactorTypeById(1).then(() => {}, () => {
         expect(db.factorType.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found', undefined, '1E3001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.factorType.find = mockReject('error')
+      const error = { message: 'error' }
+      db.factorType.find = mockReject(error)
 
       return target.getFactorTypeById(1).then(() => {}, (err) => {
         expect(db.factorType.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -118,29 +122,31 @@ describe('factorTypeService', () => {
       return target.updateFactorType(1, {}, testContext).then(() => {}, () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.factorType.update).toHaveBeenCalledWith(testTx, 1, {}, testContext)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found', undefined, '1E4001')
       })
     })
 
     test('rejects when update fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factorType.update = mockReject('error')
+      db.factorType.update = mockReject(error)
 
       return target.updateFactorType(1, {}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.factorType.update).toHaveBeenCalledWith(testTx, 1, {}, testContext)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.factorType.update = mockReject()
 
       return target.updateFactorType(1, {}, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}])
         expect(db.factorType.update).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -161,16 +167,17 @@ describe('factorTypeService', () => {
 
       return target.deleteFactorType(1).then(() => {}, () => {
         expect(db.factorType.delete).toHaveBeenCalledWith(testTx, 1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Factor Type Not Found', undefined, '1E5001')
       })
     })
 
     test('rejects when delete fails', () => {
-      db.factorType.delete = mockReject('error')
+      const error = { message: 'error' }
+      db.factorType.delete = mockReject(error)
 
       return target.deleteFactorType(1).then(() => {}, (err) => {
         expect(db.factorType.delete).toHaveBeenCalledWith(testTx, 1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

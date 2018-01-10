@@ -6,7 +6,9 @@ import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import Transactional from '../decorators/transactional'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 // Error Codes 1QXXXX
 class TreatmentDetailsService {

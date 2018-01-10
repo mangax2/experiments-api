@@ -1,6 +1,6 @@
 import setErrorDecorator from '../../src/decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator
+const { setErrorCode } = setErrorDecorator()
 
 class testClass {
   @setErrorCode('TEST123456')
@@ -149,13 +149,13 @@ describe('setErrorDecorator', () => {
 
   describe('setErrorPrefix', () => {
     it('sets the prefix property', () => {
-      setErrorDecorator.setErrorPrefix('TestPrefix')
+      setErrorDecorator().setErrorPrefix('TestPrefix')
 
-      expect(setErrorDecorator.prefix).toBe('TestPrefix')
+      expect(setErrorDecorator().getFullErrorCode('')).toBe('TestPrefix')
     })
 
     afterAll(() => {
-      setErrorDecorator.prefix = ''
+      setErrorDecorator.setErrorPrefix('')
     })
   })
 })

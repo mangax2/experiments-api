@@ -1,5 +1,7 @@
 import db from '../db/DbManager'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 // Error Codes 1KXXXX
 class RefDataSourceService {

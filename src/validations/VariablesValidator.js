@@ -1,7 +1,9 @@
 import _ from 'lodash'
 import BaseValidator from './BaseValidator'
 import AppError from '../services/utility/AppError'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3HXXXX
 class VariablesValidator extends BaseValidator {

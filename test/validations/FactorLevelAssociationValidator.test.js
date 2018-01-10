@@ -46,7 +46,7 @@ describe('FactorLevelAssociationValidator', () => {
     test('throws exception when operation is not POST', () => {
       AppError.badRequest = mock('')
       expect(() => { target.getSchema('NOT POST') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '371001')
     })
   })
 
@@ -84,7 +84,7 @@ describe('FactorLevelAssociationValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array', undefined, '372001')
       })
     })
 
@@ -92,7 +92,7 @@ describe('FactorLevelAssociationValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('FactorLevelAssociation request object needs to be an array', undefined, '372001')
       })
     })
   })

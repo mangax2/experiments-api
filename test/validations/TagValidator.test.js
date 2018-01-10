@@ -75,8 +75,7 @@ describe('TagValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object needs to be an array', undefined, '3E2001')
       })
     })
 
@@ -84,8 +83,7 @@ describe('TagValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object needs to be an array', undefined, '3E2001')
       })
     })
   })

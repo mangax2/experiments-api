@@ -6,7 +6,9 @@ import AppError from './utility/AppError'
 import CombinationElementValidator from '../validations/CombinationElementValidator'
 import TreatmentService from './TreatmentService'
 import Transactional from '../decorators/transactional'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('CombinationElementService')
 

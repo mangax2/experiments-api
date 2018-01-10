@@ -12,7 +12,9 @@ import RefDataSourceService from './RefDataSourceService'
 import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
 // Error Codes 1AXXXX

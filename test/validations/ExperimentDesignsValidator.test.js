@@ -49,8 +49,7 @@ describe('ExperimentDesignsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Designs request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Designs request object needs to be an array', undefined, '352001')
       })
     })
 
@@ -58,8 +57,7 @@ describe('ExperimentDesignsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Designs request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Designs request object needs to be an array', undefined, '352001')
       })
     })
   })

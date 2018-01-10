@@ -1,7 +1,9 @@
 import db from '../db/DbManager'
 import FactorTypesValidator from '../validations/FactorTypesValidator'
 import AppError from './utility/AppError'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 1EXXXX
 class FactorTypeService {

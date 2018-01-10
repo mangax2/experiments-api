@@ -9,7 +9,9 @@ import SecurityService from './SecurityService'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from '../services/utility/AppError'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 1FXXXX
 class GroupExperimentalUnitCompositeService {

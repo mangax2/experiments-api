@@ -28,20 +28,22 @@ describe('FactorLevelService', () => {
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factorLevel.batchCreate = mockReject('error')
+      db.factorLevel.batchCreate = mockReject(error)
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.factorLevel.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.factorLevel.batchCreate = mock()
       AppUtil.createPostResponse = mock()
 
@@ -49,7 +51,7 @@ describe('FactorLevelService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.factorLevel.batchCreate).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -64,10 +66,11 @@ describe('FactorLevelService', () => {
     })
 
     test('rejects when get all factorLevels fails', () => {
-      db.factorLevel.all = mockReject('error')
+      const error = { message: 'error' }
+      db.factorLevel.all = mockReject(error)
 
       return target.getAllFactorLevels().then(() => {}, (err) => {
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -83,11 +86,12 @@ describe('FactorLevelService', () => {
     })
 
     test('rejects when findByExperimentId fails', () => {
-      db.factorLevel.findByExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      db.factorLevel.findByExperimentId = mockReject(error)
 
       return FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
         expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -105,24 +109,26 @@ describe('FactorLevelService', () => {
     })
 
     test('rejects when findByFactorId fails', () => {
+      const error = { message: 'error' }
       target.factorService.getFactorById = mockResolve()
-      db.factorLevel.findByFactorId = mockReject('error')
+      db.factorLevel.findByFactorId = mockReject(error)
 
       return target.getFactorLevelsByFactorId(1, {}).then(() => {}, (err) => {
         expect(target.factorService.getFactorById).toHaveBeenCalledWith(1, {})
         expect(db.factorLevel.findByFactorId).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when getFactorById fails', () => {
-      target.factorService.getFactorById = mockReject('error')
+      const error = { message: 'error' }
+      target.factorService.getFactorById = mockReject(error)
       db.factorLevel.findByFactorId = mock()
 
       return target.getFactorLevelsByFactorId(1, {}).then(() => {}, (err) => {
         expect(target.factorService.getFactorById).toHaveBeenCalledWith(1, {})
         expect(db.factorLevel.findByFactorId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -143,16 +149,17 @@ describe('FactorLevelService', () => {
 
       return target.getFactorLevelById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.factorLevel.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Factor Level Not Found for requested id', undefined, '1C5001')
       })
     })
 
     test('rejects when factorLevel find fails', () => {
-      db.factorLevel.find = mockReject('error')
+      const error = { message: 'error' }
+      db.factorLevel.find = mockReject(error)
 
       return target.getFactorLevelById(1).then(() => {}, (err) => {
         expect(db.factorLevel.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -171,20 +178,22 @@ describe('FactorLevelService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factorLevel.batchUpdate = mockReject('error')
+      db.factorLevel.batchUpdate = mockReject(error)
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateFactorLevels([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.factorLevel.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
 
@@ -192,7 +201,7 @@ describe('FactorLevelService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.factorLevel.batchUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -213,7 +222,7 @@ describe('FactorLevelService', () => {
 
       return target.batchDeleteFactorLevels([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.factorLevel.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all factor levels requested for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all factor levels requested for delete were found', undefined, '1C7001')
       })
     })
   })

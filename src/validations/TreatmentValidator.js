@@ -4,7 +4,9 @@ import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 function createLevelIdToFactorIdMap(levelDbEntities) {
   return _.zipObject(

@@ -2,7 +2,9 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import OwnerValidator from '../validations/OwnerValidator'
 import Transactional from '../decorators/transactional'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 // Error Codes 1JXXXX
 class OwnerService {

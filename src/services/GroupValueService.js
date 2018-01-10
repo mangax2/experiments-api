@@ -5,7 +5,9 @@ import AppError from './utility/AppError'
 import GroupValueValidator from '../validations/GroupValueValidator'
 import GroupService from './GroupService'
 import Transactional from '../decorators/transactional'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('GroupValueService')
 

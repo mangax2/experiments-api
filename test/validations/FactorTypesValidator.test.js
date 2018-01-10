@@ -40,8 +40,7 @@ describe('FactorTypesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({}).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Factor Types request object needs to' +
-          ' be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Factor Types request object needs to be an array', undefined, '3A2001')
       })
     })
 
@@ -49,8 +48,7 @@ describe('FactorTypesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Factor Types request object needs to' +
-          ' be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Factor Types request object needs to be an array', undefined, '3A2001')
       })
     })
 

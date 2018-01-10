@@ -6,7 +6,9 @@ import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
 import Transactional from '../decorators/transactional'
-import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('FactorService')
 

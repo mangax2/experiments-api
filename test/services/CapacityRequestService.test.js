@@ -115,9 +115,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 400, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 400, response: { text: 'testText' } }, '5')
 
-      expect(AppError.badRequest).toBeCalledWith('Invalid capacity request information')
+      expect(AppError.badRequest).toBeCalledWith('Invalid capacity request information', undefined, '5')
       expect(AppError.unauthorized).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -127,9 +127,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 404, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 404, response: { text: 'testText' } }, '5')
 
-      expect(AppError.badRequest).toBeCalledWith('The associated capacity request does not exist')
+      expect(AppError.badRequest).toBeCalledWith('The associated capacity request does not exist', undefined, '5')
       expect(AppError.unauthorized).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -139,9 +139,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 401, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 401, response: { text: 'testText' } }, '5')
 
-      expect(AppError.unauthorized).toBeCalledWith('testText')
+      expect(AppError.unauthorized).toBeCalledWith('testText', undefined, '5')
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -151,9 +151,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 403, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 403, response: { text: 'testText' } }, '5')
 
-      expect(AppError.forbidden).toBeCalledWith('testText')
+      expect(AppError.forbidden).toBeCalledWith('testText', undefined, '5')
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.unauthorized).not.toBeCalled()
     })
@@ -163,7 +163,7 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      const response = CapacityRequestService.handleCapacityRequestError({ status: 500, response: { text: 'testText' } })
+      const response = CapacityRequestService.handleCapacityRequestError({ status: 500, response: { text: 'testText' } }, '5')
 
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.unauthorized).not.toBeCalled()
@@ -172,6 +172,7 @@ describe('CapacityRequestService', () => {
         status: 500,
         code: 'Internal Server Error',
         message: 'Error received from Capacity Request API: testText',
+        errorCode: '5',
       })
     })
   })

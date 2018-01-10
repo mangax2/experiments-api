@@ -3,7 +3,9 @@ import cf from 'aws-cloudfront-sign'
 import HttpUtil from './utility/HttpUtil'
 import VaultUtil from './utility/VaultUtil'
 import config from '../../config'
-import { setErrorCode } from '../decorators/setErrorDecorator'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 
 // Error Codes 14XXXX
 class DocumentationService {

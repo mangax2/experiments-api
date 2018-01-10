@@ -12,17 +12,22 @@ import RefDataSourceService from './RefDataSourceService'
 import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
+import { setErrorCode } from '../decorators/setErrorDecorator'
 
 const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
+// Error Codes 1AXXXX
 
+// @setErrorCode('1A1000')
 function getIdForFactorType(allFactorTypes, type) {
   return _.find(allFactorTypes, factorType => factorType.type === type).id
 }
 
+// @setErrorCode('1A2000')
 function extractIds(sources) {
   return _.compact(_.map(sources, 'id'))
 }
 
+// @setErrorCode('1A3000')
 function determineIdsToDelete(dbEntities, DTOs) {
   return _.difference(
     extractIds(dbEntities),
@@ -30,14 +35,17 @@ function determineIdsToDelete(dbEntities, DTOs) {
   )
 }
 
+// @setErrorCode('1A4000')
 function determineDTOsForUpdate(DTOs) {
   return _.filter(DTOs, dto => !_.isNil(dto.id))
 }
 
+// @setErrorCode('1A5000')
 function determineDTOsForCreate(DTOs) {
   return _.filter(DTOs, dto => _.isNil(dto.id))
 }
 
+// @setErrorCode('1A6000')
 function applyAsyncBatchToNonEmptyArray(
   asyncBatchFunction, ids, ...contextAndTx) {
   return _.isEmpty(ids)
@@ -45,6 +53,7 @@ function applyAsyncBatchToNonEmptyArray(
     : asyncBatchFunction(ids, ...contextAndTx)
 }
 
+// @setErrorCode('1A7000')
 function batchDeleteDbEntitiesWithoutMatchingDTO(
   dbEntities, DTOs, asyncBatchDeleteFunction, context, tx) {
   return applyAsyncBatchToNonEmptyArray(
@@ -54,6 +63,7 @@ function batchDeleteDbEntitiesWithoutMatchingDTO(
     tx)
 }
 
+// @setErrorCode('1A8000')
 function formDbEntitiesObject(
   [allDbRefDataSources, allDbFactors, allDbLevels,
     allDbFactorLevelAssociations, allFactorTypes]) {
@@ -62,12 +72,14 @@ function formDbEntitiesObject(
   }
 }
 
+// @setErrorCode('1A9000')
 function createRefIdToIdMap(refIdSource, idSource) {
   return _.zipObject(
     _.map(refIdSource, '_refId'),
     _.map(idSource, 'id'))
 }
 
+// @setErrorCode('1AA000')
 function createCompleteRefIdToIdMap(
   {
     factorDependentLevelDTOsForCreate,
@@ -88,6 +100,7 @@ function createCompleteRefIdToIdMap(
       allLevelDTOsWithParentFactorIdForUpdate))
 }
 
+// @setErrorCode('1AB000')
 function mapFactorLevelAssociationDTOToEntity(refIdToIdMap, DTOs) {
   return _.map(DTOs, dto => ({
     associatedLevelId: refIdToIdMap[dto.associatedLevelRefId],
@@ -95,6 +108,7 @@ function mapFactorLevelAssociationDTOToEntity(refIdToIdMap, DTOs) {
   }))
 }
 
+// @setErrorCode('1AC000')
 function determineFactorLevelAssociationIdsToDelete(
   refIdToIdMap,
   factorLevelAssociationEntities,
@@ -106,6 +120,7 @@ function determineFactorLevelAssociationIdsToDelete(
       && a.nested_level_id === b.nestedLevelId)), 'id')
 }
 
+// @setErrorCode('1AD000')
 function determineFactorLevelAssociationEntitiesToCreate(
   refIdToIdMap,
   factorLevelAssociationEntities,
@@ -117,6 +132,7 @@ function determineFactorLevelAssociationEntitiesToCreate(
       && a.nestedLevelId === b.nested_level_id)
 }
 
+// @setErrorCode('1AE000')
 function deleteFactorLevelAssociations(
   {
     refIdToIdMap,
@@ -133,6 +149,7 @@ function deleteFactorLevelAssociations(
       tx)
 }
 
+// @setErrorCode('1AF000')
 function mapFactorLevelDTOsToFactorLevelEntities(allLevelDTOsWithParentFactorId) {
   return _.map(allLevelDTOsWithParentFactorId, level => ({
     id: level.id,
@@ -141,6 +158,7 @@ function mapFactorLevelDTOsToFactorLevelEntities(allLevelDTOsWithParentFactorId)
   }))
 }
 
+// @setErrorCode('1AG000')
 function mapFactorDTOsToFactorEntities(
   experimentId, factorDTOs, refFactorTypeId, allDataSources) {
   return _.map(factorDTOs, factorDTO => ({
@@ -155,6 +173,7 @@ function mapFactorDTOsToFactorEntities(
   }))
 }
 
+// @setErrorCode('1AH000')
 function appendParentIdToChildren(parents, childArrayPropertyName, nameOfNewIdProperty) {
   return _.map(parents,
     parent => ({
@@ -164,6 +183,7 @@ function appendParentIdToChildren(parents, childArrayPropertyName, nameOfNewIdPr
     }))
 }
 
+// @setErrorCode('1AI000')
 function concatChildArrays(parents, childArrayPropertyName) {
   return _.concat(..._.map(parents, parent => parent[childArrayPropertyName]))
 }
@@ -181,6 +201,7 @@ class FactorDependentCompositeService {
     this.variablesValidator = new VariablesValidator()
   }
 
+  @setErrorCode('1AJ000')
   @Transactional('getFactorsWithLevels')
   static getFactorsWithLevels(experimentId, tx) {
     return Promise.all([
@@ -192,12 +213,14 @@ class FactorDependentCompositeService {
     }))
   }
 
+  @setErrorCode('1AK000')
   static extractLevelsForFactor(factor, allLevelsForAllFactors) {
     return _.filter(allLevelsForAllFactors, level =>
       Number(level.factor_id) === Number(factor.id),
     )
   }
 
+  @setErrorCode('1AL000')
   static appendLevelIdToLevel(level) {
     return {
       id: level.id,
@@ -206,16 +229,19 @@ class FactorDependentCompositeService {
     }
   }
 
+  @setErrorCode('1AM000')
   static findFactorType(factorTypes, factor) {
     return _.find(factorTypes, { id: factor.ref_factor_type_id }).type.toLowerCase()
   }
 
+  @setErrorCode('1AN000')
   static assembleFactorLevelDTOs(factorLevels) {
     return _.map(
       factorLevels,
       level => FactorDependentCompositeService.appendLevelIdToLevel(level))
   }
 
+  @setErrorCode('1AO000')
   static mapFactorEntitiesToFactorDTOs(
     factors, allFactorLevels, allFactorTypes, factorLevelAssociationEntities) {
     const factorHashById = _.keyBy(factors, 'id')
@@ -262,6 +288,7 @@ class FactorDependentCompositeService {
     })
   }
 
+  @setErrorCode('1AP000')
   static mapDependentVariablesEntitiesToDTOs(dependentVariableEntities) {
     return _.map(dependentVariableEntities, dependentVariable => ({
       name: dependentVariable.name,
@@ -270,6 +297,7 @@ class FactorDependentCompositeService {
     }))
   }
 
+  @setErrorCode('1AQ000')
   static mapFactorLevelAssociationEntitiesToDTOs(factorLevelAssociationEntities) {
     return _.map(factorLevelAssociationEntities, factorLevelAssociationEntity => ({
       id: factorLevelAssociationEntity.id,
@@ -278,6 +306,7 @@ class FactorDependentCompositeService {
     }))
   }
 
+  @setErrorCode('1AR000')
   static createVariablesObject(
     { independent = [], exogenous = [] },
     dependent = [],
@@ -287,12 +316,14 @@ class FactorDependentCompositeService {
     }
   }
 
+  @setErrorCode('1AS000')
   static assembleIndependentAndExogenous(factorDTOs) {
     return _.mapValues(_.groupBy(factorDTOs, factor => factor.type),
       factorsOfType => _.map(factorsOfType,
         factorOfType => _.omit(factorOfType, 'type')))
   }
 
+  @setErrorCode('1AT000')
   static assembleVariablesObject(
     factorEntities, allFactorLevels, factorTypes, dependentVariableEntities,
     factorLevelAssociationEntities) {
@@ -306,6 +337,7 @@ class FactorDependentCompositeService {
         factorLevelAssociationEntities))
   }
 
+  @setErrorCode('1AU000')
   @Transactional('getAllVariablesByExperimentId')
   getAllVariablesByExperimentId(experimentId, isTemplate, context, tx) {
     return Promise.all(
@@ -327,6 +359,7 @@ class FactorDependentCompositeService {
     ))
   }
 
+  @setErrorCode('1AV000')
   static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
     return _.map(dependentVariables, (dependentVariable) => {
       dependentVariable.experimentId = experimentId
@@ -334,6 +367,7 @@ class FactorDependentCompositeService {
     })
   }
 
+  @setErrorCode('1AW000')
   persistVariablesWithoutLevels(experimentId, dependentVariables, context, isTemplate, tx) {
     return this.dependentVariableService.deleteDependentVariablesForExperimentId(experimentId,
       isTemplate, context, tx)
@@ -349,6 +383,7 @@ class FactorDependentCompositeService {
       })
   }
 
+  @setErrorCode('1AX000')
   static determineDataSourceId(factorLevelDTOs, allDataSources) {
     const maxItemCount =
       _.chain(factorLevelDTOs)
@@ -369,6 +404,7 @@ class FactorDependentCompositeService {
         dataSource => dataSource.name === 'Custom').id
   }
 
+  @setErrorCode('1AY000')
   persistDependentVariables(dependentVariables, experimentId, context, isTemplate, tx) {
     const dependentVariableEntities =
       FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
@@ -377,6 +413,7 @@ class FactorDependentCompositeService {
       experimentId, dependentVariableEntities, context, isTemplate, tx)
   }
 
+  @setErrorCode('1AZ000')
   deleteFactorsAndLevels =
     ({
       allDbFactors,
@@ -391,6 +428,7 @@ class FactorDependentCompositeService {
         .then(() => batchDeleteDbEntitiesWithoutMatchingDTO(
           allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, context, tx))
 
+  @setErrorCode('1Aa000')
   updateFactors =
     (experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx) =>
       applyAsyncBatchToNonEmptyArray(
@@ -403,12 +441,14 @@ class FactorDependentCompositeService {
         context,
         tx)
 
+  @setErrorCode('1Ab000')
   updateLevels = (levelDTOsForUpdate, context, tx) => applyAsyncBatchToNonEmptyArray(
     this.factorLevelService.batchUpdateFactorLevels,
     mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate),
     context,
     tx)
 
+  @setErrorCode('1Ac000')
   updateFactorsAndLevels = ({
     experimentId, allDbRefDataSources, allIndependentDTOs: allFactorDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx,
@@ -418,6 +458,7 @@ class FactorDependentCompositeService {
     this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
   ])
 
+  @setErrorCode('1Ad000')
   createFactorsAndDependentLevels = (
     {
       experimentId, allDbRefDataSources, factorDTOsForCreate, allFactorTypes, context, tx,
@@ -440,6 +481,7 @@ class FactorDependentCompositeService {
       })
   }
 
+  @setErrorCode('1Ae000')
   createFactorLevels =
     (allFactorLevelDTOs, context, tx) =>
       applyAsyncBatchToNonEmptyArray(
@@ -449,6 +491,7 @@ class FactorDependentCompositeService {
         context,
         tx)
 
+  @setErrorCode('1Af000')
   createFactorLevelAssociations = (
     {
       refIdToIdMap,
@@ -463,6 +506,7 @@ class FactorDependentCompositeService {
     context,
     tx)
 
+  @setErrorCode('1Ag000')
   getCurrentDbEntities = ({ experimentId, tx }) => Promise.all([
     this.refDataSourceService.getRefDataSources(),
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
@@ -471,6 +515,7 @@ class FactorDependentCompositeService {
     this.factorTypeService.getAllFactorTypes()])
     .then(formDbEntitiesObject)
 
+  @setErrorCode('1Ah000')
   categorizeRequestDTOs = (allIndependentDTOs) => {
     const allLevelDTOsWithParentFactorId = concatChildArrays(
       appendParentIdToChildren(allIndependentDTOs, 'levels', 'factorId'),
@@ -489,6 +534,7 @@ class FactorDependentCompositeService {
     }
   }
 
+  @setErrorCode('1Ai000')
   createFactorsAndLevels = params => Promise.all([
     this.createFactorsAndDependentLevels(params),
     this.createFactorLevels(
@@ -496,6 +542,7 @@ class FactorDependentCompositeService {
       params.context,
       params.tx)])
 
+  @setErrorCode('1Aj000')
   persistIndependentAndAssociations = (
     experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
     const requestData = {
@@ -534,6 +581,7 @@ class FactorDependentCompositeService {
       })
   }
 
+  @setErrorCode('1Ak000')
   persistIndependentAndDependentVariables = (
     experimentId, variables, context, isTemplate, tx) => Promise.all([
     this.persistIndependentAndAssociations(
@@ -542,6 +590,7 @@ class FactorDependentCompositeService {
     this.persistDependentVariables(
       variables.dependent, experimentId, context, isTemplate, tx)])
 
+  @setErrorCode('1Al000')
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
     const expId = Number(experimentId)

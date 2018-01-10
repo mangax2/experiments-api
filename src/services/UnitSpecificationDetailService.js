@@ -7,9 +7,11 @@ import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import UnitSpecificationDetailValidator from '../validations/UnitSpecificationDetailValidator'
 import Transactional from '../decorators/transactional'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
 const logger = log4js.getLogger('UnitSpecificationDetailService')
 
+// Error Codes 1SXXXX
 class UnitSpecificationDetailService {
   constructor() {
     this.validator = new UnitSpecificationDetailValidator()
@@ -17,23 +19,26 @@ class UnitSpecificationDetailService {
     this.securityService = new SecurityService()
   }
 
+  @setErrorCode('1S1000')
   @Transactional('getUnitSpecificationDetailsByExperimentId')
   getUnitSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
+  @setErrorCode('1S2000')
   @Transactional('getUnitSpecificationDetailById')
   getUnitSpecificationDetailById = (id, context, tx) => db.unitSpecificationDetail.find(id, tx)
     .then((data) => {
       if (!data) {
         logger.error(`[[${context.requestId}]] Unit Specification Detail Not Found for requested id = ${id}`)
-        throw AppError.notFound('Unit Specification Detail Not Found for requested id')
+        throw AppError.notFound('Unit Specification Detail Not Found for requested id', undefined, getFullErrorCode('1S2001'))
       } else {
         return data
       }
     })
 
+  @setErrorCode('1S3000')
   @Transactional('batchCreateUnitSpecificationDetails')
   batchCreateUnitSpecificationDetails(specificationDetails, context, tx) {
     return this.validator.validate(specificationDetails, 'POST', tx)
@@ -41,6 +46,7 @@ class UnitSpecificationDetailService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @setErrorCode('1S4000')
   @Transactional('batchUpdateUnitSpecificationDetails')
   batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     return this.validator.validate(unitSpecificationDetails, 'PUT', tx)
@@ -48,6 +54,7 @@ class UnitSpecificationDetailService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
+  @setErrorCode('1S5000')
   @Transactional('manageAllUnitSpecificationDetails')
   manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context,
     isTemplate, tx) {
@@ -65,6 +72,7 @@ class UnitSpecificationDetailService {
     })
   }
 
+  @setErrorCode('1S6000')
   @Transactional('deleteUnitSpecificationDetails')
   deleteUnitSpecificationDetails = (idsToDelete, context, tx) => {
     if (_.compact(idsToDelete).length === 0) {
@@ -75,19 +83,21 @@ class UnitSpecificationDetailService {
         if (_.compact(data).length !== idsToDelete.length) {
           logger.error(`[[${context.requestId}]] Not all unit specification detail ids requested for delete were found`)
           throw AppError.notFound(
-            'Not all unit specification detail ids requested for delete were found')
+            'Not all unit specification detail ids requested for delete were found', undefined, getFullErrorCode('1S6001'))
         } else {
           return data
         }
       })
   }
 
+  @setErrorCode('1S7000')
   static populateExperimentId(unitSpecificationDetailsObj, experimentId) {
     _.forEach(unitSpecificationDetailsObj, (u) => {
       u.experimentId = Number(experimentId)
     })
   }
 
+  @setErrorCode('1S8000')
   updateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()
@@ -95,6 +105,7 @@ class UnitSpecificationDetailService {
     return this.batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx)
   }
 
+  @setErrorCode('1S9000')
   createUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     if (_.compact(unitSpecificationDetails).length === 0) {
       return Promise.resolve()

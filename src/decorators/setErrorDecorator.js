@@ -5,11 +5,13 @@ class setErrorDecorator {
     setErrorDecorator.prefix = errorPrefix
   }
 
+  static getFullErrorCode = errorCode => `${setErrorDecorator.prefix}${errorCode}`
+
   static setErrorCode = function (errorCode) {
     return function (target, property, descriptor) {
       const addErrorCodeIfNotExist = (ex) => {
         if (!ex.errorCode) {
-          ex.errorCode = `${setErrorDecorator.prefix}${errorCode}`
+          ex.errorCode = setErrorDecorator.getFullErrorCode(errorCode)
         }
         throw ex
       }

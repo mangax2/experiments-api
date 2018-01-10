@@ -2,7 +2,9 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 33XXXX
 class DesignSpecificationDetailValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -31,6 +33,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
 
   getEntityName = () => 'DesignSpecificationDetail'
 
+  @setErrorCode('331000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -40,7 +43,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
           DesignSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('331001'))
     }
   }
 
@@ -49,14 +52,16 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
   getDuplicateBusinessKeyError = () => 'Duplicate design specification id in request payload with' +
   ' same experiment id'
 
+  @setErrorCode('332000')
   preValidate = (designSpecificationDetailObj) => {
     if (!_.isArray(designSpecificationDetailObj) || designSpecificationDetailObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Design specification detail request object needs to be an array'))
+        AppError.badRequest('Design specification detail request object needs to be an array', undefined, getFullErrorCode('332001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('333000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

@@ -2,8 +2,11 @@ import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 32XXXX
 class DependentVariablesValidator extends SchemaValidator {
+  @setErrorCode('321000')
   getSchema = (operationName) => {
     const schema = [
       { paramName: 'required', type: 'boolean', required: true },
@@ -26,7 +29,7 @@ class DependentVariablesValidator extends SchemaValidator {
         return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
           { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('321001'))
     }
   }
 
@@ -36,14 +39,16 @@ class DependentVariablesValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'duplicate dependent variable name in request payload with same experiment id'
 
+  @setErrorCode('322000')
   preValidate = (dependentObj) => {
     if (!_.isArray(dependentObj) || dependentObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Dependent Variables request object needs to be an array'))
+        AppError.badRequest('Dependent Variables request object needs to be an array', undefined, getFullErrorCode('322001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('323000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

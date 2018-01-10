@@ -6,9 +6,11 @@ import db from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
 const logger = log4js.getLogger('GroupValidator')
 
+// Error Codes 3BXXXX
 class GroupValidator extends SchemaValidator {
   strategyRetrievalPromise
   validRandomizationIds
@@ -40,6 +42,7 @@ class GroupValidator extends SchemaValidator {
 
   getEntityName = () => 'Group'
 
+  @setErrorCode('3B1000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -52,18 +55,20 @@ class GroupValidator extends SchemaValidator {
         return GroupValidator.PATCH_VALIDATION_SCHEMA
           .concat(GroupValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS)
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('3B1001'))
     }
   }
 
+  @setErrorCode('3B2000')
   preValidate = (groupObj) => {
     if (!_.isArray(groupObj) || groupObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Group request object needs to be an array'))
+        AppError.badRequest('Group request object needs to be an array', undefined, getFullErrorCode('3B2001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3B3000')
   postValidate = (groupObj) => {
     if (!this.strategyRetrievalPromise) {
       this.getValidRandomizationIds()
@@ -72,17 +77,19 @@ class GroupValidator extends SchemaValidator {
       this.validateRandomizationStrategyIds(groupObj))
   }
 
+  @setErrorCode('3B4000')
   validateRandomizationStrategyIds = (groupObj) => {
     const uniqueRandomizationIds = _.uniq(_.filter(_.map(groupObj, 'refRandomizationStrategyId')))
     const invalidRandomizationIds = _.difference(uniqueRandomizationIds,
       this.validRandomizationIds)
 
     if (invalidRandomizationIds.length > 0) {
-      return Promise.reject(AppError.badRequest(`Invalid randomization strategy ids: ${invalidRandomizationIds.join(', ')}`))
+      return Promise.reject(AppError.badRequest(`Invalid randomization strategy ids: ${invalidRandomizationIds.join(', ')}`, undefined, getFullErrorCode('3B4001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3B5000')
   getValidRandomizationIds = () => {
     let resolver
     let rejecter
@@ -100,7 +107,7 @@ class GroupValidator extends SchemaValidator {
     ).catch((err) => {
       logger.error('An error occurred when retrieving randomization strategies', err)
       this.strategyRetrievalPromise = undefined
-      rejecter(AppError.badRequest('Unable to validate randomization strategy ids.'))
+      rejecter(AppError.badRequest('Unable to validate randomization strategy ids.', undefined, getFullErrorCode('3B5001')))
     })
   }
 }

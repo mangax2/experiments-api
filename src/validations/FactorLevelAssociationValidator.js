@@ -2,7 +2,9 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 37XXXX
 class FactorLevelAssociationValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -19,12 +21,13 @@ class FactorLevelAssociationValidator extends SchemaValidator {
     ]
   }
 
+  @setErrorCode('371000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
         return FactorLevelAssociationValidator.POST_VALIDATION_SCHEMA
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('371001'))
     }
   }
 
@@ -34,10 +37,11 @@ class FactorLevelAssociationValidator extends SchemaValidator {
 
   getEntityName = () => 'FactorLevelAssociation'
 
+  @setErrorCode('372000')
   preValidate = (factorLevelAssociationObj) => {
     if (!_.isArray(factorLevelAssociationObj) || factorLevelAssociationObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('FactorLevelAssociation request object needs to be an array'))
+        AppError.badRequest('FactorLevelAssociation request object needs to be an array', undefined, getFullErrorCode('372001')))
     }
     return Promise.resolve()
   }

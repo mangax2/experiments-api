@@ -4488,7 +4488,7 @@
         },
         "errorCode": {
           "type": "string"
-        }
+        },
         "errorMessage": {
           "type": "string"
         }

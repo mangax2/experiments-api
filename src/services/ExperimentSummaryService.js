@@ -3,14 +3,17 @@ import db from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import Transactional from '../decorators/transactional'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
 const logger = log4js.getLogger('ExperimentSummaryService')
 
+// Error Codes 19XXXX
 class ExperimentSummaryService {
   constructor() {
     this.experimentService = new ExperimentsService()
   }
 
+  @setErrorCode('191000')
   @Transactional('getExperimentSummaryById')
   getExperimentSummaryById(id, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(id, isTemplate, context, tx)
@@ -18,7 +21,7 @@ class ExperimentSummaryService {
         .then((data) => {
           if (!data) {
             logger.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
-            throw AppError.notFound('Experiment Summary Not Found for requested experimentId')
+            throw AppError.notFound('Experiment Summary Not Found for requested experimentId', undefined, getFullErrorCode('191001'))
           } else {
             return data
           }

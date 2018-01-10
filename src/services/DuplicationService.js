@@ -4,12 +4,15 @@ import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import Transactional from '../decorators/transactional'
 import TagService from './TagService'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 15XXXX
 class DuplicationService {
   constructor() {
     this.tagService = new TagService()
   }
 
+  @setErrorCode('161000')
   @Transactional('DuplicateExperiments')
   duplicateExperiments(body, context, source, tx) {
     const parsedCopyNum = Number(body ? body.numberOfCopies : undefined)
@@ -24,9 +27,10 @@ class DuplicationService {
         .then(results => this.duplicateTagsForExperiments(results[0], results[1],
           context, isTemplate))
     }
-    throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+    throw AppError.badRequest('Body must contain at least one experiment id to duplicate and the number of copies to make.', undefined, getFullErrorCode('161001'))
   }
 
+  @setErrorCode('162000')
   getAllTagsToDuplicate = (ids, isTemplate, context) => {
     const tagsToDuplicate = {}
     return Promise.all(_.map(ids, id => this.tagService.getTagsByExperimentId(id, isTemplate,
@@ -35,6 +39,7 @@ class DuplicationService {
       .then(() => tagsToDuplicate)
   }
 
+  @setErrorCode('163000')
   @Transactional('DuplicateExperiments')
   duplicateExperimentData = (ids, numberOfCopies, isTemplate, context, tx) => {
     let sqlPromise = Promise.resolve()
@@ -50,6 +55,7 @@ class DuplicationService {
     return sqlPromise.then(() => conversionMap)
   }
 
+  @setErrorCode('164000')
   duplicateTagsForExperiments = (tagsToDuplicate, idConversionMap, context, isTemplate) => {
     const newTags = _.flatMap(idConversionMap, cm =>
       _.map(tagsToDuplicate[cm.oldId],

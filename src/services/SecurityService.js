@@ -8,14 +8,17 @@ import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
 import db from '../db/DbManager'
 import Transactional from '../decorators/transactional'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
 const logger = log4js.getLogger('SecurityService')
 
+// Error Codes 1OXXXX
 class SecurityService {
   constructor() {
     this.ownerService = new OwnerService()
   }
 
+  @setErrorCode('1O1000')
   @Transactional('permissionsCheck')
   permissionsCheck(id, context, isTemplate, tx) {
     if (context.userId) {
@@ -25,12 +28,12 @@ class SecurityService {
             const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
               : 'Experiment Not Found for requested experimentId'
             logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-            throw AppError.notFound(errorMessage)
+            throw AppError.notFound(errorMessage, undefined, getFullErrorCode('1O1001'))
           } else {
             return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
               if (result.length === 0) {
                 logger.error(`Access denied for ${context.userId} on id ${id}`)
-                throw AppError.unauthorized('Access denied')
+                throw AppError.unauthorized('Access denied', undefined, getFullErrorCode('1O1002'))
               }
               return result
             })
@@ -38,9 +41,10 @@ class SecurityService {
         })
     }
 
-    throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+    throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing', undefined, getFullErrorCode('1O1003'))
   }
 
+  @setErrorCode('1O2000')
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
     .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
       .then((result) => {
@@ -52,11 +56,13 @@ class SecurityService {
         return groupIds
       }))
 
+  @setErrorCode('1O3000')
   @Transactional('permissionsCheckForExperiments')
   permissionsCheckForExperiments(ids, context, tx) {
     return Promise.all(_.map(ids, id => this.permissionsCheck(id, context, tx)))
   }
 
+  @setErrorCode('1O4000')
   getUserPermissionsForExperiment(id, context, tx) {
     return Promise.all([
       this.ownerService.getOwnersByExperimentId(id, tx),

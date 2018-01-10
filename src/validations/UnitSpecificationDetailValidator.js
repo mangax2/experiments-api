@@ -2,7 +2,9 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 3GXXXX
 class UnitSpecificationDetailValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -32,6 +34,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
 
   getEntityName = () => 'UnitSpecificationDetail'
 
+  @setErrorCode('3G1000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -41,7 +44,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
           UnitSpecificationDetailValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('3G1001'))
     }
   }
 
@@ -49,14 +52,16 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'Duplicate unit specification id in request payload with same experiment id'
 
+  @setErrorCode('3G2000')
   preValidate = (unitSpecificationDetailObj) => {
     if (!_.isArray(unitSpecificationDetailObj) || unitSpecificationDetailObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Unit specification detail request object needs to be an array'))
+        AppError.badRequest('Unit specification detail request object needs to be an array', undefined, getFullErrorCode('3G2001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3G3000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

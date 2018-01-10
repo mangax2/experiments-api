@@ -6,7 +6,9 @@ import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
 import config from '../../config'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 3DXXXX
 class OwnerValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -33,6 +35,7 @@ class OwnerValidator extends SchemaValidator {
 
   getEntityName = () => 'Owner'
 
+  @setErrorCode('3D1000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -42,18 +45,20 @@ class OwnerValidator extends SchemaValidator {
           OwnerValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('3D1001'))
     }
   }
 
+  @setErrorCode('3D2000')
   preValidate = (ownerObj) => {
     if (!_.isArray(ownerObj) || ownerObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Owner request object needs to be a populated array'))
+        AppError.badRequest('Owner request object needs to be a populated array', undefined, getFullErrorCode('3D2001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3D3000')
   postValidate = (ownerObj, context) => {
     if (!this.hasErrors()) {
       const groupIds = _.compact(ownerObj[0].groupIds)
@@ -66,15 +71,17 @@ class OwnerValidator extends SchemaValidator {
     return Promise.resolve()
   }
 
+  @setErrorCode('3D4000')
   requiredOwnerCheck = (groupIds, userIds) => {
     if (userIds.length === 0 && groupIds.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Owner is required in request'),
+        AppError.badRequest('Owner is required in request', undefined, getFullErrorCode('3D4001')),
       )
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3D5000')
   validateUserIds = (userIds) => {
     if (userIds.length === 0) {
       return Promise.resolve()
@@ -86,7 +93,7 @@ class OwnerValidator extends SchemaValidator {
           const invalidUsers = _.difference(userIds, profileIds)
 
           if (userIds.length !== profileIds.length) {
-            return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`))
+            return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`, undefined, getFullErrorCode('3D5001')))
           }
 
           return Promise.resolve()
@@ -94,6 +101,7 @@ class OwnerValidator extends SchemaValidator {
       )
   }
 
+  @setErrorCode('3D6000')
   validateGroupIds = (groupIds) => {
     if (groupIds.length === 0) {
       return Promise.resolve()
@@ -105,7 +113,7 @@ class OwnerValidator extends SchemaValidator {
           const invalidGroups = _.difference(groupIds, profileIds)
 
           if (groupIds.length !== profileIds.length) {
-            return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`))
+            return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`, undefined, getFullErrorCode('3D6001')))
           }
 
           return Promise.resolve()
@@ -113,6 +121,7 @@ class OwnerValidator extends SchemaValidator {
       )
   }
 
+  @setErrorCode('3D7000')
   userOwnershipCheck = (groupIds, userIds, userId) => {
     if (_.includes(userIds, userId)) {
       return Promise.resolve()
@@ -127,7 +136,7 @@ class OwnerValidator extends SchemaValidator {
           const concatGroups = _.concat(groupIds, config.admin_group)
 
           if (_.intersection(concatGroups, profileGroupIds).length === 0) {
-            return Promise.reject(AppError.badRequest(errorMessage))
+            return Promise.reject(AppError.badRequest(errorMessage), undefined, getFullErrorCode('3D7001'))
           }
 
           return Promise.resolve()

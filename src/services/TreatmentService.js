@@ -6,15 +6,18 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import TreatmentValidator from '../validations/TreatmentValidator'
 import Transactional from '../decorators/transactional'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
 const logger = log4js.getLogger('TreatmentService')
 
+// Error Codes 1RXXXX
 class TreatmentService {
   constructor() {
     this.validator = new TreatmentValidator()
     this.experimentService = new ExperimentsService()
   }
 
+  @setErrorCode('1R1000')
   @Transactional('batchCreateTreatments')
   batchCreateTreatments(treatments, context, tx) {
     return this.validator.validate(treatments, 'POST', tx)
@@ -22,34 +25,38 @@ class TreatmentService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @setErrorCode('1R2000')
   @Transactional('getTreatmentsByExperimentId')
   getTreatmentsByExperimentId(id, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
+  @setErrorCode('1R3000')
   @Transactional('getTreatmentById')
   getTreatmentById = (id, context, tx) => db.treatment.find(id, tx)
     .then((data) => {
       if (!data) {
         logger.error(`[[${context.requestId}]] Treatment Not Found for requested id = ${id}`)
-        throw AppError.notFound('Treatment Not Found for requested id')
+        throw AppError.notFound('Treatment Not Found for requested id', undefined, getFullErrorCode('1R3001'))
       } else {
         return data
       }
     })
 
+  @setErrorCode('1R4000')
   @Transactional('getTreatmentById')
   batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
         logger.error(`[[${context.requestId}]] Treatment not found for all requested ids.`)
-        throw AppError.notFound('Treatment not found for all requested ids.')
+        throw AppError.notFound('Treatment not found for all requested ids.', undefined, getFullErrorCode('1R4001'))
       } else {
         return data
       }
     })
 
+  @setErrorCode('1R5000')
   @Transactional('batchUpdateTreatments')
   batchUpdateTreatments(treatments, context, tx) {
     return this.validator.validate(treatments, 'PUT', tx)
@@ -57,12 +64,13 @@ class TreatmentService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
+  @setErrorCode('1R6000')
   @Transactional('batchDeleteTreatments')
   batchDeleteTreatments = (ids, context, tx) => db.treatment.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
         logger.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
-        throw AppError.notFound('Not all treatments requested for delete were found')
+        throw AppError.notFound('Not all treatments requested for delete were found', undefined, getFullErrorCode('1R6001'))
       } else {
         return data
       }

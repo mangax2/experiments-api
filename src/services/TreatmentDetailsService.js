@@ -4,10 +4,11 @@ import CombinationElementService from './CombinationElementService'
 import FactorLevelService from './FactorLevelService'
 import FactorService from './FactorService'
 import SecurityService from './SecurityService'
-
 import AppUtil from './utility/AppUtil'
 import Transactional from '../decorators/transactional'
+import { setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 1QXXXX
 class TreatmentDetailsService {
   constructor() {
     this.treatmentService = new TreatmentService()
@@ -16,6 +17,7 @@ class TreatmentDetailsService {
     this.securityService = new SecurityService()
   }
 
+  @setErrorCode('1Q1000')
   @Transactional('getAllTreatmentDetails')
   getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
     return Promise.all([
@@ -52,6 +54,7 @@ class TreatmentDetailsService {
     })
   }
 
+  @setErrorCode('1Q2000')
   @Transactional('manageAllTreatmentDetails')
   manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
@@ -64,12 +67,14 @@ class TreatmentDetailsService {
     })
   }
 
+  @setErrorCode('1Q3000')
   static populateExperimentId(treatments, experimentId) {
     _.forEach(treatments, (t) => {
       t.experimentId = Number(experimentId)
     })
   }
 
+  @setErrorCode('1Q4000')
   deleteTreatments(treatmentIdsToDelete, context, tx) {
     if (_.compact(treatmentIdsToDelete).length === 0) {
       return Promise.resolve()
@@ -77,6 +82,7 @@ class TreatmentDetailsService {
     return this.treatmentService.batchDeleteTreatments(treatmentIdsToDelete, context, tx)
   }
 
+  @setErrorCode('1Q5000')
   createTreatments(treatmentAdds, context, tx) {
     if (_.compact(treatmentAdds).length === 0) {
       return Promise.resolve()
@@ -95,6 +101,7 @@ class TreatmentDetailsService {
       })
   }
 
+  @setErrorCode('1Q6000')
   assembleBatchCreateCombinationElementsRequestFromAdds(treatments, treatmentIds) {
     this.appendParentTreatmentIdsToCombinationElements(treatments, treatmentIds)
     return this.removeUndefinedElements(
@@ -102,6 +109,7 @@ class TreatmentDetailsService {
     )
   }
 
+  @setErrorCode('1Q7000')
   appendParentTreatmentIdsToCombinationElements = (treatments, treatmentIds) => {
     _.forEach(treatments, (treatment, index) => {
       _.forEach(treatment.combinationElements, (element) => {
@@ -110,11 +118,14 @@ class TreatmentDetailsService {
     })
   }
 
+  @setErrorCode('1Q8000')
   extractCombinationElementsFromTreatments = treatments =>
     _.flatMap(treatments, treatment => treatment.combinationElements)
 
+  @setErrorCode('1Q9000')
   removeUndefinedElements = elements => _.filter(elements, element => !_.isUndefined(element))
 
+  @setErrorCode('1QA000')
   updateTreatments(treatmentUpdates, context, tx) {
     if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
@@ -124,6 +135,7 @@ class TreatmentDetailsService {
         .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
   }
 
+  @setErrorCode('1QB000')
   deleteCombinationElements(treatmentUpdates, context, tx) {
     return this.identifyCombinationElementIdsForDelete(treatmentUpdates, context, tx)
       .then((idsForDeletion) => {
@@ -135,6 +147,7 @@ class TreatmentDetailsService {
       })
   }
 
+  @setErrorCode('1QC000')
   identifyCombinationElementIdsForDelete(treatments, context, tx) {
     const treatmentIds = _.map(treatments, treatment => treatment.id)
 
@@ -151,6 +164,7 @@ class TreatmentDetailsService {
         }))
   }
 
+  @setErrorCode('1QD000')
   createAndUpdateCombinationElements(treatmentUpdates, context, tx) {
     return this.updateCombinationElements(
       this.assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
@@ -162,6 +176,7 @@ class TreatmentDetailsService {
       tx))
   }
 
+  @setErrorCode('1QE000')
   assembleBatchCreateCombinationElementsRequestFromUpdates = treatments =>
     _.flatMap(treatments, (treatment) => {
       const newElements = _.filter(treatment.combinationElements, combObj =>
@@ -173,6 +188,7 @@ class TreatmentDetailsService {
       })
     })
 
+  @setErrorCode('1QF000')
   assembleBatchUpdateCombinationElementsRequestFromUpdates = treatmentUpdates =>
     _.flatMap(treatmentUpdates, (treatmentUpdate) => {
       const existingElements = _.filter(treatmentUpdate.combinationElements, combinationElement =>
@@ -184,6 +200,7 @@ class TreatmentDetailsService {
       })
     })
 
+  @setErrorCode('1QG000')
   createCombinationElements(combinationElements, context, tx) {
     if (combinationElements.length === 0) {
       return Promise.resolve()
@@ -192,6 +209,7 @@ class TreatmentDetailsService {
       combinationElements, context, tx)
   }
 
+  @setErrorCode('1QH000')
   updateCombinationElements(combinationElements, context, tx) {
     if (combinationElements.length === 0) {
       return Promise.resolve()

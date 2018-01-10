@@ -2,7 +2,9 @@ import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 36XXXX
 class ExperimentsValidator extends SchemaValidator {
   static get POST_AND_PUT_SCHEMA_ELEMENTS() {
     return [
@@ -38,6 +40,7 @@ class ExperimentsValidator extends SchemaValidator {
     ]
   }
 
+  @setErrorCode('361000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -46,17 +49,18 @@ class ExperimentsValidator extends SchemaValidator {
       case 'FILTER':
         return ExperimentsValidator.FILTER_SCHEMA_ELEMENTS
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('361001'))
     }
   }
 
   getEntityName = () => 'Experiment'
 
+  @setErrorCode('362000')
   preValidate = (experimentObj) => {
     if (!_.isArray(experimentObj) || experimentObj.length === 0) {
       const entity = experimentObj && experimentObj.isTemplate ? 'Templates' : 'Experiments'
       return Promise.reject(
-        AppError.badRequest(`${entity} request object needs to be an array`))
+        AppError.badRequest(`${entity} request object needs to be an array`, undefined, getFullErrorCode('362001')))
     }
     return Promise.resolve()
   }

@@ -2,7 +2,9 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import { getFullErrorCode, setErrorCode } from '../decorators/setErrorDecorator'
 
+// Error Codes 38XXXX
 class FactorLevelsValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
@@ -27,6 +29,7 @@ class FactorLevelsValidator extends SchemaValidator {
 
   getEntityName = () => 'FactorLevel'
 
+  @setErrorCode('381000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -36,7 +39,7 @@ class FactorLevelsValidator extends SchemaValidator {
           FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('381001'))
     }
   }
 
@@ -44,14 +47,16 @@ class FactorLevelsValidator extends SchemaValidator {
 
   getDuplicateBusinessKeyError = () => 'Duplicate factor level value in request payload with same factor id'
 
+  @setErrorCode('382000')
   preValidate = (factorLevelObj) => {
     if (!_.isArray(factorLevelObj) || factorLevelObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Factor Level request object needs to be an array'))
+        AppError.badRequest('Factor Level request object needs to be an array', undefined, getFullErrorCode('382001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('383000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

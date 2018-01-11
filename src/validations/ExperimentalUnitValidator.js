@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 34XXXX
 class ExperimentalUnitValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('34')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {

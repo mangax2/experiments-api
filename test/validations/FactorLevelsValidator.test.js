@@ -105,7 +105,7 @@ describe('FactorLevelsValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns the duplicate business key error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate factor level value in request payload with same factor id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate factor level value in request payload with same factor id', errorCode: '384001' })
     })
   })
 

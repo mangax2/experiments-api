@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 38XXXX
 class FactorLevelsValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('38')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
@@ -47,7 +52,7 @@ class FactorLevelsValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['factorId', 'value']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate factor level value in request payload with same factor id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate factor level value in request payload with same factor id', errorCode: getFullErrorCode('384001') })
 
   @setErrorCode('382000')
   preValidate = (factorLevelObj) => {

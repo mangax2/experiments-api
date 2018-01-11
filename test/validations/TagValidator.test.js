@@ -57,8 +57,7 @@ describe('TagValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate Tag in' +
-        ' request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate Tag in request payload with same experiment id', errorCode: '3E4001' })
     })
   })
 

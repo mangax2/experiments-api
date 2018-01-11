@@ -121,7 +121,7 @@ describe('DesignSpecificationDetailValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business keys error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate design specification id in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate design specification id in request payload with same experiment id', errorCode: '334001' })
     })
   })
 

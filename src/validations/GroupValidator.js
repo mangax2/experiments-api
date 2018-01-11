@@ -14,6 +14,11 @@ const logger = log4js.getLogger('GroupValidator')
 
 // Error Codes 3BXXXX
 class GroupValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3B')
+  }
+
   strategyRetrievalPromise
   validRandomizationIds
 

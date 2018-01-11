@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 35XXXX
 class ExperimentDesignsValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('35')
+  }
+
   @setErrorCode('351000')
   getSchema = () => [
     {

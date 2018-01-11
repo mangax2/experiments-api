@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 33XXXX
 class DesignSpecificationDetailValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('33')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
@@ -51,8 +56,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'refDesignSpecId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate design specification id in request payload with' +
-  ' same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate design specification id in request payload with same experiment id', errorCode: getFullErrorCode('334001') })
 
   @setErrorCode('332000')
   preValidate = (designSpecificationDetailObj) => {

@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 31XXXX
 class CombinationElementValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('31')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'factorLevelId', type: 'numeric', required: true },
@@ -48,7 +53,7 @@ class CombinationElementValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['treatmentId', 'factorLevelId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate FactorLevel in request payload with same treatmentId'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate FactorLevel in request payload with same treatmentId', errorCode: getFullErrorCode('314001') })
 
   @setErrorCode('312000')
   preValidate = (combinationElementObj) => {

@@ -110,7 +110,7 @@ describe('CombinationElementValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business key error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate FactorLevel in request payload with same treatmentId')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate FactorLevel in request payload with same treatmentId', errorCode: '314001' })
     })
   })
 

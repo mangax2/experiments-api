@@ -170,7 +170,7 @@ describe('GroupValueValidator', () => {
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(1)
-        expect(target.messages[0]).toEqual('Group Value provided with same group id, and either same name and value, or same factor level id as another')
+        expect(target.messages[0]).toEqual({ message: 'Group Value provided with same group id, and either same name and value, or same factor level id as another', errorCode: '3C3001' })
       })
     })
 
@@ -182,7 +182,7 @@ describe('GroupValueValidator', () => {
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(1)
-        expect(target.messages[0]).toEqual('Group Value provided with same group id, and either same name and value, or same factor level id as another')
+        expect(target.messages[0]).toEqual({ message: 'Group Value provided with same group id, and either same name and value, or same factor level id as another', errorCode: '3C3001' })
       })
     })
   })

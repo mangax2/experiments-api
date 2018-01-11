@@ -77,7 +77,7 @@ describe('DependentVariablesValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('duplicate dependent variable name in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'duplicate dependent variable name in request payload with same experiment id', errorCode: '324001' })
     })
   })
 

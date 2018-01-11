@@ -12,6 +12,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3DXXXX
 class OwnerValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3D')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'experimentId', type: 'numeric', required: true },

@@ -7,6 +7,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3EXXXX
 class TagValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3E')
+  }
+
   static get VALIDATION_SCHEMA() {
     return [
       {
@@ -25,7 +30,7 @@ class TagValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['category', 'value', 'experimentId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate Tag in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate Tag in request payload with same experiment id', errorCode: getFullErrorCode('3E4001') })
 
   @setErrorCode('3E2000')
   preValidate = (obj) => {

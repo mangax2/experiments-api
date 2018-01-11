@@ -130,8 +130,7 @@ describe('FactorsValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate factor name in' +
-        ' request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate factor name in request payload with same experiment id', errorCode: '394001' })
     })
   })
 

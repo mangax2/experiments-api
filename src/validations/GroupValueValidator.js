@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3CXXXX
 class GroupValueValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3C')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
@@ -92,7 +97,7 @@ class GroupValueValidator extends SchemaValidator {
           _.uniq(groupIdsWithFactorId).length !== groupIdsWithFactorId.length
 
         if (hasDuplicateBusinessKeys) {
-          this.messages.push('Group Value provided with same group id, and either same name and value, or same factor level id as another')
+          this.messages.push({ message: 'Group Value provided with same group id, and either same name and value, or same factor level id as another', errorCode: getFullErrorCode('3C3001') })
         }
 
         return hasDuplicateBusinessKeys

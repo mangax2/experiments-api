@@ -24,7 +24,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   promMetrics(app)
 
-  setErrorDecorator.setErrorPrefix('EXP')
+  setErrorDecorator().setErrorPrefix('EXP')
 
   const requestContext = require('./middleware/requestContext')
 

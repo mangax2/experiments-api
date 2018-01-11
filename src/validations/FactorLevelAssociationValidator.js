@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 37XXXX
 class FactorLevelAssociationValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('37')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'associatedLevelId', type: 'numeric', required: true },

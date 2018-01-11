@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3AXXXX
 class FactorTypesValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3A')
+  }
+
   @setErrorCode('3A1000')
   getSchema = () => [
     {

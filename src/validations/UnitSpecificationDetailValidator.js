@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3GXXXX
 class UnitSpecificationDetailValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3G')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
@@ -52,7 +57,7 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'refUnitSpecId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate unit specification id in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate unit specification id in request payload with same experiment id', errorCode: getFullErrorCode('3G4001') })
 
   @setErrorCode('3G2000')
   preValidate = (unitSpecificationDetailObj) => {

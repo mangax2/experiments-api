@@ -46,7 +46,7 @@ function setErrorCode(errorCode) {
   }
 }
 
-export default () => ({
+module.exports = () => ({
   getFullErrorCode,
   setErrorCode,
   setErrorPrefix,

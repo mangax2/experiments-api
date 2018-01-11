@@ -502,7 +502,7 @@ describe('VariablesValidator', () => {
       }
       return target.validateEntity(variables).then(() => {
         expect(target.hasErrors()).toEqual(true)
-        expect(target.messages[0]).toEqual('Factors must contain at least one level.')
+        expect(target.messages[0]).toEqual({ message: 'Factors must contain at least one level.', errorCode: '3H3001' })
       })
     })
   })

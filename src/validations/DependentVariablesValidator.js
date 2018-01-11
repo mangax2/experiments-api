@@ -8,6 +8,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 32XXXX
 class DependentVariablesValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('32')
+  }
+
   @setErrorCode('321000')
   getSchema = (operationName) => {
     const schema = [
@@ -39,7 +44,7 @@ class DependentVariablesValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'name']
 
-  getDuplicateBusinessKeyError = () => 'duplicate dependent variable name in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'duplicate dependent variable name in request payload with same experiment id', errorCode: getFullErrorCode('324001') })
 
   @setErrorCode('322000')
   preValidate = (dependentObj) => {

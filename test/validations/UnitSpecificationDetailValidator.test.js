@@ -121,7 +121,7 @@ describe('UnitSpecificationDetailValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business keys error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate unit specification id in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate unit specification id in request payload with same experiment id', errorCode: '3G4001' })
     })
   })
 

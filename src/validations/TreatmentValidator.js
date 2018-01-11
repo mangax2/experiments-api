@@ -110,6 +110,11 @@ function formatInvalidRelationshipsErrorMessage(invalidRelationships) {
 
 // Error Codes 3FXXXX
 class TreatmentValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3F')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'isControl', type: 'boolean', required: true },
@@ -153,7 +158,7 @@ class TreatmentValidator extends SchemaValidator {
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'treatmentNumber']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate treatment number in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate treatment number in request payload with same experiment id', errorCode: getFullErrorCode('3FA001') })
 
   @setErrorCode('3F4000')
   getLevelsForExperiments = (experimentIds, tx) => Promise.all(
@@ -203,7 +208,7 @@ class TreatmentValidator extends SchemaValidator {
       .then((invalidRelationships) => {
         if (!_.isEmpty(invalidRelationships)) {
           _.forEach(formatInvalidRelationshipsErrorMessage(invalidRelationships),
-            errorMessage => this.messages.push(errorMessage))
+            errorMessage => this.messages.push({ message: errorMessage, errorCode: getFullErrorCode('3F8001') }))
         }
         return Promise.resolve()
       })

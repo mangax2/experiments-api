@@ -7,6 +7,11 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 // Error Codes 3HXXXX
 class VariablesValidator extends BaseValidator {
+  constructor() {
+    super()
+    super.setFileCode('3H')
+  }
+
   @setErrorCode('3H1000')
   findDuplicates = items =>
     _.filter(items, (value, index, iteratee) =>
@@ -97,7 +102,7 @@ class VariablesValidator extends BaseValidator {
             || _.isUndefined(variable)
             || _.size(variable.levels) === 0))
       if (_.size(factorsWithoutLevels) > 0) {
-        this.messages.push('Factors must contain at least one level.')
+        this.messages.push({ message: 'Factors must contain at least one level.', errorCode: getFullErrorCode('3H3001') })
       }
     }
     return Promise.resolve()

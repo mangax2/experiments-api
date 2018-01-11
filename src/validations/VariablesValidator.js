@@ -86,7 +86,7 @@ class VariablesValidator extends BaseValidator {
       _.zip(levelCountGroupedByFactor, nestedRefIdCountGroupedByFactor)
     if (_.some(levelCountAndRefIdCount, counts => counts[1] !== 0 && counts[0] !== counts[1])) {
       return Promise.reject(
-        AppError.badRequest('An association must exist for all levels of a nested variable.', undefined, getFullErrorCode('3H2005')))
+        AppError.badRequest('An association must exist for all levels of a nested variable.', undefined, getFullErrorCode('3H2006')))
     }
 
     return Promise.resolve()

@@ -2,26 +2,26 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
 
-// Error Codes 5KXXXX
+// Error Codes 5LXXXX
 class unitSpecificationDetailRepo {
   constructor(rep, pgp) {
     this.rep = rep
     this.pgp = pgp
   }
   
-  @setErrorCode('5K0000')
+  @setErrorCode('5L0000')
   repository = () => this.rep
 
-  @setErrorCode('5K1000')
+  @setErrorCode('5L1000')
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit_spec_detail WHERE id = $1', id)
 
-  @setErrorCode('5K2000')
+  @setErrorCode('5L2000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids])
 
-  @setErrorCode('5K3000')
+  @setErrorCode('5L3000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
 
-  @setErrorCode('5K4000')
+  @setErrorCode('5L4000')
   batchCreate = (unitSpecificationDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['value', 'uom_id', 'ref_unit_spec_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
@@ -44,7 +44,7 @@ class unitSpecificationDetailRepo {
     return tx.any(query)
   }
 
-  @setErrorCode('5K5000')
+  @setErrorCode('5L5000')
   batchUpdate = (unitSpecificationDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['id', 'value', { name: 'uom_id', cast: 'int' }, 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
@@ -66,10 +66,10 @@ class unitSpecificationDetailRepo {
     return tx.any(query)
   }
 
-  @setErrorCode('5K6000')
+  @setErrorCode('5L6000')
   remove = (id, tx = this.rep) => tx.oneOrNone('DELETE FROM unit_spec_detail WHERE id=$1 RETURNING id', id)
 
-  @setErrorCode('5K7000')
+  @setErrorCode('5L7000')
   batchRemove = (ids, tx = this.rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
@@ -77,10 +77,10 @@ class unitSpecificationDetailRepo {
     return tx.any('DELETE FROM unit_spec_detail WHERE id IN ($1:csv) RETURNING id', [ids])
   }
 
-  @setErrorCode('5K8000')
+  @setErrorCode('5L8000')
   removeByExperimentId = (experimentId, tx = this.rep) => tx.any('DELETE FROM unit_spec_detail WHERE experiment_id = $1 RETURNING id', experimentId)
 
-  @setErrorCode('5K9000')
+  @setErrorCode('5L9000')
   batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],

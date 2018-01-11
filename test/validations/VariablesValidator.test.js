@@ -59,7 +59,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.', undefined, '3H2005')
+          expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.', undefined, '3H2006')
         },
       )
     })

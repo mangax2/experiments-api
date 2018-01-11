@@ -88,7 +88,7 @@ class factorLevelRepo {
   @setErrorCode('589000')
   findByBusinessKey = (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE factor_id = $1 and value = $2`, keys)
 
-  @setErrorCode('5A0000')
+  @setErrorCode('58A000')
   batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       factor_id: obj.keys[0],

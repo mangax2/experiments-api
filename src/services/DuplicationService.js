@@ -8,7 +8,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
-// Error Codes 15XXXX
+// Error Codes 16XXXX
 class DuplicationService {
   constructor() {
     this.tagService = new TagService()

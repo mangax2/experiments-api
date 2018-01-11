@@ -1,3 +1,6 @@
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { setErrorCode } = setErrorDecorator()
 const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS experiment_parent; " +
   "DROP TABLE IF EXISTS owner_ids; " +
@@ -295,11 +298,17 @@ const duplicateUnitScript =
   "INTO TEMP unit_ids " +
   "FROM temp_unit_ids;"
 
+// Error Codes 53XXXX
+class duplicationRepo {
+  constructor(rep) {
+    this.rep = rep
+  }
 
-module.exports = (rep, pgp) => ({
-  repository: () => rep,
+  @setErrorCode('530000')
+  repository = () => this.rep
 
-  duplicateExperiment: function(experimentId,isTemplate ,context, tx = rep){ return tx.oneOrNone(
+  @setErrorCode('531000')
+  duplicateExperiment=  function(experimentId,isTemplate ,context, tx = this.rep){ return tx.oneOrNone(
       duplicateExperimentInfoScript +
         duplicateOwnersScript +
         duplicateFactorScript +
@@ -316,5 +325,7 @@ module.exports = (rep, pgp) => ({
       " SELECT * FROM experiment_parent;",
     [experimentId, context.userId,isTemplate.toString()],
   )
-  },
-})
+  }
+}
+
+module.exports = (rep) => new duplicationRepo(rep)

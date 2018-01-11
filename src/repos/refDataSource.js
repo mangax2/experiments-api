@@ -24,4 +24,4 @@ class refDataSourceRepo {
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_data_source WHERE id IN ($1:csv)', [ids])
 }
 
-module.exports = rep => refDataSourceRepo(rep)
+module.exports = rep => new refDataSourceRepo(rep)

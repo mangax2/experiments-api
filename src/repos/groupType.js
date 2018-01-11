@@ -21,4 +21,4 @@ class groupTypeRepo {
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_group_type WHERE id IN ($1:csv)', [ids])
 }
 
-module.exports = rep => groupTypeRepo(rep)
+module.exports = rep => new groupTypeRepo(rep)

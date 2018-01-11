@@ -42,7 +42,7 @@ class dependentVariableRepo {
   @setErrorCode('518000')
   findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM dependent_variable where experiment_id=$1 and name= $2', keys)
 
-  @setErrorCode('519000')
+  @setErrorCode('510000')
   batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],

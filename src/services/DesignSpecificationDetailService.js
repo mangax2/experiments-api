@@ -7,9 +7,13 @@ import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
 import Transactional from '../decorators/transactional'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('DesignSpecificationDetailService')
 
+// Error Codes 13XXXX
 class DesignSpecificationDetailService {
   constructor() {
     this.validator = new DesignSpecificationDetailValidator()
@@ -17,23 +21,26 @@ class DesignSpecificationDetailService {
     this.securityService = new SecurityService()
   }
 
+  @setErrorCode('131000')
   @Transactional('getDesignSpecificationDetailsByExperimentId')
   getDesignSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(id, isTemplate, context, tx)
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
+  @setErrorCode('132000')
   @Transactional('getDesignSpecificationDetailById')
   getDesignSpecificationDetailById = (id, context, tx) => db.designSpecificationDetail.find(id, tx)
     .then((data) => {
       if (!data) {
         logger.error(`[[${context.requestId}]] Design Specification Detail Not Found for requested id = ${id}`)
-        throw AppError.notFound('Design Specification Detail Not Found for requested id')
+        throw AppError.notFound('Design Specification Detail Not Found for requested id', undefined, getFullErrorCode('132001'))
       } else {
         return data
       }
     })
 
+  @setErrorCode('133000')
   @Transactional('batchCreateDesignSpecificationDetails')
   batchCreateDesignSpecificationDetails(specificationDetails, context, tx) {
     return this.validator.validate(specificationDetails, 'POST', tx)
@@ -41,6 +48,7 @@ class DesignSpecificationDetailService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @setErrorCode('134000')
   @Transactional('batchUpdateDesignSpecificationDetails')
   batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
     return this.validator.validate(designSpecificationDetails, 'PUT', tx)
@@ -48,12 +56,14 @@ class DesignSpecificationDetailService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
+  @setErrorCode('135000')
   populateExperimentId = (designSpecs, experimentId) => {
     _.forEach(designSpecs, (ds) => {
       ds.experimentId = Number(experimentId)
     })
   }
 
+  @setErrorCode('136000')
   @Transactional('manageAllDesignSpecificationDetails')
   manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context,
     isTemplate, tx) {
@@ -75,6 +85,7 @@ class DesignSpecificationDetailService {
     })
   }
 
+  @setErrorCode('137000')
   @Transactional('deleteDesignSpecificationDetails')
   deleteDesignSpecificationDetails = (idsToDelete, context, tx) => {
     if (_.compact(idsToDelete).length === 0) {
@@ -85,13 +96,14 @@ class DesignSpecificationDetailService {
         if (data.length !== idsToDelete.length) {
           logger.error(`[[${context.requestId}]] Not all design specification detail ids requested for delete were found`)
           throw AppError.notFound(
-            'Not all design specification detail ids requested for delete were found')
+            'Not all design specification detail ids requested for delete were found', undefined, getFullErrorCode('137001'))
         } else {
           return data
         }
       })
   }
 
+  @setErrorCode('138000')
   updateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
     if (_.compact(designSpecificationDetails).length === 0) {
       return Promise.resolve()
@@ -99,6 +111,7 @@ class DesignSpecificationDetailService {
     return this.batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx)
   }
 
+  @setErrorCode('139000')
   createDesignSpecificationDetails(designSpecificationDetails, context, tx) {
     if (_.compact(designSpecificationDetails).length === 0) {
       return Promise.resolve()
@@ -106,6 +119,7 @@ class DesignSpecificationDetailService {
     return this.batchCreateDesignSpecificationDetails(designSpecificationDetails, context, tx)
   }
 
+  @setErrorCode('13A000')
   @Transactional('getAdvancedParameters')
   getAdvancedParameters(experimentId, isTemplate, context, tx) {
     return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)

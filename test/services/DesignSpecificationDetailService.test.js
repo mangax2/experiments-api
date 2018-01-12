@@ -25,23 +25,25 @@ describe('DesignSpecificationDetailService', () => {
     })
 
     test('rejects when findAllByExperimentId fails', () => {
+      const error = { message: 'error' }
       target.experimentService.getExperimentById = mockResolve()
-      db.designSpecificationDetail.findAllByExperimentId = mockReject('error')
+      db.designSpecificationDetail.findAllByExperimentId = mockReject(error)
 
       return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when getExperimentById fails', () => {
-      target.experimentService.getExperimentById = mockReject('error')
+      const error = { message: 'error' }
+      target.experimentService.getExperimentById = mockReject(error)
       db.designSpecificationDetail.findAllByExperimentId = mock()
 
       return target.getDesignSpecificationDetailsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -62,17 +64,17 @@ describe('DesignSpecificationDetailService', () => {
 
       return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, () => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail Not Found for' +
-          ' requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail Not Found for requested id', undefined, '132001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.designSpecificationDetail.find = mockReject('error')
+      const error = { message: 'error' }
+      db.designSpecificationDetail.find = mockReject(error)
 
       return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -91,24 +93,26 @@ describe('DesignSpecificationDetailService', () => {
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchCreate = mockReject('error')
+      db.designSpecificationDetail.batchCreate = mockReject(error)
 
       return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.designSpecificationDetail.batchCreate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
+      db.designSpecificationDetail.batchCreate = mockReject(error)
 
       return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -127,24 +131,26 @@ describe('DesignSpecificationDetailService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchUpdate = mockReject('error')
+      db.designSpecificationDetail.batchUpdate = mockReject(error)
 
       return target.batchUpdateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.designSpecificationDetail.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.designSpecificationDetail.batchUpdate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
+      db.designSpecificationDetail.batchUpdate = mockReject(error)
 
       return target.batchUpdateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.designSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -191,11 +197,12 @@ describe('DesignSpecificationDetailService', () => {
     })
 
     test('rejects when create fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.populateExperimentId = mockResolve()
       target.deleteDesignSpecificationDetails = mockResolve()
       target.updateDesignSpecificationDetails = mockResolve()
-      target.createDesignSpecificationDetails = mockReject('error')
+      target.createDesignSpecificationDetails = mockReject(error)
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails({
@@ -209,15 +216,16 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when update fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.populateExperimentId = mockResolve()
       target.deleteDesignSpecificationDetails = mockResolve()
-      target.updateDesignSpecificationDetails = mockReject('error')
+      target.updateDesignSpecificationDetails = mockReject(error)
       target.createDesignSpecificationDetails = mockResolve()
       AppUtil.createCompositePostResponse = mock()
 
@@ -232,14 +240,15 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when delete fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.populateExperimentId = mockResolve()
-      target.deleteDesignSpecificationDetails = mockReject('error')
+      target.deleteDesignSpecificationDetails = mockReject(error)
       target.updateDesignSpecificationDetails = mockResolve()
       target.createDesignSpecificationDetails = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -255,7 +264,7 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.updateDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(target.createDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -283,8 +292,7 @@ describe('DesignSpecificationDetailService', () => {
 
       return target.deleteDesignSpecificationDetails([1, 2], testContext, testTx).then(() => {}, () => {
         expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all design specification detail ids' +
-          ' requested for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all design specification detail ids requested for delete were found', undefined, '137001')
       })
     })
   })

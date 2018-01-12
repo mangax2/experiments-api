@@ -1,14 +1,29 @@
-module.exports = (rep, pgp) => ({
-  repository: () => rep,
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
-  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM unit_spec_detail WHERE id = $1', id),
+const { setErrorCode } = setErrorDecorator()
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids]),
+// Error Codes 5LXXXX
+class unitSpecificationDetailRepo {
+  constructor(rep, pgp) {
+    this.rep = rep
+    this.pgp = pgp
+  }
+  
+  @setErrorCode('5L0000')
+  repository = () => this.rep
 
-  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId),
+  @setErrorCode('5L1000')
+  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit_spec_detail WHERE id = $1', id)
 
-  batchCreate: (unitSpecificationDetails, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('5L2000')
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids])
+
+  @setErrorCode('5L3000')
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
+
+  @setErrorCode('5L4000')
+  batchCreate = (unitSpecificationDetails, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       ['value', 'uom_id', 'ref_unit_spec_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'unit_spec_detail' },
     )
@@ -24,13 +39,14 @@ module.exports = (rep, pgp) => ({
       modified_date: 'CURRENT_TIMESTAMP',
     }))
 
-    const query = `${pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
+    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
 
     return tx.any(query)
-  },
+  }
 
-  batchUpdate: (unitSpecificationDetails, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('5L5000')
+  batchUpdate = (unitSpecificationDetails, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       ['id', 'value', { name: 'uom_id', cast: 'int' }, 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
       { table: 'unit_spec_detail' },
     )
@@ -45,29 +61,35 @@ module.exports = (rep, pgp) => ({
       modified_date: 'CURRENT_TIMESTAMP',
     }))
 
-    const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+    const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
     return tx.any(query)
-  },
+  }
 
-  remove: (id, tx = rep) => tx.oneOrNone('DELETE FROM unit_spec_detail WHERE id=$1 RETURNING id', id),
+  @setErrorCode('5L6000')
+  remove = (id, tx = this.rep) => tx.oneOrNone('DELETE FROM unit_spec_detail WHERE id=$1 RETURNING id', id)
 
-  batchRemove: (ids, tx = rep) => {
+  @setErrorCode('5L7000')
+  batchRemove = (ids, tx = this.rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM unit_spec_detail WHERE id IN ($1:csv) RETURNING id', [ids])
-  },
+  }
 
-  removeByExperimentId: (experimentId, tx = rep) => tx.any('DELETE FROM unit_spec_detail WHERE experiment_id = $1 RETURNING id', experimentId),
+  @setErrorCode('5L8000')
+  removeByExperimentId = (experimentId, tx = this.rep) => tx.any('DELETE FROM unit_spec_detail WHERE experiment_id = $1 RETURNING id', experimentId)
 
-  batchFindByBusinessKey: (batchKeys, tx = rep) => {
+  @setErrorCode('5L9000')
+  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],
       ref_unit_spec_id: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(experiment_id, ref_unit_spec_id, id) AS (VALUES ${pgp.helpers.values(values, ['experiment_id', 'ref_unit_spec_id', 'id'])}) select entity.experiment_id, entity.ref_unit_spec_id from public.unit_spec_detail entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) AND entity.ref_unit_spec_id = CAST(d.ref_unit_spec_id as integer) AND (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(experiment_id, ref_unit_spec_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'ref_unit_spec_id', 'id'])}) select entity.experiment_id, entity.ref_unit_spec_id from public.unit_spec_detail entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) AND entity.ref_unit_spec_id = CAST(d.ref_unit_spec_id as integer) AND (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
-  },
-})
+  }
+}
+
+module.exports = (rep, pgp) => new unitSpecificationDetailRepo(rep, pgp)

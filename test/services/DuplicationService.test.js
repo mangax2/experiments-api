@@ -41,7 +41,7 @@ describe('DuplicationService', () => {
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({ ids: [1] }, testContext, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.', undefined, '161001')
     })
 
     test('throws a bad request when ids has no values is missing from the body', () => {
@@ -49,7 +49,7 @@ describe('DuplicationService', () => {
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({ ids: [] }, testContext, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.', undefined, '161001')
     })
 
     test('throws a bad request when id is missing from the body', () => {
@@ -57,7 +57,7 @@ describe('DuplicationService', () => {
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments({}, testContext, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.', undefined, '161001')
     })
 
     test('throws a bad request when body is missing from request', () => {
@@ -65,7 +65,7 @@ describe('DuplicationService', () => {
       AppError.badRequest = mock('')
 
       expect(() => target.duplicateExperiments(null, testContext, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Body must contain at least one experiment id to duplicate and the number of copies to make.', undefined, '161001')
     })
   })
 

@@ -26,16 +26,17 @@ describe('UnitTypeService', () => {
 
       return target.getUnitTypeById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.unitType.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Unit Type Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Unit Type Not Found for requested id', undefined, '1U1001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.unitType.find = mockReject('error')
+      const error = { message: 'error' }
+      db.unitType.find = mockReject(error)
 
       return target.getUnitTypeById(1).then(() => {}, (err) => {
         expect(db.unitType.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -51,11 +52,12 @@ describe('UnitTypeService', () => {
     })
 
     test('rejects when find all fails', () => {
-      db.unitType.all = mockReject('error')
+      const error = { message: 'error' }
+      db.unitType.all = mockReject(error)
 
       return target.getAllUnitTypes().then(() => {}, (err) => {
         expect(db.unitType.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

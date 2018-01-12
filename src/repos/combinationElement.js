@@ -1,20 +1,34 @@
 import _ from 'lodash'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { setErrorCode } = setErrorDecorator()
 const columns = 'ce.id, ce.factor_level_id,ce.treatment_id, ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
 const genericSqlStatement = `SELECT ${columns} FROM combination_element ce`
 
-module.exports = (rep, pgp) => ({
-  repository: () => rep,
+// Error Codes 50XXXX
+class combinationElementRepo {
+  constructor(rep, pgp){
+    this.rep = rep
+    this.pgp = pgp
+  }
 
-  find: (id, tx = rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.id = $1`, id),
+  @setErrorCode('500000')
+  repository = () => this.rep
 
-  batchFind: (ids, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids]),
+  @setErrorCode('501000')
+  find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.id = $1`, id)
 
-  findAllByTreatmentId: (treatmentId, tx = rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId),
+  @setErrorCode('502000')
+  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids])
 
-  findAllByExperimentId: (experimentId, tx = rep) => tx.any('SELECT ce.* FROM combination_element ce INNER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId),
+  @setErrorCode('503000')
+  findAllByTreatmentId = (treatmentId, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId)
 
-  batchFindAllByTreatmentIds: (treatmentIds, tx = rep) => {
+  @setErrorCode('504000')
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT ce.* FROM combination_element ce INNER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId)
+
+  @setErrorCode('505000')
+  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => {
     if (!treatmentIds || treatmentIds.length === 0) {
       return Promise.resolve([])
     }
@@ -22,10 +36,11 @@ module.exports = (rep, pgp) => ({
       const elements = _.groupBy(data, d => d.treatment_id)
       return _.map(treatmentIds, treatmentId => elements[treatmentId])
     })
-  },
+  }
 
-  batchCreate: (combinationElements, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('506000')
+  batchCreate = (combinationElements, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       ['factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'combination_element' },
     )
@@ -37,13 +52,14 @@ module.exports = (rep, pgp) => ({
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
+    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
 
     return tx.any(query)
-  },
+  }
 
-  batchUpdate: (combinationElements, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('507000')
+  batchUpdate = (combinationElements, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       ['?id', 'factor_level_id', 'treatment_id', 'modified_user_id', 'modified_date'],
       { table: 'combination_element' },
     )
@@ -54,28 +70,33 @@ module.exports = (rep, pgp) => ({
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+    const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
     return tx.any(query)
-  },
+  }
 
-  batchRemove: (ids, tx = rep) => {
+  @setErrorCode('508000')
+  batchRemove = (ids, tx = this.rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM combination_element WHERE id IN ($1:csv) RETURNING id', [ids])
-  },
+  }
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM combination_element' +
-    ' WHERE treatment_id = $1 and factor_level_id = $2', keys),
+  @setErrorCode('509000')
+  findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM combination_element' +
+    ' WHERE treatment_id = $1 and factor_level_id = $2', keys)
 
-  batchFindByBusinessKey: (batchKeys, tx = rep) => {
+  @setErrorCode('50A000')
+  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       treatment_id: obj.keys[0],
       factor_level_id: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.factor_level_id from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.factor_level_id =  CAST(d.factor_level_id as integer) and (d.id is null or ce.id != CAST(d.id as integer))`
+    const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.factor_level_id from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.factor_level_id =  CAST(d.factor_level_id as integer) and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
-  },
-})
+  }
+}
+
+module.exports = (rep, pgp) => new combinationElementRepo(rep, pgp)

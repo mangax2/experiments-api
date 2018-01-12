@@ -28,27 +28,29 @@ describe('CombinationElementService', () => {
     })
 
     test('rejects when combinationElement db call fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.combinationElement.batchCreate = mockReject('error')
+      db.combinationElement.batchCreate = mockReject(error)
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateCombinationElements([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.combinationElement.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.combinationElement.batchCreate = mock()
 
       return target.batchCreateCombinationElements([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.combinationElement.batchCreate).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -65,13 +67,14 @@ describe('CombinationElementService', () => {
     })
 
     test('rejects when treatmentService fails', () => {
-      target.treatmentService.getTreatmentById = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.getTreatmentById = mockReject(error)
       db.combinationElement.findAllByTreatmentId = mock()
 
       return target.getCombinationElementsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.combinationElement.findAllByTreatmentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -86,11 +89,12 @@ describe('CombinationElementService', () => {
     })
 
     test('rejects when findAllByExperimentId fails', () => {
-      db.combinationElement.findAllByExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      db.combinationElement.findAllByExperimentId = mockReject(error)
 
       return target.getCombinationElementsByExperimentId(1, testTx).then(() => {}, (err) => {
         expect(db.combinationElement.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -107,13 +111,14 @@ describe('CombinationElementService', () => {
     })
 
     test('rejects when treatmentService call fails', () => {
-      target.treatmentService.batchGetTreatmentByIds = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.batchGetTreatmentByIds = mockReject(error)
       db.combinationElement.batchFindAllByTreatmentIds = mock()
 
       return target.batchGetCombinationElementsByTreatmentIds([1, 2], {}, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith([1, 2], {}, testTx)
         expect(db.combinationElement.batchFindAllByTreatmentIds).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -144,15 +149,16 @@ describe('CombinationElementService', () => {
       AppError.notFound = jest.fn(() => ({}))
 
       return target.getCombinationElementById(1, testTx).then(() => {}, () => {
-        expect(AppError.notFound).toHaveBeenCalledWith('Combination Element Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Combination Element Not Found for requested id', undefined, '116001')
       })
     })
 
     test('rejects when combinationElement find fails', () => {
-      db.combinationElement.find = mockReject('error')
+      const error = { message: 'error' }
+      db.combinationElement.find = mockReject(error)
 
       return target.getCombinationElementById(1, testTx).then(() => {}, (err) => {
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -171,20 +177,22 @@ describe('CombinationElementService', () => {
     })
 
     test('rejects when batchUpdate call fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.combinationElement.batchUpdate = mockReject('error')
+      db.combinationElement.batchUpdate = mockReject(error)
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateCombinationElements([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx)
         expect(db.combinationElement.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate call fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.combinationElement.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
 
@@ -192,7 +200,7 @@ describe('CombinationElementService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx)
         expect(db.combinationElement.batchUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -213,8 +221,7 @@ describe('CombinationElementService', () => {
 
       return target.batchDeleteCombinationElements([1], {}, testTx).then(() => {}, () => {
         expect(db.combinationElement.batchRemove).toHaveBeenCalledWith([1], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all combination elements requested' +
-          ' for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all combination elements requested for delete were found', undefined, '118001')
       })
     })
 
@@ -224,8 +231,7 @@ describe('CombinationElementService', () => {
 
       return target.batchDeleteCombinationElements([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.combinationElement.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all combination elements requested' +
-          ' for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all combination elements requested for delete were found', undefined, '118001')
       })
     })
   })

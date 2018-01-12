@@ -2,8 +2,17 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 39XXXX
 class FactorsValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('39')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
@@ -34,6 +43,7 @@ class FactorsValidator extends SchemaValidator {
 
   getEntityName = () => 'Factor'
 
+  @setErrorCode('391000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -43,23 +53,24 @@ class FactorsValidator extends SchemaValidator {
           FactorsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('391001'))
     }
   }
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'name']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate factor name in request payload with same' +
-  ' experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate factor name in request payload with same experiment id', errorCode: getFullErrorCode('394001') })
 
+  @setErrorCode('392000')
   preValidate = (factorObj) => {
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Factor request object needs to be an array'))
+        AppError.badRequest('Factor request object needs to be an array', undefined, getFullErrorCode('392001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('393000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

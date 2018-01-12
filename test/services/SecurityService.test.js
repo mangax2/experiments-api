@@ -72,7 +72,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
 
       return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
-        expect(data).toEqual({ error: 'error' })
+        expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
 
@@ -86,7 +86,7 @@ describe('SecurityService', () => {
       })
 
       return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
-        expect(data).toEqual({ error: 'error' })
+        expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
 
@@ -136,13 +136,14 @@ describe('SecurityService', () => {
     })
 
     test('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
+      const error = { message: 'error' }
       target.getUserPermissionsForExperiment = mockResolve([])
       db.experiments.find = mockResolve({})
-      AppError.unauthorized = mock('')
+      AppError.unauthorized = mock(error)
       return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(err).toBe('')
+        expect(err).toBe(error)
       })
     })
 
@@ -156,8 +157,7 @@ describe('SecurityService', () => {
       return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
-          ' experimentId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '1O1001')
       })
     })
 
@@ -170,8 +170,7 @@ describe('SecurityService', () => {
       return target.permissionsCheck(1, testContext, true, testTx).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
         expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested' +
-          ' templateId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '1O1001')
       })
     })
 
@@ -180,7 +179,7 @@ describe('SecurityService', () => {
       db.experiments.find = mock()
 
       expect(() => target.permissionsCheck(1, {}, true, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+      expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing', undefined, '1O1003')
       expect(db.experiments.find).not.toHaveBeenCalled()
     })
   })

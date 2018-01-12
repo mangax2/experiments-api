@@ -27,20 +27,22 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.unit.batchCreate = mockReject('error')
+      db.unit.batchCreate = mockReject(error)
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.unit.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validator fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.unit.batchCreate = mock()
       AppUtil.createPostResponse = mock()
 
@@ -48,7 +50,7 @@ describe('ExperimentalUnitService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
         expect(db.unit.batchCreate).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -65,24 +67,26 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when call to findAllByTreatmentId fails', () => {
+      const error = { message: 'error' }
       target.treatmentService.getTreatmentById = mockResolve()
-      db.unit.findAllByTreatmentId = mockReject('error')
+      db.unit.findAllByTreatmentId = mockReject(error)
 
       return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.unit.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when call to getTreatmentById fails', () => {
-      target.treatmentService.getTreatmentById = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.getTreatmentById = mockReject(error)
       db.unit.findAllByTreatmentId = mock()
 
       return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
         expect(db.unit.findAllByTreatmentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -126,7 +130,7 @@ describe('ExperimentalUnitService', () => {
       AppError.notFound = mock('')
 
       return target.getExperimentalUnitInfoBySetId(5).catch(() => {
-        expect(AppError.notFound).toBeCalledWith('Either the set was not found or no set entries are associated with the set.')
+        expect(AppError.notFound).toBeCalledWith('Either the set was not found or no set entries are associated with the set.', undefined, '179001')
         done()
       })
     })
@@ -251,7 +255,8 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when batchFindAllBySetId fails', () => {
-      db.unit.batchFindAllBySetId = mockReject('error')
+      const error = { message: 'error' }
+      db.unit.batchFindAllBySetId = mockReject(error)
 
       db.treatment.batchFindAllTreatmentLevelDetails = mock()
 
@@ -259,7 +264,7 @@ describe('ExperimentalUnitService', () => {
       target.mapTreatmentLevelsToOutputFormat = mock()
 
       return target.getTreatmentDetailsBySetId(1, testTx).then(() => {}, (err) => {
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
         expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
         expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
@@ -373,8 +378,7 @@ describe('ExperimentalUnitService', () => {
 
       return target.getExperimentalUnitById(1, {}, testTx).then(() => {}, () => {
         expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for' +
-          ' requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for requested id', undefined, '176001')
       })
     })
   })
@@ -391,13 +395,14 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when getExperimentById fails', () => {
-      target.experimentService.getExperimentById = mockReject('error')
+      const error = { message: 'error' }
+      target.experimentService.getExperimentById = mockReject(error)
       db.unit.findAllByExperimentId = mock()
 
       return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.unit.findAllByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -416,20 +421,22 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.unit.batchUpdate = mockReject('error')
+      db.unit.batchUpdate = mockReject(error)
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx)
         expect(db.unit.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.unit.batchUpdate = mock()
       AppUtil.createPutResponse = mock()
 
@@ -437,7 +444,7 @@ describe('ExperimentalUnitService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx)
         expect(db.unit.batchUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -456,20 +463,22 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.unit.batchPartialUpdate = mockReject('error')
+      db.unit.batchPartialUpdate = mockReject(error)
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
         expect(db.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.unit.batchPartialUpdate = mock()
       AppUtil.createPutResponse = mock()
 
@@ -477,7 +486,7 @@ describe('ExperimentalUnitService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
         expect(db.unit.batchPartialUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -498,8 +507,7 @@ describe('ExperimentalUnitService', () => {
 
       return target.batchDeleteExperimentalUnits([1], {}, testTx).then(() => {}, () => {
         expect(db.unit.batchRemove).toHaveBeenCalledWith([1], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for' +
-          ' delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for delete were found', undefined, '17F001')
       })
     })
 
@@ -509,8 +517,7 @@ describe('ExperimentalUnitService', () => {
 
       return target.batchDeleteExperimentalUnits([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.unit.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for' +
-          ' delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for delete were found', undefined, '17F001')
       })
     })
   })
@@ -522,13 +529,13 @@ describe('ExperimentalUnitService', () => {
         id: 1,
         setEntryId: 2,
       }], 'id')).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate id(s) in request payload')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate id(s) in request payload', undefined, '173001')
     })
 
     test('throws an error when duplicate setEntryId(s) are passed in', () => {
       AppError.badRequest = mock('')
       expect(() => ExperimentalUnitService.uniqueIdsCheck([{ setEntryId: 1 }, { setEntryId: 1 }], 'setEntryId')).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate setEntryId(s) in request payload')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Duplicate setEntryId(s) in request payload', undefined, '173001')
     })
 
     test('Does not throw an error when no duplicate id found', () => {

@@ -4,6 +4,9 @@ import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 function createLevelIdToFactorIdMap(levelDbEntities) {
   return _.zipObject(
@@ -105,7 +108,13 @@ function formatInvalidRelationshipsErrorMessage(invalidRelationships) {
     `Treatment number: ${invalidRelationship.treatmentDTO.treatmentNumber} has the following invalid level id combinations: ${formatInvalidNestedRelationships(invalidRelationship.invalidNestedRelationships)}`)
 }
 
+// Error Codes 3FXXXX
 class TreatmentValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('3F')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'isControl', type: 'boolean', required: true },
@@ -133,6 +142,7 @@ class TreatmentValidator extends SchemaValidator {
 
   getEntityName = () => 'Treatment'
 
+  @setErrorCode('3F1000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -142,25 +152,29 @@ class TreatmentValidator extends SchemaValidator {
           TreatmentValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('3F1001'))
     }
   }
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'treatmentNumber']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate treatment number in request payload with same experiment id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate treatment number in request payload with same experiment id', errorCode: getFullErrorCode('3FA001') })
 
+  @setErrorCode('3F4000')
   getLevelsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
       experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
 
+  @setErrorCode('3F5000')
   getAssociationsForExperiments = (experimentIds, tx) => Promise.all(
     _.map(experimentIds,
       experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
 
+  @setErrorCode('3F6000')
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
+  @setErrorCode('3F7000')
   getDataForEachExperiment = (experimentIds, treatmentDTOs, tx) => {
     const treatmentDTOsForEachExperiment =
       _.map(experimentIds, experimentId =>
@@ -174,6 +188,7 @@ class TreatmentValidator extends SchemaValidator {
       treatmentDTOsForEachExperiment))
   }
 
+  @setErrorCode('3F8000')
   validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest, tx) => {
     const distinctExperimentIds =
       this.getDistinctExperimentIdsFromDTOs(treatmentDTOsFromRequest)
@@ -193,20 +208,22 @@ class TreatmentValidator extends SchemaValidator {
       .then((invalidRelationships) => {
         if (!_.isEmpty(invalidRelationships)) {
           _.forEach(formatInvalidRelationshipsErrorMessage(invalidRelationships),
-            errorMessage => this.messages.push(errorMessage))
+            errorMessage => this.messages.push({ message: errorMessage, errorCode: getFullErrorCode('3F8001') }))
         }
         return Promise.resolve()
       })
   }
 
+  @setErrorCode('3F2000')
   preValidate = (treatmentDTOs) => {
     if (!_.isArray(treatmentDTOs) || treatmentDTOs.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Treatment request object needs to be an array'))
+        AppError.badRequest('Treatment request object needs to be an array', undefined, getFullErrorCode('3F2001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('3F9000')
   checkForDuplicateBusinessKeys = (treatmentDTOs) => {
     const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()
     const businessKeyArray = _.map(treatmentDTOs, obj => _.pick(obj, businessKeyPropertyNames))
@@ -221,6 +238,7 @@ class TreatmentValidator extends SchemaValidator {
     })
   }
 
+  @setErrorCode('3F3000')
   postValidate = (treatmentDTOs, context, tx) => {
     if (this.hasErrors()) {
       return Promise.resolve()

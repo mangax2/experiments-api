@@ -2,8 +2,17 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 31XXXX
 class CombinationElementValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('31')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'factorLevelId', type: 'numeric', required: true },
@@ -28,6 +37,7 @@ class CombinationElementValidator extends SchemaValidator {
 
   getEntityName = () => 'CombinationElement'
 
+  @setErrorCode('311000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -37,23 +47,24 @@ class CombinationElementValidator extends SchemaValidator {
           CombinationElementValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('311001'))
     }
   }
 
   getBusinessKeyPropertyNames = () => ['treatmentId', 'factorLevelId']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate FactorLevel in request payload with same' +
-  ' treatmentId'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate FactorLevel in request payload with same treatmentId', errorCode: getFullErrorCode('314001') })
 
+  @setErrorCode('312000')
   preValidate = (combinationElementObj) => {
     if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('CombinationElement request object needs to be an array'))
+        AppError.badRequest('CombinationElement request object needs to be an array', undefined, getFullErrorCode('312001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('313000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

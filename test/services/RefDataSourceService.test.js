@@ -20,11 +20,12 @@ describe('RefDataSourceService', () => {
     })
 
     test('rejects when get all fails', () => {
-      db.refDataSource.all = mockReject('error')
+      const error = { message: 'error' }
+      db.refDataSource.all = mockReject(error)
 
       return target.getRefDataSources().then(() => {}, (err) => {
         expect(db.refDataSource.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -40,11 +41,12 @@ describe('RefDataSourceService', () => {
     })
 
     test('rejects when findByTypeId fails', () => {
-      db.refDataSource.findByTypeId = mockReject('error')
+      const error = { message: 'error' }
+      db.refDataSource.findByTypeId = mockReject(error)
 
       return target.getRefDataSourcesByRefDataSourceTypeId(1).then(() => {}, (err) => {
         expect(db.refDataSource.findByTypeId).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

@@ -19,7 +19,7 @@ describe('VariablesValidator', () => {
       return target.preValidate([]).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('Variables request object cannot be an array')
+          expect(AppError.badRequest).toHaveBeenCalledWith('Variables request object cannot be an array', undefined, '3H2001')
         },
       )
     })
@@ -59,7 +59,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.')
+          expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.', undefined, '3H2006')
         },
       )
     })
@@ -96,7 +96,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 4')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 4', undefined, '3H2002')
         },
       )
     })
@@ -130,7 +130,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2', undefined, '3H2002')
         },
       )
     })
@@ -176,7 +176,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2, 3, 5')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2, 3, 5', undefined, '3H2002')
         },
       )
     })
@@ -216,7 +216,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 99')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 99', undefined, '3H2003')
         },
       )
     })
@@ -268,7 +268,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 42, 99')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 42, 99', undefined, '3H2003')
         },
       )
     })
@@ -316,7 +316,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}', undefined, '3H2004')
         },
       )
     })
@@ -372,7 +372,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}', undefined, '3H2004')
         },
       )
     })
@@ -412,7 +412,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single factor is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}')
+          expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single factor is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}', undefined, '3H2005')
         },
       )
     })
@@ -502,7 +502,7 @@ describe('VariablesValidator', () => {
       }
       return target.validateEntity(variables).then(() => {
         expect(target.hasErrors()).toEqual(true)
-        expect(target.messages[0]).toEqual('Factors must contain at least one level.')
+        expect(target.messages[0]).toEqual({ message: 'Factors must contain at least one level.', errorCode: '3H3001' })
       })
     })
   })

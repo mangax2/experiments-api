@@ -1,14 +1,27 @@
-module.exports = rep => ({
-  repository: () => rep,
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
-  findByExperimentId: (experimentId, tx = rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
+const { setErrorCode } = setErrorDecorator()
+
+// Error Codes 5EXXXX
+class ownerRepo {
+  constructor(rep) {
+    this.rep = rep
+  }
+
+  @setErrorCode('5E0000')
+  repository = () => this.rep
+
+  @setErrorCode('5E1000')
+  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
     ' owner WHERE' +
-    ' experiment_id = $1', experimentId),
+    ' experiment_id = $1', experimentId)
 
-  batchFindByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT * FROM owner where' +
-    ' experiment_id IN ($1:csv)', [experimentIds]),
+  @setErrorCode('5E2000')
+  batchFindByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT * FROM owner where' +
+    ' experiment_id IN ($1:csv)', [experimentIds])
 
-  batchCreate: (experimentsOwners, context, tx = rep) => tx.batch(
+  @setErrorCode('5E3000')
+  batchCreate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.one(
         'insert into owner(experiment_id, user_ids, group_ids, created_user_id, ' +
@@ -22,10 +35,10 @@ module.exports = rep => ({
           context.userId],
       ),
     ),
-  ),
+  )
 
-
-  batchUpdate: (experimentsOwners, context, tx = rep) => tx.batch(
+  @setErrorCode('5E4000')
+  batchUpdate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.oneOrNone(
         'UPDATE owner SET (user_ids, group_ids,' +
@@ -39,6 +52,7 @@ module.exports = rep => ({
         ],
       ),
     ),
-  ),
+  )
+}
 
-})
+module.exports = rep => new ownerRepo(rep)

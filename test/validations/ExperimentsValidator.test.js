@@ -117,7 +117,7 @@ describe('ExperimentsValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '361001')
     })
   })
 
@@ -140,8 +140,7 @@ describe('ExperimentsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiments request object needs to be' +
-          ' an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiments request object needs to be an array', undefined, '362001')
       })
     })
 
@@ -149,16 +148,14 @@ describe('ExperimentsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiments request object needs to be' +
-          ' an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiments request object needs to be an array', undefined, '362001')
       })
     })
     test('rejects when experimentObj is not an array with Istemplate True', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({ isTemplate: true }).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Templates request object needs to be' +
-          ' an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Templates request object needs to be an array', undefined, '362001')
       })
     })
   })

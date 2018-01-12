@@ -109,7 +109,7 @@ describe('UnitSpecificationDetailValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3G1001')
     })
   })
 
@@ -121,7 +121,7 @@ describe('UnitSpecificationDetailValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business keys error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate unit specification id in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate unit specification id in request payload with same experiment id', errorCode: '3G4001' })
     })
   })
 
@@ -138,8 +138,7 @@ describe('UnitSpecificationDetailValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unit specification detail request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unit specification detail request object needs to be an array', undefined, '3G2001')
       })
     })
 
@@ -147,8 +146,7 @@ describe('UnitSpecificationDetailValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unit specification detail request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unit specification detail request object needs to be an array', undefined, '3G2001')
       })
     })
   })

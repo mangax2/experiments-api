@@ -5,15 +5,20 @@ import AppError from './utility/AppError'
 import GroupValueValidator from '../validations/GroupValueValidator'
 import GroupService from './GroupService'
 import Transactional from '../decorators/transactional'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('GroupValueService')
 
+// Error Codes 1IXXXX
 class GroupValueService {
   constructor() {
     this.validator = new GroupValueValidator()
     this.groupService = new GroupService()
   }
 
+  @setErrorCode('1I1000')
   @Transactional('createGroupValueTx')
   batchCreateGroupValues(groupValues, context, tx) {
     return this.validator.validate(groupValues, 'POST', tx)
@@ -21,21 +26,24 @@ class GroupValueService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @setErrorCode('1I2000')
   @Transactional('batchGetGroupValuesByExperimentId')
   batchGetGroupValuesByExperimentId = (id, tx) =>
     db.groupValue.batchFindAllByExperimentId(id, tx)
 
+  @setErrorCode('1I3000')
   @Transactional('getGroupValueById')
   getGroupValueById = (id, context, tx) => db.groupValue.find(id, tx)
     .then((data) => {
       if (!data) {
         logger.error(`[[${context.requestId}]] Group Value Not Found for requested id = ${id}`)
-        throw AppError.notFound('Group Value Not Found for requested id')
+        throw AppError.notFound('Group Value Not Found for requested id', undefined, getFullErrorCode('1I3001'))
       } else {
         return data
       }
     })
 
+  @setErrorCode('1I4000')
   @Transactional('batchUpdateGroupValues')
   batchUpdateGroupValues(groupValues, context, tx) {
     return this.validator.validate(groupValues, 'PUT', tx)

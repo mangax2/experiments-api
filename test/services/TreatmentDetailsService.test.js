@@ -71,7 +71,8 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when it fails to get treatments', () => {
-      target.treatmentService.getTreatmentsByExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.getTreatmentsByExperimentId = mockReject(error)
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
@@ -81,13 +82,14 @@ describe('TreatmentDetailsService', () => {
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when it fails to get combinationElements', () => {
+      const error = { message: 'error' }
       target.treatmentService.getTreatmentsByExperimentId = mockResolve()
-      target.combinationElementService.getCombinationElementsByExperimentId = mockReject('error')
+      target.combinationElementService.getCombinationElementsByExperimentId = mockReject(error)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
 
@@ -96,14 +98,15 @@ describe('TreatmentDetailsService', () => {
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when it fails to get factorLevels', () => {
+      const error = { message: 'error' }
       target.treatmentService.getTreatmentsByExperimentId = mockResolve()
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
-      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject('error')
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject(error)
       target.factorService.getFactorsByExperimentId = mockResolve()
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
@@ -111,22 +114,23 @@ describe('TreatmentDetailsService', () => {
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when it fails to get factors', () => {
+      const error = { message: 'error' }
       target.treatmentService.getTreatmentsByExperimentId = mockResolve()
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
-      target.factorService.getFactorsByExperimentId = mockReject('error')
+      target.factorService.getFactorsByExperimentId = mockReject(error)
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -153,10 +157,11 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when create fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.deleteTreatments = mockResolve()
       target.updateTreatments = mockResolve()
-      target.createTreatments = mockReject('error')
+      target.createTreatments = mockReject(error)
 
       return target.manageAllTreatmentDetails(-1, {
         deletes: [1],
@@ -166,15 +171,16 @@ describe('TreatmentDetailsService', () => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], {}, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{ experimentId: -1 }], testContext, testTx)
         expect(target.createTreatments).toHaveBeenCalledWith([{ experimentId: -1 }, { experimentId: -1 }], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when update fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.deleteTreatments = mockResolve()
-      target.updateTreatments = mockReject('error')
-      target.createTreatments = mockReject('error')
+      target.updateTreatments = mockReject(error)
+      target.createTreatments = mockReject(error)
 
       return target.manageAllTreatmentDetails(-1, {
         deletes: [1],
@@ -184,15 +190,16 @@ describe('TreatmentDetailsService', () => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], {}, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([{ experimentId: -1 }], testContext, testTx)
         expect(target.createTreatments).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when delete fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
-      target.deleteTreatments = mockReject('error')
-      target.updateTreatments = mockReject('error')
-      target.createTreatments = mockReject('error')
+      target.deleteTreatments = mockReject(error)
+      target.updateTreatments = mockReject(error)
+      target.createTreatments = mockReject(error)
 
       return target.manageAllTreatmentDetails(-1, {
         deletes: [1],
@@ -202,7 +209,7 @@ describe('TreatmentDetailsService', () => {
         expect(target.deleteTreatments).toHaveBeenCalledWith([1], {}, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.createTreatments).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -226,11 +233,12 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when batchDelete fails', () => {
-      target.treatmentService.batchDeleteTreatments = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.batchDeleteTreatments = mockReject(error)
 
       return target.deleteTreatments([1], {}, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchDeleteTreatments).toHaveBeenCalledWith([1], {}, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
@@ -266,30 +274,32 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when createCombinationElements fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheckForExperiments = mockResolve()
       target.treatmentService.batchCreateTreatments = mockResolve([{ id: 1 }])
-      target.createCombinationElements = mockReject('error')
+      target.createCombinationElements = mockReject(error)
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
       return target.createTreatments([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).toHaveBeenCalledWith([{}], [1])
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when batchCreateTreatments fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheckForExperiments = mockResolve()
-      target.treatmentService.batchCreateTreatments = mockReject('error')
-      target.createCombinationElements = mockReject('error')
+      target.treatmentService.batchCreateTreatments = mockReject(error)
+      target.createCombinationElements = mockReject(error)
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
       return target.createTreatments([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.createCombinationElements).not.toHaveBeenCalled()
         expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -350,41 +360,44 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when createAndUpdateCombinationElements fails', () => {
+      const error = { message: 'error' }
       target.treatmentService.batchUpdateTreatments = mockResolve()
       target.deleteCombinationElements = mockResolve()
-      target.createAndUpdateCombinationElements = mockReject('error')
+      target.createAndUpdateCombinationElements = mockReject(error)
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.createAndUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when deleteCombinationElements fails', () => {
+      const error = { message: 'error' }
       target.treatmentService.batchUpdateTreatments = mockResolve()
-      target.deleteCombinationElements = mockReject('error')
-      target.createAndUpdateCombinationElements = mockReject('error')
+      target.deleteCombinationElements = mockReject(error)
+      target.createAndUpdateCombinationElements = mockReject(error)
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when batchUpdateTreatments fails', () => {
-      target.treatmentService.batchUpdateTreatments = mockReject('error')
-      target.deleteCombinationElements = mockReject('error')
-      target.createAndUpdateCombinationElements = mockReject('error')
+      const error = { message: 'error' }
+      target.treatmentService.batchUpdateTreatments = mockReject(error)
+      target.deleteCombinationElements = mockReject(error)
+      target.createAndUpdateCombinationElements = mockReject(error)
 
       return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.deleteCombinationElements).not.toHaveBeenCalled()
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -412,24 +425,26 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when delete fails', () => {
+      const error = { message: 'error' }
       target.identifyCombinationElementIdsForDelete = mockResolve([1])
-      target.combinationElementService.batchDeleteCombinationElements = mockReject('error')
+      target.combinationElementService.batchDeleteCombinationElements = mockReject(error)
 
       return target.deleteCombinationElements([{}], {}, testTx).then(() => {}, (err) => {
         expect(target.identifyCombinationElementIdsForDelete).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.combinationElementService.batchDeleteCombinationElements).toHaveBeenCalledWith([1], {}, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when identifyCombinationElementIdsForDelete fails', () => {
-      target.identifyCombinationElementIdsForDelete = mockReject('error')
-      target.combinationElementService.batchDeleteCombinationElements = mockReject('error')
+      const error = { message: 'error' }
+      target.identifyCombinationElementIdsForDelete = mockReject(error)
+      target.combinationElementService.batchDeleteCombinationElements = mockReject(error)
 
       return target.deleteCombinationElements([{}], {}, testTx).then(() => {}, (err) => {
         expect(target.identifyCombinationElementIdsForDelete).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.combinationElementService.batchDeleteCombinationElements).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -458,12 +473,13 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when batchGetCombinationElementsByTreatmentIds fails', () => {
+      const error = { message: 'error' }
       const treatments = [{ id: 1, combinationElements: [{ id: 1 }, { id: 3 }] }]
-      target.combinationElementService.batchGetCombinationElementsByTreatmentIds = mockReject('error')
+      target.combinationElementService.batchGetCombinationElementsByTreatmentIds = mockReject(error)
 
       return target.identifyCombinationElementIdsForDelete(treatments, {}, testTx).then(() => {}, (err) => {
         expect(target.combinationElementService.batchGetCombinationElementsByTreatmentIds).toHaveBeenCalledWith([1], {}, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -484,8 +500,9 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when createCombinationElements fails', () => {
+      const error = { message: 'error' }
       target.updateCombinationElements = mockResolve()
-      target.createCombinationElements = mockReject('error')
+      target.createCombinationElements = mockReject(error)
       target.assembleBatchUpdateCombinationElementsRequestFromUpdates = mock([{}])
       target.assembleBatchCreateCombinationElementsRequestFromUpdates = mock([{}])
 
@@ -494,13 +511,14 @@ describe('TreatmentDetailsService', () => {
         expect(target.createCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.assembleBatchUpdateCombinationElementsRequestFromUpdates).toHaveBeenCalledWith([{}])
         expect(target.assembleBatchCreateCombinationElementsRequestFromUpdates).toHaveBeenCalledWith([{}])
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when updateCombinationElements fails', () => {
-      target.updateCombinationElements = mockReject('error')
-      target.createCombinationElements = mockReject('error')
+      const error = { message: 'error' }
+      target.updateCombinationElements = mockReject(error)
+      target.createCombinationElements = mockReject(error)
       target.assembleBatchUpdateCombinationElementsRequestFromUpdates = mock([{}])
       target.assembleBatchCreateCombinationElementsRequestFromUpdates = mock([{}])
 
@@ -509,7 +527,7 @@ describe('TreatmentDetailsService', () => {
         expect(target.createCombinationElements).not.toHaveBeenCalled()
         expect(target.assembleBatchUpdateCombinationElementsRequestFromUpdates).toHaveBeenCalledWith([{}])
         expect(target.assembleBatchCreateCombinationElementsRequestFromUpdates).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -565,11 +583,12 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when batchCreateCombinationElements fails', () => {
-      target.combinationElementService.batchCreateCombinationElements = mockReject('error')
+      const error = { message: 'error' }
+      target.combinationElementService.batchCreateCombinationElements = mockReject(error)
 
       return target.createCombinationElements([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.combinationElementService.batchCreateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -593,11 +612,12 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('rejects when batchUpdateCombinationElements fails', () => {
-      target.combinationElementService.batchUpdateCombinationElements = mockReject('error')
+      const error = { message: 'error' }
+      target.combinationElementService.batchUpdateCombinationElements = mockReject(error)
 
       return target.updateCombinationElements([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.combinationElementService.batchUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

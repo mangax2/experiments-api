@@ -109,7 +109,7 @@ describe('DesignSpecificationDetailValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '331001')
     })
   })
 
@@ -121,7 +121,7 @@ describe('DesignSpecificationDetailValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business keys error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate design specification id in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate design specification id in request payload with same experiment id', errorCode: '334001' })
     })
   })
 
@@ -138,9 +138,7 @@ describe('DesignSpecificationDetailValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Design specification detail request' +
-          ' object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Design specification detail request object needs to be an array', undefined, '332001')
       })
     })
 
@@ -148,8 +146,7 @@ describe('DesignSpecificationDetailValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Design specification detail request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Design specification detail request object needs to be an array', undefined, '332001')
       })
     })
   })

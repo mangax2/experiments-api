@@ -26,16 +26,17 @@ describe('GroupTypeService', () => {
 
       return target.getGroupTypeById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.groupType.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Group Type Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Group Type Not Found for requested id', undefined, '1H1001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.groupType.find = mockReject('error')
+      const error = { message: 'error' }
+      db.groupType.find = mockReject(error)
 
       return target.getGroupTypeById(1).then(() => {}, (err) => {
         expect(db.groupType.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -51,11 +52,12 @@ describe('GroupTypeService', () => {
     })
 
     test('rejects when get all fails', () => {
-      db.groupType.all = mockReject('error')
+      const error = { message: 'error' }
+      db.groupType.all = mockReject(error)
 
       return target.getAllGroupTypes().then(() => {}, (err) => {
         expect(db.groupType.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

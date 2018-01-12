@@ -9,6 +9,8 @@ const { getFullErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('BaseValidator')
 
+// Error Codes 30XXXX
+// Decorator isn't used because it would be less helpful compared to the child validator's file code
 class BaseValidator {
   constructor() {
     this.messages = []

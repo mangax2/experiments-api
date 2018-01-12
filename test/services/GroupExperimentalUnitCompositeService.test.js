@@ -152,7 +152,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     test('throws an error when there are group validation errors', () => {
       const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
-      target.validateGroups = mock('error!')
+      target.validateGroups = mock(error)
       AppError.badRequest = mock(error)
       target.groupService.deleteGroupsForExperimentId = mock()
       target.getGroupTree = mockResolve([])
@@ -440,34 +440,43 @@ describe('GroupExperimentalUnitCompositeService', () => {
     test('returns an error due to units and childGroups being empty', () => {
       const group = { units: [], childGroups: [] }
       target.validateGroups = mock()
+      AppError.badRequest = mock()
 
-      expect(target.validateGroup(group)).toEqual('Each group should have at least one unit or' +
-        ' at least one child group')
+      target.validateGroup(group)
+
+      expect(AppError.badRequest).toHaveBeenCalledWith('Each group should have at least one unit or at least one child group', undefined, '1FC002')
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
     test('returns an error when units and child groups are populated', () => {
       const group = { units: [{}], childGroups: [{}] }
       target.validateGroups = mock()
+      AppError.badRequest = mock()
 
-      expect(target.validateGroup(group)).toEqual('Only leaf child groups should have units')
+      target.validateGroup(group)
+
+      expect(AppError.badRequest).toHaveBeenCalledWith('Only leaf child groups should have units', undefined, '1FC001')
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
     test('returns no error when there are just units', () => {
       const group = { units: [{}], childGroups: [] }
       target.validateGroups = mock()
+      AppError.badRequest = mock()
 
       expect(target.validateGroup(group)).toEqual(undefined)
+      expect(AppError.badRequest).not.toHaveBeenCalled()
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
 
     test('defaults units and child groups to empty arrays if they are not present', () => {
       const group = {}
       target.validateGroups = mock()
+      AppError.badRequest = mock()
 
-      expect(target.validateGroup(group)).toEqual('Each group should have at least one unit or' +
-        ' at least one child group')
+      target.validateGroup(group)
+
+      expect(AppError.badRequest).toHaveBeenCalledWith('Each group should have at least one unit or at least one child group', undefined, '1FC002')
       expect(target.validateGroups).not.toHaveBeenCalled()
     })
   })

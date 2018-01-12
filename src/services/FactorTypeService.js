@@ -30,32 +30,6 @@ class FactorTypeService {
         return data
       }
     })
-
-  @setErrorCode('1E4000')
-  updateFactorType(id, factorType, context) {
-    return this.validator.validate([factorType])
-      .then(() => db.factorType.repository().tx('updateFactorType', tx =>
-        db.factorType.update(tx, id, factorType, context)
-          .then((data) => {
-            if (!data) {
-              throw AppError.notFound('Factor Type Not Found', undefined, getFullErrorCode('1E4001'))
-            } else {
-              return data
-            }
-          })))
-  }
-
-  @setErrorCode('1E5000')
-  deleteFactorType = id => db.factorType.repository().tx('deleteFactorType', tx =>
-    db.factorType.delete(tx, id)
-      .then((data) => {
-        if (!data) {
-          throw AppError.notFound('Factor Type Not Found', undefined, getFullErrorCode('1E5001'))
-        } else {
-          return data
-        }
-      }),
-  )
 }
 
 module.exports = FactorTypeService

@@ -48,7 +48,7 @@ class GroupExperimentalUnitCompositeService {
       .then(() => {
         const error = this.validateGroups(groupAndUnitDetails)
         if (error) {
-          throw AppError.badRequest(error, undefined, getFullErrorCode('1F2001'))
+          throw error
         }
         return this.getGroupTree(experimentId, isTemplate, context, tx)
           .then((oldGroupsAndUnits) => {
@@ -157,10 +157,10 @@ class GroupExperimentalUnitCompositeService {
     const units = group.units ? group.units : []
     const childGroups = group.childGroups ? group.childGroups : []
     if (units.length > 0 && childGroups.length > 0) {
-      return 'Only leaf child groups should have units'
+      return AppError.badRequest('Only leaf child groups should have units', undefined, getFullErrorCode('1FC001'))
     }
     if (units.length === 0 && childGroups.length === 0) {
-      return 'Each group should have at least one unit or at least one child group'
+      return AppError.badRequest('Each group should have at least one unit or at least one child group', undefined, getFullErrorCode('1FC002'))
     }
     if (childGroups.length > 0) {
       return this.validateGroups(childGroups)

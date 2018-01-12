@@ -29,30 +29,6 @@ class ExperimentDesignService {
         return data
       }
     })
-
-  @setErrorCode('184000')
-  updateExperimentDesign(id, experimentDesign, context) {
-    return this.validator.validate([experimentDesign])
-      .then(() => db.experimentDesign.update(id, experimentDesign, context)
-        .then((data) => {
-          if (!data) {
-            throw AppError.notFound('Experiment Design Not Found', undefined, getFullErrorCode('184001'))
-          } else {
-            return data
-          }
-        }),
-      )
-  }
-
-  @setErrorCode('185000')
-  deleteExperimentDesign = id => db.experimentDesign.delete(id)
-    .then((data) => {
-      if (!data) {
-        throw AppError.notFound('Experiment Design Not Found', undefined, getFullErrorCode('185001'))
-      } else {
-        return data
-      }
-    })
 }
 
 module.exports = ExperimentDesignService

@@ -290,7 +290,7 @@ describe('ExperimentalUnitService', () => {
       db.unit.batchFindAllBySetId = mockResolve([])
 
       db.treatment.batchFindAllTreatmentLevelDetails = mock()
-      AppError.badRequest = mock('')
+      AppError.notFound = mock('')
 
       target = new ExperimentalUnitService()
       target.mapTreatmentLevelsToOutputFormat = mock()
@@ -299,7 +299,7 @@ describe('ExperimentalUnitService', () => {
         expect(db.unit.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
         expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalled()
+        expect(AppError.notFound).toHaveBeenCalled()
       })
     })
   })

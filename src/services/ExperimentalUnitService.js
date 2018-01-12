@@ -137,7 +137,7 @@ class ExperimentalUnitService {
             .then(this.mapTreatmentLevelsToOutputFormat)
         }
 
-        throw AppError.badRequest(`No treatments found for set id: ${setId}.`, undefined, getFullErrorCode('17C001'))
+        throw AppError.notFound(`No treatments found for set id: ${setId}.`, undefined, getFullErrorCode('17C001'))
       })
     }
 

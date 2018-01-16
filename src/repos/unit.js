@@ -28,13 +28,13 @@ class unitRepo {
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J6000')
-  batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, this.rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
+  batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.this.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId)
+  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId)
 
   @setErrorCode('5J8000')
-  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.this.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
+  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
 
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {

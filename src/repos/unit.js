@@ -39,7 +39,7 @@ class unitRepo {
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['group_id', 'treatment_id', 'this.rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'unit' },
     )
 
@@ -62,7 +62,7 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'group_id', 'treatment_id', 'this.rep', {
+      ['?id', 'group_id', 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
       }, 'modified_user_id', 'modified_date'],

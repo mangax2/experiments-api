@@ -8,39 +8,44 @@ function setErrorPrefix(errorPrefix) {
 
 const getFullErrorCode = errorCode => `${prefix}${errorCode}`
 
+const addErrorCodeIfNotExist = (ex, errorCode) => {
+  if (!ex.errorCode) {
+    ex.errorCode = getFullErrorCode(errorCode)
+  }
+  throw ex
+}
+
+const wrappingFunction = ((errorCode, bindingFunction) => function () {
+  try {
+    const result = bindingFunction(this, arguments)
+    if (Promise.resolve(result) === result || bluebird.resolve(result) === result) {
+      return result.catch(err => addErrorCodeIfNotExist(err, errorCode))
+    }
+    return result
+  } catch (err) {
+    return addErrorCodeIfNotExist(err, errorCode)
+  }
+})
+
+const addErrorHandling = (errorCode, functionToWrap) => {
+  const bindingFunction = (thisRef, args) => functionToWrap(...args)
+  return wrappingFunction(errorCode, bindingFunction)
+}
+
 function setErrorCode(errorCode) {
   return function (target, property, descriptor) {
-    const addErrorCodeIfNotExist = (ex) => {
-      if (!ex.errorCode) {
-        ex.errorCode = getFullErrorCode(errorCode)
-      }
-      throw ex
-    }
-
-    const wrappingFunction = (bindingFunction => function () {
-      try {
-        const result = bindingFunction(this, arguments)
-        if (Promise.resolve(result) === result || bluebird.resolve(result) === result) {
-          return result.catch(addErrorCodeIfNotExist)
-        }
-        return result
-      } catch (ex) {
-        return addErrorCodeIfNotExist(ex)
-      }
-    })
-
     if (descriptor.value) {
       // This section handles traditional javascript functions [function (arg) { //logic }]
-      const wrappedFunction = descriptor.value
-      const bindingFunction = (thisRef, args) => wrappedFunction.apply(thisRef, args)
-      descriptor.value = wrappingFunction(bindingFunction)
+      const functionToWrap = descriptor.value
+      const bindingFunction = (thisRef, args) => functionToWrap.apply(thisRef, args)
+      descriptor.value = wrappingFunction(errorCode, bindingFunction)
     } else {
       // This section handles arrow functions [(arg) => { //logic }]
       const originalInitializer = descriptor.initializer
       descriptor.initializer = function () {
         const functionToWrap = originalInitializer.call(this)
         const bindingFunction = (thisRef, args) => functionToWrap(...args)
-        return wrappingFunction(bindingFunction)
+        return wrappingFunction(errorCode, bindingFunction)
       }
     }
 
@@ -49,6 +54,7 @@ function setErrorCode(errorCode) {
 }
 
 module.exports = () => ({
+  addErrorHandling,
   getFullErrorCode,
   setErrorCode,
   setErrorPrefix,

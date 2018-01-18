@@ -88,16 +88,6 @@ class CapacityRequestService {
 
     syncPromises.push(ExperimentsService.updateCapacityRequestSyncDate(experimentId, context, tx))
 
-    // This is some code you can use to recreate just the issue with pgp swallowing the errorCode
-    //
-    // return ExperimentsService.updateCapacityRequestSyncTime(experimentId, context, tx)
-    //   .then(() => AppUtil.createNoContentResponse())
-
-    // return syncPromises[0].then(() => AppUtil.createNoContentResponse()).catch((err) => {
-    //   console.log(err)
-    //   throw err
-    // })
-
     return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
   }
 }

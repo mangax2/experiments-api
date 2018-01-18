@@ -49,8 +49,6 @@ class experimentsRepo {
   @setErrorCode('558000')
   updateCapacityRequestSyncDate = (id, context, tx = this.rep) => tx.any('UPDATE experiment SET (capacity_request_sync_date, modified_user_id) = (CURRENT_TIMESTAMP, $1) WHERE id=$2 RETURNING id',
     [context.userId, id])
-    // [id, context.userId])
-    // The commented out line is how you can trigger the pgp errorCode issue
 }
 
 module.exports = rep => new experimentsRepo(rep)

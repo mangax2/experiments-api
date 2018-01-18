@@ -143,44 +143,47 @@ class DesignSpecificationDetailService {
   @setErrorCode('13A000')
   @Transactional('syncDesignSpecificationDetails')
   syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
-    return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
-      .then(currentDesignSpecDetails =>
-        this.refDesignSpecificationService.getAllRefDesignSpecs().then((refDesignSpecs) => {
-          const upsertValues = []
+    return this.securityService.permissionsCheck(experimentId, context, false, tx)
+      .then(() =>
+        this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
+          .then(currentDesignSpecDetails =>
+            this.refDesignSpecificationService.getAllRefDesignSpecs().then((refDesignSpecs) => {
+              const upsertValues = []
 
-          if (capacitySyncDesignSpecDetails.locations) {
-            const refLocationId = _.find(refDesignSpecs, dS => dS.name === 'Locations').id
+              if (capacitySyncDesignSpecDetails.locations) {
+                const refLocationId = _.find(refDesignSpecs, dS => dS.name === 'Locations').id
 
-            upsertValues.push({
-              refDesignSpecId: refLocationId,
-              value: capacitySyncDesignSpecDetails.locations,
-            })
-          }
+                upsertValues.push({
+                  refDesignSpecId: refLocationId,
+                  value: capacitySyncDesignSpecDetails.locations,
+                })
+              }
 
-          if (capacitySyncDesignSpecDetails.reps) {
-            const refMinRepsId = _.find(refDesignSpecs, dS => dS.name === 'Min Rep').id
-            const currentMinReps = _.find(
-              currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
-            )
+              if (capacitySyncDesignSpecDetails.reps) {
+                const refMinRepsId = _.find(refDesignSpecs, dS => dS.name === 'Min Rep').id
+                const currentMinReps = _.find(
+                  currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
+                )
 
-            if (!currentMinReps) {
-              const refRepId = _.find(refDesignSpecs, dS => dS.name === 'Reps').id
+                if (!currentMinReps) {
+                  const refRepId = _.find(refDesignSpecs, dS => dS.name === 'Reps').id
 
-              upsertValues.push({
-                refDesignSpecId: refRepId,
-                value: capacitySyncDesignSpecDetails.reps,
-              })
-            }
-          }
+                  upsertValues.push({
+                    refDesignSpecId: refRepId,
+                    value: capacitySyncDesignSpecDetails.reps,
+                  })
+                }
+              }
 
-          if (upsertValues.length > 0) {
-            return db.designSpecificationDetail.syncDesignSpecificationDetails(
-              experimentId, upsertValues, context, tx,
-            )
-          }
+              if (upsertValues.length > 0) {
+                return db.designSpecificationDetail.syncDesignSpecificationDetails(
+                  experimentId, upsertValues, context, tx,
+                )
+              }
 
-          return Promise.resolve()
-        }),
+              return Promise.resolve()
+            }),
+          ),
       )
   }
 }

@@ -379,8 +379,25 @@ describe('DesignSpecificationDetailService', () => {
   })
 
   describe('syncDesignSpecificationDetails', () => {
+    test('rejects when security service rejects', () => {
+      target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockReject() }
+      target.getDesignSpecificationDetailsByExperimentId = mock()
+      target.refDesignSpecificationService = {
+        getAllRefDesignSpecs: mock(),
+      }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mock()
+
+      return target.syncDesignSpecificationDetails({}, 1, testContext, testTx).then(() => {}, () => {
+        expect(target.getDesignSpecificationDetailsByExperimentId).not.toHaveBeenCalled()
+        expect(target.refDesignSpecificationService.getAllRefDesignSpecs).not.toHaveBeenCalled()
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
     test('returns a resolved promise when there are no design specification details to sync', () => {
       target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockResolve() }
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockResolve([]),
@@ -394,6 +411,7 @@ describe('DesignSpecificationDetailService', () => {
 
     test('rejects when it fails to get ref design specifications', () => {
       target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockResolve() }
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockReject(),
@@ -407,6 +425,7 @@ describe('DesignSpecificationDetailService', () => {
 
     test('rejects when it fails to get design specification details', () => {
       target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockResolve() }
       target.getDesignSpecificationDetailsByExperimentId = mockReject()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockReject(),
@@ -421,6 +440,7 @@ describe('DesignSpecificationDetailService', () => {
 
     test('adds a location and rep design for upsert', () => {
       target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockResolve() }
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
       target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
@@ -448,6 +468,7 @@ describe('DesignSpecificationDetailService', () => {
 
     test('adds a location but does nothing for reps when min reps are defined', () => {
       target = new DesignSpecificationDetailService()
+      target.securityService = { permissionsCheck: mockResolve() }
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([
         { id: 1, ref_design_spec_id: 1, value: '1' },
         { id: 2, ref_design_spec_id: 3, value: '8' },

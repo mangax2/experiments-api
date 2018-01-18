@@ -6,6 +6,7 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
+import RefDesignSpecificationService from './RefDesignSpecificationService'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -13,11 +14,53 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('DesignSpecificationDetailService')
 
+function createDesignSpecificationDetailObject(id, refDesignSpecId, value, experimentId) {
+  const designSpecificationDetail = {
+    refDesignSpecId,
+    value,
+    experimentId,
+  }
+
+  if (id) {
+    designSpecificationDetail.id = id
+  }
+
+  return designSpecificationDetail
+}
+
+function handleDesignSpecificationDetailSyncValue(
+  currentDesignSpecificationDetail,
+  syncDesignSpecificationDetailValue,
+  refDesignSpecId,
+  experimentId) {
+  if (currentDesignSpecificationDetail) {
+    if (syncDesignSpecificationDetailValue.toString() !== currentDesignSpecificationDetail.value) {
+      return createDesignSpecificationDetailObject(
+        currentDesignSpecificationDetail.id,
+        refDesignSpecId,
+        syncDesignSpecificationDetailValue.toString(),
+        experimentId,
+      )
+    }
+  } else {
+    return createDesignSpecificationDetailObject(
+      undefined,
+      refDesignSpecId,
+      syncDesignSpecificationDetailValue.toString(),
+      experimentId,
+    )
+  }
+
+  return undefined
+}
+
+
 // Error Codes 13XXXX
 class DesignSpecificationDetailService {
   constructor() {
     this.validator = new DesignSpecificationDetailValidator()
     this.experimentService = new ExperimentsService()
+    this.refDesignSpecificationService = new RefDesignSpecificationService()
     this.securityService = new SecurityService()
   }
 
@@ -136,6 +179,84 @@ class DesignSpecificationDetailService {
 
         return advancedParameters
       })
+  }
+
+  @setErrorCode('13A000')
+  @Transactional('syncDesignSpecificationDetails')
+  syncDesignSpecificationDetails(designSpecificationDetails, experimentId, context, tx) {
+    return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
+      .then(currentDesignSpecDetails =>
+        this.refDesignSpecificationService.getAllRefDesignSpecs().then((designSpecs) => {
+          const designSpecificationDetailChanges = { adds: [], updates: [], deletes: [] }
+
+          // handle locations
+          if (designSpecificationDetails.locations) {
+            const refLocationId = _.find(designSpecs, dS => dS.name === 'Locations').id
+            const currentLocations = _.find(
+              currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refLocationId,
+            )
+
+            const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
+              currentLocations,
+              designSpecificationDetails.locations,
+              refLocationId,
+              experimentId,
+            )
+
+            if (syncDesignSpecificationDetail) {
+              if (syncDesignSpecificationDetail.id) {
+                designSpecificationDetailChanges.updates.push(syncDesignSpecificationDetail)
+              } else {
+                designSpecificationDetailChanges.adds.push(syncDesignSpecificationDetail)
+              }
+            }
+          }
+
+          // handle reps
+          if (designSpecificationDetails.reps) {
+            const refMinRepsId = _.find(designSpecs, dS => dS.name === 'Min Rep').id
+            const currentMinReps = _.find(
+              currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
+            )
+
+            if (!currentMinReps) {
+              const refRepId = _.find(designSpecs, dS => dS.name === 'Reps').id
+              const currentReps = _.find(
+                currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refRepId,
+              )
+
+              const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
+                currentReps,
+                designSpecificationDetails.reps,
+                refRepId,
+                experimentId,
+              )
+
+              if (syncDesignSpecificationDetail) {
+                if (syncDesignSpecificationDetail.id) {
+                  designSpecificationDetailChanges.updates.push(syncDesignSpecificationDetail)
+                } else {
+                  designSpecificationDetailChanges.adds.push(syncDesignSpecificationDetail)
+                }
+              }
+            }
+          }
+
+          if (
+            designSpecificationDetailChanges.adds.length > 0 ||
+            designSpecificationDetailChanges.updates.length > 0
+          ) {
+            return this.manageAllDesignSpecificationDetails(
+              designSpecificationDetailChanges,
+              experimentId,
+              context,
+              false,
+              tx,
+            )
+          }
+
+          return Promise.resolve()
+        }))
   }
 }
 

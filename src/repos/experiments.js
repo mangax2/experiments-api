@@ -18,7 +18,7 @@ class experimentsRepo {
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids])
 
   @setErrorCode('553000')
-  batchFindExperimentOrTemplate = (ids,isTemplate, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2' [ids,isTemplate])
+  batchFindExperimentOrTemplate = (ids,isTemplate, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2', [ids, isTemplate])
 
   @setErrorCode('554000')
   all = (isTemplate) => this.rep.any('SELECT * FROM experiment where is_template = $1', isTemplate)
@@ -45,6 +45,12 @@ class experimentsRepo {
 
   @setErrorCode('557000')
   remove = (id, isTemplate) => this.rep.oneOrNone('delete from experiment where id=$1 AND is_template = $2 RETURNING id', [id, isTemplate])
+
+  @setErrorCode('558000')
+  updateCapacityRequestSyncDate = (id, context, tx = this.rep) => tx.any('UPDATE experiment SET (capacity_request_sync_date, modified_user_id) = (CURRENT_TIMESTAMP, $1) WHERE id=$2 RETURNING id',
+    [context.userId, id])
+    // [id, context.userId])
+    // The commented out line is how you can trigger the pgp errorCode issue
 }
 
 module.exports = rep => new experimentsRepo(rep)

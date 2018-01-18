@@ -15,6 +15,12 @@ class AppUtil {
     return data ? data.map(d => this.createResponseElements(d.id, 200, 'Resource updated')) : []
   }
 
+  static createNoContentResponse() {
+    return {
+      status: 204,
+    }
+  }
+
   static createCompositePostResponse() {
     return {
       status: 200,

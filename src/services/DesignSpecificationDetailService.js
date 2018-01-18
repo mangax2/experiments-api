@@ -183,14 +183,14 @@ class DesignSpecificationDetailService {
 
   @setErrorCode('13A000')
   @Transactional('syncDesignSpecificationDetails')
-  syncDesignSpecificationDetails(designSpecificationDetails, experimentId, context, tx) {
+  syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
     return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
       .then(currentDesignSpecDetails =>
         this.refDesignSpecificationService.getAllRefDesignSpecs().then((designSpecs) => {
           const designSpecificationDetailChanges = { adds: [], updates: [], deletes: [] }
 
           // handle locations
-          if (designSpecificationDetails.locations) {
+          if (capacitySyncDesignSpecDetails.locations) {
             const refLocationId = _.find(designSpecs, dS => dS.name === 'Locations').id
             const currentLocations = _.find(
               currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refLocationId,
@@ -198,7 +198,7 @@ class DesignSpecificationDetailService {
 
             const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
               currentLocations,
-              designSpecificationDetails.locations,
+              capacitySyncDesignSpecDetails.locations,
               refLocationId,
               experimentId,
             )
@@ -213,7 +213,7 @@ class DesignSpecificationDetailService {
           }
 
           // handle reps
-          if (designSpecificationDetails.reps) {
+          if (capacitySyncDesignSpecDetails.reps) {
             const refMinRepsId = _.find(designSpecs, dS => dS.name === 'Min Rep').id
             const currentMinReps = _.find(
               currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
@@ -227,7 +227,7 @@ class DesignSpecificationDetailService {
 
               const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
                 currentReps,
-                designSpecificationDetails.reps,
+                capacitySyncDesignSpecDetails.reps,
                 refRepId,
                 experimentId,
               )

@@ -1,4 +1,6 @@
+import { mockResolve } from '../jestUtil'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
+import ExperimentsService from '../../src/services/ExperimentsService'
 import AppError from '../../src/services/utility/AppError'
 import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
@@ -173,6 +175,44 @@ describe('CapacityRequestService', () => {
         code: 'Internal Server Error',
         message: 'Error received from Capacity Request API: testText',
         errorCode: '5',
+      })
+    })
+  })
+
+  describe('syncCapacityRequestDataWithExperiment', () => {
+    const testContext = {}
+    const testTx = { tx: {} }
+
+    test('calls designSpecificationDetailService and ExperimentsService', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+
+      const capacityRequestData = {
+        locations: 4,
+        reps: 3,
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
+      })
+    })
+
+    test('only calls ExperimentsService when nothing to sync', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+
+      const capacityRequestData = {}
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
   })

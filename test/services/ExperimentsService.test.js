@@ -425,6 +425,15 @@ describe('ExperimentsService', () => {
     })
   })
 
+  describe('updateCapacityRequestSyncDate', () => {
+    test('calls repo updateCapacityRequestSyncDate', () => {
+      db.experiments.updateCapacityRequestSyncDate = mockResolve()
+      return ExperimentsService.updateCapacityRequestSyncDate(1, testContext, testTx).then(() => {
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
+      })
+    })
+  })
+
   describe('prepareTagResponse', () => {
     test('maps category to name to prepare response ', () => {
       const result = ExperimentsService.prepareTagResponse([{

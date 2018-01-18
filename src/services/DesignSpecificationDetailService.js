@@ -14,47 +14,6 @@ const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('DesignSpecificationDetailService')
 
-function createDesignSpecificationDetailObject(id, refDesignSpecId, value, experimentId) {
-  const designSpecificationDetail = {
-    refDesignSpecId,
-    value,
-    experimentId,
-  }
-
-  if (id) {
-    designSpecificationDetail.id = id
-  }
-
-  return designSpecificationDetail
-}
-
-function handleDesignSpecificationDetailSyncValue(
-  currentDesignSpecificationDetail,
-  syncDesignSpecificationDetailValue,
-  refDesignSpecId,
-  experimentId) {
-  if (currentDesignSpecificationDetail) {
-    if (syncDesignSpecificationDetailValue.toString() !== currentDesignSpecificationDetail.value) {
-      return createDesignSpecificationDetailObject(
-        currentDesignSpecificationDetail.id,
-        refDesignSpecId,
-        syncDesignSpecificationDetailValue.toString(),
-        experimentId,
-      )
-    }
-  } else {
-    return createDesignSpecificationDetailObject(
-      undefined,
-      refDesignSpecId,
-      syncDesignSpecificationDetailValue.toString(),
-      experimentId,
-    )
-  }
-
-  return undefined
-}
-
-
 // Error Codes 13XXXX
 class DesignSpecificationDetailService {
   constructor() {
@@ -186,77 +145,43 @@ class DesignSpecificationDetailService {
   syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
     return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
       .then(currentDesignSpecDetails =>
-        this.refDesignSpecificationService.getAllRefDesignSpecs().then((designSpecs) => {
-          const designSpecificationDetailChanges = { adds: [], updates: [], deletes: [] }
+        this.refDesignSpecificationService.getAllRefDesignSpecs().then((refDesignSpecs) => {
+          const upsertValues = []
 
-          // handle locations
           if (capacitySyncDesignSpecDetails.locations) {
-            const refLocationId = _.find(designSpecs, dS => dS.name === 'Locations').id
-            const currentLocations = _.find(
-              currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refLocationId,
-            )
+            const refLocationId = _.find(refDesignSpecs, dS => dS.name === 'Locations').id
 
-            const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
-              currentLocations,
-              capacitySyncDesignSpecDetails.locations,
-              refLocationId,
-              experimentId,
-            )
-
-            if (syncDesignSpecificationDetail) {
-              if (syncDesignSpecificationDetail.id) {
-                designSpecificationDetailChanges.updates.push(syncDesignSpecificationDetail)
-              } else {
-                designSpecificationDetailChanges.adds.push(syncDesignSpecificationDetail)
-              }
-            }
+            upsertValues.push({
+              refDesignSpecId: refLocationId,
+              value: capacitySyncDesignSpecDetails.locations,
+            })
           }
 
-          // handle reps
           if (capacitySyncDesignSpecDetails.reps) {
-            const refMinRepsId = _.find(designSpecs, dS => dS.name === 'Min Rep').id
+            const refMinRepsId = _.find(refDesignSpecs, dS => dS.name === 'Min Rep').id
             const currentMinReps = _.find(
               currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
             )
 
             if (!currentMinReps) {
-              const refRepId = _.find(designSpecs, dS => dS.name === 'Reps').id
-              const currentReps = _.find(
-                currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refRepId,
-              )
+              const refRepId = _.find(refDesignSpecs, dS => dS.name === 'Reps').id
 
-              const syncDesignSpecificationDetail = handleDesignSpecificationDetailSyncValue(
-                currentReps,
-                capacitySyncDesignSpecDetails.reps,
-                refRepId,
-                experimentId,
-              )
-
-              if (syncDesignSpecificationDetail) {
-                if (syncDesignSpecificationDetail.id) {
-                  designSpecificationDetailChanges.updates.push(syncDesignSpecificationDetail)
-                } else {
-                  designSpecificationDetailChanges.adds.push(syncDesignSpecificationDetail)
-                }
-              }
+              upsertValues.push({
+                refDesignSpecId: refRepId,
+                value: capacitySyncDesignSpecDetails.reps,
+              })
             }
           }
 
-          if (
-            designSpecificationDetailChanges.adds.length > 0 ||
-            designSpecificationDetailChanges.updates.length > 0
-          ) {
-            return this.manageAllDesignSpecificationDetails(
-              designSpecificationDetailChanges,
-              experimentId,
-              context,
-              false,
-              tx,
+          if (upsertValues.length > 0) {
+            return db.designSpecificationDetail.syncDesignSpecificationDetails(
+              experimentId, upsertValues, context, tx,
             )
           }
 
           return Promise.resolve()
-        }))
+        }),
+      )
   }
 }
 

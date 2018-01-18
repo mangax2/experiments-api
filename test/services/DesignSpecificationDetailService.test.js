@@ -382,50 +382,51 @@ describe('DesignSpecificationDetailService', () => {
     test('returns a resolved promise when there are no design specification details to sync', () => {
       target = new DesignSpecificationDetailService()
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
-      target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockResolve([]),
       }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mock()
 
       return target.syncDesignSpecificationDetails({}, 1, testContext, testTx).then(() => {
-        expect(target.manageAllDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
 
     test('rejects when it fails to get ref design specifications', () => {
       target = new DesignSpecificationDetailService()
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
-      target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockReject(),
       }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mock()
 
       return target.syncDesignSpecificationDetails({}, 1, testContext, testTx).then(() => {}, () => {
-        expect(target.manageAllDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
 
     test('rejects when it fails to get design specification details', () => {
       target = new DesignSpecificationDetailService()
       target.getDesignSpecificationDetailsByExperimentId = mockReject()
-      target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockReject(),
       }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mockResolve()
 
       return target.syncDesignSpecificationDetails({}, 1, testContext, testTx).then(() => {}, () => {
-        expect(target.manageAllDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(target.refDesignSpecificationService.getAllRefDesignSpecs).not.toHaveBeenCalled()
       })
     })
 
-    test('adds a location and rep design specification detail when there are none', () => {
+    test('adds a location and rep design for upsert', () => {
       target = new DesignSpecificationDetailService()
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([])
       target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockResolve([{ id: 1, name: 'Locations' }, { id: 2, name: 'Reps' }, { id: 3, name: 'Min Rep' }]),
       }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mockResolve()
 
       const capacityRequestDesignSpecificationDetails = {
         locations: 5,
@@ -433,67 +434,31 @@ describe('DesignSpecificationDetailService', () => {
       }
 
       return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
-        expect(target.manageAllDesignSpecificationDetails).toHaveBeenCalledWith(
-          { adds: [{ refDesignSpecId: 1, value: '5', experimentId: 1 }, { refDesignSpecId: 2, value: '4', experimentId: 1 }], updates: [], deletes: [] },
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).toHaveBeenCalledWith(
           1,
+          [
+            { value: 5, refDesignSpecId: 1 },
+            { value: 4, refDesignSpecId: 2 },
+          ],
           testContext,
-          false,
           testTx,
         )
       })
     })
 
-    test('updates a location and rep design specification details', () => {
-      target = new DesignSpecificationDetailService()
-      target.getDesignSpecificationDetailsByExperimentId = mockResolve([
-        { id: 1, ref_design_spec_id: 1, value: '1' },
-        { id: 2, ref_design_spec_id: 2, value: '8' },
-      ])
-      target.manageAllDesignSpecificationDetails = mock()
-      target.refDesignSpecificationService = {
-        getAllRefDesignSpecs: mockResolve([
-          { id: 1, name: 'Locations' },
-          { id: 2, name: 'Reps' },
-          { id: 3, name: 'Min Rep' }]),
-      }
-
-      const capacityRequestDesignSpecificationDetails = {
-        locations: 5,
-        reps: 4,
-      }
-
-      return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
-        expect(target.manageAllDesignSpecificationDetails).toHaveBeenCalledWith(
-          {
-            adds: [],
-            updates: [{
-              id: 1, refDesignSpecId: 1, value: '5', experimentId: 1,
-            }, {
-              id: 2, refDesignSpecId: 2, value: '4', experimentId: 1,
-            }],
-            deletes: [],
-          },
-          1,
-          testContext,
-          false,
-          testTx,
-        )
-      })
-    })
-
-    test('updates a location but does nothing for reps when min reps are defined', () => {
+    test('adds a location but does nothing for reps when min reps are defined', () => {
       target = new DesignSpecificationDetailService()
       target.getDesignSpecificationDetailsByExperimentId = mockResolve([
         { id: 1, ref_design_spec_id: 1, value: '1' },
         { id: 2, ref_design_spec_id: 3, value: '8' },
       ])
-      target.manageAllDesignSpecificationDetails = mock()
       target.refDesignSpecificationService = {
         getAllRefDesignSpecs: mockResolve([
           { id: 1, name: 'Locations' },
           { id: 2, name: 'Reps' },
           { id: 3, name: 'Min Rep' }]),
       }
+      db.designSpecificationDetail.syncDesignSpecificationDetails = mockResolve()
 
       const capacityRequestDesignSpecificationDetails = {
         locations: 5,
@@ -501,43 +466,14 @@ describe('DesignSpecificationDetailService', () => {
       }
 
       return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
-        expect(target.manageAllDesignSpecificationDetails).toHaveBeenCalledWith(
-          {
-            adds: [],
-            updates: [{
-              id: 1, refDesignSpecId: 1, value: '5', experimentId: 1,
-            }],
-            deletes: [],
-          },
+        expect(db.designSpecificationDetail.syncDesignSpecificationDetails).toHaveBeenCalledWith(
           1,
+          [
+            { value: 5, refDesignSpecId: 1 },
+          ],
           testContext,
-          false,
           testTx,
         )
-      })
-    })
-
-    test('does nothing when the values are the same', () => {
-      target = new DesignSpecificationDetailService()
-      target.getDesignSpecificationDetailsByExperimentId = mockResolve([
-        { id: 1, ref_design_spec_id: 1, value: '1' },
-        { id: 2, ref_design_spec_id: 2, value: '8' },
-      ])
-      target.manageAllDesignSpecificationDetails = mock()
-      target.refDesignSpecificationService = {
-        getAllRefDesignSpecs: mockResolve([
-          { id: 1, name: 'Locations' },
-          { id: 2, name: 'Reps' },
-          { id: 3, name: 'Min Rep' }]),
-      }
-
-      const capacityRequestDesignSpecificationDetails = {
-        locations: 1,
-        reps: 8,
-      }
-
-      return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
-        expect(target.manageAllDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
   })

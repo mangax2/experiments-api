@@ -14,181 +14,130 @@ import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator()
+const { addErrorHandling, setErrorCode } = setErrorDecorator()
 
 const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
 // Error Codes 1AXXXX
 
-// @setErrorCode('1A1000')
-function getIdForFactorType(allFactorTypes, type) {
-  return _.find(allFactorTypes, factorType => factorType.type === type).id
-}
+const getIdForFactorType = addErrorHandling('1A1000',
+  (allFactorTypes, type) => _.find(allFactorTypes, factorType => factorType.type === type).id)
 
-// @setErrorCode('1A2000')
-function extractIds(sources) {
-  return _.compact(_.map(sources, 'id'))
-}
+const extractIds = addErrorHandling('1A2000',
+  sources => _.compact(_.map(sources, 'id')))
 
-// @setErrorCode('1A3000')
-function determineIdsToDelete(dbEntities, DTOs) {
-  return _.difference(
-    extractIds(dbEntities),
-    extractIds(DTOs),
-  )
-}
+const determineIdsToDelete = addErrorHandling('1A3000',
+  (dbEntities, DTOs) => _.difference(extractIds(dbEntities), extractIds(DTOs)))
 
-// @setErrorCode('1A4000')
-function determineDTOsForUpdate(DTOs) {
-  return _.filter(DTOs, dto => !_.isNil(dto.id))
-}
 
-// @setErrorCode('1A5000')
-function determineDTOsForCreate(DTOs) {
-  return _.filter(DTOs, dto => _.isNil(dto.id))
-}
+const determineDTOsForUpdate = addErrorHandling('1A4000',
+  DTOs => _.filter(DTOs, dto => !_.isNil(dto.id)))
 
-// @setErrorCode('1A6000')
-function applyAsyncBatchToNonEmptyArray(
-  asyncBatchFunction, ids, ...contextAndTx) {
-  return _.isEmpty(ids)
-    ? Promise.resolve([])
-    : asyncBatchFunction(ids, ...contextAndTx)
-}
+const determineDTOsForCreate = addErrorHandling('1A5000',
+  DTOs => _.filter(DTOs, dto => _.isNil(dto.id)))
 
-// @setErrorCode('1A7000')
-function batchDeleteDbEntitiesWithoutMatchingDTO(
-  dbEntities, DTOs, asyncBatchDeleteFunction, context, tx) {
-  return applyAsyncBatchToNonEmptyArray(
-    asyncBatchDeleteFunction,
-    determineIdsToDelete(dbEntities, DTOs),
-    context,
-    tx)
-}
+const applyAsyncBatchToNonEmptyArray = addErrorHandling('1A6000',
+  (asyncBatchFunction, ids, ...contextAndTx) =>
+    (_.isEmpty(ids) ? Promise.resolve([]) : asyncBatchFunction(ids, ...contextAndTx)))
 
-// @setErrorCode('1A8000')
-function formDbEntitiesObject(
-  [allDbRefDataSources, allDbFactors, allDbLevels,
-    allDbFactorLevelAssociations, allFactorTypes]) {
-  return {
-    allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations, allFactorTypes,
-  }
-}
+const batchDeleteDbEntitiesWithoutMatchingDTO = addErrorHandling('1A7000',
+  (dbEntities, DTOs, asyncBatchDeleteFunction, context, tx) =>
+    applyAsyncBatchToNonEmptyArray(asyncBatchDeleteFunction,
+      determineIdsToDelete(dbEntities, DTOs), context, tx))
 
-// @setErrorCode('1A9000')
-function createRefIdToIdMap(refIdSource, idSource) {
-  return _.zipObject(
-    _.map(refIdSource, '_refId'),
-    _.map(idSource, 'id'))
-}
+const formDbEntitiesObject = addErrorHandling('1A8000',
+  ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations,
+    allFactorTypes]) =>
+    ({
+      allDbRefDataSources,
+      allDbFactors,
+      allDbLevels,
+      allDbFactorLevelAssociations,
+      allFactorTypes,
+    }))
 
-// @setErrorCode('1AA000')
-function createCompleteRefIdToIdMap(
-  {
+const createRefIdToIdMap = addErrorHandling('1A9000',
+  (refIdSource, idSource) => _.zipObject(_.map(refIdSource, '_refId'), _.map(idSource, 'id')))
+
+const createCompleteRefIdToIdMap = addErrorHandling('1AA000',
+  ({
     factorDependentLevelDTOsForCreate,
     factorIndependentLevelDTOsForCreate,
     allLevelDTOsWithParentFactorIdForUpdate,
     dependentLevelResponses,
     independentLevelResponses,
-  }) {
-  return _.assign(
-    createRefIdToIdMap(
-      factorDependentLevelDTOsForCreate,
-      dependentLevelResponses),
-    createRefIdToIdMap(
-      factorIndependentLevelDTOsForCreate,
-      independentLevelResponses),
-    createRefIdToIdMap(
-      allLevelDTOsWithParentFactorIdForUpdate,
-      allLevelDTOsWithParentFactorIdForUpdate))
-}
+  }) =>
+    _.assign(createRefIdToIdMap(factorDependentLevelDTOsForCreate, dependentLevelResponses),
+      createRefIdToIdMap(factorIndependentLevelDTOsForCreate, independentLevelResponses),
+      createRefIdToIdMap(allLevelDTOsWithParentFactorIdForUpdate,
+        allLevelDTOsWithParentFactorIdForUpdate)))
 
-// @setErrorCode('1AB000')
-function mapFactorLevelAssociationDTOToEntity(refIdToIdMap, DTOs) {
-  return _.map(DTOs, dto => ({
+const mapFactorLevelAssociationDTOToEntity = addErrorHandling('1AB000',
+  (refIdToIdMap, DTOs) => _.map(DTOs, dto => ({
     associatedLevelId: refIdToIdMap[dto.associatedLevelRefId],
     nestedLevelId: refIdToIdMap[dto.nestedLevelRefId],
-  }))
-}
+  })))
 
-// @setErrorCode('1AC000')
-function determineFactorLevelAssociationIdsToDelete(
-  refIdToIdMap,
-  factorLevelAssociationEntities,
-  factorLevelAssociationDTOs) {
-  return _.map(_.differenceWith(
-    factorLevelAssociationEntities,
-    mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
-    (a, b) => (a.associated_level_id === b.associatedLevelId
-      && a.nested_level_id === b.nestedLevelId)), 'id')
-}
+const determineFactorLevelAssociationIdsToDelete = addErrorHandling('1AC000',
+  (refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs) =>
+    _.map(_.differenceWith(factorLevelAssociationEntities,
+      mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
+      (a, b) => (a.associated_level_id === b.associatedLevelId
+        && a.nested_level_id === b.nestedLevelId)), 'id'))
 
-// @setErrorCode('1AD000')
-function determineFactorLevelAssociationEntitiesToCreate(
-  refIdToIdMap,
-  factorLevelAssociationEntities,
-  factorLevelAssociationDTOs) {
-  return _.differenceWith(
-    mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
-    factorLevelAssociationEntities,
-    (a, b) => a.associatedLevelId === b.associated_level_id
-      && a.nestedLevelId === b.nested_level_id)
-}
+const determineFactorLevelAssociationEntitiesToCreate = addErrorHandling('1AD000', (
+  (refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs) =>
+    _.differenceWith(
+      mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
+      factorLevelAssociationEntities,
+      (a, b) => a.associatedLevelId === b.associated_level_id
+        && a.nestedLevelId === b.nested_level_id)))
 
-// @setErrorCode('1AE000')
-function deleteFactorLevelAssociations(
-  {
+const deleteFactorLevelAssociations = addErrorHandling('1AE000',
+  ({
     refIdToIdMap,
     allDbFactorLevelAssociations,
     allFactorLevelAssociationDTOs,
     tx,
-  }) {
-  const idsToDelete = determineFactorLevelAssociationIdsToDelete(
-    refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs)
-  return _.isEmpty(idsToDelete)
-    ? Promise.resolve()
-    : FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
-      idsToDelete,
-      tx)
-}
+  }) => {
+    const idsToDelete = determineFactorLevelAssociationIdsToDelete(
+      refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs)
+    return _.isEmpty(idsToDelete)
+      ? Promise.resolve()
+      : FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
+        idsToDelete,
+        tx)
+  })
 
-// @setErrorCode('1AF000')
-function mapFactorLevelDTOsToFactorLevelEntities(allLevelDTOsWithParentFactorId) {
-  return _.map(allLevelDTOsWithParentFactorId, level => ({
+const mapFactorLevelDTOsToFactorLevelEntities = addErrorHandling('1AF000',
+  allLevelDTOsWithParentFactorId => _.map(allLevelDTOsWithParentFactorId, level => ({
     id: level.id,
     value: { items: level.items, objectType: level.objectType },
     factorId: level.factorId,
-  }))
-}
+  })))
 
-// @setErrorCode('1AG000')
-function mapFactorDTOsToFactorEntities(
-  experimentId, factorDTOs, refFactorTypeId, allDataSources) {
-  return _.map(factorDTOs, factorDTO => ({
-    id: factorDTO.id,
-    name: factorDTO.name,
-    refFactorTypeId,
-    experimentId,
-    tier: factorDTO.tier,
-    refDataSourceId:
-      FactorDependentCompositeService.determineDataSourceId(
-        factorDTO.levels, allDataSources),
-  }))
-}
+const mapFactorDTOsToFactorEntities = addErrorHandling('1AG000',
+  (experimentId, factorDTOs, refFactorTypeId, allDataSources) =>
+    _.map(factorDTOs, factorDTO => ({
+      id: factorDTO.id,
+      name: factorDTO.name,
+      refFactorTypeId,
+      experimentId,
+      tier: factorDTO.tier,
+      refDataSourceId:
+        FactorDependentCompositeService.determineDataSourceId(factorDTO.levels, allDataSources),
+    })))
 
-// @setErrorCode('1AH000')
-function appendParentIdToChildren(parents, childArrayPropertyName, nameOfNewIdProperty) {
-  return _.map(parents,
+const appendParentIdToChildren = addErrorHandling('1AH000',
+  (parents, childArrayPropertyName, nameOfNewIdProperty) => _.map(parents,
     parent => ({
       [childArrayPropertyName]: _.map(parent[childArrayPropertyName],
         child => ({ [nameOfNewIdProperty]: parent.id, ...child })),
       ..._.omit(parent, childArrayPropertyName),
-    }))
-}
+    })))
 
-// @setErrorCode('1AI000')
-function concatChildArrays(parents, childArrayPropertyName) {
-  return _.concat(..._.map(parents, parent => parent[childArrayPropertyName]))
-}
+const concatChildArrays = addErrorHandling('1AI000',
+  (parents, childArrayPropertyName) =>
+    _.concat(..._.map(parents, parent => parent[childArrayPropertyName])))
 
 class FactorDependentCompositeService {
   constructor() {
@@ -544,7 +493,7 @@ class FactorDependentCompositeService {
       params.context,
       params.tx)])
 
-  @setErrorCode('1Aj000')
+  @setErrorCode('1AJ000')
   persistIndependentAndAssociations = (
     experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
     const requestData = {

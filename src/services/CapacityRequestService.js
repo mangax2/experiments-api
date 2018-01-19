@@ -9,6 +9,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 import Transactional from '../decorators/transactional'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 import ExperimentsService from './ExperimentsService'
+import SecurityService from './SecurityService'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -18,6 +19,7 @@ const logger = log4js.getLogger('CapacityRequestService')
 class CapacityRequestService {
   constructor() {
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
+    this.securityService = new SecurityService()
   }
 
   @setErrorCode('101000')
@@ -74,21 +76,23 @@ class CapacityRequestService {
   @setErrorCode('104000')
   @Transactional('capacityRequestSync')
   syncCapacityRequestDataWithExperiment(experimentId, capacityRequestData, context, tx) {
-    const syncPromises = []
+    return this.securityService.permissionsCheck(experimentId, context, false, tx).then(() => {
+      const syncPromises = []
 
-    const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
+      const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
 
-    if (_.keys(designSpecificationDetailValues).length > 0) {
-      syncPromises.push(
-        this.designSpecificationDetailService.syncDesignSpecificationDetails(
-          designSpecificationDetailValues, experimentId, context, tx,
-        ),
-      )
-    }
+      if (_.keys(designSpecificationDetailValues).length > 0) {
+        syncPromises.push(
+          this.designSpecificationDetailService.syncDesignSpecificationDetails(
+            designSpecificationDetailValues, experimentId, context, tx,
+          ),
+        )
+      }
 
-    syncPromises.push(ExperimentsService.updateCapacityRequestSyncDate(experimentId, context, tx))
+      syncPromises.push(ExperimentsService.updateCapacityRequestSyncDate(experimentId, context, tx))
 
-    return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
+      return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
+    })
   }
 }
 

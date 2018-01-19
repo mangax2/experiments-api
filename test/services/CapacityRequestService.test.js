@@ -1,4 +1,4 @@
-import { mockResolve } from '../jestUtil'
+import { mock, mockResolve, mockReject } from '../jestUtil'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import AppError from '../../src/services/utility/AppError'
@@ -183,9 +183,33 @@ describe('CapacityRequestService', () => {
     const testContext = {}
     const testTx = { tx: {} }
 
+    test('it rejects when security service rejects', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mock()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockReject(),
+      }
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mock(),
+      }
+
+      const capacityRequestData = {
+        locations: 4,
+        reps: 3,
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
     test('calls designSpecificationDetailService and ExperimentsService', () => {
       ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
       const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockResolve(),
+      }
       capacityRequestService.designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
@@ -204,6 +228,9 @@ describe('CapacityRequestService', () => {
     test('only calls ExperimentsService when nothing to sync', () => {
       ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
       const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockResolve(),
+      }
       capacityRequestService.designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }

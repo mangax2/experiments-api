@@ -681,7 +681,7 @@
         }
       }
     },
-    "/experiments/:id/capacity-request-sync": {
+    "/experiments/{id}/capacity-request-sync": {
       "post": {
         "summary": "Synchronizes capacity request data with an experiment's data",
         "description": "Synchronizes specific fields from a request from the Capacity Request system with the data stored for an Experiment",

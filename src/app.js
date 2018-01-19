@@ -92,6 +92,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
           status: 500,
           code: 'Internal Server Error',
           message: err.toString(),
+          errorCode: err.errorCode,
         }
         return res.status(500).json(pgerror)
       }

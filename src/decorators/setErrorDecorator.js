@@ -1,3 +1,5 @@
+import bluebird from 'bluebird'
+
 let prefix = ''
 
 function setErrorPrefix(errorPrefix) {
@@ -16,7 +18,7 @@ const addErrorCodeIfNotExist = (ex, errorCode) => {
 const wrappingFunction = ((errorCode, bindingFunction) => function () {
   try {
     const result = bindingFunction(this, arguments)
-    if (Promise.resolve(result) === result) {
+    if (Promise.resolve(result) === result || bluebird.resolve(result) === result) {
       return result.catch(err => addErrorCodeIfNotExist(err, errorCode))
     }
     return result

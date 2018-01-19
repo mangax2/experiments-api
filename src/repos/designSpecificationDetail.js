@@ -88,6 +88,28 @@ class designSpecificationDetailRepo {
     const query = `WITH d(experiment_id, ref_design_spec_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'ref_design_spec_id', 'id'])}) select entity.experiment_id, entity.ref_design_spec_id from public.design_spec_detail entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) AND entity.ref_design_spec_id = CAST(d.ref_design_spec_id as integer) AND (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
   }
+
+  @setErrorCode('52A000')
+  syncDesignSpecificationDetails = (experimentId, upsertDetails, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
+      ['value', 'ref_design_spec_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      { table: 'design_spec_detail' },
+    )
+
+    const data = upsertDetails.map(dsd => ({
+      value: dsd.value,
+      ref_design_spec_id: dsd.refDesignSpecId,
+      experiment_id: experimentId,
+      created_user_id: context.userId,
+      created_date: 'CURRENT_TIMESTAMP',
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+
+    const query = `${this.pgp.helpers.insert(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} ON CONFLICT ON CONSTRAINT design_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date`
+
+    return tx.query(query)
+  }
 }
 
 module.exports = (rep, pgp) => new designSpecificationDetailRepo(rep, pgp)

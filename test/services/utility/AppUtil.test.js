@@ -53,4 +53,10 @@ describe('AppUtil', () => {
       expect(AppUtil.createCompositePostResponse()).toEqual({ status: 200, message: 'SUCCESS' })
     })
   })
+
+  describe('createNoContentResponse', () => {
+    test('returns an object with a status and no message', () => {
+      expect(AppUtil.createNoContentResponse()).toEqual({ status: 204 })
+    })
+  })
 })

@@ -19,7 +19,7 @@ const UnitSpecificationDetail = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: property('uom_id'),
     },
-    refUnitSpecID: {
+    refUnitSpecId: {
       type: GraphQLInt,
       resolve: property('ref_unit_spec_id'),
     },

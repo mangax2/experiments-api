@@ -81,6 +81,10 @@ function ownerBatchResolver(ids, tx) {
   return db.owner.batchFind(ids, tx)
 }
 
+function ownersByExperimentIdsBatchResolver(ids, tx) {
+  return db.owner.graphQLBatchFindByExperimentId(ids, tx)
+}
+
 function refDataSourceBatchResolver(ids, tx) {
   return db.refDataSource.batchFind(ids, tx)
 }
@@ -174,6 +178,7 @@ function createLoaders(tx) {
     groupValue: createDataLoader(groupValueBatchResolver),
     nestedFactorLevel: createDataLoader(nestedFactorLevelBatchResolver),
     owner: createDataLoader(ownerBatchResolver),
+    ownersByExperimentIds: createDataLoader(ownersByExperimentIdsBatchResolver),
     refDataSource: createDataLoader(refDataSourceBatchResolver),
     refDataSourceType: createDataLoader(refDataSourceTypeBatchResolver),
     refDesignSpec: createDataLoader(refDesignSpecBatchResolver),

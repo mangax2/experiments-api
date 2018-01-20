@@ -1,3 +1,5 @@
+import _ from "lodash"
+
 module.exports = rep => ({
   repository: () => rep,
 
@@ -9,6 +11,12 @@ module.exports = rep => ({
 
   batchFindByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT * FROM owner where' +
     ' experiment_id IN ($1:csv)', [experimentIds]),
+
+  graphQLBatchFindByExperimentId: (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM owner WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  },
+
 
   batchCreate: (experimentsOwners, context, tx = rep) => tx.batch(
     experimentsOwners.map(

@@ -32,10 +32,6 @@ const Factor = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: property('ref_data_source_id'),
     },
-    dataSource: {
-      type: DataSource,
-      resolve: Resolvers.refDataSourceBatchResolver,
-    },
     auditInfo: {
       type: AuditInfo,
       resolve(_) {
@@ -45,6 +41,10 @@ const Factor = new GraphQLObjectType({
 
     // direct relationships
     // TODO experiment? template?
+    dataSource: {
+      type: DataSource,
+      resolve: Resolvers.refDataSourceBatchResolver,
+    },
     factorType: {
       type: FactorType,
       resolve: Resolvers.refFactorTypeBatchResolver,

@@ -118,6 +118,10 @@ function ownerBatchResolver(entity, args, context) {
   return context.loaders.owner.load(entity.id)
 }
 
+function ownersForExperimentBatchResolver(entity, args, context) {
+  return context.loaders.ownersByExperimentIds.load(entity.id)
+}
+
 function refDataSourceBatchResolver(entity, args, context) {
   return context.loaders.refDataSource.load(entity.ref_data_source_id)
 }
@@ -237,6 +241,7 @@ module.exports = {
   groupValueBatchResolver,
   nestedFactorLevelForFactorLevelResolver,
   ownerBatchResolver,
+  ownersForExperimentBatchResolver,
   refDataSourceBatchResolver,
   refDataSourceTypeBatchResolver,
   refDesignSpecBatchResolver,

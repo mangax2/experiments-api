@@ -1,10 +1,10 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
-import ExperimentsService from '../../src/services/ExperimentsService'
 import AppError from '../../src/services/utility/AppError'
 import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
+import db from '../../src/db/DbManager'
 
 describe('CapacityRequestService', () => {
   describe('associateExperimentToCapacityRequest', () => {
@@ -184,13 +184,15 @@ describe('CapacityRequestService', () => {
     const testTx = { tx: {} }
 
     test('it rejects when security service rejects', () => {
-      ExperimentsService.updateCapacityRequestSyncDate = mock()
       const capacityRequestService = new CapacityRequestService()
       capacityRequestService.securityService = {
         permissionsCheck: mockReject(),
       }
       capacityRequestService.designSpecificationDetailService = {
         syncDesignSpecificationDetails: mock(),
+      }
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
       }
 
       const capacityRequestData = {
@@ -199,19 +201,21 @@ describe('CapacityRequestService', () => {
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
-        expect(ExperimentsService.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
 
-    test('calls designSpecificationDetailService and ExperimentsService', () => {
-      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+    test('calls designSpecificationDetailService and update capacity request sync date', () => {
       const capacityRequestService = new CapacityRequestService()
       capacityRequestService.securityService = {
         permissionsCheck: mockResolve(),
       }
       capacityRequestService.designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
+      }
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
       }
 
       const capacityRequestData = {
@@ -220,13 +224,12 @@ describe('CapacityRequestService', () => {
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
-        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
       })
     })
 
-    test('only calls ExperimentsService when nothing to sync', () => {
-      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+    test('only calls to update capacity request sync date when nothing to sync', () => {
       const capacityRequestService = new CapacityRequestService()
       capacityRequestService.securityService = {
         permissionsCheck: mockResolve(),
@@ -234,12 +237,15 @@ describe('CapacityRequestService', () => {
       capacityRequestService.designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
+      }
 
       const capacityRequestData = {}
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
-        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
       })
     })
   })

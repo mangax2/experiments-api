@@ -8,8 +8,8 @@ import cfServices from './utility/ServiceConfig'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import Transactional from '../decorators/transactional'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
-import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
+import db from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -89,7 +89,7 @@ class CapacityRequestService {
         )
       }
 
-      syncPromises.push(ExperimentsService.updateCapacityRequestSyncDate(experimentId, context, tx))
+      syncPromises.push(db.experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
 
       return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
     })

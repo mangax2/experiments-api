@@ -184,13 +184,15 @@ describe('CapacityRequestService', () => {
     const testTx = { tx: {} }
 
     test('it rejects when security service rejects', () => {
-      const capacityRequestService = new CapacityRequestService()
-      capacityRequestService.securityService = {
+      const securityService = {
         permissionsCheck: mockReject(),
       }
-      capacityRequestService.designSpecificationDetailService = {
+
+      const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mock(),
       }
+
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
@@ -207,16 +209,16 @@ describe('CapacityRequestService', () => {
     })
 
     test('calls designSpecificationDetailService and update capacity request sync date', () => {
-      const capacityRequestService = new CapacityRequestService()
-      capacityRequestService.securityService = {
+      const securityService = {
         permissionsCheck: mockResolve(),
       }
-      capacityRequestService.designSpecificationDetailService = {
+      const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
 
       const capacityRequestData = {
         locations: 4,
@@ -230,16 +232,16 @@ describe('CapacityRequestService', () => {
     })
 
     test('only calls to update capacity request sync date when nothing to sync', () => {
-      const capacityRequestService = new CapacityRequestService()
-      capacityRequestService.securityService = {
+      const securityService = {
         permissionsCheck: mockResolve(),
       }
-      capacityRequestService.designSpecificationDetailService = {
+      const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
 
       const capacityRequestData = {}
 

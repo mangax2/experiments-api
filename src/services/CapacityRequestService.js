@@ -7,8 +7,8 @@ import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import Transactional from '../decorators/transactional'
-import DesignSpecificationDetailService from './DesignSpecificationDetailService'
-import SecurityService from './SecurityService'
+// import DesignSpecificationDetailService from './DesignSpecificationDetailService'
+// import SecurityService from './SecurityService'
 import db from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
@@ -17,9 +17,9 @@ const logger = log4js.getLogger('CapacityRequestService')
 
 // Error Codes 10XXXX
 class CapacityRequestService {
-  constructor() {
-    this.designSpecificationDetailService = new DesignSpecificationDetailService()
-    this.securityService = new SecurityService()
+  constructor(designSpecificationDetailService, securityService) {
+    this.designSpecificationDetailService = designSpecificationDetailService
+    this.securityService = securityService
   }
 
   @setErrorCode('101000')

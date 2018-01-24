@@ -39,9 +39,10 @@ router.get('/ping', (req, res) => {
 
 router.post('/experiments/:id/capacity-request-sync', (req, res, next) => {
   const { id } = req.params
-  return new CapacityRequestService().syncCapacityRequestDataWithExperiment(
-    id, req.body, req.context,
-  ).then(value => res.json(value)).catch(err => next(err))
+  return new CapacityRequestService(new DesignSpecificationDetailService(), new SecurityService())
+    .syncCapacityRequestDataWithExperiment(id, req.body, req.context)
+    .then(value => res.json(value))
+    .catch(err => next(err))
 })
 
 router.get('/experiment-designs', (req, res, next) => new ExperimentDesignService().getAllExperimentDesigns()

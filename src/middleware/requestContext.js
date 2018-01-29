@@ -29,6 +29,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     requestId: (req.headers ? req.headers['X-Request-Id'] : null) || uuid(),
   }
   res.set('X-Request-Id', req.context.requestId)
+  res.set('Access-Control-Expose-Headers', 'X-Request-Id')
 
   if (_.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method) && !_.startsWith(req.url, '/experiments-api/graphql') && userId === undefined) {
     throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')

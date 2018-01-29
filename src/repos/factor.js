@@ -1,24 +1,33 @@
 import _ from 'lodash'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
-module.exports = (rep, pgp) => ({
-  repository: () => rep,
+const { setErrorCode } = setErrorDecorator()
 
-  find: (id, tx = rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id),
+// Error Codes 57XXXX
+class factorRepo {
+  constructor(rep, pgp) {
+    this.rep = rep
+    this.pgp = pgp
+  }
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]),
+  @setErrorCode('570000')
+  repository = () => this.rep
 
-  findByExperimentId: (experimentId, tx = rep) => tx.any('SELECT * FROM factor WHERE' +
-    ' experiment_id=$1', experimentId),
+  @setErrorCode('571000')
+  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id)
 
-  batchFindByExperimentId: (experimentIds, tx = rep) => {
-    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
-  },
+  @setErrorCode('572000')
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids])
 
-  all: (tx = rep) => tx.any('SELECT * FROM factor'),
+  @setErrorCode('573000')
+  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
 
-  batchCreate: (factors, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('574000')
+  all = (tx = this.rep) => tx.any('SELECT * FROM factor')
+
+  @setErrorCode('575000')
+  batchCreate = (factors, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       [
         'name',
         'ref_factor_type_id',
@@ -42,12 +51,13 @@ module.exports = (rep, pgp) => ({
       modified_date: 'CURRENT_TIMESTAMP',
       tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
     }))
-    const query = `${pgp.helpers.insert(values, columnSet)} RETURNING id`
+    const query = `${this.pgp.helpers.insert(values, columnSet)} RETURNING id`
     return tx.any(query)
-  },
+  }
 
-  batchUpdate: (factors, context, tx = rep) => {
-    const columnSet = new pgp.helpers.ColumnSet(
+  @setErrorCode('576000')
+  batchUpdate = (factors, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
       [
         '?id',
         'name',
@@ -69,26 +79,37 @@ module.exports = (rep, pgp) => ({
       modified_date: 'CURRENT_TIMESTAMP',
       tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
     }))
-    const query = `${pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
+    const query = `${this.pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
     return tx.any(query)
-  },
+  }
 
-  batchRemove: (ids, tx = rep) => {
+  @setErrorCode('577000')
+  batchRemove = (ids, tx = this.rep) => {
     if (!ids || ids.length === 0) {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM factor WHERE id IN ($1:csv) RETURNING id', [ids])
-  },
+  }
 
-  findByBusinessKey: (keys, tx = rep) => tx.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys),
+  @setErrorCode('578000')
+  findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys)
 
-  batchFindByBusinessKey: (batchKeys, tx = rep) => {
+  @setErrorCode('579000')
+  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],
       name: obj.keys[1],
       id: obj.updateId,
     }))
-    const query = `WITH d(experiment_id, name, id) AS (VALUES ${pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
+    const query = `WITH d(experiment_id, name, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
-  },
-})
+  }
+
+  @setErrorCode('57A000')
+  batchFindByExperimentId = (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  }
+}
+
+module.exports = (rep, pgp) => new factorRepo(rep, pgp)

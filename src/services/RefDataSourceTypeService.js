@@ -1,14 +1,20 @@
 import _ from 'lodash'
 import db from '../db/DbManager'
 import RefDataSourceService from './RefDataSourceService'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { setErrorCode } = setErrorDecorator()
+
+// Error Codes 1LXXXX
 class RefDataSourceTypeService {
   constructor() {
     this.refDataSourceService = new RefDataSourceService()
   }
 
+  @setErrorCode('1L1000')
   getRefDataSourceTypes = () => db.refDataSourceType.all()
 
+  @setErrorCode('1L2000')
   getRefDataSourceTypesWithDataSources() {
     return db.refDataSourceType.all()
       .then(data => this.refDataSourceService.getRefDataSources()

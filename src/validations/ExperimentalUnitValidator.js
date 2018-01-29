@@ -2,8 +2,17 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 34XXXX
 class ExperimentalUnitValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('34')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
@@ -31,6 +40,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
 
   getEntityName = () => 'ExperimentalUnit'
 
+  @setErrorCode('341000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -44,14 +54,15 @@ class ExperimentalUnitValidator extends SchemaValidator {
           ExperimentalUnitValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('341001'))
     }
   }
 
+  @setErrorCode('342000')
   preValidate = (combinationElementObj) => {
     if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('ExperimentalUnit request object needs to be an array'))
+        AppError.badRequest('ExperimentalUnit request object needs to be an array', undefined, getFullErrorCode('342001')))
     }
     return Promise.resolve()
   }

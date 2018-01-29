@@ -2,8 +2,17 @@ import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 38XXXX
 class FactorLevelsValidator extends SchemaValidator {
+  constructor() {
+    super()
+    super.setFileCode('38')
+  }
+
   static get POST_VALIDATION_SCHEMA() {
     return [
       // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
@@ -27,6 +36,7 @@ class FactorLevelsValidator extends SchemaValidator {
 
   getEntityName = () => 'FactorLevel'
 
+  @setErrorCode('381000')
   getSchema = (operationName) => {
     switch (operationName) {
       case 'POST':
@@ -36,22 +46,24 @@ class FactorLevelsValidator extends SchemaValidator {
           FactorLevelsValidator.PUT_ADDITIONAL_SCHEMA_ELEMENTS,
         )
       default:
-        throw AppError.badRequest('Invalid Operation')
+        throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('381001'))
     }
   }
 
   getBusinessKeyPropertyNames = () => ['factorId', 'value']
 
-  getDuplicateBusinessKeyError = () => 'Duplicate factor level value in request payload with same factor id'
+  getDuplicateBusinessKeyError = () => ({ message: 'Duplicate factor level value in request payload with same factor id', errorCode: getFullErrorCode('384001') })
 
+  @setErrorCode('382000')
   preValidate = (factorLevelObj) => {
     if (!_.isArray(factorLevelObj) || factorLevelObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Factor Level request object needs to be an array'))
+        AppError.badRequest('Factor Level request object needs to be an array', undefined, getFullErrorCode('382001')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('383000')
   postValidate = (targetObject) => {
     if (!this.hasErrors()) {
       const businessKeyPropertyNames = this.getBusinessKeyPropertyNames()

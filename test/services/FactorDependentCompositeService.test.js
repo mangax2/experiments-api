@@ -84,24 +84,26 @@ describe('FactorDependentCompositeService', () => {
     })
 
     test('rejects when getFactorLevelsByExperimentIdNoExistenceCheck fails', () => {
+      const error = { message: 'error' }
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
-      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject('error')
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject(error)
 
       return FactorDependentCompositeService.getFactorsWithLevels(1, testTx).then(() => {}, (err) => {
         expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when getFactorsByExperimentIdNoExistenceCheck fails', () => {
-      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockReject('error')
+      const error = { message: 'error' }
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mock()
 
       return FactorDependentCompositeService.getFactorsWithLevels(1, testTx).then(() => {}, (err) => {
         expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -737,10 +739,11 @@ describe('FactorDependentCompositeService', () => {
     })
 
     test('rejects when a call fails in the Promise all', () => {
+      const error = { message: 'error' }
       ExperimentsService.verifyExperimentExists = mockResolve()
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve()
       target.factorTypeService.getAllFactorTypes = mockResolve()
-      DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject('error')
+      DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve()
 
       return target.getAllVariablesByExperimentId(1, false, {}, testTx).then(() => {}, (err) => {
@@ -749,7 +752,7 @@ describe('FactorDependentCompositeService', () => {
         expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -791,24 +794,26 @@ describe('FactorDependentCompositeService', () => {
     })
 
     test('rejects when batchCreateDependentVariables fails', () => {
+      const error = { message: 'error' }
       target.dependentVariableService.deleteDependentVariablesForExperimentId = mockResolve()
-      target.dependentVariableService.batchCreateDependentVariables = mockReject('error')
+      target.dependentVariableService.batchCreateDependentVariables = mockReject(error)
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when deleteDependentVariablesForExperimentId fails', () => {
-      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      target.dependentVariableService.deleteDependentVariablesForExperimentId = mockReject(error)
       target.dependentVariableService.batchCreateDependentVariables = mock()
 
       return target.persistVariablesWithoutLevels(1, [{}], testContext, false, testTx).then(() => {}, (err) => {
         expect(target.dependentVariableService.deleteDependentVariablesForExperimentId).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.dependentVariableService.batchCreateDependentVariables).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

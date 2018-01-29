@@ -10,9 +10,13 @@ import SecurityService from './SecurityService'
 import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import Transactional from '../decorators/transactional'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
 const logger = log4js.getLogger('ExperimentsService')
 
+// Error Codes 15XXXX
 class ExperimentsService {
   constructor() {
     this.validator = new ExperimentsValidator()
@@ -22,6 +26,7 @@ class ExperimentsService {
     this.duplicationService = new DuplicationService()
   }
 
+  @setErrorCode('151000')
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, isTemplate, tx) {
     return this.validator.validate(experiments, 'POST', tx)
@@ -50,6 +55,7 @@ class ExperimentsService {
         }))
   }
 
+  @setErrorCode('152000')
   batchCreateExperimentTags(experiments, context, isTemplate) {
     const tags = this.assignExperimentIdToTags(experiments)
     if (tags && tags.length > 0) {
@@ -58,21 +64,23 @@ class ExperimentsService {
     return Promise.resolve()
   }
 
+  @setErrorCode('153000')
   validateAssociatedRequests = (experiments, isTemplate) => {
     const associatedRequests = _.map(_.filter(experiments, 'request'), exp => exp.request)
     if (!isTemplate) {
       const invalidAssociateRequests = _.filter(associatedRequests, req => !req.id || !req.type)
       if (invalidAssociateRequests.length > 0) {
-        return Promise.reject(AppError.badRequest('Each request must have an id and a type.'))
+        return Promise.reject(AppError.badRequest('Each request must have an id and a type.', undefined, getFullErrorCode('153001')))
       }
       return Promise.resolve()
     }
     if (associatedRequests.length > 0) {
-      return Promise.reject(AppError.badRequest('Template(s) cannot be associated to a request'))
+      return Promise.reject(AppError.badRequest('Template(s) cannot be associated to a request', undefined, getFullErrorCode('153002')))
     }
     return Promise.resolve()
   }
 
+  @setErrorCode('154000')
   getExperiments(queryString, isTemplate, context) {
     if (this.isFilterRequest(queryString) === true) {
       return this.getExperimentsByFilters(queryString, isTemplate, context)
@@ -85,6 +93,7 @@ class ExperimentsService {
         .then(() => data))
   }
 
+  @setErrorCode('155000')
   populateOwners(experiments) {
     if (experiments.length === 0) return Promise.resolve([])
     const experimentIds = _.map(experiments, 'id')
@@ -98,6 +107,7 @@ class ExperimentsService {
     )
   }
 
+  @setErrorCode('156000')
   populateTagsForAllExperiments(experiments, isTemplate) {
     if (experiments.length === 0) return Promise.resolve([])
     const entity = isTemplate ? 'template' : 'experiment'
@@ -105,6 +115,7 @@ class ExperimentsService {
       .then(entityTags => ExperimentsService.mergeTagsWithExperiments(experiments, entityTags))
   }
 
+  @setErrorCode('157000')
   @Transactional('verifyExperimentExists')
   static verifyExperimentExists(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
@@ -112,11 +123,12 @@ class ExperimentsService {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-        throw AppError.notFound(errorMessage)
+        throw AppError.notFound(errorMessage, undefined, getFullErrorCode('157001'))
       }
     })
   }
 
+  @setErrorCode('158000')
   @Transactional('getExperimentById')
   getExperimentById(id, isTemplate, context, tx) {
     return db.experiments.find(id, isTemplate, tx).then((data) => {
@@ -124,7 +136,7 @@ class ExperimentsService {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-        throw AppError.notFound(errorMessage)
+        throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
       } else {
         return Promise.all(
           [
@@ -141,6 +153,7 @@ class ExperimentsService {
     })
   }
 
+  @setErrorCode('159000')
   @Transactional('updateExperiment')
   updateExperiment(experimentId, experiment, context, isTemplate, tx) {
     const id = Number(experimentId)
@@ -153,7 +166,7 @@ class ExperimentsService {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
               logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-              throw AppError.notFound(errorMessage)
+              throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
@@ -179,6 +192,7 @@ class ExperimentsService {
           })))
   }
 
+  @setErrorCode('15A000')
   deleteExperiment =
     (id, context, isTemplate, tx) => this.securityService.permissionsCheck(id, context,
       isTemplate, tx)
@@ -186,12 +200,13 @@ class ExperimentsService {
         .then((data) => {
           if (!data) {
             logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
-            throw AppError.notFound('Experiment Not Found for requested experimentId')
+            throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
           } else {
             return this.tagService.deleteTagsForExperimentId(id).then(() => data)
           }
         }))
 
+  @setErrorCode('15B000')
   getExperimentsByFilters(queryString, isTemplate, context) {
     return this.validator.validate([queryString], 'FILTER').then(() => {
       const lowerCaseTagCategories = _.toLower(queryString['tags.category'])
@@ -209,8 +224,10 @@ class ExperimentsService {
     })
   }
 
+  @setErrorCode('15C000')
   getAllExperiments = isTemplate => db.experiments.all(isTemplate)
 
+  @setErrorCode('15D000')
   assignExperimentIdToTags = experiments => _.compact(
     _.flatMap(experiments, (exp) => {
       const { tags } = exp
@@ -224,12 +241,14 @@ class ExperimentsService {
       return exp.tags
     }))
 
+  @setErrorCode('15E000')
   isFilterRequest = (queryString) => {
     const allowedFilters = ['tags.category', 'tags.value']
     return !_.isEmpty(queryString)
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
+  @setErrorCode('15F000')
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {
     const { source } = queryString
@@ -265,7 +284,7 @@ class ExperimentsService {
               AppUtil.createPostResponse(data),
             )
           }
-          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed'))
+          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed', undefined, getFullErrorCode('15F001')))
         })
         break
       }
@@ -276,12 +295,13 @@ class ExperimentsService {
         break
       }
       default:
-        experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
+        experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15F002')))
         break
     }
     return experimentPromise
   }
 
+  @setErrorCode('15G000')
   @Transactional('manageTemplates')
   manageTemplates(requestBody, queryString, context, tx) {
     const { source } = queryString
@@ -303,24 +323,26 @@ class ExperimentsService {
         break
       }
       default:
-        templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type'))
+        templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15G001')))
         break
     }
     return templatePromise
   }
 
+  @setErrorCode('15H000')
   createEntity(id, numberOfCopies, context, isTemplate, tx) {
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
       return this.generateEntities([id], numberOfCopies,
         context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
-    return Promise.reject(AppError.badRequest(`Invalid ${entityCreatedFrom} Id or number of Copies`))
+    return Promise.reject(AppError.badRequest(`Invalid ${entityCreatedFrom} Id or number of Copies`, undefined, getFullErrorCode('15H001')))
   }
 
+  @setErrorCode('15I000')
   copyEntities(ids, numberOfCopies, context, isTemplate, tx) {
     if (!_.isArray(ids)) {
-      return Promise.reject(AppError.badRequest('ids must be an array'))
+      return Promise.reject(AppError.badRequest('ids must be an array', undefined, getFullErrorCode('15I001')))
     }
 
     const idsCheck = _.partition(ids, id => _.isNumber(id))
@@ -328,10 +350,10 @@ class ExperimentsService {
       return this.generateEntities(ids, numberOfCopies,
         context, isTemplate, 'copy', tx)
     }
-    return Promise.reject(AppError.badRequest('Invalid ids or number' +
-      ' of Copies'))
+    return Promise.reject(AppError.badRequest('Invalid ids or number of Copies', undefined, getFullErrorCode('15I002')))
   }
 
+  @setErrorCode('15J000')
   batchCreateTemplates(templates, context, tx) {
     const templatesArrayObj = _.map(templates, (t) => {
       t.isTemplate = true
@@ -340,11 +362,19 @@ class ExperimentsService {
     return this.batchCreateExperiments(templatesArrayObj, context, true, tx)
   }
 
+  @setErrorCode('15K000')
   generateEntities(ids, numberOfCopies, context, isTemplate, source, tx) {
     const duplicationObj = { ids, numberOfCopies, isTemplate }
     return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }
 
+  @setErrorCode('15N000')
+  @Transactional('updateCapacityRequestSyncTime')
+  static updateCapacityRequestSyncDate(experimentId, context, tx) {
+    return db.experiments.updateCapacityRequestSyncDate(experimentId, context, tx)
+  }
+
+  @setErrorCode('15L000')
   static
   mergeTagsWithExperiments(experiments, entityTags) {
     const experimentsAndTagsMap = _.groupBy(entityTags, 'entityId')
@@ -356,6 +386,7 @@ class ExperimentsService {
     })
   }
 
+  @setErrorCode('15M000')
   static
   prepareTagResponse(tags) {
     return _.map(tags, t => ({ category: t.category, value: t.value }))

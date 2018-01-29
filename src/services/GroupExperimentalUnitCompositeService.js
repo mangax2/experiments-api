@@ -9,7 +9,11 @@ import SecurityService from './SecurityService'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from '../services/utility/AppError'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 1FXXXX
 class GroupExperimentalUnitCompositeService {
   constructor() {
     this.groupService = new GroupService()
@@ -19,6 +23,7 @@ class GroupExperimentalUnitCompositeService {
     this.securityService = new SecurityService()
   }
 
+  @setErrorCode('1F1000')
   @Transactional('saveDesignSpecsAndGroupUnitDetails')
   saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context,
     isTemplate, tx) {
@@ -33,17 +38,17 @@ class GroupExperimentalUnitCompositeService {
       ]).then(() => AppUtil.createCompositePostResponse())
     }
 
-    throw AppError.badRequest('Design Specifications and Group-Experimental-Units object must be' +
-      ' defined')
+    throw AppError.badRequest('Design Specifications and Group-Experimental-Units object must be defined', undefined, getFullErrorCode('1F1001'))
   }
 
+  @setErrorCode('1F2000')
   @Transactional('saveGroupAndUnitDetails')
   saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
       .then(() => {
         const error = this.validateGroups(groupAndUnitDetails)
         if (error) {
-          throw AppError.badRequest(error)
+          throw error
         }
         return this.getGroupTree(experimentId, isTemplate, context, tx)
           .then((oldGroupsAndUnits) => {
@@ -62,27 +67,33 @@ class GroupExperimentalUnitCompositeService {
       })
   }
 
+  @setErrorCode('1F3000')
   createGroupValues = (groupAdds, context, tx) => (groupAdds.length > 0
     ? this.groupValueService.batchCreateGroupValues(_.flatMap(groupAdds, g => g.groupValues),
       context, tx)
     : Promise.resolve())
 
+  @setErrorCode('1F4000')
   batchUpdateExperimentalUnits = (unitUpdates, context, tx) => (unitUpdates.length > 0
     ? this.experimentalUnitService.batchUpdateExperimentalUnits(unitUpdates, context, tx)
     : Promise.resolve())
 
+  @setErrorCode('1F5000')
   batchDeleteExperimentalUnits = (unitDeletes, context, tx) => (unitDeletes.length > 0
     ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), context, tx)
     : Promise.resolve())
 
+  @setErrorCode('1F6000')
   batchUpdateGroups = (groupUpdates, context, tx) => (groupUpdates.length > 0
     ? this.groupService.batchUpdateGroupsNoValidate(groupUpdates, context, tx)
     : Promise.resolve())
 
+  @setErrorCode('1F7000')
   batchDeleteGroups = (groupDeletes, context, tx) => (groupDeletes.length > 0
     ? this.groupService.batchDeleteGroups(_.map(groupDeletes, 'id'), context, tx)
     : Promise.resolve())
 
+  @setErrorCode('1F8000')
   recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx) {
     const groups = _.map(groupAndUnitDetails, (gU) => {
       gU.experimentId = Number(experimentId)
@@ -99,6 +110,7 @@ class GroupExperimentalUnitCompositeService {
           context, tx))
   }
 
+  @setErrorCode('1F9000')
   createGroupValuesUnitsAndChildGroups(experimentId, groupResponse, groupAndUnitDetails,
     context, tx) {
     const updatedGroupAndUnitDetails = this.assignGroupIdToGroupValuesAndUnits(
@@ -113,6 +125,7 @@ class GroupExperimentalUnitCompositeService {
     return Promise.all(promises)
   }
 
+  @setErrorCode('1FA000')
   createExperimentalUnits(experimentId, units, context, tx) {
     if (units.length === 0) {
       return Promise.resolve()
@@ -121,13 +134,14 @@ class GroupExperimentalUnitCompositeService {
     return db.treatment.getDistinctExperimentIds(treatmentIds, tx).then((experimentIdsResp) => {
       const experimentIds = _.compact(_.map(experimentIdsResp, 'experiment_id'))
       if (experimentIds.length > 1 || Number(experimentIds[0]) !== Number(experimentId)) {
-        throw AppError.badRequest('Treatments not associated with same experiment')
+        throw AppError.badRequest('Treatments not associated with same experiment', undefined, getFullErrorCode('1FA001'))
       } else {
         return this.experimentalUnitService.batchCreateExperimentalUnits(units, context, tx)
       }
     })
   }
 
+  @setErrorCode('1FB000')
   validateGroups(groups) {
     let error
     _.forEach(groups, (grp) => {
@@ -138,14 +152,15 @@ class GroupExperimentalUnitCompositeService {
     return error
   }
 
+  @setErrorCode('1FC000')
   validateGroup(group) {
     const units = group.units ? group.units : []
     const childGroups = group.childGroups ? group.childGroups : []
     if (units.length > 0 && childGroups.length > 0) {
-      return 'Only leaf child groups should have units'
+      return AppError.badRequest('Only leaf child groups should have units', undefined, getFullErrorCode('1FC001'))
     }
     if (units.length === 0 && childGroups.length === 0) {
-      return 'Each group should have at least one unit or at least one child group'
+      return AppError.badRequest('Each group should have at least one unit or at least one child group', undefined, getFullErrorCode('1FC002'))
     }
     if (childGroups.length > 0) {
       return this.validateGroups(childGroups)
@@ -153,6 +168,7 @@ class GroupExperimentalUnitCompositeService {
     return undefined
   }
 
+  @setErrorCode('1FD000')
   assignGroupIdToGroupValuesAndUnits = (groupAndUnitDetails, groupIds) => {
     _.forEach(groupAndUnitDetails, (gU, index) => {
       _.forEach(gU.groupValues, (gV) => { gV.groupId = groupIds[index] })
@@ -162,6 +178,7 @@ class GroupExperimentalUnitCompositeService {
     return groupAndUnitDetails
   }
 
+  @setErrorCode('1FE000')
   @Transactional('getGroupAndUnitDetails')
   getGroupAndUnitDetails(experimentId, isTemplate, context, tx) {
     return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate,
@@ -180,6 +197,7 @@ class GroupExperimentalUnitCompositeService {
       })
   }
 
+  @setErrorCode('1FF000')
   @Transactional('getGroupTree')
   getGroupTree(experimentId, isTemplate, context, tx) {
     return this.getGroupAndUnitDetails(experimentId, isTemplate, context, tx)
@@ -196,6 +214,7 @@ class GroupExperimentalUnitCompositeService {
       })
   }
 
+  @setErrorCode('1FG000')
   compareGroupTrees = (newTree, oldTree) => {
     const newGroups = _.flatMap(newTree, g => this.assignAncestryAndLocation(g))
     const oldGroups = _.flatMap(oldTree, g => this.assignAncestryAndLocation(g))
@@ -221,6 +240,7 @@ class GroupExperimentalUnitCompositeService {
     return this.formatComparisonResults(oldGroups, newGroups, oldUnits, newUnits)
   }
 
+  @setErrorCode('1FH000')
   findMatchingEntity = (entity, hashedEntities, hashProperty, additionalLogic) => {
     const matchingEntity = _.find(hashedEntities[entity[hashProperty]], e => !e.used)
     if (matchingEntity) {
@@ -232,6 +252,7 @@ class GroupExperimentalUnitCompositeService {
     }
   }
 
+  @setErrorCode('1FI000')
   assignAncestryAndLocation = (group, parent) => {
     const parentAncestors = parent ? parent.ancestors : ''
     const businessKeys = _.map(group.groupValues, (gv) => {
@@ -263,6 +284,7 @@ class GroupExperimentalUnitCompositeService {
     return [group]
   }
 
+  @setErrorCode('1FJ000')
   formatComparisonResults = (oldGroups, newGroups, oldUnits, newUnits) => {
     const partitionedGroups = _.partition(newGroups, g => !g.id)
     const partitionedUnits = _.partition(newUnits, u => !u.id)

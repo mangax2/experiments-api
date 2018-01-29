@@ -1,8 +1,10 @@
 import CapacityRequestService from '../../src/services/CapacityRequestService'
+import ExperimentsService from '../../src/services/ExperimentsService'
 import AppError from '../../src/services/utility/AppError'
 import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
+import { mock, mockReject, mockResolve } from '../jestUtil'
 
 describe('CapacityRequestService', () => {
   describe('associateExperimentToCapacityRequest', () => {
@@ -115,9 +117,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 400, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 400, response: { text: 'testText' } }, '5')
 
-      expect(AppError.badRequest).toBeCalledWith('Invalid capacity request information')
+      expect(AppError.badRequest).toBeCalledWith('Invalid capacity request information', undefined, '5')
       expect(AppError.unauthorized).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -127,9 +129,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 404, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 404, response: { text: 'testText' } }, '5')
 
-      expect(AppError.badRequest).toBeCalledWith('The associated capacity request does not exist')
+      expect(AppError.badRequest).toBeCalledWith('The associated capacity request does not exist', undefined, '5')
       expect(AppError.unauthorized).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -139,9 +141,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 401, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 401, response: { text: 'testText' } }, '5')
 
-      expect(AppError.unauthorized).toBeCalledWith('testText')
+      expect(AppError.unauthorized).toBeCalledWith('testText', undefined, '5')
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.forbidden).not.toBeCalled()
     })
@@ -151,9 +153,9 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      CapacityRequestService.handleCapacityRequestError({ status: 403, response: { text: 'testText' } })
+      CapacityRequestService.handleCapacityRequestError({ status: 403, response: { text: 'testText' } }, '5')
 
-      expect(AppError.forbidden).toBeCalledWith('testText')
+      expect(AppError.forbidden).toBeCalledWith('testText', undefined, '5')
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.unauthorized).not.toBeCalled()
     })
@@ -163,7 +165,7 @@ describe('CapacityRequestService', () => {
       AppError.unauthorized = jest.fn()
       AppError.forbidden = jest.fn()
 
-      const response = CapacityRequestService.handleCapacityRequestError({ status: 500, response: { text: 'testText' } })
+      const response = CapacityRequestService.handleCapacityRequestError({ status: 500, response: { text: 'testText' } }, '5')
 
       expect(AppError.badRequest).not.toBeCalled()
       expect(AppError.unauthorized).not.toBeCalled()
@@ -172,6 +174,72 @@ describe('CapacityRequestService', () => {
         status: 500,
         code: 'Internal Server Error',
         message: 'Error received from Capacity Request API: testText',
+        errorCode: '5',
+      })
+    })
+  })
+
+  describe('syncCapacityRequestDataWithExperiment', () => {
+    const testContext = {}
+    const testTx = { tx: {} }
+
+    test('it rejects when security service rejects', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mock()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockReject(),
+      }
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mock(),
+      }
+
+      const capacityRequestData = {
+        locations: 4,
+        reps: 3,
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
+    test('calls designSpecificationDetailService and ExperimentsService', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+
+      const capacityRequestData = {
+        locations: 4,
+        reps: 3,
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
+      })
+    })
+
+    test('only calls ExperimentsService when nothing to sync', () => {
+      ExperimentsService.updateCapacityRequestSyncDate = mockResolve()
+      const capacityRequestService = new CapacityRequestService()
+      capacityRequestService.securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      capacityRequestService.designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+
+      const capacityRequestData = {}
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
+        expect(ExperimentsService.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
       })
     })
   })

@@ -112,7 +112,7 @@ describe('FactorsValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '391001')
     })
   })
 
@@ -130,8 +130,7 @@ describe('FactorsValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate factor name in' +
-        ' request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate factor name in request payload with same experiment id', errorCode: '394001' })
     })
   })
 
@@ -148,8 +147,7 @@ describe('FactorsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Factor request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Factor request object needs to be an array', undefined, '392001')
       })
     })
 
@@ -157,8 +155,7 @@ describe('FactorsValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Factor request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Factor request object needs to be an array', undefined, '392001')
       })
     })
   })

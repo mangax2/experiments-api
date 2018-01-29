@@ -1,6 +1,7 @@
 import express from 'express'
 import log4js from 'log4js'
 import pt from 'promise-timeout'
+import CapacityRequestService from '../services/CapacityRequestService'
 import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
@@ -34,6 +35,13 @@ const router = express.Router()
 router.get('/ping', (req, res) => {
   logger.debug(`the user for /ping url is ${req.userProfile.id}`)
   return res.json({ message: 'Received Ping request: Experiments API !!!' })
+})
+
+router.post('/experiments/:id/capacity-request-sync', (req, res, next) => {
+  const { id } = req.params
+  return new CapacityRequestService().syncCapacityRequestDataWithExperiment(
+    id, req.body, req.context,
+  ).then(value => res.json(value)).catch(err => next(err))
 })
 
 router.get('/experiment-designs', (req, res, next) => new ExperimentDesignService().getAllExperimentDesigns()

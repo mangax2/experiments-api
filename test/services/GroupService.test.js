@@ -27,24 +27,26 @@ describe('GroupService', () => {
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.group.batchCreate = mockReject('error')
+      db.group.batchCreate = mockReject(error)
 
       return target.batchCreateGroups([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.group.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.group.batchCreate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
+      db.group.batchCreate = mockReject(error)
 
       return target.batchCreateGroups([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
         expect(db.group.batchCreate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -62,24 +64,26 @@ describe('GroupService', () => {
     })
 
     test('rejects when findAllByExperimentId fails', () => {
+      const error = { message: 'error' }
       target.experimentService.getExperimentById = mockResolve()
-      db.group.findAllByExperimentId = mockReject('error')
+      db.group.findAllByExperimentId = mockReject(error)
 
       return target.getGroupsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.group.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when getExperimentById fails', () => {
-      target.experimentService.getExperimentById = mockReject('error')
-      db.group.findAllByExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      target.experimentService.getExperimentById = mockReject(error)
+      db.group.findAllByExperimentId = mockReject(error)
 
       return target.getGroupsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.group.findAllByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -100,16 +104,17 @@ describe('GroupService', () => {
 
       return target.getGroupById(1, {}, testTx).then(() => {}, () => {
         expect(db.group.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Group Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Group Not Found for requested id', undefined, '1G3001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.group.find = mockReject('error')
+      const error = { message: 'error' }
+      db.group.find = mockReject(error)
 
       return target.getGroupById(1, {}, testTx).then(() => {}, (err) => {
         expect(db.group.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -128,24 +133,26 @@ describe('GroupService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.group.batchUpdate = mockReject('error')
+      db.group.batchUpdate = mockReject(error)
 
       return target.batchUpdateGroups([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.group.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
-      db.group.batchUpdate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
+      db.group.batchUpdate = mockReject(error)
 
       return target.batchUpdateGroups([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.group.batchUpdate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -188,7 +195,7 @@ describe('GroupService', () => {
 
       return target.batchDeleteGroups([1], {}, testTx).then(() => {}, () => {
         expect(db.group.batchRemove).toHaveBeenCalledWith([1], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found', undefined, '1G7001')
       })
     })
 
@@ -198,7 +205,7 @@ describe('GroupService', () => {
 
       return target.batchDeleteGroups([1, 2], {}, testTx).then(() => {}, () => {
         expect(db.group.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found')
+        expect(AppError.notFound).toHaveBeenCalledWith('Not all groups requested for delete were found', undefined, '1G7001')
       })
     })
   })

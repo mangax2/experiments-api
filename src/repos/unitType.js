@@ -1,12 +1,26 @@
 import _ from "lodash"
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
-module.exports = rep => ({
-  repository: () => rep,
+const { setErrorCode } = setErrorDecorator()
 
-  find: id => rep.oneOrNone('SELECT * FROM ref_unit_type WHERE id = $1', id),
+// Error Codes 5MXXXX
+class unitTypeRepo {
+  constructor(rep) {
+    this.rep = rep
+  }
 
-  all: () => rep.any('SELECT * FROM ref_unit_type'),
+  @setErrorCode('5M0000')
+  repository = () => this.rep
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids])
-    .then(data => _.map(ids, id => _.filter(data, row => row.id === id))),
-})
+  @setErrorCode('5M1000')
+  find = id => this.rep.oneOrNone('SELECT * FROM ref_unit_type WHERE id = $1', id)
+
+  @setErrorCode('5M2000')
+  all = () => this.rep.any('SELECT * FROM ref_unit_type')
+
+  @setErrorCode('5M3000')
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids])
+    .then(data => _.map(ids, id => _.filter(data, row => row.id === id)))
+}
+
+module.exports = rep => new unitTypeRepo(rep)

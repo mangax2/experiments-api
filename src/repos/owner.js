@@ -1,24 +1,28 @@
 import _ from "lodash"
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
-module.exports = rep => ({
-  repository: () => rep,
+const { setErrorCode } = setErrorDecorator()
 
-  batchFind: (ids, tx = rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]),
+// Error Codes 5EXXXX
+class ownerRepo {
+  constructor(rep) {
+    this.rep = rep
+  }
 
-  findByExperimentId: (experimentId, tx = rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
+  @setErrorCode('5E0000')
+  repository = () => this.rep
+
+  @setErrorCode('5E1000')
+  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
     ' owner WHERE' +
-    ' experiment_id = $1', experimentId),
+    ' experiment_id = $1', experimentId)
 
-  batchFindByExperimentIds: (experimentIds, tx = rep) => tx.any('SELECT * FROM owner where' +
-    ' experiment_id IN ($1:csv)', [experimentIds]),
+  @setErrorCode('5E2000')
+  batchFindByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT * FROM owner where' +
+    ' experiment_id IN ($1:csv)', [experimentIds])
 
-  graphQLBatchFindByExperimentId: (experimentIds, tx = rep) => {
-    return tx.any('SELECT * FROM owner WHERE experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
-  },
-
-
-  batchCreate: (experimentsOwners, context, tx = rep) => tx.batch(
+  @setErrorCode('5E3000')
+  batchCreate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.one(
         'insert into owner(experiment_id, user_ids, group_ids, created_user_id, ' +
@@ -32,10 +36,10 @@ module.exports = rep => ({
           context.userId],
       ),
     ),
-  ),
+  )
 
-
-  batchUpdate: (experimentsOwners, context, tx = rep) => tx.batch(
+  @setErrorCode('5E4000')
+  batchUpdate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.oneOrNone(
         'UPDATE owner SET (user_ids, group_ids,' +
@@ -49,6 +53,16 @@ module.exports = rep => ({
         ],
       ),
     ),
-  ),
+  )
 
-})
+  @setErrorCode('5E5000')
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids])
+
+  @setErrorCode('5E6000')
+  graphQLBatchFindByExperimentId = (experimentIds, tx = this.rep) => {
+    return tx.any('SELECT * FROM owner WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+  }
+}
+
+module.exports = rep => new ownerRepo(rep)

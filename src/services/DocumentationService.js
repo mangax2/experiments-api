@@ -3,8 +3,13 @@ import cf from 'aws-cloudfront-sign'
 import HttpUtil from './utility/HttpUtil'
 import VaultUtil from './utility/VaultUtil'
 import config from '../../config'
+import setErrorDecorator from '../decorators/setErrorDecorator'
 
+const { setErrorCode } = setErrorDecorator()
+
+// Error Codes 14XXXX
 class DocumentationService {
+  @setErrorCode('141000')
   static getImage(topic, imageName) {
     const cookies = DocumentationService.getCloudfrontCookies()
 
@@ -23,6 +28,7 @@ class DocumentationService {
     return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/experiments/images/${topic}/${imageName}`, headers)
   }
 
+  @setErrorCode('142000')
   static getDoc(fileName) {
     const cookies = DocumentationService.getCloudfrontCookies()
 
@@ -41,6 +47,7 @@ class DocumentationService {
     return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/experiments/${fileName}`, headers)
   }
 
+  @setErrorCode('143000')
   static getCloudfrontCookies() {
     const keyPairId = config.env === 'local' ? 'APKAIDNVPE572RTKAYCQ' : VaultUtil.cloudFrontKeyPair
     const url = config.env === 'local' ? 'http://dcb6g58iy3guq.cloudfront.net/*' : VaultUtil.cloudFrontUrl

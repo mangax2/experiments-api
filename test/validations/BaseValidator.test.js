@@ -8,6 +8,7 @@ describe('BaseValidator', () => {
 
   beforeEach(() => {
     target = new BaseValidator()
+    target.fileCode = ''
   })
 
   describe('hasError', () => {
@@ -190,17 +191,17 @@ describe('BaseValidator', () => {
   describe('checkLength', () => {
     test('adds a message if value is not a string', () => {
       target.checkLength({}, { min: 0, max: 0 }, 'test')
-      expect(target.messages[0]).toEqual('test must be a string')
+      expect(target.messages[0]).toEqual({ message: 'test must be a string', errorCode: 'ZZ01' })
     })
 
     test('adds a message if value is too short', () => {
       target.checkLength('', { min: 1, max: 2 }, 'test')
-      expect(target.messages[0]).toEqual('test length is out of range(min=1 max=2)')
+      expect(target.messages[0]).toEqual({ message: 'test length is out of range(min=1 max=2)', errorCode: 'ZZ02' })
     })
 
     test('adds a message if value is too long', () => {
       target.checkLength('abc', { min: 1, max: 2 }, 'test')
-      expect(target.messages[0]).toEqual('test length is out of range(min=1 max=2)')
+      expect(target.messages[0]).toEqual({ message: 'test length is out of range(min=1 max=2)', errorCode: 'ZZ02' })
     })
 
     test('does not add a message if the string value is within the min and max', () => {
@@ -212,14 +213,12 @@ describe('BaseValidator', () => {
   describe('literalCheck', () => {
     test('adds a message if value is an object', () => {
       expect(target.literalCheck({}, 'test')).toEqual(false)
-      expect(target.messages[0]).toEqual('test must be a literal value. Object and Arrays are' +
-        ' not supported.')
+      expect(target.messages[0]).toEqual({ message: 'test must be a literal value. Object and Arrays are not supported.', errorCode: 'ZZ03' })
     })
 
     test('adds a message if value is an array', () => {
       expect(target.literalCheck([], 'test')).toEqual(false)
-      expect(target.messages[0]).toEqual('test must be a literal value. Object and Arrays are' +
-        ' not supported.')
+      expect(target.messages[0]).toEqual({ message: 'test must be a literal value. Object and Arrays are not supported.', errorCode: 'ZZ03' })
     })
 
     test('returns true if values is not an object or array', () => {
@@ -232,19 +231,19 @@ describe('BaseValidator', () => {
     test('adds a message if value is undefined', () => {
       target.checkRequired(undefined, 'test')
 
-      expect(target.messages[0]).toEqual('test is required')
+      expect(target.messages[0]).toEqual({ message: 'test is required', errorCode: 'ZZ04' })
     })
 
     test('adds a message if value is null', () => {
       target.checkRequired(null, 'test')
 
-      expect(target.messages[0]).toEqual('test is required')
+      expect(target.messages[0]).toEqual({ message: 'test is required', errorCode: 'ZZ04' })
     })
 
     test('adds a message if value is empty', () => {
       target.checkRequired('', 'test')
 
-      expect(target.messages[0]).toEqual('test is required')
+      expect(target.messages[0]).toEqual({ message: 'test is required', errorCode: 'ZZ04' })
     })
 
     test('does not add a message if value is filled', () => {
@@ -258,13 +257,13 @@ describe('BaseValidator', () => {
     test('adds a message if the value is not numeric', () => {
       target.checkNumeric('test', 'test')
 
-      expect(target.messages[0]).toEqual('test must be numeric')
+      expect(target.messages[0]).toEqual({ message: 'test must be numeric', errorCode: 'ZZ05' })
     })
 
     test('adds a message if the value is numeric but in string format', () => {
       target.checkNumeric('1', 'test')
 
-      expect(target.messages[0]).toEqual('test must be numeric')
+      expect(target.messages[0]).toEqual({ message: 'test must be numeric', errorCode: 'ZZ05' })
     })
 
 
@@ -279,13 +278,13 @@ describe('BaseValidator', () => {
     test('adds a message if the value is too low', () => {
       target.checkNumericRange(0, { min: 1, max: 2 }, 'test')
 
-      expect(target.messages[0]).toEqual('test value is out of numeric range(min=1 max=2)')
+      expect(target.messages[0]).toEqual({ message: 'test value is out of numeric range(min=1 max=2)', errorCode: 'ZZ06' })
     })
 
     test('adds a message if the value is too high', () => {
       target.checkNumericRange(3, { min: 1, max: 2 }, 'test')
 
-      expect(target.messages[0]).toEqual('test value is out of numeric range(min=1 max=2)')
+      expect(target.messages[0]).toEqual({ message: 'test value is out of numeric range(min=1 max=2)', errorCode: 'ZZ06' })
     })
 
     test('does not add a message if the value is within the range', () => {
@@ -299,7 +298,7 @@ describe('BaseValidator', () => {
     test('adds a message if value is not found in data', () => {
       target.checkConstants(1, [2], 'test')
 
-      expect(target.messages[0]).toEqual('test requires a valid value')
+      expect(target.messages[0]).toEqual({ message: 'test requires a valid value', errorCode: 'ZZ07' })
     })
 
     test('does not add a message if value is in data', () => {
@@ -313,7 +312,7 @@ describe('BaseValidator', () => {
     test('adds a message if value is not a boolean', () => {
       target.checkBoolean('test', 'test')
 
-      expect(target.messages[0]).toEqual('test must be a boolean')
+      expect(target.messages[0]).toEqual({ message: 'test must be a boolean', errorCode: 'ZZ08' })
     })
 
     test('does not add a message if value is a boolean', () => {
@@ -338,7 +337,7 @@ describe('BaseValidator', () => {
 
       return target.checkReferentialIntegrityById(1, {}, testTx).then(() => {
         expect(target.referentialIntegrityService.getById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(target.messages[0]).toEqual('test not found for id 1')
+        expect(target.messages[0]).toEqual({ message: 'test not found for id 1', errorCode: 'ZZ09' })
       })
     })
 
@@ -449,7 +448,7 @@ describe('BaseValidator', () => {
       return target.verifyIdsExist([1, 2], [{ paramName: 'testParam' }], {}, testTx).then(() => {
         expect(target.referentialIntegrityService.getEntitiesByIds).toHaveBeenCalledWith([1, 2], {}, testTx)
         expect(target.messages.length).toEqual(1)
-        expect(target.messages[0]).toEqual('test not found for testParam(s): 2')
+        expect(target.messages[0]).toEqual({ message: 'test not found for testParam(s): 2', errorCode: 'ZZ0B' })
       })
     })
 
@@ -498,8 +497,7 @@ describe('BaseValidator', () => {
       target.formatBusinessKey = mock('test1,test2')
 
       return target.verifyBusinessKeysAreUnique([], {}, testTx).then(() => {
-        expect(target.messages[0]).toEqual('test already exists for business' +
-          ' keys test1,test2')
+        expect(target.messages[0]).toEqual({ message: 'test already exists for business keys test1,test2', errorCode: 'ZZ0C' })
       })
     })
 
@@ -547,11 +545,11 @@ describe('BaseValidator', () => {
     })
 
     test('rejects when messages exist', () => {
-      target.messages.push('error!')
+      target.messages.push({ message: 'error!', errorCode: 'code' })
       AppError.badRequest = mock()
 
       return target.check().then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('error!')
+        expect(AppError.badRequest).toHaveBeenCalledWith('error!', undefined, 'code')
       })
     })
   })

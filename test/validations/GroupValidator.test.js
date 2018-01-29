@@ -102,7 +102,7 @@ describe('GroupValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3B1001')
     })
   })
 
@@ -125,8 +125,7 @@ describe('GroupValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group request object needs to be an array', undefined, '3B2001')
       })
     })
 
@@ -134,8 +133,7 @@ describe('GroupValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Group request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Group request object needs to be an array', undefined, '3B2001')
       })
     })
   })
@@ -190,7 +188,7 @@ describe('GroupValidator', () => {
       AppError.badRequest = mock()
 
       return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1', undefined, '3B4001')
       })
     })
 
@@ -200,7 +198,7 @@ describe('GroupValidator', () => {
       AppError.badRequest = mock()
 
       return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1, 3')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1, 3', undefined, '3B4001')
       })
     })
   })
@@ -247,8 +245,7 @@ describe('GroupValidator', () => {
           expect(true).toBe(false)
         }, () => {
           expect(target.validRandomizationIds).toEqual(undefined)
-          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
-            ' strategy ids.')
+          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization strategy ids.', undefined, '3B5001')
         })
       })
     })
@@ -267,8 +264,7 @@ describe('GroupValidator', () => {
           expect(true).toBe(false)
         }, () => {
           expect(target.validRandomizationIds).toEqual(undefined)
-          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization' +
-            ' strategy ids.')
+          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization strategy ids.', undefined, '3B5001')
         })
       })
     })

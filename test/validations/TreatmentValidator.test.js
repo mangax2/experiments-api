@@ -106,7 +106,7 @@ describe('TreatmentValidator', () => {
         AppError.badRequest = mock('')
 
         expect(() => { target.getSchema('test') }).toThrow()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '3F1001')
       })
     })
   })
@@ -119,7 +119,7 @@ describe('TreatmentValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business key error mesasge', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate treatment number in request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate treatment number in request payload with same experiment id', errorCode: '3FA001' })
     })
   })
 
@@ -128,8 +128,7 @@ describe('TreatmentValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object needs to be an array', undefined, '3F2001')
       })
     })
 
@@ -137,8 +136,7 @@ describe('TreatmentValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Treatment request object needs to be an array', undefined, '3F2001')
       })
     })
 
@@ -245,7 +243,7 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
-          'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }',
+          { message: 'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }', errorCode: '3F8001' },
         ])
       })
     })
@@ -312,8 +310,8 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
-          'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }',
-          'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 12, Nested Level Id: 22 }',
+          { message: 'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }', errorCode: '3F8001' },
+          { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 12, Nested Level Id: 22 }', errorCode: '3F8001' },
         ])
       })
     })
@@ -606,8 +604,8 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
-          'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 22, Nested Level Id: 31 }',
-          'Treatment number: 3 has the following invalid level id combinations: { Associated Level Id: 21, Nested Level Id: 32 }',
+          { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 22, Nested Level Id: 31 }', errorCode: '3F8001' },
+          { message: 'Treatment number: 3 has the following invalid level id combinations: { Associated Level Id: 21, Nested Level Id: 32 }', errorCode: '3F8001' },
         ])
       })
     })
@@ -813,8 +811,8 @@ describe('TreatmentValidator', () => {
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
         expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
         expect(target.messages).toEqual([
-          'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 32 }',
-          'Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }',
+          { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 32 }', errorCode: '3F8001' },
+          { message: 'Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }', errorCode: '3F8001' },
         ])
       })
     })

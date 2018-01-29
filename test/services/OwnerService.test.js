@@ -26,24 +26,26 @@ describe('OwnerService', () => {
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.owner.batchCreate = mockReject('error')
+      db.owner.batchCreate = mockReject(error)
 
       return target.batchCreateOwners([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx, testContext)
         expect(db.owner.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.owner.batchCreate = mock()
 
       return target.batchCreateOwners([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx, testContext)
         expect(db.owner.batchCreate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -59,11 +61,12 @@ describe('OwnerService', () => {
     })
 
     test('rejects when findByExperimentId fails', () => {
-      db.owner.findByExperimentId = mockReject('error')
+      const error = { message: 'error' }
+      db.owner.findByExperimentId = mockReject(error)
 
       return target.getOwnersByExperimentId(1, testTx).then(() => {}, (err) => {
         expect(db.owner.findByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -78,11 +81,12 @@ describe('OwnerService', () => {
     })
 
     test('rejects when batchFindByExperimentIds fails', () => {
-      db.owner.batchFindByExperimentIds = mockReject('error')
+      const error = { message: 'error' }
+      db.owner.batchFindByExperimentIds = mockReject(error)
 
       return target.getOwnersByExperimentIds([1, 2], testTx).then(() => {}, (err) => {
         expect(db.owner.batchFindByExperimentIds).toHaveBeenCalledWith([1, 2], testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -101,24 +105,26 @@ describe('OwnerService', () => {
     })
 
     test('rejects when batchUpdate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.owner.batchUpdate = mockReject('error')
+      db.owner.batchUpdate = mockReject(error)
 
       return target.batchUpdateOwners([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx, testContext)
         expect(db.owner.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       db.owner.batchUpdate = mock()
 
       return target.batchUpdateOwners([], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testTx, testContext)
         expect(db.owner.batchUpdate).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

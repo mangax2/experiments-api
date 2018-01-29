@@ -98,7 +98,7 @@ describe('CombinationElementValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '311001')
     })
   })
 
@@ -110,7 +110,7 @@ describe('CombinationElementValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('gets duplicate business key error message', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate FactorLevel in request payload with same treatmentId')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate FactorLevel in request payload with same treatmentId', errorCode: '314001' })
     })
   })
 
@@ -127,8 +127,7 @@ describe('CombinationElementValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('CombinationElement request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('CombinationElement request object needs to be an array', undefined, '312001')
       })
     })
 
@@ -136,8 +135,7 @@ describe('CombinationElementValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('CombinationElement request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('CombinationElement request object needs to be an array', undefined, '312001')
       })
     })
   })

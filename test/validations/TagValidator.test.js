@@ -57,8 +57,7 @@ describe('TagValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual('Duplicate Tag in' +
-        ' request payload with same experiment id')
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'Duplicate Tag in request payload with same experiment id', errorCode: '3E4001' })
     })
   })
 
@@ -75,8 +74,7 @@ describe('TagValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object needs to be an array', undefined, '3E2001')
       })
     })
 
@@ -84,8 +82,7 @@ describe('TagValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object' +
-          ' needs to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Tag request object needs to be an array', undefined, '3E2001')
       })
     })
   })

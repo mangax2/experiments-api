@@ -26,16 +26,17 @@ describe('UnitSpecificationService', () => {
 
       return target.getUnitSpecificationById(1, { requestId: 5 }).then(() => {}, () => {
         expect(db.unitSpecification.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Not Found for requested id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Not Found for requested id', undefined, '1T1001')
       })
     })
 
     test('rejects when find fails', () => {
-      db.unitSpecification.find = mockReject('error')
+      const error = { message: 'error' }
+      db.unitSpecification.find = mockReject(error)
 
       return target.getUnitSpecificationById(1).then(() => {}, (err) => {
         expect(db.unitSpecification.find).toHaveBeenCalledWith(1)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -51,11 +52,12 @@ describe('UnitSpecificationService', () => {
     })
 
     test('rejects when find all fails', () => {
-      db.unitSpecification.all = mockReject('error')
+      const error = { message: 'error' }
+      db.unitSpecification.all = mockReject(error)
 
       return target.getAllUnitSpecifications().then(() => {}, (err) => {
         expect(db.unitSpecification.all).toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })

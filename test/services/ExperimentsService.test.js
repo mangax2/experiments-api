@@ -154,11 +154,12 @@ describe('ExperimentsService', () => {
     })
 
     test('rejects when batchCreateTags fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
-      target.tagService.batchCreateTags = mockReject('error')
+      target.tagService.batchCreateTags = mockReject(error)
       target.ownerService.batchCreateOwners = mockResolve({})
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -169,17 +170,18 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when batchCreateOwners fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mock()
-      target.ownerService.batchCreateOwners = mockReject('error')
+      target.ownerService.batchCreateOwners = mockReject(error)
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -190,14 +192,15 @@ describe('ExperimentsService', () => {
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when batchCreate fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
-      db.experiments.batchCreate = mockReject('error')
+      db.experiments.batchCreate = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       AppUtil.createPostResponse = mock()
@@ -209,12 +212,13 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
@@ -228,7 +232,7 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
@@ -275,7 +279,7 @@ describe('ExperimentsService', () => {
       AppError.badRequest = mock()
 
       target.validateAssociatedRequests([{ request: { type: 'ce' } }], true).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request', undefined, '153002')
         done()
       })
     })
@@ -285,8 +289,7 @@ describe('ExperimentsService', () => {
       AppError.badRequest = mock()
 
       target.validateAssociatedRequests([], true).then(() => {
-        expect(AppError.badRequest).not.toHaveBeenCalledWith('Template(s) cannot be associated to' +
-          ' a request')
+        expect(AppError.badRequest).not.toHaveBeenCalledWith('Template(s) cannot be associated to a request')
         done()
       })
     })
@@ -412,11 +415,21 @@ describe('ExperimentsService', () => {
     })
 
     test('rejects when getTagsByExperimentIds fails', () => {
-      target.tagService.getAllTagsForEntity = mockReject('error')
+      const error = { message: 'error' }
+      target.tagService.getAllTagsForEntity = mockReject(error)
 
       return target.populateTagsForAllExperiments([{ id: 1 }]).then(() => {}, (err) => {
         expect(target.tagService.getAllTagsForEntity).toHaveBeenCalledWith('experiment')
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
+      })
+    })
+  })
+
+  describe('updateCapacityRequestSyncDate', () => {
+    test('calls repo updateCapacityRequestSyncDate', () => {
+      db.experiments.updateCapacityRequestSyncDate = mockResolve()
+      return ExperimentsService.updateCapacityRequestSyncDate(1, testContext, testTx).then(() => {
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
       })
     })
   })
@@ -466,7 +479,7 @@ describe('ExperimentsService', () => {
 
       return ExperimentsService.verifyExperimentExists(1, false, {}, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '157001')
       })
     })
 
@@ -476,7 +489,7 @@ describe('ExperimentsService', () => {
 
       return ExperimentsService.verifyExperimentExists(1, true, {}, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '157001')
       })
     })
   })
@@ -496,28 +509,30 @@ describe('ExperimentsService', () => {
     })
 
     test('rejects when tagService fails', () => {
+      const error = { message: 'error' }
       db.experiments.find = mockResolve({})
-      target.tagService.getTagsByExperimentId = mockReject('error')
+      target.tagService.getTagsByExperimentId = mockReject(error)
       target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when ownerService fails', () => {
+      const error = { message: 'error' }
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockResolve([])
-      target.ownerService.getOwnersByExperimentId = mockReject('error')
+      target.ownerService.getOwnersByExperimentId = mockReject(error)
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
@@ -528,8 +543,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
-          ' experimentId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '158001')
         expect(target.tagService.getTagsByExperimentId).not.toHaveBeenCalled()
       })
     })
@@ -541,8 +555,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, true, testContext, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested' +
-          ' templateId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '158001')
         expect(target.tagService.getTagsByExperimentId).not.toHaveBeenCalled()
       })
     })
@@ -622,11 +635,12 @@ describe('ExperimentsService', () => {
     })
 
     test('rejects when batchCreateTags fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
       db.experiments.update = mockResolve({})
       target.assignExperimentIdToTags = mock([{}])
-      target.tagService.saveTags = mockReject('error')
+      target.tagService.saveTags = mockReject(error)
       target.ownerService.batchUpdateOwners = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
@@ -644,7 +658,7 @@ describe('ExperimentsService', () => {
           isTemplate: false,
         }])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
@@ -660,7 +674,7 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: false }, testContext, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found to Update for id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found to Update for id', undefined, '159001')
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
       })
@@ -678,16 +692,17 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, true, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: true }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: true }, testContext, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found to Update for id')
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found to Update for id', undefined, '159001')
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.saveTags).not.toHaveBeenCalled()
       })
     })
 
     test('rejects when update fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
       target.validator.validate = mockResolve()
-      db.experiments.update = mockReject('error')
+      db.experiments.update = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
 
@@ -697,13 +712,14 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).toHaveBeenCalledWith(1, { isTemplate: false }, testContext, testTx)
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
+      const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
-      target.validator.validate = mockReject('error')
+      target.validator.validate = mockReject(error)
       db.experiments.update = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
@@ -714,7 +730,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -741,8 +757,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested' +
-          ' experimentId')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '15A001')
       })
     })
   })
@@ -781,27 +796,29 @@ describe('ExperimentsService', () => {
     })
 
     test('rejects when findExperimentsByTags fails', () => {
+      const error = { message: 'error' }
       target.validator.validate = mockResolve()
       target.toLowerCaseArray = mock([])
-      target.tagService.getEntityTagsByTagFilters = mockReject('error')
+      target.tagService.getEntityTagsByTagFilters = mockReject(error)
       db.experiments.batchFind = mockResolve()
 
       return target.getExperimentsByFilters('', false, testContext).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.tagService.getEntityTagsByTagFilters).toHaveBeenCalledWith('', '', false, testContext)
         expect(db.experiments.batchFind).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
 
     test('rejects when validate fails', () => {
-      target.validator.validate = mockReject('error')
+      const error = { message: 'error' }
+      target.validator.validate = mockReject(error)
       target.toLowerCaseArray = mock()
 
       return target.getExperimentsByFilters('').then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([''], 'FILTER')
         expect(target.toLowerCaseArray).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
+        expect(err).toEqual(error)
       })
     })
   })
@@ -882,7 +899,7 @@ describe('ExperimentsService', () => {
       const requestBody = {}
       AppError.badRequest = mock()
       return target.manageExperiments(requestBody, { source: 'fgsdhfhsdf' }, testContext, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Source Type')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Source Type', undefined, '15F002')
       })
     })
 
@@ -970,22 +987,21 @@ describe('ExperimentsService', () => {
     test('Throw Validations when the templateId or numberofCopies is not a number ', () => {
       AppError.badRequest = mock()
       return target.createEntity('test', '2', testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Template Id or number of' +
-          ' Copies')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Template Id or number of Copies', undefined, '15H001')
       })
     })
 
     test('Throw Validations when the ids is not array during Copy Experiments ', () => {
       AppError.badRequest = mock()
       return target.copyEntities('test', '2', testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array', undefined, '15I001')
       })
     })
 
     test('Throw Validations when the ids is not a numeric array during Copy Experiments ', () => {
       AppError.badRequest = mock()
       return target.copyEntities([1, 2, '3'], '2', testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies', undefined, '15I002')
       })
     })
   })
@@ -1002,7 +1018,7 @@ describe('ExperimentsService', () => {
       const requestBody = {}
       AppError.badRequest = mock()
       return target.manageTemplates(requestBody, { source: 'fgsdhfhsdf' }, testContext, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Source Type')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Source Type', undefined, '15G001')
       })
     })
 
@@ -1014,8 +1030,7 @@ describe('ExperimentsService', () => {
       })
     })
 
-    test('manage Templates when there is  query parameter source is experiment when if the' +
-      ' numberOfCopies is no defined default to 1', () => {
+    test('manage Templates when there is  query parameter source is experiment when if the numberOfCopies is no defined default to 1', () => {
       const requestBody = { id: 1 }
       target.createEntity = mockResolve()
       return target.manageTemplates(requestBody, { source: 'experiment' }, testContext, testTx).then(() => {
@@ -1070,22 +1085,21 @@ describe('ExperimentsService', () => {
     test('Throw Validations when the experimentId or numberofCopies is not a number ', () => {
       AppError.badRequest = mock()
       return target.createEntity('test', '2', testContext, true, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Experiment Id or number of' +
-          ' Copies')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Experiment Id or number of Copies', undefined, '15H001')
       })
     })
 
     test('Throw Validations when the ids is not array during Copy Templates ', () => {
       AppError.badRequest = mock()
       return target.copyEntities('test', '2', testContext, true, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('ids must be an array', undefined, '15I001')
       })
     })
 
     test('Throw Validations when the ids is not a numeric array during Copy Templates ', () => {
       AppError.badRequest = mock()
       return target.copyEntities([1, 2, '3'], '2', testContext, true, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies', undefined, '15I002')
       })
     })
   })

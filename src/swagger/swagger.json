@@ -681,6 +681,63 @@
         }
       }
     },
+    "/experiments/{id}/capacity-request-sync": {
+      "post": {
+        "summary": "Synchronizes capacity request data with an experiment's data",
+        "description": "Synchronizes specific fields from a request from the Capacity Request system with the data stored for an Experiment",
+        "operationId": "capacityRequestSync",
+        "tags": [
+          "Capacity"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "type": "integer",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Capacity Request Sync Values",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "locations": {
+                  "type": "integer"
+                },
+                "reps": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sync Successful"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experiments/{id}/composites/treatments": {
       "get": {
         "summary": "get all treatment details, including combination elements with factor and level information for an experiment",
@@ -4484,6 +4541,9 @@
           "format": "int32"
         },
         "code": {
+          "type": "string"
+        },
+        "errorCode": {
           "type": "string"
         },
         "errorMessage": {

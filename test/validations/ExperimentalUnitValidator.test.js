@@ -111,7 +111,7 @@ describe('ExperimentalUnitValidator', () => {
       AppError.badRequest = mock('')
 
       expect(() => { target.getSchema('test') }).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation')
+      expect(AppError.badRequest).toHaveBeenCalledWith('Invalid Operation', undefined, '341001')
     })
   })
 
@@ -128,8 +128,7 @@ describe('ExperimentalUnitValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('ExperimentalUnit request object needs' +
-          ' to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('ExperimentalUnit request object needs to be an array', undefined, '342001')
       })
     })
 
@@ -137,8 +136,7 @@ describe('ExperimentalUnitValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('ExperimentalUnit request object needs' +
-          ' to be an array')
+        expect(AppError.badRequest).toHaveBeenCalledWith('ExperimentalUnit request object needs to be an array', undefined, '342001')
       })
     })
   })

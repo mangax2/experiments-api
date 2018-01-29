@@ -27,9 +27,12 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const promMetrics = require('@monsantoit/prom-metrics')
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
+  const setErrorDecorator = require('./decorators/setErrorDecorator')
   const app = express()
 
   promMetrics(app)
+
+  setErrorDecorator().setErrorPrefix('EXP')
 
   const requestContext = require('./middleware/requestContext')
 
@@ -97,6 +100,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
           status: 500,
           code: 'Internal Server Error',
           message: err.toString(),
+          errorCode: err.errorCode,
         }
         return res.status(500).json(pgerror)
       }
@@ -119,9 +123,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const logError = (err, context) => {
     if (err.stack) {
-      logger.error(`[[${context.requestId}]] ${err.stack}`)
+      logger.error(`[[${context.requestId}]] ${err.errorCode}: ${err.stack}`)
     } else {
-      logger.error(`[[${context.requestId}]] ${err}`)
+      logger.error(`[[${context.requestId}]] ${err.errorCode}: ${err}`)
     }
   }
 

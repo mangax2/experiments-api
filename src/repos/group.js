@@ -15,6 +15,9 @@ class groupRepo {
   @setErrorCode('5B1000')
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM "group" WHERE id = $1', id)
 
+  @setErrorCode('5BA000')
+  findGroupBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT g.*, gv.value AS location_number FROM "group" g INNER JOIN group_value gv ON g.id = gv.group_id WHERE g.set_id = $1 AND gv.name = \'locationNumber\'', setId)
+
   @setErrorCode('5B2000')
   findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select g.*, gv.value as this.rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
 

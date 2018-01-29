@@ -92,10 +92,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.getGroupTree = mockResolve([])
       target.compareGroupTrees = mock({
         groups: { adds: [{}], updates: [], deletes: [] },
-        units: { adds: [], updates: [], deletes: [] },
+        units: { adds: [{}], updates: [], deletes: [] },
       })
       target.createGroupValues = mockResolve()
-      target.createExperimentalUnits = mockResolve()
+      target.createExperimentalUnits = mockResolve([5])
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
       target.batchUpdateGroups = mockResolve()
@@ -729,6 +729,57 @@ describe('GroupExperimentalUnitCompositeService', () => {
           deletes: [oldUnits[1]],
         },
       })
+    })
+  })
+
+  describe('createRcbGroupStructure', () => {
+    test('creates the correct data structure', () => {
+      const setGroup = {
+        ref_randomization_strategy_id: 2,
+        ref_group_type_id: 4,
+        location_number: 1,
+      }
+
+      const result = target.createRcbGroupStructure(5, setGroup, 2, [{ id: 3 }, { id: 7 }], 6)
+
+      expect(result).toEqual([{
+        refRandomizationStrategyId: 2,
+        refGroupTypeId: 4,
+        groupValues: [{
+          name: 'locationNumber',
+          value: 1,
+        }],
+        setId: 5,
+        childGroups: [{
+          refRandomizationStrategyId: 2,
+          refGroupTypeId: 6,
+          groupValues: [{
+            name: 'repNumber',
+            value: 1,
+          }],
+          units: [{
+            treatmentId: 3,
+            rep: 1,
+          }, {
+            treatmentId: 7,
+            rep: 1,
+          }],
+        }, {
+          refRandomizationStrategyId: 2,
+          refGroupTypeId: 6,
+          groupValues: [{
+            name: 'repNumber',
+            value: 2,
+          }],
+          units: [{
+            treatmentId: 3,
+            rep: 2,
+          }, {
+            treatmentId: 7,
+            rep: 2,
+          }],
+        }],
+      }])
     })
   })
 })

@@ -330,7 +330,8 @@ class GroupExperimentalUnitCompositeService {
           treatments, repGroupTypeId)
 
         return this.getGroupTree(experimentId, false, context, tx).then((experimentGroups) => {
-          const oldGroupsAndUnits = [_.find(experimentGroups, group => group.set_id === setId)]
+          const oldGroupsAndUnits =
+            [_.find(experimentGroups, group => group.set_id === Number(setId))]
           const entries = []
           while (entries.length < numberOfReps * treatments.length) {
             entries.push({})
@@ -338,17 +339,19 @@ class GroupExperimentalUnitCompositeService {
 
           return this.persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits,
             experimentId, context, tx)
-            .then(() => PingUtil.getMonsantoHeader()).then(header =>
-              HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
-                .then(originalSet => Promise.all(_.map(originalSet.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
+            .then(() => PingUtil.getMonsantoHeader()).then((header) => {
+              header.push({ headerName: 'oauth_resourceownerinfo', headerValue: `username=${context.userId},user_id=${context.userId}` })
+              return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+                .then(originalSet => Promise.all(_.map(originalSet.body.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
                 .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
                 .then((result) => {
-                  const units = _.flatMap(newGroupsAndUnits[0].childGroups, 'units')
-                  const setEntryIds = _.map(result.entries, 'entryId')
+                  const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
+                  const setEntryIds = _.map(result.body.entries, 'entryId')
                   _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
                   return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
                     context, tx)
-                }))
+                })
+            })
             .catch((err) => {
               logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
               throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
@@ -359,7 +362,7 @@ class GroupExperimentalUnitCompositeService {
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context, tx) =>
-    db.groups.findGroupBySetId(setId, tx).then((setGroup) => {
+    db.group.findGroupBySetId(setId, tx).then((setGroup) => {
       if (!setGroup) {
         logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))

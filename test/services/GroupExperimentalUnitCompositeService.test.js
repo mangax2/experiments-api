@@ -738,6 +738,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   describe('resetSet', () => {
     test('calls all the correct services', (done) => {
       const newStructure = [{ childGroups: [{ units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }] }]
+      const header = ['header']
       cfServices.experimentsExternalAPIUrls = {
         value: {
           setsAPIUrl: 'testUrl',
@@ -753,10 +754,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.createRcbGroupStructure = mock(newStructure)
       target.getGroupTree = mockResolve([{ set_id: 5 }])
       target.persistGroupUnitChanges = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve('header')
-      HttpUtil.getWithRetry = mockResolve({ entries: [{}, {}, {}, {}] })
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
       HttpUtil.delete = mockResolve()
-      HttpUtil.patch = mockResolve({ entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] })
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
       target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
 
       target.resetSet(5, {}, testTx).then(() => {
@@ -766,9 +767,9 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.getGroupTree).toBeCalledWith(3, false, {}, testTx)
         expect(target.persistGroupUnitChanges).toBeCalledWith(newStructure, [{ set_id: 5 }], 3, {}, testTx)
         expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', 'header')
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
         expect(HttpUtil.delete).toHaveBeenCalledTimes(4)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', 'header', { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
         done()
       })
@@ -804,14 +805,14 @@ describe('GroupExperimentalUnitCompositeService', () => {
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', (done) => {
       const setGroup = { experiment_id: 5 }
-      db.groups = { findGroupBySetId: mockResolve(setGroup) }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
       db.factor = { findByExperimentId: mockResolve() }
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 12, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
       db.groupType = { all: mockResolve([{ id: 6, type: 'Location' }, { id: 7, type: 'Rep' }]) }
 
       return target.verifySetAndGetDetails(3, {}, testTx).then((result) => {
-        expect(db.groups.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
         expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
@@ -829,12 +830,12 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('throws correct error when set is not found', (done) => {
-      db.groups = { findGroupBySetId: mockResolve(undefined) }
+      db.group = { findGroupBySetId: mockResolve(undefined) }
       db.factor = { findByExperimentId: mockResolve() }
       AppError.notFound = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.groups.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
         expect(db.factor.findByExperimentId).not.toBeCalled()
         expect(AppError.notFound).toBeCalledWith('No set found for id 3', undefined, '1FK001')
 
@@ -844,7 +845,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
     test('throws correct error when number of reps not found', (done) => {
       const setGroup = { experiment_id: 5 }
-      db.groups = { findGroupBySetId: mockResolve(setGroup) }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
       db.factor = { findByExperimentId: mockResolve() }
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
@@ -852,7 +853,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       AppError.badRequest = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.groups.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
         expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
@@ -865,7 +866,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
     test('throws correct error when factors are tiered', (done) => {
       const setGroup = { experiment_id: 5 }
-      db.groups = { findGroupBySetId: mockResolve(setGroup) }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
       db.factor = { findByExperimentId: mockResolve([{ tier: 1 }]) }
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 11, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
@@ -873,7 +874,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       AppError.badRequest = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.groups.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
         expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()

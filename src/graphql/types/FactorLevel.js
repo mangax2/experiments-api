@@ -45,12 +45,8 @@ const FactorLevel = new GraphQLObjectType({
       type: GraphQLList(FactorLevel),
       resolve: Resolvers.associatedFactorLevelForFactorLevelResolver,
     },
-    // TODO combinationElements: {} ?
-    // TODO groupValues: {} ?
 
     // indirect relationships
-    // TODO treatments: {} ?
-    // TODO units: {} ?
   }),
 })
 

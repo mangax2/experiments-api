@@ -46,7 +46,6 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
 
     // indirect relationships
-    // TODO factorLevels: {} ?
   }),
 })
 

@@ -121,6 +121,10 @@ function setBySetIdsBatchResolver(ids, tx) {
   return db.group.batchFindAllBySetIds(ids, tx)
 }
 
+// function setEntriesBySetIdsBatchResolver(ids, tx) {
+//   return db.unit.batchFindAllBySetIdsGQL(ids, tx)
+// }
+
 function treatmentBatchResolver(ids, tx) {
   return db.treatment.batchFind(ids, tx)
 }
@@ -188,6 +192,7 @@ function createLoaders(tx) {
     refUnitSpec: createDataLoader(refUnitSpecBatchResolver),
     refUnitType: createDataLoader(refUnitTypeBatchResolver),
     setBySetIds: createDataLoader(setBySetIdsBatchResolver),
+    // setEntriesBySetIds: createDataLoader(setEntriesBySetIdsBatchResolver),
     treatment: createDataLoader(treatmentBatchResolver),
     treatmentByExperimentIds: createDataLoader(treatmentByExperimentIdsBatchResolver),
     unit: createDataLoader(unitBatchResolver),

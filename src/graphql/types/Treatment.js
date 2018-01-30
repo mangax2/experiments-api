@@ -34,15 +34,12 @@ const Treatment = new GraphQLObjectType({
       },
     },
     // direct relationships
-    // TODO experiment/template: {} ?
     combinationElements: {
       type: GraphQLList(CombinationElement),
       resolve: Resolvers.combinationElementForTreatmentBatchResolver,
     },
-    // TODO units: {} ?
 
     // indirect relationships:
-    // TODO factorLevels: {} ?
   },
 })
 

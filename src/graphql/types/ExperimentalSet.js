@@ -4,7 +4,6 @@ import GroupType from './reference/GroupType'
 import { Group } from './Group'
 import { GroupValue } from './GroupValue'
 // import { ExperimentalUnit } from './ExperimentalUnit'
-import db from '../../db/DbManager'
 import Resolvers from '../resolvers'
 
 const ExperimentalSet = new GraphQLObjectType({
@@ -45,7 +44,6 @@ const ExperimentalSet = new GraphQLObjectType({
       type: GraphQLList(GroupValue),
       resolve: Resolvers.groupValueBatchResolver,
     },
-    // TODO
     // setEntries: {
     //   type: GraphQLList(ExperimentalUnit),
     //   resolve: Resolvers.setEntryBatchResolver,
@@ -53,9 +51,4 @@ const ExperimentalSet = new GraphQLObjectType({
   }),
 })
 
-const getSetBySetId = ({ setId }) =>
-  (setId !== null
-    ? db.group.batchFindBySetId(setId)
-    : null)
-
-export { ExperimentalSet, getSetBySetId }
+export default ExperimentalSet

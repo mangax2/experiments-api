@@ -40,7 +40,6 @@ const Factor = new GraphQLObjectType({
     },
 
     // direct relationships
-    // TODO experiment? template?
     dataSource: {
       type: DataSource,
       resolve: Resolvers.refDataSourceBatchResolver,

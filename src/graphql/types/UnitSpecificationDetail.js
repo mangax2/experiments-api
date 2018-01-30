@@ -39,7 +39,6 @@ const UnitSpecificationDetail = new GraphQLObjectType({
       type: UnitSpecification,
       resolve: Resolvers.refUnitSpecForUnitSpecificationDetailBatchResolver,
     },
-    // TODO experiment? template?
   },
 })
 

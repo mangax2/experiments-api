@@ -75,8 +75,6 @@ const Experiment = new GraphQLObjectType({
     // },
 
     // indirect relationships
-    // TODO units: {} ?
-    // TODO summary: {} ?
   },
 })
 

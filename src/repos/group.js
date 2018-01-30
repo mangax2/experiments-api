@@ -16,7 +16,7 @@ class groupRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM "group" WHERE id = $1', id)
 
   @setErrorCode('5B2000')
-  findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select g.*, gv.value as this.rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
+  findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select g.*, gv.value as rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
 
   @setErrorCode('5B3000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids])

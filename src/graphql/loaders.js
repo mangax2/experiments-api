@@ -82,7 +82,7 @@ function ownerBatchResolver(ids, tx) {
 }
 
 function ownersByExperimentIdsBatchResolver(ids, tx) {
-  return db.owner.graphQLBatchFindByExperimentId(ids, tx)
+  return db.owner.batchFindByExperimentIds(ids, tx)
 }
 
 function refDataSourceBatchResolver(ids, tx) {

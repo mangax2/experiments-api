@@ -17,7 +17,10 @@ class designSpecificationDetailRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM design_spec_detail WHERE id = $1', id)
 
   @setErrorCode('522000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('523000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)

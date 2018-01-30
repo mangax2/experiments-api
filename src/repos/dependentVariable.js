@@ -17,7 +17,10 @@ class dependentVariableRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM dependent_variable WHERE id = $1', id)
 
   @setErrorCode('512000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM dependent_variable WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM dependent_variable WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('513000')
   all = () => this.rep.any('SELECT * FROM dependent_variable')

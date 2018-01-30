@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -15,10 +16,16 @@ class experimentsRepo {
   find = (id, isTemplate, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1 AND is_template = $2', [id, isTemplate])
 
   @setErrorCode('552000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('553000')
-  batchFindExperimentOrTemplate = (ids,isTemplate, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2', [ids, isTemplate])
+  batchFindExperimentOrTemplate = (ids,isTemplate, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2', [ids, isTemplate]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('554000')
   all = (isTemplate) => this.rep.any('SELECT * FROM experiment where is_template = $1', isTemplate)

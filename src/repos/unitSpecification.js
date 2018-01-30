@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -18,7 +19,10 @@ class unitSpecificationRepo {
   all = () => this.rep.any('SELECT * FROM ref_unit_spec')
 
   @setErrorCode('5K3000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_unit_spec WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_unit_spec WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 }
 
 module.exports = rep => new unitSpecificationRepo(rep)

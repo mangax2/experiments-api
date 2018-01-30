@@ -17,7 +17,10 @@ class treatmentRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE id = $1', id)
 
   @setErrorCode('5I2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5I3000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
@@ -81,7 +84,9 @@ class treatmentRepo {
   findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2', keys)
 
   @setErrorCode('5IA000')
-  batchFindAllTreatmentLevelDetails = (treatmentIds, tx = this.rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds])
+  batchFindAllTreatmentLevelDetails = (treatmentIds, tx = this.rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds]).then(data => {
+    return _.map(treatmentIds, treatmentId => _.filter(data, dataElement => dataElement.treatment_id === treatmentId))
+  })
 
   @setErrorCode('5IB000')
   batchFindByBusinessKey = (batchKeys, tx = this.rep) => {

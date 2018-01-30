@@ -17,7 +17,10 @@ class factorLevelAssociationRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor_level_association WHERE id = $1', id)
 
   @setErrorCode('592000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor_level_association WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor_level_association WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('593000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT fla.* FROM factor f INNER JOIN factor_level fl ON f.id = fl.factor_id INNER JOIN factor_level_association fla ON fl.id = fla.associated_level_id WHERE f.experiment_id = $1', experimentId)

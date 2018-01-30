@@ -119,7 +119,10 @@ class unitRepo {
   }
 
   @setErrorCode('5JD000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 }
 
 module.exports = (rep, pgp) => new unitRepo(rep, pgp)

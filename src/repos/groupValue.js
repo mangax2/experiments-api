@@ -20,7 +20,10 @@ class groupValueRepo {
   find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.id = $1`, id)
 
   @setErrorCode('5D2000')
-  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids])
+  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5D3000')
   batchFindAllByExperimentId = (experimentId, tx = this.rep) => {
@@ -92,7 +95,7 @@ class groupValueRepo {
 
   @setErrorCode('5D9000')
   batchFindAllByGroupId = (groupIds, tx = this.rep) => {
-    return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, groupIds)
+    return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, [groupIds])
       .then(data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)))
   }
 }

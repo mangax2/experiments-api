@@ -20,8 +20,9 @@ class groupTypeRepo {
 
   @setErrorCode('5C3000')
   batchFind = (ids, tx = rep) => {
-    return tx.any('SELECT * FROM ref_group_type WHERE id IN ($1:csv)', [ids]).then(results => {
-      return _.map(ids, id => _.find(results, result => result.id === id))
+    return tx.any('SELECT * FROM ref_group_type WHERE id IN ($1:csv)', [ids]).then(data => {
+      const keyedData = _.keyBy(data, 'id')
+      return _.map(ids, id => keyedData[id])
     })
   }
 }

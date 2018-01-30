@@ -17,7 +17,10 @@ class factorRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id)
 
   @setErrorCode('572000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('573000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)

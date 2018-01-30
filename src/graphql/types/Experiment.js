@@ -55,7 +55,7 @@ const Experiment = new GraphQLObjectType({
       resolve: Resolvers.groupsForExperimentBatchResolver,
     },
     owners: {
-      type: GraphQLList(Owner),
+      type: Owner,
       resolve: Resolvers.ownersForExperimentBatchResolver,
     },
     treatments: {

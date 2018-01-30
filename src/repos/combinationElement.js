@@ -19,7 +19,10 @@ class combinationElementRepo {
   find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.id = $1`, id)
 
   @setErrorCode('502000')
-  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids])
+  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('503000')
   findAllByTreatmentId = (treatmentId, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.treatment_id = $1`, treatmentId)

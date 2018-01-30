@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+
 function associatedFactorLevelForFactorLevelResolver(entity, args, context) {
   return context.loaders.associatedFactorLevel.load(entity.id)
 }
@@ -39,7 +41,7 @@ function experimentBatchResolver(entity, args, context) {
 }
 
 function experimentsBatchResolver(entity, args, context) {
-  return context.loaders.experiments.load()
+  return context.loaders.experiments.load(-1)
 }
 
 function factorBatchResolver(entity, args, context) {
@@ -171,6 +173,14 @@ function setBySetIdParameterBatchResolver(entity, args, context) {
 //   return context.loaders.unitsBySetId.load(entity.set_id)
 // }
 
+function templateBatchResolver(entity, args, context) {
+  return context.loaders.template.load(args.id)
+}
+
+function templatesBatchResolver(entity, args, context) {
+  return context.loaders.templates.load(-1)
+}
+
 function treatmentBatchResolver(entity, args, context) {
   return context.loaders.treatment.load(entity.id)
 }
@@ -254,6 +264,8 @@ module.exports = {
   setBySetIdParameterBatchResolver,
   // setEntryBatchResolver,
   refUnitTypeForUnitSpecificationBatchResolver,
+  templateBatchResolver,
+  templatesBatchResolver,
   treatmentBatchResolver,
   treatmentByExperimentIdParameterBatchResolver,
   treatmentsForExperimentBatchResolver,

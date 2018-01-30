@@ -23,27 +23,23 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.experimentBatchResolver,
       },
-      // TODO template: {
-      //   type: Template,
-      //   args: {
-      //     id: {
-      //       type: GraphQLNonNull(GraphQLInt),
-      //     },
-      //   },
-      //   resolve(_, { id }) {
-      //     return getTemplateById(id)
-      //   },
-      // },
+      template: {
+        type: Experiment,
+        args: {
+          id: {
+            type: GraphQLNonNull(GraphQLInt),
+          },
+        },
+        resolve: Resolvers.templateBatchResolver,
+      },
       experiments: {
         type: GraphQLList(Experiment),
         resolve: Resolvers.experimentsBatchResolver,
       },
-      // TODO templates: {
-      //   type: GraphQLList(Template),
-      //   resolve() {
-      //     return getAllTemplates()
-      //   },
-      // },
+      templates: {
+        type: GraphQLList(Experiment),
+        resolve: Resolvers.templatesBatchResolver,
+      },
       factors: {
         type: GraphQLList(Factor),
         args: {

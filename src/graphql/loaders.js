@@ -34,7 +34,7 @@ function experimentBatchResolver(ids, tx) {
 }
 
 function experimentsBatchResolver(tx) {
-  return db.experiments.all(false, tx)
+  return db.experiments.all(false, tx).then(data => [data])
 }
 
 function factorBatchResolver(ids, tx) {
@@ -121,6 +121,14 @@ function setBySetIdsBatchResolver(ids, tx) {
   return db.group.batchFindAllBySetIds(ids, tx)
 }
 
+function templateBatchResolver(ids, tx) {
+  return db.experiments.batchFindExperimentOrTemplate(ids, true, tx)
+}
+
+function templatesBatchResolver(tx) {
+  return db.experiments.all(true, tx).then(data => [data])
+}
+
 function treatmentBatchResolver(ids, tx) {
   return db.treatment.batchFind(ids, tx)
 }
@@ -188,6 +196,8 @@ function createLoaders(tx) {
     refUnitSpec: createDataLoader(refUnitSpecBatchResolver),
     refUnitType: createDataLoader(refUnitTypeBatchResolver),
     setBySetIds: createDataLoader(setBySetIdsBatchResolver),
+    template: createDataLoader(templateBatchResolver),
+    templates: createDataLoader(templatesBatchResolver),
     treatment: createDataLoader(treatmentBatchResolver),
     treatmentByExperimentIds: createDataLoader(treatmentByExperimentIdsBatchResolver),
     unit: createDataLoader(unitBatchResolver),

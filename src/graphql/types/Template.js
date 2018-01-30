@@ -88,11 +88,8 @@ const Template = new GraphQLObjectType({
     // tags: {
     //   type: GraphQLList(Tag),
     // },
-    // TODO experimentDesign: {} ?
 
     // indirect relationships
-    // TODO units: {} ?
-    // TODO summary: {} ?
   },
 })
 

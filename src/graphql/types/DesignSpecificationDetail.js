@@ -35,7 +35,6 @@ const DesignSpecificationDetail = new GraphQLObjectType({
       type: DesignSpecification,
       resolve: Resolvers.refDesignSpecForDesignSpecDetailBatchResolver,
     },
-    // TODO experiment? template?
   },
 })
 

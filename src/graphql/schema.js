@@ -7,7 +7,7 @@ import { DesignSpecificationDetail } from './types/DesignSpecificationDetail'
 // import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group } from './types/Group'
 import { ExperimentalUnit } from './types/ExperimentalUnit'
-import { ExperimentalSet } from './types/ExperimentalSet'
+import ExperimentalSet from './types/ExperimentalSet'
 import Resolvers from './resolvers'
 
 export default new GraphQLSchema({
@@ -103,7 +103,15 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.setBySetIdParameterBatchResolver,
       },
-      // TODO setEntries: {} ?
+      // setEntries: {
+      //   type: GraphQLList(ExperimentalUnit),
+      //   args: {
+      //     setId: {
+      //       type: GraphQLNonNull(GraphQLInt),
+      //     },
+      //   },
+      //   resolve: Resolvers.setEntriesBySetIdParameterBatchResolver,
+      // },
     },
   }),
 })

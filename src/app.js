@@ -21,7 +21,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const serviceConfig = require('./services/utility/ServiceConfig')
   const express = require('express')
   const _ = require('lodash')
-  // const inflector = require('json-inflector')
+  const inflector = require('json-inflector')
   const bodyParser = require('body-parser')
   const log4js = require('log4js')
   const promMetrics = require('@monsantoit/prom-metrics')
@@ -53,7 +53,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(requestContext)
   }
 
-  // app.use(inflector())
   const pingFunc = (function () {
     const createPingPage = require('@monsantoit/ping-page')
     const pingPage = createPingPage(require('../package.json'))
@@ -74,7 +73,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   app.use(compression())
   app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
 
-  app.use(appBaseUrl, require('./routes/routes'))
+  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
+  app.use(appBaseUrl, inflector(), require('./routes/routes'))
 
   swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
     app.use(appBaseUrl, middleware.swaggerUi())
@@ -110,8 +110,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     logger.error(err, req.context)
     return res.status(500).json(err)
   })
-
-  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
 
   const { port } = config
 

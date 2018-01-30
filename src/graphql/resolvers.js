@@ -201,6 +201,9 @@ function setBySetIdParameterBatchResolver(entity, args, context) {
   return context.loaders.setBySetIds.load(args.setId)
 }
 
+// function setEntriesBySetIdParameterBatchResolver(entity, args, context) {
+//   return context.loaders.setEntriesBySetId.load(entity.setId)
+// }
 
 // function setEntryBatchResolver(entity, args, context) {
 //   return context.loaders.unitsBySetId.load(entity.set_id)
@@ -301,6 +304,7 @@ module.exports = {
   refUnitSpecBatchResolver,
   refUnitSpecForUnitSpecificationDetailBatchResolver,
   setBySetIdParameterBatchResolver,
+  // setEntriesBySetIdParameterBatchResolver,
   // setEntryBatchResolver,
   refUnitTypeForUnitSpecificationBatchResolver,
   templateBatchResolver,

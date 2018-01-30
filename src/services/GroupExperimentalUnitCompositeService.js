@@ -321,13 +321,13 @@ class GroupExperimentalUnitCompositeService {
   @Transactional('resetSet')
   resetSet = (setId, context, tx) =>
     // get group by setId
-    this.verifySetAndGetDetails(setId, tx).then((results) => {
+    this.verifySetAndGetDetails(setId, context, tx).then((results) => {
       const {
-        experimentId, setGroup, numberOfReps, repGroupType,
+        experimentId, setGroup, numberOfReps, repGroupTypeId,
       } = results
       return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
         const newGroupsAndUnits = this.createRcbGroupStructure(setId, setGroup, numberOfReps,
-          treatments, repGroupType.id)
+          treatments, repGroupTypeId)
 
         return this.getGroupTree(experimentId, false, context, tx).then((experimentGroups) => {
           const oldGroupsAndUnits = [_.find(experimentGroups, group => group.set_id === setId)]
@@ -338,29 +338,30 @@ class GroupExperimentalUnitCompositeService {
 
           return this.persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits,
             experimentId, context, tx)
-            .then(() => PingUtil.getMonsantoHeader).then(header =>
+            .then(() => PingUtil.getMonsantoHeader()).then(header =>
               HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
                 .then(originalSet => Promise.all(_.map(originalSet.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
                 .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
                 .then((result) => {
                   const units = _.flatMap(newGroupsAndUnits[0].childGroups, 'units')
                   const setEntryIds = _.map(result.entries, 'entryId')
-                  _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds(index) })
-                  return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units)
+                  _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
+                  return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
+                    context, tx)
                 }))
             .catch((err) => {
-              logger.error('An error occurred while communicating with the sets service', err)
-              throw AppError.badRequest('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
+              logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+              throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
             })
         })
       })
     })
 
   @setErrorCode('1FK000')
-  verifySetAndGetDetails = (setId, tx) => {
+  verifySetAndGetDetails = (setId, context, tx) =>
     db.groups.findGroupBySetId(setId, tx).then((setGroup) => {
       if (!setGroup) {
-        logger.error(`No set found for id ${setId}.`)
+        logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
       }
       const experimentId = setGroup.experiment_id
@@ -369,7 +370,8 @@ class GroupExperimentalUnitCompositeService {
       const refDesignSpecPromise = db.refDesignSpecification.all()
       const groupTypePromise = db.groupType.all()
 
-      return Promise.all(factorsPromise, designSpecPromise, refDesignSpecPromise, groupTypePromise)
+      return Promise.all([factorsPromise, designSpecPromise, refDesignSpecPromise,
+        groupTypePromise])
         .then((results) => {
           const repsRefDesignSpec = _.find(results[2], refDesignSpec => refDesignSpec.name === 'Reps')
           const minRepRefDesignSpec = _.find(results[2], refDesignSpec => refDesignSpec.name === 'Min Rep')
@@ -378,12 +380,12 @@ class GroupExperimentalUnitCompositeService {
               || _.find(results[1], sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
 
           if (_.find(results[0], factor => factor.tier)) {
-            logger.error(`The specified set (id ${setId}) has tiering set up and cannot be reset.`)
+            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) has tiering set up and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) has tiering set up and cannot be reset.`,
               undefined, getFullErrorCode('1FK002'))
           }
           if (!repDesignSpecDetail) {
-            logger.error(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
+            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`,
               undefined, getFullErrorCode('1FK003'))
           }
@@ -395,11 +397,10 @@ class GroupExperimentalUnitCompositeService {
             experimentId,
             setGroup,
             numberOfReps,
-            repGroupType,
+            repGroupTypeId: repGroupType.id,
           }
         })
     })
-  }
 
   @setErrorCode('1FN000')
   createRcbGroupStructure = (setId, setGroup, numOfReps, treatments, repTypeId) => {

@@ -267,6 +267,10 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/sets/:setId/reset', (req, res, next) => new GroupExperimentalUnitCompositeService().resetSet(req.params.setId, req.context)
+  .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
 router.get('/sets/:setId/treatment-details', (req, res, next) => new ExperimentalUnitService().getTreatmentDetailsBySetId(req.params.setId)
   .then(value => res.json(value))
   .catch(err => next(err)))

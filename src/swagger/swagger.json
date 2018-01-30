@@ -2426,6 +2426,49 @@
         }
       }
     },
+    "/sets/{setId}/reset": {
+      "post": {
+        "summary": "Resets a set back to its original state",
+        "description": "Resets the set in a field packed experiment back to its original number of reps and units.",
+        "operationId": "resetSet",
+        "tags": ["Set Entry"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success with no content"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/sets/{setId}/treatment-details": {
       "get": {
         "summary": "Gets all levels for each treatment in a set",

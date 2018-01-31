@@ -1,7 +1,6 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
 import FactorLevel from './FactorLevel'
-import Treatment from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 

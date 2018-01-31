@@ -760,7 +760,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
       target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
 
-      target.resetSet(5, {}, testTx).then(() => {
+      return target.resetSet(5, {}, testTx).then(() => {
         expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
         expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
         expect(target.createRcbGroupStructure).toBeCalledWith(5, {}, 5, [{}, {}], 7)
@@ -794,7 +794,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       PingUtil.getMonsantoHeader = mockReject()
       AppError.internalServerError = mock()
 
-      target.resetSet(5, {}, testTx).catch(() => {
+      return target.resetSet(5, {}, testTx).catch(() => {
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1FM001')
         done()
       })

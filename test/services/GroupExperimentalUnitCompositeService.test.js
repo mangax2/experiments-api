@@ -736,7 +736,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('resetSet', () => {
-    test('calls all the correct services', (done) => {
+    test('calls all the correct services', () => {
       const newStructure = [{ childGroups: [{ units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }] }]
       const header = ['header']
       cfServices.experimentsExternalAPIUrls = {
@@ -771,7 +771,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(HttpUtil.delete).toHaveBeenCalledTimes(4)
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
-        done()
       })
     })
 
@@ -803,7 +802,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   })
 
   describe('verifySetAndGetDetails', () => {
-    test('returns the expected data', (done) => {
+    test('returns the expected data', () => {
       const setGroup = { experiment_id: 5 }
       db.group = { findGroupBySetId: mockResolve(setGroup) }
       db.factor = { findByExperimentId: mockResolve() }
@@ -824,8 +823,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
           numberOfReps: 2,
           repGroupTypeId: 7,
         })
-
-        done()
       })
     })
 

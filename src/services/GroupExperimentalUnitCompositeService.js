@@ -375,14 +375,14 @@ class GroupExperimentalUnitCompositeService {
 
       return Promise.all([factorsPromise, designSpecPromise, refDesignSpecPromise,
         groupTypePromise])
-        .then((results) => {
-          const repsRefDesignSpec = _.find(results[2], refDesignSpec => refDesignSpec.name === 'Reps')
-          const minRepRefDesignSpec = _.find(results[2], refDesignSpec => refDesignSpec.name === 'Min Rep')
+        .then(([factors, designSpecs, refDesignSpecs, groupTypes]) => {
+          const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
+          const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
           const repDesignSpecDetail =
-            _.find(results[1], sd => sd.ref_design_spec_id === minRepRefDesignSpec.id)
-              || _.find(results[1], sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
+            _.find(designSpecs, sd => sd.ref_design_spec_id === minRepRefDesignSpec.id)
+              || _.find(designSpecs, sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
 
-          if (_.find(results[0], factor => factor.tier)) {
+          if (_.find(factors, factor => factor.tier)) {
             logger.error(`[[${context.requestId}]] The specified set (id ${setId}) has tiering set up and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) has tiering set up and cannot be reset.`,
               undefined, getFullErrorCode('1FK002'))
@@ -393,7 +393,7 @@ class GroupExperimentalUnitCompositeService {
               undefined, getFullErrorCode('1FK003'))
           }
 
-          const repGroupType = _.find(results[3], groupType => groupType.type === 'Rep')
+          const repGroupType = _.find(groupTypes, groupType => groupType.type === 'Rep')
           const numberOfReps = Number(repDesignSpecDetail.value)
 
           return {
@@ -406,7 +406,7 @@ class GroupExperimentalUnitCompositeService {
     })
 
   @setErrorCode('1FN000')
-  createRcbGroupStructure = (setId, setGroup, numOfReps, treatments, repTypeId) => {
+  createRcbGroupStructure = (setId, setGroup, numberOfReps, treatments, repRefGroupTypeId) => {
     const newGroupsAndUnits = [{
       refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
       refGroupTypeId: setGroup.ref_group_type_id,
@@ -422,11 +422,11 @@ class GroupExperimentalUnitCompositeService {
       treatmentId: treatment.id,
       rep: currentRepNumber,
     })
-    while (currentRepNumber < numOfReps) {
+    while (currentRepNumber < numberOfReps) {
       currentRepNumber += 1
       newGroupsAndUnits[0].childGroups.push({
         refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
-        refGroupTypeId: repTypeId,
+        refGroupTypeId: repRefGroupTypeId,
         groupValues: [{
           name: 'repNumber',
           value: currentRepNumber,

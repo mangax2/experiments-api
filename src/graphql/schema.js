@@ -14,7 +14,7 @@ export default new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-      experiment: {
+      getExperimentById: {
         type: Experiment,
         args: {
           id: {
@@ -23,7 +23,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.experimentBatchResolver,
       },
-      template: {
+      getTemplateById: {
         type: Experiment,
         args: {
           id: {
@@ -32,15 +32,15 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.templateBatchResolver,
       },
-      experiments: {
+      getAllExperiments: {
         type: GraphQLList(ExperimentInfo),
         resolve: Resolvers.experimentsBatchResolver,
       },
-      templates: {
+      getAllTemplates: {
         type: GraphQLList(ExperimentInfo),
         resolve: Resolvers.templatesBatchResolver,
       },
-      factors: {
+      getFactorsByExperimentId: {
         type: GraphQLList(Factor),
         args: {
           experimentId: {
@@ -49,7 +49,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.factorByExperimentIdParameterBatchResolver,
       },
-      treatments: {
+      getTreatmentsByExperimentId: {
         type: GraphQLList(Treatment),
         args: {
           experimentId: {
@@ -58,7 +58,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.treatmentByExperimentIdParameterBatchResolver,
       },
-      unitSpecificationDetails: {
+      getUnitSpecificationDetailsByExperimentId: {
         type: GraphQLList(UnitSpecificationDetail),
         args: {
           experimentId: {
@@ -67,7 +67,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.unitSpecDetailByExperimentIdParameterBatchResolver,
       },
-      designSpecificationDetails: {
+      getDesignSpecificationDetailsByExperimentId: {
         type: GraphQLList(DesignSpecificationDetail),
         args: {
           experimentId: {
@@ -76,7 +76,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.designSpecDetailByExperimentIdParameterBatchResolver,
       },
-      groups: {
+      getGroupsByExperimentId: {
         type: GraphQLList(Group),
         args: {
           experimentId: {
@@ -85,7 +85,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.groupByExperimentIdParameterBatchResolver,
       },
-      units: {
+      getUnitsByExperimentId: {
         type: GraphQLList(ExperimentalUnit),
         args: {
           experimentId: {
@@ -94,7 +94,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.unitByExperimentIdParameterBatchResolver,
       },
-      set: {
+      getSetBySetId: {
         type: ExperimentalSet,
         args: {
           setId: {
@@ -103,7 +103,7 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.setBySetIdParameterBatchResolver,
       },
-      setEntries: {
+      getSetEntriesBySetId: {
         type: GraphQLList(ExperimentalUnit),
         args: {
           setId: {

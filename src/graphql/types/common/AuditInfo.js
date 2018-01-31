@@ -2,7 +2,7 @@ import { GraphQLObjectType, GraphQLString } from 'graphql'
 
 const AuditInfo = new GraphQLObjectType({
   name: 'AuditInfo',
-  fields: () => ({
+  fields: {
     // properties
     createdUserId: {
       type: GraphQLString,
@@ -16,7 +16,7 @@ const AuditInfo = new GraphQLObjectType({
     modifiedDate: {
       type: GraphQLString,
     },
-  }),
+  },
 })
 
 const getAuditInfo = ({

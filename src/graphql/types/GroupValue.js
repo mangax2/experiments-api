@@ -7,7 +7,7 @@ import Resolvers from '../resolvers'
 
 const GroupValue = new GraphQLObjectType({
   name: 'GroupValue',
-  fields: () => ({
+  fields: {
     // properties
     id: {
       type: GraphQLInt,
@@ -38,11 +38,7 @@ const GroupValue = new GraphQLObjectType({
       type: FactorLevel,
       resolve: Resolvers.factorLevelForGroupValueBatchResolver,
     },
-    group: {
-      type: Group,
-      resolve: Resolvers.groupForGroupValueBatchResolver,
-    },
-  }),
+  },
 })
 
 export default GroupValue

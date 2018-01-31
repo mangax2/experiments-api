@@ -251,6 +251,10 @@ function unitByExperimentIdParameterBatchResolver(entity, args, context) {
   return context.loaders.unitByExperimentIds.load(args.experimentId)
 }
 
+function unitBySetIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.unitsBySetId.load(args.setId)
+}
+
 function unitSpecDetailBatchResolver(entity, args, context) {
   return context.loaders.unitSpecDetail.load(entity.id)
 }
@@ -316,6 +320,7 @@ module.exports = {
   treatmentForCombinationElementBatchResolver,
   unitBatchResolver,
   unitByExperimentIdParameterBatchResolver,
+  unitBySetIdParameterBatchResolver,
   unitSpecDetailBatchResolver,
   unitSpecDetailByExperimentIdParameterBatchResolver,
   unitSpecDetailForExperimentBatchResolver,

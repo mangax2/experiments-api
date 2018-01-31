@@ -103,15 +103,15 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.setBySetIdParameterBatchResolver,
       },
-      // setEntries: {
-      //   type: GraphQLList(ExperimentalUnit),
-      //   args: {
-      //     setId: {
-      //       type: GraphQLNonNull(GraphQLInt),
-      //     },
-      //   },
-      //   resolve: Resolvers.setEntriesBySetIdParameterBatchResolver,
-      // },
+      setEntries: {
+        type: GraphQLList(ExperimentalUnit),
+        args: {
+          setId: {
+            type: GraphQLNonNull(GraphQLInt),
+          },
+        },
+        resolve: Resolvers.unitBySetIdParameterBatchResolver,
+      },
     },
   }),
 })

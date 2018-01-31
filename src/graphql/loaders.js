@@ -149,9 +149,9 @@ function unitByExperimentIdBatchResolver(ids, tx) {
   return db.unit.batchfindAllByExperimentIds(ids, tx)
 }
 
-// function unitsBySetIdBatchResolver(ids, tx) {
-//   return db.unit.batchFindAllBySetIdRaw(ids, tx)
-// }
+function unitBySetIdBatchResolver(ids, tx) {
+  return db.unit.batchFindAllBySetIds(ids, tx)
+}
 
 function unitSpecDetailBatchResolver(ids, tx) {
   return db.unitSpecificationDetail.batchFind(ids, tx)
@@ -207,7 +207,7 @@ function createLoaders(tx) {
     treatmentByExperimentIds: createDataLoader(treatmentByExperimentIdsBatchResolver),
     unit: createDataLoader(unitBatchResolver),
     unitByExperimentIds: createDataLoader(unitByExperimentIdBatchResolver),
-    // unitsBySetId: createDataLoader(unitsBySetIdBatchResolver),
+    unitsBySetId: createDataLoader(unitBySetIdBatchResolver),
     unitSpecDetail: createDataLoader(unitSpecDetailBatchResolver),
     unitSpecDetailByExperimentIds: createDataLoader(unitSpecDetailByExperimentIdsBatchResolver),
   }

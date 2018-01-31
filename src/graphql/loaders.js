@@ -22,7 +22,8 @@ const transactionalBatchResolverWrapper =
 
 function createLoaders(tx) {
   const transactionalWrapper = transactionalBatchResolverWrapper(tx)
-  const createDataLoader = batchResolver => new DataLoader(transactionalWrapper(batchResolver))
+  const createDataLoader = batchLoaderCallback =>
+    new DataLoader(transactionalWrapper(batchLoaderCallback))
   return {
     associatedFactorLevel:
       createDataLoader(db.factorLevelAssociation.batchFindAssociatedLevels),

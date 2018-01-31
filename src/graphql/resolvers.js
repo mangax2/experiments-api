@@ -18,10 +18,6 @@ function dependentVariableForExperimentBatchResolver(entity, args, context) {
   return context.loaders.dependentVariableByExperimentIds.load(entity.id)
 }
 
-function dependentVariableByExperimentIdsBatchResolver(entity, args, context) {
-  return context.loaders.dependentVariableByExperimentIds.load(entity.id)
-}
-
 function designSpecDetailBatchResolver(entity, args, context) {
   return context.loaders.designSpecDetail.load(entity.id)
 }
@@ -201,14 +197,6 @@ function setBySetIdParameterBatchResolver(entity, args, context) {
   return context.loaders.setBySetIds.load(args.setId)
 }
 
-// function setEntriesBySetIdParameterBatchResolver(entity, args, context) {
-//   return context.loaders.setEntriesBySetId.load(entity.setId)
-// }
-
-// function setEntryBatchResolver(entity, args, context) {
-//   return context.loaders.unitsBySetId.load(entity.set_id)
-// }
-
 function templateBatchResolver(entity, args, context) {
   return context.loaders.template.load(args.id)
 }
@@ -280,7 +268,6 @@ module.exports = {
   combinationElementForTreatmentBatchResolver,
   dependentVariableBatchResolver,
   dependentVariableForExperimentBatchResolver,
-  dependentVariableByExperimentIdsBatchResolver,
   designSpecDetailBatchResolver,
   designSpecDetailByExperimentIdParameterBatchResolver,
   designSpecDetailForExperimentBatchResolver,
@@ -315,8 +302,6 @@ module.exports = {
   refUnitSpecBatchResolver,
   refUnitSpecForUnitSpecificationDetailBatchResolver,
   setBySetIdParameterBatchResolver,
-  // setEntriesBySetIdParameterBatchResolver,
-  // setEntryBatchResolver,
   refUnitTypeForUnitSpecificationBatchResolver,
   templateBatchResolver,
   templatesBatchResolver,

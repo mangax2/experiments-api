@@ -1,10 +1,10 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLNonNull, GraphQLList } from 'graphql'
+import ExperimentInfo from './types/ExperimentInfo'
 import Experiment from './types/Experiment'
 import { Factor } from './types/Factor'
 import { Treatment } from './types/Treatment'
 import { UnitSpecificationDetail } from './types/UnitSpecificationDetail'
 import { DesignSpecificationDetail } from './types/DesignSpecificationDetail'
-// import { Template, getAllTemplates, getTemplateById } from './types/Template'
 import { Group } from './types/Group'
 import { ExperimentalUnit } from './types/ExperimentalUnit'
 import ExperimentalSet from './types/ExperimentalSet'
@@ -33,11 +33,11 @@ export default new GraphQLSchema({
         resolve: Resolvers.templateBatchResolver,
       },
       experiments: {
-        type: GraphQLList(Experiment),
+        type: GraphQLList(ExperimentInfo),
         resolve: Resolvers.experimentsBatchResolver,
       },
       templates: {
-        type: GraphQLList(Experiment),
+        type: GraphQLList(ExperimentInfo),
         resolve: Resolvers.templatesBatchResolver,
       },
       factors: {

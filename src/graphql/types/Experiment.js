@@ -1,6 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-// import { Tag } from './Tag'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import DependentVariable from './DependentVariable'
 import { DesignSpecificationDetail } from './DesignSpecificationDetail'
@@ -66,17 +65,7 @@ const Experiment = new GraphQLObjectType({
       type: GraphQLList(UnitSpecificationDetail),
       resolve: Resolvers.unitSpecDetailForExperimentBatchResolver,
     },
-
-    // This was removed because experiment is no longer retrieved
-    // using ExperimentService.  This can be added back once a
-    // loader is set up for it.
-    // tags: {
-    //   type: new GraphQLList(Tag),
-    // },
-
-    // indirect relationships
   },
 })
-
 
 export default Experiment

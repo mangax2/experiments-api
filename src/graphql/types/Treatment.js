@@ -1,6 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
-import TreatmentService from '../../services/TreatmentService'
 import CombinationElement from './CombinationElement'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
@@ -43,9 +42,4 @@ const Treatment = new GraphQLObjectType({
   },
 })
 
-const getTreatmentsByExperimentId = ({ experimentId, isTemplate = false }) =>
-  new TreatmentService().getTreatmentsByExperimentId(experimentId, isTemplate)
-
-const getTreatmentById = ({ id }) => new TreatmentService().getTreatmentById(id)
-
-export { Treatment, getTreatmentsByExperimentId, getTreatmentById }
+export default Treatment

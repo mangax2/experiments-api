@@ -1,5 +1,4 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql'
-import TagService from '../../services/TagService'
 
 const Tag = new GraphQLObjectType({
   name: 'Tag',
@@ -13,7 +12,4 @@ const Tag = new GraphQLObjectType({
   },
 })
 
-const getTagsByExperimentId = ({ id, isTemplate = false }) =>
-  new TagService().getTagsByExperimentId(id, isTemplate)
-
-export { Tag, getTagsByExperimentId }
+export default Tag

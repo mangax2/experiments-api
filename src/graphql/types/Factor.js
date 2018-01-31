@@ -1,8 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
 import Resolvers from '../resolvers'
-import FactorService from '../../services/FactorService'
-import { FactorLevel } from './FactorLevel'
+import FactorLevel from './FactorLevel'
 import FactorType from './reference/FactorType'
 import DataSource from './reference/DataSource'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
@@ -57,10 +56,4 @@ const Factor = new GraphQLObjectType({
   },
 })
 
-const getFactorById = ({ id }) =>
-  new FactorService().getFactorById(id)
-
-const getFactorsByExperimentId = ({ experimentId, isTemplate }) =>
-  new FactorService().getFactorsByExperimentId(experimentId, isTemplate)
-
-export { Factor, getFactorById, getFactorsByExperimentId }
+export default Factor

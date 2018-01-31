@@ -1,8 +1,7 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import { Group } from './Group'
-import { Treatment } from './Treatment'
-import ExperimentalUnitService from '../../services/ExperimentalUnitService'
+import Group from './Group'
+import Treatment from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -49,7 +48,4 @@ const ExperimentalUnit = new GraphQLObjectType({
   }),
 })
 
-const getExperimentalUnitsByExperimentId = ({ experimentId }) =>
-  new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(experimentId)
-
-export { ExperimentalUnit, getExperimentalUnitsByExperimentId }
+export default ExperimentalUnit

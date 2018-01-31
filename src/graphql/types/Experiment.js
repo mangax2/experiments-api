@@ -2,12 +2,12 @@ import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt } from 'graph
 import { property } from 'lodash'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import DependentVariable from './DependentVariable'
-import { DesignSpecificationDetail } from './DesignSpecificationDetail'
-import { Factor } from './Factor'
-import { Group } from './Group'
+import DesignSpecificationDetail from './DesignSpecificationDetail'
+import Factor from './Factor'
+import Group from './Group'
 import Owner from './Owner'
-import { Treatment } from './Treatment'
-import { UnitSpecificationDetail } from './UnitSpecificationDetail'
+import Treatment from './Treatment'
+import UnitSpecificationDetail from './UnitSpecificationDetail'
 import Resolvers from '../resolvers'
 
 const Experiment = new GraphQLObjectType({

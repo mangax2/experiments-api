@@ -2,8 +2,7 @@ import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
 import GraphQLJSON from 'graphql-type-json'
 import Resolvers from '../resolvers'
-import FactorLevelService from '../../services/FactorLevelService'
-import { Factor } from './Factor'
+import Factor from './Factor'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import FactorLevelValue from './FactorLevelValue'
 
@@ -50,10 +49,4 @@ const FactorLevel = new GraphQLObjectType({
   }),
 })
 
-const getFactorLevelById = ({ id }) =>
-  new FactorLevelService().getFactorLevelById(id)
-
-const getFactorLevelsByFactorId = ({ factorId }) =>
-  new FactorLevelService().getFactorLevelsByFactorId(factorId)
-
-export { FactorLevel, getFactorLevelById, getFactorLevelsByFactorId }
+export default FactorLevel

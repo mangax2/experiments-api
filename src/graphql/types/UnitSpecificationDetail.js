@@ -1,6 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import UnitSpecificationDetailService from '../../services/UnitSpecificationDetailService'
 import UnitSpecification from './reference/UnitSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
@@ -42,7 +41,4 @@ const UnitSpecificationDetail = new GraphQLObjectType({
   },
 })
 
-const getUnitSpecificationDetailsByExperimentId = ({ experimentId: id, isTemplate }) =>
-  new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(id, isTemplate)
-
-export { UnitSpecificationDetail, getUnitSpecificationDetailsByExperimentId }
+export default UnitSpecificationDetail

@@ -1,9 +1,9 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
 import GroupType from './reference/GroupType'
-import { Group } from './Group'
-import { GroupValue } from './GroupValue'
-import { ExperimentalUnit } from './ExperimentalUnit'
+import Group from './Group'
+import GroupValue from './GroupValue'
+import ExperimentalUnit from './ExperimentalUnit'
 import Resolvers from '../resolvers'
 
 const ExperimentalSet = new GraphQLObjectType({

@@ -1,6 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import DesignSpecificationDetailService from '../../services/DesignSpecificationDetailService'
 import DesignSpecification from './reference/DesignSpecification'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
@@ -38,7 +37,4 @@ const DesignSpecificationDetail = new GraphQLObjectType({
   },
 })
 
-const getDesignSpecificationDetailsByExperimentId = ({ experimentId: id, isTemplate }) =>
-  new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(id, isTemplate)
-
-export { DesignSpecificationDetail, getDesignSpecificationDetailsByExperimentId }
+export default DesignSpecificationDetail

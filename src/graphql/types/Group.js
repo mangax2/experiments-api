@@ -1,12 +1,10 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLList } from 'graphql'
 import { property } from 'lodash'
 import GroupType from './reference/GroupType'
-import GroupService from '../../services/GroupService'
-import { GroupValue } from './GroupValue'
-import { ExperimentalUnit } from './ExperimentalUnit'
+import GroupValue from './GroupValue'
+import ExperimentalUnit from './ExperimentalUnit'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
-
 
 const Group = new GraphQLObjectType({
   name: 'Group',
@@ -66,17 +64,4 @@ const Group = new GraphQLObjectType({
   }),
 })
 
-const getGroupById = ({ id }) =>
-  (id !== null
-    ? new GroupService().getGroupById(id)
-    : null)
-
-const getGroupsByExperimentId = ({ experimentId, isTemplate }) =>
-  new GroupService().getGroupsByExperimentId(experimentId, isTemplate)
-
-// const getChildGroups = ({ parentId }) =>
-//   (parentId !== null
-//     ? new GroupService().getGroupsbyParentId(parentId)
-//     : [])
-
-export { Group, getGroupById, getGroupsByExperimentId }
+export default Group

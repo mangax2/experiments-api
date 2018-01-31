@@ -1,8 +1,7 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
 import { property } from 'lodash'
-import GroupValueService from '../../services/GroupValueService'
-import { FactorLevel } from './FactorLevel'
-import { Group } from './Group'
+import FactorLevel from './FactorLevel'
+import Group from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
@@ -46,7 +45,4 @@ const GroupValue = new GraphQLObjectType({
   }),
 })
 
-const getGroupValueById = ({ id }) =>
-  new GroupValueService().getGroupValueById(id)
-
-export { GroupValue, getGroupValueById }
+export default GroupValue

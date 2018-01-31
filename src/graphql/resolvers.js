@@ -255,6 +255,13 @@ function unitBySetIdParameterBatchResolver(entity, args, context) {
   return context.loaders.unitsBySetId.load(args.setId)
 }
 
+function unitBySetIdBatchResolver(entity, args, context) {
+  if (entity.set_id) {
+    return context.loaders.unitsBySetId.load(entity.set_id)
+  }
+  return Promise.resolve(null)
+}
+
 function unitSpecDetailBatchResolver(entity, args, context) {
   return context.loaders.unitSpecDetail.load(entity.id)
 }
@@ -321,6 +328,7 @@ module.exports = {
   unitBatchResolver,
   unitByExperimentIdParameterBatchResolver,
   unitBySetIdParameterBatchResolver,
+  unitBySetIdBatchResolver,
   unitSpecDetailBatchResolver,
   unitSpecDetailByExperimentIdParameterBatchResolver,
   unitSpecDetailForExperimentBatchResolver,

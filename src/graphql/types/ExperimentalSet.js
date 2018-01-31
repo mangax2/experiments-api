@@ -3,7 +3,7 @@ import { property } from 'lodash'
 import GroupType from './reference/GroupType'
 import { Group } from './Group'
 import { GroupValue } from './GroupValue'
-// import { ExperimentalUnit } from './ExperimentalUnit'
+import { ExperimentalUnit } from './ExperimentalUnit'
 import Resolvers from '../resolvers'
 
 const ExperimentalSet = new GraphQLObjectType({
@@ -44,10 +44,10 @@ const ExperimentalSet = new GraphQLObjectType({
       type: GraphQLList(GroupValue),
       resolve: Resolvers.groupValueBatchResolver,
     },
-    // setEntries: {
-    //   type: GraphQLList(ExperimentalUnit),
-    //   resolve: Resolvers.setEntryBatchResolver,
-    // },
+    setEntries: {
+      type: GraphQLList(ExperimentalUnit),
+      resolve: Resolvers.unitBySetIdBatchResolver,
+    },
   }),
 })
 

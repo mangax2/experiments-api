@@ -111,9 +111,9 @@ class groupRepo {
   batchFindBySetId = (setId, tx = this.rep) => tx.one('SELECT * FROM "group" WHERE set_id = $1', setId)
 
   @setErrorCode('5BB000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE set_id IN ($1:csv)', setIds).then(data => {
-    const keyedData = _.keyBy(data, 'id')
-    return _.map(setIds, id => keyedData[id])
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE set_id IN ($1:csv)', [setIds]).then(data => {
+    const keyedData = _.keyBy(data, 'set_id')
+    return _.map(setIds, setId => keyedData[setId])
   })
 
   @setErrorCode('5BC000')

@@ -3,6 +3,9 @@ import GroupExperimentalUnitCompositeService from '../../src/services/GroupExper
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
+import HttpUtil from '../../src/services/utility/HttpUtil'
+import PingUtil from '../../src/services/utility/PingUtil'
+import cfServices from '../../src/services/utility/ServiceConfig'
 
 describe('GroupExperimentalUnitCompositeService', () => {
   let target
@@ -92,10 +95,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.getGroupTree = mockResolve([])
       target.compareGroupTrees = mock({
         groups: { adds: [{}], updates: [], deletes: [] },
-        units: { adds: [], updates: [], deletes: [] },
+        units: { adds: [{}], updates: [], deletes: [] },
       })
       target.createGroupValues = mockResolve()
-      target.createExperimentalUnits = mockResolve()
+      target.createExperimentalUnits = mockResolve([5])
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
       target.batchUpdateGroups = mockResolve()
@@ -729,6 +732,205 @@ describe('GroupExperimentalUnitCompositeService', () => {
           deletes: [oldUnits[1]],
         },
       })
+    })
+  })
+
+  describe('resetSet', () => {
+    test('calls all the correct services', () => {
+      const newStructure = [{ childGroups: [{ units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }] }]
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        setGroup: {},
+        numberOfReps: 5,
+        repGroupTypeId: 7,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{}, {}])
+      target.createRcbGroupStructure = mock(newStructure)
+      target.getGroupTree = mockResolve([{ set_id: 5 }])
+      target.persistGroupUnitChanges = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+
+      return target.resetSet(5, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(target.createRcbGroupStructure).toBeCalledWith(5, {}, 5, [{}, {}], 7)
+        expect(target.getGroupTree).toBeCalledWith(3, false, {}, testTx)
+        expect(target.persistGroupUnitChanges).toBeCalledWith(newStructure, [{ set_id: 5 }], 3, {}, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.delete).toHaveBeenCalledTimes(4)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
+      })
+    })
+
+    test('sends the correct error and code back when sets error occurs', (done) => {
+      const newStructure = [{ childGroups: [{ units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }] }]
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        setGroup: {},
+        numberOfReps: 5,
+        repGroupTypeId: 7,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{}, {}])
+      target.createRcbGroupStructure = mock(newStructure)
+      target.getGroupTree = mockResolve([{ set_id: 5 }])
+      target.persistGroupUnitChanges = mockResolve()
+      PingUtil.getMonsantoHeader = mockReject()
+      AppError.internalServerError = mock()
+
+      return target.resetSet(5, {}, testTx).catch(() => {
+        expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1FM001')
+        done()
+      })
+    })
+  })
+
+  describe('verifySetAndGetDetails', () => {
+    test('returns the expected data', () => {
+      const setGroup = { experiment_id: 5 }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
+      db.factor = { findByExperimentId: mockResolve() }
+      db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 12, value: 2 }]) }
+      db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
+      db.groupType = { all: mockResolve([{ id: 6, type: 'Location' }, { id: 7, type: 'Rep' }]) }
+
+      return target.verifySetAndGetDetails(3, {}, testTx).then((result) => {
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.refDesignSpecification.all).toBeCalledWith()
+        expect(db.groupType.all).toBeCalledWith()
+
+        expect(result).toEqual({
+          experimentId: 5,
+          setGroup,
+          numberOfReps: 2,
+          repGroupTypeId: 7,
+        })
+      })
+    })
+
+    test('throws correct error when set is not found', (done) => {
+      db.group = { findGroupBySetId: mockResolve(undefined) }
+      db.factor = { findByExperimentId: mockResolve() }
+      AppError.notFound = mock()
+
+      return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.factor.findByExperimentId).not.toBeCalled()
+        expect(AppError.notFound).toBeCalledWith('No set found for id 3', undefined, '1FK001')
+
+        done()
+      })
+    })
+
+    test('throws correct error when number of reps not found', (done) => {
+      const setGroup = { experiment_id: 5 }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
+      db.factor = { findByExperimentId: mockResolve() }
+      db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
+      db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
+      db.groupType = { all: mockResolve([{ id: 6, type: 'Location' }, { id: 7, type: 'Rep' }]) }
+      AppError.badRequest = mock()
+
+      return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.refDesignSpecification.all).toBeCalledWith()
+        expect(db.groupType.all).toBeCalledWith()
+        expect(AppError.badRequest).toBeCalledWith('The specified set (id 3) does not have a minimum number of reps and cannot be reset.', undefined, '1FK003')
+
+        done()
+      })
+    })
+
+    test('throws correct error when factors are tiered', (done) => {
+      const setGroup = { experiment_id: 5 }
+      db.group = { findGroupBySetId: mockResolve(setGroup) }
+      db.factor = { findByExperimentId: mockResolve([{ tier: 1 }]) }
+      db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 11, value: 2 }]) }
+      db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
+      db.groupType = { all: mockResolve([{ id: 6, type: 'Location' }, { id: 7, type: 'Rep' }]) }
+      AppError.badRequest = mock()
+
+      return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
+        expect(db.group.findGroupBySetId).toBeCalledWith(3, testTx)
+        expect(db.factor.findByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
+        expect(db.refDesignSpecification.all).toBeCalledWith()
+        expect(db.groupType.all).toBeCalledWith()
+        expect(AppError.badRequest).toBeCalledWith('The specified set (id 3) has tiering set up and cannot be reset.', undefined, '1FK002')
+
+        done()
+      })
+    })
+  })
+
+  describe('createRcbGroupStructure', () => {
+    test('creates the correct data structure', () => {
+      const setGroup = {
+        ref_randomization_strategy_id: 2,
+        ref_group_type_id: 4,
+        location_number: 1,
+      }
+
+      const result = target.createRcbGroupStructure(5, setGroup, 2, [{ id: 3 }, { id: 7 }], 6)
+
+      expect(result).toEqual([{
+        refRandomizationStrategyId: 2,
+        refGroupTypeId: 4,
+        groupValues: [{
+          name: 'locationNumber',
+          value: 1,
+        }],
+        setId: 5,
+        childGroups: [{
+          refRandomizationStrategyId: 2,
+          refGroupTypeId: 6,
+          groupValues: [{
+            name: 'repNumber',
+            value: 1,
+          }],
+          units: [{
+            treatmentId: 3,
+            rep: 1,
+          }, {
+            treatmentId: 7,
+            rep: 1,
+          }],
+        }, {
+          refRandomizationStrategyId: 2,
+          refGroupTypeId: 6,
+          groupValues: [{
+            name: 'repNumber',
+            value: 2,
+          }],
+          units: [{
+            treatmentId: 3,
+            rep: 2,
+          }, {
+            treatmentId: 7,
+            rep: 2,
+          }],
+        }],
+      }])
     })
   })
 })

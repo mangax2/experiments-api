@@ -71,7 +71,8 @@ class GroupExperimentalUnitCompositeService {
         this.createGroupValues(comparisonResults.groups.adds, context, tx),
         this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx)
           .then((unitIds) => {
-            _.forEach(comparisonResults.units.adds, (unit, index) => { unit.id = unitIds[index] })
+            _.forEach(comparisonResults.units.adds,
+              (unit, index) => { unit.id = unitIds[index].id })
           }),
         this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
         this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),

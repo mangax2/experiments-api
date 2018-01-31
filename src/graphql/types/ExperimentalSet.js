@@ -8,7 +8,7 @@ import Resolvers from '../resolvers'
 
 const ExperimentalSet = new GraphQLObjectType({
   name: 'ExperimentalSet',
-  fields: () => ({
+  fields: {
     // properties
     groupId: {
       type: GraphQLInt,
@@ -48,7 +48,7 @@ const ExperimentalSet = new GraphQLObjectType({
       type: GraphQLList(ExperimentalUnit),
       resolve: Resolvers.unitBySetIdBatchResolver,
     },
-  }),
+  },
 })
 
 export default ExperimentalSet

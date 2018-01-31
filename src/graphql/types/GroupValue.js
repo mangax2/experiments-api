@@ -2,13 +2,12 @@ import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
 import { property } from 'lodash'
 import GroupValueService from '../../services/GroupValueService'
 import { FactorLevel } from './FactorLevel'
-import { Group } from './Group'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
 const GroupValue = new GraphQLObjectType({
   name: 'GroupValue',
-  fields: () => ({
+  fields: {
     // properties
     id: {
       type: GraphQLInt,
@@ -39,11 +38,7 @@ const GroupValue = new GraphQLObjectType({
       type: FactorLevel,
       resolve: Resolvers.factorLevelForGroupValueBatchResolver,
     },
-    group: {
-      type: Group,
-      resolve: Resolvers.groupForGroupValueBatchResolver,
-    },
-  }),
+  },
 })
 
 const getGroupValueById = ({ id }) =>

@@ -1,13 +1,12 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
 import { FactorLevel } from './FactorLevel'
-import { Treatment } from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
 const CombinationElement = new GraphQLObjectType({
   name: 'CombinationElement',
-  fields: () => ({
+  fields: {
     // properties
     id: {
       type: GraphQLInt,
@@ -32,11 +31,7 @@ const CombinationElement = new GraphQLObjectType({
       type: FactorLevel,
       resolve: Resolvers.factorLevelForCombinationElementBatchResolver,
     },
-    treatment: {
-      type: Treatment,
-      resolve: Resolvers.treatmentForCombinationElementBatchResolver,
-    },
-  }),
+  },
 })
 
 export default CombinationElement

@@ -24,6 +24,26 @@ function LimitQueryDepth(maxDepth) {
   }
 }
 
+function LimitNumQueries(maxQueries) {
+  return (context) => {
+    let currentNumQueries = 0
+    return {
+      Field: {
+        enter: () => {
+          if (context.getParentType().toString() === 'RootQueryType') {
+            currentNumQueries += 1
+
+            if (currentNumQueries > maxQueries) {
+              context.reportError(new GraphQLError(
+                `Validation: Number of queries per request has exceeded maximum allowed number: ${maxQueries}`))
+            }
+          }
+        },
+      },
+    }
+  }
+}
+
 function x(request, response) {
   return db.tx('GraphQLTransaction', (tx) => {
     const handler = graphqlHTTP({
@@ -31,7 +51,7 @@ function x(request, response) {
       context: { loaders: loaders.createLoaders(tx) },
       // NOTE: Depth must be greater than schema depth or
       // GraphiQL will fail to retrieve documentation.
-      validationRules: [LimitQueryDepth(10)],
+      validationRules: [LimitQueryDepth(10), LimitNumQueries(5)],
       graphiql: true,
     })
     return handler(request, response)

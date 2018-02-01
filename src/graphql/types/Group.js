@@ -8,7 +8,7 @@ import Resolvers from '../resolvers'
 
 const Group = new GraphQLObjectType({
   name: 'Group',
-  fields: () => ({
+  fields: {
     // properties
     id: {
       type: GraphQLInt,
@@ -41,14 +41,6 @@ const Group = new GraphQLObjectType({
     },
 
     // direct relationships
-    parent: {
-      type: Group,
-      resolve: Resolvers.parentGroupBatchResolver,
-    },
-    children: {
-      type: GraphQLList(Group),
-      resolve: Resolvers.childGroupsBatchResolver,
-    },
     groupType: {
       type: GroupType,
       resolve: Resolvers.refGroupTypeBatchResolver,
@@ -61,7 +53,7 @@ const Group = new GraphQLObjectType({
       type: GraphQLList(ExperimentalUnit),
       resolve: Resolvers.unitBatchResolver,
     },
-  }),
+  },
 })
 
 export default Group

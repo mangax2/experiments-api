@@ -1,4 +1,4 @@
-import _ from "lodash"
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()

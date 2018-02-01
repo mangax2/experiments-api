@@ -1,7 +1,6 @@
 import _ from 'lodash'
-
-const DataLoader = require('dataloader')
-const db = require('../db/DbManager')
+import DataLoader from 'dataloader'
+import db from '../db/DbManager'
 
 function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
@@ -50,7 +49,7 @@ function createLoaders(tx) {
   const unitSpecDetailByIdLoader = createDataLoader(db.unitSpecificationDetail.batchFind)
 
   // Loaders that load by parent ID.  These prime the caches of loaders that load by entity ID.
-  function primeCacheForOneToManyPulledFromOneSide(dbCallback, loaderPrimeTarget) {
+  function createLoaderToPrimeCacheOfChildren(dbCallback, loaderPrimeTarget) {
     return createDataLoader((ids, dbTransaction) => dbCallback(ids, dbTransaction)
       .then((childrenByParent) => {
         _.forEach(childrenByParent, (childrenForParent) => {
@@ -62,40 +61,40 @@ function createLoaders(tx) {
       }))
   }
 
-  const associatedFactorLevelsByNestedFactorLevelIds = primeCacheForOneToManyPulledFromOneSide(
+  const associatedFactorLevelsByNestedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindAssociatedLevels, factorLevelByIdLoader)
 
-  const combinationElementsByTreatmentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const combinationElementsByTreatmentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.combinationElement.batchFindAllByTreatmentIds, factorLevelByIdLoader)
 
-  const factorByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const factorByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factor.batchFindByExperimentId, factorByIdLoader)
 
-  const dependentVariableByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const dependentVariableByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.dependentVariable.batchFindByExperimentId, dependentVariableByIdLoader)
 
-  const designSpecDetailByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const designSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.designSpecificationDetail.batchFindAllByExperimentId, designSpecDetailByIdLoader)
 
-  const factorLevelByFactorIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const factorLevelByFactorIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)
 
-  const groupByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const groupByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.group.batchFindAllByExperimentId, groupByIdLoader)
 
-  const groupByParentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const groupByParentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.group.batchFindAllByParentId, groupByIdLoader)
 
-  const nestedFactorLevelByAssociatedFactorLevelIds = primeCacheForOneToManyPulledFromOneSide(
+  const nestedFactorLevelByAssociatedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindNestedLevels, factorLevelByIdLoader)
 
-  const ownerByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const ownerByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.owner.batchFindByExperimentIds, ownerByIdLoader)
 
-  const treatmentByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const treatmentByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.treatment.batchFindAllByExperimentId, treatmentByIdLoader)
 
-  const unitSpecDetailByExperimentIdLoader = primeCacheForOneToManyPulledFromOneSide(
+  const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
 
   return {

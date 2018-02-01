@@ -47,7 +47,7 @@ function LimitNumQueries(maxQueries) {
   }
 }
 
-function x(request, response) {
+function graphqlMiddlewareFunction(request, response) {
   return db.tx('GraphQLTransaction', (tx) => {
     const handler = graphqlHTTP({
       schema,
@@ -61,4 +61,4 @@ function x(request, response) {
   })
 }
 
-module.exports = x
+module.exports = graphqlMiddlewareFunction

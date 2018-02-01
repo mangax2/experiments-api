@@ -1,13 +1,12 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import Group from './Group'
 import Treatment from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
 import Resolvers from '../resolvers'
 
 const ExperimentalUnit = new GraphQLObjectType({
   name: 'ExperimentalUnit',
-  fields: () => ({
+  fields: {
     // properties
     id: {
       type: GraphQLInt,
@@ -35,17 +34,13 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
 
     // direct relationships
-    group: {
-      type: Group,
-      resolve: Resolvers.groupForExperimentalUnitBatchResolver,
-    },
     treatment: {
       type: Treatment,
       resolve: Resolvers.treatmentForExperimentalUnitBatchResolver,
     },
 
     // indirect relationships
-  }),
+  },
 })
 
 export default ExperimentalUnit

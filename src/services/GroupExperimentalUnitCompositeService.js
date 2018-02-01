@@ -1,3 +1,4 @@
+import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '../decorators/transactional'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
@@ -10,8 +11,13 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from '../services/utility/AppError'
 import setErrorDecorator from '../decorators/setErrorDecorator'
+import HttpUtil from '../services/utility/HttpUtil'
+import PingUtil from '../services/utility/PingUtil'
+import cfServices from '../services/utility/ServiceConfig'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+const logger = log4js.getLogger('GroupExperimentalUnitCompositeService')
 
 // Error Codes 1FXXXX
 class GroupExperimentalUnitCompositeService {
@@ -51,20 +57,28 @@ class GroupExperimentalUnitCompositeService {
           throw error
         }
         return this.getGroupTree(experimentId, isTemplate, context, tx)
-          .then((oldGroupsAndUnits) => {
-            const comparisonResults = this.compareGroupTrees(groupAndUnitDetails, oldGroupsAndUnits)
-            return this.recursiveBatchCreate(experimentId, groupAndUnitDetails, context, tx)
-              .then(() => Promise.all([
-                this.createGroupValues(comparisonResults.groups.adds, context, tx),
-                this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context,
-                  tx),
-                this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
-                this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
-                this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, context, tx)]))
-              .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, context, tx))
-              .then(() => AppUtil.createCompositePostResponse())
-          })
+          .then(oldGroupsAndUnits =>
+            this.persistGroupUnitChanges(groupAndUnitDetails, oldGroupsAndUnits, experimentId,
+              context, tx))
       })
+  }
+
+  @setErrorCode('1FL000')
+  persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits, experimentId, context, tx) {
+    const comparisonResults = this.compareGroupTrees(newGroupsAndUnits, oldGroupsAndUnits)
+    return this.recursiveBatchCreate(experimentId, newGroupsAndUnits, context, tx)
+      .then(() => Promise.all([
+        this.createGroupValues(comparisonResults.groups.adds, context, tx),
+        this.createExperimentalUnits(experimentId, comparisonResults.units.adds, context, tx)
+          .then((unitIds) => {
+            _.forEach(comparisonResults.units.adds,
+              (unit, index) => { unit.id = unitIds[index].id })
+          }),
+        this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
+        this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
+        this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, context, tx)]))
+      .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, context, tx))
+      .then(() => AppUtil.createCompositePostResponse())
   }
 
   @setErrorCode('1F3000')
@@ -302,6 +316,127 @@ class GroupExperimentalUnitCompositeService {
         deletes: _.filter(oldUnits, u => !u.used),
       },
     }
+  }
+
+  @setErrorCode('1FM000')
+  @Transactional('resetSet')
+  resetSet = (setId, context, tx) =>
+    // get group by setId
+    this.verifySetAndGetDetails(setId, context, tx).then((results) => {
+      const {
+        experimentId, setGroup, numberOfReps, repGroupTypeId,
+      } = results
+      return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
+        const newGroupsAndUnits = this.createRcbGroupStructure(setId, setGroup, numberOfReps,
+          treatments, repGroupTypeId)
+
+        return this.getGroupTree(experimentId, false, context, tx).then((experimentGroups) => {
+          const oldGroupsAndUnits =
+            [_.find(experimentGroups, group => group.set_id === Number(setId))]
+          const entries = []
+          while (entries.length < numberOfReps * treatments.length) {
+            entries.push({})
+          }
+
+          return this.persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits,
+            experimentId, context, tx)
+            .then(() => PingUtil.getMonsantoHeader()).then((header) => {
+              header.push({ headerName: 'oauth_resourceownerinfo', headerValue: `username=${context.userId},user_id=${context.userId}` })
+              return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+                .then(originalSet => Promise.all(_.map(originalSet.body.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
+                .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
+            })
+            .catch((err) => {
+              logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+              throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
+            })
+            .then((result) => {
+              const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
+              const setEntryIds = _.map(result.body.entries, 'entryId')
+              _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
+              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
+                context, tx)
+            })
+        })
+      })
+    })
+
+  @setErrorCode('1FK000')
+  verifySetAndGetDetails = (setId, context, tx) =>
+    db.group.findGroupBySetId(setId, tx).then((setGroup) => {
+      if (!setGroup) {
+        logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
+        throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
+      }
+      const experimentId = setGroup.experiment_id
+      const factorsPromise = db.factor.findByExperimentId(experimentId, tx)
+      const designSpecPromise = db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)
+      const refDesignSpecPromise = db.refDesignSpecification.all()
+      const groupTypePromise = db.groupType.all()
+
+      return Promise.all([factorsPromise, designSpecPromise, refDesignSpecPromise,
+        groupTypePromise])
+        .then(([factors, designSpecs, refDesignSpecs, groupTypes]) => {
+          const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
+          const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
+          const repDesignSpecDetail =
+            _.find(designSpecs, sd => sd.ref_design_spec_id === minRepRefDesignSpec.id)
+              || _.find(designSpecs, sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
+
+          if (_.find(factors, factor => factor.tier)) {
+            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) has tiering set up and cannot be reset.`)
+            throw AppError.badRequest(`The specified set (id ${setId}) has tiering set up and cannot be reset.`,
+              undefined, getFullErrorCode('1FK002'))
+          }
+          if (!repDesignSpecDetail) {
+            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
+            throw AppError.badRequest(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`,
+              undefined, getFullErrorCode('1FK003'))
+          }
+
+          const repGroupType = _.find(groupTypes, groupType => groupType.type === 'Rep')
+          const numberOfReps = Number(repDesignSpecDetail.value)
+
+          return {
+            experimentId,
+            setGroup,
+            numberOfReps,
+            repGroupTypeId: repGroupType.id,
+          }
+        })
+    })
+
+  @setErrorCode('1FN000')
+  createRcbGroupStructure = (setId, setGroup, numberOfReps, treatments, repRefGroupTypeId) => {
+    const newGroupsAndUnits = [{
+      refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
+      refGroupTypeId: setGroup.ref_group_type_id,
+      groupValues: [{
+        name: 'locationNumber',
+        value: setGroup.location_number,
+      }],
+      setId,
+      childGroups: [],
+    }]
+    let currentRepNumber = 0
+    const createUnit = treatment => ({
+      treatmentId: treatment.id,
+      rep: currentRepNumber,
+    })
+    while (currentRepNumber < numberOfReps) {
+      currentRepNumber += 1
+      newGroupsAndUnits[0].childGroups.push({
+        refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
+        refGroupTypeId: repRefGroupTypeId,
+        groupValues: [{
+          name: 'repNumber',
+          value: currentRepNumber,
+        }],
+        units: _.map(treatments, createUnit),
+      })
+    }
+
+    return newGroupsAndUnits
   }
 }
 

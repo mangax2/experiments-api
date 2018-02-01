@@ -368,12 +368,6 @@ class ExperimentsService {
     return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }
 
-  @setErrorCode('15N000')
-  @Transactional('updateCapacityRequestSyncTime')
-  static updateCapacityRequestSyncDate(experimentId, context, tx) {
-    return db.experiments.updateCapacityRequestSyncDate(experimentId, context, tx)
-  }
-
   @setErrorCode('15L000')
   static
   mergeTagsWithExperiments(experiments, entityTags) {

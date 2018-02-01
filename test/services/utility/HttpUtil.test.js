@@ -53,6 +53,20 @@ describe('HttpUtil', () => {
     })
   })
 
+  describe('patch', () => {
+    test('calls setHeaders and agent.patch', () => {
+      const httpCall = { send: mockResolve() }
+      HttpUtil.setHeaders = mock(httpCall)
+      agent.patch = mock({})
+
+      HttpUtil.patch('testUrl', [], {})
+
+      expect(HttpUtil.setHeaders).toHaveBeenCalledWith({}, [])
+      expect(agent.patch).toHaveBeenCalledWith('testUrl')
+      expect(httpCall.send).toHaveBeenCalledWith({})
+    })
+  })
+
   describe('post', () => {
     test('calls setHeaders and agent.post', () => {
       const httpCall = { send: mockResolve() }

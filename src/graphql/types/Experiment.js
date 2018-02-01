@@ -9,6 +9,7 @@ import Owner from './Owner'
 import Treatment from './Treatment'
 import UnitSpecificationDetail from './UnitSpecificationDetail'
 import Resolvers from '../resolvers'
+import ExperimentalUnit from './ExperimentalUnit'
 
 const Experiment = new GraphQLObjectType({
   name: 'Experiment',
@@ -64,6 +65,10 @@ const Experiment = new GraphQLObjectType({
     unitSpecificationDetails: {
       type: GraphQLList(UnitSpecificationDetail),
       resolve: Resolvers.unitSpecDetailForExperimentBatchResolver,
+    },
+    units: {
+      type: GraphQLList(ExperimentalUnit),
+      resolve: Resolvers.unitByExperimentIdBatchResolver,
     },
   },
 })

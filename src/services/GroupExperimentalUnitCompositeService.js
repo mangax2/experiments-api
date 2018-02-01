@@ -345,17 +345,17 @@ class GroupExperimentalUnitCompositeService {
               return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
                 .then(originalSet => Promise.all(_.map(originalSet.body.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
                 .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
-                .then((result) => {
-                  const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
-                  const setEntryIds = _.map(result.body.entries, 'entryId')
-                  _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
-                  return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
-                    context, tx)
-                })
             })
             .catch((err) => {
               logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
               throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
+            })
+            .then((result) => {
+              const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
+              const setEntryIds = _.map(result.body.entries, 'entryId')
+              _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
+              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
+                context, tx)
             })
         })
       })

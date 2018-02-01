@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql'
 import db from '../db/DbManager'
 import loaders from '../graphql/loaders'
 import schema from '../graphql/schema'
+import config from '../../config'
 
 function LimitQueryDepth(maxDepth) {
   return (context) => {
@@ -54,7 +55,7 @@ function x(request, response) {
       // NOTE: Depth must be greater than schema depth or
       // GraphiQL will fail to retrieve documentation.
       validationRules: [LimitQueryDepth(10), LimitNumQueries(5)],
-      graphiql: true,
+      graphiql: config.env === 'local',
     })
     return handler(request, response)
   })

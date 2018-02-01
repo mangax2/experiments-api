@@ -76,11 +76,6 @@ class GroupService {
         return data
       }
     })
-
-  @setErrorCode('1G8000')
-  @Transactional('getGroupsByParentId')
-  getGroupsbyParentId = (id, tx) => db.group.findAllByParentId(id, tx)
-    .then(data => data)
 }
 
 module.exports = GroupService

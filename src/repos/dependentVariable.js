@@ -62,13 +62,6 @@ class dependentVariableRepo {
     return tx.any('SELECT * FROM dependent_variable where experiment_id IN ($1:csv)', [experimentIds])
       .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
   }
-
-  @setErrorCode('51B000')
-  batchCreate = (t, dependentVariables, context) => t.batch(dependentVariables.map(dependentVariable => t.one('insert into dependent_variable(required, name, experiment_id, created_user_id, created_date,' +
-    'modified_user_id, modified_date, question_code) values($1, $2, $3, $4, CURRENT_TIMESTAMP,' +
-    ' $4,' +
-    ' CURRENT_TIMESTAMP,$5)  RETURNING id', [dependentVariable.required, dependentVariable.name, dependentVariable.experimentId, context.userId, dependentVariable.questionCode]),
-  ))
 }
 
 module.exports = (rep, pgp) => new dependentVariableRepo(rep, pgp)

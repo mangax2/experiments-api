@@ -58,7 +58,10 @@ class ownerRepo {
   )
 
   @setErrorCode('5E5000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 }
 
 module.exports = rep => new ownerRepo(rep)

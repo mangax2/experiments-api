@@ -26,7 +26,7 @@ class designSpecificationDetailRepo {
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
 
   @setErrorCode('524000')
-  batchCreate = (designSpecificationDetails, context, tx = rep) => {
+  batchCreate = (designSpecificationDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['value', 'ref_design_spec_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'design_spec_detail' },

@@ -30,12 +30,14 @@ function LimitNumQueries(maxQueries) {
     return {
       Field: {
         enter: () => {
-          if (context.getParentType().toString() === 'RootQueryType') {
-            currentNumQueries += 1
+          if (context.getParentType()) {
+            if (context.getParentType().toString() === 'RootQueryType') {
+              currentNumQueries += 1
 
-            if (currentNumQueries > maxQueries) {
-              context.reportError(new GraphQLError(
-                `Validation: Number of queries per request has exceeded maximum allowed number: ${maxQueries}`))
+              if (currentNumQueries > maxQueries) {
+                context.reportError(new GraphQLError(
+                  `Validation: Number of queries per request has exceeded maximum allowed number: ${maxQueries}`))
+              }
             }
           }
         },

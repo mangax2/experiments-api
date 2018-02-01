@@ -53,6 +53,11 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     app.use(requestContext)
   }
 
+  const compression = require('compression')
+  app.use(compression())
+  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
+  app.use(inflector())
+
   const pingFunc = (function () {
     const createPingPage = require('@monsantoit/ping-page')
     const pingPage = createPingPage(require('../package.json'))
@@ -69,12 +74,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   pingFunc()
 
-  const compression = require('compression')
-  app.use(compression())
-  app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
 
-  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
-  app.use(appBaseUrl, inflector(), require('./routes/routes'))
+  app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
+  app.use(appBaseUrl, require('./routes/routes'))
 
   swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
     app.use(appBaseUrl, middleware.swaggerUi())

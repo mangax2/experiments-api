@@ -39,9 +39,10 @@ router.get('/ping', (req, res) => {
 
 router.post('/experiments/:id/capacity-request-sync', (req, res, next) => {
   const { id } = req.params
-  return new CapacityRequestService().syncCapacityRequestDataWithExperiment(
-    id, req.body, req.context,
-  ).then(value => res.json(value)).catch(err => next(err))
+  return new CapacityRequestService(new DesignSpecificationDetailService(), new SecurityService())
+    .syncCapacityRequestDataWithExperiment(id, req.body, req.context)
+    .then(value => res.json(value))
+    .catch(err => next(err))
 })
 
 router.get('/experiment-designs', (req, res, next) => new ExperimentDesignService().getAllExperimentDesigns()
@@ -265,6 +266,10 @@ router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecif
 
 router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id, req.context)
   .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.post('/sets/:setId/reset', (req, res, next) => new GroupExperimentalUnitCompositeService().resetSet(req.params.setId, req.context)
+  .then(() => res.sendStatus(204))
   .catch(err => next(err)))
 
 router.get('/sets/:setId/treatment-details', (req, res, next) => new ExperimentalUnitService().getTreatmentDetailsBySetId(req.params.setId)

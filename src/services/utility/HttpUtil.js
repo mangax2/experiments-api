@@ -26,6 +26,14 @@ class HttpUtil {
     })
   }
 
+  static patch(url, headers, data, threshold = 20000) {
+    const startTimeMillis = new Date().getTime()
+    return HttpUtil.setHeaders(agent.patch(url), headers).send(data).then((result) => {
+      HttpUtil.logExternalTime(startTimeMillis, threshold, url, 'PATCH')
+      return result
+    })
+  }
+
   static post(url, headers, data, threshold = 20000) {
     const startTimeMillis = new Date().getTime()
     return HttpUtil.setHeaders(agent.post(url), headers).send(data).then((result) => {

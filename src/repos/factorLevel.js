@@ -5,7 +5,6 @@ const { setErrorCode } = setErrorDecorator()
 const columns = "id,value,factor_id,created_user_id,created_date,modified_user_id,modified_date"
 const qualifiedColumns = "fl.id,fl.value,fl.factor_id,fl.created_user_id,fl.created_date,fl.modified_user_id,fl.modified_date"
 
-
 // Error Codes 58XXXX
 class factorLevelRepo {
   constructor(rep, pgp) {

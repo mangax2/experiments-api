@@ -84,9 +84,7 @@ class treatmentRepo {
   findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2', keys)
 
   @setErrorCode('5IA000')
-  batchFindAllTreatmentLevelDetails = (treatmentIds, tx = this.rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds]).then(data => {
-    return _.map(treatmentIds, treatmentId => _.filter(data, dataElement => dataElement.treatment_id === treatmentId))
-  })
+  batchFindAllTreatmentLevelDetails = (treatmentIds, tx = this.rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5IB000')
   batchFindByBusinessKey = (batchKeys, tx = this.rep) => {

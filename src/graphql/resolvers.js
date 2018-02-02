@@ -38,6 +38,10 @@ function experimentsBatchResolver(entity, args, context) {
   return context.loaders.experiments.load(-1)
 }
 
+function experimentsByNameBatchResolver(entity, args, context) {
+  return context.loaders.experimentsByName.load(args.name)
+}
+
 function factorBatchResolver(entity, args, context) {
   if (entity.factor_id) {
     return context.loaders.factor.load(entity.factor_id)
@@ -281,6 +285,7 @@ module.exports = {
   designSpecDetailForExperimentBatchResolver,
   experimentBatchResolver,
   experimentsBatchResolver,
+  experimentsByNameBatchResolver,
   factorBatchResolver,
   factorByExperimentIdsBatchResolver,
   factorByExperimentIdParameterBatchResolver,

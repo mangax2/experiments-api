@@ -56,6 +56,11 @@ class experimentsRepo {
   @setErrorCode('558000')
   updateCapacityRequestSyncDate = (id, context, tx = this.rep) => tx.any('UPDATE experiment SET (capacity_request_sync_date, modified_user_id, modified_date) = (CURRENT_TIMESTAMP, $1, CURRENT_TIMESTAMP) WHERE id=$2 RETURNING id',
     [context.userId, id])
+
+  batchFindExperimentsByName = (names, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE name IN ($1:csv)', [names]).then(data => {
+    const groupedData = _.groupBy(data, 'name')
+    return _.map(names, name => groupedData[name])
+  })
 }
 
 module.exports = rep => new experimentsRepo(rep)

@@ -110,6 +110,7 @@ function createLoaders(tx) {
     designSpecDetailByExperimentIds: designSpecDetailByExperimentIdLoader,
     experiment: experimentByIdLoader,
     experiments: createDataLoader(experimentsBatchLoaderCallback),
+    experimentsByName: createDataLoader(db.experiments.batchFindExperimentsByName),
     factor: factorByIdLoader,
     factorByExperimentIds: factorByExperimentIdLoader,
     factorLevel: factorLevelByIdLoader,

@@ -1,4 +1,4 @@
-import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLNonNull, GraphQLList } from 'graphql'
+import { GraphQLSchema, GraphQLObjectType, GraphQLInt, GraphQLString, GraphQLNonNull, GraphQLList } from 'graphql'
 import ExperimentInfo from './types/ExperimentInfo'
 import Experiment from './types/Experiment'
 import Factor from './types/Factor'
@@ -22,6 +22,15 @@ export default new GraphQLSchema({
           },
         },
         resolve: Resolvers.experimentBatchResolver,
+      },
+      getExperimentsByName: {
+        type: GraphQLList(Experiment),
+        args: {
+          name: {
+            type: GraphQLNonNull(GraphQLString),
+          },
+        },
+        resolve: Resolvers.experimentsByNameBatchResolver,
       },
       getTemplateById: {
         type: Experiment,

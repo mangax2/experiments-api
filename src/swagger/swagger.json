@@ -2432,6 +2432,7 @@
         "description": "Resets the set in a field packed experiment back to its original number of reps and units.",
         "operationId": "resetSet",
         "tags": ["Sets"],
+        "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
           {

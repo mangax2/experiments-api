@@ -3,7 +3,7 @@
 writeSchema()
 
 function writeSchema() {
-  const schema = require('./schema').default
+  const schema = require('../schema').default
   const printSchema = require('graphql').printSchema
 
   const graphQLSchema = printSchema(schema)

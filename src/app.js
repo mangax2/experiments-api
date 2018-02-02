@@ -10,14 +10,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     require('babel-register')
   }
 
-  const graphql = require('graphql')
-  const schema = require('./graphql/schema').default
-  const schemaErrors = graphql.validateSchema(schema)
-
-  if (schemaErrors.length > 0) {
-    throw new Error(`GraphQL Schema Is Invalid: ${schemaErrors.toString()}`)
-  }
-
   const serviceConfig = require('./services/utility/ServiceConfig')
   const express = require('express')
   const _ = require('lodash')

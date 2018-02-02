@@ -1,8 +1,6 @@
 import { GraphQLObjectType, GraphQLInt } from 'graphql'
 import { property } from 'lodash'
-import Treatment from './Treatment'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
-import Resolvers from '../resolvers'
 
 const ExperimentalUnit = new GraphQLObjectType({
   name: 'ExperimentalUnit',
@@ -34,10 +32,6 @@ const ExperimentalUnit = new GraphQLObjectType({
     },
 
     // direct relationships
-    treatment: {
-      type: Treatment,
-      resolve: Resolvers.treatmentForExperimentalUnitBatchResolver,
-    },
 
     // indirect relationships
   },

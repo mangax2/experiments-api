@@ -107,7 +107,10 @@ class factorLevelRepo {
   @setErrorCode('58B000')
   batchFindByFactorId = (factorIds, tx = this.rep) => {
     return tx.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
-      .then(data => _.map(factorIds, factorId => _.filter(data, row => row.factor_id === factorId)))
+      .then(data => {
+        const dataByFactorId = _.groupBy(data, 'factor_id')
+        return _.map(factorIds, factorId => dataByFactorId[factorId])
+      })
   }
 }
 

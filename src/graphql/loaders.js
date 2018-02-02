@@ -94,6 +94,9 @@ function createLoaders(tx) {
   const treatmentByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.treatment.batchFindAllByExperimentId, treatmentByIdLoader)
 
+  const treatmentBySetIdLoader = createLoaderToPrimeCacheOfChildren(
+    db.treatment.batchFindAllBySetId, treatmentByIdLoader)
+
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
 
@@ -132,6 +135,7 @@ function createLoaders(tx) {
     templates: createDataLoader(templatesBatchLoaderCallback),
     treatment: treatmentByIdLoader,
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
+    treatmentBySetIds: treatmentBySetIdLoader,
     unit: createDataLoader(db.unit.batchFindAllByGroupIdsAndGroupByGroupId),
     unitByExperimentIds: createDataLoader(db.unit.batchfindAllByExperimentIds),
     unitsBySetId: createDataLoader(db.unit.batchFindAllBySetIds),

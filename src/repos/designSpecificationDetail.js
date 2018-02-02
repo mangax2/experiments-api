@@ -118,7 +118,10 @@ class designSpecificationDetailRepo {
   @setErrorCode('52B000')
   batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
     return tx.any('SELECT * FROM design_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 }
 

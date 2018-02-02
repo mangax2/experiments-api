@@ -60,7 +60,10 @@ class dependentVariableRepo {
   @setErrorCode('51A000')
   batchFindByExperimentId = (experimentIds, tx = this.rep) => {
     return tx.any('SELECT * FROM dependent_variable where experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 }
 

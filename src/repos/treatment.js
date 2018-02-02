@@ -102,7 +102,19 @@ class treatmentRepo {
   @setErrorCode('5IC000')
   batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
     return tx.any('SELECT * FROM treatment WHERE experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
+  }
+
+  batchFindAllBySetId = (setIds, tx = this.rep) => {
+    return tx.any('SELECT es.set_id, t.* FROM (SELECT DISTINCT g.set_id, g.experiment_id FROM public.group g WHERE g.set_id IN ($1:csv)) es INNER JOIN treatment t on es.experiment_id = t.experiment_id', [setIds])
+      .then(data => {
+        const dataBySetId = _.groupBy(data, 'set_id')
+        return _.map(setIds, setId =>
+          _.map(dataBySetId[setId], treatment => _.omit(treatment, ['set_id'])))
+      })
   }
 }
 

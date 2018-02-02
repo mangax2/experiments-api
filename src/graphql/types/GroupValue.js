@@ -1,8 +1,6 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLString } from 'graphql'
 import { property } from 'lodash'
-import FactorLevel from './FactorLevel'
 import { AuditInfo, getAuditInfo } from './common/AuditInfo'
-import Resolvers from '../resolvers'
 
 const GroupValue = new GraphQLObjectType({
   name: 'GroupValue',
@@ -33,10 +31,6 @@ const GroupValue = new GraphQLObjectType({
     },
 
     // direct relationships
-    factorLevel: {
-      type: FactorLevel,
-      resolve: Resolvers.factorLevelForGroupValueBatchResolver,
-    },
   },
 })
 

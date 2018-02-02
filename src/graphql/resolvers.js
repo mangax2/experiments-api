@@ -213,6 +213,10 @@ function treatmentByExperimentIdParameterBatchResolver(entity, args, context) {
   return context.loaders.treatmentByExperimentIds.load(args.experimentId)
 }
 
+function treatmentBySetIdParameterBatchResolver(entity, args, context) {
+  return context.loaders.treatmentBySetIds.load(args.setId)
+}
+
 function treatmentForCombinationElementBatchResolver(entity, args, context) {
   if (entity.treatment_id) {
     return context.loaders.treatment.load(entity.treatment_id)
@@ -311,6 +315,7 @@ module.exports = {
   templatesBatchResolver,
   treatmentBatchResolver,
   treatmentByExperimentIdParameterBatchResolver,
+  treatmentBySetIdParameterBatchResolver,
   treatmentsForExperimentBatchResolver,
   treatmentForExperimentalUnitBatchResolver,
   treatmentForCombinationElementBatchResolver,

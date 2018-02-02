@@ -112,6 +112,15 @@ export default new GraphQLSchema({
         },
         resolve: Resolvers.unitBySetIdParameterBatchResolver,
       },
+      getTreatmentsBySetId: {
+        type: GraphQLList(Treatment),
+        args: {
+          setId: {
+            type: GraphQLNonNull(GraphQLInt),
+          },
+        },
+        resolve: Resolvers.treatmentBySetIdParameterBatchResolver,
+      },
     },
   }),
 })

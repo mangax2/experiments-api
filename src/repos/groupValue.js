@@ -96,7 +96,10 @@ class groupValueRepo {
   @setErrorCode('5D9000')
   batchFindAllByGroupId = (groupIds, tx = this.rep) => {
     return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, [groupIds])
-      .then(data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)))
+      .then(data => {
+        const dataByGroupId = _.groupBy(data, 'group_id')
+        return _.map(groupIds, groupId => dataByGroupId[groupId])
+      })
   }
 }
 

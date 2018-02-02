@@ -122,7 +122,10 @@ class groupRepo {
   @setErrorCode('5BC000')
   batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
     return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 
   @setErrorCode('5BD000')
@@ -131,7 +134,10 @@ class groupRepo {
   @setErrorCode('5BE000')
   batchFindAllByParentId = (parentIds, tx = this.rep) => {
     return tx.any('SELECT * FROM "group" WHERE parent_id in ($1:csv)', [parentIds])
-      .then(data => _.map(parentIds, parentId => _.filter(data, row => row.parent_id === parentId)))
+      .then(data => {
+        const dataByParentId = _.groupBy(data, 'parent_id')
+        return _.map(parentIds, parentId => dataByParentId[parentId])
+      })
   }
 }
 

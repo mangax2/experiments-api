@@ -89,7 +89,10 @@ class factorLevelAssociationRepo {
   @setErrorCode('59B000')
   batchFindNestedLevels = (associatedLevelIds, tx = this.rep) => {
     return tx.any('SELECT fla.associated_level_id, fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.nested_level_id WHERE fla.associated_level_id IN ($1:csv)', [associatedLevelIds])
-      .then(data => _.map(associatedLevelIds, associatedLevelId => _.map(_.filter(data, row => row.associated_level_id === associatedLevelId), row => _.omit(row, ['associated_level_id']))))
+      .then(data => {
+        const dataByAssociatedLevelId = _.groupBy(data, 'associated_level_id')
+        return _.map(associatedLevelIds, associatedLevelId => _.map(dataByAssociatedLevelId[associatedLevelId], row => _.omit(row, ['associated_level_id'])))
+      })
   }
 
   @setErrorCode('59C000')
@@ -98,7 +101,10 @@ class factorLevelAssociationRepo {
   @setErrorCode('59D000')
   batchFindAssociatedLevels = (nestedLevelIds, tx = this.rep) => {
     return tx.any('SELECT fla.nested_level_id, fl.* FROM factor_level fl INNER JOIN factor_level_association fla ON fl.id = fla.associated_level_id WHERE fla.nested_level_id IN ($1:csv)', [nestedLevelIds])
-      .then(data => _.map(nestedLevelIds, nestedLevelId => _.map(_.filter(data, row => row.nested_level_id === nestedLevelId), row => _.omit(row, ['nested_level_id']))))
+      .then(data => {
+        const dataByNestedLevelId = _.groupBy(data, 'nested_level_id')
+        return _.map(nestedLevelIds, nestedLevelId => _.map(dataByNestedLevelId[nestedLevelId], row => _.omit(row, ['nested_level_id'])))
+      })
   }
 }
 

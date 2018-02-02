@@ -27,7 +27,12 @@ class unitRepo {
 
   @setErrorCode('5JE000')
   batchfindAllByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT u.*, t.experiment_id FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id IN ($1:csv)', experimentIds)
-    .then(data => _.map(experimentIds, experimentId => _.filter(data, row => row.experiment_id === experimentId)))
+    .then(data => {
+      const unitByExperimentId = _.groupBy(data, 'experiment_id')
+      return _.map(experimentIds, experimentId => {
+        return unitByExperimentId[experimentId]
+      })
+    })
 
   @setErrorCode('5J5000')
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
@@ -38,7 +43,10 @@ class unitRepo {
   @setErrorCode('5JF000')
   batchFindAllByGroupIdsAndGroupByGroupId = (groupIds, tx = this.rep) => {
     return tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
-      .then(data => _.map(groupIds, groupId => _.filter(data, row => row.group_id === groupId)))
+      .then(data => {
+        const dataByGroupId = _.groupBy(data, 'group_id')
+        return _.map(groupIds, groupId => dataByGroupId[groupId])
+      })
   }
 
   @setErrorCode('5J7000')

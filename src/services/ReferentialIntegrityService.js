@@ -2,6 +2,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
 
+// Error Codes 1NXXXX
 class ReferentialIntegrityService {
   @setErrorCode('1N1000')
   getById = (id, entity, tx) => entity.find(id, tx)

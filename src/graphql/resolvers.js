@@ -35,6 +35,8 @@ function experimentBatchResolver(entity, args, context) {
 }
 
 function experimentsBatchResolver(entity, args, context) {
+  // -1 is passed here because this loader loads all experiments, so the ID is irrelevant.
+  // It is specified because data loader requires an ID to associate with cached results.
   return context.loaders.experiments.load(-1)
 }
 

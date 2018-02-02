@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -22,7 +23,10 @@ class groupRepo {
   findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select g.*, gv.value as rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
 
   @setErrorCode('5B3000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5B4000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
@@ -105,6 +109,36 @@ class groupRepo {
   removeByExperimentId = (experimentId, tx = this.rep) =>
     // Delete only top most groups DELETE CASCADE on parent_id will delete all child groups.
     tx.any('DELETE FROM "group" WHERE experiment_id = $1 and parent_id IS NULL RETURNING id', experimentId)
+
+  @setErrorCode('5BA000')
+  batchFindBySetId = (setId, tx = this.rep) => tx.one('SELECT * FROM "group" WHERE set_id = $1', setId)
+
+  @setErrorCode('5BB000')
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE set_id IN ($1:csv)', [setIds]).then(data => {
+    const keyedData = _.keyBy(data, 'set_id')
+    return _.map(setIds, setId => keyedData[setId])
+  })
+
+  @setErrorCode('5BC000')
+  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
+    return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
+  }
+
+  @setErrorCode('5BD000')
+  findAllByParentId = (parentId, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE parent_id=$1', parentId)
+
+  @setErrorCode('5BE000')
+  batchFindAllByParentId = (parentIds, tx = this.rep) => {
+    return tx.any('SELECT * FROM "group" WHERE parent_id in ($1:csv)', [parentIds])
+      .then(data => {
+        const dataByParentId = _.groupBy(data, 'parent_id')
+        return _.map(parentIds, parentId => dataByParentId[parentId])
+      })
+  }
 }
 
 module.exports = (rep, pgp) => new groupRepo(rep, pgp)

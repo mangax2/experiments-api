@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -10,7 +11,7 @@ class factorLevelRepo {
     this.rep = rep
     this.pgp = pgp
   }
-  
+
   @setErrorCode('580000')
   repository = () => this.rep
 
@@ -18,7 +19,10 @@ class factorLevelRepo {
   find = (id, tx = this.rep) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE id = $1`, id)
 
   @setErrorCode('582000')
-  batchFind = (ids, tx = this.rep) => tx.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids])
+  batchFind = (ids, tx = this.rep) => tx.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('583000')
   findByExperimentId = (experimentId, tx = this.rep) =>
@@ -97,6 +101,15 @@ class factorLevelRepo {
     }))
     const query = `WITH d(factor_id, value, id) AS (VALUES ${this.pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = CAST(d.value as jsonb) and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
+  }
+
+  @setErrorCode('58B000')
+  batchFindByFactorId = (factorIds, tx = this.rep) => {
+    return tx.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
+      .then(data => {
+        const dataByFactorId = _.groupBy(data, 'factor_id')
+        return _.map(factorIds, factorId => dataByFactorId[factorId])
+      })
   }
 }
 

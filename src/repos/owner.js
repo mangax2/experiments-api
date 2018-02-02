@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -17,8 +18,10 @@ class ownerRepo {
     ' experiment_id = $1', experimentId)
 
   @setErrorCode('5E2000')
-  batchFindByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT * FROM owner where' +
-    ' experiment_id IN ($1:csv)', [experimentIds])
+  batchFindByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT * FROM owner where experiment_id IN ($1:csv)', [experimentIds]).then(data => {
+    const keyedData = _.keyBy(data, 'experiment_id')
+    return _.map(experimentIds, experimentId => keyedData[experimentId])
+  })
 
   @setErrorCode('5E3000')
   batchCreate = (experimentsOwners, context, tx = this.rep) => tx.batch(
@@ -53,6 +56,12 @@ class ownerRepo {
       ),
     ),
   )
+
+  @setErrorCode('5E5000')
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 }
 
 module.exports = rep => new ownerRepo(rep)

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -16,7 +17,10 @@ class treatmentRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE id = $1', id)
 
   @setErrorCode('5I2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5I3000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
@@ -91,6 +95,24 @@ class treatmentRepo {
     }))
     const query = `WITH d(experiment_id, treatment_number, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'treatment_number', 'id'])}) select t.experiment_id, t.treatment_number from public.treatment t inner join d on t.experiment_id = CAST(d.experiment_id as integer) and t.treatment_number = d.treatment_number and (d.id is null or t.id != CAST(d.id as integer))`
     return tx.any(query)
+  }
+
+  @setErrorCode('5IC000')
+  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
+    return tx.any('SELECT * FROM treatment WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
+  }
+
+  batchFindAllBySetId = (setIds, tx = this.rep) => {
+    return tx.any('SELECT es.set_id, t.* FROM (SELECT DISTINCT g.set_id, g.experiment_id FROM public.group g WHERE g.set_id IN ($1:csv)) es INNER JOIN treatment t on es.experiment_id = t.experiment_id', [setIds])
+      .then(data => {
+        const dataBySetId = _.groupBy(data, 'set_id')
+        return _.map(setIds, setId =>
+          _.map(dataBySetId[setId], treatment => _.omit(treatment, ['set_id'])))
+      })
   }
 }
 

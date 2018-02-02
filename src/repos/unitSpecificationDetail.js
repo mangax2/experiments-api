@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -8,7 +9,7 @@ class unitSpecificationDetailRepo {
     this.rep = rep
     this.pgp = pgp
   }
-  
+
   @setErrorCode('5L0000')
   repository = () => this.rep
 
@@ -16,7 +17,10 @@ class unitSpecificationDetailRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit_spec_detail WHERE id = $1', id)
 
   @setErrorCode('5L2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5L3000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
@@ -89,6 +93,15 @@ class unitSpecificationDetailRepo {
     }))
     const query = `WITH d(experiment_id, ref_unit_spec_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'ref_unit_spec_id', 'id'])}) select entity.experiment_id, entity.ref_unit_spec_id from public.unit_spec_detail entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) AND entity.ref_unit_spec_id = CAST(d.ref_unit_spec_id as integer) AND (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
+  }
+
+  @setErrorCode('5LA000')
+  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
+    return tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 }
 

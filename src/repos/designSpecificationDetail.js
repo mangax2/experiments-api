@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -16,7 +17,10 @@ class designSpecificationDetailRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM design_spec_detail WHERE id = $1', id)
 
   @setErrorCode('522000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('523000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
@@ -109,6 +113,15 @@ class designSpecificationDetailRepo {
     const query = `${this.pgp.helpers.insert(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} ON CONFLICT ON CONSTRAINT design_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date`
 
     return tx.query(query)
+  }
+
+  @setErrorCode('52B000')
+  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
+    return tx.any('SELECT * FROM design_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 }
 

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -8,7 +9,7 @@ class factorRepo {
     this.rep = rep
     this.pgp = pgp
   }
-  
+
   @setErrorCode('570000')
   repository = () => this.rep
 
@@ -16,7 +17,10 @@ class factorRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id)
 
   @setErrorCode('572000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('573000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
@@ -102,6 +106,15 @@ class factorRepo {
     }))
     const query = `WITH d(experiment_id, name, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
     return tx.any(query)
+  }
+
+  @setErrorCode('57A000')
+  batchFindByExperimentId = (experimentIds, tx = rep) => {
+    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {
+        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+      })
   }
 }
 

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -19,7 +20,10 @@ class groupValueRepo {
   find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.id = $1`, id)
 
   @setErrorCode('5D2000')
-  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids])
+  batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5D3000')
   batchFindAllByExperimentId = (experimentId, tx = this.rep) => {
@@ -84,6 +88,18 @@ class groupValueRepo {
     }))
     const query = `WITH d(group_id, name, id) AS (VALUES ${this.pgp.helpers.values(values, ['group_id', 'name', 'id'])}) select gv.group_id, gv.name from public.group_value gv inner join d on gv.group_id = CAST(d.group_id as integer) and gv.name = d.name and (d.id is null or gv.id != CAST(d.id as integer))`
     return tx.any(query)
+  }
+
+  @setErrorCode('5D8000')
+  findAllByGroupId = (groupId, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.group_id = $1`, groupId)
+
+  @setErrorCode('5D9000')
+  batchFindAllByGroupId = (groupIds, tx = this.rep) => {
+    return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, [groupIds])
+      .then(data => {
+        const dataByGroupId = _.groupBy(data, 'group_id')
+        return _.map(groupIds, groupId => dataByGroupId[groupId])
+      })
   }
 }
 

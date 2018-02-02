@@ -1,10 +1,10 @@
-import { mock, mockResolve, mockReject } from '../jestUtil'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import AppError from '../../src/services/utility/AppError'
 import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import db from '../../src/db/DbManager'
+import { mock, mockReject, mockResolve } from '../jestUtil'
 
 describe('CapacityRequestService', () => {
   describe('associateExperimentToCapacityRequest', () => {

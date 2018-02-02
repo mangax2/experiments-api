@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -16,7 +17,10 @@ class factorTypeRepo {
   find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM ref_factor_type WHERE id = $1', id)
 
   @setErrorCode('5A2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids])
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5A3000')
   all = () => this.rep.any('SELECT * FROM ref_factor_type')

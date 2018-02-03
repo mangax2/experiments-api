@@ -1,0 +1,212 @@
+schema {
+  query: Query
+}
+
+type AuditInfo {
+  createdUserId: String
+  modifiedUserId: String
+  createdDate: String
+  modifiedDate: String
+}
+
+type ClusterComposite {
+  text: String
+  label: String
+  objectType: String
+  items: [ClusterComposite]
+}
+
+type CombinationElement {
+  id: Int
+  factorLevelId: Int
+  treatmentId: Int
+  auditInfo: AuditInfo
+  factorLevel: FactorLevel
+}
+
+type DependentVariable {
+  id: Int
+  name: String
+  required: Boolean
+  questionCode: String
+  experimentId: Int
+  auditInfo: AuditInfo
+}
+
+type DesignSpecification {
+  id: Int
+  name: String
+}
+
+type DesignSpecificationDetail {
+  id: Int
+  value: String
+  refDesignSpecId: Int
+  experimentId: Int
+  auditInfo: AuditInfo
+  designSpecification: DesignSpecification
+}
+
+type Experiment {
+  id: Int
+  name: String
+  description: String
+  status: String
+  capacityRequestSyncDate: String
+  auditInfo: AuditInfo
+  dependentVariables: [DependentVariable]
+  designSpecifications: [DesignSpecificationDetail]
+  factors: [Factor]
+  groups: [Group]
+  owners: Owner
+  treatments: [Treatment]
+  unitSpecificationDetails: [UnitSpecificationDetail]
+  units: [ExperimentalUnit]
+}
+
+type ExperimentalSet {
+  groupId: Int
+  experimentId: Int
+  refRandomizationStrategyId: Int
+  refGroupTypeId: Int
+  setId: Int
+  groupType: GroupType
+  groupValues: [GroupValue]
+  setEntries: [ExperimentalUnit]
+}
+
+type ExperimentalUnit {
+  id: Int
+  groupId: Int
+  treatmentId: Int
+  rep: Int
+  setEntryId: Int
+}
+
+type ExperimentInfo {
+  id: Int
+  name: String
+  description: String
+  status: String
+  capacityRequestSyncDate: String
+  auditInfo: AuditInfo
+  owners: Owner
+}
+
+type Factor {
+  id: Int
+  name: String
+  experimentId: Int
+  refFactorTypeId: Int
+  tier: Int
+  auditInfo: AuditInfo
+  factorType: FactorType
+  factorLevels: [FactorLevel]
+}
+
+type FactorLevel {
+  id: Int
+  value: FactorLevelValue
+  valueJSON: JSON
+  factorId: Int
+  auditInfo: AuditInfo
+  factor: Factor
+  nestedLevels: [FactorLevel]
+  associatedLevels: [FactorLevel]
+}
+
+type FactorLevelValue {
+  items: [ClusterComposite]
+  objectType: String
+}
+
+type FactorType {
+  id: Int
+  type: String
+}
+
+type Group {
+  id: Int
+  experimentId: Int
+  parentId: Int
+  refRandomizationStrategyId: Int
+  refGroupTypeId: Int
+  setId: Int
+  groupType: GroupType
+  groupValues: [GroupValue]
+  units: [ExperimentalUnit]
+}
+
+type GroupType {
+  id: Int
+  type: String
+}
+
+type GroupValue {
+  id: Int
+  name: String
+  value: String
+  factorLevelId: Int
+  groupId: Int
+  auditInfo: AuditInfo
+}
+
+scalar JSON
+
+type Owner {
+  id: Int
+  experimentId: Int
+  userIds: [String]
+  groupIds: [String]
+  auditInfo: AuditInfo
+}
+
+type Query {
+  getExperimentById(id: Int!): Experiment
+  getExperimentsByName(name: String!): [Experiment]
+  getTemplateById(id: Int!): Experiment
+  getAllExperiments: [ExperimentInfo]
+  getAllTemplates: [ExperimentInfo]
+  getFactorsByExperimentId(experimentId: Int!): [Factor]
+  getTreatmentsByExperimentId(experimentId: Int!): [Treatment]
+  getUnitSpecificationDetailsByExperimentId(experimentId: Int!): [UnitSpecificationDetail]
+  getDesignSpecificationDetailsByExperimentId(experimentId: Int!): [DesignSpecificationDetail]
+  getGroupsByExperimentId(experimentId: Int!): [Group]
+  getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
+  getSetBySetId(setId: Int!): ExperimentalSet
+  getSetEntriesBySetId(setId: Int!): [ExperimentalUnit]
+  getTreatmentsBySetId(setId: Int!): [Treatment]
+}
+
+type Treatment {
+  id: Int
+  experimentId: Int
+  isControl: String
+  treatmentNumber: Int
+  notes: String
+  auditInfo: AuditInfo
+  combinationElements: [CombinationElement]
+}
+
+type UnitSpecification {
+  id: Int
+  name: String
+  uomType: String
+  refUnitTypeId: Int
+  unitType: UnitType
+}
+
+type UnitSpecificationDetail {
+  id: Int
+  value: String
+  uomId: Int
+  refUnitSpecId: Int
+  experimentId: Int
+  auditInfo: AuditInfo
+  unitSpecification: UnitSpecification
+}
+
+type UnitType {
+  id: Int
+  name: String
+}

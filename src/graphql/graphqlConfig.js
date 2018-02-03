@@ -1,8 +1,10 @@
 import graphqlHTTP from 'express-graphql'
 import { GraphQLError } from 'graphql'
+import { importSchema } from 'graphql-import'
+import { makeExecutableSchema } from 'graphql-tools'
+import resolvers from './resolvers'
 import db from '../db/DbManager'
 import loaders from '../graphql/loaders'
-import schema from '../graphql/schema'
 import config from '../../config'
 
 function LimitQueryDepth(maxDepth) {
@@ -32,7 +34,7 @@ function LimitNumQueries(maxQueries) {
       Field: {
         enter: () => {
           if (context.getParentType()) {
-            if (context.getParentType().toString() === 'RootQueryType') {
+            if (context.getParentType().toString() === 'Query') {
               currentNumQueries += 1
 
               if (currentNumQueries > maxQueries) {
@@ -48,10 +50,25 @@ function LimitNumQueries(maxQueries) {
 }
 
 function graphqlMiddlewareFunction(request, response) {
+  const typeDefs = importSchema('./src/graphql/schema.graphql')
+
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  })
+
   return db.tx('GraphQLTransaction', (tx) => {
     const handler = graphqlHTTP({
       schema,
-      context: { loaders: loaders.createLoaders(tx) },
+      context: {
+        loaders: loaders.createLoaders(tx),
+        getAuditInfo: entity => ({
+          createdDate: entity.created_date,
+          createdUserId: entity.created_user_id,
+          modifiedDate: entity.modified_date,
+          modifiedUserId: entity.modified_user_id,
+        }),
+      },
       // NOTE: Depth must be greater than schema depth or
       // GraphiQL will fail to retrieve documentation.
       validationRules: [LimitQueryDepth(10), LimitNumQueries(5)],

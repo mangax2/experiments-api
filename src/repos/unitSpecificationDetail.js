@@ -100,7 +100,7 @@ class unitSpecificationDetailRepo {
     return tx.any('SELECT * FROM unit_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
-        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
 }

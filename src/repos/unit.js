@@ -30,7 +30,7 @@ class unitRepo {
     .then(data => {
       const unitByExperimentId = _.groupBy(data, 'experiment_id')
       return _.map(experimentIds, experimentId => {
-        return unitByExperimentId[experimentId]
+        return unitByExperimentId[experimentId] || []
       })
     })
 
@@ -45,7 +45,7 @@ class unitRepo {
     return tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
       .then(data => {
         const dataByGroupId = _.groupBy(data, 'group_id')
-        return _.map(groupIds, groupId => dataByGroupId[groupId])
+        return _.map(groupIds, groupId => dataByGroupId[groupId] || [])
       })
   }
 
@@ -55,7 +55,7 @@ class unitRepo {
   @setErrorCode('5JE000')
   batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT set_id, id FROM public.group WHERE set_id IN ($1:csv) UNION ALL SELECT sg.set_id, g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT sg.set_id, u.* FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
-    return _.map(setIds, setId => _.map(unitsGroupedBySet[setId], unit => _.omit(unit, ['set_id'])))
+    return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
   })
 
   @setErrorCode('5J8000')

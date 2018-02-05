@@ -124,7 +124,7 @@ class groupRepo {
     return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
-        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
 
@@ -136,7 +136,7 @@ class groupRepo {
     return tx.any('SELECT * FROM "group" WHERE parent_id in ($1:csv)', [parentIds])
       .then(data => {
         const dataByParentId = _.groupBy(data, 'parent_id')
-        return _.map(parentIds, parentId => dataByParentId[parentId])
+        return _.map(parentIds, parentId => dataByParentId[parentId] || [])
       })
   }
 }

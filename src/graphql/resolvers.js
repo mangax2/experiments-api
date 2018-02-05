@@ -8,6 +8,9 @@ export default {
       context.loaders.experimentsByName.load(args.name),
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
+    // -1 is passed here because these loaders load all experiments/templates,
+    // so the ID is irrelevant.
+    // It is specified because data loader requires an ID to associate with cached results.
     getAllExperiments: (entity, args, context) =>
       context.loaders.experiments.load(-1),
     getAllTemplates: (entity, args, context) =>

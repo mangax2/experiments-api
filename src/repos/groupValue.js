@@ -98,7 +98,7 @@ class groupValueRepo {
     return tx.any(`${genericSqlStatement} WHERE gv.group_id IN ($1:csv)`, [groupIds])
       .then(data => {
         const dataByGroupId = _.groupBy(data, 'group_id')
-        return _.map(groupIds, groupId => dataByGroupId[groupId])
+        return _.map(groupIds, groupId => dataByGroupId[groupId] || [])
       })
   }
 }

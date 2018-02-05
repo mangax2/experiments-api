@@ -37,7 +37,7 @@ class combinationElementRepo {
     }
     return tx.any(`${genericSqlStatement} WHERE ce.treatment_id IN ($1:csv)`, [treatmentIds]).then((data) => {
       const elements = _.groupBy(data, d => d.treatment_id)
-      return _.map(treatmentIds, treatmentId => elements[treatmentId])
+      return _.map(treatmentIds, treatmentId => elements[treatmentId] || [])
     })
   }
 

@@ -108,7 +108,7 @@ class factorLevelRepo {
     return tx.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
       .then(data => {
         const dataByFactorId = _.groupBy(data, 'factor_id')
-        return _.map(factorIds, factorId => dataByFactorId[factorId])
+        return _.map(factorIds, factorId => dataByFactorId[factorId] || [])
       })
   }
 }

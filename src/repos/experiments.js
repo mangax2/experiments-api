@@ -60,7 +60,7 @@ class experimentsRepo {
   @setErrorCode('559000')
   batchFindExperimentsByName = (names, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE name IN ($1:csv)', [names]).then(data => {
     const groupedData = _.groupBy(data, 'name')
-    return _.map(names, name => groupedData[name])
+    return _.map(names, name => groupedData[name] || [])
   })
 }
 

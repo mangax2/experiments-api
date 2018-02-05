@@ -4,8 +4,11 @@ verifySchema()
 
 function verifySchema() {
   require('babel-register')
+  const importSchema = require('graphql-import').importSchema
+  const buildSchema = require('graphql').buildSchema
+
   const validateSchema = require('graphql').validateSchema
-  const schema = require('../schema').default
+  const schema = buildSchema(importSchema('./src/graphql/schema.graphql'))
   const schemaErrors = validateSchema(schema)
 
   if (schemaErrors.length > 0) {

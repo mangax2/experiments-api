@@ -4,19 +4,20 @@
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {
-    "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files && babel ./akana --out-dir ./build --copy-files",
+    "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files && babel ./akana --out-dir ./build --copy-files && babel ./src/graphql --out-dir ./build/graphql --copy-files",
     "clean": "rm -rf build && mkdir build && rm -rf doc",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "devDebug": "cross-env NODE_ENV=development nodemon $NODE_DEBUG_OPTION ./src/app.js",
     "eslint": "./node_modules/.bin/eslint src --fix --ext .js; exit 0",
     "eslintTests": "eslint test --fix --ext .js; exit 0",
-    "graphdoc": "node ./build/graphql/scripts/writeSchema.js && graphdoc --force -s ./schema.graphql -o ./doc/schema",
-    "precommit": "node ./src/graphql/scripts/verifySchema.js && eslint src --ext .js",
+    "graphdoc": "graphdoc --force -s ./build/graphql/schema.graphql -o ./doc/schema",
+    "precommit": "npm run validateSchema && eslint src --ext .js",
     "prepush": "jest --config .jestrc.json",
     "start": "NODE_ENV=production node ./build/app",
     "test": "jest --config .jestrc.json",
     "testCoverage": "jest --config .jestCoveragerc.json",
-    "testDev": "jest --config .jestrc.json --watch"
+    "testDev": "jest --config .jestrc.json --watch",
+    "validateSchema": "node ./src/graphql/scripts/verifySchema.js"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,8 @@
     "express": "4.14.1",
     "express-graphql": "0.6.11",
     "graphql": "0.12.3",
+    "graphql-import": "0.4.2",
+    "graphql-tools": "2.19.0",
     "graphql-type-json": "0.1.4",
     "json-inflector": "1.1.0",
     "lodash": "4.17.4",

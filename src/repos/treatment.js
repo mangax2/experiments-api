@@ -102,7 +102,7 @@ class treatmentRepo {
     return tx.any('SELECT * FROM treatment WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
-        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId])
+        return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
 
@@ -111,7 +111,7 @@ class treatmentRepo {
       .then(data => {
         const dataBySetId = _.groupBy(data, 'set_id')
         return _.map(setIds, setId =>
-          _.map(dataBySetId[setId], treatment => _.omit(treatment, ['set_id'])))
+          _.map(dataBySetId[setId] || [], treatment => _.omit(treatment, ['set_id'])))
       })
   }
 }

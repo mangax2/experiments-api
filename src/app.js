@@ -47,7 +47,18 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const compression = require('compression')
   app.use(compression())
-  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig'))
+
+  const { makeExecutableSchema } = require('graphql-tools')
+  const { importSchema } = require('graphql-import')
+  const resolvers = require('./graphql/resolvers').default
+  const typeDefs = importSchema('./src/graphql/schema.graphql')
+
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  })
+
+  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig')(schema))
   app.use(inflector())
 
   const pingFunc = (function () {

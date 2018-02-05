@@ -131,9 +131,6 @@ export default {
     associatedLevels: (entity, args, context) =>
       context.loaders.associatedFactorLevel.load(entity.id),
   },
-  FactorLevelValue: {
-    objectType: property('object_type'),
-  },
   Group: {
     experimentId: property('experiment_id'),
     parentId: property('parent_id'),

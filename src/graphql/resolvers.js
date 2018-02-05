@@ -80,7 +80,7 @@ export default {
       context.loaders.unitByExperimentIds.load(entity.id),
   },
   ExperimentalSet: {
-    groupId: property('group_id'),
+    groupId: property('id'),
     experimentId: property('experiment_id'),
     refRandomizationStrategyId: property('ref_randomization_strategy_id'),
     refGroupTypeId: property('ref_group_type_id'),

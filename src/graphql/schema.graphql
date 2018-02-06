@@ -134,7 +134,6 @@ type Group {
   setId: Int
   groupType: GroupType
   groupValues: [GroupValue]
-  units: [ExperimentalUnit]
 }
 
 type GroupType {

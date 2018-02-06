@@ -4994,7 +4994,7 @@
       "properties": {
         "data": {
           "type": "object",
-          "example": {"getExperimentById": {"id": 123 } }
+          "example": "{getExperimentById: {id: 123 }}"
         },
         "errors": {
           "type": "array",

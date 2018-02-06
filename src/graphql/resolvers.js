@@ -140,14 +140,8 @@ export default {
     refRandomizationStrategyId: property('ref_randomization_strategy_id'),
     refGroupTypeId: property('ref_group_type_id'),
     setId: property('set_id'),
-    groupType: (entity, args, context) =>
-      (entity.ref_group_type_id
-        ? context.loaders.refGroupType.load(entity.ref_group_type_id)
-        : Promise.resolve(null)),
-    groupValues: (entity, args, context) =>
-      context.loaders.groupValue.load(entity.id),
-    units: (entity, args, context) =>
-      context.loaders.unit.load(entity.id),
+    groupType: entity => entity.groupType,
+    groupValues: entity => entity.groupValues,
   },
   GroupValue: {
     factorLevelId: property('factor_level_id'),

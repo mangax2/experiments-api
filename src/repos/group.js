@@ -121,9 +121,43 @@ class groupRepo {
 
   @setErrorCode('5BC000')
   batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
-    return tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id IN ($1:csv)', [experimentIds])
+    return tx.any('SELECT g.id, g.experiment_id, g.parent_id, g.ref_randomization_strategy_id, g.ref_group_type_id, g.set_id, gt.id as group_type_id, gt.type, gv.id as group_value_id, gv.name, gv.value, gv.factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date FROM "group" g INNER JOIN ref_group_type gt on g.ref_group_type_id = gt.id LEFT JOIN group_value gv on g.id = gv.group_id WHERE g.experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
-        const dataByExperimentId = _.groupBy(data, 'experiment_id')
+        const dataByGroup = _.groupBy(data, 'id')
+        const groups = _.flatMap(_.values(dataByGroup), groupData => {
+          const head = _.head(groupData)
+          const currentGroup = {
+            id: head.id,
+            experiment_id: head.experiment_id,
+            parent_id: head.parent_id,
+            ref_randomization_strategy_id: head.ref_randomization_strategy_id,
+            ref_group_type_id: head.ref_group_type_id,
+            set_id: head.set_id,
+            groupType: {
+              id: head.group_type_id,
+              type: head.type,
+            }
+          }
+          currentGroup.groupValues = _.compact(_.map(groupData, groupValue => {
+            if (!_.isNil(groupValue.group_value_id)) {
+              return {
+                id: groupValue.group_value_id,
+                name: groupValue.name,
+                value: groupValue.value,
+                factor_level_id: groupValue.factor_level_id,
+                group_id: groupValue.group_id,
+                created_user_id: groupValue.created_user_id,
+                created_date: groupValue.created_date,
+                modified_user_id: groupValue.modified_user_id,
+                modified_date: groupValue.modified_date,
+              }
+            } else {
+              return null
+            }
+          }))
+          return currentGroup
+        })
+        const dataByExperimentId = _.groupBy(groups, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }

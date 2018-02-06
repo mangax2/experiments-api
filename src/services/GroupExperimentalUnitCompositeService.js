@@ -413,7 +413,7 @@ class GroupExperimentalUnitCompositeService {
       refGroupTypeId: setGroup.ref_group_type_id,
       groupValues: [{
         name: 'locationNumber',
-        value: setGroup.location_number,
+        value: setGroup.location_number.toString(),
       }],
       setId,
       childGroups: [],
@@ -430,7 +430,7 @@ class GroupExperimentalUnitCompositeService {
         refGroupTypeId: repRefGroupTypeId,
         groupValues: [{
           name: 'repNumber',
-          value: currentRepNumber,
+          value: currentRepNumber.toString(),
         }],
         units: _.map(treatments, createUnit),
       })

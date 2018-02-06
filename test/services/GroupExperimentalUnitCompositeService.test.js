@@ -940,7 +940,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         refGroupTypeId: 4,
         groupValues: [{
           name: 'locationNumber',
-          value: 1,
+          value: '1',
         }],
         setId: 5,
         childGroups: [{
@@ -948,7 +948,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',
-            value: 1,
+            value: '1',
           }],
           units: [{
             treatmentId: 3,
@@ -962,7 +962,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',
-            value: 2,
+            value: '2',
           }],
           units: [{
             treatmentId: 3,

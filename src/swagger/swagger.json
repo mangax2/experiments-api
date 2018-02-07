@@ -1943,6 +1943,7 @@
         "operationId": "graphQL",
         "tags": ["graphql"],
         "produces": ["application/json"],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "name": "query",

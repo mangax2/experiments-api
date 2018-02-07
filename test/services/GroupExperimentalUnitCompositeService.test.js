@@ -768,8 +768,45 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.persistGroupUnitChanges).toBeCalledWith(newStructure, [{ set_id: 5 }], 3, {}, testTx)
         expect(PingUtil.getMonsantoHeader).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.delete).toHaveBeenCalledTimes(4)
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
+      })
+    })
+
+    test('calls only the sets services it needs to', () => {
+      const newStructure = [{ childGroups: [{ units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }, { units: [{}, {}] }] }]
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        setGroup: {},
+        numberOfReps: 5,
+        repGroupTypeId: 7,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{}, {}])
+      target.createRcbGroupStructure = mock(newStructure)
+      target.getGroupTree = mockResolve([{ set_id: 5 }])
+      target.persistGroupUnitChanges = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+
+      return target.resetSet(5, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(target.createRcbGroupStructure).toBeCalledWith(5, {}, 5, [{}, {}], 7)
+        expect(target.getGroupTree).toBeCalledWith(3, false, {}, testTx)
+        expect(target.persistGroupUnitChanges).toBeCalledWith(newStructure, [{ set_id: 5 }], 3, {}, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
+        expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
       })
     })
@@ -819,7 +856,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.getGroupTree = mockResolve([{ set_id: 5 }])
       target.persistGroupUnitChanges = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve(header)
-      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{ entryId: 1 }, { entryId: 2 }, { entryId: 3 }, { entryId: 4 }] } })
       HttpUtil.delete = mockResolve()
       HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
       target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockReject()
@@ -833,8 +870,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.persistGroupUnitChanges).toBeCalledWith(newStructure, [{ set_id: 5 }], 3, {}, testTx)
         expect(PingUtil.getMonsantoHeader).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.delete).toHaveBeenCalledTimes(4)
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] })
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{ entryId: 1, deleted: true }, { entryId: 2, deleted: true }, { entryId: 3, deleted: true }, { entryId: 4, deleted: true }] })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{ setEntryId: 1001 }, { setEntryId: 1002 }, { setEntryId: 1003 }, { setEntryId: 1004 }, { setEntryId: 1005 }, { setEntryId: 1006 }, { setEntryId: 1007 }, { setEntryId: 1008 }, { setEntryId: 1009 }, { setEntryId: 1000 }], {}, testTx)
 
         expect(AppError.internalServerError).not.toBeCalled()

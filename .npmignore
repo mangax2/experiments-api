@@ -30,3 +30,6 @@ benchmarks/graphs
 /.idea_modules
 *.iml
 *.tgz
+
+jsconfig.json
+launch.json

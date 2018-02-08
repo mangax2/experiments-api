@@ -6,6 +6,7 @@
   "scripts": {
     "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files && babel ./akana --out-dir ./build --copy-files && babel ./src/graphql --out-dir ./build/graphql --copy-files",
     "clean": "rm -rf build && mkdir build && rm -rf doc",
+    "debug": "cross-env NODE_ENV=development nodemon --debug ./src/app.js",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",
     "devDebug": "cross-env NODE_ENV=development nodemon $NODE_DEBUG_OPTION ./src/app.js",
     "eslint": "./node_modules/.bin/eslint src --fix --ext .js; exit 0",

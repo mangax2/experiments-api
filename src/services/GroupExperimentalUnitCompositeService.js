@@ -343,8 +343,19 @@ class GroupExperimentalUnitCompositeService {
             .then(() => PingUtil.getMonsantoHeader()).then((header) => {
               header.push({ headerName: 'oauth_resourceownerinfo', headerValue: `username=${context.userId},user_id=${context.userId}` })
               return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
-                .then(originalSet => Promise.all(_.map(originalSet.body.entries, entry => HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/entries/${entry.entryId}`, header))))
-                .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
+                .then((originalSet) => {
+                  const originals = []
+                  _.forEach(originalSet.body.entries, (entry) => {
+                    originals.push({ entryId: entry.entryId, deleted: true })
+                  })
+
+                  const originalsDeletePromise = originals.length > 0
+                    ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
+                    : Promise.resolve()
+
+                  return originalsDeletePromise
+                    .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
+                })
             })
             .catch((err) => {
               logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)

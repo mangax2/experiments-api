@@ -1943,6 +1943,7 @@
         "operationId": "graphQL",
         "tags": ["graphql"],
         "produces": ["application/json"],
+        "consumes": ["application/json"],
         "parameters": [
           {
             "name": "query",
@@ -4994,7 +4995,7 @@
       "properties": {
         "data": {
           "type": "object",
-          "example": {"getExperimentById": {"id": 123 } }
+          "example": "{getExperimentById: {id: 123 }}"
         },
         "errors": {
           "type": "array",

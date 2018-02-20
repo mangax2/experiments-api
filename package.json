@@ -11,7 +11,6 @@
     "devDebug": "cross-env NODE_ENV=development nodemon $NODE_DEBUG_OPTION ./src/app.js",
     "eslint": "./node_modules/.bin/eslint src --fix --ext .js; exit 0",
     "eslintTests": "eslint test --fix --ext .js; exit 0",
-    "graphdoc": "graphdoc --force -s ./build/graphql/schema.graphql -o ./doc/schema",
     "precommit": "npm run validateSchema && eslint src --ext .js",
     "prepush": "jest --config .jestrc.json",
     "start": "NODE_ENV=production node ./build/app",
@@ -54,7 +53,6 @@
     "validator": "9.1.2"
   },
   "devDependencies": {
-    "@2fd/graphdoc": "2.4.0",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
     "babel-eslint": "8.0.3",

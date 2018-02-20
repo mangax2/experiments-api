@@ -58,7 +58,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     resolvers,
   })
 
-  app.use('/experiments-api/graphql', require('./graphql/graphqlConfig')(schema))
+  const cors = require('cors')
+
+  app.use('/experiments-api/graphql', cors(), require('./graphql/graphqlConfig')(schema))
   app.use(inflector())
 
   const pingFunc = (function () {

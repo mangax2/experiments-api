@@ -1,0 +1,1 @@
+ALTER TABLE experiment ADD COLUMN capacity_request_sync_date timestamp with time zone

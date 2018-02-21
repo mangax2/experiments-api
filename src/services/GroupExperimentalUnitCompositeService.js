@@ -354,7 +354,10 @@ class GroupExperimentalUnitCompositeService {
                     : Promise.resolve()
 
                   return originalsDeletePromise
-                    .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries }))
+                    .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
+                      entries,
+                      layout: [],
+                    }))
                 })
             })
             .catch((err) => {

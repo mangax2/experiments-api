@@ -6,6 +6,7 @@ import CombinationElementService from '../services/CombinationElementService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
+import EnvisionDatasetsService from '../services/EnvisionDatasetsService'
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentDesignService from '../services/ExperimentDesignService'
@@ -240,6 +241,14 @@ router.get('/unit-types/:id', (req, res, next) => new UnitTypeService().getUnitT
   .catch(err => next(err)))
 
 router.get('/experiments/:id/unit-specification-details/', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, false, req.context)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+
+router.get('/experiments/:id/envision-datasets-data/', (req, res, next) => new EnvisionDatasetsService().getDataForEnvisionDatasets(req.params.id, req.context)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+
+router.get('/experiments/:id/envision-datasets-schema/', (req, res, next) => new EnvisionDatasetsService().getSchemaForEnvisionDatasets(req.params.id, req.context)
   .then(values => res.json(values))
   .catch(err => next(err)))
 

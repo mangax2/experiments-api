@@ -15,6 +15,7 @@
   "collectCoverage": true,
   "collectCoverageFrom": [
     "**/src/**/*.{js,jsx}",
+    "!**/envision/**",
     "!**/graphql/**",
     "!**/src/app.js",
     "!**/src/db/*.js",

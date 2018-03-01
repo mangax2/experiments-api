@@ -1656,6 +1656,100 @@
         }
       }
     },
+    "/experiments/{id}/envision-datasets-data/": {
+      "get": {
+        "summary": "Generate input data for the envision datasets report from an experiment.",
+        "description": "Returns experiment data in a format that can be used to generate a envision datasets report",
+        "operationId": "getEnvision-datasets-dataByExperimentId",
+        "tags": [
+          "Envision Datasets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envision-Datasets data",
+            "schema": {
+              "$ref": "#/definitions/EnvisonDatasetsData"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/experiments/{id}/envision-datasets-schema/": {
+      "get": {
+        "summary": "Generate schema data for the envision datasets report from an experiment.",
+        "description": "Returns schema data in a format that can be used to generate a envision datasets report",
+        "operationId": "getEnvision-datasets-schemaByExperimentId",
+        "tags": [
+          "Envision Datasets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envision-Datasets schema",
+            "schema": {
+              "$ref": "#/definitions/EnvisonDatasetsSchema"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/factors/{id}": {
       "get": {
         "summary": "get one factor entity",
@@ -5805,6 +5899,15 @@
           }
         }
       }
+    },
+    "EnvisonDatasetsData": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "EnvisonDatasetsSchema": {
+      "type": "object"
     }
   }
 }

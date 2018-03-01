@@ -76,7 +76,7 @@ class EnvisionDatasetsService {
           prop: `${objPropName}.factor`,
           items: [],
         }))
-        record = JSON.parse(JSON.stringify(n))
+        record = Object.assign({}, n)
       }
       this.updateFactorItemsRecords([], f.level, record.name, record)
     })
@@ -97,7 +97,7 @@ class EnvisionDatasetsService {
             label: i.label,
             prop: `${factorPropName}.level.${objPropName}`,
           }))
-          record = JSON.parse(JSON.stringify(n))
+          record = Object.assign({}, n)
         }
         existingItems.push(record.name)
       }

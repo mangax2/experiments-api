@@ -19,7 +19,7 @@ class EnvisionDatasetsService {
   @Transactional('getSchemaForEnvisionDatasets')
   getSchemaForEnvisionDatasets(id, context, tx) {
     return db.envisionDatasets.getDataForEnvisionDatasets(id, context, tx)
-      .then(data => this.generateSchemaAndData(data))
+      .then(data => this.generateSchema(data))
   }
 
   @setErrorCode('1V3000')
@@ -40,7 +40,7 @@ class EnvisionDatasetsService {
   }
 
   @setErrorCode('1V4000')
-  generateSchemaAndData = (data) => {
+  generateSchema = (data) => {
     if (!_.isNil(data) && !_.isEmpty(data)) {
       const schema = JSON.parse(JSON.stringify(SCHEMA))
       schema.pageHeader = `Experiment ${data[0].experiment_id}`
@@ -78,8 +78,7 @@ class EnvisionDatasetsService {
         }))
         record = JSON.parse(JSON.stringify(n))
       }
-      const existingItems = []
-      this.updateFactorItemsRecords(existingItems, f.level, record.name, record)
+      this.updateFactorItemsRecords([], f.level, record.name, record)
     })
   }
 
@@ -97,7 +96,6 @@ class EnvisionDatasetsService {
             name: objPropName,
             label: i.label,
             prop: `${factorPropName}.level.${objPropName}`,
-            value: i.text,
           }))
           record = JSON.parse(JSON.stringify(n))
         }
@@ -142,9 +140,9 @@ class EnvisionDatasetsService {
 
 
   @setErrorCode('1VC000')
-  createFactorColumnSchema = (factorDataArray) => {
+  createFactorColumnSchema = (factorDataRecords) => {
     const schema = []
-    _.forEach(factorDataArray, (p) => {
+    _.forEach(factorDataRecords, (p) => {
       this.createColumnItemSchema(`variable: ${p.label}`, p.prop, schema)
       _.forEach(p.items, (i) => {
         this.createColumnItemSchema(`property: ${i.label}`, `${i.prop}.text`, schema)

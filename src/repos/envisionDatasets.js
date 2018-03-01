@@ -22,9 +22,8 @@ const locationsScript =
   "AND gv.name = 'locationNumber';"
 
 const treatmentToFactorLevelListScript =
-  "DROP TABLE IF EXISTS treatmentToFactorLevelList;" +
+  "WITH treatmentToFactorLevelList AS (" +
   "SELECT id, jsonb_build_object('factor', name,'level', value) as factors " +
-  "INTO TEMP treatmentToFactorLevelList " +
   "FROM ( " +
     "SELECT t.id, f.name, fl.value " +
     "FROM treatment t, combination_element c, factor_level fl, factor f " +
@@ -33,15 +32,14 @@ const treatmentToFactorLevelListScript =
     "AND c.factor_level_id = fl.id " +
     "AND f.id = fl.factor_id " +
   ") s " +
-  "group by id, name, value;"
+  "group by id, name, value),"
 
 const treatmentToFactorLevelArrayScript =
-  "DROP TABLE IF EXISTS treatmentToFactorLevelArray;" +
+  "treatmentToFactorLevelArray AS (" +
   "SELECT id, array_agg(factors) AS factors " +
-  "INTO TEMP treatmentToFactorLevelArray " +
   "FROM treatmentToFactorLevelList as tab " +
   "group by id " +
-  "order by id;"
+  "order by id)"
 
 const putDataTogetherScript =
   "SELECT e.id as experiment_id, e.name, e.description, " +

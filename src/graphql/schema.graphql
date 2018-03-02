@@ -12,6 +12,7 @@ type AuditInfo {
 type ClusterComposite {
   text: String
   label: String
+  questionCode: String
   objectType: String
   items: [ClusterComposite]
 }

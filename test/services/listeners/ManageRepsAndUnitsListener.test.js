@@ -4,6 +4,7 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import db from '../../../src/db/DbManager'
+import { mockResolve } from '../../jestUtil';
 
 describe('ManageRepsAndUnitsListener', () => {
   describe('createConsumer', () => {
@@ -103,7 +104,9 @@ describe('ManageRepsAndUnitsListener', () => {
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups)) }
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb')) }
-      target.getDbActions = jest.fn(() => ({ unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update' }))
+      target.getDbActions = jest.fn(() => ({
+        unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update', groupsToBeCreated: 'groups',
+      }))
       target.saveToDb = jest.fn(() => Promise.resolve())
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
       const testTx = { tx: {} }
@@ -112,7 +115,7 @@ describe('ManageRepsAndUnitsListener', () => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
         expect(db.unit.batchFindAllByGroupIds).toBeCalledWith([5], testTx)
         expect(target.getDbActions).toBeCalledWith([], 'unitsFromDb', groups)
-        expect(target.saveToDb).toBeCalledWith(5, groups, 'create', 'update', 'delete', testTx)
+        expect(target.saveToDb).toBeCalledWith(5, 'create', 'update', 'delete', 'groups', testTx)
         expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
       })
     })
@@ -123,7 +126,9 @@ describe('ManageRepsAndUnitsListener', () => {
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups)) }
       db.unit = { batchFindAllByGroupIds: jest.fn(() => Promise.resolve('unitsFromDb')) }
-      target.getDbActions = jest.fn(() => ({ unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update' }))
+      target.getDbActions = jest.fn(() => ({
+        unitsToBeCreated: 'create', unitsToBeDeleted: 'delete', unitsToBeUpdated: 'update', groupsToBeCreated: 'groups',
+      }))
       target.saveToDb = jest.fn(() => Promise.reject(new Error('test')))
       ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
       const testTx = { tx: {} }
@@ -132,7 +137,7 @@ describe('ManageRepsAndUnitsListener', () => {
         expect(db.group.findRepGroupsBySetId).toBeCalledWith(5, testTx)
         expect(db.unit.batchFindAllByGroupIds).toBeCalledWith([5], testTx)
         expect(target.getDbActions).toBeCalledWith([], 'unitsFromDb', groups)
-        expect(target.saveToDb).toBeCalledWith(5, groups, 'create', 'update', 'delete', testTx)
+        expect(target.saveToDb).toBeCalledWith(5, 'create', 'update', 'delete', 'groups', testTx)
         expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
       })
     })
@@ -227,6 +232,7 @@ describe('ManageRepsAndUnitsListener', () => {
       const result = target.getDbActions(unitsFromMessage, unitsFromDb, groups)
 
       expect(result).toEqual({
+        groupsToBeCreated: [{ rep: 2 }],
         unitsToBeCreated: [{
           rep: 1,
           setEntryId: 236,
@@ -250,36 +256,40 @@ describe('ManageRepsAndUnitsListener', () => {
     })
   })
 
-  describe('getPromisesWhenGroupIsNull', () => {
-    test('calls everything correctly when there are units', () => {
-      const unitsToBeCreated = [{ id: 5, rep: 1, groupId: 11 }, { id: 7, rep: 1, groupId: 11 }]
-      const existingGroups = [{
-        experimentId: 25, parentId: 27, refRandomizationStrategyId: 1, refGroupTypeId: 3, rep: '1',
-      }]
-      const context = { userId: 'test' }
-      db.group = { batchCreate: jest.fn(() => Promise.resolve([{ id: 11 }])) }
-      db.groupValue = { batchCreate: jest.fn(() => Promise.resolve()) }
-      db.unit = { batchCreate: jest.fn(() => Promise.resolve()) }
+  describe('addGroupIdToUnits', () => {
+    test('only changes groupId of units without groupId', () => {
+      const groups = [{ rep: 3, id: 5 }, { rep: 5, id: 7 }]
+      const units = [{ rep: 5 }, { rep: 3, groupId: 3 }]
 
-      return Promise.all(ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull(unitsToBeCreated, existingGroups, context, {}))
-        .then(() => {
-          expect(db.group.batchCreate).toBeCalledWith(existingGroups, context, {})
-          expect(db.groupValue.batchCreate).toBeCalledWith([{ name: 'repNumber', value: '1', groupId: 11 }], context, {})
-          expect(db.unit.batchCreate).toBeCalledWith(unitsToBeCreated, context, {})
-        })
+      ManageRepsAndUnitsListener.addGroupIdToUnits(groups, units)
+
+      expect(units).toEqual([{ rep: 5, groupId: 7 }, { rep: 3, groupId: 3 }])
+    })
+  })
+
+  describe('createGroups', () => {
+    test('makes no calls to the database if empty array', () => {
+      db.group.batchCreate = mockResolve()
+      db.groupValue.batchCreate = mockResolve()
+
+      return ManageRepsAndUnitsListener.createGroups([], {}, {}).then(() => {
+        expect(db.group.batchCreate).not.toBeCalled()
+        expect(db.groupValue.batchCreate).not.toBeCalled()
+      })
     })
 
-    test('does nothing if there are no units', () => {
-      const context = { userId: 'test' }
-      db.group = { batchCreate: jest.fn(() => Promise.resolve([{ id: 11 }])) }
-      db.groupValue = { batchCreate: jest.fn(() => Promise.resolve()) }
-      db.unit = { batchCreate: jest.fn(() => Promise.resolve()) }
-
-      const result = ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull([], [], context, {})
-      expect(result.length).toBe(0)
-      expect(db.group.batchCreate).not.toBeCalled()
-      expect(db.groupValue.batchCreate).not.toBeCalled()
-      expect(db.unit.batchCreate).not.toBeCalled()
+    test('calls the database and assigns group ids as expected', () => {
+      const groups = [{ rep: 5 }, { rep: 3 }, { rep: 7 }]
+      db.group.batchCreate = mockResolve([2, 4, 6])
+      db.groupValue.batchCreate = mockResolve()
+      
+      return ManageRepsAndUnitsListener.createGroups(groups, {}, {}).then(() => {
+        expect(db.group.batchCreate).toBeCalledWith(groups, {}, {})
+        expect(db.groupValue.batchCreate).toBeCalledWith([
+          { name: 'repNumber', value: 5, groupId: 2 },
+          { name: 'repNumber', value: 3, groupId: 4 },
+          { name: 'repNumber', value: 7, groupId: 6 }], {}, {})
+      })
     })
   })
 
@@ -294,11 +304,11 @@ describe('ManageRepsAndUnitsListener', () => {
         getGroupsWithNoUnits: jest.fn(() => Promise.resolve([{ id: 11 }])),
       }
       db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
-      ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull = jest.fn(() => Promise.resolve())
+      ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
 
-      return target.saveToDb(9, [], [{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], {}).then(() => {
-        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }], context, {})
-        expect(ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull).toBeCalledWith([{ id: 4, groupId: null }], [], context, {})
+      return target.saveToDb(9, [{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], [], {}).then(() => {
+        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: undefined }], context, {})
+        expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
         expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
         expect(db.unit.batchRemove).toBeCalledWith([6])
         expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})
@@ -308,6 +318,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
     test('calls everything correctly when values are not present', () => {
       const target = new ManageRepsAndUnitsListener()
+      const context = { userId: 'REP_PACKING' }
       db.unit = {
         batchCreate: jest.fn(() => Promise.resolve()),
         batchUpdate: jest.fn(() => Promise.resolve()),
@@ -315,11 +326,11 @@ describe('ManageRepsAndUnitsListener', () => {
         getGroupsWithNoUnits: jest.fn(() => Promise.resolve([{ id: 11 }])),
       }
       db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
-      ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull = jest.fn(() => Promise.resolve())
+      ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
 
       return target.saveToDb(9, [], [], [], [], {}).then(() => {
         expect(db.unit.batchCreate).not.toBeCalled()
-        expect(ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull).not.toBeCalled()
+        expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
         expect(db.unit.batchUpdate).not.toBeCalled()
         expect(db.unit.batchRemove).not.toBeCalled()
         expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})
@@ -337,11 +348,11 @@ describe('ManageRepsAndUnitsListener', () => {
         getGroupsWithNoUnits: jest.fn(() => Promise.resolve([{ id: 11 }])),
       }
       db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
-      ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull = jest.fn(() => Promise.resolve())
+      ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
 
-      return target.saveToDb(9, [], [{ id: 4, groupId: null }], [{ id: 5 }], [6], {}).then(() => {
-        expect(db.unit.batchCreate).not.toBeCalled()
-        expect(ManageRepsAndUnitsListener.getPromisesWhenGroupIsNull).toBeCalledWith([{ id: 4, groupId: null }], [], context, {})
+      return target.saveToDb(9, [{ id: 4, groupId: null }], [{ id: 5 }], [6], [], {}).then(() => {
+        expect(db.unit.batchCreate).toBeCalledWith([{ id: 4, groupId: undefined }], context, {})
+        expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
         expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
         expect(db.unit.batchRemove).toBeCalledWith([6])
         expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})

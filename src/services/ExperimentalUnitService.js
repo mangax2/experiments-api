@@ -165,18 +165,6 @@ class ExperimentalUnitService {
       .then(() => db.unit.batchUpdate(experimentalUnits, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
-
-  @setErrorCode('17F000')
-  @Transactional('batchDeleteExperimentalUnits')
-  batchDeleteExperimentalUnits = (ids, context, tx) => db.unit.batchRemove(ids, tx)
-    .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.requestId}]] Not all experimental units requested for delete were found`)
-        throw AppError.notFound('Not all experimental units requested for delete were found', undefined, getFullErrorCode('17F001'))
-      } else {
-        return data
-      }
-    })
 }
 
 module.exports = ExperimentalUnitService

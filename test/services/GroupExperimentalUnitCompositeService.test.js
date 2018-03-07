@@ -207,18 +207,18 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('batchDeleteExperimentalUnits', () => {
     test('does not call experimentalUnitService if no units passed in', () => {
-      target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
+      db.unit = { batchRemove: mockResolve() }
 
-      return target.batchDeleteExperimentalUnits([], {}, testTx).then(() => {
-        expect(target.experimentalUnitService.batchDeleteExperimentalUnits).not.toBeCalled()
+      return target.batchDeleteExperimentalUnits([], testTx).then(() => {
+        expect(db.unit.batchRemove).not.toBeCalled()
       })
     })
 
     test('does call experimentalUnitService if units are passed in', () => {
-      target.experimentalUnitService = { batchDeleteExperimentalUnits: mockResolve() }
+      db.unit = { batchRemove: mockResolve() }
 
-      return target.batchDeleteExperimentalUnits([{ id: 5 }], {}, testTx).then(() => {
-        expect(target.experimentalUnitService.batchDeleteExperimentalUnits).toBeCalledWith([5], {}, testTx)
+      return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
+        expect(db.unit.batchRemove).toBeCalledWith([5], testTx)
       })
     })
   })

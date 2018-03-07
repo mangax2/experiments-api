@@ -76,7 +76,7 @@ class GroupExperimentalUnitCompositeService {
           }),
         this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
         this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
-        this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, context, tx)]))
+        this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
       .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, context, tx))
       .then(() => AppUtil.createCompositePostResponse())
   }
@@ -93,8 +93,8 @@ class GroupExperimentalUnitCompositeService {
     : Promise.resolve())
 
   @setErrorCode('1F5000')
-  batchDeleteExperimentalUnits = (unitDeletes, context, tx) => (unitDeletes.length > 0
-    ? this.experimentalUnitService.batchDeleteExperimentalUnits(_.map(unitDeletes, 'id'), context, tx)
+  batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
+    ? db.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
     : Promise.resolve())
 
   @setErrorCode('1F6000')

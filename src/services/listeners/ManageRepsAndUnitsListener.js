@@ -149,7 +149,11 @@ class ManageRepsAndUnitsListener {
 
   static addGroupIdToUnits = (groups, units) => {
     _.forEach(_.filter(units, unit => !unit.groupId), (unit) => {
-      unit.groupId = (_.find(groups, group => group.rep === unit.rep) || {}).id
+      const parentGroup = _.find(groups, group => group.rep === unit.rep)
+      if (!parentGroup) {
+        throw new Error(`Unable to find a parent group for set entry ${unit.setEntryId}`)
+      }
+      unit.groupId = parentGroup.id
     })
   }
 

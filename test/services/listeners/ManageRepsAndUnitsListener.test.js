@@ -4,7 +4,7 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import db from '../../../src/db/DbManager'
-import { mockResolve } from '../../jestUtil';
+import { mockResolve, mock } from '../../jestUtil';
 
 describe('ManageRepsAndUnitsListener', () => {
   describe('createConsumer', () => {
@@ -265,6 +265,14 @@ describe('ManageRepsAndUnitsListener', () => {
 
       expect(units).toEqual([{ rep: 5, groupId: 7 }, { rep: 3, groupId: 3 }])
     })
+
+    test('throws an exception when a group is not found for a unit', () => {
+      const groups = [{ rep: 3, id: 5 }]
+      const units = [{ rep: 5, setEntryId: 9 }]
+
+      expect(() => ManageRepsAndUnitsListener.addGroupIdToUnits(groups, units))
+        .toThrow('Unable to find a parent group for set entry 9')
+    })
   })
 
   describe('createGroups', () => {
@@ -305,10 +313,12 @@ describe('ManageRepsAndUnitsListener', () => {
       }
       db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
       ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
+      ManageRepsAndUnitsListener.addGroupIdToUnits = mock()
 
       return target.saveToDb(9, [{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], [], {}).then(() => {
-        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: undefined }], context, {})
+        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, {})
         expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
+        expect(ManageRepsAndUnitsListener.addGroupIdToUnits).toHaveBeenCalledTimes(2)
         expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
         expect(db.unit.batchRemove).toBeCalledWith([6])
         expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})
@@ -327,34 +337,14 @@ describe('ManageRepsAndUnitsListener', () => {
       }
       db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
       ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
+      ManageRepsAndUnitsListener.addGroupIdToUnits = mock()
 
       return target.saveToDb(9, [], [], [], [], {}).then(() => {
         expect(db.unit.batchCreate).not.toBeCalled()
         expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
+        expect(ManageRepsAndUnitsListener.addGroupIdToUnits).not.toBeCalled()
         expect(db.unit.batchUpdate).not.toBeCalled()
         expect(db.unit.batchRemove).not.toBeCalled()
-        expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})
-        expect(db.group.batchRemove).toBeCalledWith([11], {})
-      })
-    })
-
-    test('calls everything except unit batchCreate when all units to create are for new groups', () => {
-      const target = new ManageRepsAndUnitsListener()
-      const context = { userId: 'REP_PACKING' }
-      db.unit = {
-        batchCreate: jest.fn(() => Promise.resolve()),
-        batchUpdate: jest.fn(() => Promise.resolve()),
-        batchRemove: jest.fn(() => Promise.resolve()),
-        getGroupsWithNoUnits: jest.fn(() => Promise.resolve([{ id: 11 }])),
-      }
-      db.group = { batchRemove: jest.fn(() => Promise.resolve()) }
-      ManageRepsAndUnitsListener.createGroups = jest.fn(() => Promise.resolve())
-
-      return target.saveToDb(9, [{ id: 4, groupId: null }], [{ id: 5 }], [6], [], {}).then(() => {
-        expect(db.unit.batchCreate).toBeCalledWith([{ id: 4, groupId: undefined }], context, {})
-        expect(ManageRepsAndUnitsListener.createGroups).toBeCalledWith([], context, {})
-        expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
-        expect(db.unit.batchRemove).toBeCalledWith([6])
         expect(db.unit.getGroupsWithNoUnits).toBeCalledWith(9, {})
         expect(db.group.batchRemove).toBeCalledWith([11], {})
       })

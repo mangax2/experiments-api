@@ -491,37 +491,6 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('batchDeleteExperimentalUnits', () => {
-    test('successfully calls batchRemove and returns data', () => {
-      db.unit.batchRemove = mockResolve([1])
-
-      return target.batchDeleteExperimentalUnits([1], {}, testTx).then((data) => {
-        expect(db.unit.batchRemove).toHaveBeenCalledWith([1], testTx)
-        expect(data).toEqual([1])
-      })
-    })
-
-    test('throws an error when no elements due to nulls', () => {
-      db.unit.batchRemove = mockResolve([null])
-      AppError.notFound = mock()
-
-      return target.batchDeleteExperimentalUnits([1], {}, testTx).then(() => {}, () => {
-        expect(db.unit.batchRemove).toHaveBeenCalledWith([1], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for delete were found', undefined, '17F001')
-      })
-    })
-
-    test('throws an error when not all elements are deleted', () => {
-      db.unit.batchRemove = mockResolve([1])
-      AppError.notFound = mock()
-
-      return target.batchDeleteExperimentalUnits([1, 2], {}, testTx).then(() => {}, () => {
-        expect(db.unit.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Not all experimental units requested for delete were found', undefined, '17F001')
-      })
-    })
-  })
-
   describe('uniqueIdsCheck', () => {
     test('throws an error when duplicate id(s) are passed in', () => {
       AppError.badRequest = mock('')

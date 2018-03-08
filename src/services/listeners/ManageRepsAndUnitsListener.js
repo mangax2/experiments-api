@@ -67,10 +67,11 @@ class ManageRepsAndUnitsListener {
         }
         const groupIds = _.map(groups, 'id')
         return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
-          const { unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated }
-            = this.getDbActions(unitsFromMessage, unitsFromDB, groups)
-          return this.saveToDb(setId, groups, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted,
-            tx)
+          const {
+            groupsToBeCreated, unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
+          } = this.getDbActions(unitsFromMessage, unitsFromDB, groups)
+          return this.saveToDb(setId, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted,
+            groupsToBeCreated, tx)
         })
       }).then(() => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
@@ -102,40 +103,77 @@ class ManageRepsAndUnitsListener {
       return unitToBeUpdated
     })
 
+    const repsToBeCreated = _.uniq(_.map(
+      _.filter([].concat(unitsToBeCreated).concat(unitsToBeUpdated),
+        unit => _.isNil(unit.groupId)), 'rep'))
+    const groupTemplate = _.pick(inflector.transform(groups, 'camelizeLower')[0],
+      'experimentId', 'parentId', 'refRandomizationStrategyId', 'refGroupTypeId')
+
+    const groupsToBeCreated = _.map(repsToBeCreated, rep =>
+      Object.assign({ rep }, groupTemplate))
+
     return {
+      groupsToBeCreated,
       unitsToBeCreated,
       unitsToBeUpdated,
       unitsToBeDeleted,
     }
   }
 
-  saveToDb = (setId, groups, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx) => {
+  saveToDb = (
+    setId, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, groupsToBeCreated, tx,
+  ) => {
     const context = { userId: 'REP_PACKING' }
-    const promises = []
-    if (unitsToBeCreated.length > 0) {
-      const units = _.partition(unitsToBeCreated, u => u.groupId === null)
-      const unitsToBeCreatedForNewGroup = units[0]
-      const unitsToBeCreatedForExistingGroup = units[1]
-      if (unitsToBeCreatedForExistingGroup.length > 0) {
-        promises.push(db.unit.batchCreate(unitsToBeCreatedForExistingGroup,
-          context, tx))
-      }
-      promises.concat(ManageRepsAndUnitsListener
-        .getPromisesWhenGroupIsNull(unitsToBeCreatedForNewGroup, groups, context, tx))
-    }
-    if (unitsToBeUpdated.length > 0) {
-      promises.push(db.unit.batchUpdate(unitsToBeUpdated,
-        context, tx))
-    }
-    return Promise.all(promises)
+    return ManageRepsAndUnitsListener.createGroups(groupsToBeCreated, context, tx)
       .then(() => {
-        if (unitsToBeDeleted.length > 0) {
-          return db.unit.batchRemove(unitsToBeDeleted)
+        const promises = []
+        if (unitsToBeCreated.length > 0) {
+          ManageRepsAndUnitsListener.addGroupIdToUnits(groupsToBeCreated, unitsToBeCreated)
+          promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))
         }
-        return Promise.resolve()
+        if (unitsToBeUpdated.length > 0) {
+          ManageRepsAndUnitsListener.addGroupIdToUnits(groupsToBeCreated, unitsToBeUpdated)
+          promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
+        }
+        return Promise.all(promises)
+          .then(() => {
+            if (unitsToBeDeleted.length > 0) {
+              return db.unit.batchRemove(unitsToBeDeleted)
+            }
+            return Promise.resolve()
+          })
       })
-      .then(() => db.unit.getGroupsWithNoUnits(setId, tx).then(groupIdstoBeDeleted =>
-        db.group.batchRemove(_.map(groupIdstoBeDeleted, 'id'), tx)))
+      .then(() => db.unit.getGroupsWithNoUnits(setId, tx))
+      .then(groupIdstoBeDeleted => db.group.batchRemove(_.map(groupIdstoBeDeleted, 'id'), tx))
+  }
+
+  static addGroupIdToUnits = (groups, units) => {
+    _.forEach(_.filter(units, unit => !unit.groupId), (unit) => {
+      const parentGroup = _.find(groups, group => group.rep === unit.rep)
+      if (!parentGroup) {
+        throw new Error(`Unable to find a parent group for set entry ${unit.setEntryId}`)
+      }
+      unit.groupId = parentGroup.id
+    })
+  }
+
+  static createGroups = (groupsToBeCreated, context, tx) => {
+    if (groupsToBeCreated && groupsToBeCreated.length > 0) {
+      return db.group.batchCreate(groupsToBeCreated, context, tx)
+        .then((groupResponse) => {
+          const groupValues = _.map(groupsToBeCreated, (group, index) => {
+            group.id = groupResponse[index]
+
+            return {
+              name: 'repNumber',
+              value: group.rep,
+              groupId: group.id,
+            }
+          })
+          return db.groupValue.batchCreate(groupValues, context, tx)
+        })
+    }
+    return Promise.resolve()
   }
 
   static sendResponseMessage = (setId, isSuccess) => {
@@ -146,34 +184,6 @@ class ManageRepsAndUnitsListener {
         result: isSuccess ? 'SUCCESS' : 'FAILURE',
       },
     })
-  }
-
-  static getPromisesWhenGroupIsNull(unitsToBeCreatedForNewGroup, groups,
-    context, tx) {
-    const newGroupsToBeCreatedPromises = []
-    if (unitsToBeCreatedForNewGroup.length > 0) {
-      const groupedUnits = _.groupBy(unitsToBeCreatedForNewGroup, 'rep')
-      _.forEach(_.keys(groupedUnits), (rep) => {
-        const newGroup = _.pick(inflector.transform(groups, 'camelizeLower')[0], 'experimentId', 'parentId', 'refRandomizationStrategyId', 'refGroupTypeId')
-        newGroup.rep = rep
-        const prms = db.group.batchCreate([newGroup],
-          context, tx).then((groupResp) => {
-          const newGroupValue = {
-            name: 'repNumber',
-            value: rep,
-            groupId: groupResp[0].id,
-          }
-          const unitsC = _.map(groupedUnits[rep], (unit) => {
-            unit.groupId = groupResp[0].id
-            return unit
-          })
-          return Promise.all([db.groupValue.batchCreate([newGroupValue], context, tx),
-            db.unit.batchCreate(unitsC, context, tx)])
-        })
-        newGroupsToBeCreatedPromises.push(prms)
-      })
-    }
-    return newGroupsToBeCreatedPromises
   }
 }
 

@@ -162,7 +162,7 @@ class ManageRepsAndUnitsListener {
       return db.group.batchCreate(groupsToBeCreated, context, tx)
         .then((groupResponse) => {
           const groupValues = _.map(groupsToBeCreated, (group, index) => {
-            group.id = groupResponse[index]
+            group.id = groupResponse[index].id
 
             return {
               name: 'repNumber',

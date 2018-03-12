@@ -288,7 +288,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
     test('calls the database and assigns group ids as expected', () => {
       const groups = [{ rep: 5 }, { rep: 3 }, { rep: 7 }]
-      db.group.batchCreate = mockResolve([2, 4, 6])
+      db.group.batchCreate = mockResolve([{ id: 2 }, { id: 4 }, { id: 6 }])
       db.groupValue.batchCreate = mockResolve()
       
       return ManageRepsAndUnitsListener.createGroups(groups, {}, {}).then(() => {

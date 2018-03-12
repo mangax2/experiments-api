@@ -53,7 +53,7 @@ const putDataTogetherScript =
   "INNER JOIN unit u ON u.treatment_id = t.id " +
   "INNER JOIN treatmentToFactorLevelArray tfla ON tfla.id = u.treatment_id " +
   "INNER JOIN grouplist gl ON u.group_id = gl.id " +
-  "INNER JOIN locations l ON gl.ancestors[1] = l.id;"
+  "INNER JOIN locations l ON gl.ancestors[1] = l.id OR gl.id = l.id;"
 
 // Error Codes 5NXXXX
 class envisionDatasetsRepo {

@@ -26,11 +26,11 @@ const treatmentToFactorLevelListScript =
   "SELECT id, jsonb_build_object('factor', name,'level', value) as factors " +
   "FROM ( " +
     "SELECT t.id, f.name, fl.value " +
-    "FROM treatment t, combination_element c, factor_level fl, factor f " +
+    "FROM treatment t " +
+      "LEFT OUTER JOIN combination_element c ON c.treatment_id = t.id " +
+      "LEFT OUTER JOIN factor_level fl ON c.factor_level_id = fl.id " +
+      "LEFT OUTER JOIN factor f ON f.id = fl.factor_id " +
     "WHERE t.experiment_id = $1 " +
-    "AND c.treatment_id = t.id " +
-    "AND c.factor_level_id = fl.id " +
-    "AND f.id = fl.factor_id " +
   ") s " +
   "group by id, name, value),"
 

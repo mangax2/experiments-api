@@ -55,6 +55,7 @@ describe('EnvisionDatasetsService', () => {
       label: 'Name',
       objectType: 'Other',
     })
+    data[0].factors.push({ level: null, factor: null })
     data.push({
       experimentId: 111,
       name: 'testExperiment',

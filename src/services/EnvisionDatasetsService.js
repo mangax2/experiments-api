@@ -32,7 +32,9 @@ class EnvisionDatasetsService {
           d[record.name] = f
           this.updateFactorItemsData(f.level, f.level, record)
         }
-        delete f.level.items
+        if (!_.isNil(f.level)) {
+          delete f.level.items
+        }
       })
       delete d.factors
     })
@@ -68,17 +70,19 @@ class EnvisionDatasetsService {
   @setErrorCode('1V7000')
   updateFactorRecords = (records, factors) => {
     _.forEach(factors, (f) => {
-      let record = _.find(records, item => item.label === f.factor)
-      if (_.isNil(record)) {
-        const n = this.addNewRecord(records, 'factor', objPropName => ({
-          name: objPropName,
-          label: f.factor,
-          prop: `${objPropName}.factor`,
-          items: [],
-        }))
-        record = Object.assign({}, n)
+      if (!_.isNil(f.factor)) {
+        let record = _.find(records, item => item.label === f.factor)
+        if (_.isNil(record)) {
+          const n = this.addNewRecord(records, 'factor', objPropName => ({
+            name: objPropName,
+            label: f.factor,
+            prop: `${objPropName}.factor`,
+            items: [],
+          }))
+          record = Object.assign({}, n)
+        }
+        this.updateFactorItemsRecords([], f.level, record.name, record)
       }
-      this.updateFactorItemsRecords([], f.level, record.name, record)
     })
   }
 

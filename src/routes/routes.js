@@ -28,6 +28,7 @@ import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
+import getSchemaHierarchy from '../graphql/scripts/getSchemaHierarchy'
 
 
 const logger = log4js.getLogger('Router')
@@ -407,6 +408,17 @@ router.post('/kafka-publish', (req, res, next) => {
   pt.timeout(KafkaProducer.publish({ topic, message }), 8000)
     .then(result => res.json(result))
     .catch(err => next(err))
+})
+
+router.get('/graphql-schema/:entity', (req, res, next) => {
+  const { entity } = req.params
+
+  try {
+    const schema = getSchemaHierarchy(entity)
+    return res.json(schema)
+  } catch (err) {
+    return next(err)
+  }
 })
 
 module.exports = router

@@ -13,7 +13,7 @@ type ClusterComposite {
   text: String
   label: String
   questionCode: String
-  placeholder: Boolean
+  isPlaceholder: Boolean
   objectType: String
   items: [ClusterComposite]
 }

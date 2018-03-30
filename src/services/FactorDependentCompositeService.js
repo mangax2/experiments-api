@@ -13,6 +13,7 @@ import Transactional from '../decorators/transactional'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import setErrorDecorator from '../decorators/setErrorDecorator'
+import { notifyChanges } from '../decorators/notifyChanges'
 
 const { addErrorHandling, setErrorCode } = setErrorDecorator()
 
@@ -541,6 +542,7 @@ class FactorDependentCompositeService {
     this.persistDependentVariables(
       variables.dependent, experimentId, context, isTemplate, tx)])
 
+  @notifyChanges('update', 1)
   @setErrorCode('1Al000')
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {

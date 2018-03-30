@@ -28,6 +28,7 @@
     "@monsantoit/oauth-ping": "4.1.0",
     "@monsantoit/ping-page": "2.0.5",
     "@monsantoit/prom-metrics": "3.0.1",
+    "avsc": "5.2.3",
     "aws-cloudfront-sign": "2.2.0",
     "bluebird": "3.4.7",
     "body-parser": "1.16.1",

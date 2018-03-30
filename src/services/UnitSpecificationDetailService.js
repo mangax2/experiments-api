@@ -6,6 +6,7 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import UnitSpecificationDetailValidator from '../validations/UnitSpecificationDetailValidator'
+import { notifyChanges } from '../decorators/notifyChanges'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -56,6 +57,7 @@ class UnitSpecificationDetailService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('1S5000')
   @Transactional('manageAllUnitSpecificationDetails')
   manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context,

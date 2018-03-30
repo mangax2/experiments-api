@@ -7,6 +7,7 @@ import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
 import RefDesignSpecificationService from './RefDesignSpecificationService'
+import { notifyChanges } from '../decorators/notifyChanges'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -65,6 +66,7 @@ class DesignSpecificationDetailService {
     })
   }
 
+  @notifyChanges('update', 1)
   @setErrorCode('136000')
   @Transactional('manageAllDesignSpecificationDetails')
   manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context,

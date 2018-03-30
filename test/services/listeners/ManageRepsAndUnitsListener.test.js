@@ -4,7 +4,7 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import db from '../../../src/db/DbManager'
-import { mockResolve, mock } from '../../jestUtil';
+import { mockResolve, mock } from '../../jestUtil'
 
 describe('ManageRepsAndUnitsListener', () => {
   describe('createConsumer', () => {
@@ -16,7 +16,13 @@ describe('ManageRepsAndUnitsListener', () => {
   describe('sendResponseMessage', () => {
     test('sends a success if isSuccess', () => {
       KafkaProducer.publish = jest.fn()
-      cfServices.experimentsKafka = { value: { topics: { repPackingResultTopic: 'topic' } } }
+      cfServices.experimentsKafka = {
+        value: {
+          topics:
+            { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
+          schema: { product360Outgoing: 1 },
+        },
+      }
 
       ManageRepsAndUnitsListener.sendResponseMessage(555, true)
 
@@ -28,7 +34,13 @@ describe('ManageRepsAndUnitsListener', () => {
 
     test('sends a failure if not isSuccess', () => {
       KafkaProducer.publish = jest.fn()
-      cfServices.experimentsKafka = { value: { topics: { repPackingResultTopic: 'topic' } } }
+      cfServices.experimentsKafka = {
+        value: {
+          topics:
+            { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
+          schema: { product360Outgoing: 1 },
+        },
+      }
 
       ManageRepsAndUnitsListener.sendResponseMessage(777, false)
 
@@ -56,6 +68,7 @@ describe('ManageRepsAndUnitsListener', () => {
       expect(target.consumer).toBe(consumer)
       expect(ManageRepsAndUnitsListener.createConsumer).toBeCalledWith({
         client_id: 'PD-EXPERIMENTS-API-DEV-SVC',
+        groupId: 'PD-EXPERIMENTS-API-DEV-SVC',
         connectionString: 'host',
         reconnectionDelay: { min: 100000, max: 100000 },
         ssl: {
@@ -100,6 +113,13 @@ describe('ManageRepsAndUnitsListener', () => {
   describe('adjustExperimentWithRepPackChanges', () => {
     test('publishes a success when successful', () => {
       const target = new ManageRepsAndUnitsListener()
+      cfServices.experimentsKafka = {
+        value: {
+          topics:
+            { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
+          schema: { product360Outgoing: 1 },
+        },
+      }
       const message = { setId: 5, entryChanges: [] }
       const groups = [{ id: 5 }]
       db.group = { findRepGroupsBySetId: jest.fn(() => Promise.resolve(groups)) }
@@ -290,7 +310,7 @@ describe('ManageRepsAndUnitsListener', () => {
       const groups = [{ rep: 5 }, { rep: 3 }, { rep: 7 }]
       db.group.batchCreate = mockResolve([{ id: 2 }, { id: 4 }, { id: 6 }])
       db.groupValue.batchCreate = mockResolve()
-      
+
       return ManageRepsAndUnitsListener.createGroups(groups, {}, {}).then(() => {
         expect(db.group.batchCreate).toBeCalledWith(groups, {}, {})
         expect(db.groupValue.batchCreate).toBeCalledWith([

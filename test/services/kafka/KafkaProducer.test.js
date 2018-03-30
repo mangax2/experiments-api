@@ -2,6 +2,7 @@ import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import Kafka from 'no-kafka'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
+import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 
 describe('KafkaProducer', () => {
   describe('createProducer', () => {
@@ -64,6 +65,20 @@ describe('KafkaProducer', () => {
       return KafkaProducer.publish({ topic: 'topic', message: 'message' }).then(() => {
         expect(KafkaProducer.init).not.toBeCalled()
         expect(producer.send).toBeCalledWith({ topic: 'topic', message: { value: '"message"' } }, {})
+      })
+    })
+
+    test('send an avro message', () => {
+      const producer = {
+        send: jest.fn(),
+      }
+      KafkaProducer.producerPromise = Promise.resolve(producer)
+      KafkaProducer.init = jest.fn()
+
+      const message = 'test'
+      return KafkaProducer.publish({ topic: 'topic', message, schemaId: 1 }).then(() => {
+        expect(KafkaProducer.init).not.toBeCalled()
+        expect(producer.send).toBeCalledWith({ topic: 'topic', message: { value: serializeKafkaAvroMsg(message, 1) } }, {})
       })
     })
   })

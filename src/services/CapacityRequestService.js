@@ -10,6 +10,7 @@ import Transactional from '../decorators/transactional'
 // import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 // import SecurityService from './SecurityService'
 import db from '../db/DbManager'
+import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -73,6 +74,7 @@ class CapacityRequestService {
     }
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('104000')
   @Transactional('capacityRequestSync')
   syncCapacityRequestDataWithExperiment(experimentId, capacityRequestData, context, tx) {

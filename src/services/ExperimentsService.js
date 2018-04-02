@@ -154,7 +154,7 @@ class ExperimentsService {
     })
   }
 
-  @notifyChanges('update', 0)
+  @notifyChanges('update', 0, 3)
   @setErrorCode('159000')
   @Transactional('updateExperiment')
   updateExperiment(experimentId, experiment, context, isTemplate, tx) {

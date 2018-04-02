@@ -13,10 +13,16 @@ class testClass {
   }
 
   @notifyChanges('update', 0)
-  static updateFunc = id => Promise.resolve([{ id }])
-
-  @notifyChanges('update', 0)
   static update(id) {
+    return Promise.resolve([{ id }])
+  }
+
+  @notifyChanges('update', 0, 1)
+  static updateFunc = (id, isTemplate) => {
+    if (isTemplate) {
+      return Promise.resolve()
+    }
+
     return Promise.resolve([{ id }])
   }
 }
@@ -74,6 +80,29 @@ describe('notifyChanges', () => {
     test('notify update function', () => {
       KafkaProducer.publish = mock()
       return testClass.update(2).then(() => {
+        expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
+        expect(KafkaProducer.publish).toHaveBeenCalledWith({
+          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          message: {
+            resource_id: 2,
+            event_category: 'update',
+            time: expect.any(String),
+          },
+          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+        })
+      })
+    })
+
+    test('notify update template', () => {
+      KafkaProducer.publish = mock()
+      return testClass.updateFunc(2, true).then(() => {
+        expect(KafkaProducer.publish).toHaveBeenCalledTimes(0)
+      })
+    })
+
+    test('notify update with send parameter set', () => {
+      KafkaProducer.publish = mock()
+      return testClass.updateFunc(2, false).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
           topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,

@@ -25,11 +25,20 @@ function addKafkaNotification(result, args, event, argIdx) {
   })
 }
 
-function notifyChanges(event, argIdx) {
+function toSendKafkaNotify(event, args, sendArgIdx) {
+  if (event === 'create') return true
+  else if (!_.isNil(args[sendArgIdx]) && args[sendArgIdx]) return false
+
+  return true
+}
+
+function notifyChanges(event, argIdx, sendArgIdx) {
   return function (target, property, descriptor) {
     const wrappingFunction = (bindingFunction => function () {
       const result = bindingFunction(this, arguments)
-      addKafkaNotification(result, arguments, event, argIdx)
+      if (toSendKafkaNotify(event, arguments, sendArgIdx)) {
+        addKafkaNotification(result, arguments, event, argIdx)
+      }
 
       return result
     })

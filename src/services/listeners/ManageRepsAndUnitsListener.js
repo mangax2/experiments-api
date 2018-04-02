@@ -78,7 +78,7 @@ class ManageRepsAndUnitsListener {
             groupsToBeCreated, tx)
         })
       }).then(() => {
-        _.forEach(experimentIds, id => sendKafkaNotification('update', id))
+        _.forEach(experimentIds, id => sendKafkaNotification('update', id.experiment_id))
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
       }).catch((err) => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)

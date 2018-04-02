@@ -250,7 +250,7 @@ class ExperimentsService {
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
-  @notifyChanges('create')
+  @notifyChanges('create', null, 1)
   @setErrorCode('15F000')
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {

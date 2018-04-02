@@ -4,10 +4,16 @@ import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 import cfServices from '../../src/services/utility/ServiceConfig'
 
 class testClass {
-  @notifyChanges('create')
-  static createFunc = () => Promise.resolve([{ id: 3 }])
+  @notifyChanges('create', null, 1)
+  static createFunc = (id, typeString) => {
+    if (typeString === 'template') {
+      return Promise.resolve()
+    }
 
-  @notifyChanges('create', 0)
+    return Promise.resolve([{ id }])
+  }
+
+  @notifyChanges('create', null, 0)
   static create() {
     return Promise.resolve([{ id: 3 }])
   }
@@ -29,14 +35,37 @@ class testClass {
 
 describe('notifyChanges', () => {
   describe('notifyChanges', () => {
-    test('notify create arrow function', () => {
+    test('notify create experiment arrow function', () => {
       KafkaProducer.publish = mock()
-      return testClass.createFunc().then(() => {
+      return testClass.createFunc(3).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
           topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
           message: {
             resource_id: 3,
+            event_category: 'create',
+            time: expect.any(String),
+          },
+          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+        })
+      })
+    })
+
+    test('notify create template', () => {
+      KafkaProducer.publish = mock()
+      return testClass.createFunc(3, 'template').then(() => {
+        expect(KafkaProducer.publish).toHaveBeenCalledTimes(0)
+      })
+    })
+
+    test('notify create experiment', () => {
+      KafkaProducer.publish = mock()
+      return testClass.createFunc(1, 'experiment').then(() => {
+        expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
+        expect(KafkaProducer.publish).toHaveBeenCalledWith({
+          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          message: {
+            resource_id: 1,
             event_category: 'create',
             time: expect.any(String),
           },

@@ -26,8 +26,8 @@ function addKafkaNotification(result, args, event, argIdx) {
 }
 
 function toSendKafkaNotify(event, args, sendArgIdx) {
-  if (event === 'create') return true
-  else if (!_.isNil(args[sendArgIdx]) && args[sendArgIdx]) return false
+  if (event === 'create' && args[sendArgIdx] === 'template') return false
+  else if (args[sendArgIdx] === true) return false
 
   return true
 }

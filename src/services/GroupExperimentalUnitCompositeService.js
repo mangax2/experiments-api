@@ -14,6 +14,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
+import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -29,6 +30,7 @@ class GroupExperimentalUnitCompositeService {
     this.securityService = new SecurityService()
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('1F1000')
   @Transactional('saveDesignSpecsAndGroupUnitDetails')
   saveDesignSpecsAndGroupUnitDetails(experimentId, designSpecsAndGroupAndUnitDetails, context,
@@ -47,6 +49,7 @@ class GroupExperimentalUnitCompositeService {
     throw AppError.badRequest('Design Specifications and Group-Experimental-Units object must be defined', undefined, getFullErrorCode('1F1001'))
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('1F2000')
   @Transactional('saveGroupAndUnitDetails')
   saveGroupAndUnitDetails(experimentId, groupAndUnitDetails, context, isTemplate, tx) {
@@ -369,7 +372,7 @@ class GroupExperimentalUnitCompositeService {
               const setEntryIds = _.map(result.body.entries, 'entryId')
               _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
               return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
-                context, tx)
+                context, tx).then(sendKafkaNotification('update', experimentId))
             })
         })
       })

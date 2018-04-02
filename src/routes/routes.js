@@ -28,6 +28,7 @@ import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
+import { sendKafkaNotification } from '../decorators/notifyChanges'
 
 
 const logger = log4js.getLogger('Router')
@@ -197,7 +198,10 @@ router.get('/experiments/:id/groups', (req, res, next) => new GroupService().get
   .catch(err => next(err)))
 
 router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.body, req.context)
-  .then(factors => res.json(factors))
+  .then((factors) => {
+    res.json(factors)
+    sendKafkaNotification('update', parseInt(req.params.id, 10))
+  })
   .catch(err => next(err)))
 
 router.get('/groups/:id', (req, res, next) => new GroupService().getGroupById(req.params.id, req.context)
@@ -403,8 +407,8 @@ router.get('/getDoc/:fileName', (req, res, next) => {
 })
 
 router.post('/kafka-publish', (req, res, next) => {
-  const { topic, message } = req.body
-  pt.timeout(KafkaProducer.publish({ topic, message }), 8000)
+  const { topic, message, schemaId } = req.body
+  pt.timeout(KafkaProducer.publish({ topic, message, schemaId }), 8000)
     .then(result => res.json(result))
     .catch(err => next(err))
 })

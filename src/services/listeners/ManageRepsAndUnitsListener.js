@@ -8,12 +8,14 @@ import db from '../../db/DbManager'
 import Transactional from '../../decorators/transactional'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
+import { sendKafkaNotification } from '../../decorators/notifyChanges'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
   listen() {
     const params = {
       client_id: VaultUtil.clientId,
+      groupId: VaultUtil.clientId,
       connectionString: cfServices.experimentsKafka.value.host,
       reconnectionDelay: {
         min: 100000,
@@ -61,11 +63,13 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
+      let experimentIds
       return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
         if (groups.length === 0) {
           return Promise.reject(AppError.notFound(`No groups found for setId "${set.setId}".`))
         }
         const groupIds = _.map(groups, 'id')
+        experimentIds = _.uniqBy(groups, 'experiment_id')
         return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
           const {
             groupsToBeCreated, unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
@@ -74,6 +78,7 @@ class ManageRepsAndUnitsListener {
             groupsToBeCreated, tx)
         })
       }).then(() => {
+        _.forEach(experimentIds, id => sendKafkaNotification('update', id.experiment_id))
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
       }).catch((err) => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)

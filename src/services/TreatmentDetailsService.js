@@ -5,6 +5,7 @@ import FactorLevelService from './FactorLevelService'
 import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
+import { notifyChanges } from '../decorators/notifyChanges'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -56,6 +57,7 @@ class TreatmentDetailsService {
     })
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('1Q2000')
   @Transactional('manageAllTreatmentDetails')
   manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, isTemplate, tx) {

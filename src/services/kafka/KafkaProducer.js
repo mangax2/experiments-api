@@ -1,4 +1,6 @@
+import _ from 'lodash'
 import Kafka from 'no-kafka'
+import { serializeKafkaAvroMsg } from '../utility/AvroUtil'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 
@@ -26,7 +28,7 @@ class KafkaProducer {
     return new Kafka.Producer(params)
   }
 
-  static publish = ({ topic, message }) => {
+  static publish = ({ topic, message, schemaId }) => {
     if (!KafkaProducer.producerPromise) {
       KafkaProducer.init()
     }
@@ -34,7 +36,8 @@ class KafkaProducer {
       const messageToBePublished = {
         topic,
         message: {
-          value: JSON.stringify(message),
+          value: _.isNil(schemaId) ?
+            JSON.stringify(message) : serializeKafkaAvroMsg(message, schemaId),
         },
       }
 

@@ -9,6 +9,7 @@ import OwnerService from './OwnerService'
 import SecurityService from './SecurityService'
 import DuplicationService from './DuplicationService'
 import TagService from './TagService'
+import { notifyChanges } from '../decorators/notifyChanges'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -153,6 +154,7 @@ class ExperimentsService {
     })
   }
 
+  @notifyChanges('update', 0, 3)
   @setErrorCode('159000')
   @Transactional('updateExperiment')
   updateExperiment(experimentId, experiment, context, isTemplate, tx) {
@@ -248,6 +250,7 @@ class ExperimentsService {
       && _.intersection(Object.keys(queryString), allowedFilters).length > 0
   }
 
+  @notifyChanges('create', null, 1)
   @setErrorCode('15F000')
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {

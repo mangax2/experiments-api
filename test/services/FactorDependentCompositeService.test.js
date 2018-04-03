@@ -1,4 +1,4 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
@@ -10,6 +10,7 @@ describe('FactorDependentCompositeService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
+  kafkaProducerMocker()
 
   let verifyExperimentExistsOriginal
   let getFactorsByExperimentIdNoExistenceCheckOriginal

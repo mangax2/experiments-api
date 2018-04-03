@@ -4,9 +4,11 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import db from '../../../src/db/DbManager'
-import { mockResolve, mock } from '../../jestUtil'
+import { kafkaProducerMocker, mockResolve, mock } from '../../jestUtil'
 
 describe('ManageRepsAndUnitsListener', () => {
+  kafkaProducerMocker()
+
   describe('createConsumer', () => {
     test('creates an object of type Kafka.GroupConsumer', () => {
       expect(ManageRepsAndUnitsListener.createConsumer() instanceof Kafka.GroupConsumer).toBe(true)

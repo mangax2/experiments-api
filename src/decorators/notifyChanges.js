@@ -21,7 +21,8 @@ function sendKafkaNotification(event, id) {
 function addKafkaNotification(result, args, event, argIdx) {
   result.then((ids) => {
     const experimentIds = event === 'create' ? _.map(ids, 'id') : [parseInt(args[argIdx], 10)]
-    _.forEach(experimentIds, id => sendKafkaNotification(event, id))
+    Promise.all(_.map(experimentIds, id => sendKafkaNotification(event, id)))
+      .catch((err) => { console.error(err) })
   })
 }
 

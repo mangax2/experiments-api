@@ -1,4 +1,4 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
 import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -11,6 +11,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
+  kafkaProducerMocker()
 
   beforeEach(() => {
     target = new GroupExperimentalUnitCompositeService()

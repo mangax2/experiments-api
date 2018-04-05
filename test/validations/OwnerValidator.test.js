@@ -195,22 +195,34 @@ describe('OwnerValidator', () => {
     test('resolves when all user ids are valid, and the user enacting the call is present in the' +
       ' list', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
+      HttpUtil.post = mockResolve({ body: { data: { getUsersById: [{ id: 'KMCCL' }] } } })
 
       return target.validateUserIds(['KMCCL']).then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when PAPI returns errors', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { errors: [{}] } })
+      AppError.badRequest = mock()
+
+      return target.validateUserIds(['KMCCL', 'JGORD1']).then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '3D5002')
       })
     })
 
     test('rejects when the not all users are valid', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: [{ id: 'KMCCL' }] })
+      HttpUtil.post = mockResolve({ body: { data: { getUsersById: [{ id: 'KMCCL' }] } } })
       AppError.badRequest = mock()
 
       return target.validateUserIds(['KMCCL', 'JGORD1']).then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Some users listed are invalid: JGORD1', undefined, '3D5001')
       })
     })
@@ -219,33 +231,43 @@ describe('OwnerValidator', () => {
   describe('validateGroupIds', () => {
     test('resolves when groupIds is empty', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getGroupsById: [{ id: 'group1' }] } } })
 
       return target.validateGroupIds([]).then(() => {
         expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
       })
     })
 
-    test('resolves when all group ids are valid, and the user enacting the call is present in' +
-      ' the' +
-      ' list', () => {
+    test('resolves when all group ids are valid, and the user enacting the call is present in the list', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getGroupsById: [{ id: 'group1' }] } } })
 
       return target.validateGroupIds(['group1']).then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/groups?ids=group1`, {})
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getGroupsById(ids:["group1"]){ id } }' })
+      })
+    })
+
+    test('rejects when PAPI returns errors', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { errors: [{}] } })
+      AppError.badRequest = mock()
+
+      return target.validateGroupIds(['group1', 'group2']).then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '3D6002')
       })
     })
 
     test('rejects when the not all groups are valid', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getGroupsById: [{ id: 'group1' }] } } })
       AppError.badRequest = mock()
 
       return target.validateGroupIds(['group1', 'group2']).then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Some groups listed are invalid: group2', undefined, '3D6001')
       })
     })
@@ -254,17 +276,29 @@ describe('OwnerValidator', () => {
   describe('userOwnershipCheck', () => {
     test('resolves when userId is present in userIds', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group1' }] } } } })
 
       return target.userOwnershipCheck(['group1'], ['user1'], 'user1').then(() => {
         expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
       })
     })
 
+    test('rejects when PAPI returns errors', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { errors: [{}] } })
+      AppError.badRequest = mock()
+
+      return target.userOwnershipCheck(['group1'], ['user1'], 'user2').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
+        expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '3D7002')
+      })
+    })
+
     test('rejects when userId is not the owner', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }] } })
-      AppError.badRequest = mock()
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group1' }] } } } })
+      AppError.badRequest = mock('')
 
       return target.userOwnershipCheck([], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
@@ -274,46 +308,45 @@ describe('OwnerValidator', () => {
 
     test('Promise Resolves when userId is in group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group2' }] } } } })
       AppError.badRequest = mock()
 
       return target.userOwnershipCheck(['group2'], ['user1'], 'user2').then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`, {})
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
       })
     })
 
     test('resolves when user is in the admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'COSMOS-ADMIN' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'COSMOS-ADMIN' }] } } } })
 
       return target.userOwnershipCheck([], [], 'user').then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user/groups`, {})
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user"){ id, groups{ id } }}' })
       })
     })
 
     test('rejects when userId is not the owner and not in group or admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group2' }] } } } })
       AppError.badRequest = mock()
 
       return target.userOwnershipCheck(['group1'], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`, {})
-
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
         expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
       })
     })
 
     test('rejects when no userIds or groupIds have been specified, and not in admin group', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group2' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group2' }] } } } })
       AppError.badRequest = mock()
 
       return target.userOwnershipCheck([], [], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/user2/groups`, {})
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
 
         expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
       })

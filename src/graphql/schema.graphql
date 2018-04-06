@@ -14,6 +14,7 @@ type ClusterComposite {
   label: String
   questionCode: String
   isPlaceholder: Boolean
+  uomCode: String
   objectType: String
   items: [ClusterComposite]
 }

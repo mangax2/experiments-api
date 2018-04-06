@@ -1,4 +1,4 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -9,6 +9,7 @@ describe('ExperimentsService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
+  kafkaProducerMocker()
 
   beforeEach(() => {
     target = new ExperimentsService()

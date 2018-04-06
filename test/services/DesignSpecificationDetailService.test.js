@@ -1,4 +1,4 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
 import DesignSpecificationDetailService from '../../src/services/DesignSpecificationDetailService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -8,6 +8,7 @@ describe('DesignSpecificationDetailService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
+  kafkaProducerMocker()
 
   beforeEach(() => {
     target = new DesignSpecificationDetailService()

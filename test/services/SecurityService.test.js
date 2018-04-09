@@ -17,24 +17,53 @@ describe('SecurityService', () => {
   describe('getGroupsByUserId', () => {
     test('returns empty Array profile api returns empty groups', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: {} })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [] } } } })
       return target.getGroupsByUserId('kprat1').then((data) => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
-        expect(HttpUtil.get).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
         expect(data.length).toBe(0)
-        HttpUtil.get.mockReset()
-        HttpUtil.get.mockClear()
+        HttpUtil.post.mockReset()
+        HttpUtil.post.mockClear()
       })
     })
+
+    test('rejects when PAPI returns nothing', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({})
+      AppError.badRequest = mock()
+
+      return target.getGroupsByUserId('kprat1').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user permissions', '1O2001')
+        HttpUtil.post.mockReset()
+        HttpUtil.post.mockClear()
+      })
+    })
+
+    test('rejects when PAPI returns errors', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { errors: [{}] } })
+      AppError.badRequest = mock()
+
+      return target.getGroupsByUserId('kprat1').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '1O2002')
+        HttpUtil.post.mockReset()
+        HttpUtil.post.mockClear()
+      })
+    })
+
     test('Calls The PingUtil and returns groupIds', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.get = mockResolve({ body: { groups: [{ id: 'group1' }, { id: 'group2' }] } })
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group1' }, { id: 'group2' }] } } } })
       return target.getGroupsByUserId('kprat1').then((response) => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
-        expect(HttpUtil.get).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
         expect(response.length).toBe(2)
-        HttpUtil.get.mockReset()
-        HttpUtil.get.mockClear()
+        HttpUtil.post.mockReset()
+        HttpUtil.post.mockClear()
       })
     })
   })

@@ -10,6 +10,20 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
+
+function getPAPIResult(graphqlQuery, errorCode) {
+  return PingUtil.getMonsantoHeader().then(header =>
+    HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+      .then((result) => {
+        const errors = _.get(result, 'body.errors')
+        if (errors && errors.length > 0) {
+          return Promise.reject(AppError.badRequest('Profile API encountered an error', errors, getFullErrorCode(errorCode)))
+        }
+
+        return Promise.resolve(result)
+      }))
+}
+
 // Error Codes 3DXXXX
 class OwnerValidator extends SchemaValidator {
   constructor() {
@@ -93,19 +107,19 @@ class OwnerValidator extends SchemaValidator {
     if (userIds.length === 0) {
       return Promise.resolve()
     }
-    return PingUtil.getMonsantoHeader()
-      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users?ids=${userIds.join()}`, header)
-        .then((result) => {
-          const profileIds = _.map(result.body, 'id')
-          const invalidUsers = _.difference(userIds, profileIds)
 
-          if (userIds.length !== profileIds.length) {
-            return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`, undefined, getFullErrorCode('3D5001')))
-          }
+    const graphqlQuery = `{ getUsersById(ids: ${JSON.stringify(userIds)}){ id } }`
 
-          return Promise.resolve()
-        }),
-      )
+    return getPAPIResult(graphqlQuery, '3D5002').then((result) => {
+      const profileIds = _.compact(_.map(result.body.data.getUsersById, 'id'))
+      const invalidUsers = _.difference(userIds, profileIds)
+
+      if (userIds.length !== profileIds.length) {
+        return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`, undefined, getFullErrorCode('3D5001')))
+      }
+
+      return Promise.resolve()
+    })
   }
 
   @setErrorCode('3D6000')
@@ -113,19 +127,19 @@ class OwnerValidator extends SchemaValidator {
     if (groupIds.length === 0) {
       return Promise.resolve()
     }
-    return PingUtil.getMonsantoHeader()
-      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/groups?ids=${groupIds.join()}`, header)
-        .then((result) => {
-          const profileIds = _.map(result.body.groups, 'id')
-          const invalidGroups = _.difference(groupIds, profileIds)
 
-          if (groupIds.length !== profileIds.length) {
-            return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`, undefined, getFullErrorCode('3D6001')))
-          }
+    const graphqlQuery = `{ getGroupsById(ids:${JSON.stringify(groupIds)}){ id } }`
 
-          return Promise.resolve()
-        }),
-      )
+    return getPAPIResult(graphqlQuery, '3D6002').then((result) => {
+      const profileIds = _.compact(_.map(result.body.data.getGroupsById, 'id'))
+      const invalidGroups = _.difference(groupIds, profileIds)
+
+      if (groupIds.length !== profileIds.length) {
+        return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`, undefined, getFullErrorCode('3D6001')))
+      }
+
+      return Promise.resolve()
+    })
   }
 
   @setErrorCode('3D7000')
@@ -134,20 +148,20 @@ class OwnerValidator extends SchemaValidator {
       return Promise.resolve()
     }
 
-    return PingUtil.getMonsantoHeader()
-      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
-        .then((result) => {
-          const profileGroupIds = _.map(result.body.groups, 'id')
-          const errorMessage = 'You cannot remove yourself as an owner'
+    const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
 
-          const concatGroups = _.concat(groupIds, config.admin_group)
+    return getPAPIResult(graphqlQuery, '3D7002').then((result) => {
+      const profileGroupIds = _.compact(_.map(result.body.data.getUserById.groups, 'id'))
+      const errorMessage = 'You cannot remove yourself as an owner'
 
-          if (_.intersection(concatGroups, profileGroupIds).length === 0) {
-            return Promise.reject(AppError.badRequest(errorMessage), undefined, getFullErrorCode('3D7001'))
-          }
+      const concatGroups = _.concat(groupIds, config.admin_group)
 
-          return Promise.resolve()
-        }))
+      if (_.intersection(concatGroups, profileGroupIds).length === 0) {
+        return Promise.reject(AppError.badRequest(errorMessage, undefined, getFullErrorCode('3D7001')))
+      }
+
+      return Promise.resolve()
+    })
   }
 }
 

@@ -22,7 +22,7 @@ function addKafkaNotification(result, args, event, argIdx) {
   result.then((ids) => {
     const experimentIds = event === 'create' ? _.map(ids, 'id') : [parseInt(args[argIdx], 10)]
     Promise.all(_.map(experimentIds, id => sendKafkaNotification(event, id)))
-      .catch((err) => { console.error(err) })
+      .catch(/* istanbul ignore next */(err) => { console.error(err) })
   })
 }
 

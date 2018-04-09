@@ -10,6 +10,20 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
+
+function getPAPIResult(graphqlQuery, errorCode) {
+  return PingUtil.getMonsantoHeader().then(header =>
+    HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+      .then((result) => {
+        const errors = _.get(result, 'body.errors')
+        if (errors && errors.length > 0) {
+          return Promise.reject(AppError.badRequest('Profile API encountered an error', errors, getFullErrorCode(errorCode)))
+        }
+
+        return Promise.resolve(result)
+      }))
+}
+
 // Error Codes 3DXXXX
 class OwnerValidator extends SchemaValidator {
   constructor() {
@@ -93,26 +107,19 @@ class OwnerValidator extends SchemaValidator {
     if (userIds.length === 0) {
       return Promise.resolve()
     }
-    return PingUtil.getMonsantoHeader()
-      .then((header) => {
-        const graphqlQuery = `{ getUsersById(ids: ${JSON.stringify(userIds)}){ id } }`
-        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
-          .then((result) => {
-            const errors = _.get(result, 'body.errors')
-            if (errors && errors.length > 0) {
-              return Promise.reject(AppError.badRequest('Profile API encountered an error', errors, getFullErrorCode('3D5002')))
-            }
 
-            const profileIds = _.compact(_.map(result.body.data.getUsersById, 'id'))
-            const invalidUsers = _.difference(userIds, profileIds)
+    const graphqlQuery = `{ getUsersById(ids: ${JSON.stringify(userIds)}){ id } }`
 
-            if (userIds.length !== profileIds.length) {
-              return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`, undefined, getFullErrorCode('3D5001')))
-            }
+    return getPAPIResult(graphqlQuery, '3D5002').then((result) => {
+      const profileIds = _.compact(_.map(result.body.data.getUsersById, 'id'))
+      const invalidUsers = _.difference(userIds, profileIds)
 
-            return Promise.resolve()
-          })
-      })
+      if (userIds.length !== profileIds.length) {
+        return Promise.reject(AppError.badRequest(`Some users listed are invalid: ${invalidUsers}`, undefined, getFullErrorCode('3D5001')))
+      }
+
+      return Promise.resolve()
+    })
   }
 
   @setErrorCode('3D6000')
@@ -120,26 +127,19 @@ class OwnerValidator extends SchemaValidator {
     if (groupIds.length === 0) {
       return Promise.resolve()
     }
-    return PingUtil.getMonsantoHeader()
-      .then((header) => {
-        const graphqlQuery = `{ getGroupsById(ids:${JSON.stringify(groupIds)}){ id } }`
-        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
-          .then((result) => {
-            const errors = _.get(result, 'body.errors')
-            if (errors && errors.length > 0) {
-              return Promise.reject(AppError.badRequest('Profile API encountered an error', errors, getFullErrorCode('3D6002')))
-            }
 
-            const profileIds = _.compact(_.map(result.body.data.getGroupsById, 'id'))
-            const invalidGroups = _.difference(groupIds, profileIds)
+    const graphqlQuery = `{ getGroupsById(ids:${JSON.stringify(groupIds)}){ id } }`
 
-            if (groupIds.length !== profileIds.length) {
-              return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`, undefined, getFullErrorCode('3D6001')))
-            }
+    return getPAPIResult(graphqlQuery, '3D6002').then((result) => {
+      const profileIds = _.compact(_.map(result.body.data.getGroupsById, 'id'))
+      const invalidGroups = _.difference(groupIds, profileIds)
 
-            return Promise.resolve()
-          })
-      })
+      if (groupIds.length !== profileIds.length) {
+        return Promise.reject(AppError.badRequest(`Some groups listed are invalid: ${invalidGroups}`, undefined, getFullErrorCode('3D6001')))
+      }
+
+      return Promise.resolve()
+    })
   }
 
   @setErrorCode('3D7000')
@@ -148,28 +148,20 @@ class OwnerValidator extends SchemaValidator {
       return Promise.resolve()
     }
 
-    return PingUtil.getMonsantoHeader()
-      .then((header) => {
-        const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
-        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
-          .then((result) => {
-            const errors = _.get(result, 'body.errors')
-            if (errors && errors.length > 0) {
-              return Promise.reject(AppError.badRequest('Profile API encountered an error', errors, getFullErrorCode('3D7002')))
-            }
+    const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
 
-            const profileGroupIds = _.compact(_.map(result.body.data.getUserById.groups, 'id'))
-            const errorMessage = 'You cannot remove yourself as an owner'
+    return getPAPIResult(graphqlQuery, '3D7002').then((result) => {
+      const profileGroupIds = _.compact(_.map(result.body.data.getUserById.groups, 'id'))
+      const errorMessage = 'You cannot remove yourself as an owner'
 
-            const concatGroups = _.concat(groupIds, config.admin_group)
+      const concatGroups = _.concat(groupIds, config.admin_group)
 
-            if (_.intersection(concatGroups, profileGroupIds).length === 0) {
-              return Promise.reject(AppError.badRequest(errorMessage), undefined, getFullErrorCode('3D7001'))
-            }
+      if (_.intersection(concatGroups, profileGroupIds).length === 0) {
+        return Promise.reject(AppError.badRequest(errorMessage, undefined, getFullErrorCode('3D7001')))
+      }
 
-            return Promise.resolve()
-          })
-      })
+      return Promise.resolve()
+    })
   }
 }
 

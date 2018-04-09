@@ -302,7 +302,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck([], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
+        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner', undefined, '3D7001')
       })
     })
 
@@ -335,7 +335,7 @@ describe('OwnerValidator', () => {
       return target.userOwnershipCheck(['group1'], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
-        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
+        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner', undefined, '3D7001')
       })
     })
 
@@ -348,7 +348,7 @@ describe('OwnerValidator', () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
         expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
 
-        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner')
+        expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner', undefined, '3D7001')
       })
     })
   })

@@ -11,9 +11,8 @@ FROM question_type qt;
 
 --update factor level value column for multiline items
 with itemsArray as (
-select fl.id as fl_id, json_array_elements(to_json(fl.value #>'{items}')) as value from experiment e, factor f, factor_level fl
-where e.id = f.experiment_id and f.id = fl.factor_id
-and json_typeof(to_json(fl.value #>'{items}')) = 'array'
+select fl.id as fl_id, json_array_elements(to_json(fl.value #>'{items}')) as value from factor_level fl
+where json_typeof(to_json(fl.value #>'{items}')) = 'array'
 ),
 multilineitemsArrayWithPHAdded as (
 select ia.fl_id,
@@ -34,9 +33,8 @@ where ua.fl_id = fl.id;
 
 --update factor level value column for single line items
 with itemsArray as (
-select fl.id as fl_id, fl.value from experiment e, factor f, factor_level fl
-where e.id = f.experiment_id and f.id = fl.factor_id
-and (fl.value #>'{items, 0}')::jsonb ? 'items' = false
+select fl.id as fl_id, fl.value from factor_level fl
+where (fl.value #>'{items, 0}')::jsonb ? 'items' = false
 ),
 itemsArrayWithPHAdded as (
 select ia.fl_id,

@@ -6,6 +6,10 @@ function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
 }
 
+function experimentBySetIdBatchLoaderCallback(setIds, tx) {
+  return db.experiments.batchFindExperimentBySetId(setIds, tx).then(data => [data])
+}
+
 function experimentsBatchLoaderCallback(tx) {
   return db.experiments.all(false, tx).then(data => [data])
 }
@@ -31,6 +35,7 @@ function createLoaders(tx) {
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
   const designSpecDetailByIdLoader = createDataLoader(db.designSpecificationDetail.batchFind)
   const experimentByIdLoader = createDataLoader(experimentBatchLoaderCallback)
+  const experimentBySetIdLoader = createDataLoader(experimentBySetIdBatchLoaderCallback)
   const factorLevelByIdLoader = createDataLoader(db.factorLevel.batchFind)
   const factorLevelAssociationByIdLoader = createDataLoader(db.factorLevelAssociation.batchFind)
   const factorByIdLoader = createDataLoader(db.factor.batchFind)
@@ -109,6 +114,7 @@ function createLoaders(tx) {
     designSpecDetail: designSpecDetailByIdLoader,
     designSpecDetailByExperimentIds: designSpecDetailByExperimentIdLoader,
     experiment: experimentByIdLoader,
+    experimentBySetId: experimentBySetIdLoader,
     experiments: createDataLoader(experimentsBatchLoaderCallback),
     experimentsByName: createDataLoader(db.experiments.batchFindExperimentsByName),
     factor: factorByIdLoader,

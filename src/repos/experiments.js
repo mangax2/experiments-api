@@ -27,6 +27,19 @@ class experimentsRepo {
     return _.map(ids, id => keyedData[id])
   })
 
+  @setErrorCode('55A000')
+  batchFindExperimentBySetId = (setIds, tx = this.rep) => {
+    if(setIds.length === 1 && setIds[0] === 'null') {
+      return tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\'')
+    }
+
+    return tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', setIds).then((data) => {
+      return _.compact(_.map(setIds, (setId) => {
+        return _.find(data, d => d.set_id === setId)
+      }))
+    })
+  }
+
   @setErrorCode('554000')
   all = (isTemplate) => this.rep.any('SELECT * FROM experiment where is_template = $1', isTemplate)
 

@@ -29,15 +29,54 @@ class experimentsRepo {
 
   @setErrorCode('55A000')
   batchFindExperimentBySetId = (setIds, tx = this.rep) => {
-    if(setIds.length === 1 && setIds[0] === 'null') {
-      return tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\'')
+    const promises = []
+
+    if (setIds.includes('null')){
+      promises.push(tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\''))
+    } else {
+      promises.push(Promise.resolve())
     }
 
-    return tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', setIds).then((data) => {
-      return _.compact(_.map(setIds, (setId) => {
-        return _.find(data, d => d.set_id === setId)
-      }))
+    if(_.without(setIds, 'null').length > 0) {
+      promises.push(tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', [_.without(setIds, 'null')]))
+    } else {
+      promises.push(Promise.resolve())
+    }
+
+    return tx.batch(promises).then(([experimentsNeedingSets, experimentsWithSets]) => {
+      const values = []
+      _.forEach(setIds, (setId) => {
+        if(setId === 'null') {
+          values.push(experimentsNeedingSets)
+        } else {
+          const experimentWithSet = _.find(experimentsWithSets, (exp) => exp.set_id === setId)
+          if (experimentWithSet) {
+            values.push([experimentWithSet])
+          } else {
+            values.push([])
+          }
+        }
+      })
+
+      return values
     })
+
+
+    // return tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', _.without(setIds, 'null')).then((experimentsWithSets) => {
+    //   if (setIds.includes('null')){
+    //     return tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\'')
+    //   }
+    // })
+
+    // if(setIds.length === 1 && setIds[0] === 'null') {
+    //   return tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\'')
+    // }
+    //
+    // return tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', setIds).then((data) => {
+    //   return _.compact(_.map(setIds, (setId) => {
+    //     return _.find(data, d => d.set_id === setId)
+    //   }))
+    // })
   }
 
   @setErrorCode('554000')

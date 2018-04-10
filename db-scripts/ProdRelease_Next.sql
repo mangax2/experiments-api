@@ -10,6 +10,9 @@ FROM question_type qt;
 
 
 --update factor level items with 'isPlaceholder = true' where isPlaceholder is not set
+drop table if exists itemsArrayWithPHAddedTable;
+drop table if exists uniqueFLitemsWithPHArray;
+drop table if exists uniqueFLmultiitemsWithPHArray;
 with recursive
     itemsArraywithoutNested as (
       select fl.id as fl_id,
@@ -56,23 +59,25 @@ with recursive
       end as value
     from itemsArrayWithPHAdded
     where jsonb_array_length((value #>'{items}')::jsonb) > (nr+1)
-  ),
-    uniqueFLitemsWithPHArray as (
-      select fl_id, nr, nested,
-        case
-        when nested = 'yes'
-          then jsonb_agg(to_json(value))
-        else value
-        end as value
-      from itemsArrayWithPHAdded
-      where jsonb_array_length((value #>'{items}')::jsonb) = (nr+1)
-      group by fl_id, nr, nested, value
   )
+select * into TEMP itemsArrayWithPHAddedTable from itemsArrayWithPHAdded;
+
+select nested, fl_id, nr, jsonb_agg(to_json(value)) as value into TEMP uniqueFLmultiitemsWithPHArray
+from itemsArrayWithPHAddedTable
+where jsonb_array_length((value #>'{items}')::jsonb) = (nr+1) and nested = 'yes'
+group by nested, fl_id, nr;
+
+select nested, fl_id, nr, value into TEMP uniqueFLitemsWithPHArray
+from itemsArrayWithPHAddedTable
+where jsonb_array_length((value #>'{items}')::jsonb) = (nr+1) and nested = 'no'
+group by nested, fl_id, nr, value;
+
 update factor_level as fl
-set value = case
-            when ua.nested = 'yes'
-              then jsonb_set(fl.value, '{items}', ua.value)
-            else ua.value
-            end
+set value = jsonb_set(fl.value, '{items}', ua.value)
+from uniqueFLmultiitemsWithPHArray ua
+where ua.fl_id = fl.id;
+
+update factor_level as fl
+set value = ua.value
 from uniqueFLitemsWithPHArray ua
 where ua.fl_id = fl.id;

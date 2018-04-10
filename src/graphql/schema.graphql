@@ -166,6 +166,7 @@ type Owner {
 type Query {
   getExperimentById(id: Int!): Experiment
   getExperimentsByName(name: String!): [Experiment]
+  getExperimentBySetId(setId: Int): [ExperimentInfo]
   getTemplateById(id: Int!): Experiment
   getAllExperiments: [ExperimentInfo]
   getAllTemplates: [ExperimentInfo]

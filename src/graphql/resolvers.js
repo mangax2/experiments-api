@@ -6,6 +6,10 @@ export default {
       context.loaders.experiment.load(args.id),
     getExperimentsByName: (entity, args, context) =>
       context.loaders.experimentsByName.load(args.name),
+    // 'null' is passed here because the load function won't take null
+    // and a string is an invalid type for this call, so it's guaranteed to act the way we need
+    getExperimentBySetId: (entity, args, context) =>
+      context.loaders.experimentBySetId.load(args.setId || 'null'),
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
     // -1 is passed here because these loaders load all experiments/templates,

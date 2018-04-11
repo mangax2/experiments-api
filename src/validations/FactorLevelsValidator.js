@@ -18,12 +18,6 @@ class FactorLevelsValidator extends SchemaValidator {
       // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'factorId', type: 'numeric', required: true },
       { paramName: 'factorId', type: 'refData', entity: db.factor },
-      {
-        paramName: 'FactorLevel',
-        type: 'businessKey',
-        keys: ['factorId', 'value'],
-        entity: db.factorLevel,
-      },
     ]
   }
 
@@ -71,7 +65,7 @@ class FactorLevelsValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.factorId))
       _.forEach(groupByObject, (innerArray) => {
         const value = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
-        if (_.uniq(value).length !== value.length) {
+        if (_.uniqWith(value, _.isEqual).length !== value.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

@@ -31,6 +31,7 @@ function createLoaders(tx) {
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
   const designSpecDetailByIdLoader = createDataLoader(db.designSpecificationDetail.batchFind)
   const experimentByIdLoader = createDataLoader(experimentBatchLoaderCallback)
+  const experimentBySetIdLoader = createDataLoader(db.experiments.batchFindExperimentBySetId)
   const factorLevelByIdLoader = createDataLoader(db.factorLevel.batchFind)
   const factorLevelAssociationByIdLoader = createDataLoader(db.factorLevelAssociation.batchFind)
   const factorByIdLoader = createDataLoader(db.factor.batchFind)
@@ -109,6 +110,7 @@ function createLoaders(tx) {
     designSpecDetail: designSpecDetailByIdLoader,
     designSpecDetailByExperimentIds: designSpecDetailByExperimentIdLoader,
     experiment: experimentByIdLoader,
+    experimentBySetId: experimentBySetIdLoader,
     experiments: createDataLoader(experimentsBatchLoaderCallback),
     experimentsByName: createDataLoader(db.experiments.batchFindExperimentsByName),
     factor: factorByIdLoader,

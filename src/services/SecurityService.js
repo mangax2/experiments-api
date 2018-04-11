@@ -48,15 +48,23 @@ class SecurityService {
 
   @setErrorCode('1O2000')
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
-    .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/users/${userId}/groups`, header)
-      .then((result) => {
-        let groupIds = []
-        if (result.body && result.body.groups) {
-          groupIds = _.map(result.body.groups, 'id')
-          return groupIds
-        }
-        return groupIds
-      }))
+    .then((header) => {
+      const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
+      return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+        .then((result) => {
+          const graphqlResult = _.get(result, 'body')
+
+          if (_.isNil(graphqlResult)) {
+            throw AppError.badRequest('Unable to verify user permissions', getFullErrorCode('1O2001'))
+          }
+
+          if (graphqlResult.errors && graphqlResult.errors.length > 0) {
+            throw AppError.badRequest('Profile API encountered an error', graphqlResult.errors, getFullErrorCode('1O2002'))
+          }
+
+          return _.map(graphqlResult.data.getUserById.groups, 'id')
+        })
+    })
 
   @setErrorCode('1O3000')
   @Transactional('permissionsCheckForExperiments')

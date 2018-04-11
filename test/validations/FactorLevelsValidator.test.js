@@ -19,12 +19,6 @@ describe('FactorLevelsValidator', () => {
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
-        {
-          paramName: 'FactorLevel',
-          type: 'businessKey',
-          keys: ['factorId', 'value'],
-          entity: {},
-        },
       ]
 
       expect(FactorLevelsValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -57,12 +51,6 @@ describe('FactorLevelsValidator', () => {
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
-        {
-          paramName: 'FactorLevel',
-          type: 'businessKey',
-          keys: ['factorId', 'value'],
-          entity: {},
-        },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -76,12 +64,6 @@ describe('FactorLevelsValidator', () => {
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
         { paramName: 'factorId', type: 'numeric', required: true },
         { paramName: 'factorId', type: 'refData', entity: {} },
-        {
-          paramName: 'FactorLevel',
-          type: 'businessKey',
-          keys: ['factorId', 'value'],
-          entity: {},
-        },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

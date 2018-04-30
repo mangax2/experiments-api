@@ -1,6 +1,6 @@
 {
   "name": "experiments-api",
-  "version": "2.17.0",
+  "version": "2.17.1",
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {

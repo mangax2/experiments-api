@@ -139,9 +139,6 @@ router.get('/factors/:id', (req, res, next) => new FactorService().getFactorById
 router.get('/factors', (req, res, next) => new FactorService().getAllFactors()
   .then(factors => res.json(factors))
   .catch(err => next(err)))
-router.post('/factors/lists', (req, res, next) => new ListsService(new PreferencesService()).setUserLists(req.body.userId, req.body.listIds, req.headers, req.context)
-  .then(() => res.sendStatus(204))
-  .catch(err => next(err)))
 
 router.get('/factor-levels', (req, res, next) => new FactorLevelService().getAllFactorLevels()
   .then(factorLevels => res.json(factorLevels))
@@ -272,6 +269,10 @@ router.get('/unit-specification-details/:id', (req, res, next) => new UnitSpecif
   .catch(err => next(err)))
 router.post('/experiments/:id/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.params.id, req.body, req.context, false)
   .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.post('/preferences/factors/lists', (req, res, next) => new ListsService(new PreferencesService()).setUserLists(req.body.userId, req.body.listIds, req.headers, req.context)
+  .then(() => res.sendStatus(204))
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()

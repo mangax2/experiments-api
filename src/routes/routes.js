@@ -16,6 +16,8 @@ import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/FactorTypeService'
 import GroupValueService from '../services/GroupValueService'
+import ListsService from '../services/ListsService'
+import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentService from '../services/TreatmentService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
@@ -136,6 +138,9 @@ router.get('/factors/:id', (req, res, next) => new FactorService().getFactorById
   .catch(err => next(err)))
 router.get('/factors', (req, res, next) => new FactorService().getAllFactors()
   .then(factors => res.json(factors))
+  .catch(err => next(err)))
+router.post('/factors/lists', (req, res, next) => new ListsService(new PreferencesService()).setUserLists(req.body.userId, req.body.listIds, req.headers, req.context)
+  .then(() => res.sendStatus(204))
   .catch(err => next(err)))
 
 router.get('/factor-levels', (req, res, next) => new FactorLevelService().getAllFactorLevels()

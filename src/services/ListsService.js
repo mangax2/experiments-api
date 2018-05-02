@@ -27,8 +27,10 @@ class ListsService {
       throw AppError.badRequest('UserId and Authorization Header must be present', null, '1W2001')
     } else {
       return this.getLists(userId, listIds).then((returnedLists) => {
-        if (returnedLists.body.content.length !== _.uniq(listIds).length) {
-          throw AppError.badRequest('Not all provided list ids are valid', null, '1W2002')
+        const returnedListIds = _.map(returnedLists.body.content, 'id')
+        const invalidListIds = _.filter(listIds, id => !returnedListIds.includes(id))
+        if (invalidListIds.length > 0) {
+          throw AppError.badRequest(`Not all provided list ids are valid. Invalid List Ids: ${invalidListIds}`, null, '1W2002')
         }
 
         return this.preferencesService.getPreferences('experiments-ui', 'factors', headers.authorization, context)

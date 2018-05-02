@@ -50,16 +50,16 @@ describe('ListsService', () => {
       AppError.badRequest = mock('')
 
       const target = new ListsService()
-      target.getLists = mockResolve({ body: { content: [{}, {}] } })
+      target.getLists = mockResolve({ body: { content: [{ id: 2 }, { id: 3 }] } })
 
       return target.setUserLists('kmccl', [1], { authorization: '' }, {}).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Not all provided list ids are valid', null, '1W2002')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Not all provided list ids are valid. Invalid List Ids: 1', null, '1W2002')
       })
     })
 
     test('adds the provided list ids to the user preferences', () => {
       const target = new ListsService({ getPreferences: mockResolve({ body: {} }), setPreferences: mockResolve() })
-      target.getLists = mockResolve({ body: { content: [{}, {}] } })
+      target.getLists = mockResolve({ body: { content: [{ id: 1 }, { id: 2 }] } })
 
       return target.setUserLists('kmccl', [1, 2], { authorization: '' }, {}).then(() => {
         expect(target.getLists).toHaveBeenCalledWith('kmccl', [1, 2])

@@ -39,7 +39,7 @@ class ListsService {
             preferences.listIds = _.uniq(_.compact(([].concat(preferences.listIds, listIds))))
             return this.preferencesService.setPreferences('experiments-ui', 'factors', preferences, headers.authorization, context)
           })
-      })
+      }, (err) => { throw AppError.internalServerError('Error Retrieving Lists', JSON.parse(err.response.text), '1W2003') })
     }
   }
 }

@@ -1,4 +1,4 @@
-import { mock, mockResolve } from '../jestUtil'
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import AppError from '../../src/services/utility/AppError'
 import PingUtil from '../../src/services/utility/PingUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
@@ -54,6 +54,17 @@ describe('ListsService', () => {
 
       return target.setUserLists('kmccl', [1], { authorization: '' }, {}).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Not all provided list ids are valid. Invalid List Ids: 1', null, '1W2002')
+      })
+    })
+
+    test('throws an error when Material Lists call fails', () => {
+      AppError.internalServerError = mock('')
+
+      const target = new ListsService()
+      target.getLists = mockReject({ response: { text: '{ "message": "It Broke"}' } })
+
+      return target.setUserLists('kmccl', ['a'], { authorization: '' }, {}).then(() => {}, () => {
+        expect(AppError.internalServerError).toHaveBeenCalledWith('Error Retrieving Lists', { message: 'It Broke' }, '1W2003')
       })
     })
 

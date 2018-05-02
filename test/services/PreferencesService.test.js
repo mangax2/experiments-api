@@ -38,7 +38,7 @@ describe('PreferencesService', () => {
       const target = new PreferencesService()
       expect(target.handlePreferencesAPIError({ status: 502, response: { text: 'It Broke' } }, 1))
         .toEqual({
-          status: 500, code: 'Internal Server Error', message: 'Error received from Preferences API: It Broke', errorCode: 1,
+          status: 500, code: 'Internal Server Error', message: 'Error received from Preferences API. It Broke', errorCode: 1,
         })
     })
   })

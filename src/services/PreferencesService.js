@@ -17,16 +17,16 @@ class PreferencesService {
     if (err.status === 400) {
       return AppError.badRequest('Bad Request', undefined, errorCode)
     } else if (err.status === 401) {
-      return AppError.unauthorized(err.response.text, undefined, errorCode)
+      return AppError.unauthorized('Unauthorized', undefined, errorCode)
     } else if (err.status === 403) {
-      return AppError.forbidden(err.response.text, undefined, errorCode)
+      return AppError.forbidden('Forbidden', undefined, errorCode)
     } else if (err.status === 404) {
       return AppError.badRequest('Preferences not found', undefined, errorCode)
     }
     return {
       status: 500,
       code: 'Internal Server Error',
-      message: `Error received from Preferences API: ${err.response.text}`,
+      message: `Error received from Preferences API. ${err.response.text}`,
       errorCode,
     }
   }

@@ -2314,6 +2314,54 @@
         }
       }
     },
+    "/preferences/factors/lists": {
+      "post": {
+        "summary": "Adds list ids to user preferences for factors",
+        "description": "Accepts an array of list ids to set for the user preferences for material lists",
+        "operationId": "postMaterialListPreferences",
+        "tags": ["Preferences"],
+        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ListsValue",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ListPreferencesPayload"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Preferences Updated"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/ref-data-source-types": {
       "get": {
         "summary": "Gets all Reference Data Source Types and all their defined Data Sources",
@@ -5271,6 +5319,20 @@
     },
     "Levels": {
       "type": "string"
+    },
+    "ListPreferencesPayload": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "listIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
     },
     "PermissionsResponse": {
       "type": "string"

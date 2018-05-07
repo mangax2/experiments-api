@@ -137,6 +137,15 @@ class unitRepo {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
+
+  @setErrorCode('5JE000')
+  batchClearEntryIds = (setId, tx = this.rep) => {
+    if (!setId) {
+      return Promise.resolve()
+    }
+
+    return tx.none('UPDATE unit SET set_entry_id = NULL WHERE id IN (WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT u.id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id)', setId)
+  }
 }
 
 module.exports = (rep, pgp) => new unitRepo(rep, pgp)

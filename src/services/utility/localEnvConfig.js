@@ -41,6 +41,15 @@ const cfServices = {
         product360Outgoing: 1726
       }
     }
+  },
+  setsKafka: {
+    value: {
+      enableKafka: 'false',
+      host: 'kafka.tst.datahub.internal:9093',
+      topics: {
+        setsChangesTopic: 'rsr.field-sets.product360-np.outgoing.avro'
+      },
+    }
   }
 }
 

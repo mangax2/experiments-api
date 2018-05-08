@@ -4,11 +4,11 @@ import cfServices from '../services/utility/ServiceConfig'
 
 function sendKafkaNotification(event, id) {
   const message =
-    {
-      resource_id: id,
-      event_category: event,
-      time: new Date(Date.now()).toISOString(),
-    }
+      {
+        resource_id: id,
+        event_category: event,
+        time: new Date(Date.now()).toISOString(),
+      }
 
   KafkaProducer.publish(
     {

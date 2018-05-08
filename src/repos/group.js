@@ -173,6 +173,11 @@ class groupRepo {
         return _.map(parentIds, parentId => dataByParentId[parentId] || [])
       })
   }
+
+  @setErrorCode('5BF000')
+  clearSetId = (setId, tx = this.rep) => {
+    return tx.any('UPDATE "group" SET set_id = NULL WHERE set_id=$1 RETURNING experiment_id', setId)
+  }
 }
 
 module.exports = (rep, pgp) => new groupRepo(rep, pgp)

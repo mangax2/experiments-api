@@ -15,7 +15,7 @@ class SetsChangesListener {
     const params = {
       client_id: VaultUtil.clientId,
       groupId: VaultUtil.clientId,
-      connectionString: cfServices.setsKafka.value.host,
+      connectionString: cfServices.experimentsKafka.value.host,
       reconnectionDelay: {
         min: 100000,
         max: 100000,
@@ -29,7 +29,7 @@ class SetsChangesListener {
 
     this.consumer = SetsChangesListener.createConsumer(params)
     const strategies = [{
-      subscriptions: [cfServices.setsKafka.value.topics.setsChangesTopic],
+      subscriptions: [cfServices.experimentsKafka.value.topics.setsChangesTopic],
       handler: this.dataHandler,
     }]
     this.consumer.init(strategies)

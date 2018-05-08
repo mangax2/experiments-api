@@ -21,7 +21,7 @@ describe('SetsChangesListener', () => {
       VaultUtil.kafkaPrivateKey = 'key'
       VaultUtil.kafkaPassword = 'password'
       VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
-      cfServices.setsKafka = { value: { host: 'host', topics: { setsChangesTopic: 'topic' } } }
+      cfServices.experimentsKafka = { value: { host: 'host', topics: { setsChangesTopic: 'topic' } } }
       const consumer = { init: jest.fn() }
       SetsChangesListener.createConsumer = jest.fn(() => consumer)
 
@@ -74,6 +74,7 @@ describe('SetsChangesListener', () => {
       const target = new SetsChangesListener()
       target.clearSet = mockResolve([{ experiment_id: 1 }])
       target.consumer = { commitOffset: mock() }
+      cfServices.experimentsKafka = { value: { topics: { product360OutgoingTopic: 'topic1' }, schema: { product360Outgoing: 123 } } }
 
       return target.dataHandler([{ message: { value: serializedMessage }, offset: 1 }], 'topic', 'partition').then(() => {
         expect(target.clearSet).toHaveBeenCalledWith(123)

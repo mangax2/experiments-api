@@ -35,22 +35,14 @@ const cfServices = {
       topics: {
         repPackingTopic:'rsr.field-experiments.test.incoming.json',
         repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json',
-        product360OutgoingTopic: 'rsr.field-experiments.product360-test.outgoing.avro'
+        product360OutgoingTopic: 'rsr.field-experiments.product360-test.outgoing.avro',
+        setsChangesTopic: 'rsr.field-sets.product360-np.outgoing.avro'
       },
       schema: {
         product360Outgoing: 1726
       }
     }
   },
-  setsKafka: {
-    value: {
-      enableKafka: 'false',
-      host: 'kafka.tst.datahub.internal:9093',
-      topics: {
-        setsChangesTopic: 'rsr.field-sets.product360-np.outgoing.avro'
-      },
-    }
-  }
 }
 
 module.exports = cfServices

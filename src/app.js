@@ -146,7 +146,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     }
   }
   const setsChangesMessageConsume = () => {
-    if (serviceConfig.setsKafka.value.enableKafka === 'true') {
+    if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
       try {
         require('./services/listeners/SetsChangesListener').setsChangesListener.listen()
       } catch (error) {

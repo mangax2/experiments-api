@@ -74,8 +74,7 @@
     "pg-monitor": "0.7.1"
   },
   "engines": {
-    "node": "~6.9.4",
-    "npm": "3.10.x"
+    "node": "8.11.1"
   },
   "license": "ISC"
 }

@@ -1102,7 +1102,7 @@ describe('ExperimentsService', () => {
       db.experiments.findExperimentsByUserIdOrGroup = mockResolve()
       AppError.badRequest = mock()
 
-      return target.getExperimentsByUser('testUser', false, testTx).then(() => {
+      return target.getExperimentsByUser(['testUser'], false, testTx).then(() => {
         expect(target.securityService.getGroupsByUserId).toBeCalledWith('testUser')
         expect(db.experiments.findExperimentsByUserIdOrGroup).toBeCalledWith(false, 'testUser', ['testGroup'], testTx)
         expect(AppError.badRequest).not.toBeCalled()
@@ -1118,6 +1118,19 @@ describe('ExperimentsService', () => {
         expect(target.securityService.getGroupsByUserId).not.toBeCalled()
         expect(db.experiments.findExperimentsByUserIdOrGroup).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('No UserId provided.', undefined, '15N001')
+        done()
+      })
+    })
+
+    test('returns a 400 if more than one user id provided', (done) => {
+      target.securityService.getGroupsByUserId = mockResolve(['testGroup'])
+      db.experiments.findExperimentsByUserIdOrGroup = mockResolve()
+      AppError.badRequest = mock()
+
+      return target.getExperimentsByUser(['testUser1', 'testUser2'], false, testTx).catch(() => {
+        expect(target.securityService.getGroupsByUserId).not.toBeCalled()
+        expect(db.experiments.findExperimentsByUserIdOrGroup).not.toBeCalled()
+        expect(AppError.badRequest).toBeCalledWith('Multiple UserIds are not allowed.', undefined, '15N002')
         done()
       })
     })

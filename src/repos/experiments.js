@@ -99,7 +99,7 @@ class experimentsRepo {
   })
 
   findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds, tx = this.rep) => tx.any(
-    'SELECT e.* FROM experiment e INNER JOIN owner o ON e.id=o.experiment_id WHERE e.is_template=$1 AND (o.user_ids && ARRAY[$2]::VARCHAR[] OR o.group_ids && ARRAY[$3:csv]::VARCHAR[])',
+    'SELECT e.* FROM experiment e INNER JOIN owner o ON e.id=o.experiment_id WHERE e.is_template=$1 AND (o.user_ids && ARRAY[UPPER($2)]::VARCHAR[] OR o.group_ids && ARRAY[$3:csv]::VARCHAR[])',
     [isTemplate, userId, groupIds])
 }
 

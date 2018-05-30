@@ -23,9 +23,7 @@ class PingUtil {
       ]
     }).catch((error) => {
       logger.error('Authentication service returned error', error)
-      return Promise.reject(AppError.create(500, 'Internal Server Error', 'Authentication service' +
-        ' returned' +
-        ' error'))
+      return Promise.reject(AppError.create(500, 'Internal Server Error', 'Authentication service returned an error'))
     })
   }
 }

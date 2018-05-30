@@ -165,11 +165,13 @@ type Owner {
 
 type Query {
   getExperimentById(id: Int!): Experiment
+  getExperimentsByCriteria(criteria: String!, value: String!): [Experiment]
   getExperimentsByName(name: String!): [Experiment]
   getExperimentBySetId(setId: Int): [ExperimentInfo]
   getTemplateById(id: Int!): Experiment
   getAllExperiments: [ExperimentInfo]
   getAllTemplates: [ExperimentInfo]
+  getTemplatesByCriteria(criteria: String!, value: String!): [Experiment]
   getFactorsByExperimentId(experimentId: Int!): [Factor]
   getTreatmentsByExperimentId(experimentId: Int!): [Treatment]
   getUnitSpecificationDetailsByExperimentId(experimentId: Int!): [UnitSpecificationDetail]

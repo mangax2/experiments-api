@@ -388,6 +388,26 @@ class ExperimentsService {
   prepareTagResponse(tags) {
     return _.map(tags, t => ({ category: t.category, value: t.value }))
   }
+
+  @setErrorCode('15N000')
+  @Transactional('getExperimentsByUser')
+  getExperimentsByUser = (userId, isTemplate, tx) => {
+    if (!userId) {
+      return Promise.reject(AppError.badRequest('No UserId provided.', undefined, getFullErrorCode('15N001')))
+    }
+    return this.securityService.getGroupsByUserId(userId).then(groupIds =>
+      db.experiments.findExperimentsByUserIdOrGroup(isTemplate, userId, groupIds, tx))
+  }
+
+  @setErrorCode('15O000')
+  getExperimentsByCriteria = ({ criteria, value, isTemplate }) => {
+    switch (criteria) {
+      case 'owner':
+        return this.getExperimentsByUser(value, isTemplate)
+      default:
+        return Promise.reject(AppError.badRequest('Invalid criteria provided', undefined, getFullErrorCode('15O001')))
+    }
+  }
 }
 
 module.exports = ExperimentsService

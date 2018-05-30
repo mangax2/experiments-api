@@ -1095,4 +1095,64 @@ describe('ExperimentsService', () => {
       })
     })
   })
+
+  describe('getExperimentsByUser', () => {
+    test('calls both security service and experiments repo', () => {
+      target.securityService.getGroupsByUserId = mockResolve(['testGroup'])
+      db.experiments.findExperimentsByUserIdOrGroup = mockResolve()
+      AppError.badRequest = mock()
+
+      return target.getExperimentsByUser('testUser', false, testTx).then(() => {
+        expect(target.securityService.getGroupsByUserId).toBeCalledWith('testUser')
+        expect(db.experiments.findExperimentsByUserIdOrGroup).toBeCalledWith(false, 'testUser', ['testGroup'], testTx)
+        expect(AppError.badRequest).not.toBeCalled()
+      })
+    })
+
+    test('returns a 400 if no user id provided', (done) => {
+      target.securityService.getGroupsByUserId = mockResolve(['testGroup'])
+      db.experiments.findExperimentsByUserIdOrGroup = mockResolve()
+      AppError.badRequest = mock()
+
+      return target.getExperimentsByUser(undefined, false, testTx).catch(() => {
+        expect(target.securityService.getGroupsByUserId).not.toBeCalled()
+        expect(db.experiments.findExperimentsByUserIdOrGroup).not.toBeCalled()
+        expect(AppError.badRequest).toBeCalledWith('No UserId provided.', undefined, '15N001')
+        done()
+      })
+    })
+  })
+
+  describe('getExperimentsByCriteria', () => {
+    let originalGetExperimentsByUser
+
+    beforeAll(() => {
+      originalGetExperimentsByUser = target.getExperimentsByUser
+    })
+
+    afterAll(() => {
+      target.getExperimentsByUser = originalGetExperimentsByUser
+    })
+
+    test('calls getExperimentsByUser if criteria is owner', () => {
+      target.getExperimentsByUser = mockResolve()
+      AppError.badRequest = mock()
+
+      return target.getExperimentsByCriteria({ criteria: 'owner', value: 'testUser', isTemplate: true }).then(() => {
+        expect(target.getExperimentsByUser).toBeCalledWith('testUser', true)
+        expect(AppError.badRequest).not.toBeCalled()
+      })
+    })
+
+    test('returns a 400 if criteria does not match', (done) => {
+      target.getExperimentsByUser = mockResolve()
+      AppError.badRequest = mock()
+
+      return target.getExperimentsByCriteria({ criteria: 'badCriteria', value: 'testUser', isTemplate: true }).catch(() => {
+        expect(target.getExperimentsByUser).not.toBeCalled()
+        expect(AppError.badRequest).toBeCalledWith('Invalid criteria provided', undefined, '15O001')
+        done()
+      })
+    })
+  })
 })

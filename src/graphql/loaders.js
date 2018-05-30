@@ -31,8 +31,7 @@ function createLoaders(tx) {
 
   const experimentsByCriteriaLoader =
     new DataLoader(args =>
-      new ExperimentsService().getExperimentsByCriteria(args[0])
-        .then(data => [data]))
+      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)

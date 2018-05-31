@@ -24,10 +24,8 @@ const transactionalBatchResolverWrapper =
 
 function createLoaders(tx) {
   const transactionalWrapper = transactionalBatchResolverWrapper(tx)
-  const createDataLoader = (batchLoaderCallback) => {
-    const temp = transactionalWrapper(batchLoaderCallback)
-    return new DataLoader(temp)
-  }
+  const createDataLoader = batchLoaderCallback =>
+    new DataLoader(transactionalWrapper(batchLoaderCallback))
 
   const experimentsByCriteriaLoader =
     new DataLoader(args =>

@@ -20,7 +20,7 @@ describe('PingUtil', () => {
 
       return PingUtil.getMonsantoHeader().then(() => {}, (err) => {
         expect(oauthPing.httpGetToken).toHaveBeenCalled()
-        expect(err.data).toEqual('Authentication service returned error')
+        expect(err.data).toEqual('Authentication service returned an error')
         expect(err.message).toEqual('Internal Server Error')
       })
     })

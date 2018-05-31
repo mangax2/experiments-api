@@ -4,6 +4,9 @@ export default {
   Query: {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load(args.id),
+    getExperimentsByCriteria: (entity, args, context) =>
+      context.loaders.experimentsByCriteria.load(
+        { criteria: args.criteria, value: args.value, isTemplate: false }),
     getExperimentsByName: (entity, args, context) =>
       context.loaders.experimentsByName.load(args.name),
     // 'null' is passed here because the load function won't take null
@@ -12,6 +15,9 @@ export default {
       context.loaders.experimentBySetId.load(args.setId || 'null'),
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
+    getTemplatesByCriteria: (entity, args, context) =>
+      context.loaders.experimentsByCriteria.load(
+        { criteria: args.criteria, value: args.value, isTemplate: true }),
     // -1 is passed here because these loaders load all experiments/templates,
     // so the ID is irrelevant.
     // It is specified because data loader requires an ID to associate with cached results.

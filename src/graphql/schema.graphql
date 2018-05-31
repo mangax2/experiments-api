@@ -27,6 +27,10 @@ type CombinationElement {
   factorLevel: FactorLevel
 }
 
+enum Criteria {
+  owner
+}
+
 type DependentVariable {
   id: Int
   name: String
@@ -165,11 +169,13 @@ type Owner {
 
 type Query {
   getExperimentById(id: Int!): Experiment
+  getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!): [Experiment]
   getExperimentBySetId(setId: Int): [ExperimentInfo]
   getTemplateById(id: Int!): Experiment
   getAllExperiments: [ExperimentInfo]
   getAllTemplates: [ExperimentInfo]
+  getTemplatesByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getFactorsByExperimentId(experimentId: Int!): [Factor]
   getTreatmentsByExperimentId(experimentId: Int!): [Treatment]
   getUnitSpecificationDetailsByExperimentId(experimentId: Int!): [UnitSpecificationDetail]

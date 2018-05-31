@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import DataLoader from 'dataloader'
 import db from '../db/DbManager'
+import ExperimentsService from '../services/ExperimentsService'
 
 function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
@@ -25,6 +26,10 @@ function createLoaders(tx) {
   const transactionalWrapper = transactionalBatchResolverWrapper(tx)
   const createDataLoader = batchLoaderCallback =>
     new DataLoader(transactionalWrapper(batchLoaderCallback))
+
+  const experimentsByCriteriaLoader =
+    new DataLoader(args =>
+      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
@@ -112,6 +117,7 @@ function createLoaders(tx) {
     experiment: experimentByIdLoader,
     experimentBySetId: experimentBySetIdLoader,
     experiments: createDataLoader(experimentsBatchLoaderCallback),
+    experimentsByCriteria: experimentsByCriteriaLoader,
     experimentsByName: createDataLoader(db.experiments.batchFindExperimentsByName),
     factor: factorByIdLoader,
     factorByExperimentIds: factorByExperimentIdLoader,

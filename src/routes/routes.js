@@ -272,7 +272,7 @@ router.post('/experiments/:id/composites/unit-specification-details', (req, res,
   .catch(err => next(err)))
 
 router.post('/preferences/factors/lists', (req, res, next) => new ListsService(new PreferencesService()).setUserLists(req.body.userId, req.body.listIds, req.headers, req.context)
-  .then(() => res.sendStatus(204))
+  .then(data => res.status(200).json(data))
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()

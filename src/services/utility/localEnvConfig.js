@@ -12,11 +12,6 @@ const cfServices = {
     max: 10,
     idleTimeoutMillis: 30000,
   },
-  pingDataSource: {
-    url: 'https://test.amp.monsanto.com/as/token.oauth2',
-    clientId: process.env.EXPERIMENTS_API_CLIENT_ID,
-    clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
-  },
   experimentsExternalAPIUrls: {
     value: {
       capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
@@ -42,6 +37,14 @@ const cfServices = {
         product360Outgoing: 1726
       }
     }
+  },
+  pingDataSource: {
+    url: 'https://test.amp.monsanto.com/as/token.oauth2',
+    clientId: process.env.EXPERIMENTS_API_CLIENT_ID,
+    clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
+  },
+  'velocity-home': {
+    value: "dev.velocity-np.ag"
   },
 }
 

@@ -38,6 +38,7 @@ class ListsService {
             const preferences = data.body
             preferences.listIds = _.uniq(_.compact(([].concat(preferences.listIds, listIds))))
             return this.preferencesService.setPreferences('experiments-ui', 'factors', preferences, headers.authorization, context)
+              .then(() => ({ success: true, url: `https://${cfService['velocity-home'].value}/experiments`, method: 'newtab' }))
           })
       }, (err) => { throw AppError.internalServerError('Error Retrieving Lists', JSON.parse(err.response.text), '1W2003') })
     }

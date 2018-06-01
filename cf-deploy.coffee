@@ -13,6 +13,7 @@ module.exports = (cfDeploy) ->
   startupCommand: 'npm start'
   services: [
     'expSys',
+    'velocity-home',
     "#{experimentsDataSource}",
     "#{experimentsVault}",
     "#{experimentsExternalAPIUrls}",

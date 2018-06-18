@@ -1179,6 +1179,56 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Save all design specification details for an experiment",
+        "description": "Save all design specification details for an experiment",
+        "operationId": "postDesign-specification-detailsByExperimentId",
+        "tags": [
+          "Design Specification Detail"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "designSpecBody",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CompositeDesignSpecificationDetailPayloadForPOST"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Save Design Specification Detail Success"
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/experiments/{id}/experimental-units": {
@@ -3394,6 +3444,56 @@
                 "$ref": "#/definitions/DesignSpecificationDetail"
               }
             }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Save all design specification details for a template",
+        "description": "Save all design specification details for a template",
+        "operationId": "postDesign-specification-detailsByTemplateId",
+        "tags": [
+          "Design Specification Detail"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "designSpecBody",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CompositeDesignSpecificationDetailPayloadForPOST"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Save Design Specification Detail Success"
           },
           "400": {
             "description": "Invalid Request",

@@ -2385,8 +2385,11 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Preferences Updated"
+          "200": {
+            "description": "Preferences Updated",
+            "schema": {
+              "$ref": "#/definitions/ListPreferencesResponse"
+            }
           },
           "400": {
             "description": "Invalid/Problematic Input",
@@ -5431,6 +5434,20 @@
           "items": {
             "type": "integer"
           }
+        }
+      }
+    },
+    "ListPreferencesResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
         }
       }
     },

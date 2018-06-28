@@ -42,7 +42,10 @@ class ExperimentsService {
           const experimentsOwners = _.map(experiments, (exp) => {
             const owners = _.map(exp.owners, _.trim)
             const ownerGroups = _.map(exp.ownerGroups, _.trim)
-            return { experimentId: exp.id, userIds: owners, groupIds: ownerGroups }
+            const reviewers = _.map(exp.reviewers, _.trim)
+            return {
+              experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerIds: reviewers,
+            }
           })
 
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
@@ -103,6 +106,7 @@ class ExperimentsService {
         const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
         experiment.owners = owners.user_ids
         experiment.ownerGroups = owners.group_ids
+        experiment.reviewers = owners.reviewer_ids
         return experiment
       }),
     )
@@ -147,6 +151,7 @@ class ExperimentsService {
         ).then((ownersAndTags) => {
           data.owners = ownersAndTags[0].user_ids
           data.ownerGroups = ownersAndTags[0].group_ids
+          data.reviewers = ownersAndTags[0].reviewer_ids
           data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
           return data
         })
@@ -172,11 +177,12 @@ class ExperimentsService {
             } else {
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
-
+              const trimmedReviewers = _.map(experiment.reviewers, _.trim)
               const owners = {
                 experimentId: id,
                 userIds: trimmedUserIds,
                 groupIds: trimmedOwnerGroups,
+                reviewerIds: trimmedReviewers,
               }
               return this.ownerService.batchUpdateOwners([owners], context, tx)
                 .then(() => {

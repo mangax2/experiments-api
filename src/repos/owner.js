@@ -27,14 +27,16 @@ class ownerRepo {
   batchCreate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.one(
-        'insert into owner(experiment_id, user_ids, group_ids, created_user_id, ' +
+        'insert into owner(experiment_id, user_ids, group_ids, reviewer_ids,created_user_id, ' +
         ' created_date,' +
-        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[], $4,' +
-        ' CURRENT_TIMESTAMP, $4,' +
+        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[],$4:varchar[],' +
+        ' $5,' +
+        ' CURRENT_TIMESTAMP, $5,' +
         ' CURRENT_TIMESTAMP)  RETURNING id',
         [ownershipInfo.experimentId,
           ownershipInfo.userIds,
           ownershipInfo.groupIds,
+          ownershipInfo.reviewerIds,
           context.userId],
       ),
     ),
@@ -44,12 +46,13 @@ class ownerRepo {
   batchUpdate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.oneOrNone(
-        'UPDATE owner SET (user_ids, group_ids,' +
-        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[], $3,' +
-        ' CURRENT_TIMESTAMP) WHERE experiment_id=$4 RETURNING *',
+        'UPDATE owner SET (user_ids, group_ids,reviewer_ids' +
+        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[],$3::varchar[], $4,' +
+        ' CURRENT_TIMESTAMP) WHERE experiment_id=$5 RETURNING *',
         [
           ownershipInfo.userIds,
           ownershipInfo.groupIds,
+          ownershipInfo.reviewerIds,
           context.userId,
           ownershipInfo.experimentId,
         ],

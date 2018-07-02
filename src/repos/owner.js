@@ -13,7 +13,8 @@ class ownerRepo {
   repository = () => this.rep
 
   @setErrorCode('5E1000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT user_ids, group_ids FROM' +
+  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT user_ids,' +
+    ' group_ids,reviewer_ids FROM' +
     ' owner WHERE' +
     ' experiment_id = $1', experimentId)
 
@@ -29,7 +30,7 @@ class ownerRepo {
       ownershipInfo => tx.one(
         'insert into owner(experiment_id, user_ids, group_ids, reviewer_ids,created_user_id, ' +
         ' created_date,' +
-        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[],$4:varchar[],' +
+        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[],$4::varchar[],' +
         ' $5,' +
         ' CURRENT_TIMESTAMP, $5,' +
         ' CURRENT_TIMESTAMP)  RETURNING id',
@@ -46,8 +47,8 @@ class ownerRepo {
   batchUpdate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.oneOrNone(
-        'UPDATE owner SET (user_ids, group_ids,reviewer_ids' +
-        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[],$3::varchar[], $4,' +
+        'UPDATE owner SET (user_ids, group_ids,reviewer_ids,' +
+        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[], $3::varchar[], $4,' +
         ' CURRENT_TIMESTAMP) WHERE experiment_id=$5 RETURNING *',
         [
           ownershipInfo.userIds,

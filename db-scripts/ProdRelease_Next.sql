@@ -1,2 +1,2 @@
-DELETE FROM ref_data_source
-where ref_id in ('PLANT_SAMPLE', 'PROTEIN', 'CONTAINER', 'FORMULATION_CATALOG')
+ALTER TABLE public.owner
+    ADD COLUMN reviewer_ids character varying[] NOT NULL DEFAULT ARRAY[]::character varying[];

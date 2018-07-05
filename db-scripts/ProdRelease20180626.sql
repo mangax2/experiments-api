@@ -1,0 +1,2 @@
+DELETE FROM ref_data_source
+where ref_id in ('PLANT_SAMPLE', 'PROTEIN', 'CONTAINER', 'FORMULATION_CATALOG')

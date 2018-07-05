@@ -35,26 +35,31 @@ describe('ExperimentsService', () => {
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
+        reviewers: ['group2 '],
       }], testContext, false, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
@@ -79,29 +84,34 @@ describe('ExperimentsService', () => {
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
+        reviewers: ['group2 '],
         request: { id: 1, type: 'field' },
       }], testContext, true, testTx).catch(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
@@ -566,6 +576,7 @@ describe('ExperimentsService', () => {
       return target.updateExperiment(1, {
         owners: ['KMCCL '],
         ownerGroups: ['group1'],
+        reviewers: ['group2'],
 
       }, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -574,23 +585,27 @@ describe('ExperimentsService', () => {
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
         }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
           id: 1,
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
         }, testContext, testTx)
         expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
         }])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
         expect(data).toEqual({})

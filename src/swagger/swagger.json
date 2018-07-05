@@ -5021,6 +5021,12 @@
             "type": "string"
           }
         },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "request": {
           "type": "object",
           "description": "The identifiers for the Capacity Request to associate with the experiment. This element is optional.",
@@ -5077,6 +5083,12 @@
           }
         },
         "ownerGroups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewers": {
           "type": "array",
           "items": {
             "type": "string"

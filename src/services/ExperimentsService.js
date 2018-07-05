@@ -34,15 +34,13 @@ class ExperimentsService {
       .then(() => this.validateAssociatedRequests(experiments, isTemplate))
       .then(() => db.experiments.batchCreate(experiments, context, tx)
         .then((data) => {
-          // console.log('***************')
-          const experimentIds = _.map(data, d => d.id)
+         const experimentIds = _.map(data, d => d.id)
           _.forEach(experiments, (experiment, index) => {
             experiment.id = experimentIds[index]
           })
 
           const experimentsOwners = _.map(experiments, (exp) => {
-            // console.log('exp', exp)
-            const owners = _.map(exp.owners, _.trim)
+          const owners = _.map(exp.owners, _.trim)
             const ownerGroups = _.map(exp.ownerGroups, _.trim)
             const reviewers = _.map(exp.reviewers, _.trim)
             return {

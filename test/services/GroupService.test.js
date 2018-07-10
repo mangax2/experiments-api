@@ -157,16 +157,6 @@ describe('GroupService', () => {
     })
   })
 
-  describe('batchUpdateGroupsNoValidate', () => {
-    test('updates groups', () => {
-      db.group.batchUpdate = mockResolve([{}])
-
-      return target.batchUpdateGroupsNoValidate([{}], testContext, testTx).then(() => {
-        expect(db.group.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
-      })
-    })
-  })
-
   describe('partiallyUpdateGroup', () => {
     test('partially updates a group', () => {
       target.validator.validate = mockResolve()

@@ -54,11 +54,6 @@ class GroupService {
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @setErrorCode('1G5000')
-  @Transactional('batchUpdateGroups')
-  batchUpdateGroupsNoValidate = (groups, context, tx) =>
-    db.group.batchUpdate(groups, context, tx)
-
   @setErrorCode('1G6000')
   @Transactional('partiallyUpdateGroup')
   partiallyUpdateGroup = (groups, context, tx) =>

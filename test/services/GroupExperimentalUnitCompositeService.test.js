@@ -102,7 +102,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.createExperimentalUnits = mockResolve([5])
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
-      target.batchUpdateGroups = mockResolve()
       target.batchDeleteGroups = mockResolve()
       AppUtil.createCompositePostResponse = mock()
 
@@ -115,7 +114,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.createExperimentalUnits).toBeCalled()
         expect(target.batchUpdateExperimentalUnits).toBeCalled()
         expect(target.batchDeleteExperimentalUnits).toBeCalled()
-        expect(target.batchUpdateGroups).toBeCalled()
         expect(target.batchDeleteGroups).toBeCalled()
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
@@ -135,7 +133,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.createExperimentalUnits = mockResolve()
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
-      target.batchUpdateGroups = mockResolve()
       target.batchDeleteGroups = mockResolve()
       target.getGroupTree = mockResolve([])
 
@@ -147,7 +144,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.createExperimentalUnits).not.toBeCalled()
         expect(target.batchUpdateExperimentalUnits).not.toBeCalled()
         expect(target.batchDeleteExperimentalUnits).not.toBeCalled()
-        expect(target.batchUpdateGroups).not.toBeCalled()
         expect(target.batchDeleteGroups).not.toBeCalled()
         expect(err).toEqual(error)
       })
@@ -220,24 +216,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
         expect(db.unit.batchRemove).toBeCalledWith([5], testTx)
-      })
-    })
-  })
-
-  describe('batchUpdateGroups', () => {
-    test('does not call groupService if no groups passed in', () => {
-      target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
-
-      return target.batchUpdateGroups([], testContext, testTx).then(() => {
-        expect(target.groupService.batchUpdateGroupsNoValidate).not.toBeCalled()
-      })
-    })
-
-    test('does call groupService if groups are passed in', () => {
-      target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
-
-      return target.batchUpdateGroups([{}], testContext, testTx).then(() => {
-        expect(target.groupService.batchUpdateGroupsNoValidate).toBeCalledWith([{}], testContext, testTx)
       })
     })
   })
@@ -626,9 +604,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.assignAncestryAndLocation).toHaveBeenCalledTimes(2)
       expect(target.findMatchingEntity).toHaveBeenCalledTimes(2)
 
-      additionalLogicFuncs[0](testGroup, { ref_randomization_strategy_id: 3 })
+      additionalLogicFuncs[0](testGroup, {})
 
-      expect(testGroup.oldRefRandomizationStrategyId).toBe(3)
       expect(testGroup.units[0].groupId).toBe(5)
 
       additionalLogicFuncs[1](testGroup.units[0], { group: { id: 7 }, setEntryId: 3 })
@@ -725,7 +702,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groups: {
           adds: [newGroups[1]],
           deletes: [oldGroups[1]],
-          updates: [newGroups[0]],
         },
         units: {
           adds: [newUnits[2]],
@@ -974,7 +950,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       const result = target.createRcbGroupStructure(5, setGroup, 2, [{ id: 3 }, { id: 7 }], 6)
 
       expect(result).toEqual([{
-        refRandomizationStrategyId: 2,
         refGroupTypeId: 4,
         groupValues: [{
           name: 'locationNumber',
@@ -982,7 +957,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         }],
         setId: 5,
         childGroups: [{
-          refRandomizationStrategyId: 2,
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',
@@ -996,7 +970,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
             rep: 1,
           }],
         }, {
-          refRandomizationStrategyId: 2,
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',

@@ -14,34 +14,33 @@ class groupRepo {
   repository = () => this.rep
 
   @setErrorCode('5B1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM "group" WHERE id = $1', id)
+  find = (id, tx = this.rep) => tx.oneOrNone('SELECT g.*, dsd.value AS ref_randomization_strategy_id FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE g.id = $1', id)
 
   @setErrorCode('5BA000')
-  findGroupBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT g.*, gv.value AS location_number FROM "group" g INNER JOIN group_value gv ON g.id = gv.group_id WHERE g.set_id = $1 AND gv.name = \'locationNumber\'', setId)
+  findGroupBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT dsd.value AS ref_randomization_strategy_id, g.*, gv.value AS location_number FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 INNER JOIN group_value gv ON g.id = gv.group_id WHERE g.set_id = $1 AND gv.name = \'locationNumber\'', setId)
 
   @setErrorCode('5B2000')
-  findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select g.*, gv.value as rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
+  findRepGroupsBySetId = (setId, tx = this.rep) => tx.any('select dsd.value AS ref_randomization_strategy_id, g.*, gv.value as rep from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\' ',setId)
 
   @setErrorCode('5B3000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids, tx = this.rep) => tx.any('SELECT dsd.value AS ref_randomization_strategy_id, g.* FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE g.id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('5B4000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT id, experiment_id, parent_id, ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT g.id, g.experiment_id, parent_id, dsd.value AS ref_randomization_strategy_id, ref_group_type_id, set_id  FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE g.experiment_id=$1 ORDER BY g.id ASC', experimentId)
 
   @setErrorCode('5B5000')
   batchCreate = (groups, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['experiment_id', 'parent_id', 'ref_randomization_strategy_id', 'ref_group_type_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['experiment_id', 'parent_id', 'ref_group_type_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'group' },
     )
 
     const values = groups.map(group => ({
       experiment_id: group.experimentId,
       parent_id: group.parentId,
-      ref_randomization_strategy_id: group.refRandomizationStrategyId,
       ref_group_type_id: group.refGroupTypeId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
@@ -60,9 +59,6 @@ class groupRepo {
       ['?id', 'experiment_id', {
         name: 'parent_id',
         cast: 'int',
-      }, {
-        name: 'ref_randomization_strategy_id',
-        cast: 'int',
       }, 'ref_group_type_id', 'modified_user_id', 'modified_date'],
       { table: 'group' },
     )
@@ -70,7 +66,6 @@ class groupRepo {
       id: u.id,
       experiment_id: u.experimentId,
       parent_id: u.parentId,
-      ref_randomization_strategy_id: u.refRandomizationStrategyId,
       ref_group_type_id: u.refGroupTypeId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
@@ -111,18 +106,18 @@ class groupRepo {
     tx.any('DELETE FROM "group" WHERE experiment_id = $1 and parent_id IS NULL RETURNING id', experimentId)
 
   @setErrorCode('5BA000')
-  batchFindBySetId = (setId, tx = this.rep) => tx.one('SELECT * FROM "group" WHERE set_id = $1', setId)
+  batchFindBySetId = (setId, tx = this.rep) => tx.one('SELECT g.*, dsd.value AS ref_randomization_strategy_id FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE set_id = $1', setId)
 
   @setErrorCode('5BB000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE set_id IN ($1:csv)', [setIds]).then(data => {
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT g.*, dsd.value AS ref_randomization_strategy_id FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE set_id IN ($1:csv)', [setIds]).then(data => {
     const keyedData = _.keyBy(data, 'set_id')
     return _.map(setIds, setId => keyedData[setId])
   })
 
   @setErrorCode('5BC000')
   batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
-    return tx.any('SELECT g.id, g.experiment_id, g.parent_id, g.ref_randomization_strategy_id, g.ref_group_type_id, g.set_id, gt.id as group_type_id, gt.type, gv.id as group_value_id, gv.name, gv.value, gv.factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date FROM "group" g INNER JOIN ref_group_type gt on g.ref_group_type_id = gt.id LEFT JOIN group_value gv on g.id = gv.group_id WHERE g.experiment_id IN ($1:csv)', [experimentIds])
-      .then(data => {
+    return tx.any('SELECT g.id, g.experiment_id, g.parent_id, dsd.value AS ref_randomization_strategy_id, g.ref_group_type_id, g.set_id, gt.id as group_type_id, gt.type, gv.id as group_value_id, gv.name, gv.value, gv.factor_level_id, gv.group_id, gv.created_user_id, gv.created_date, gv.modified_user_id, gv.modified_date FROM "group" g INNER JOIN ref_group_type gt on g.ref_group_type_id = gt.id LEFT JOIN group_value gv on g.id = gv.group_id LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE g.experiment_id IN ($1:csv)', [experimentIds])
+      .then(data => {{{}}
         const dataByGroup = _.groupBy(data, 'id')
         const groups = _.flatMap(_.values(dataByGroup), groupData => {
           const head = _.head(groupData)
@@ -163,11 +158,11 @@ class groupRepo {
   }
 
   @setErrorCode('5BD000')
-  findAllByParentId = (parentId, tx = this.rep) => tx.any('SELECT * FROM "group" WHERE parent_id=$1', parentId)
+  findAllByParentId = (parentId, tx = this.rep) => tx.any('SELECT dsd.value AS ref_randomization_strategy_id, g.* FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE parent_id=$1', parentId)
 
   @setErrorCode('5BE000')
   batchFindAllByParentId = (parentIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM "group" WHERE parent_id in ($1:csv)', [parentIds])
+    return tx.any('SELECT dsd.value AS ref_randomization_strategy_id, g.* FROM "group" g LEFT OUTER JOIN design_spec_detail dsd ON g.experiment_id = dsd.experiment_id AND dsd.ref_design_spec_id = 9 WHERE parent_id in ($1:csv)', [parentIds])
       .then(data => {
         const dataByParentId = _.groupBy(data, 'parent_id')
         return _.map(parentIds, parentId => dataByParentId[parentId] || [])

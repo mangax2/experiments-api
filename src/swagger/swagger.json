@@ -4416,7 +4416,7 @@
       "properties": {
         "refRandomizationStrategyId": {
           "type": "integer",
-          "description": "reference to RandomizationStrategy Table"
+          "description": "This is a deprecated field that is no longer needed and will be removed in the next major version release."
         },
         "refGroupTypeId": {
           "type": "integer",
@@ -4459,7 +4459,7 @@
         },
         "refRandomizationStrategyId": {
           "type": "integer",
-          "description": "reference to RandomizationStrategy Table"
+          "description": "This is now sourced from DesignSpecificationDetail (route /experiments/{id}/design-specification-details/) and is here only for backwards compatibility until the next major version release."
         },
         "experimentId": {
           "type": "integer",
@@ -5290,7 +5290,7 @@
         },
         "refRandomizationStrategyId": {
           "type": "integer",
-          "description": "Id of RandomizationStrategy "
+          "description": "This is now sourced from DesignSpecificationDetail (route /experiments/{id}/design-specification-details/) and is here only for backwards compatibility until the next major version release."
         },
         "refGroupTypeId": {
           "type": "integer",

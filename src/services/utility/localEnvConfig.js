@@ -15,7 +15,6 @@ const cfServices = {
   experimentsExternalAPIUrls: {
     value: {
       capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
-      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer/v3',
       preferencesAPIUrl: 'https://preferences.velocity-np.ag/v2',
       profileAPIUrl: 'https://profile.velocity-np.ag/v3',
       experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',

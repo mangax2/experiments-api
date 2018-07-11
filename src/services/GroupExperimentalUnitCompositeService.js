@@ -77,7 +77,6 @@ class GroupExperimentalUnitCompositeService {
             _.forEach(comparisonResults.units.adds,
               (unit, index) => { unit.id = unitIds[index].id })
           }),
-        this.batchUpdateGroups(comparisonResults.groups.updates, context, tx),
         this.batchUpdateExperimentalUnits(comparisonResults.units.updates, context, tx),
         this.batchDeleteExperimentalUnits(comparisonResults.units.deletes, tx)]))
       .then(() => this.batchDeleteGroups(comparisonResults.groups.deletes, context, tx))
@@ -98,11 +97,6 @@ class GroupExperimentalUnitCompositeService {
   @setErrorCode('1F5000')
   batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
     ? db.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
-    : Promise.resolve())
-
-  @setErrorCode('1F6000')
-  batchUpdateGroups = (groupUpdates, context, tx) => (groupUpdates.length > 0
-    ? this.groupService.batchUpdateGroupsNoValidate(groupUpdates, context, tx)
     : Promise.resolve())
 
   @setErrorCode('1F7000')
@@ -242,8 +236,7 @@ class GroupExperimentalUnitCompositeService {
 
     _.forEach(newGroups, (g) => {
       this.findMatchingEntity(g, hashedOldGroups, 'ancestors',
-        (group, matchingGroup) => {
-          group.oldRefRandomizationStrategyId = matchingGroup.ref_randomization_strategy_id
+        (group) => {
           _.forEach(group.units, (u) => { u.groupId = group.id })
         })
     })
@@ -309,8 +302,6 @@ class GroupExperimentalUnitCompositeService {
     return {
       groups: {
         adds: partitionedGroups[0],
-        updates: _.filter(partitionedGroups[1],
-          g => g.refRandomizationStrategyId !== g.oldRefRandomizationStrategyId),
         deletes: _.filter(oldGroups, g => !g.used),
       },
       units: {
@@ -426,7 +417,6 @@ class GroupExperimentalUnitCompositeService {
   @setErrorCode('1FN000')
   createRcbGroupStructure = (setId, setGroup, numberOfReps, treatments, repRefGroupTypeId) => {
     const newGroupsAndUnits = [{
-      refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
       refGroupTypeId: setGroup.ref_group_type_id,
       groupValues: [{
         name: 'locationNumber',
@@ -443,7 +433,6 @@ class GroupExperimentalUnitCompositeService {
     while (currentRepNumber < numberOfReps) {
       currentRepNumber += 1
       newGroupsAndUnits[0].childGroups.push({
-        refRandomizationStrategyId: setGroup.ref_randomization_strategy_id,
         refGroupTypeId: repRefGroupTypeId,
         groupValues: [{
           name: 'repNumber',

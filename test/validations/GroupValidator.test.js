@@ -1,9 +1,7 @@
-import { mock, mockReject, mockResolve } from '../jestUtil'
+import { mock } from '../jestUtil'
 import GroupValidator from '../../src/validations/GroupValidator'
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
-import HttpUtil from '../../src/services/utility/HttpUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
 
 describe('GroupValidator', () => {
   let target
@@ -22,7 +20,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
       ]
@@ -60,7 +58,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
       ]
@@ -77,7 +75,7 @@ describe('GroupValidator', () => {
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'parentId', type: 'numeric', required: false },
         { paramName: 'parentId', type: 'refData', entity: {} },
-        { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
+        { paramName: 'refRandomizationStrategyId', type: 'numeric' },
         { paramName: 'refGroupTypeId', type: 'numeric', required: true },
         { paramName: 'refGroupTypeId', type: 'refData', entity: {} },
         { paramName: 'id', type: 'numeric', required: true },
@@ -139,134 +137,6 @@ describe('GroupValidator', () => {
   })
 
   describe('postValidate', () => {
-    test('does not call getValidRandomization and calls validateRandomizationStrategyIds', () => {
-      target.strategyRetrievalPromise = Promise.resolve()
-      target.getValidRandomizationIds = mock()
-      target.validateRandomizationStrategyIds = mock()
-
-      return target.postValidate([{}]).then(() => {
-        expect(target.getValidRandomizationIds).not.toHaveBeenCalled()
-        expect(target.validateRandomizationStrategyIds).toHaveBeenCalledWith([{}])
-      })
-    })
-
-    test('calls getValidRandomization and calls validateRandomizationStrategyIds', () => {
-      target.getValidRandomizationIds = mock(() => { target.strategyRetrievalPromise = Promise.resolve() })
-      target.validateRandomizationStrategyIds = mock()
-
-      return target.postValidate([{}]).then(() => {
-        expect(target.getValidRandomizationIds).toHaveBeenCalled()
-        expect(target.validateRandomizationStrategyIds).toHaveBeenCalledWith([{}])
-      })
-    })
-
-    test('rejects when strategyRetrievalPromise fails', () => {
-      target.strategyRetrievalPromise = Promise.resolve('error')
-      target.validateRandomizationStrategyIds = mock()
-
-      return target.postValidate([{}]).then(() => {}, (err) => {
-        expect(target.validateRandomizationStrategyIds).not.toHaveBeenCalled()
-        expect(err).toEqual('error')
-      })
-    })
-  })
-
-  describe('validateRandomizationStrategyIds', () => {
-    test('resolves when there are no invalid randomization ids', () => {
-      target.validRandomizationIds = [1]
-      const groupObj = [{ refRandomizationStrategyId: 1 }]
-      AppError.badRequest = mock()
-
-      return target.validateRandomizationStrategyIds(groupObj).then(() => {
-        expect(AppError.badRequest).not.toHaveBeenCalled()
-      })
-    })
-
-    test('rejects when there are invalid randomization ids', () => {
-      target.validRandomizationIds = [2]
-      const groupObj = [{ refRandomizationStrategyId: 1 }]
-      AppError.badRequest = mock()
-
-      return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1', undefined, '3B4001')
-      })
-    })
-
-    test('rejects when there are multiple invalid randomization ids', () => {
-      target.validRandomizationIds = [2]
-      const groupObj = [{ refRandomizationStrategyId: 1 }, { refRandomizationStrategyId: 2 }, { refRandomizationStrategyId: 3 }]
-      AppError.badRequest = mock()
-
-      return target.validateRandomizationStrategyIds(groupObj).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid randomization strategy ids: 1, 3', undefined, '3B4001')
-      })
-    })
-  })
-
-  describe('getValidRandomizationIds', () => {
-    test('calls ping and then randomization strategy service', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 1 }] })
-
-      return target.getValidRandomizationIds().then(() => {
-        expect(target.validRandomizationIds).toEqual([1])
-      })
-    })
-
-    test('does not set any valid ids when result is undefined', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.getWithRetry = mockResolve()
-
-      return target.getValidRandomizationIds().then(() => {
-        expect(target.validRandomizationIds).toEqual(undefined)
-      })
-    })
-
-    test('does not set any valid ids when result has no body', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.getWithRetry = mockResolve({})
-
-      return target.getValidRandomizationIds().then(() => {
-        expect(target.validRandomizationIds).toEqual(undefined)
-      })
-    })
-
-    test('rejects when HttpUtil get fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
-      HttpUtil.getWithRetry = mockReject('error')
-      AppError.badRequest = mock()
-
-      const resultingPromise = target.getValidRandomizationIds()
-      const strategyPromise = target.strategyRetrievalPromise
-
-      return resultingPromise.then(() => {
-        expect(target.strategyRetrievalPromise).toEqual(undefined)
-        return strategyPromise.then(() => {
-          expect(true).toBe(false)
-        }, () => {
-          expect(target.validRandomizationIds).toEqual(undefined)
-          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization strategy ids.', undefined, '3B5001')
-        })
-      })
-    })
-
-    test('rejects when PingUtil getMonsantoHeader fails', () => {
-      PingUtil.getMonsantoHeader = mockReject('error')
-      HttpUtil.getWithRetry = mockReject('error')
-      AppError.badRequest = mock()
-
-      const resultingPromise = target.getValidRandomizationIds()
-      const strategyPromise = target.strategyRetrievalPromise
-
-      return resultingPromise.then(() => {
-        expect(target.strategyRetrievalPromise).toEqual(undefined)
-        return strategyPromise.then(() => {
-          expect(true).toBe(false)
-        }, () => {
-          expect(target.validRandomizationIds).toEqual(undefined)
-          expect(AppError.badRequest).toHaveBeenCalledWith('Unable to validate randomization strategy ids.', undefined, '3B5001')
-        })
-      })
-    })
+    test('resolves', () => target.postValidate().then(() => {}))
   })
 })

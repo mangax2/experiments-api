@@ -112,7 +112,7 @@ class ManageRepsAndUnitsListener {
       _.filter([].concat(unitsToBeCreated).concat(unitsToBeUpdated),
         unit => _.isNil(unit.groupId)), 'rep'))
     const groupTemplate = _.pick(inflector.transform(groups, 'camelizeLower')[0],
-      'experimentId', 'parentId', 'refRandomizationStrategyId', 'refGroupTypeId')
+      'experimentId', 'parentId', 'refGroupTypeId')
 
     const groupsToBeCreated = _.map(repsToBeCreated, rep =>
       Object.assign({ rep }, groupTemplate))

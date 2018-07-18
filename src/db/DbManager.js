@@ -26,6 +26,7 @@ import Unit from '../repos/unit'
 import UnitSpecification from '../repos/unitSpecification'
 import UnitSpecificationDetail from '../repos/unitSpecificationDetail'
 import UnitType from '../repos/unitType'
+import Comment from '../repos/comment'
 
 const logger = log4js.getLogger('DbManager')
 
@@ -58,6 +59,7 @@ const options = {
     obj.unitSpecification = UnitSpecification(obj, pgp)
     obj.unitSpecificationDetail = UnitSpecificationDetail(obj, pgp)
     obj.unitType = UnitType(obj, pgp)
+    obj.comment = Comment(obj, pgp)
   },
 }
 

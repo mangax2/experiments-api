@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import log4js from 'log4js'
 import _ from 'lodash'
 import db from '../db/DbManager'
@@ -83,7 +84,6 @@ class ExperimentsService {
     }
     return Promise.resolve()
   }
-
   @setErrorCode('154000')
   getExperiments(queryString, isTemplate, context) {
     if (this.isFilterRequest(queryString) === true) {
@@ -143,16 +143,22 @@ class ExperimentsService {
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
       } else {
-        return Promise.all(
-          [
-            this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, isTemplate, context),
-          ],
-        ).then((ownersAndTags) => {
-          data.owners = ownersAndTags[0].user_ids
-          data.ownerGroups = ownersAndTags[0].group_ids
-          data.reviewers = ownersAndTags[0].reviewer_ids
-          data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
+        const promises = []
+
+        promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
+        promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
+        // Dont Change the order of the promises
+        if (data.status === 'REJECTED') {
+          promises.push(db.comment.findRecentByExperimentId(data.id, tx))
+        }
+        return Promise.all(promises).then((respones) => {
+          data.owners = respones[0].user_ids
+          data.ownerGroups = respones[0].group_ids
+          data.reviewers = respones[0].reviewer_ids
+          data.tags = ExperimentsService.prepareTagResponse(respones[1])
+          if (respones[2]) {
+            data.comment = respones[2].description
+          }
           return data
         })
       }
@@ -175,6 +181,11 @@ class ExperimentsService {
               logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
             } else {
+              const comment = {}
+              if (experiment.comment) {
+                comment.description = experiment.comment
+                comment.experimentId = experiment.id
+              }
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
               const trimmedReviewers = _.map(experiment.reviewers, _.trim)
@@ -184,7 +195,14 @@ class ExperimentsService {
                 groupIds: trimmedOwnerGroups,
                 reviewerIds: trimmedReviewers,
               }
-              return this.ownerService.batchUpdateOwners([owners], context, tx)
+              const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
+              const promises = []
+              promises.push(updateOwnerPromise)
+              if (experiment.comment && experiment.status === 'REJECTED') {
+                const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
+                promises.push(createExperimentCommentPromise)
+              }
+              return Promise.all(promises)
                 .then(() => {
                   experiment.id = id
                   const tags = this.assignExperimentIdToTags([experiment])

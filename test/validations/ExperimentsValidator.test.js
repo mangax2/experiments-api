@@ -24,7 +24,7 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
       ]
 
@@ -67,7 +67,7 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
       ]
 
@@ -87,7 +87,7 @@ describe('ExperimentsValidator', () => {
           required: false,
         },
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
-        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE'] },
+        { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
       ]
 

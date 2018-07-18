@@ -151,13 +151,13 @@ class ExperimentsService {
         if (data.status === 'REJECTED') {
           promises.push(db.comment.findRecentByExperimentId(data.id, tx))
         }
-        return Promise.all(promises).then((respones) => {
-          data.owners = respones[0].user_ids
-          data.ownerGroups = respones[0].group_ids
-          data.reviewers = respones[0].reviewer_ids
-          data.tags = ExperimentsService.prepareTagResponse(respones[1])
-          if (respones[2]) {
-            data.comment = respones[2].description
+        return Promise.all(promises).then(([owners, tags, comment]) => {
+          data.owners = owners.user_ids
+          data.ownerGroups = owners.group_ids
+          data.reviewers = owners.reviewer_ids
+          data.tags = ExperimentsService.prepareTagResponse(tags)
+          if (comment) {
+            data.comment = comment.description
           }
           return data
         })

@@ -90,7 +90,6 @@ class SecurityService {
         if (_.intersection(reviewerIdsAssignedToExperiments, userGroupIds).length > 0) {
           userPermissions.push('review')
         }
-        return userPermissions
       }
       return userPermissions
     })

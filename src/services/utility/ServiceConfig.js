@@ -22,7 +22,6 @@ if (localEnv || testEnv) {
   services = require('@monsantoit/cloud-foundry').services
   services.experimentsDataSource.user = VaultUtil.dbAppUser
   services.experimentsDataSource.password = VaultUtil.dbAppPassword
-  services.experimentsDataSource.ssl = true
   services.pingDataSource = {
     url: services.experimentsExternalAPIUrls.value.pingAPIUrl,
     clientId: VaultUtil.clientId,

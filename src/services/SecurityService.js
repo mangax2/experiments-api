@@ -74,20 +74,24 @@ class SecurityService {
 
   @setErrorCode('1O4000')
   getUserPermissionsForExperiment(id, context, tx) {
+    const userPermissions = []
     return Promise.all([
       this.ownerService.getOwnersByExperimentId(id, tx),
       this.getGroupsByUserId(context.userId)]).then((data) => {
       if (data[0] && data[1]) {
         const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)
+        const reviewerIdsAssignedToExperiments = _.concat(data[0].reviewer_ids, config.admin_group)
         const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
         const userGroupIds = data[1]
         if (upperCaseUserIds.includes(context.userId) ||
             _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
-          return ['write']
+          userPermissions.push('write')
         }
-        return []
+        if (_.intersection(reviewerIdsAssignedToExperiments, userGroupIds).length > 0) {
+          userPermissions.push('review')
+        }
       }
-      return []
+      return userPermissions
     })
   }
 }

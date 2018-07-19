@@ -94,6 +94,34 @@ describe('SecurityService', () => {
       })
     })
 
+    test('returns user permissions array , when reviewer is part of the group', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['ak'],
+        reviewer_ids: ['reviewer_1'],
+      })
+      target.getGroupsByUserId = jest.fn(() => ['reviewer_1', 'reviewer_2'])
+      const expectedResult = ['review']
+
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
+    test('returns user permissions array , when user and reviewer is part of the group', () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['ak'],
+        group_ids: ['group_1'],
+        reviewer_ids: ['reviewer_1'],
+      })
+      target.getGroupsByUserId = jest.fn(() =>
+        ['group_1', 'group_2', 'group_3', 'reviewer_1', 'reviewer_3'])
+      const expectedResult = ['write', 'review']
+
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
+        expect(data).toEqual(expectedResult)
+      })
+    })
+
     test('returns error when owner service fails', () => {
       target.ownerService.getOwnersByExperimentId = mockReject({
         error: 'error',
@@ -163,7 +191,6 @@ describe('SecurityService', () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
       })
     })
-
     test('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
       const error = { message: 'error' }
       target.getUserPermissionsForExperiment = mockResolve([])

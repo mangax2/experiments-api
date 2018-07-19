@@ -498,15 +498,38 @@ describe('ExperimentsService', () => {
 
   describe('getExperimentById', () => {
     test('calls find, getTagsByExperimentId, and returns data', () => {
-      db.experiments.find = mockResolve({})
+      db.experiments.find = mockResolve({
+        status: 'REJECTED',
+      })
+      db.comment.findRecentByExperimentId = mockResolve({
+        description: 'rejected',
+      })
       target.tagService.getTagsByExperimentId = mockResolve([])
       target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ tags: [] })
+        expect(data).toEqual({ status: 'REJECTED', comment: 'rejected', tags: [] })
+      })
+    })
+
+    test('calls find, getTagsByExperimentId, and returns data without comment', () => {
+      db.experiments.find = mockResolve({
+        status: 'REJECTED',
+      })
+      db.comment.findRecentByExperimentId = mockResolve(undefined)
+      target.tagService.getTagsByExperimentId = mockResolve([])
+      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+
+      return target.getExperimentById(1, false, testContext, testTx).then((data) => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
+        expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual({ status: 'REJECTED', tags: [] })
       })
     })
 
@@ -568,7 +591,11 @@ describe('ExperimentsService', () => {
       ' batchCreateTags', () => {
       target.validator.validate = mockResolve()
       target.securityService.permissionsCheck = mockResolve()
-      db.experiments.update = mockResolve({})
+      db.experiments.update = mockResolve({
+        status: 'REJECTED',
+        comment: 'rejection reason',
+      })
+      db.comment.batchCreate = mock()
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
@@ -577,7 +604,8 @@ describe('ExperimentsService', () => {
         owners: ['KMCCL '],
         ownerGroups: ['group1'],
         reviewers: ['group2'],
-
+        status: 'REJECTED',
+        comment: 'rejection reason',
       }, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{
@@ -586,6 +614,9 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
+
         }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
           id: 1,
@@ -593,7 +624,10 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
         }, testContext, testTx)
+        expect(db.comment.batchCreate).toHaveBeenCalled()
         expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
@@ -606,9 +640,11 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
         }])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
-        expect(data).toEqual({})
+        expect(data).toEqual({ comment: 'rejection reason', status: 'REJECTED' })
       })
     })
 
@@ -735,6 +771,25 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).not.toHaveBeenCalled()
+        expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
+        expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
+        expect(err).toEqual(error)
+      })
+    })
+
+
+    test('rejects when comment validate fails', () => {
+      const error = { message: 'error' }
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockReject(error)
+      db.comment.update = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+
+      return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
+        expect(db.comment.update).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(err).toEqual(error)

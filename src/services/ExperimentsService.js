@@ -148,15 +148,13 @@ class ExperimentsService {
         promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
         promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
         // Dont Change the order of the promises
-        if (data.status === 'REJECTED') {
-          promises.push(db.comment.findRecentByExperimentId(data.id, tx))
-        }
+        promises.push(db.comment.findRecentByExperimentId(data.id, tx))
         return Promise.all(promises).then(([owners, tags, comment]) => {
           data.owners = owners.user_ids
           data.ownerGroups = owners.group_ids
           data.reviewers = owners.reviewer_ids
           data.tags = ExperimentsService.prepareTagResponse(tags)
-          if (comment) {
+          if (!_.isNil(comment)) {
             data.comment = comment.description
           }
           return data
@@ -182,7 +180,7 @@ class ExperimentsService {
               throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
             } else {
               const comment = {}
-              if (experiment.comment) {
+              if (!_.isNil(experiment.comment)) {
                 comment.description = experiment.comment
                 comment.experimentId = experiment.id
               }

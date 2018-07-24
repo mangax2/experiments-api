@@ -46,7 +46,7 @@ class commentRepo {
       ],
       {table: 'comment'})
     const values = comments.map(comment => ({
-      description: comment.description,
+      description: comment.description || '',
       experiment_id: comment.experimentId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',

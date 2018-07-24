@@ -156,6 +156,10 @@ router.post('/experiments/:id/composites/treatments', (req, res, next) => new Tr
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.patch('/experiments/:id/review', (req, res, next) => new ExperimentsService().handleReviewStatus(req.params.id, false, req.body, req.context)
+  .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
 router.get('/design-specification-details/:id', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailById(req.params.id, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
@@ -397,6 +401,11 @@ router.get('/templates/:id/unit-specification-details/', (req, res, next) => new
 router.post('/templates/:id/composites/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().manageAllUnitSpecificationDetails(req.params.id, req.body, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
+
+router.patch('/templates/:id/review', (req, res, next) => new ExperimentsService().handleReviewStatus(req.params.id, true, req.body, req.context)
+  .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
 
 router.get('/getImage/:topic/:imageName', (req, res, next) => {
   DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {

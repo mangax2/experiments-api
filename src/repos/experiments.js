@@ -69,7 +69,7 @@ class experimentsRepo {
   batchCreate = (experiments, context, tx = this.rep) => tx.batch(
     experiments.map(
       experiment => tx.one(
-        'insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date, modified_user_id, modified_date,is_template) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP,$6)  RETURNING id',
+        'insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date, modified_user_id, modified_date, is_template) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP,$6)  RETURNING id',
         [experiment.name,
           experiment.description,
           experiment.refExperimentDesignId,
@@ -98,9 +98,16 @@ class experimentsRepo {
     return _.map(names, name => groupedData[name] || [])
   })
 
+  @setErrorCode('55B000')
   findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds, tx = this.rep) => tx.any(
     'SELECT e.* FROM experiment e INNER JOIN owner o ON e.id=o.experiment_id WHERE e.is_template=$1 AND (o.user_ids && ARRAY[UPPER($2)]::VARCHAR[] OR o.group_ids && ARRAY[$3:csv]::VARCHAR[])',
     [isTemplate, userId, groupIds])
+
+  @setErrorCode('55C000')
+  updateExperimentStatus = (experimentId, status, taskId, context, tx = this.rep) => {
+    const query = `UPDATE experiment SET (status, task_id, modified_user_id, modified_date) = ($2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $1`
+    return tx.oneOrNone(query, [experimentId, status, taskId, context.userId])
+  }
 }
 
 module.exports = rep => new experimentsRepo(rep)

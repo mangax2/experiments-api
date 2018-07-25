@@ -3741,8 +3741,8 @@
       "patch": {
         "summary": "Updates the review status of the experiment",
         "description": "Allows updating the review status of an experiment",
-        "operationId": "reviewExperimentById",
-        "tags": ["Experiments"],
+        "operationId": "reviewTemplateById",
+        "tags": ["Templates"],
         "produces": [
           "application/json"
         ],
@@ -5262,6 +5262,14 @@
         "numberOfDependentVariables": {
           "type": "integer",
           "description": "the number of dependent variables associated with the experiment."
+        },
+        "status": {
+          "type": "string",
+          "description": "status of the experiment"
+        },
+        "statusComment": {
+          "type": "string",
+          "description": "most recent review rejection comment"
         }
       }
     },

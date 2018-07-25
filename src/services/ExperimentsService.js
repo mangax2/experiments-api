@@ -484,7 +484,7 @@ class ExperimentsService {
           }
 
           const taskTemplate = {
-            title: `${isTemplate ? 'Template' : 'Experiment'} Review Requested`,
+            title: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" Review Requested`,
             body: {
               text: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" is ready for statistician review.`,
             },

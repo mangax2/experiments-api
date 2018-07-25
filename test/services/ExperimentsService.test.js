@@ -1377,7 +1377,7 @@ describe('ExperimentsService', () => {
       date.setFullYear(date.getFullYear() + 1)
 
       const expectedTaskTemplate = {
-        title: 'Experiment Review Requested',
+        title: 'Experiment "EXP NAME" Review Requested',
         body: {
           text: 'Experiment "EXP NAME" is ready for statistician review.',
         },
@@ -1413,7 +1413,7 @@ describe('ExperimentsService', () => {
       date.setFullYear(date.getFullYear() + 1)
 
       const expectedTaskTemplate = {
-        title: 'Template Review Requested',
+        title: 'Template "TEMPLATE NAME" Review Requested',
         body: {
           text: 'Template "TEMPLATE NAME" is ready for statistician review.',
         },

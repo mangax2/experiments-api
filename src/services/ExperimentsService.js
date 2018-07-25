@@ -529,7 +529,7 @@ class ExperimentsService {
         const taskID = experiment.task_id
 
         return PingUtil.getMonsantoHeader().then(headers =>
-          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
+          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
             .catch((err) => {
               logger.error(`Unable to complete task. Reason: ${err.response.text}`)
               if (err.status !== 404 && err.response.text !== 'task has already been completed') {

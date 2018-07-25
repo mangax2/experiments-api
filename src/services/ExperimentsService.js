@@ -508,7 +508,7 @@ class ExperimentsService {
                 const taskId = taskResult.body.id
                 return db.experiments.updateExperimentStatus(experimentId, 'SUBMITTED', taskId, context, tx)
               }),
-          )
+          ).catch(err => Promise.reject(AppError.internalServerError('Error encountered contacting the velocity messaging api', err.message, '15Q005')))
         }
 
         return Promise.reject(AppError.badRequest('The timestamp field is an invalid date string', null, getFullErrorCode('15Q003')))

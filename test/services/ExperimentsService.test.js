@@ -1437,6 +1437,44 @@ describe('ExperimentsService', () => {
         expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
       })
     })
+
+    test('fails to create a task', () => {
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
+      target.securityService.permissionsCheck = mockResolve()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('error')))
+      db.experiments.updateExperimentStatus = mockResolve()
+      AppError.internalServerError = mock()
+
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+
+      const expectedTaskTemplate = {
+        title: 'Template "TEMPLATE NAME" Review Requested',
+        body: {
+          text: 'Template "TEMPLATE NAME" is ready for statistician review.',
+        },
+        userGroups: ['REVIEWER'],
+        actions: [
+          {
+            title: 'Review Template "TEMPLATE NAME"',
+            url: 'https://dev.velocity-np.ag/experiments/templates/1',
+          },
+        ],
+        tags: [
+          'experiment-review-request',
+        ],
+        dueDate: date.toISOString().slice(0, date.toISOString().indexOf('T')),
+        tagKey: `1|${date.toISOString().slice(0, date.toISOString().indexOf('T'))}`,
+      }
+
+      return target.submitForReview(1, true, date.toISOString(), testContext, testTx).then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
+        expect(db.experiments.updateExperimentStatus).not.toHaveBeenCalled()
+        expect(AppError.internalServerError).toHaveBeenCalledWith('Error encountered contacting the velocity messaging api', 'error', '15Q005')
+      })
+    })
   })
 
   describe('submitReview', () => {

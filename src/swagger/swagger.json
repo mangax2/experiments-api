@@ -1234,6 +1234,100 @@
         }
       }
     },
+    "/experiments/{id}/envision-datasets-data/": {
+      "get": {
+        "summary": "Generate input data for the envision datasets report from an experiment.",
+        "description": "Returns experiment data in a format that can be used to generate a envision datasets report",
+        "operationId": "getEnvision-datasets-dataByExperimentId",
+        "tags": [
+          "Envision Datasets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envision-Datasets data",
+            "schema": {
+              "$ref": "#/definitions/EnvisonDatasetsData"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/experiments/{id}/envision-datasets-schema/": {
+      "get": {
+        "summary": "Generate schema data for the envision datasets report from an experiment.",
+        "description": "Returns schema data in a format that can be used to generate a envision datasets report",
+        "operationId": "getEnvision-datasets-schemaByExperimentId",
+        "tags": [
+          "Envision Datasets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envision-Datasets schema",
+            "schema": {
+              "$ref": "#/definitions/EnvisonDatasetsSchema"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/experiments/{id}/experimental-units": {
       "get": {
         "summary": "get all experimental units for a given experiment id",
@@ -1426,6 +1520,62 @@
           },
           "401": {
             "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/experiments/{id}/review": {
+      "patch": {
+        "summary": "Updates the review status of the experiment",
+        "description": "Allows updating the review status of an experiment",
+        "operationId": "reviewExperimentById",
+        "tags": ["Experiments"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "statusInput",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully updated status"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1690,100 +1840,6 @@
           },
           "400": {
             "description": "Invalid body",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/experiments/{id}/envision-datasets-data/": {
-      "get": {
-        "summary": "Generate input data for the envision datasets report from an experiment.",
-        "description": "Returns experiment data in a format that can be used to generate a envision datasets report",
-        "operationId": "getEnvision-datasets-dataByExperimentId",
-        "tags": [
-          "Envision Datasets"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Envision-Datasets data",
-            "schema": {
-              "$ref": "#/definitions/EnvisonDatasetsData"
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/experiments/{id}/envision-datasets-schema/": {
-      "get": {
-        "summary": "Generate schema data for the envision datasets report from an experiment.",
-        "description": "Returns schema data in a format that can be used to generate a envision datasets report",
-        "operationId": "getEnvision-datasets-schemaByExperimentId",
-        "tags": [
-          "Envision Datasets"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Envision-Datasets schema",
-            "schema": {
-              "$ref": "#/definitions/EnvisonDatasetsSchema"
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -3668,6 +3724,62 @@
           },
           "401": {
             "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/templates/{id}/review": {
+      "patch": {
+        "summary": "Updates the review status of the experiment",
+        "description": "Allows updating the review status of an experiment",
+        "operationId": "reviewExperimentById",
+        "tags": ["Experiments"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "statusInput",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully updated status"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -6105,6 +6217,24 @@
     },
     "EnvisonDatasetsSchema": {
       "type": "object"
+    },
+    "ReviewInput": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Status to set the experiment to. Examples are: DRAFT, SUBMITTED, APPROVED, REJECTED"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp required for submitting a review. Must be greater than the current date"
+        },
+        "comment": {
+          "type": "string",
+          "description": "An optional description for reviewing an experiment"
+        }
+      }
     }
   }
 }

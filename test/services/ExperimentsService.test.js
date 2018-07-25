@@ -1384,7 +1384,7 @@ describe('ExperimentsService', () => {
         userGroups: ['REVIEWER'],
         actions: [
           {
-            title: 'Review Experiment',
+            title: 'Review Experiment "EXP NAME"',
             url: 'https://dev.velocity-np.ag/experiments/1',
           },
         ],
@@ -1420,7 +1420,7 @@ describe('ExperimentsService', () => {
         userGroups: ['REVIEWER'],
         actions: [
           {
-            title: 'Review Template',
+            title: 'Review Template "TEMPLATE NAME"',
             url: 'https://dev.velocity-np.ag/experiments/templates/1',
           },
         ],

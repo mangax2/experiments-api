@@ -491,7 +491,7 @@ class ExperimentsService {
             userGroups: experiment.reviewers,
             actions: [
               {
-                title: `Review ${isTemplate ? 'Template' : 'Experiment'}`,
+                title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
                 url: `https://${cfService['velocity-home'].value}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
               },
             ],

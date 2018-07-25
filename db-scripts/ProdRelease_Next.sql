@@ -42,9 +42,6 @@ WITH treatment_numbers AS (
 ), experiment_status AS (
   SELECT e_1.id AS experiment_id,
   c_1.description AS status_comment FROM experiment e_1 JOIN comment c_1 ON c_1.experiment_id = e_1.id ORDER BY c_1.id DESC LIMIT 1
-), review_enabled AS (
-  SELECT e_1.id AS experiment_id,
-  array_length(reviewer_ids, 1) > 0 AS enabled FROM experiment e_1 JOIN owner o_1 ON o_1.experiment_id = e_1.id
 )
 SELECT e.id,
   e.name,
@@ -56,8 +53,7 @@ SELECT e.id,
   COALESCE(dv.number_of_dependent_variables, 0::bigint)::integer AS number_of_dependent_variables,
   COALESCE(f.number_of_factors, 0::bigint)::integer AS number_of_independent_variables,
   e.status,
-  es.status_comment,
-  re.enabled AS review_enabled
+  es.status_comment
 FROM experiment e
   LEFT JOIN treatment_numbers t ON t.experiment_id = e.id
   LEFT JOIN dependent_variable_numbers dv ON dv.experiment_id = e.id
@@ -66,7 +62,6 @@ FROM experiment e
   LEFT JOIN unit_spec_numbers us ON us.experiment_id = e.id
   LEFT JOIN unit_type_name utn ON utn.experiment_id = e.id
   LEFT JOIN experiment_status es ON es.experiment_id = e.id
-  LEFT JOIN review_enabled re ON re.experiment_id = e.id
 
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_ro_user;
 GRANT SELECT ON TABLE public.experiment_summary TO experiments_dev_app_user;

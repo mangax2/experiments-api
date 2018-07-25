@@ -451,19 +451,19 @@ class ExperimentsService {
         return this.cancelReview(experimentId, isTemplate, context, tx)
       case 'SUBMITTED':
         if (_.isNil(body.timestamp)) {
-          return Promise.reject(AppError.badRequest(`timestamp must be provided in body for submitting ${isTemplate ? 'a template' : 'an experiment'}`))
+          return Promise.reject(AppError.badRequest(`The timestamp field must be provided in body for submitting ${isTemplate ? 'a template' : 'an experiment'}`, null, getFullErrorCode('15P002')))
         }
         return this.submitForReview(experimentId, isTemplate, body.timestamp, context, tx)
       case 'APPROVED':
       case 'REJECTED':
         return this.submitReview(experimentId, isTemplate, body.status.toUpperCase(), body.comment, context, tx)
       default:
-        return Promise.reject(AppError.badRequest(`Invalid status provided. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P002')))
+        return Promise.reject(AppError.badRequest(`Invalid status provided. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P003')))
     }
   }
 
   @setErrorCode('15Q000')
-  submitForReview = (experimentId, isTemplate, timeStamp, context, tx) =>
+  submitForReview = (experimentId, isTemplate, timestamp, context, tx) =>
     Promise.all([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
       .then(([experiment]) => {
         if (!_.isNil(experiment.task_id)) {
@@ -473,7 +473,7 @@ class ExperimentsService {
         if (experiment.reviewers.length === 0) {
           return Promise.reject(AppError.badRequest(`No reviewers have been assigned to this ${isTemplate ? 'template' : 'experiment'}`, null, getFullErrorCode('15Q002')))
         }
-        const date = new Date(timeStamp)
+        const date = new Date(timestamp)
 
         if (date instanceof Date && !_.isNaN(date.getTime())) {
           const isoDateString = date.toISOString()
@@ -511,7 +511,7 @@ class ExperimentsService {
           )
         }
 
-        return Promise.reject(AppError.badRequest('timestamp is an invalid date string', null, getFullErrorCode('15Q003')))
+        return Promise.reject(AppError.badRequest('The timestamp field is an invalid date string', null, getFullErrorCode('15Q003')))
       })
 
   @setErrorCode('15R000')

@@ -1258,7 +1258,7 @@ describe('ExperimentsService', () => {
     test('rejects when provided status is not valid', () => {
       AppError.badRequest = mock()
       return target.handleReviewStatus(1, false, { status: 'BAD' }, testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid status provided. Acceptable options are: DRAFT,SUBMITTED,APPROVED,REJECTED', null, '15P002')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid status provided. Acceptable options are: DRAFT,SUBMITTED,APPROVED,REJECTED', null, '15P003')
       })
     })
 
@@ -1272,14 +1272,14 @@ describe('ExperimentsService', () => {
     test('rejects when status is SUBMITTED and timestamp is not present in body for experiment', () => {
       AppError.badRequest = mock()
       return target.handleReviewStatus(1, false, { status: 'SUBMITTED' }, testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('timestamp must be provided in body for submitting an experiment')
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field must be provided in body for submitting an experiment', null, '15P002')
       })
     })
 
     test('rejects when status is SUBMITTED and timestamp is not present in body for template', () => {
       AppError.badRequest = mock()
       return target.handleReviewStatus(1, true, { status: 'SUBMITTED' }, testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('timestamp must be provided in body for submitting a template')
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field must be provided in body for submitting a template', null, '15P002')
       })
     })
 
@@ -1352,7 +1352,7 @@ describe('ExperimentsService', () => {
       target.securityService.permissionsCheck = mockResolve()
 
       return target.submitForReview(1, false, 'abc', testContext, testTx).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('timestamp is an invalid date string', null, '15Q003')
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field is an invalid date string', null, '15Q003')
       })
     })
 

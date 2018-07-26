@@ -69,7 +69,9 @@ class HttpUtil {
     if (err) {
       if (err.status === 401) {
         return 'Unauthorized'
-      } else if (err.response) {
+      }
+
+      if (err.response) {
         const error = JSON.parse(err.response.text)
 
         if (_.isArray(error)) {

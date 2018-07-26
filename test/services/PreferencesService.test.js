@@ -5,6 +5,10 @@ import PreferencesService from '../../src/services/PreferencesService'
 import AppError from '../../src/services/utility/AppError'
 
 describe('PreferencesService', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('handlePreferencesAPIError', () => {
     test('returns a bad request when status is 400', () => {
       AppError.badRequest = mock('')

@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import TreatmentDetailsService from '../../src/services/TreatmentDetailsService'
 import FactorLevelService from '../../src/services/FactorLevelService'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -12,6 +14,7 @@ describe('TreatmentDetailsService', () => {
   let getFactorLevelsByExperimentIdNoExistenceCheckOriginal
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new TreatmentDetailsService()
 
     getFactorLevelsByExperimentIdNoExistenceCheckOriginal = FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck

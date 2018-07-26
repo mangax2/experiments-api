@@ -60,6 +60,8 @@
     "semi": [
       "error",
       "never"
-    ]
+    ],
+    "implicit-arrow-linebreak": "off",
+    "operator-linebreak": "off"
   }
 }

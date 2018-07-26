@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -14,6 +16,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupExperimentalUnitCompositeService()
   })
 
@@ -293,12 +296,11 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('createGroupValuesUnitsAndChildGroups', () => {
     test('rejects when recursiveBatchCreate fails', () => {
-      target.getUnitsAndGroupValues = mock({ groupValues: [{}], units: [{}], childGroups: [{}] })
+      target.assignGroupIdToGroupValuesAndUnits = mock([{ groupValues: [{}], units: [{}], childGroups: [{ id: 1 }] }])
       target.recursiveBatchCreate = mockReject('error')
 
-      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
-        expect(err).toEqual('error')
+      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {}, () => {
+        expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{ id: 1 }], testContext, testTx)
       })
     })
 
@@ -309,6 +311,15 @@ describe('GroupExperimentalUnitCompositeService', () => {
       return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{ childGroups: [{}] }], testContext, testTx).then(() => {
         expect(target.groupValueService.batchCreateGroupValues).not.toHaveBeenCalled()
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
+      })
+    })
+
+    test('does not call recursiveBatchCreate', () => {
+      target.assignGroupIdToGroupValuesAndUnits = mock([{ groupValues: [{}], units: [{}], childGroups: [] }])
+      target.recursiveBatchCreate = mockReject('error')
+
+      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {
+        expect(target.recursiveBatchCreate).not.toHaveBeenCalled()
       })
     })
   })

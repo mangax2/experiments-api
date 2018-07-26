@@ -55,4 +55,3 @@ exports.notFound = function (message, data, errorCode) {
 exports.internalServerError = function (message, data, errorCode) {
   return create(500, message, data, errorCode, exports.internalServerError)
 }
-

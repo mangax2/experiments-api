@@ -7,6 +7,7 @@ describe('DependentVariablesValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new DependentVariablesValidator()
   })
 

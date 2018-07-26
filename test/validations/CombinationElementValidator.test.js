@@ -7,6 +7,7 @@ describe('CombinationElementValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new CombinationElementValidator()
   })
 

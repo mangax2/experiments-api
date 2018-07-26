@@ -7,6 +7,7 @@ describe('GroupValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupValidator()
   })
 
@@ -137,6 +138,6 @@ describe('GroupValidator', () => {
   })
 
   describe('postValidate', () => {
-    test('resolves', () => target.postValidate().then(() => {}))
+    test('resolves', () => expect(target.postValidate()).resolves.toBe(undefined))
   })
 })

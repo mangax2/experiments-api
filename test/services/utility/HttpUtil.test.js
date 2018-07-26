@@ -1,8 +1,12 @@
-import { mock, mockResolve, mockReject } from '../../jestUtil'
 import agent from 'superagent'
+import { mock, mockResolve, mockReject } from '../../jestUtil'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
 describe('HttpUtil', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('setHeaders', () => {
     test('sets headers of the httpCall', () => {
       const httpCall = { set: mock() }
@@ -136,4 +140,3 @@ describe('HttpUtil', () => {
     })
   })
 })
-

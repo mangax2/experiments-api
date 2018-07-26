@@ -67,6 +67,7 @@ class SetsChangesListener {
         })
       }).catch((err) => {
         logger.error(`Failed to clear setId: ${setId}`, err)
+        return Promise.reject(err)
       })
     }
 

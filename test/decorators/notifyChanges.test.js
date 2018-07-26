@@ -34,6 +34,10 @@ class testClass {
 }
 
 describe('notifyChanges', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('notifyChanges', () => {
     test('notify create experiment arrow function', () => {
       KafkaProducer.publish = mock()

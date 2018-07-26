@@ -4,10 +4,16 @@ import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import db from '../../src/db/DbManager'
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 
 describe('CapacityRequestService', () => {
   kafkaProducerMocker()
+
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
 
   describe('associateExperimentToCapacityRequest', () => {
     const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]

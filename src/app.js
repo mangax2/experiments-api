@@ -1,8 +1,18 @@
+const swaggerTools = require('swagger-tools')
 require('../log4js-conf')()
 const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
-const swaggerTools = require('swagger-tools')
 const vaultUtil = require('./services/utility/VaultUtil')
+
+process.on('unhandledRejection', (reason) => {
+  // NOTE: THIS SHOULD BE A TEMPORARY METHOD UNTIL WE CAN FIGURE OUT HOW TO FIX ALL UNHANDLED!
+  // THE MOST COMMON UNHANDLED IS Promise.all() WHERE THE CALLS ARE MAKING DB CALLS AND ONE FAILS
+  // THIS CANCELS THE TRANSACTION AND CAUSES ANY OTHER CALLS TO TRY AND MAKE CALLS AGAINST
+  // THE CLOSED CONNECTION. THAT THROWS UNHANDLED REJECTIONS.
+
+  // IF WE DON'T HANDLE THESE REJECTIONS, FUTURE NODE VERSIONS WILL CRASH THE APP WHEN ONE HITS
+  console.error('Unhandled Rejection:', reason.message)
+})
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   if (config.node_env !== 'production') {
@@ -95,7 +105,9 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
       if (_.isArray(err)) {
         logError(err, req.context)
         return res.status(400).json(err)
-      } else if (err.status) {
+      }
+
+      if (err.status) {
         logError(err, req.context)
         return res.status(err.status).json(err)
       }

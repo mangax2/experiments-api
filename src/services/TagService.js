@@ -63,15 +63,20 @@ class TagService {
   }
 
   @setErrorCode('1P4000')
-  getTagsByExperimentId = (id, isTemplate, context) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header).then(result => result.body.tags).catch((err) => {
-    if (err.status === 404) {
-      return Promise.resolve([])
-    }
-    logger.error(`[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
-    err.errorCode = getFullErrorCode('1P4001')
-    return Promise.reject(err)
-  }),
-  )
+  getTagsByExperimentId = (id, isTemplate, context) =>
+    PingUtil.getMonsantoHeader()
+      .then(header =>
+        HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header)
+          .then(result => result.body.tags)
+          .catch((err) => {
+            if (err.status === 404) {
+              return Promise.resolve([])
+            }
+            logger.error(`[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
+            err.errorCode = getFullErrorCode('1P4001')
+            return Promise.reject(err)
+          }),
+      )
 
   @setErrorCode('1P5000')
   copyTags = (sourceExperimentId, targetExperimentId, context, isTemplate) =>

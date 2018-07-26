@@ -10,6 +10,7 @@ describe('EnvisionDatasetsService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     records.push({
       name: 'factor1', label: 'GM', prop: 'factor1.factor', items: [],
     })

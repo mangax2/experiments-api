@@ -5,6 +5,10 @@ import HttpUtil from '../../src/services/utility/HttpUtil'
 import ListsService from '../../src/services/ListsService'
 
 describe('ListsService', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('getLists', () => {
     test('gets authorization headers and calls lists api', () => {
       PingUtil.getMonsantoHeader = mockResolve([])

@@ -9,11 +9,11 @@ import SecurityService from './SecurityService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
-import AppError from '../services/utility/AppError'
+import AppError from './utility/AppError'
 import setErrorDecorator from '../decorators/setErrorDecorator'
-import HttpUtil from '../services/utility/HttpUtil'
-import PingUtil from '../services/utility/PingUtil'
-import cfServices from '../services/utility/ServiceConfig'
+import HttpUtil from './utility/HttpUtil'
+import PingUtil from './utility/PingUtil'
+import cfServices from './utility/ServiceConfig'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

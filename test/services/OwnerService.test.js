@@ -9,6 +9,7 @@ describe('OwnerService', () => {
   const testContext = {}
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new OwnerService()
   })
 

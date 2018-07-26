@@ -1,5 +1,5 @@
-import ManageRepsAndUnitsListener from '../../../src/services/listeners/ManageRepsAndUnitsListener'
 import Kafka from 'no-kafka'
+import ManageRepsAndUnitsListener from '../../../src/services/listeners/ManageRepsAndUnitsListener'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
@@ -8,6 +8,10 @@ import { kafkaProducerMocker, mockResolve, mock } from '../../jestUtil'
 
 describe('ManageRepsAndUnitsListener', () => {
   kafkaProducerMocker()
+
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
 
   describe('createConsumer', () => {
     test('creates an object of type Kafka.GroupConsumer', () => {

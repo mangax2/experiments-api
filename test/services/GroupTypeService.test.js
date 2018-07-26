@@ -7,6 +7,7 @@ describe('GroupTypeService', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupTypeService()
   })
 

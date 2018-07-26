@@ -1,8 +1,8 @@
 import log4js from 'log4js'
 import _ from 'lodash'
-import HttpUtil from '../services/utility/HttpUtil'
-import PingUtil from '../services/utility/PingUtil'
-import cfServices from '../services/utility/ServiceConfig'
+import HttpUtil from './utility/HttpUtil'
+import PingUtil from './utility/PingUtil'
+import cfServices from './utility/ServiceConfig'
 import AppError from './utility/AppError'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
@@ -16,13 +16,20 @@ class PreferencesService {
   handlePreferencesAPIError = (err, errorCode) => {
     if (err.status === 400) {
       return AppError.badRequest('Bad Request', undefined, errorCode)
-    } else if (err.status === 401) {
+    }
+
+    if (err.status === 401) {
       return AppError.unauthorized('Unauthorized', undefined, errorCode)
-    } else if (err.status === 403) {
+    }
+
+    if (err.status === 403) {
       return AppError.forbidden('Forbidden', undefined, errorCode)
-    } else if (err.status === 404) {
+    }
+
+    if (err.status === 404) {
       return AppError.badRequest('Preferences not found', undefined, errorCode)
     }
+
     return {
       status: 500,
       code: 'Internal Server Error',

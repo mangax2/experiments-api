@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
@@ -31,6 +33,7 @@ describe('FactorDependentCompositeService', () => {
   let mapDependentVariableDTO2DbEntityOriginal
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new FactorDependentCompositeService()
 
     verifyExperimentExistsOriginal = ExperimentsService.verifyExperimentExists

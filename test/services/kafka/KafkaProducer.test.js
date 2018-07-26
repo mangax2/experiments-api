@@ -1,10 +1,14 @@
-import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import Kafka from 'no-kafka'
+import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 
 describe('KafkaProducer', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('createProducer', () => {
     test('creates a Kafka.Producer object', () => {
       expect(KafkaProducer.createProducer() instanceof Kafka.Producer).toBe(true)

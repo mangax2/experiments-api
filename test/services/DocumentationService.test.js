@@ -6,6 +6,10 @@ import VaultUtil from '../../src/services/utility/VaultUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 
 describe('DocumentationService', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('getCloudFrontCookies', () => {
     test('calls getSignedCookie' +
       ' undefined', () => {

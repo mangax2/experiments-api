@@ -1,9 +1,13 @@
+import bluebird from 'bluebird'
 import { mock, mockReject, mockResolve } from '../../jestUtil'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
-import bluebird from 'bluebird'
 
 describe('VaultUtil', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   beforeAll(() => {
     console.error = mock()
   })

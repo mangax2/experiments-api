@@ -7,6 +7,7 @@ describe('BaseValidator', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new BaseValidator()
     target.fileCode = ''
   })
@@ -165,11 +166,11 @@ describe('BaseValidator', () => {
   })
 
   describe('preValidate', () => {
-    test('returns a resolved Promise', () => target.preValidate().then(() => {}))
+    test('returns a resolved Promise', () => expect(target.preValidate()).resolves.toBe(undefined))
   })
 
   describe('postValidate', () => {
-    test('returns a resolved Promise', () => target.postValidate().then(() => {}))
+    test('returns a resolved Promise', () => expect(target.postValidate()).resolves.toBe(undefined))
   })
 
   describe('validateEntity', () => {

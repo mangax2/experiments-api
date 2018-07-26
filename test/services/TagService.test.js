@@ -12,6 +12,7 @@ describe('TagService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new TagService()
   })
 
@@ -111,7 +112,7 @@ describe('TagService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.get = mockReject({ status: 404 })
 
-      return target.getTagsByExperimentId(1, false, testTx).then(() => {}, (data) => {
+      return target.getTagsByExperimentId(1, false, testTx).then((data) => {
         expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(data).toEqual([])
       })

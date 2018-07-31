@@ -528,6 +528,15 @@ class ExperimentsService {
 
         const taskID = experiment.task_id
 
+        const newComment = {
+          description: comment,
+          experimentId,
+        }
+
+        if (_.isNil(taskID)) {
+          return Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
+        }
+
         return PingUtil.getMonsantoHeader().then(headers =>
           HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
             .catch((err) => {
@@ -538,13 +547,7 @@ class ExperimentsService {
 
               return Promise.resolve()
             })
-            .then(() => {
-              const newComment = {
-                description: comment,
-                experimentId,
-              }
-              return Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
-            }),
+            .then(() => Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])),
         )
       })
 
@@ -555,7 +558,7 @@ class ExperimentsService {
         const taskID = experiment.task_id
 
         if (_.isNil(taskID)) {
-          return Promise.resolve()
+          return db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)
         }
 
         return PingUtil.getMonsantoHeader().then(headers =>

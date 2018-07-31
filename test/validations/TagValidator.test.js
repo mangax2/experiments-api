@@ -7,6 +7,7 @@ describe('TagValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new TagValidator()
   })
 

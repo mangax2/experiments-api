@@ -7,6 +7,7 @@ describe('ExperimentsValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new ExperimentsValidator()
   })
 
@@ -161,6 +162,6 @@ describe('ExperimentsValidator', () => {
   })
 
   describe('postValidate', () => {
-    test('resolves', () => target.postValidate().then(() => {}))
+    test('resolves', () => expect(target.postValidate()).resolves.toBe(undefined))
   })
 })

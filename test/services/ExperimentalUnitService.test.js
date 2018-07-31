@@ -10,6 +10,7 @@ describe('ExperimentalUnitService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new ExperimentalUnitService()
   })
 

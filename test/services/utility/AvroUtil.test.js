@@ -2,6 +2,10 @@ import avro from 'avsc'
 import { encode, serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 
 describe('AvroUtil', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('encode', () => {
     test('test encoding function', () => {
       const message = {

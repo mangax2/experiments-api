@@ -13,8 +13,12 @@ class testClass {
 }
 
 describe('setErrorDecorator', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('setErrorCode', () => {
-    test('adds error code to exception when it is not present in an arrow function', (done) => {
+    test('adds error code to exception when it is not present in an arrow function', () => {
       const testMethod = () => { throw new Error('test') }
 
       try {
@@ -22,22 +26,20 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST123456')
-        done()
       }
     })
 
-    test('adds error code to exception from promise when it is not present in an arrow function', (done) => {
+    test('adds error code to exception from promise when it is not present in an arrow function', () => {
       const testMethod = () => Promise.reject(new Error('test'))
 
       testClass.arrowFunc(testMethod)
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST123456')
-          done()
         })
     })
 
-    test('does not add error code to exception when it is already present in an arrow function', (done) => {
+    test('does not add error code to exception when it is already present in an arrow function', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => { throw error }
@@ -47,11 +49,10 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST741258')
-        done()
       }
     })
 
-    test('does not add error code to exception from promise when it is already present in an arrow function', (done) => {
+    test('does not add error code to exception from promise when it is already present in an arrow function', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => Promise.reject(error)
@@ -60,7 +61,6 @@ describe('setErrorDecorator', () => {
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST741258')
-          done()
         })
     })
 
@@ -80,7 +80,7 @@ describe('setErrorDecorator', () => {
       })
     })
 
-    test('adds error code to exception when it is not present in a regular function', (done) => {
+    test('adds error code to exception when it is not present in a regular function', () => {
       const testMethod = () => { throw new Error('test') }
 
       try {
@@ -88,22 +88,20 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST654321')
-        done()
       }
     })
 
-    test('adds error code to exception from promise when it is not present in a regular function', (done) => {
+    test('adds error code to exception from promise when it is not present in a regular function', () => {
       const testMethod = () => Promise.reject(new Error('test'))
 
       testClass.regularFunc(testMethod)
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST654321')
-          done()
         })
     })
 
-    test('does not add error code to exception when it is already present in a regular function', (done) => {
+    test('does not add error code to exception when it is already present in a regular function', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => { throw error }
@@ -113,11 +111,10 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST741258')
-        done()
       }
     })
 
-    test('does not add error code to exception from promise when it is already present in a regular function', (done) => {
+    test('does not add error code to exception from promise when it is already present in a regular function', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => Promise.reject(error)
@@ -126,7 +123,6 @@ describe('setErrorDecorator', () => {
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST741258')
-          done()
         })
     })
 
@@ -160,7 +156,7 @@ describe('setErrorDecorator', () => {
   })
 
   describe('addErrorHandling', () => {
-    test('adds error code to exception when it is not present', (done) => {
+    test('adds error code to exception when it is not present', () => {
       const testMethod = () => { throw new Error('test') }
       const methodUnderTest = addErrorHandling('TEST123456', testMethod)
 
@@ -169,11 +165,10 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST123456')
-        done()
       }
     })
 
-    test('adds error code to exception from promise when it is not present', (done) => {
+    test('adds error code to exception from promise when it is not present', () => {
       const testMethod = () => Promise.reject(new Error('test'))
       const methodUnderTest = addErrorHandling('TEST123456', testMethod)
 
@@ -181,11 +176,10 @@ describe('setErrorDecorator', () => {
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST123456')
-          done()
         })
     })
 
-    test('does not add error code to exception when it is already present', (done) => {
+    test('does not add error code to exception when it is already present', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => { throw error }
@@ -196,11 +190,10 @@ describe('setErrorDecorator', () => {
       } catch (err) {
         expect(err.message).toBe('test')
         expect(err.errorCode).toBe('TEST741258')
-        done()
       }
     })
 
-    test('does not add error code to exception from promise when it is already present', (done) => {
+    test('does not add error code to exception from promise when it is already present', () => {
       const error = new Error('test')
       error.errorCode = 'TEST741258'
       const testMethod = () => Promise.reject(error)
@@ -210,7 +203,6 @@ describe('setErrorDecorator', () => {
         .catch((err) => {
           expect(err.message).toBe('test')
           expect(err.errorCode).toBe('TEST741258')
-          done()
         })
     })
 

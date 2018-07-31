@@ -1,6 +1,10 @@
 import AppError from '../../../src/services/utility/AppError'
 
 describe('AppError', () => {
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('create', () => {
     test('returns an Unknown message when status code is not in the list', () => {
       const error = AppError.create(999, 'test message', {})

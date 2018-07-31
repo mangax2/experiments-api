@@ -2,12 +2,19 @@ import Kafka from 'no-kafka'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import db from '../../../src/db/DbManager'
-import { kafkaProducerMocker, mock, mockResolve, mockReject } from '../../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockResolve, mockReject,
+} from '../../jestUtil'
 import SetsChangesListener from '../../../src/services/listeners/SetsChangesListener'
 import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 
 describe('SetsChangesListener', () => {
   kafkaProducerMocker()
+
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('createConsumer', () => {
     test('creates an object of type Kafka.GroupConsumer', () => {
       expect(SetsChangesListener.createConsumer() instanceof Kafka.GroupConsumer).toBe(true)

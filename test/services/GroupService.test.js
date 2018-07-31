@@ -10,6 +10,7 @@ describe('GroupService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupService()
   })
 

@@ -7,6 +7,7 @@ describe('RefDesignSpecificationService', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new RefDesignSpecificationService()
   })
 

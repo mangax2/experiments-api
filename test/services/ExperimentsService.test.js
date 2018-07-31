@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -17,6 +19,7 @@ describe('ExperimentsService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new ExperimentsService()
     PingUtil.getMonsantoHeader.mockClear()
   })
@@ -74,11 +77,9 @@ describe('ExperimentsService', () => {
 
     test('calls validate, batchCreate, batchCreateOwners, assignExperimentIdToTags,' +
       ' batchCreateTags, and createPostResponse Will  Call ValidateAssociatedRequests and' +
-      ' validate the template objects' +
-      ' and' +
-      ' not batchAssociateExperimentsToCapacityRequests ', () => {
+      ' validate the template objects and not batchAssociateExperimentsToCapacityRequests', () => {
       target.validator.validate = mockResolve()
-      target.validateAssociatedRequests = mock()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
@@ -92,7 +93,7 @@ describe('ExperimentsService', () => {
         ownerGroups: ['group1 '],
         reviewers: ['group2 '],
         request: { id: 1, type: 'field' },
-      }], testContext, true, testTx).catch(() => {
+      }], testContext, true, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
@@ -120,17 +121,15 @@ describe('ExperimentsService', () => {
           reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, true)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
         expect(target.validateAssociatedRequests).toHaveBeenCalled()
         expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request')
       })
     })
 
     test('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but' +
-      ' not' +
-      ' tagService when there are no tags', () => {
+      ' not tagService when there are no tags', () => {
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
@@ -150,8 +149,7 @@ describe('ExperimentsService', () => {
     })
 
     test('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but' +
-      ' not' +
-      ' tagService when tags are undefined', () => {
+      ' not tagService when tags are undefined', () => {
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
@@ -259,35 +257,33 @@ describe('ExperimentsService', () => {
   })
 
   describe('validateAssociatedRequests', () => {
-    test('resolves if the experiments have no associated requests', (done) => {
+    test('resolves if the experiments have no associated requests', () => {
       target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{}], false).then(() => {
-        done()
+      expect(target.validateAssociatedRequests([{}], false)).resolves.toBe(undefined)
+    })
+
+    test('resolves if the experiments have associated requests that are completely filled out', () => {
+      target = new ExperimentsService()
+
+      expect(target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }], false)).resolves.toBe(undefined)
+    })
+
+    test('rejects if the experiments have associated requests with only an id', () => {
+      target = new ExperimentsService()
+      AppError.badRequest = mock()
+
+      return target.validateAssociatedRequests([{ request: { id: 1 } }], false).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Each request must have an id and a type.', undefined, '153001')
       })
     })
 
-    test('resolves if the experiments have associated requests that are completely filled out', (done) => {
+    test('rejects if the experiments have associated requests with only a type', () => {
       target = new ExperimentsService()
+      AppError.badRequest = mock()
 
-      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }], false).then(() => {
-        done()
-      })
-    })
-
-    test('resolves if the experiments have associated requests with only an id', (done) => {
-      target = new ExperimentsService()
-
-      target.validateAssociatedRequests([{ request: { id: 1 } }], false).catch(() => {
-        done()
-      })
-    })
-
-    test('resolves if the experiments have associated requests with only a type', (done) => {
-      target = new ExperimentsService()
-
-      target.validateAssociatedRequests([{ request: { type: 'ce' } }], false).catch(() => {
-        done()
+      return target.validateAssociatedRequests([{ request: { type: 'ce' } }], false).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Each request must have an id and a type.', undefined, '153001')
       })
     })
 

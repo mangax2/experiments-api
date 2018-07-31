@@ -10,6 +10,7 @@ describe('ExperimentDesignService', () => {
   db.experimentDesign.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new ExperimentDesignService()
   })
 

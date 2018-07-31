@@ -7,6 +7,7 @@ describe('GroupValueValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupValueValidator()
   })
 

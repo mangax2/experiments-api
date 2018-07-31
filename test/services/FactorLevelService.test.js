@@ -11,6 +11,7 @@ describe('FactorLevelService', () => {
   db.factorLevel.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new FactorLevelService()
   })
 

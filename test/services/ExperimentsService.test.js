@@ -1525,6 +1525,19 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('only calls updates to the database when task is null', () => {
+      target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: null })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      db.experiments.updateExperimentStatus = mockResolve()
+      db.comment.batchCreate = mockResolve()
+
+      return target.submitReview(1, true, '', null, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
+        expect(db.comment.batchCreate).toHaveBeenCalled()
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+      })
+    })
+
     test('successfully completes the task and updates experiment status and comment', () => {
       target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
       target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
@@ -1565,11 +1578,13 @@ describe('ExperimentsService', () => {
   })
 
   describe('cancelReview', () => {
-    test('simply resolves when there is no task id present on the experiment', () => {
+    test('simply calls db update when there is no task id present on the experiment', () => {
       target.getExperimentById = mockResolve({})
       target.securityService.permissionsCheck = mockResolve()
+      db.experiments.updateExperimentStatus = mockResolve()
 
       return target.cancelReview(1, false, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
         expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
       })
     })

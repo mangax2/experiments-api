@@ -70,10 +70,15 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const cors = require('cors')
 
+  app.use((req, res, next) => {
+    if (!req.url.endsWith('/graphql')) {
+      app.use(inflector())
+    }
+    next()
+  })
   app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
 
   app.use('/experiments-api/graphql', cors(), require('./graphql/graphqlConfig')(schema))
-  app.use(inflector())
 
   const pingFunc = (function () {
     const createPingPage = require('@monsantoit/ping-page')

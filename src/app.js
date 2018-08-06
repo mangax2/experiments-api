@@ -70,6 +70,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const cors = require('cors')
 
+  app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
+
   app.use('/experiments-api/graphql', cors(), require('./graphql/graphqlConfig')(schema))
   app.use(inflector())
 
@@ -90,7 +92,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   pingFunc()
 
 
-  app.use(bodyParser.json({ limit: 1024 * 1024 * 40 }))
   app.use(appBaseUrl, require('./routes/routes'))
 
   swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {

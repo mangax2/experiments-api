@@ -64,9 +64,11 @@ class unitRepo {
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location'],
       { table: 'unit' },
     )
+
+    console.log(_.map(units, 'location').join(', '))
 
     const values = units.map(u => ({
       group_id: u.groupId,
@@ -77,6 +79,7 @@ class unitRepo {
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
+      location: u.location,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
@@ -87,12 +90,15 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', { name: 'group_id', cast: 'int' }, 'treatment_id', 'rep', {
+      ['?id', , 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
-      }, 'modified_user_id', 'modified_date'],
+      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }],
       { table: 'unit' },
     )
+
+    console.log(_.map(units, 'location').join(', '))
+
     const data = units.map(u => ({
       id: u.id,
       group_id: u.groupId,
@@ -101,6 +107,7 @@ class unitRepo {
       set_entry_id: u.setEntryId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
+      location: u.location,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 

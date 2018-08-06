@@ -290,6 +290,7 @@ class GroupExperimentalUnitCompositeService {
       u.hashKey = `${group.locNumber}|${u.rep}|${u.treatmentId || u.treatment_id}`
       u.oldGroupId = undefined
       u.group = group
+      u.location = group.locNumber
     })
     return [group]
   }

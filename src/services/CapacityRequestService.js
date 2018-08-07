@@ -30,7 +30,7 @@ class CapacityRequestService {
       .then(headers => HttpUtil.get(capacityRequestUri, headers)
         .then((response) => {
           const capacityRequest = response.body
-          capacityRequest.protocol_number = experiment.id
+          capacityRequest.experiment_id = experiment.id
           const putBody = {
             currentUser: context.userId,
             request: capacityRequest,

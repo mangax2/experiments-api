@@ -7,6 +7,7 @@ describe('FactorTypesValidator', () => {
   let target
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new FactorTypesValidator()
   })
 
@@ -62,6 +63,6 @@ describe('FactorTypesValidator', () => {
   })
 
   describe('postValidate', () => {
-    test('resolves', () => target.postValidate().then(() => {}))
+    test('resolves', () => expect(target.postValidate()).resolves.toBe(undefined))
   })
 })

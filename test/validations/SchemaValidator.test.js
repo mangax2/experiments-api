@@ -7,6 +7,7 @@ describe('SchemaValidator', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new SchemaValidator()
   })
 

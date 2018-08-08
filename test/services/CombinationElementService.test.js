@@ -11,6 +11,7 @@ describe('CombinationElementService', () => {
   db.combinationElement.respository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new CombinationElementService()
   })
 
@@ -102,9 +103,9 @@ describe('CombinationElementService', () => {
   describe('batchGetCombinationElementByTreatmentIds', () => {
     test('calls combinationElement batchFindAllByTreatmentIds', () => {
       target.treatmentService.batchGetTreatmentByIds = mockResolve()
-      db.combinationElement.batchFindAllByTreatmentIds = mock()
+      db.combinationElement.batchFindAllByTreatmentIds = mockResolve()
 
-      return target.batchGetCombinationElementsByTreatmentIds([1, 2], {}, testTx).then(() => {}, () => {
+      return target.batchGetCombinationElementsByTreatmentIds([1, 2], {}, testTx).then(() => {
         expect(target.treatmentService.batchGetTreatmentByIds).toHaveBeenCalledWith([1, 2], {}, testTx)
         expect(db.combinationElement.batchFindAllByTreatmentIds).toHaveBeenCalledWith([1, 2], testTx)
       })
@@ -126,11 +127,12 @@ describe('CombinationElementService', () => {
   describe('batchGetCombinationElementsByTreatmentIdsNoValidate', () => {
     test('calls combinationElement batchFindAllByTreatmentIds without calling treatmentService', () => {
       target.treatmentService.batchGetTreatmentByIds = mock()
-      db.combinationElement.batchFindAllByTreatmentIds = mock()
+      db.combinationElement.batchFindAllByTreatmentIds = mockResolve()
 
-      target.batchGetCombinationElementsByTreatmentIdsNoValidate([1, 2], testTx)
-      expect(target.treatmentService.batchGetTreatmentByIds).not.toHaveBeenCalled()
-      expect(db.combinationElement.batchFindAllByTreatmentIds).toHaveBeenCalledWith([1, 2], testTx)
+      return target.batchGetCombinationElementsByTreatmentIdsNoValidate([1, 2], testTx).then(() => {
+        expect(target.treatmentService.batchGetTreatmentByIds).not.toHaveBeenCalled()
+        expect(db.combinationElement.batchFindAllByTreatmentIds).toHaveBeenCalledWith([1, 2], testTx)
+      })
     })
   })
 
@@ -138,7 +140,7 @@ describe('CombinationElementService', () => {
     test('returns data when call returns data', () => {
       db.combinationElement.find = mockResolve({})
 
-      target.getCombinationElementById(1, testTx).then((data) => {
+      return target.getCombinationElementById(1, testContext, testTx).then((data) => {
         expect(db.combinationElement.find).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({})
       })
@@ -148,7 +150,7 @@ describe('CombinationElementService', () => {
       db.combinationElement.find = mockResolve()
       AppError.notFound = jest.fn(() => ({}))
 
-      return target.getCombinationElementById(1, testTx).then(() => {}, () => {
+      return target.getCombinationElementById(1, testContext, testTx).then(() => {}, () => {
         expect(AppError.notFound).toHaveBeenCalledWith('Combination Element Not Found for requested id', undefined, '116001')
       })
     })
@@ -157,7 +159,7 @@ describe('CombinationElementService', () => {
       const error = { message: 'error' }
       db.combinationElement.find = mockReject(error)
 
-      return target.getCombinationElementById(1, testTx).then(() => {}, (err) => {
+      return target.getCombinationElementById(1, testContext, testTx).then(() => {}, (err) => {
         expect(err).toEqual(error)
       })
     })

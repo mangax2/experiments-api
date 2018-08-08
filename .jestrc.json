@@ -1,5 +1,5 @@
 {
-  "testEnvironment": "jsdom",
+  "testEnvironment": "node",
   "moduleFileExtensions": [
     "js",
     "json"

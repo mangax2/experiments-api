@@ -1,5 +1,9 @@
+/* eslint-disable max-len */
 import log4js from 'log4js'
 import _ from 'lodash'
+import HttpUtil from './utility/HttpUtil'
+import PingUtil from './utility/PingUtil'
+import cfService from './utility/ServiceConfig'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -42,7 +46,10 @@ class ExperimentsService {
           const experimentsOwners = _.map(experiments, (exp) => {
             const owners = _.map(exp.owners, _.trim)
             const ownerGroups = _.map(exp.ownerGroups, _.trim)
-            return { experimentId: exp.id, userIds: owners, groupIds: ownerGroups }
+            const reviewers = _.map(exp.reviewers, _.trim)
+            return {
+              experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerIds: reviewers,
+            }
           })
 
           return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
@@ -103,6 +110,7 @@ class ExperimentsService {
         const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
         experiment.owners = owners.user_ids
         experiment.ownerGroups = owners.group_ids
+        experiment.reviewers = owners.reviewer_ids
         return experiment
       }),
     )
@@ -139,15 +147,20 @@ class ExperimentsService {
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
       } else {
-        return Promise.all(
-          [
-            this.ownerService.getOwnersByExperimentId(id, tx),
-            this.tagService.getTagsByExperimentId(id, isTemplate, context),
-          ],
-        ).then((ownersAndTags) => {
-          data.owners = ownersAndTags[0].user_ids
-          data.ownerGroups = ownersAndTags[0].group_ids
-          data.tags = ExperimentsService.prepareTagResponse(ownersAndTags[1])
+        const promises = []
+
+        promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
+        promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
+        // Dont Change the order of the promises
+        promises.push(db.comment.findRecentByExperimentId(data.id, tx))
+        return Promise.all(promises).then(([owners, tags, comment]) => {
+          data.owners = owners.user_ids
+          data.ownerGroups = owners.group_ids
+          data.reviewers = owners.reviewer_ids
+          data.tags = ExperimentsService.prepareTagResponse(tags)
+          if (!_.isNil(comment)) {
+            data.comment = comment.description
+          }
           return data
         })
       }
@@ -170,15 +183,28 @@ class ExperimentsService {
               logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
             } else {
+              const comment = {}
+              if (!_.isNil(experiment.comment)) {
+                comment.description = experiment.comment
+                comment.experimentId = experiment.id
+              }
               const trimmedUserIds = _.map(experiment.owners, _.trim)
               const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
-
+              const trimmedReviewers = _.map(experiment.reviewers, _.trim)
               const owners = {
                 experimentId: id,
                 userIds: trimmedUserIds,
                 groupIds: trimmedOwnerGroups,
+                reviewerIds: trimmedReviewers,
               }
-              return this.ownerService.batchUpdateOwners([owners], context, tx)
+              const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
+              const promises = []
+              promises.push(updateOwnerPromise)
+              if (experiment.comment && experiment.status === 'REJECTED') {
+                const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
+                promises.push(createExperimentCommentPromise)
+              }
+              return Promise.all(promises)
                 .then(() => {
                   experiment.id = id
                   const tags = this.assignExperimentIdToTags([experiment])
@@ -411,6 +437,143 @@ class ExperimentsService {
         return Promise.reject(AppError.badRequest('Invalid criteria provided', undefined, getFullErrorCode('15O001')))
     }
   }
+
+  @setErrorCode('15P000')
+  @Transactional('handleReviewStatus')
+  handleReviewStatus = (experimentId, isTemplate, body, context, tx) => {
+    const acceptableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED']
+    if (_.isNil(body.status)) {
+      return Promise.reject(AppError.badRequest(`Status must be provided in body. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P001')))
+    }
+
+    switch (body.status.toUpperCase()) {
+      case 'DRAFT':
+        return this.cancelReview(experimentId, isTemplate, context, tx)
+      case 'SUBMITTED':
+        if (_.isNil(body.timestamp)) {
+          return Promise.reject(AppError.badRequest(`The timestamp field must be provided in body for submitting ${isTemplate ? 'a template' : 'an experiment'}`, null, getFullErrorCode('15P002')))
+        }
+        return this.submitForReview(experimentId, isTemplate, body.timestamp, context, tx)
+      case 'APPROVED':
+      case 'REJECTED':
+        return this.submitReview(experimentId, isTemplate, body.status.toUpperCase(), body.comment, context, tx)
+      default:
+        return Promise.reject(AppError.badRequest(`Invalid status provided. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P003')))
+    }
+  }
+
+  @setErrorCode('15Q000')
+  submitForReview = (experimentId, isTemplate, timestamp, context, tx) =>
+    Promise.all([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
+      .then(([experiment]) => {
+        if (!_.isNil(experiment.task_id)) {
+          return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has already been submitted for review. To submit a new review, please cancel the existing review.`, null, getFullErrorCode('15Q001')))
+        }
+
+        if (experiment.reviewers.length === 0) {
+          return Promise.reject(AppError.badRequest(`No reviewers have been assigned to this ${isTemplate ? 'template' : 'experiment'}`, null, getFullErrorCode('15Q002')))
+        }
+        const date = new Date(timestamp)
+
+        if (date instanceof Date && !_.isNaN(date.getTime())) {
+          const isoDateString = date.toISOString()
+          const currentISODateString = new Date().toISOString()
+
+          if (isoDateString.slice(0, isoDateString.indexOf('T')) <= currentISODateString.slice(0, isoDateString.indexOf('T'))) {
+            return Promise.reject(AppError.badRequest('Provided date must be greater than current date', null, getFullErrorCode('15Q004')))
+          }
+
+          const taskTemplate = {
+            title: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" Review Requested`,
+            body: {
+              text: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" is ready for statistician review.`,
+            },
+            userGroups: experiment.reviewers,
+            actions: [
+              {
+                title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
+                url: `https://${cfService['velocity-home'].value}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
+              },
+            ],
+            tags: [
+              'experiment-review-request',
+            ],
+            dueDate: isoDateString.slice(0, isoDateString.indexOf('T')),
+            tagKey: `${experimentId}|${isoDateString.slice(0, isoDateString.indexOf('T'))}`,
+          }
+
+          return PingUtil.getMonsantoHeader().then(headers =>
+            HttpUtil.post(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
+              .then((taskResult) => {
+                const taskId = taskResult.body.id
+                return db.experiments.updateExperimentStatus(experimentId, 'SUBMITTED', taskId, context, tx)
+              }),
+          ).catch(err => Promise.reject(AppError.internalServerError('Error encountered contacting the velocity messaging api', err.message, '15Q005')))
+        }
+
+        return Promise.reject(AppError.badRequest('The timestamp field is an invalid date string', null, getFullErrorCode('15Q003')))
+      })
+
+  @setErrorCode('15R000')
+  submitReview = (experimentId, isTemplate, status, comment, context, tx) =>
+    Promise.all([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.getUserPermissionsForExperiment(experimentId, context, tx)])
+      .then(([experiment, permissions]) => {
+        if (!permissions.includes('review')) {
+          return Promise.reject(AppError.forbidden('Only reviewers are allowed to submit a review', null, getFullErrorCode('15R001')))
+        }
+
+        if (experiment.status !== 'SUBMITTED') {
+          return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has not been submitted for review`, null, getFullErrorCode('15R002')))
+        }
+
+        const taskID = experiment.task_id
+
+        const newComment = {
+          description: comment,
+          experimentId,
+        }
+
+        if (_.isNil(taskID)) {
+          return Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
+        }
+
+        return PingUtil.getMonsantoHeader().then(headers =>
+          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
+            .catch((err) => {
+              logger.error(`Unable to complete task. Reason: ${err.response.text}`)
+              if (err.status !== 404 && err.response.text !== 'task has already been completed') {
+                return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15R003')))
+              }
+
+              return Promise.resolve()
+            })
+            .then(() => Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])),
+        )
+      })
+
+  @setErrorCode('15S000')
+  cancelReview = (experimentId, isTemplate, context, tx) =>
+    Promise.all([this.getExperimentById(experimentId, isTemplate, context), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
+      .then(([experiment]) => {
+        const taskID = experiment.task_id
+
+        if (_.isNil(taskID)) {
+          return db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)
+        }
+
+        return PingUtil.getMonsantoHeader().then(headers =>
+          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
+            .catch((err) => {
+              logger.error(`Unable to complete task. Reason: ${err.response.text}`)
+
+              if (err.status !== 404 && err.response.text !== 'task has already been completed') {
+                return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15S001')))
+              }
+              return Promise.resolve()
+            })
+            .then(() => db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)),
+        )
+      })
 }
 
 module.exports = ExperimentsService

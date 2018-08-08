@@ -1,16 +1,10 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
-import HttpUtil from '../services/utility/HttpUtil'
-import PingUtil from '../services/utility/PingUtil'
-import cfServices from '../services/utility/ServiceConfig'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
-
-const logger = log4js.getLogger('GroupValidator')
 
 // Error Codes 3BXXXX
 class GroupValidator extends SchemaValidator {
@@ -19,16 +13,13 @@ class GroupValidator extends SchemaValidator {
     super.setFileCode('3B')
   }
 
-  strategyRetrievalPromise
-  validRandomizationIds
-
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
       { paramName: 'parentId', type: 'numeric', required: false },
       { paramName: 'parentId', type: 'refData', entity: db.group },
-      { paramName: 'refRandomizationStrategyId', type: 'numeric', required: true },
+      { paramName: 'refRandomizationStrategyId', type: 'numeric' },
       { paramName: 'refGroupTypeId', type: 'numeric', required: true },
       { paramName: 'refGroupTypeId', type: 'refData', entity: db.groupType },
     ]
@@ -76,47 +67,7 @@ class GroupValidator extends SchemaValidator {
   }
 
   @setErrorCode('3B3000')
-  postValidate = (groupObj) => {
-    if (!this.strategyRetrievalPromise) {
-      this.getValidRandomizationIds()
-    }
-    return this.strategyRetrievalPromise.then(() =>
-      this.validateRandomizationStrategyIds(groupObj))
-  }
-
-  @setErrorCode('3B4000')
-  validateRandomizationStrategyIds = (groupObj) => {
-    const uniqueRandomizationIds = _.uniq(_.filter(_.map(groupObj, 'refRandomizationStrategyId')))
-    const invalidRandomizationIds = _.difference(uniqueRandomizationIds,
-      this.validRandomizationIds)
-
-    if (invalidRandomizationIds.length > 0) {
-      return Promise.reject(AppError.badRequest(`Invalid randomization strategy ids: ${invalidRandomizationIds.join(', ')}`, undefined, getFullErrorCode('3B4001')))
-    }
-    return Promise.resolve()
-  }
-
-  @setErrorCode('3B5000')
-  getValidRandomizationIds = () => {
-    let resolver
-    let rejecter
-    this.strategyRetrievalPromise = new Promise((resolve, reject) => {
-      resolver = resolve
-      rejecter = reject
-    })
-    return PingUtil.getMonsantoHeader().then(header =>
-      HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header).then((result) => {
-        if (result && result.body) {
-          this.validRandomizationIds = _.map(result.body, 'id')
-        }
-        resolver()
-      }),
-    ).catch((err) => {
-      logger.error('An error occurred when retrieving randomization strategies', err)
-      this.strategyRetrievalPromise = undefined
-      rejecter(AppError.badRequest('Unable to validate randomization strategy ids.', undefined, getFullErrorCode('3B5001')))
-    })
-  }
+  postValidate = () => Promise.resolve()
 }
 
 module.exports = GroupValidator

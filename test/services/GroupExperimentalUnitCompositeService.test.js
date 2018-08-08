@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -14,6 +16,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupExperimentalUnitCompositeService()
   })
 
@@ -102,7 +105,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.createExperimentalUnits = mockResolve([5])
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
-      target.batchUpdateGroups = mockResolve()
       target.batchDeleteGroups = mockResolve()
       AppUtil.createCompositePostResponse = mock()
 
@@ -115,7 +117,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.createExperimentalUnits).toBeCalled()
         expect(target.batchUpdateExperimentalUnits).toBeCalled()
         expect(target.batchDeleteExperimentalUnits).toBeCalled()
-        expect(target.batchUpdateGroups).toBeCalled()
         expect(target.batchDeleteGroups).toBeCalled()
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
@@ -135,7 +136,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       target.createExperimentalUnits = mockResolve()
       target.batchUpdateExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
-      target.batchUpdateGroups = mockResolve()
       target.batchDeleteGroups = mockResolve()
       target.getGroupTree = mockResolve([])
 
@@ -147,7 +147,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(target.createExperimentalUnits).not.toBeCalled()
         expect(target.batchUpdateExperimentalUnits).not.toBeCalled()
         expect(target.batchDeleteExperimentalUnits).not.toBeCalled()
-        expect(target.batchUpdateGroups).not.toBeCalled()
         expect(target.batchDeleteGroups).not.toBeCalled()
         expect(err).toEqual(error)
       })
@@ -220,24 +219,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
         expect(db.unit.batchRemove).toBeCalledWith([5], testTx)
-      })
-    })
-  })
-
-  describe('batchUpdateGroups', () => {
-    test('does not call groupService if no groups passed in', () => {
-      target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
-
-      return target.batchUpdateGroups([], testContext, testTx).then(() => {
-        expect(target.groupService.batchUpdateGroupsNoValidate).not.toBeCalled()
-      })
-    })
-
-    test('does call groupService if groups are passed in', () => {
-      target.groupService = { batchUpdateGroupsNoValidate: mockResolve() }
-
-      return target.batchUpdateGroups([{}], testContext, testTx).then(() => {
-        expect(target.groupService.batchUpdateGroupsNoValidate).toBeCalledWith([{}], testContext, testTx)
       })
     })
   })
@@ -315,12 +296,11 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('createGroupValuesUnitsAndChildGroups', () => {
     test('rejects when recursiveBatchCreate fails', () => {
-      target.getUnitsAndGroupValues = mock({ groupValues: [{}], units: [{}], childGroups: [{}] })
+      target.assignGroupIdToGroupValuesAndUnits = mock([{ groupValues: [{}], units: [{}], childGroups: [{ id: 1 }] }])
       target.recursiveBatchCreate = mockReject('error')
 
-      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
-        expect(err).toEqual('error')
+      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {}, () => {
+        expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{ id: 1 }], testContext, testTx)
       })
     })
 
@@ -331,6 +311,15 @@ describe('GroupExperimentalUnitCompositeService', () => {
       return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{ childGroups: [{}] }], testContext, testTx).then(() => {
         expect(target.groupValueService.batchCreateGroupValues).not.toHaveBeenCalled()
         expect(target.recursiveBatchCreate).toHaveBeenCalledWith(1, [{}], testContext, testTx)
+      })
+    })
+
+    test('does not call recursiveBatchCreate', () => {
+      target.assignGroupIdToGroupValuesAndUnits = mock([{ groupValues: [{}], units: [{}], childGroups: [] }])
+      target.recursiveBatchCreate = mockReject('error')
+
+      return target.createGroupValuesUnitsAndChildGroups(1, [{}], [{}], testContext, testTx).then(() => {
+        expect(target.recursiveBatchCreate).not.toHaveBeenCalled()
       })
     })
   })
@@ -626,9 +615,8 @@ describe('GroupExperimentalUnitCompositeService', () => {
       expect(target.assignAncestryAndLocation).toHaveBeenCalledTimes(2)
       expect(target.findMatchingEntity).toHaveBeenCalledTimes(2)
 
-      additionalLogicFuncs[0](testGroup, { ref_randomization_strategy_id: 3 })
+      additionalLogicFuncs[0](testGroup, {})
 
-      expect(testGroup.oldRefRandomizationStrategyId).toBe(3)
       expect(testGroup.units[0].groupId).toBe(5)
 
       additionalLogicFuncs[1](testGroup.units[0], { group: { id: 7 }, setEntryId: 3 })
@@ -725,7 +713,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         groups: {
           adds: [newGroups[1]],
           deletes: [oldGroups[1]],
-          updates: [newGroups[0]],
         },
         units: {
           adds: [newUnits[2]],
@@ -974,7 +961,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
       const result = target.createRcbGroupStructure(5, setGroup, 2, [{ id: 3 }, { id: 7 }], 6)
 
       expect(result).toEqual([{
-        refRandomizationStrategyId: 2,
         refGroupTypeId: 4,
         groupValues: [{
           name: 'locationNumber',
@@ -982,7 +968,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
         }],
         setId: 5,
         childGroups: [{
-          refRandomizationStrategyId: 2,
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',
@@ -996,7 +981,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
             rep: 1,
           }],
         }, {
-          refRandomizationStrategyId: 2,
           refGroupTypeId: 6,
           groupValues: [{
             name: 'repNumber',

@@ -10,6 +10,7 @@ describe('GroupService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new GroupService()
   })
 
@@ -153,16 +154,6 @@ describe('GroupService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.group.batchUpdate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
-      })
-    })
-  })
-
-  describe('batchUpdateGroupsNoValidate', () => {
-    test('updates groups', () => {
-      db.group.batchUpdate = mockResolve([{}])
-
-      return target.batchUpdateGroupsNoValidate([{}], testContext, testTx).then(() => {
-        expect(db.group.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
       })
     })
   })

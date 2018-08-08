@@ -1,4 +1,6 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import DesignSpecificationDetailService from '../../src/services/DesignSpecificationDetailService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -11,6 +13,7 @@ describe('DesignSpecificationDetailService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new DesignSpecificationDetailService()
   })
 

@@ -1,9 +1,16 @@
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 import ExperimentsService from '../../src/services/ExperimentsService'
 import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
+import PingUtil from '../../src/services/utility/PingUtil'
+import HttpUtil from '../../src/services/utility/HttpUtil'
+
+jest.mock('../../src/services/utility/PingUtil')
+jest.mock('../../src/services/utility/HttpUtil')
 
 describe('ExperimentsService', () => {
   let target
@@ -12,7 +19,9 @@ describe('ExperimentsService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new ExperimentsService()
+    PingUtil.getMonsantoHeader.mockClear()
   })
 
   describe('batchCreateExperiments', () => {
@@ -35,26 +44,31 @@ describe('ExperimentsService', () => {
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
+        reviewers: ['group2 '],
       }], testContext, false, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
         }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
@@ -63,11 +77,9 @@ describe('ExperimentsService', () => {
 
     test('calls validate, batchCreate, batchCreateOwners, assignExperimentIdToTags,' +
       ' batchCreateTags, and createPostResponse Will  Call ValidateAssociatedRequests and' +
-      ' validate the template objects' +
-      ' and' +
-      ' not batchAssociateExperimentsToCapacityRequests ', () => {
+      ' validate the template objects and not batchAssociateExperimentsToCapacityRequests', () => {
       target.validator.validate = mockResolve()
-      target.validateAssociatedRequests = mock()
+      target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1 }])
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
@@ -79,42 +91,45 @@ describe('ExperimentsService', () => {
       return target.batchCreateExperiments([{
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
+        reviewers: ['group2 '],
         request: { id: 1, type: 'field' },
-      }], testContext, true, testTx).catch(() => {
+      }], testContext, true, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }], 'POST', testTx)
         expect(db.experiments.batchCreate).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
+          reviewers: ['group2 '],
           request: { id: 1, type: 'field' },
         }])
-        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, false)
+        expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, true)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{ id: 1 }])
         expect(target.validateAssociatedRequests).toHaveBeenCalled()
         expect(CapacityRequestService.batchAssociateExperimentsToCapacityRequests).not.toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Template(s) cannot be associated to a request')
       })
     })
 
     test('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but' +
-      ' not' +
-      ' tagService when there are no tags', () => {
+      ' not tagService when there are no tags', () => {
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
@@ -134,8 +149,7 @@ describe('ExperimentsService', () => {
     })
 
     test('calls validate, batchCreate, assignExperimentIdToTags, and createPostResponse, but' +
-      ' not' +
-      ' tagService when tags are undefined', () => {
+      ' not tagService when tags are undefined', () => {
       target.validator.validate = mockResolve()
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mockResolve([{ id: 1, owners: ['KMCCL'] }])
@@ -243,35 +257,33 @@ describe('ExperimentsService', () => {
   })
 
   describe('validateAssociatedRequests', () => {
-    test('resolves if the experiments have no associated requests', (done) => {
+    test('resolves if the experiments have no associated requests', () => {
       target = new ExperimentsService()
 
-      target.validateAssociatedRequests([{}], false).then(() => {
-        done()
+      expect(target.validateAssociatedRequests([{}], false)).resolves.toBe(undefined)
+    })
+
+    test('resolves if the experiments have associated requests that are completely filled out', () => {
+      target = new ExperimentsService()
+
+      expect(target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }], false)).resolves.toBe(undefined)
+    })
+
+    test('rejects if the experiments have associated requests with only an id', () => {
+      target = new ExperimentsService()
+      AppError.badRequest = mock()
+
+      return target.validateAssociatedRequests([{ request: { id: 1 } }], false).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Each request must have an id and a type.', undefined, '153001')
       })
     })
 
-    test('resolves if the experiments have associated requests that are completely filled out', (done) => {
+    test('rejects if the experiments have associated requests with only a type', () => {
       target = new ExperimentsService()
+      AppError.badRequest = mock()
 
-      target.validateAssociatedRequests([{ request: { id: 1, type: 'ce' } }], false).then(() => {
-        done()
-      })
-    })
-
-    test('resolves if the experiments have associated requests with only an id', (done) => {
-      target = new ExperimentsService()
-
-      target.validateAssociatedRequests([{ request: { id: 1 } }], false).catch(() => {
-        done()
-      })
-    })
-
-    test('resolves if the experiments have associated requests with only a type', (done) => {
-      target = new ExperimentsService()
-
-      target.validateAssociatedRequests([{ request: { type: 'ce' } }], false).catch(() => {
-        done()
+      return target.validateAssociatedRequests([{ request: { type: 'ce' } }], false).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Each request must have an id and a type.', undefined, '153001')
       })
     })
 
@@ -488,15 +500,38 @@ describe('ExperimentsService', () => {
 
   describe('getExperimentById', () => {
     test('calls find, getTagsByExperimentId, and returns data', () => {
-      db.experiments.find = mockResolve({})
+      db.experiments.find = mockResolve({
+        status: 'REJECTED',
+      })
+      db.comment.findRecentByExperimentId = mockResolve({
+        description: 'rejected',
+      })
       target.tagService.getTagsByExperimentId = mockResolve([])
       target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ tags: [] })
+        expect(data).toEqual({ status: 'REJECTED', comment: 'rejected', tags: [] })
+      })
+    })
+
+    test('calls find, getTagsByExperimentId, and returns data without comment', () => {
+      db.experiments.find = mockResolve({
+        status: 'REJECTED',
+      })
+      db.comment.findRecentByExperimentId = mockResolve(undefined)
+      target.tagService.getTagsByExperimentId = mockResolve([])
+      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+
+      return target.getExperimentById(1, false, testContext, testTx).then((data) => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
+        expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
+        expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual({ status: 'REJECTED', tags: [] })
       })
     })
 
@@ -558,7 +593,11 @@ describe('ExperimentsService', () => {
       ' batchCreateTags', () => {
       target.validator.validate = mockResolve()
       target.securityService.permissionsCheck = mockResolve()
-      db.experiments.update = mockResolve({})
+      db.experiments.update = mockResolve({
+        status: 'REJECTED',
+        comment: 'rejection reason',
+      })
+      db.comment.batchCreate = mock()
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
@@ -566,7 +605,9 @@ describe('ExperimentsService', () => {
       return target.updateExperiment(1, {
         owners: ['KMCCL '],
         ownerGroups: ['group1'],
-
+        reviewers: ['group2'],
+        status: 'REJECTED',
+        comment: 'rejection reason',
       }, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{
@@ -574,26 +615,38 @@ describe('ExperimentsService', () => {
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
+
         }], 'PUT', testTx)
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
           id: 1,
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
         }, testContext, testTx)
+        expect(db.comment.batchCreate).toHaveBeenCalled()
         expect(target.ownerService.batchUpdateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
+          reviewerIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
           owners: ['KMCCL '],
           ownerGroups: ['group1'],
+          reviewers: ['group2'],
+          status: 'REJECTED',
+          comment: 'rejection reason',
         }])
         expect(target.tagService.saveTags).toHaveBeenCalledWith([{}], 1, {}, false)
-        expect(data).toEqual({})
+        expect(data).toEqual({ comment: 'rejection reason', status: 'REJECTED' })
       })
     })
 
@@ -720,6 +773,25 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
         expect(db.experiments.update).not.toHaveBeenCalled()
+        expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
+        expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
+        expect(err).toEqual(error)
+      })
+    })
+
+
+    test('rejects when comment validate fails', () => {
+      const error = { message: 'error' }
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockReject(error)
+      db.comment.update = mock()
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+
+      return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{ isTemplate: false }], 'PUT', testTx)
+        expect(db.comment.update).not.toHaveBeenCalled()
         expect(target.assignExperimentIdToTags).not.toHaveBeenCalled()
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(err).toEqual(error)
@@ -887,7 +959,8 @@ describe('ExperimentsService', () => {
         expect(target.batchCreateExperiments).toHaveBeenCalled()
       })
     })
-    test('manage Experiments when there is an inavlid query parameter in the post end point', () => {
+
+    test('manage Experiments when there is an invalid query parameter in the post end point', () => {
       const requestBody = {}
       AppError.badRequest = mock()
       return target.manageExperiments(requestBody, { source: 'fgsdhfhsdf' }, testContext, testTx).catch(() => {
@@ -969,6 +1042,7 @@ describe('ExperimentsService', () => {
         }, testContext, 'copy', testTx)
       })
     })
+
     test('createExperiments from Template', () => {
       target.generateEntities = mockResolve()
       return target.createEntity(1, 1, testContext, false, testTx).then(() => {
@@ -1165,6 +1239,397 @@ describe('ExperimentsService', () => {
         expect(target.getExperimentsByUser).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('Invalid criteria provided', undefined, '15O001')
         done()
+      })
+    })
+  })
+
+  describe('handleReviewStatus', () => {
+    test('throws an error when status is not provided', () => {
+      AppError.badRequest = mock()
+      return target.handleReviewStatus(1, false, {}, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Status must be provided in body. Acceptable options are: DRAFT,SUBMITTED,APPROVED,REJECTED', null, '15P001')
+      })
+    })
+
+    test('rejects when provided status is not valid', () => {
+      AppError.badRequest = mock()
+      return target.handleReviewStatus(1, false, { status: 'BAD' }, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid status provided. Acceptable options are: DRAFT,SUBMITTED,APPROVED,REJECTED', null, '15P003')
+      })
+    })
+
+    test('calls cancel review when provided status is DRAFT', () => {
+      target.cancelReview = mockResolve()
+      return target.handleReviewStatus(1, false, { status: 'DRAFT' }, testContext, testTx).then(() => {
+        expect(target.cancelReview).toHaveBeenCalledWith(1, false, testContext, testTx)
+      })
+    })
+
+    test('rejects when status is SUBMITTED and timestamp is not present in body for experiment', () => {
+      AppError.badRequest = mock()
+      return target.handleReviewStatus(1, false, { status: 'SUBMITTED' }, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field must be provided in body for submitting an experiment', null, '15P002')
+      })
+    })
+
+    test('rejects when status is SUBMITTED and timestamp is not present in body for template', () => {
+      AppError.badRequest = mock()
+      return target.handleReviewStatus(1, true, { status: 'SUBMITTED' }, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field must be provided in body for submitting a template', null, '15P002')
+      })
+    })
+
+    test('calls submitForReview when status is SUBMITTED and timestamp was provided', () => {
+      target.submitForReview = mockResolve()
+      return target.handleReviewStatus(1, false, { status: 'SUBMITTED', timestamp: '123' }, testContext, testTx).then(() => {
+        expect(target.submitForReview).toHaveBeenCalledWith(1, false, '123', testContext, testTx)
+      })
+    })
+
+    test('calls cancel review when provided status is APPROVED with no comment', () => {
+      target.submitReview = mockResolve()
+      return target.handleReviewStatus(1, false, { status: 'APPROVED' }, testContext, testTx).then(() => {
+        expect(target.submitReview).toHaveBeenCalledWith(1, false, 'APPROVED', undefined, testContext, testTx)
+      })
+    })
+
+    test('calls cancel review when provided status is REJECTED with a comment', () => {
+      target.submitReview = mockResolve()
+      return target.handleReviewStatus(1, false, { status: 'APPROVED', comment: 'test comment' }, testContext, testTx).then(() => {
+        expect(target.submitReview).toHaveBeenCalledWith(1, false, 'APPROVED', 'test comment', testContext, testTx)
+      })
+    })
+  })
+
+  describe('submitForReview', () => {
+    test('rejects when experiment has a task id', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ task_id: '1' })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, false, '123', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment has already been submitted for review. To submit a new review, please cancel the existing review.', null, '15Q001')
+      })
+    })
+
+    test('rejects when template has a task id', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ task_id: '1' })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, true, '123', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Template has already been submitted for review. To submit a new review, please cancel the existing review.', null, '15Q001')
+      })
+    })
+
+    test('rejects when experiment does not have reviewers assigned', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ reviewers: [] })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, false, '123', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('No reviewers have been assigned to this experiment', null, '15Q002')
+      })
+    })
+
+    test('rejects when template does not have reviewers assigned', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ reviewers: [] })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, true, '123', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('No reviewers have been assigned to this template', null, '15Q002')
+      })
+    })
+
+    test('rejects when date is invalid', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'] })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, false, 'abc', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The timestamp field is an invalid date string', null, '15Q003')
+      })
+    })
+
+    test('rejects when date is less than current date', () => {
+      AppError.badRequest = mock()
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'] })
+      target.securityService.permissionsCheck = mockResolve()
+
+      return target.submitForReview(1, false, '1970-01-01T00:00:00.000Z', testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Provided date must be greater than current date', null, '15Q004')
+      })
+    })
+
+    test('creates a task and updates experiment status when everything is valid', () => {
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'EXP NAME' })
+      target.securityService.permissionsCheck = mockResolve()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
+      db.experiments.updateExperimentStatus = mockResolve()
+
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+
+      const expectedTaskTemplate = {
+        title: 'Experiment "EXP NAME" Review Requested',
+        body: {
+          text: 'Experiment "EXP NAME" is ready for statistician review.',
+        },
+        userGroups: ['REVIEWER'],
+        actions: [
+          {
+            title: 'Review Experiment "EXP NAME"',
+            url: 'https://dev.velocity-np.ag/experiments/1',
+          },
+        ],
+        tags: [
+          'experiment-review-request',
+        ],
+        dueDate: date.toISOString().slice(0, date.toISOString().indexOf('T')),
+        tagKey: `1|${date.toISOString().slice(0, date.toISOString().indexOf('T'))}`,
+      }
+
+      return target.submitForReview(1, false, date.toISOString(), testContext, testTx).then(() => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
+      })
+    })
+
+    test('creates a task and updates experiment status when everything is valid for a template', () => {
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
+      target.securityService.permissionsCheck = mockResolve()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
+      db.experiments.updateExperimentStatus = mockResolve()
+
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+
+      const expectedTaskTemplate = {
+        title: 'Template "TEMPLATE NAME" Review Requested',
+        body: {
+          text: 'Template "TEMPLATE NAME" is ready for statistician review.',
+        },
+        userGroups: ['REVIEWER'],
+        actions: [
+          {
+            title: 'Review Template "TEMPLATE NAME"',
+            url: 'https://dev.velocity-np.ag/experiments/templates/1',
+          },
+        ],
+        tags: [
+          'experiment-review-request',
+        ],
+        dueDate: date.toISOString().slice(0, date.toISOString().indexOf('T')),
+        tagKey: `1|${date.toISOString().slice(0, date.toISOString().indexOf('T'))}`,
+      }
+
+      return target.submitForReview(1, true, date.toISOString(), testContext, testTx).then(() => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
+      })
+    })
+
+    test('fails to create a task', () => {
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
+      target.securityService.permissionsCheck = mockResolve()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('error')))
+      db.experiments.updateExperimentStatus = mockResolve()
+      AppError.internalServerError = mock()
+
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+
+      const expectedTaskTemplate = {
+        title: 'Template "TEMPLATE NAME" Review Requested',
+        body: {
+          text: 'Template "TEMPLATE NAME" is ready for statistician review.',
+        },
+        userGroups: ['REVIEWER'],
+        actions: [
+          {
+            title: 'Review Template "TEMPLATE NAME"',
+            url: 'https://dev.velocity-np.ag/experiments/templates/1',
+          },
+        ],
+        tags: [
+          'experiment-review-request',
+        ],
+        dueDate: date.toISOString().slice(0, date.toISOString().indexOf('T')),
+        tagKey: `1|${date.toISOString().slice(0, date.toISOString().indexOf('T'))}`,
+      }
+
+      return target.submitForReview(1, true, date.toISOString(), testContext, testTx).then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
+        expect(db.experiments.updateExperimentStatus).not.toHaveBeenCalled()
+        expect(AppError.internalServerError).toHaveBeenCalledWith('Error encountered contacting the velocity messaging api', 'error', '15Q005')
+      })
+    })
+  })
+
+  describe('submitReview', () => {
+    test('rejects when submitting user is not a reviewer', () => {
+      target.getExperimentById = mockResolve()
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['write'])
+      AppError.forbidden = mock()
+
+      return target.submitReview(1, false, '', null, testContext, testTx).then(() => {}, () => {
+        expect(AppError.forbidden).toHaveBeenCalledWith('Only reviewers are allowed to submit a review', null, '15R001')
+      })
+    })
+
+    test('rejects when current experiment status is not SUBMITTED', () => {
+      target.getExperimentById = mockResolve({ status: 'DRAFT' })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      AppError.badRequest = mock()
+
+      return target.submitReview(1, false, '', null, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment has not been submitted for review', null, '15R002')
+      })
+    })
+
+    test('rejects when current template status is not SUBMITTED', () => {
+      target.getExperimentById = mockResolve({ status: 'DRAFT' })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      AppError.badRequest = mock()
+
+      return target.submitReview(1, true, '', null, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Template has not been submitted for review', null, '15R002')
+      })
+    })
+
+    test('rejects when unable to complete task due to messaging api issue', () => {
+      target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      AppError.badRequest = mock()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      const error = new Error('text')
+      error.status = 400
+      error.response = {
+        text: 'error',
+      }
+      HttpUtil.put.mockReturnValueOnce(Promise.reject(error))
+
+      return target.submitReview(1, true, '', null, testContext, testTx).then(() => {}, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to complete task', null, '15R003')
+      })
+    })
+
+    test('only calls updates to the database when task is null', () => {
+      target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: null })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      db.experiments.updateExperimentStatus = mockResolve()
+      db.comment.batchCreate = mockResolve()
+
+      return target.submitReview(1, true, '', null, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
+        expect(db.comment.batchCreate).toHaveBeenCalled()
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+      })
+    })
+
+    test('successfully completes the task and updates experiment status and comment', () => {
+      target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      const error = new Error('text')
+      error.status = 400
+      error.response = {
+        text: 'error',
+      }
+      HttpUtil.put.mockReturnValueOnce(Promise.resolve())
+      db.experiments.updateExperimentStatus = mockResolve()
+      db.comment.batchCreate = mockResolve()
+
+      return target.submitReview(1, true, 'APPROVED', null, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'APPROVED', null, testContext, testTx)
+        expect(db.comment.batchCreate).toHaveBeenCalledWith([{ description: null, experimentId: 1 }], testContext, testTx)
+      })
+    })
+
+    test('updates status of experiment and adds comment when task complete call fails but is ignored', () => {
+      target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
+      target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      const error = new Error('text')
+      error.status = 404
+      error.response = {
+        text: 'error',
+      }
+      HttpUtil.put.mockReturnValueOnce(Promise.reject(error))
+      db.experiments.updateExperimentStatus = mockResolve()
+      db.comment.batchCreate = mockResolve()
+
+      return target.submitReview(1, true, 'APPROVED', null, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'APPROVED', null, testContext, testTx)
+        expect(db.comment.batchCreate).toHaveBeenCalledWith([{ description: null, experimentId: 1 }], testContext, testTx)
+      })
+    })
+  })
+
+  describe('cancelReview', () => {
+    test('simply calls db update when there is no task id present on the experiment', () => {
+      target.getExperimentById = mockResolve({})
+      target.securityService.permissionsCheck = mockResolve()
+      db.experiments.updateExperimentStatus = mockResolve()
+
+      return target.cancelReview(1, false, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
+        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when unable to complete task', () => {
+      target.getExperimentById = mockResolve({ task_id: 123 })
+      target.securityService.permissionsCheck = mockResolve()
+      AppError.badRequest = mock()
+      db.experiments.updateExperimentStatus = mock()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      const error = new Error('text')
+      error.status = 400
+      error.response = {
+        text: 'error',
+      }
+      HttpUtil.put.mockReturnValueOnce(Promise.reject(error))
+
+      return target.cancelReview(1, false, testContext, testTx).then(() => {}, () => {
+        expect(db.experiments.updateExperimentStatus).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to complete task', null, '15S001')
+      })
+    })
+
+    test('successfully completes a task and updates the experiment status', () => {
+      target.getExperimentById = mockResolve({ task_id: 123 })
+      target.securityService.permissionsCheck = mockResolve()
+      db.experiments.updateExperimentStatus = mock()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.put.mockReturnValueOnce(Promise.resolve())
+
+      return target.cancelReview(1, false, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'DRAFT', null, testContext, testTx)
+      })
+    })
+
+    test('updates the experiment status when task complete call fails but is ignored', () => {
+      target.getExperimentById = mockResolve({ task_id: 123 })
+      target.securityService.permissionsCheck = mockResolve()
+      db.experiments.updateExperimentStatus = mock()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      const error = new Error('text')
+      error.status = 404
+      error.response = {
+        text: 'error',
+      }
+      HttpUtil.put.mockReturnValueOnce(Promise.reject(error))
+
+      return target.cancelReview(1, false, testContext, testTx).then(() => {
+        expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'DRAFT', null, testContext, testTx)
       })
     })
   })

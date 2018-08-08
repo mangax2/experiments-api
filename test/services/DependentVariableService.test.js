@@ -11,6 +11,7 @@ describe('DependentVariableService', () => {
   db.dependentVariable.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
+    expect.hasAssertions()
     target = new DependentVariableService()
   })
 

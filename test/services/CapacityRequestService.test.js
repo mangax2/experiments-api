@@ -4,14 +4,20 @@ import cfServices from '../../src/services/utility/ServiceConfig'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import db from '../../src/db/DbManager'
-import { kafkaProducerMocker, mock, mockReject, mockResolve } from '../jestUtil'
+import {
+  kafkaProducerMocker, mock, mockReject, mockResolve,
+} from '../jestUtil'
 
 describe('CapacityRequestService', () => {
   kafkaProducerMocker()
 
+  beforeEach(() => {
+    expect.hasAssertions()
+  })
+
   describe('associateExperimentToCapacityRequest', () => {
     const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
-    const capacityRequest = { id: 5, protocol_number: 7 }
+    const capacityRequest = { id: 5, experiment_id: 7 }
     let originalFunction
 
     beforeAll(() => {
@@ -41,7 +47,7 @@ describe('CapacityRequestService', () => {
         .then(() => {
           expect(PingUtil.getMonsantoHeader).toBeCalled()
           expect(HttpUtil.get).toBeCalledWith('test/requests/53?type=ce', headers)
-          expect(capacityRequest.protocol_number).toBe(100)
+          expect(capacityRequest.experiment_id).toBe(100)
           expect(HttpUtil.put).toBeCalledWith('test/requests/53?type=ce', headers, { currentUser: 'testUser', request: capacityRequest })
           expect(CapacityRequestService.handleCapacityRequestError).not.toBeCalled()
         })

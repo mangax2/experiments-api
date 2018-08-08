@@ -28,9 +28,8 @@ function addKafkaNotification(result, args, event, argIdx) {
 
 function toSendKafkaNotify(event, args, sendArgIdx) {
   if (event === 'create' && args[sendArgIdx] === 'template') return false
-  else if (args[sendArgIdx] === true) return false
 
-  return true
+  return args[sendArgIdx] !== true
 }
 
 function notifyChanges(event, argIdx, sendArgIdx) {

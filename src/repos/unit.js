@@ -68,8 +68,6 @@ class unitRepo {
       { table: 'unit' },
     )
 
-    console.log(_.map(units, 'location').join(', '))
-
     const values = units.map(u => ({
       group_id: u.groupId,
       treatment_id: u.treatmentId,
@@ -96,8 +94,6 @@ class unitRepo {
       }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }],
       { table: 'unit' },
     )
-
-    console.log(_.map(units, 'location').join(', '))
 
     const data = units.map(u => ({
       id: u.id,

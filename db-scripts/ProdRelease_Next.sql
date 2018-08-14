@@ -1,5 +1,3 @@
-BEGIN TRANSACTION;
-
 ALTER TABLE unit
 	ADD COLUMN location INT;
 
@@ -30,5 +28,3 @@ WHERE unit.id = ulm.id;
 
 ALTER TABLE unit
 	ALTER COLUMN location SET NOT NULL;
-	
-ROLLBACK;

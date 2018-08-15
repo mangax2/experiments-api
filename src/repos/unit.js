@@ -88,7 +88,7 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', , 'treatment_id', 'rep', {
+      ['?id', { name: 'group_id', cast: 'int' }, 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
       }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }],

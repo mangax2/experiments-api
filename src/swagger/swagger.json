@@ -5032,6 +5032,10 @@
           "type": "integer",
           "description": "id of treatment entity"
         },
+        "location": {
+          "type": "integer",
+          "description": "the location of the experimental unit"
+        },
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit"
@@ -5072,6 +5076,10 @@
         "treatmentId": {
           "type": "integer",
           "description": "id of treatment entity"
+        },
+        "location": {
+          "type": "integer",
+          "description": "the location of the experimental unit"
         },
         "rep": {
           "type": "integer",
@@ -5467,10 +5475,6 @@
     "GroupValue": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Group Value Id"
-        },
         "factorLevelId":{
           "type": "integer",
           "description": "Factor Level Id"
@@ -5512,10 +5516,6 @@
     "GroupValueResponseWithoutAuditKeys": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Group Value Id"
-        },
         "factorLevelId":{
           "type": "integer",
           "description": "Factor Level Id"

@@ -238,18 +238,21 @@ describe('ManageRepsAndUnitsListener', () => {
         rep: 1,
         setEntryId: 233,
         treatmentId: 8,
+        location: 1,
       }, {
         id: 66,
         groupId: 5,
         rep: 1,
         setEntryId: 234,
         treatmentId: 7,
+        location: 1,
       }, {
         id: 77,
         groupId: 5,
         rep: 1,
         setEntryId: 235,
         treatmentId: 9,
+        location: 1,
       }]
       const groups = [{ id: 5, rep: 1 }]
 
@@ -264,11 +267,13 @@ describe('ManageRepsAndUnitsListener', () => {
           setEntryId: 236,
           treatmentId: 9,
           groupId: 5,
+          location: 1,
         }, {
           rep: 2,
           setEntryId: 237,
           treatmentId: 7,
           groupId: null,
+          location: 1,
         }],
         unitsToBeUpdated: [{
           id: 77,
@@ -276,6 +281,7 @@ describe('ManageRepsAndUnitsListener', () => {
           rep: 1,
           setEntryId: 235,
           treatmentId: 8,
+          location: 1,
         }],
         unitsToBeDeleted: [55],
       })

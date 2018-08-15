@@ -92,11 +92,13 @@ class ManageRepsAndUnitsListener {
 
   getDbActions = (unitsFromMessage, unitsFromDB, groups) => {
     const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
+    const { location } = unitsFromDB[0]
     _.forEach(unitsFromMessage, (unitM) => {
       const group = _.find(groups, g => Number(g.rep) === Number(unitM.rep))
       unitM.groupId = group ? group.id : null
+      unitM.location = location
     })
-    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId'))
+    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId', 'location'))
     const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
     const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
     const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,

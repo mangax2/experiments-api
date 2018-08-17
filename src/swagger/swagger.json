@@ -4562,11 +4562,11 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
+          "type": "string",
           "description": "unique id for group entity"
         },
         "parentId": {
-          "type": "integer",
+          "type": "string",
           "description": "reference to parent Group"
         },
         "refRandomizationStrategyId": {
@@ -4574,7 +4574,7 @@
           "description": "This is now sourced from DesignSpecificationDetail (route /experiments/{id}/design-specification-details/) and is here only for backwards compatibility until the next major version release."
         },
         "experimentId": {
-          "type": "integer",
+          "type": "string",
           "description": "id of experimentId entity"
         },
         "groupValues": {
@@ -5531,10 +5531,6 @@
         "value": {
           "type": "string",
           "description": "Value of the entity associated to the group"
-        },
-        "groupId": {
-          "type": "integer",
-          "description": "Group Id"
         }
       }
     },

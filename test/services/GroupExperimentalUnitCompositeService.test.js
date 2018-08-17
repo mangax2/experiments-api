@@ -512,10 +512,10 @@ describe('GroupExperimentalUnitCompositeService', () => {
       const parentGroup = { id: 2 }
       const firstChildGroup = { id: 1, parent_id: 2 }
       const secondChildGroup = { id: 5, parent_id: 2 }
-      target.getGroupAndUnitDetails = mockResolve([firstChildGroup, parentGroup, secondChildGroup])
+      target.getGroupsAndUnits = mockResolve([firstChildGroup, parentGroup, secondChildGroup])
 
       return target.getGroupTree(1, false, testContext, testTx).then((result) => {
-        expect(target.getGroupAndUnitDetails).toBeCalledWith(1, false, testContext, testTx)
+        expect(target.getGroupsAndUnits).toBeCalledWith(1, testTx)
         expect(result).toEqual([{ id: 2, childGroups: [firstChildGroup, secondChildGroup] }])
       })
     })

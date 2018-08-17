@@ -196,7 +196,7 @@ class GroupExperimentalUnitCompositeService {
   @setErrorCode('1FF000')
   @Transactional('getGroupTree')
   getGroupTree(experimentId, isTemplate, context, tx) {
-    return this.getGroupAndUnitDetails(experimentId, isTemplate, context, tx)
+    return this.getGroupsAndUnits(experimentId, tx)
       .then((groups) => {
         const childGroupHash = _.groupBy(groups, 'parent_id')
         _.forEach(groups, (g) => {

@@ -22,7 +22,7 @@ class AWSUtil {
   }
 
   callLambda = (functionName, payload, invocationType = 'RequestResponse') => {
-    const lambda = new AWS.Lambda()
+    const lambda = this.createLambda()
     const params = {
       FunctionName: functionName,
       Payload: payload,
@@ -31,6 +31,8 @@ class AWSUtil {
 
     return invokeLambda(lambda, params)
   }
+
+  createLambda = () => new AWS.Lambda()
 }
 
 module.exports = new AWSUtil()

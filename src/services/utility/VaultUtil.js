@@ -57,6 +57,7 @@ class VaultUtil {
         const awsPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/aws`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.awsAccessKeyId = vaultObj.body.data.accessKeyId
           this.awsSecretAccessKey = vaultObj.body.data.secretAccessKey
+          this.awsLambdaName = vaultObj.body.data.lambdaName
         })
         return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise, awsPromise])
       }).catch((err) => {

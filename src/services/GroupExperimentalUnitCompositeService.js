@@ -489,7 +489,7 @@ class GroupExperimentalUnitCompositeService {
         setLocAssociations,
       }, 'camelizeLower')
 
-      return AWSUtil.callLambda('cosmos-group-generation-lambda', JSON.stringify(body))
+      return AWSUtil.callLambda(cfServices.aws.lambdaName, JSON.stringify(body))
         .then(data => JSON.parse(data.Payload))
         .catch((err) => {
           console.error(err)

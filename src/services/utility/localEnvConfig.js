@@ -49,8 +49,11 @@ const cfServices = {
   'velocity-home': {
     value: "dev.velocity-np.ag"
   },
-  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    lambdaName: "cosmos-group-generation-lambda"
+  }
 }
 
 module.exports = cfServices

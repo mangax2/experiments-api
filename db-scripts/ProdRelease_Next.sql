@@ -28,3 +28,18 @@ WHERE unit.id = ulm.id;
 
 ALTER TABLE unit
 	ALTER COLUMN location SET NOT NULL;
+
+INSERT INTO public.ref_unit_spec(
+  id, name, uom_type, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES (10, 'Number of Rows', 'Length', 1, 'kchit', now(), 'kchit', now();
+
+
+  INSERT INTO public.ref_unit_spec(
+  id, name, uom_type, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES (11, 'Row Spacing', 'Length', 1, 'kchit', now(), 'kchit', now();
+
+
+
+  INSERT INTO public.ref_unit_spec(
+  id, name, uom_type, ref_unit_type_id, created_user_id, created_date, modified_user_id, modified_date)
+  VALUES (12, 'Row Length', 'Length', 1, 'kchit', now(), 'kchit', now();

@@ -5,6 +5,7 @@ import GroupExperimentalUnitCompositeService from '../../src/services/GroupExper
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
+import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import cfServices from '../../src/services/utility/ServiceConfig'
@@ -506,87 +507,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
   })
 
-  describe('getGroupAndUnitDetails', () => {
-    test('returns an empty array if groupIds are empty', () => {
-      target.groupService.getGroupsByExperimentId = mockResolve([])
-      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve([])
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
-
-      return target.getGroupAndUnitDetails(1, false, testContext, testTx).then((data) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual([])
-      })
-    })
-
-    test('returns a list of groups with groupValues and units', () => {
-      const groups = [{ id: 1 }, { id: 2 }]
-      const groupValues = [{ group_id: 1, value: 'testValue' }, {
-        group_id: 2,
-        value: 'testValue2',
-      }]
-      const units = [{ group_id: 1 }, { group_id: 2 }]
-      const expectedResult = [
-        { id: 1, groupValues: [{ group_id: 1, value: 'testValue' }], units: [{ group_id: 1 }] },
-        { id: 2, groupValues: [{ group_id: 2, value: 'testValue2' }], units: [{ group_id: 2 }] },
-      ]
-
-      target.groupService.getGroupsByExperimentId = mockResolve(groups)
-      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve(groupValues)
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve(units)
-
-      return target.getGroupAndUnitDetails(1, false, testContext, testTx).then((data) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual(expectedResult)
-      })
-    })
-
-    test('rejects when getExperimentalUnitsByExperimentIdNoValidate fails', () => {
-      const error = { message: 'error' }
-      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
-      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockReject(error)
-
-      return target.getGroupAndUnitDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('rejects when batchGetGroupValuesByExperimentId fails', () => {
-      const error = { message: 'error' }
-      target.groupService.getGroupsByExperimentId = mockResolve([{ id: 3 }])
-      target.groupValueService.batchGetGroupValuesByExperimentId = mockReject(error)
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
-
-      return target.getGroupAndUnitDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('rejects when getGroupsByExperimentId fails', () => {
-      const error = { message: 'error' }
-      target.groupService.getGroupsByExperimentId = mockReject(error)
-      target.groupValueService.batchGetGroupValuesByExperimentId = mockResolve()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve()
-
-      return target.getGroupAndUnitDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.groupService.getGroupsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(target.groupValueService.batchGetGroupValuesByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('getGroupTree', () => {
     test('correctly structures the group response', () => {
       const parentGroup = { id: 2 }
@@ -995,6 +915,111 @@ describe('GroupExperimentalUnitCompositeService', () => {
           }],
         }],
       }])
+    })
+  })
+
+  describe('getGroupsAndUnits', () => {
+    test('properly sends and retrieves data to lambda', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
+      PingUtil.getMonsantoHeader = mockResolve()
+      HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
+      db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
+      db.unit.findAllByExperimentId = mockResolve('units')
+      db.group.getLocSetIdAssociation = mockResolve('setIds')
+      AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
+      AppError.internalServerError = mock()
+
+      const expectedLambdaPayload = {
+        experimentId: 5,
+        variables: [
+          {
+            id: 1,
+            name: 'var1',
+            levels: [
+              { id: 3, factorId: 1, items: {} },
+              { id: 5, factorId: 1, items: [{}, {}] },
+            ],
+          },
+        ],
+        designSpecs: 'designSpecs',
+        refDesignSpecs: 'refDesignSpecs',
+        randomizationStrategies: 'randStrats',
+        treatments: [
+          {
+            id: 7,
+            combinationElements: [
+              {
+                treatmentId: 7,
+                factorLevelId: 3,
+                factorLevel: { id: 3, factorId: 1, items: {} },
+                factorName: 'var1',
+              },
+              {
+                treatmentId: 7,
+                factorLevelId: 5,
+                factorLevel: { id: 5, factorId: 1, items: [{}, {}] },
+                factorName: 'var1',
+              },
+            ],
+          },
+        ],
+        units: 'units',
+        setLocAssociations: 'setIds',
+      }
+
+      return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.getWithRetry).toBeCalled()
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.treatment.findAllByExperimentId).toBeCalled()
+        expect(db.combinationElement.findAllByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
+        expect(db.group.getLocSetIdAssociation).toBeCalled()
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda', JSON.stringify(expectedLambdaPayload))
+        expect(AppError.internalServerError).not.toBeCalled()
+        expect(data).toEqual({ test: 'message' })
+      })
+    })
+
+    test('properly handles lambda errors', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
+      PingUtil.getMonsantoHeader = mockResolve()
+      HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
+      db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
+      db.unit.findAllByExperimentId = mockResolve('units')
+      db.group.getLocSetIdAssociation = mockResolve('setIds')
+      AWSUtil.callLambda = mockReject()
+      AppError.internalServerError = mock({ message: 'error result' })
+
+      return target.getGroupsAndUnits(5, testTx).catch(() => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.getWithRetry).toBeCalled()
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.treatment.findAllByExperimentId).toBeCalled()
+        expect(db.combinationElement.findAllByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
+        expect(db.group.getLocSetIdAssociation).toBeCalled()
+        expect(AWSUtil.callLambda).toBeCalled()
+        expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
+      })
     })
   })
 })

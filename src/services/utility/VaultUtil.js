@@ -54,7 +54,11 @@ class VaultUtil {
           this.kafkaPassword = vaultObj.body.data.password
           this.kafkaClientCert = Buffer.from(vaultObj.body.data.clientCert, 'base64').toString()
         })
-        return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise])
+        const awsPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/aws`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+          this.awsAccessKeyId = vaultObj.body.data.accessKeyId
+          this.awsSecretAccessKey = vaultObj.body.data.secretAccessKey
+        })
+        return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise, awsPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

@@ -27,6 +27,8 @@ if (localEnv || testEnv) {
     clientId: VaultUtil.clientId,
     clientSecret: VaultUtil.clientSecret,
   }
+  services.awsAccessKeyId = VaultUtil.awsAccessKeyId
+  services.awsSecretAccessKey = VaultUtil.awsSecretAccessKey
   cfServices = services
 }
 

@@ -35,6 +35,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   promMetrics(app)
 
   setErrorDecorator().setErrorPrefix('EXP')
+  require('./services/utility/AWSUtil').configure(serviceConfig.awsAccessKeyId, serviceConfig.awsSecretAccessKey)
 
   const requestContext = require('./middleware/requestContext')
 

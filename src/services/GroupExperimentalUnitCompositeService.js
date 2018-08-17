@@ -1,15 +1,18 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import inflector from 'json-inflector'
 import Transactional from '../decorators/transactional'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 import GroupService from './GroupService'
 import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
+import FactorService from './FactorService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
+import AWSUtil from './utility/AWSUtil'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
@@ -28,6 +31,7 @@ class GroupExperimentalUnitCompositeService {
     this.experimentalUnitService = new ExperimentalUnitService()
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
+    this.factorService = new FactorService()
   }
 
   @notifyChanges('update', 0)
@@ -187,25 +191,6 @@ class GroupExperimentalUnitCompositeService {
       _.forEach(gU.childGroups, (cg) => { cg.parentId = groupIds[index] })
     })
     return groupAndUnitDetails
-  }
-
-  @setErrorCode('1FE000')
-  @Transactional('getGroupAndUnitDetails')
-  getGroupAndUnitDetails(experimentId, isTemplate, context, tx) {
-    return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate,
-      context, tx),
-    this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
-    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
-      .then((groupValuesAndUnits) => {
-        const groups = groupValuesAndUnits[0]
-        const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
-        const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
-        return _.map(groups, (group) => {
-          group.groupValues = groupValuesGroupByGroupId[group.id]
-          group.units = unitsGroupByGroupId[group.id]
-          return group
-        })
-      })
   }
 
   @setErrorCode('1FF000')
@@ -445,6 +430,73 @@ class GroupExperimentalUnitCompositeService {
 
     return newGroupsAndUnits
   }
+
+  @setErrorCode('1FO000')
+  @Transactional('getGroupsAndUnits')
+  getGroupsAndUnits = (experimentId, tx) =>
+    Promise.all([
+      PingUtil.getMonsantoHeader().then(header =>
+        HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header))
+        .then(data => data.body),
+      db.factor.findByExperimentId(experimentId, tx),
+      db.factorLevel.findByExperimentId(experimentId, tx),
+      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+      db.refDesignSpecification.all(tx),
+      db.treatment.findAllByExperimentId(experimentId, tx),
+      db.combinationElement.findAllByExperimentId(experimentId, tx),
+      db.unit.findAllByExperimentId(experimentId, tx),
+      db.group.getLocSetIdAssociation(experimentId, tx),
+    ]).then(([
+      randomizationStrategies,
+      variables,
+      variableLevels,
+      designSpecs,
+      refDesignSpecs,
+      treatments,
+      combinationElements,
+      units,
+      setLocAssociations,
+    ]) => {
+      const variableLevelsMap = _.groupBy(variableLevels, 'factor_id')
+      const combinationElementsMap = _.groupBy(combinationElements, 'treatment_id')
+      _.forEach(variables, (variable) => {
+        variable.levels = variableLevelsMap[variable.id]
+        _.forEach(variable.levels, (level) => {
+          level.factorName = variable.name
+        })
+      })
+      _.forEach(treatments, (treatment) => {
+        treatment.combinationElements = combinationElementsMap[treatment.id]
+      })
+      _.forEach(combinationElements, (ce) => {
+        const variableLevel = _.find(variableLevels, level => ce.factor_level_id === level.id) || {}
+        ce.factorLevel = variableLevel
+        ce.factorName = variableLevel.factorName
+      })
+      _.forEach(variableLevels, (level) => {
+        const levelItems = _.get(level, 'value.items') || []
+        level.items = levelItems.length === 1 ? levelItems[0] : levelItems
+        delete level.value
+        delete level.factorName
+      })
+      const body = inflector.transform({
+        experimentId,
+        variables,
+        designSpecs,
+        refDesignSpecs,
+        randomizationStrategies,
+        treatments,
+        units,
+        setLocAssociations,
+      }, 'camelizeLower')
+
+      return AWSUtil.callLambda(cfServices.aws.lambdaName, JSON.stringify(body))
+        .then(data => JSON.parse(data.Payload))
+        .catch((err) => {
+          console.error(err)
+          return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))
+        })
+    })
 }
 
 module.exports = GroupExperimentalUnitCompositeService

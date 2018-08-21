@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
@@ -42,6 +43,15 @@ class locationAssociationRepo {
   @setErrorCode('5P5000')
   removeByExperimentIdAndLocation = (experimentId, location, tx = this.rep) =>
     tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2', [experimentId, location])
+
+  @setErrorCode('5P6000')
+  batchRemoveByExperimentIdAndLocation = (experimentIdsAndLocations, tx = this.rep) => {
+    const promises = _.map(experimentIdsAndLocations, association =>
+      tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2', [association.experimentId, association.location])
+    )
+
+    return tx.batch(promises)
+  }
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

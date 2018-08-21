@@ -54,6 +54,7 @@ describe('GroupService', () => {
       target.experimentService.getExperimentById = mockResolve({})
       db.locationAssociation = {
         batchCreate: mockResolve(),
+        batchRemoveByExperimentIdAndLocation: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {

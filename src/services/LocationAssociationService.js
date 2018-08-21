@@ -16,11 +16,11 @@ class LocationAssociationService {
   }
 
   @setErrorCode('1Y1000')
-  @Transactional('partiallyUpdateGroup')
+  @Transactional('associateSetsToLocations')
   associateSetsToLocations = (experimentId, groups, context, tx) =>
     Promise.all([
       this.experimentalUnitService
-        .getExperimentalUnitsByExperimentIdNoValidate(experimentId, false, context, tx),
+        .getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
       this.experimentService.getExperimentById(experimentId, false, context, tx),
     ]).then(([units]) => {
       const locations = _.uniq(_.map(units, 'location'))
@@ -44,7 +44,8 @@ class LocationAssociationService {
         }
       })
 
-      return db.locationAssociation.batchCreate(assocations, context, tx)
+      return db.locationAssociation.batchRemoveByExperimentIdAndLocation(assocations, tx).then(() =>
+        db.locationAssociation.batchCreate(assocations, context, tx))
     })
 }
 

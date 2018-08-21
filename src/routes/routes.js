@@ -203,7 +203,7 @@ router.get('/experiments/:id/groups', (req, res, next) => new GroupService().get
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
-router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.body, req.context)
+router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.params.id, req.body, req.context)
   .then((factors) => {
     res.json(factors)
     sendKafkaNotification('update', parseInt(req.params.id, 10))

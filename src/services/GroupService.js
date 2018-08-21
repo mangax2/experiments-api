@@ -56,9 +56,26 @@ class GroupService {
 
   @setErrorCode('1G6000')
   @Transactional('partiallyUpdateGroup')
-  partiallyUpdateGroup = (groups, context, tx) =>
-    this.validator.validate(groups, 'PATCH', tx)
-      .then(() => db.group.partiallyUpdate(groups, context, tx))
+  partiallyUpdateGroup = (experimentId, groups /* context, tx */) => {
+    const assocations = _.map(groups, (group) => {
+      const splitGroupId = group.id.split('.')
+      const locationNumber = Number(splitGroupId[1])
+
+      if (_.isNil(locationNumber) || _.isNaN(locationNumber)) {
+        throw AppError.badRequest('Unable to determine location from group id')
+      }
+
+      return {
+        experimentId: Number(experimentId),
+        locationNumber,
+        setId: group.setId,
+      }
+    })
+
+    console.info(assocations)
+    return []
+    // return db.locationAssociation.batchCreate(groups, context, tx)
+  }
 
   @setErrorCode('1G7000')
   @Transactional('batchDeleteGroups')

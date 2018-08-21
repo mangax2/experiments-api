@@ -13,18 +13,20 @@ ON CONFLICT DO NOTHING;
 
 -- Dev
 
--- GRANT INSERT, DELETE, UPDATE, SELECT ON TABLE public.comment TO experiments_dev_app_user;
+-- GRANT INSERT, DELETE, UPDATE, SELECT ON TABLE public.location_association TO experiments_dev_app_user;
 
--- GRANT SELECT ON TABLE public.comment TO experiments_ro_user;
+-- GRANT SELECT ON TABLE public.location_association TO experiments_ro_user;
 
 -- NP
 
 -- GRANT INSERT, DELETE, UPDATE, SELECT ON TABLE public.location_association TO experiments_app_user;
 
+-- GRANT SELECT ON TABLE public.location_association TO experiments_ro_user;
+
 -- Prod
 
--- GRANT INSERT, DELETE, UPDATE, SELECT ON TABLE public.comment TO experiments_secure_app_user;
+-- GRANT INSERT, DELETE, UPDATE, SELECT ON TABLE public.location_association TO experiments_secure_app_user;
 
--- GRANT SELECT ON TABLE public.comment TO experiments_secure_ro_user;
+-- GRANT SELECT ON TABLE public.location_association TO experiments_secure_ro_user;
 
 

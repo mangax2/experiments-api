@@ -63,23 +63,22 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
-      let experimentIds
-      return db.group.findRepGroupsBySetId(setId, tx).then((groups) => {
-        if (groups.length === 0) {
-          return Promise.reject(AppError.notFound(`No groups found for setId "${set.setId}".`))
+      return db.locationAssociation.findBySetId(setId, tx).then((assoc) => {
+        if (!assoc) {
+          return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }
-        const groupIds = _.map(groups, 'id')
-        experimentIds = _.uniqBy(groups, 'experiment_id')
-        return db.unit.batchFindAllByGroupIds(groupIds, tx).then((unitsFromDB) => {
-          const {
-            groupsToBeCreated, unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
-          } = this.getDbActions(unitsFromMessage, unitsFromDB, groups)
-          return this.saveToDb(setId, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted,
-            groupsToBeCreated, tx)
-        })
-      }).then(() => {
-        _.forEach(experimentIds, id => sendKafkaNotification('update', id.experiment_id))
-        ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
+        const { location } = assoc
+        const experimentId = assoc.experiment_id
+        return db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
+          .then((unitsFromDB) => {
+            const {
+              unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
+            } = this.getDbActions(unitsFromMessage, unitsFromDB, location)
+            return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx)
+          }).then(() => {
+            sendKafkaNotification('update', experimentId)
+            ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
+          })
       }).catch((err) => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
         return Promise.reject(err)
@@ -90,97 +89,46 @@ class ManageRepsAndUnitsListener {
     return Promise.reject(AppError.badRequest('The rep pack message was in an invalid format.'))
   }
 
-  getDbActions = (unitsFromMessage, unitsFromDB, groups) => {
+  getDbActions = (unitsFromMessage, unitsFromDB, location) => {
     const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
-    const { location } = unitsFromDB[0]
     _.forEach(unitsFromMessage, (unitM) => {
-      const group = _.find(groups, g => Number(g.rep) === Number(unitM.rep))
-      unitM.groupId = group ? group.id : null
       unitM.location = location
     })
-    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'groupId', 'location'))
+    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'location'))
     const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
     const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
-    const unitsToBeUpdatedSlim = _.differenceWith(_.difference(unitsFromMessage,
-      unitsToBeCreated),
-    unitsFromDbSlim, _.isEqual)
-    const unitsToBeUpdated = _.map(unitsToBeUpdatedSlim, (unitToBeUpdated) => {
+    const unitsThatAlreadyExist = _.difference(unitsFromMessage, unitsToBeCreated)
+    const unitsThatNeedUpdating = _.differenceWith(unitsThatAlreadyExist,
+      unitsFromDbSlim, _.isEqual)
+    const unitsToBeUpdated = _.map(unitsThatNeedUpdating, (unitToBeUpdated) => {
       unitToBeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
         unitFromDb.setEntryId === unitToBeUpdated.setEntryId).id
       return unitToBeUpdated
     })
 
-    const repsToBeCreated = _.uniq(_.map(
-      _.filter([].concat(unitsToBeCreated).concat(unitsToBeUpdated),
-        unit => _.isNil(unit.groupId)), 'rep'))
-    const groupTemplate = _.pick(inflector.transform(groups, 'camelizeLower')[0],
-      'experimentId', 'parentId', 'refGroupTypeId')
-
-    const groupsToBeCreated = _.map(repsToBeCreated, rep =>
-      Object.assign({ rep }, groupTemplate))
-
     return {
-      groupsToBeCreated,
       unitsToBeCreated,
       unitsToBeUpdated,
       unitsToBeDeleted,
     }
   }
 
-  saveToDb = (
-    setId, unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, groupsToBeCreated, tx,
-  ) => {
+  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx) => {
     const context = { userId: 'REP_PACKING' }
-    return ManageRepsAndUnitsListener.createGroups(groupsToBeCreated, context, tx)
-      .then(() => {
-        const promises = []
-        if (unitsToBeCreated.length > 0) {
-          ManageRepsAndUnitsListener.addGroupIdToUnits(groupsToBeCreated, unitsToBeCreated)
-          promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))
-        }
-        if (unitsToBeUpdated.length > 0) {
-          ManageRepsAndUnitsListener.addGroupIdToUnits(groupsToBeCreated, unitsToBeUpdated)
-          promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
-        }
-        return Promise.all(promises)
-          .then(() => {
-            if (unitsToBeDeleted.length > 0) {
-              return db.unit.batchRemove(unitsToBeDeleted)
-            }
-            return Promise.resolve()
-          })
-      })
-      .then(() => db.unit.getGroupsWithNoUnits(setId, tx))
-      .then(groupIdstoBeDeleted => db.group.batchRemove(_.map(groupIdstoBeDeleted, 'id'), tx))
-  }
-
-  static addGroupIdToUnits = (groups, units) => {
-    _.forEach(_.filter(units, unit => !unit.groupId), (unit) => {
-      const parentGroup = _.find(groups, group => group.rep === unit.rep)
-      if (!parentGroup) {
-        throw new Error(`Unable to find a parent group for set entry ${unit.setEntryId}`)
-      }
-      unit.groupId = parentGroup.id
-    })
-  }
-
-  static createGroups = (groupsToBeCreated, context, tx) => {
-    if (groupsToBeCreated && groupsToBeCreated.length > 0) {
-      return db.group.batchCreate(groupsToBeCreated, context, tx)
-        .then((groupResponse) => {
-          const groupValues = _.map(groupsToBeCreated, (group, index) => {
-            group.id = groupResponse[index].id
-
-            return {
-              name: 'repNumber',
-              value: group.rep,
-              groupId: group.id,
-            }
-          })
-          return db.groupValue.batchCreate(groupValues, context, tx)
-        })
+    const promises = []
+    if (unitsToBeCreated.length > 0) {
+      promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))
     }
-    return Promise.resolve()
+    if (unitsToBeUpdated.length > 0) {
+      promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
+    }
+    return Promise.all(promises)
+      .then(() => {
+        if (unitsToBeDeleted.length > 0) {
+          return db.unit.batchRemove(unitsToBeDeleted)
+        }
+        return Promise.resolve()
+      })
   }
 
   static sendResponseMessage = (setId, isSuccess) => {

@@ -149,6 +149,11 @@ class unitRepo {
 
     return tx.none('UPDATE unit SET set_entry_id = NULL WHERE id IN (WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT u.id FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id)', setId)
   }
+
+  @setErrorCode('5JF000')
+  batchFindAllByExperimentIdAndLocation = (experimentId, location, tx = this.rep) => {
+    return tx.any('SELECT * FROM unit WHERE experiment_id=$1 AND location=$2', [experimentId, location])
+  }
 }
 
 module.exports = (rep, pgp) => new unitRepo(rep, pgp)

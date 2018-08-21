@@ -1,0 +1,52 @@
+import _ from 'lodash'
+import db from '../db/DbManager'
+import AppError from './utility/AppError'
+import ExperimentsService from './ExperimentsService'
+import ExperimentalUnitService from './ExperimentalUnitService'
+import Transactional from '../decorators/transactional'
+import setErrorDecorator from '../decorators/setErrorDecorator'
+
+const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+
+// Error Codes 1YXXXX
+class LocationAssociationService {
+  constructor() {
+    this.experimentService = new ExperimentsService()
+    this.experimentalUnitService = new ExperimentalUnitService()
+  }
+
+  @setErrorCode('1Y1000')
+  @Transactional('partiallyUpdateGroup')
+  associateSetsToLocations = (experimentId, groups, context, tx) =>
+    Promise.all([
+      this.experimentalUnitService
+        .getExperimentalUnitsByExperimentIdNoValidate(experimentId, false, context, tx),
+      this.experimentService.getExperimentById(experimentId, false, context, tx),
+      // eslint-disable-next-line no-unused-vars
+    ]).then(([units]) => {
+      const locations = _.uniq(_.map(units, 'location'))
+
+      const assocations = _.map(groups, (group) => {
+        const splitGroupId = group.id.split('.')
+        const location = Number(splitGroupId[1])
+
+        if (_.isNil(location) || _.isNaN(location)) {
+          throw AppError.badRequest('Unable to determine location from group id', null, getFullErrorCode('1Y1001'))
+        }
+
+        if (!locations.includes(location)) {
+          throw AppError.badRequest('Location does not match valid locations for this experiment', null, getFullErrorCode('1Y1002'))
+        }
+
+        return {
+          experimentId: Number(experimentId),
+          location,
+          setId: group.setId,
+        }
+      })
+
+      return db.locationAssociation.batchCreate(assocations, context, tx)
+    })
+}
+
+module.exports = LocationAssociationService

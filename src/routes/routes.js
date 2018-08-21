@@ -17,6 +17,7 @@ import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/FactorTypeService'
 import GroupValueService from '../services/GroupValueService'
 import ListsService from '../services/ListsService'
+import LocationAssociationService from '../services/LocationAssociationService'
 import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentService from '../services/TreatmentService'
@@ -203,10 +204,10 @@ router.get('/experiments/:id/groups', (req, res, next) => new GroupService().get
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
-router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.params.id, req.body, req.context)
-  .then((factors) => {
-    res.json(factors)
+router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
+  .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
+    return res.sendStatus(200)
   })
   .catch(err => next(err)))
 

@@ -158,17 +158,17 @@ describe('GroupService', () => {
     })
   })
 
-  // describe('partiallyUpdateGroup', () => {
-  //   test('partially updates a group', () => {
-  //     target.validator.validate = mockResolve()
-  //     db.group.partiallyUpdate = mockResolve()
-  //
-  //     return target.partiallyUpdateGroup([{}], testContext, testTx).then(() => {
-  //       expect(target.validator.validate).toBeCalledWith([{}], 'PATCH', testTx)
-  //       expect(db.group.partiallyUpdate).toBeCalledWith([{}], testContext, testTx)
-  //     })
-  //   })
-  // })
+  describe('partiallyUpdateGroup', () => {
+    test('partially updates a group', () => {
+      target.validator.validate = mockResolve()
+      db.group.partiallyUpdate = mockResolve()
+
+      return target.partiallyUpdateGroup([{}], testContext, testTx).then(() => {
+        expect(target.validator.validate).toBeCalledWith([{}], 'PATCH', testTx)
+        expect(db.group.partiallyUpdate).toBeCalledWith([{}], testContext, testTx)
+      })
+    })
+  })
 
   describe('batchDeleteGroups', () => {
     test('successfully calls batchRemove and returns data', () => {

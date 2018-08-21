@@ -1,59 +1,47 @@
-// TODO update error codes
-
-// import _ from 'lodash'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()
 
-// Error Codes 5BXXXX
+// Error Codes 5PXXXX
 class locationAssociationRepo {
   constructor(rep, pgp) {
     this.rep = rep
     this.pgp = pgp
   }
 
-  @setErrorCode('5B0000')
+  @setErrorCode('5P0000')
   repository = () => this.rep
 
-  @setErrorCode('5B1000')
-  findByLocationNumber = (experimentId, locationNumber, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE experiment_id = $1 AND locationNumber = $2', [experimentId,locationNumber])
+  @setErrorCode('5P1000')
+  findByLocation = (experimentId, location, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE experiment_id = $1 AND location = $2', [experimentId, location])
 
-  @setErrorCode('5B2000')
+  @setErrorCode('5P2000')
   findBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
 
-  @setErrorCode('5B3000')
+  @setErrorCode('5P3000')
+  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM location_association WHERE experiment_id = $1', experimentId)
+
+  @setErrorCode('5P4000')
   batchCreate = (associations, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['experiment_id', 'location_number', 'set_id'],
-      {table: 'location_assocation'},
+      ['experiment_id', 'location', 'set_id'],
+      {table: 'location_association'},
     )
 
     const values = associations.map(association => ({
       experiment_id: association.experimentId,
-      location_number: association.locationNumber,
+      location: association.location,
       set_id: association.setId,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet)}`
 
-    // TODO find out if Sets needs anything from the return!!!
-
     return tx.none(query)
   }
 
-  @setErrorCode('5B4000')
-  removeByExperimentIdAndLocationNumber = (experimentId, locationNumber, tx = this.rep) =>
-    tx.none('DELETE FROM location_assocation WHERE experiment_id = $1 AND location_number = $2', [experimentId, locationNumber])
-
-  // @setErrorCode('5B4000')
-  // batchUpdate = (assocations, context, tx = this.rep) => {
-  //
-  // }
-
-  // @setErrorCode('5B5000')
-  // batchRemoveBySetIds = (setIds, context, tx = this.rep) => {
-  //
-  // }
+  @setErrorCode('5P5000')
+  removeByExperimentIdAndLocation = (experimentId, location, tx = this.rep) =>
+    tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2', [experimentId, location])
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

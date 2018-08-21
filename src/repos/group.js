@@ -173,6 +173,10 @@ class groupRepo {
   clearSetId = (setId, tx = this.rep) => {
     return tx.any('UPDATE "group" SET set_id = NULL WHERE set_id=$1 RETURNING experiment_id', setId)
   }
+
+  @setErrorCode('5BG000')
+  getLocSetIdAssociation = (experimentId, tx = this.rep) =>
+    tx.any('SELECT g.experiment_id, g.id as group_id, g.set_id, gv.value as location FROM public.group g INNER JOIN group_value gv ON g.id = gv.group_id WHERE set_id IS NOT NULL AND gv.name=\'locationNumber\' AND g.experiment_id=$1', experimentId)
 }
 
 module.exports = (rep, pgp) => new groupRepo(rep, pgp)

@@ -22,7 +22,6 @@ class LocationAssociationService {
       this.experimentalUnitService
         .getExperimentalUnitsByExperimentIdNoValidate(experimentId, false, context, tx),
       this.experimentService.getExperimentById(experimentId, false, context, tx),
-      // eslint-disable-next-line no-unused-vars
     ]).then(([units]) => {
       const locations = _.uniq(_.map(units, 'location'))
 

@@ -152,7 +152,7 @@ class unitRepo {
 
   @setErrorCode('5JF000')
   batchFindAllByExperimentIdAndLocation = (experimentId, location, tx = this.rep) => {
-    return tx.any('SELECT * FROM unit WHERE experiment_id=$1 AND location=$2', [experimentId, location])
+    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2', [experimentId, location])
   }
 }
 

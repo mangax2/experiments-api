@@ -27,7 +27,15 @@ class LocationAssociationService {
 
       const assocations = _.map(groups, (group) => {
         const splitGroupId = group.id.split('.')
+        const experimentIdFromGroup = Number(splitGroupId[0])
         const location = Number(splitGroupId[1])
+
+        if (_.isNil(experimentIdFromGroup)
+          || _.isNaN(experimentIdFromGroup)
+          || experimentIdFromGroup !== experimentId
+        ) {
+          throw AppError.badRequest('Experiment Id from Group Id does not match Experiment Id on route', null, getFullErrorCode('1Y1003'))
+        }
 
         if (_.isNil(location) || _.isNaN(location)) {
           throw AppError.badRequest('Unable to determine location from group id', null, getFullErrorCode('1Y1001'))

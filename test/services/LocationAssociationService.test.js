@@ -25,6 +25,17 @@ describe('GroupService', () => {
       })
     })
 
+    test('rejects when experiment id from group id does not match the routes id', () => {
+      const groups = [{ id: '1.2' }]
+      AppError.badRequest = mock()
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 2 }])
+      target.experimentService.getExperimentById = mockResolve({})
+
+      return target.associateSetsToLocations(2, groups, testContext, testTx).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Id from Group Id does not match Experiment Id on route', null, '1Y1003')
+      })
+    })
+
     test('rejects when passed in group id has location value that is not a number', () => {
       const groups = [{ id: '1.abc' }]
       AppError.badRequest = mock()

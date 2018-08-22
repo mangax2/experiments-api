@@ -17,6 +17,7 @@ import FactorType from '../repos/factorType'
 import Group from '../repos/group'
 import GroupType from '../repos/groupType'
 import GroupValue from '../repos/groupValue'
+import LocationAssociation from '../repos/locationAssociation'
 import Owner from '../repos/owner'
 import RefDataSource from '../repos/refDataSource'
 import RefDataSourceType from '../repos/refDataSourceType'
@@ -60,6 +61,7 @@ const options = {
     obj.unitSpecificationDetail = UnitSpecificationDetail(obj, pgp)
     obj.unitType = UnitType(obj, pgp)
     obj.comment = Comment(obj, pgp)
+    obj.locationAssociation = LocationAssociation(obj, pgp)
   },
 }
 

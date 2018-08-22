@@ -125,7 +125,7 @@ class ManageRepsAndUnitsListener {
     return Promise.all(promises)
       .then(() => {
         if (unitsToBeDeleted.length > 0) {
-          return db.unit.batchRemove(unitsToBeDeleted)
+          return db.unit.batchRemove(unitsToBeDeleted, tx)
         }
         return Promise.resolve()
       })

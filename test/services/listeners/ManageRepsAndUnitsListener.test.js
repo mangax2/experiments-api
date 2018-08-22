@@ -291,7 +291,7 @@ describe('ManageRepsAndUnitsListener', () => {
       return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], {}).then(() => {
         expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, {})
         expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
-        expect(db.unit.batchRemove).toBeCalledWith([6])
+        expect(db.unit.batchRemove).toBeCalledWith([6], {})
       })
     })
 

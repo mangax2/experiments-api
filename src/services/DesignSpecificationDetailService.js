@@ -1,6 +1,7 @@
 import log4js from 'log4js'
 import _ from 'lodash'
 import db from '../db/DbManager'
+import cfServices from './utility/ServiceConfig'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
@@ -97,16 +98,18 @@ class DesignSpecificationDetailService {
                             update.refDesignSpecId === randomizationRefSpecId)
 
                           return PingUtil.getMonsantoHeader().then((headers) => {
-                            const randomizationUrl = 'https://api01-np.agro.services/randomizer/v3/strategies'
+                            const { randomizationAPIUrl } =
+                              cfServices.experimentsExternalAPIUrls.value
 
-                            return HttpUtil.get(randomizationUrl, headers).then((strategies) => {
-                              const randStrategy = _.find(strategies.body, strategy =>
-                                strategy.id.toString() === randomizationStrategySpec.value)
+                            return HttpUtil.get(randomizationAPIUrl, headers)
+                              .then((strategies) => {
+                                const randStrategy = _.find(strategies.body, strategy =>
+                                  strategy.id.toString() === randomizationStrategySpec.value)
 
-                              return this.factorService
-                                .updateFactorsForDesign(experimentId, randStrategy, tx)
-                                .then(() => AppUtil.createCompositePostResponse())
-                            })
+                                return this.factorService
+                                  .updateFactorsForDesign(experimentId, randStrategy, tx)
+                                  .then(() => AppUtil.createCompositePostResponse())
+                              })
                           })
                         }
                         return AppUtil.createCompositePostResponse()

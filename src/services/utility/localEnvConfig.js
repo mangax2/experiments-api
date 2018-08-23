@@ -22,7 +22,8 @@ const cfServices = {
       experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',
       setsAPIUrl: 'https://api01-np.agro.services/sets-api/v2',
       materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
-      velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5'
+      velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5',
+      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer/v3/strategies',
     },
   },
   experimentsKafka:{

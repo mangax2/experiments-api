@@ -2,6 +2,7 @@ import _ from 'lodash'
 import DataLoader from 'dataloader'
 import db from '../db/DbManager'
 import ExperimentsService from '../services/ExperimentsService'
+import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
 
 function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
@@ -31,6 +32,16 @@ function createLoaders(tx) {
     new DataLoader(args =>
       Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
 
+  const groupByIdLoader =
+    new DataLoader(args =>
+      Promise.all(_.map(args, arg =>
+        new GroupExperimentalUnitCompositeService().getGroupsAndUnits(arg))))
+
+  const groupBySetIdLoader =
+    new DataLoader(args =>
+      Promise.all(_.map(args, arg =>
+        new GroupExperimentalUnitCompositeService().getGroupAndUnitsBySetId(arg, tx))))
+
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
@@ -40,14 +51,12 @@ function createLoaders(tx) {
   const factorLevelByIdLoader = createDataLoader(db.factorLevel.batchFind)
   const factorLevelAssociationByIdLoader = createDataLoader(db.factorLevelAssociation.batchFind)
   const factorByIdLoader = createDataLoader(db.factor.batchFind)
-  const groupByIdLoader = createDataLoader(db.group.batchFind)
   const ownerByIdLoader = createDataLoader(db.owner.batchFind)
   const refDataSourceByIdLoader = createDataLoader(db.refDataSource.batchFind)
   const refDataSourceTypeByIdLoader = createDataLoader(db.refDataSourceType.batchFind)
   const refDesignSpecByIdLoader = createDataLoader(db.refDesignSpecification.batchFind)
   const refExperimentDesignByIdLoader = createDataLoader(db.experimentDesign.batchFind)
   const refFactorTypeByIdLoader = createDataLoader(db.factorType.batchFind)
-  const refGroupTypeByIdLoader = createDataLoader(db.groupType.batchFind)
   const refUnitSpecByIdLoader = createDataLoader(db.unitSpecification.batchFind)
   const refUnitTypeByIdLoader = createDataLoader(db.unitType.batchFind)
   const templateByIdLoader = createDataLoader(templateBatchLoaderCallback)
@@ -86,10 +95,7 @@ function createLoaders(tx) {
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)
 
   const groupByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.group.batchFindAllByExperimentId, groupByIdLoader)
-
-  const groupByParentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.group.batchFindAllByParentId, groupByIdLoader)
+    new GroupExperimentalUnitCompositeService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
 
   const nestedFactorLevelByAssociatedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindNestedLevels, factorLevelByIdLoader)
@@ -126,7 +132,6 @@ function createLoaders(tx) {
     factorLevelAssociation: factorLevelAssociationByIdLoader,
     group: groupByIdLoader,
     groupsByExperimentIds: groupByExperimentIdLoader,
-    groupByParentIds: groupByParentIdLoader,
     groupValue: createDataLoader(db.groupValue.batchFindAllByGroupId),
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
     owner: ownerByIdLoader,
@@ -136,16 +141,14 @@ function createLoaders(tx) {
     refDesignSpec: refDesignSpecByIdLoader,
     refExperimentDesign: refExperimentDesignByIdLoader,
     refFactorType: refFactorTypeByIdLoader,
-    refGroupType: refGroupTypeByIdLoader,
     refUnitSpec: refUnitSpecByIdLoader,
     refUnitType: refUnitTypeByIdLoader,
-    setBySetIds: createDataLoader(db.group.batchFindAllBySetIds),
+    setBySetIds: groupBySetIdLoader,
     template: templateByIdLoader,
     templates: createDataLoader(templatesBatchLoaderCallback),
     treatment: treatmentByIdLoader,
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
     treatmentBySetIds: treatmentBySetIdLoader,
-    unit: createDataLoader(db.unit.batchFindAllByGroupIdsAndGroupByGroupId),
     unitByExperimentIds: createDataLoader(db.unit.batchfindAllByExperimentIds),
     unitsBySetId: createDataLoader(db.unit.batchFindAllBySetIds),
     unitSpecDetail: unitSpecDetailByIdLoader,

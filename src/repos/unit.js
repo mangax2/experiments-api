@@ -40,20 +40,14 @@ class unitRepo {
   @setErrorCode('5J6000')
   batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
 
-  @setErrorCode('5JF000')
-  batchFindAllByGroupIdsAndGroupByGroupId = (groupIds, tx = this.rep) => {
-    return tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
-      .then(data => {
-        const dataByGroupId = _.groupBy(data, 'group_id')
-        return _.map(groupIds, groupId => dataByGroupId[groupId] || [])
-      })
-  }
-
   @setErrorCode('5J7000')
   batchFindAllBySetId = (setId, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId)
 
-  @setErrorCode('5JG000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT set_id, id FROM public.group WHERE set_id IN ($1:csv) UNION ALL SELECT sg.set_id, g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT sg.set_id, u.* FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id', [setIds]).then(data => {
+  @setErrorCode('5JE000')
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.* from location_association la\n' +
+    'INNER JOIN unit u on la.location = u.location \n' +
+    'INNER JOIN treatment t on t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
+    'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
     return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
   })

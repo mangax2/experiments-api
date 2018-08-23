@@ -1,4 +1,4 @@
-import { property } from 'lodash'
+import { has, property } from 'lodash'
 
 export default {
   Query: {
@@ -91,25 +91,10 @@ export default {
   },
   ExperimentalSet: {
     groupId: property('id'),
-    experimentId: property('experiment_id'),
-    refRandomizationStrategyId: property('ref_randomization_strategy_id'),
-    refGroupTypeId: property('ref_group_type_id'),
-    setId: property('set_id'),
-    groupType: (entity, args, context) =>
-      (entity.ref_group_type_id
-        ? context.loaders.refGroupType.load(entity.ref_group_type_id)
-        : Promise.resolve(null)),
-    groupValues: (entity, args, context) =>
-      context.loaders.groupValue.load(entity.id),
-    setEntries: (entity, args, context) =>
-      (entity.set_id
-        ? context.loaders.unitsBySetId.load(entity.set_id)
-        : Promise.resolve(null)),
   },
   ExperimentalUnit: {
-    groupId: property('group_id'),
-    treatmentId: property('treatment_id'),
-    setEntryId: property('set_entry_id'),
+    treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),
+    setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),
@@ -143,21 +128,6 @@ export default {
       context.loaders.nestedFactorLevel.load(entity.id),
     associatedLevels: (entity, args, context) =>
       context.loaders.associatedFactorLevel.load(entity.id),
-  },
-  Group: {
-    experimentId: property('experiment_id'),
-    parentId: property('parent_id'),
-    refRandomizationStrategyId: property('ref_randomization_strategy_id'),
-    refGroupTypeId: property('ref_group_type_id'),
-    setId: property('set_id'),
-    groupType: entity => entity.groupType,
-    groupValues: entity => entity.groupValues,
-  },
-  GroupValue: {
-    factorLevelId: property('factor_level_id'),
-    groupId: property('group_id'),
-    auditInfo: (entity, args, context) =>
-      context.getAuditInfo(entity),
   },
   Owner: {
     experimentId: property('experiment_id'),

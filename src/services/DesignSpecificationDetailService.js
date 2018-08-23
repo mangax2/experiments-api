@@ -7,6 +7,9 @@ import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
 import RefDesignSpecificationService from './RefDesignSpecificationService'
+import FactorService from './FactorService'
+import PingUtil from './utility/PingUtil'
+import HttpUtil from './utility/HttpUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
@@ -22,6 +25,7 @@ class DesignSpecificationDetailService {
     this.experimentService = new ExperimentsService()
     this.refDesignSpecificationService = new RefDesignSpecificationService()
     this.securityService = new SecurityService()
+    this.factorService = new FactorService()
   }
 
   @setErrorCode('131000')
@@ -77,12 +81,39 @@ class DesignSpecificationDetailService {
         this.populateExperimentId(updates, experimentId)
         this.populateExperimentId(adds, experimentId)
 
-        return this.deleteDesignSpecificationDetails(deletes, context, tx)
-          .then(() =>
-            this.updateDesignSpecificationDetails(updates, context, tx)
+        const updatedRefDesignSpecIds = _.map(updates, 'refDesignSpecId')
+        return this.refDesignSpecificationService.getAllRefDesignSpecs()
+          .then(refSpecs =>
+            this.deleteDesignSpecificationDetails(deletes, context, tx)
               .then(() =>
-                this.createDesignSpecificationDetails(adds, context, tx)
-                  .then(() => AppUtil.createCompositePostResponse())))
+                this.updateDesignSpecificationDetails(updates, context, tx)
+                  .then(() =>
+                    this.createDesignSpecificationDetails(adds, context, tx)
+                      .then(() => {
+                        const randomizationRefSpecId = _.find(refSpecs, refSpec => refSpec.name === 'Randomization Strategy ID').id
+
+                        if (updatedRefDesignSpecIds.includes(randomizationRefSpecId)) {
+                          const randomizationStrategySpec = _.find(updates, update =>
+                            update.refDesignSpecId === randomizationRefSpecId)
+
+                          return PingUtil.getMonsantoHeader().then((headers) => {
+                            const randomizationUrl = 'https://api01-np.agro.services/randomizer/v3/strategies'
+
+                            return HttpUtil.get(randomizationUrl, headers).then((strategies) => {
+                              const randStrategy = _.find(strategies.body, strategy =>
+                                strategy.id.toString() === randomizationStrategySpec.value)
+
+                              return this.factorService
+                                .updateFactorsForDesign(experimentId, randStrategy, tx)
+                                .then(() => AppUtil.createCompositePostResponse())
+                            })
+                          })
+                        }
+                        return AppUtil.createCompositePostResponse()
+                      }),
+                  ),
+              ),
+          )
       }
 
       return Promise.resolve()

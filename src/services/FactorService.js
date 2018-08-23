@@ -71,6 +71,17 @@ class FactorService {
         return data
       }
     })
+
+  updateFactorsForDesign = (experimentId, randStrategy, tx) => {
+    const rules = JSON.parse(randStrategy.rules)
+    const hasSplits = _.some(rules, (rule, key) => key.includes('groupedAttribute'))
+
+    if (!hasSplits) {
+      return db.factor.removeTiersForExperiment(experimentId, tx)
+    }
+
+    return Promise.resolve()
+  }
 }
 
 module.exports = FactorService

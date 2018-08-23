@@ -19,9 +19,9 @@ function sendKafkaNotification(event, id) {
 }
 
 function addKafkaNotification(result, args, event, argIdx) {
-  result.then((ids) => {
+  return result.then((ids) => {
     const experimentIds = event === 'create' ? _.map(ids, 'id') : [parseInt(args[argIdx], 10)]
-    Promise.all(_.map(experimentIds, id => sendKafkaNotification(event, id)))
+    return Promise.all(_.map(experimentIds, id => sendKafkaNotification(event, id)))
       .catch(/* istanbul ignore next */(err) => { console.error(err) })
   })
 }
@@ -37,7 +37,8 @@ function notifyChanges(event, argIdx, sendArgIdx) {
     const wrappingFunction = (bindingFunction => function () {
       const result = bindingFunction(this, arguments)
       if (toSendKafkaNotify(event, arguments, sendArgIdx)) {
-        addKafkaNotification(result, arguments, event, argIdx)
+        return addKafkaNotification(result, arguments, event, argIdx)
+          .then(() => result)
       }
 
       return result

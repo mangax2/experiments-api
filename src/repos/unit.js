@@ -52,7 +52,7 @@ class unitRepo {
   @setErrorCode('5J7000')
   batchFindAllBySetId = (setId, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId)
 
-  @setErrorCode('5JE000')
+  @setErrorCode('5JG000')
   batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT set_id, id FROM public.group WHERE set_id IN ($1:csv) UNION ALL SELECT sg.set_id, g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT sg.set_id, u.* FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
     return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
@@ -141,13 +141,18 @@ class unitRepo {
     return _.map(ids, id => keyedData[id])
   })
 
-  @setErrorCode('5JE000')
+  @setErrorCode('5JH000')
   batchClearEntryIds = (setId, tx = this.rep) => {
     if (!setId) {
       return Promise.resolve()
     }
 
     return tx.none('UPDATE unit SET set_entry_id = NULL WHERE id IN (WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT u.id FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id)', setId)
+  }
+
+  @setErrorCode('5JI000')
+  batchFindAllByExperimentIdAndLocation = (experimentId, location, tx = this.rep) => {
+    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2', [experimentId, location])
   }
 }
 

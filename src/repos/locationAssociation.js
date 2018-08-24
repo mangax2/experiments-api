@@ -28,7 +28,7 @@ class locationAssociationRepo {
 
 
     if (setIds.includes('null')) {
-      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e LEFT JOIN location_association la ON e.id = la.experiment_id'))
+      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e LEFT JOIN location_association la ON e.id = la.experiment_id WHERE la.experiment_id IS NULL ORDER BY id ASC'))
     } else {
       promises.push(Promise.resolve())
     }

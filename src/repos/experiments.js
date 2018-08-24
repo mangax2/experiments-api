@@ -27,41 +27,6 @@ class experimentsRepo {
     return _.map(ids, id => keyedData[id])
   })
 
-  @setErrorCode('55A000')
-  batchFindExperimentBySetId = (setIds, tx = this.rep) => {
-    const promises = []
-
-    if (setIds.includes('null')){
-      promises.push(tx.any('SELECT DISTINCT e.* FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id INNER JOIN ref_group_type rgt ON g.ref_group_type_id = rgt.id WHERE g.set_id IS NULL AND rgt.type = \'Location\''))
-    } else {
-      promises.push(Promise.resolve())
-    }
-
-    if(_.without(setIds, 'null').length > 0) {
-      promises.push(tx.any('SELECT e.*, g.set_id FROM experiment e INNER JOIN "group" g ON g.experiment_id = e.id WHERE g.set_id IN ($1:csv)', [_.without(setIds, 'null')]))
-    } else {
-      promises.push(Promise.resolve())
-    }
-
-    return tx.batch(promises).then(([experimentsNeedingSets, experimentsWithSets]) => {
-      const values = []
-      _.forEach(setIds, (setId) => {
-        if(setId === 'null') {
-          values.push(experimentsNeedingSets)
-        } else {
-          const experimentWithSet = _.find(experimentsWithSets, (exp) => exp.set_id === setId)
-          if (experimentWithSet) {
-            values.push([experimentWithSet])
-          } else {
-            values.push([])
-          }
-        }
-      })
-
-      return values
-    })
-  }
-
   @setErrorCode('554000')
   all = (isTemplate) => this.rep.any('SELECT * FROM experiment where is_template = $1', isTemplate)
 

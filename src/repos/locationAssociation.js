@@ -22,6 +22,43 @@ class locationAssociationRepo {
   @setErrorCode('5P3000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM location_association WHERE experiment_id = $1', experimentId)
 
+  @setErrorCode('5P7000')
+  batchFindExperimentBySetId = (setIds, tx = this.rep) => {
+    const promises = []
+
+
+    if (setIds.includes('null')) {
+      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e LEFT JOIN location_association la ON e.id = la.experiment_id'))
+    } else {
+      promises.push(Promise.resolve())
+    }
+
+    const validSetIds = _.without(setIds, 'null')
+    if (validSetIds.length > 0) {
+      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e, location_association la WHERE e.id = la.experiment_id and la.set_id IN ($1:csv)', [validSetIds]))
+    } else {
+      promises.push(Promise.resolve())
+    }
+
+    return tx.batch(promises).then(([experimentsNeedingSets, experimentsWithSets]) => {
+      const values = []
+      _.forEach(setIds, (setId) => {
+        if (setId === 'null') {
+          values.push(experimentsNeedingSets)
+        } else {
+          const experimentWithSet = _.find(experimentsWithSets, (exp) => exp.set_id === setId)
+          if (experimentWithSet) {
+            values.push([experimentWithSet])
+          } else {
+            values.push([])
+          }
+        }
+      })
+
+      return values
+    })
+  }
+
   @setErrorCode('5P4000')
   batchCreate = (associations, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(

@@ -72,6 +72,8 @@ class FactorService {
       }
     })
 
+  @setErrorCode('1D8000')
+  @Transactional('updateFactorsForDesign')
   updateFactorsForDesign = (experimentId, randStrategy, tx) => {
     const rules = JSON.parse(randStrategy.rules)
     const hasSplits = _.some(rules, (rule, key) => key.includes('groupedAttribute'))

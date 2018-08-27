@@ -931,7 +931,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
       db.unit.findAllByExperimentId = mockResolve('units')
-      db.group.getLocSetIdAssociation = mockResolve('setIds')
+      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
       AppError.internalServerError = mock()
 
@@ -983,7 +983,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
         expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.group.getLocSetIdAssociation).toBeCalled()
+        expect(db.locationAssociation.findByExperimentId).toBeCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
         expect(data).toEqual({ test: 'message' })
@@ -1002,7 +1002,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
       db.unit.findAllByExperimentId = mockResolve('units')
-      db.group.getLocSetIdAssociation = mockResolve('setIds')
+      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       AWSUtil.callLambda = mockReject()
       AppError.internalServerError = mock({ message: 'error result' })
 
@@ -1016,10 +1016,345 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
         expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.group.getLocSetIdAssociation).toBeCalled()
+        expect(db.locationAssociation.findByExperimentId).toBeCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
       })
+    })
+  })
+
+  describe('getGroupsAndUnitsByExperimentIds', () => {
+    test('multiple experiments, getting groups succeeded', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockResolve([{ id: 1 }, { id: 2 }])
+      return target.getGroupsAndUnitsByExperimentIds([111, 112], testTx).then((data) => {
+        expect(target.getGroupsAndUnits).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([[{ id: 1 }, { id: 2 }], [{ id: 1 }, { id: 2 }]])
+      })
+    })
+
+    test('multiple experiments, getting groups failed', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockReject('An error occurred')
+      return target.getGroupsAndUnitsByExperimentIds([111, 112], testTx).then((data) => {
+        expect(target.getGroupsAndUnits).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([[], []])
+      })
+    })
+  })
+
+  describe('getGroupAndUnitsBySetId', () => {
+    test('getting a group and units with a valid set id', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+        id: 1,
+        setId: 4781,
+        parentId: null,
+        setEntries: [
+          { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+        ],
+      })
+      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
+        expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
+        expect(group).toEqual({
+          id: 1,
+          setId: 4781,
+          parentId: null,
+          setEntries: [
+            { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+          ],
+        })
+      })
+    })
+
+    test('getting a group and units with an invalid set id', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({})
+      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
+        expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
+        expect(group).toEqual({})
+      })
+    })
+
+    test('getting a group and units with an empty return of the db query', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      db.locationAssociation.findBySetId = mockResolve(null)
+      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+        id: 1,
+        setId: 4781,
+        parentId: null,
+        setEntries: [
+          { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+        ],
+      })
+      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
+        expect(target.getGroupAndUnitsBySetIdAndExperimentId).not.toHaveBeenCalled()
+        expect(group).toEqual({})
+      })
+    })
+
+    test('getting a group and units with a failed db query', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      db.locationAssociation.findBySetId = mockReject('error')
+      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+        id: 1,
+        setId: 4781,
+        parentId: null,
+        setEntries: [
+          { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+        ],
+      })
+      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
+        expect(target.getGroupAndUnitsBySetIdAndExperimentId).not.toHaveBeenCalled()
+        expect(group).toEqual({})
+      })
+    })
+  })
+
+  describe('getGroupAndUnitsBySetIdAndExperimentId', () => {
+    test('get a group and units from a set id and experiment id', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockResolve([
+        {
+          id: 1,
+          setId: 4781,
+          parentId: null,
+        },
+        {
+          id: 2,
+          parentId: 1,
+          units: [{ id: 1 }, { id: 2 }],
+        },
+        {
+          id: 3,
+          parentId: 1,
+        },
+        {
+          id: 4,
+          parentId: 2,
+          units: [{ id: 3 }],
+        },
+        {
+          id: 5,
+          parentId: 2,
+          units: [{ id: 4 }, { id: 5 }],
+        },
+        {
+          id: 6,
+          parentId: 5,
+          units: [{ id: 6 }],
+        },
+      ])
+      return target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, testTx).then((group) => {
+        expect(group).toEqual({
+          id: 1,
+          setId: 4781,
+          parentId: null,
+          setEntries: [
+            { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+          ],
+        })
+      })
+    })
+
+    test('get a group and units from an invalid set id and experiment id', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockResolve([
+        {
+          id: 1,
+          setId: 4781,
+          parentId: null,
+        },
+        {
+          id: 2,
+          parentId: 1,
+          units: [{ id: 1 }, { id: 2 }],
+        },
+        {
+          id: 3,
+          parentId: 1,
+        },
+        {
+          id: 4,
+          parentId: 2,
+          units: [{ id: 3 }],
+        },
+        {
+          id: 5,
+          parentId: 2,
+          units: [{ id: 4 }, { id: 5 }],
+        },
+        {
+          id: 6,
+          parentId: 5,
+          units: [{ id: 6 }],
+        },
+      ])
+      return target.getGroupAndUnitsBySetIdAndExperimentId(4782, 112, testTx).then((group) => {
+        expect(group).toEqual({})
+      })
+    })
+
+    test('get a group and units from a failed AWS lambda called', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockReject('error')
+      return target.getGroupAndUnitsBySetIdAndExperimentId(4782, 112, testTx).then((group) => {
+        expect(group).toEqual({})
+      })
+    })
+  })
+
+  describe('getUnitsFromGroupsBySetId', () => {
+    test('get units from a set id', () => {
+      const groups = [
+        {
+          id: 1,
+          setId: 4781,
+          parentId: null,
+        },
+        {
+          id: 2,
+          parentId: 1,
+          units: [{ id: 1 }, { id: 2 }],
+        },
+        {
+          id: 3,
+          parentId: 1,
+        },
+        {
+          id: 4,
+          parentId: 2,
+          units: [{ id: 3 }],
+        },
+        {
+          id: 5,
+          parentId: 2,
+          units: [{ id: 4 }, { id: 5 }],
+        },
+        {
+          id: 6,
+          parentId: 5,
+          units: [{ id: 6 }],
+        },
+      ]
+
+      target = new GroupExperimentalUnitCompositeService()
+      expect(target.getUnitsFromGroupsBySetId(groups, 4781))
+        .toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }])
+      expect(target.getUnitsFromGroupsBySetId(groups, 4782)).toEqual([])
+    })
+  })
+
+  describe('getChildGroupUnits', () => {
+    test('get units from child groups', () => {
+      const groups = [
+        {
+          id: 1,
+          parentId: null,
+        },
+        {
+          id: 2,
+          parentId: 1,
+          units: [{ id: 1 }, { id: 2 }],
+        },
+        {
+          id: 3,
+          parentId: 1,
+        },
+        {
+          id: 4,
+          parentId: 2,
+          units: [{ id: 3 }],
+        },
+        {
+          id: 5,
+          parentId: 2,
+          units: [{ id: 4 }, { id: 5 }],
+        },
+        {
+          id: 6,
+          parentId: 5,
+          units: [{ id: 6 }],
+        },
+      ]
+
+      target = new GroupExperimentalUnitCompositeService()
+      expect(target.getChildGroupUnits(groups, 1))
+        .toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }])
+      expect(target.getChildGroupUnits(groups, 7)).toEqual([])
+    })
+  })
+
+  describe('getAllChildGroups', () => {
+    test('get all child groups', () => {
+      const groups = [
+        {
+          id: 1,
+          parentId: null,
+        },
+        {
+          id: 2,
+          parentId: 1,
+        },
+        {
+          id: 3,
+          parentId: 1,
+        },
+        {
+          id: 4,
+          parentId: 2,
+        },
+        {
+          id: 5,
+          parentId: 2,
+        },
+        {
+          id: 6,
+          parentId: 5,
+        },
+      ]
+      target = new GroupExperimentalUnitCompositeService()
+      expect(target.getAllChildGroups(groups, 1)).toEqual([{
+        id: 2,
+        parentId: 1,
+      },
+      {
+        id: 3,
+        parentId: 1,
+      },
+      {
+        id: 4,
+        parentId: 2,
+      },
+      {
+        id: 5,
+        parentId: 2,
+      },
+      {
+        id: 6,
+        parentId: 5,
+      },
+      ])
+
+      expect(target.getAllChildGroups(groups, 2)).toEqual([
+        {
+          id: 4,
+          parentId: 2,
+        },
+        {
+          id: 5,
+          parentId: 2,
+        },
+        {
+          id: 6,
+          parentId: 5,
+        },
+      ])
+      expect(target.getAllChildGroups(groups, 7)).toEqual([])
     })
   })
 })

@@ -445,7 +445,7 @@ class GroupExperimentalUnitCompositeService {
       db.treatment.findAllByExperimentId(experimentId, tx),
       db.combinationElement.findAllByExperimentId(experimentId, tx),
       db.unit.findAllByExperimentId(experimentId, tx),
-      db.group.getLocSetIdAssociation(experimentId, tx),
+      db.locationAssociation.findByExperimentId(experimentId, tx),
     ]).then(([
       randomizationStrategies,
       variables,
@@ -497,6 +497,52 @@ class GroupExperimentalUnitCompositeService {
           return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))
         })
     })
+
+  @setErrorCode('1FP000')
+  getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => Promise.all(_.map(experimentIds,
+    experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))
+
+  @setErrorCode('1FQ000')
+  @Transactional('getGroupAndUnitsBySetId')
+  getGroupAndUnitsBySetId = (setId, tx) => db.locationAssociation.findBySetId(setId, tx)
+    .then((setAssocation) => {
+      if (!setAssocation) return {}
+      return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,
+        setAssocation.experiment_id, tx)
+    })
+    .catch(() => ({}))
+
+  @setErrorCode('1FR000')
+  getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, tx) =>
+    this.getGroupsAndUnits(experimentId, tx)
+      .then((groups) => {
+        const group = _.find(groups, g => g.setId === setId)
+        if (_.isNil(group)) return {}
+        group.setEntries = this.getUnitsFromGroupsBySetId(groups, setId)
+        return group
+      })
+      .catch(() => ({}))
+
+  @setErrorCode('1FS000')
+  getUnitsFromGroupsBySetId = (groups, setId) => {
+    const group = _.find(groups, g => g.setId === setId)
+    if (_.isNil(group)) return []
+    return _.compact(_.concat(group.units, this.getChildGroupUnits(groups, group.id)))
+  }
+
+  @setErrorCode('1FT000')
+  getChildGroupUnits = (groups, parentId) => {
+    const children = this.getAllChildGroups(groups, parentId)
+    return _.compact(_.flatMap(children, c => c.units))
+  }
+
+  @setErrorCode('1FU000')
+  getAllChildGroups = (groups, parentId) => {
+    const children = _.filter(groups, g => g.parentId === parentId)
+    if (_.isEmpty(children)) return []
+
+    return _.concat(children, _.flatMap(children, c => this.getAllChildGroups(groups, c.id)))
+  }
 }
 
 module.exports = GroupExperimentalUnitCompositeService

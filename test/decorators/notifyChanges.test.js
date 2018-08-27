@@ -1,7 +1,10 @@
 import { mock } from '../jestUtil'
-import { notifyChanges } from '../../src/decorators/notifyChanges'
-import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 import cfServices from '../../src/services/utility/ServiceConfig'
+import KafkaProducer from '../../src/services/kafka/KafkaProducer'
+
+cfServices.experimentsKafka.value.enableKafka = 'true'
+
+const { notifyChanges } = require('../../src/decorators/notifyChanges')
 
 class testClass {
   @notifyChanges('create', null, 1)
@@ -36,6 +39,10 @@ class testClass {
 describe('notifyChanges', () => {
   beforeEach(() => {
     expect.hasAssertions()
+  })
+
+  afterAll(() => {
+    cfServices.experimentsKafka.value.enableKafka = 'false'
   })
 
   describe('notifyChanges', () => {

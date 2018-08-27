@@ -9,6 +9,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 import Transactional from '../decorators/transactional'
 // import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 // import SecurityService from './SecurityService'
+// import UnitSpecificationDetailService from './UnitSpecificationDetailService'
 import db from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 
@@ -18,8 +19,9 @@ const logger = log4js.getLogger('CapacityRequestService')
 
 // Error Codes 10XXXX
 class CapacityRequestService {
-  constructor(designSpecificationDetailService, securityService) {
+  constructor(designSpecificationDetailService, unitSpecificationDetailService, securityService) {
     this.designSpecificationDetailService = designSpecificationDetailService
+    this.unitSpecificationDetailService = unitSpecificationDetailService
     this.securityService = securityService
   }
 
@@ -89,13 +91,19 @@ class CapacityRequestService {
       const syncPromises = []
 
       const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
-
+      const unitSpecificationDetailValues = _.pick(capacityRequestData, ['number of rows',
+        'row length', 'row spacing', 'plot row length uom', 'row spacing uom'])
       if (_.keys(designSpecificationDetailValues).length > 0) {
         syncPromises.push(
           this.designSpecificationDetailService.syncDesignSpecificationDetails(
             designSpecificationDetailValues, experimentId, context, tx,
-          ),
-        )
+          ))
+      }
+      if (_.keys(unitSpecificationDetailValues).length > 0) {
+        syncPromises.push(
+          this.unitSpecificationDetailService.syncUnitSpecificationDetails(
+            unitSpecificationDetailValues, experimentId, context, tx,
+          ))
       }
 
       syncPromises.push(db.experiments.updateCapacityRequestSyncDate(experimentId, context, tx))

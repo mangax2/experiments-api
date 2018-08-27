@@ -101,7 +101,7 @@ class DesignSpecificationDetailService {
                             const { randomizationAPIUrl } =
                               cfServices.experimentsExternalAPIUrls.value
 
-                            return HttpUtil.get(randomizationAPIUrl, headers)
+                            return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
                               .then((strategies) => {
                                 const randStrategy = _.find(strategies.body, strategy =>
                                   strategy.id.toString() === randomizationStrategySpec.value)

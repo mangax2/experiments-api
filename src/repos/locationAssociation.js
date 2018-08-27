@@ -28,7 +28,13 @@ class locationAssociationRepo {
 
 
     if (setIds.includes('null')) {
-      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e LEFT JOIN location_association la ON e.id = la.experiment_id WHERE la.experiment_id IS NULL ORDER BY id ASC'))
+      promises.push(tx.any('WITH experiment_location_pairs AS (\n' +
+        'SELECT DISTINCT e.id, u.location FROM experiment e, unit u, treatment t\n' +
+        'WHERE u.treatment_id = t.id AND t.experiment_id = e.id ),\n' +
+        'experiment_ids_missing_setIds AS(\n' +
+        'SELECT DISTINCT ela.id FROM experiment_location_pairs ela\n' +
+        'LEFT JOIN location_association la ON ela.id = la.experiment_id AND ela.location = la.location WHERE la.experiment_id IS NULL ORDER BY id ASC)\n' +
+        'SELECT e.* from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
     } else {
       promises.push(Promise.resolve())
     }

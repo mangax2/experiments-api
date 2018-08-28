@@ -11,6 +11,7 @@
     "devDebug": "cross-env NODE_ENV=development nodemon $NODE_DEBUG_OPTION ./src/app.js",
     "eslint": "./node_modules/.bin/eslint src --fix --ext .js; exit 0",
     "eslintTests": "eslint test --fix --ext .js; exit 0",
+    "migrations": "node ./sqlMigration.js",
     "precommit": "npm run validateSchema && eslint src --ext .js",
     "prepush": "jest --config .jestrc.json",
     "start": "NODE_ENV=production node ./build/app",

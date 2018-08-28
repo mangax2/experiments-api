@@ -307,4 +307,77 @@ describe('UnitSpecificationDetailService', () => {
       })
     })
   })
+
+  describe('syncUnitSpecificationDetails', () => {
+    test('returns a resolved promise when there are no unit specification details to sync', () => {
+      target = new UnitSpecificationDetailService()
+      target.getUnitSpecificationDetailsByExperimentId = mockResolve([])
+      target.unitSpecificationService = {
+        getAllUnitSpecifications: mockResolve([]),
+      }
+      db.unitSpecificationDetail.syncUnitSpecificationDetails = mock()
+
+      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {
+        expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when it fails to get unit specifications', () => {
+      target = new UnitSpecificationDetailService()
+      target.getUnitSpecificationDetailsByExperimentId = mockResolve([])
+      target.unitSpecificationService = {
+        getAllUnitSpecifications: mockReject(),
+      }
+      db.unitSpecificationDetail.syncUnitSpecificationDetails = mock()
+
+      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {
+        expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when it fails to get unit specification details', () => {
+      target = new UnitSpecificationDetailService()
+      target.getUnitSpecificationDetailsByExperimentId = mockResolve([])
+      target.unitSpecificationService = {
+        getAllUnitSpecifications: mockReject(),
+      }
+      db.unitSpecificationDetail.syncUnitSpecificationDetails = mockResolve()
+
+      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {
+        expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+        expect(target.unitSpecificationService.getAllUnitSpecifications).toHaveBeenCalled()
+      })
+    })
+
+    test('adds a rows per plot and row spacing unit for upsert', () => {
+      target = new UnitSpecificationDetailService()
+      target.getUnitSpecificationDetailsByExperimentId = mockResolve([])
+      target.manageAllUnitSpecificationDetails = mock()
+      target.unitSpecificationService = {
+        getAllUnitSpecifications: mockResolve([{ id: 1, name: 'Number of Rows' },
+          { id: 2, name: 'Row Spacing' }, { id: 3, name: 'Row Length' }]),
+      }
+      db.unitSpecificationDetail.syncUnitSpecificationDetails = mockResolve()
+
+      const capacityRequestUnitSpecificationDetails = {
+        'number of rows': 5,
+        'row spacing': 4,
+        'row spacing uom': 2,
+        'row length': 6,
+        'plot row length uom': 3,
+      }
+
+      return target.syncUnitSpecificationDetails(capacityRequestUnitSpecificationDetails, 1, testContext, testTx).then(() => {
+        expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).toHaveBeenCalledWith(
+          1,
+          [{ refUnitSpecId: 1, value: 5 },
+            { refUnitSpecId: 3, uomId: 3, value: 6 },
+            { refUnitSpecId: 2, uomId: 2, value: 4 },
+          ],
+          testContext,
+          testTx,
+        )
+      })
+    })
+  })
 })

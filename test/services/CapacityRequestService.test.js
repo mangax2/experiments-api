@@ -199,8 +199,11 @@ describe('CapacityRequestService', () => {
       const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mock(),
       }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mock(),
+      }
 
-      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
@@ -213,6 +216,7 @@ describe('CapacityRequestService', () => {
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
         expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
     })
 
@@ -223,10 +227,13 @@ describe('CapacityRequestService', () => {
       const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mockResolve(),
+      }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
-      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
 
       const capacityRequestData = {
         locations: 4,
@@ -236,6 +243,35 @@ describe('CapacityRequestService', () => {
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
         expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
+    test('calls unitSpecificationDetailService and update capacity request sync date', () => {
+      const securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      const designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mockResolve(),
+      }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
+      }
+
+      const capacityRequestData = {
+        'row length': 4,
+        'row spacing': 5,
+
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).toHaveBeenCalled()
       })
     })
 
@@ -246,15 +282,20 @@ describe('CapacityRequestService', () => {
       const designSpecificationDetailService = {
         syncDesignSpecificationDetails: mockResolve(),
       }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mockResolve(),
+      }
+
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
-      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, securityService)
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
 
       const capacityRequestData = {}
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
       })
     })

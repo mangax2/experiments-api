@@ -106,7 +106,6 @@ class unitSpecificationDetailRepo {
 
   @setErrorCode('5LB000')
   syncUnitSpecificationDetails = (experimentId, upsertDetails, context, tx = this.rep) => {
-   console.log("#####",upsertDetails)
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['value', 'ref_unit_spec_id','uom_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'unit_spec_detail' },

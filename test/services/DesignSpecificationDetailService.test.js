@@ -4,7 +4,12 @@ import {
 import DesignSpecificationDetailService from '../../src/services/DesignSpecificationDetailService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
+import HttpUtil from '../../src/services/utility/HttpUtil'
+import PingUtil from '../../src/services/utility/PingUtil'
 import db from '../../src/db/DbManager'
+
+jest.mock('../../src/services/utility/HttpUtil')
+jest.mock('../../src/services/utility/PingUtil')
 
 describe('DesignSpecificationDetailService', () => {
   let target
@@ -166,6 +171,7 @@ describe('DesignSpecificationDetailService', () => {
       target.deleteDesignSpecificationDetails = mockResolve()
       target.updateDesignSpecificationDetails = mockResolve()
       target.createDesignSpecificationDetails = mockResolve()
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails({
@@ -182,12 +188,40 @@ describe('DesignSpecificationDetailService', () => {
       })
     })
 
+    test('manages delete, update, and create design specification details call and calls out to clear factor tiers', () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.populateExperimentId = mockResolve()
+      target.deleteDesignSpecificationDetails = mockResolve()
+      target.updateDesignSpecificationDetails = mockResolve()
+      target.createDesignSpecificationDetails = mockResolve()
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
+      AppUtil.createCompositePostResponse = mock()
+      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.get.mockReturnValueOnce(Promise.resolve({ body: [{ id: 8 }] }))
+      target.factorService.updateFactorsForDesign = mockResolve()
+
+      return target.manageAllDesignSpecificationDetails({
+        deletes: [1],
+        updates: [{ refDesignSpecId: 1, value: '8' }],
+        adds: [{}, {}],
+      }, 1, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
+        expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
+        expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{ refDesignSpecId: 1, value: '8' }], testContext, testTx)
+        expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{}, {}], testContext, testTx)
+        expect(target.factorService.updateFactorsForDesign).toHaveBeenCalledWith(1, { id: 8 }, testTx)
+        expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
+      })
+    })
+
     test('returns nothing when designSpecificationDetailsObj is null', () => {
       target.securityService.permissionsCheck = mockResolve()
       target.populateExperimentId = mockResolve()
       target.deleteDesignSpecificationDetails = mock()
       target.updateDesignSpecificationDetails = mock()
       target.createDesignSpecificationDetails = mock()
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails(null, 1, testContext, false, testTx).then(() => {
@@ -207,13 +241,14 @@ describe('DesignSpecificationDetailService', () => {
       target.deleteDesignSpecificationDetails = mockResolve()
       target.updateDesignSpecificationDetails = mockResolve()
       target.createDesignSpecificationDetails = mockReject(error)
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails({
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, false, testTx).then(() => {}, (err) => {
+      }, 1, testContext, false, testTx).then(null, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)
@@ -231,6 +266,7 @@ describe('DesignSpecificationDetailService', () => {
       target.deleteDesignSpecificationDetails = mockResolve()
       target.updateDesignSpecificationDetails = mockReject(error)
       target.createDesignSpecificationDetails = mockResolve()
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails({
@@ -255,13 +291,14 @@ describe('DesignSpecificationDetailService', () => {
       target.deleteDesignSpecificationDetails = mockReject(error)
       target.updateDesignSpecificationDetails = mockResolve()
       target.createDesignSpecificationDetails = mockResolve()
+      target.refDesignSpecificationService.getAllRefDesignSpecs = mockResolve([{ name: 'Randomization Strategy ID', id: 1 }])
       AppUtil.createCompositePostResponse = mock()
 
       return target.manageAllDesignSpecificationDetails({
         deletes: [1],
         updates: [{}],
         adds: [{}, {}],
-      }, 1, testContext, false, testTx).then(() => {}, (err) => {
+      }, 1, testContext, false, testTx).then(null, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.populateExperimentId).toHaveBeenCalledTimes(2)
         expect(target.deleteDesignSpecificationDetails).toHaveBeenCalledWith([1], testContext, testTx)

@@ -109,12 +109,18 @@ class factorRepo {
   }
 
   @setErrorCode('57A000')
-  batchFindByExperimentId = (experimentIds, tx = rep) => {
+  batchFindByExperimentId = (experimentIds, tx = this.rep) => {
     return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
+  }
+
+  @setErrorCode('57B000')
+  removeTiersForExperiment = (experimentId, tx = this.rep) => {
+    const query = 'UPDATE factor SET tier = NULL WHERE experiment_id = $1'
+    return tx.none(query, experimentId)
   }
 }
 

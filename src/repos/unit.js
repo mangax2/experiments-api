@@ -38,7 +38,7 @@ class unitRepo {
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J6000')
-  batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
+  batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id, location FROM unit WHERE group_id IN ($1:csv)', [groupIds])
 
   @setErrorCode('5JF000')
   batchFindAllByGroupIdsAndGroupByGroupId = (groupIds, tx = this.rep) => {

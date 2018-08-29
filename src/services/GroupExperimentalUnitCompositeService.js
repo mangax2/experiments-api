@@ -457,36 +457,41 @@ class GroupExperimentalUnitCompositeService {
       units,
       setLocAssociations,
     ]) => {
-      const variableLevelsMap = _.groupBy(variableLevels, 'factor_id')
-      const combinationElementsMap = _.groupBy(combinationElements, 'treatment_id')
-      _.forEach(variables, (variable) => {
+      const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+      const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+      const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
+      const trimmedCombinations = _.map(combinationElements, comb => _.omit(comb, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'id']))
+      const trimmedUnits = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'group_id']))
+
+      const variableLevelsMap = _.groupBy(trimmedVariableLevels, 'factor_id')
+      const combinationElementsMap = _.groupBy(trimmedCombinations, 'treatment_id')
+
+      _.forEach(trimmedVariables, (variable) => {
         variable.levels = variableLevelsMap[variable.id]
         _.forEach(variable.levels, (level) => {
           level.factorName = variable.name
         })
       })
-      _.forEach(treatments, (treatment) => {
+
+      _.forEach(trimmedTreatments, (treatment) => {
         treatment.combinationElements = combinationElementsMap[treatment.id]
       })
-      _.forEach(combinationElements, (ce) => {
-        const variableLevel = _.find(variableLevels, level => ce.factor_level_id === level.id) || {}
-        ce.factorLevel = variableLevel
-        ce.factorName = variableLevel.factorName
-      })
-      _.forEach(variableLevels, (level) => {
+
+      _.forEach(trimmedVariableLevels, (level) => {
         const levelItems = _.get(level, 'value.items') || []
         level.items = levelItems.length === 1 ? levelItems[0] : levelItems
         delete level.value
         delete level.factorName
       })
+
       const body = inflector.transform({
         experimentId,
-        variables,
+        variables: trimmedVariables,
         designSpecs,
         refDesignSpecs,
         randomizationStrategies,
-        treatments,
-        units,
+        treatments: trimmedTreatments,
+        units: trimmedUnits,
         setLocAssociations,
       }, 'camelizeLower')
 

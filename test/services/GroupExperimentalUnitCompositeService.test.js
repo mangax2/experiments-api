@@ -930,7 +930,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
       db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.unit.findAllByExperimentId = mockResolve('units')
+      db.unit.findAllByExperimentId = mockResolve([])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
       AppError.internalServerError = mock()
@@ -957,19 +957,15 @@ describe('GroupExperimentalUnitCompositeService', () => {
               {
                 treatmentId: 7,
                 factorLevelId: 3,
-                factorLevel: { id: 3, factorId: 1, items: {} },
-                factorName: 'var1',
               },
               {
                 treatmentId: 7,
                 factorLevelId: 5,
-                factorLevel: { id: 5, factorId: 1, items: [{}, {}] },
-                factorName: 'var1',
               },
             ],
           },
         ],
-        units: 'units',
+        units: [],
         setLocAssociations: 'setIds',
       }
 
@@ -984,7 +980,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
         expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.locationAssociation.findByExperimentId).toBeCalled()
-        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda', JSON.stringify(expectedLambdaPayload))
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
         expect(data).toEqual({ test: 'message' })
       })

@@ -32,7 +32,7 @@ class LocationAssociationService {
 
         if (_.isNil(experimentIdFromGroup)
           || _.isNaN(experimentIdFromGroup)
-          || experimentIdFromGroup !== experimentId
+          || experimentIdFromGroup !== Number(experimentId)
         ) {
           throw AppError.badRequest('Experiment Id from Group Id does not match Experiment Id on route', null, getFullErrorCode('1Y1003'))
         }

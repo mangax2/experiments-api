@@ -123,47 +123,44 @@ class UnitSpecificationDetailService {
 @Transactional('syncUnitSpecificationDetails')
  syncUnitSpecificationDetails=(capacitySyncUnitSpecDetails, experimentId, context, tx) =>
    this.getUnitSpecificationDetailsByExperimentId(experimentId, false, context, tx)
-     .then(() => {
-       this.unitSpecificationService.getAllUnitSpecifications()
-         .then((refUnitSpecs) => {
-           const unitSpecUpsertValues = []
-           if (capacitySyncUnitSpecDetails['number of rows']) {
-             const refRowsPerPlotId = _.find(refUnitSpecs, uS => uS.name === 'Number of Rows').id
+     .then(unitSpecificationDetails => this.unitSpecificationService.getAllUnitSpecifications()
+       .then((refUnitSpecs) => {
+         const unitSpecUpsertValues = []
+         if (capacitySyncUnitSpecDetails['number of rows']) {
+           const refRowsPerPlotId = _.find(refUnitSpecs, uS => uS.name === 'Number of Rows').id
+           unitSpecUpsertValues.push({
+             refUnitSpecId: refRowsPerPlotId,
+             value: capacitySyncUnitSpecDetails['number of rows'],
+             experimentId,
+           })
+         }
+         if (capacitySyncUnitSpecDetails['row length']) {
+           const refPlotRowLengthId = _.find(refUnitSpecs, uS => uS.name === 'Row Length').id
+           unitSpecUpsertValues.push({
+             refUnitSpecId: refPlotRowLengthId,
+             value: capacitySyncUnitSpecDetails['row length'],
+             uomId: capacitySyncUnitSpecDetails['plot row length uom'],
+             experimentId,
+           })
+         }
 
-             unitSpecUpsertValues.push({
-               refUnitSpecId: refRowsPerPlotId,
-               value: capacitySyncUnitSpecDetails['number of rows'],
-             })
-           }
-           if (capacitySyncUnitSpecDetails['row length']) {
-             const refPlotRowLength = _.find(refUnitSpecs, uS => uS.name === 'Row Length')
-             const refPlotRowLengthId = refPlotRowLength.id
-             unitSpecUpsertValues.push({
-               refUnitSpecId: refPlotRowLengthId,
-               value: capacitySyncUnitSpecDetails['row length'],
-               uomId: capacitySyncUnitSpecDetails['plot row length uom'],
-             })
-           }
+         if (capacitySyncUnitSpecDetails['row spacing']) {
+           const refRowSpacingId = _.find(refUnitSpecs, uS => uS.name === 'Row Spacing').id
+           unitSpecUpsertValues.push({
+             refUnitSpecId: refRowSpacingId,
+             value: capacitySyncUnitSpecDetails['row spacing'],
+             uomId: capacitySyncUnitSpecDetails['row spacing uom'],
+             experimentId,
 
-           if (capacitySyncUnitSpecDetails['row spacing']) {
-             const refRowSpacing = _.find(refUnitSpecs, uS => uS.name === 'Row Spacing')
-             const refRowSpacingId = refRowSpacing.id
-             unitSpecUpsertValues.push({
-               refUnitSpecId: refRowSpacingId,
-               value: capacitySyncUnitSpecDetails['row spacing'],
-               uomId: capacitySyncUnitSpecDetails['row spacing uom'],
+           })
+         }
 
-             })
-           }
-
-           if (unitSpecUpsertValues.length > 0) {
-             return db.unitSpecificationDetail.syncUnitSpecificationDetails(
-               experimentId, unitSpecUpsertValues, context, tx,
-             )
-           }
-           return Promise.resolve()
-         })
-     })
+         if (unitSpecUpsertValues.length > 0) {
+           return db.unitSpecificationDetail.batchRemove(_.map(unitSpecificationDetails, 'id'), tx)
+             .then(() => db.unitSpecificationDetail.batchCreate(unitSpecUpsertValues, context, tx))
+         }
+         return Promise.resolve()
+       }))
 }
 
 module.exports = UnitSpecificationDetailService

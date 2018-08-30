@@ -103,29 +103,6 @@ class unitSpecificationDetailRepo {
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
-
-  @setErrorCode('5LB000')
-  syncUnitSpecificationDetails = (experimentId, upsertDetails, context, tx = this.rep) => {
-    const columnSet = new this.pgp.helpers.ColumnSet(
-      ['value', 'ref_unit_spec_id','uom_id', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'unit_spec_detail' },
-    )
-    const data = upsertDetails.map(usd => ({
-      value: usd.value,
-      ref_unit_spec_id: usd.refUnitSpecId,
-      uom_id :usd.uomId,
-      experiment_id: experimentId,
-      created_user_id: context.userId,
-      created_date: 'CURRENT_TIMESTAMP',
-      modified_user_id: context.userId,
-      modified_date: 'CURRENT_TIMESTAMP',
-    }))
-
-    const query = `${this.pgp.helpers.insert(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} ON CONFLICT ON CONSTRAINT unit_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value ,
-     uom_id = Excluded.uom_id, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date`
-
-    return tx.query(query)
-  }
 }
 
 module.exports = (rep, pgp) => new unitSpecificationDetailRepo(rep, pgp)

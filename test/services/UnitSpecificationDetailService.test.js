@@ -330,7 +330,7 @@ describe('UnitSpecificationDetailService', () => {
       }
       db.unitSpecificationDetail.syncUnitSpecificationDetails = mock()
 
-      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {
+      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {}, () => {
         expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
     })
@@ -343,7 +343,7 @@ describe('UnitSpecificationDetailService', () => {
       }
       db.unitSpecificationDetail.syncUnitSpecificationDetails = mockResolve()
 
-      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {
+      return target.syncUnitSpecificationDetails({}, 1, testContext, testTx).then(() => {}, () => {
         expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(target.unitSpecificationService.getAllUnitSpecifications).toHaveBeenCalled()
       })
@@ -351,13 +351,17 @@ describe('UnitSpecificationDetailService', () => {
 
     test('adds a rows per plot and row spacing unit for upsert', () => {
       target = new UnitSpecificationDetailService()
-      target.getUnitSpecificationDetailsByExperimentId = mockResolve([])
+      target.getUnitSpecificationDetailsByExperimentId = mockResolve([
+        { id: 1, ref_unit_spec_id: 1, value: '1' },
+        { id: 2, ref_unit_spec_id: 3, value: '8' },
+      ])
       target.manageAllUnitSpecificationDetails = mock()
       target.unitSpecificationService = {
         getAllUnitSpecifications: mockResolve([{ id: 1, name: 'Number of Rows' },
           { id: 2, name: 'Row Spacing' }, { id: 3, name: 'Row Length' }]),
       }
-      db.unitSpecificationDetail.syncUnitSpecificationDetails = mockResolve()
+      db.unitSpecificationDetail.batchRemove = mockResolve()
+      db.unitSpecificationDetail.batchCreate = mockResolve()
 
       const capacityRequestUnitSpecificationDetails = {
         'number of rows': 5,
@@ -368,15 +372,7 @@ describe('UnitSpecificationDetailService', () => {
       }
 
       return target.syncUnitSpecificationDetails(capacityRequestUnitSpecificationDetails, 1, testContext, testTx).then(() => {
-        expect(db.unitSpecificationDetail.syncUnitSpecificationDetails).toHaveBeenCalledWith(
-          1,
-          [{ refUnitSpecId: 1, value: 5 },
-            { refUnitSpecId: 3, uomId: 3, value: 6 },
-            { refUnitSpecId: 2, uomId: 2, value: 4 },
-          ],
-          testContext,
-          testTx,
-        )
+        expect(db.unitSpecificationDetail.batchCreate).toHaveBeenCalled()
       })
     })
   })

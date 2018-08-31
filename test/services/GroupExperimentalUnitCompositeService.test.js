@@ -934,6 +934,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
       AppError.internalServerError = mock()
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
       const expectedLambdaPayload = {
         experimentId: 5,
@@ -983,6 +984,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
         expect(data).toEqual({ test: 'message' })
+        expect(target.lambdaPerformanceService.savePerformanceStats).toBeCalled()
       })
     })
 
@@ -1001,6 +1003,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       AWSUtil.callLambda = mockReject()
       AppError.internalServerError = mock({ message: 'error result' })
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
       return target.getGroupsAndUnits(5, testTx).catch(() => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
@@ -1015,6 +1018,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(db.locationAssociation.findByExperimentId).toBeCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
+        expect(target.lambdaPerformanceService.savePerformanceStats).not.toBeCalled()
       })
     })
   })

@@ -17,6 +17,7 @@ import FactorType from '../repos/factorType'
 import Group from '../repos/group'
 import GroupType from '../repos/groupType'
 import GroupValue from '../repos/groupValue'
+import lambdaPerformance from '../repos/lambdaPerformance'
 import LocationAssociation from '../repos/locationAssociation'
 import Owner from '../repos/owner'
 import RefDataSource from '../repos/refDataSource'
@@ -51,6 +52,7 @@ const options = {
     obj.group = Group(obj, pgp)
     obj.groupType = GroupType(obj, pgp)
     obj.groupValue = GroupValue(obj, pgp)
+    obj.lambdaPerformance = lambdaPerformance(obj, pgp)
     obj.owner = Owner(obj, pgp)
     obj.refDataSource = RefDataSource(obj, pgp)
     obj.refDataSourceType = RefDataSourceType(obj, pgp)

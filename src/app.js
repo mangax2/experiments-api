@@ -30,9 +30,12 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
   const setErrorDecorator = require('./decorators/setErrorDecorator')
+  const lambdaPerformanceService = require('./services/LambdaPerformanceService')
   const app = express()
 
-  promMetrics(app)
+  const prometheusClient = promMetrics(app)
+  lambdaPerformanceService.setUpPrometheus(prometheusClient, 7)
+  lambdaPerformanceService.setUpPrometheus(prometheusClient, 30)
 
   setErrorDecorator().setErrorPrefix('EXP')
   require('./services/utility/AWSUtil').configure(serviceConfig.aws.accessKeyId, serviceConfig.aws.secretAccessKey)

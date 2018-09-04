@@ -8,6 +8,7 @@ import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
 import FactorService from './FactorService'
+import LambdaPerformanceService from './LambdaPerformanceService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -32,6 +33,7 @@ class GroupExperimentalUnitCompositeService {
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
+    this.lambdaPerformanceService = new LambdaPerformanceService()
   }
 
   @notifyChanges('update', 0)
@@ -484,7 +486,7 @@ class GroupExperimentalUnitCompositeService {
         delete level.factorName
       })
 
-      const body = inflector.transform({
+      const body = JSON.stringify(inflector.transform({
         experimentId,
         variables: trimmedVariables,
         designSpecs,
@@ -493,10 +495,13 @@ class GroupExperimentalUnitCompositeService {
         treatments: trimmedTreatments,
         units: trimmedUnits,
         setLocAssociations,
-      }, 'camelizeLower')
+      }, 'camelizeLower'))
 
-      return AWSUtil.callLambda(cfServices.aws.lambdaName, JSON.stringify(body))
-        .then(data => JSON.parse(data.Payload))
+      const startTime = new Date()
+      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+        .then(data => this.lambdaPerformanceService.savePerformanceStats(body.length,
+          data.Payload.length, new Date() - startTime)
+          .then(() => JSON.parse(data.Payload)))
         .catch((err) => {
           console.error(err)
           return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))

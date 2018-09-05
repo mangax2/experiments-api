@@ -438,6 +438,7 @@ class ExperimentsService {
     }
   }
 
+  @notifyChanges('update', 0)
   @setErrorCode('15P000')
   @Transactional('handleReviewStatus')
   handleReviewStatus = (experimentId, isTemplate, body, context, tx) => {

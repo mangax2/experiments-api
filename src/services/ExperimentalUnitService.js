@@ -3,7 +3,10 @@ import _ from 'lodash'
 import inflector from 'json-inflector'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
+import PingUtil from './utility/PingUtil'
+import HttpUtil from './utility/HttpUtil'
 import AppError from './utility/AppError'
+import cfServices from './utility/ServiceConfig'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
@@ -175,27 +178,43 @@ class ExperimentalUnitService {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }
-      return db.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id, tx)
-        .then((combinationElements) => {
-          const elementsByTreatmentId = _.groupBy(combinationElements, 'treatment_id')
-          const factorLevelIdsToTreatmentIdMapper = {}
-          _.forEach(elementsByTreatmentId, (ces, treatmentId) => {
-            const factorLevelIds = _.map(ces, 'factor_level_id')
-            const key = factorLevelIds.sort().join(',')
-            factorLevelIdsToTreatmentIdMapper[key] = Number(treatmentId)
-          })
-          const units = _.map(experimentalUnits, (unit) => {
-            const newUnit = _.pick(unit, 'rep', 'setEntryId', 'location')
-            const factorLevelKey = unit.factorLevelIds.sort().join(',')
-            newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
-            return newUnit
-          })
-          if (_.find(units, unit => !unit.treatmentId)) {
-            throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
-          }
-          return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
-            context, tx)
+      const randomizationPromise = PingUtil.getMonsantoHeader().then(header =>
+        HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header))
+        .then(data => data.body)
+        .catch((err) => {
+          logger.error(`[[${context.requestId}]] An error occurred while communicating with the randomization service`, err)
+          throw AppError.internalServerError('An error occurred while communicating with the randomization service.', undefined, getFullErrorCode('17F003'))
         })
+      return Promise.all([
+        db.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id, tx),
+        db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId(setInfo.experiment_id,
+          tx),
+        randomizationPromise,
+      ]).then(([combinationElements, selectedRandomizationStrategy, randomizationStrategies]) => {
+        const customStrategy = _.find(randomizationStrategies, rs => rs.name === 'Custom')
+        if (!customStrategy || !selectedRandomizationStrategy ||
+          selectedRandomizationStrategy.value !== customStrategy.id) {
+          throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom" randomization strategy.', undefined, getFullErrorCode('17F004'))
+        }
+        const elementsByTreatmentId = _.groupBy(combinationElements, 'treatment_id')
+        const factorLevelIdsToTreatmentIdMapper = {}
+        _.forEach(elementsByTreatmentId, (ces, treatmentId) => {
+          const factorLevelIds = _.map(ces, 'factor_level_id')
+          const key = factorLevelIds.sort().join(',')
+          factorLevelIdsToTreatmentIdMapper[key] = Number(treatmentId)
+        })
+        const units = _.map(experimentalUnits, (unit) => {
+          const newUnit = _.pick(unit, 'rep', 'setEntryId', 'location')
+          const factorLevelKey = unit.factorLevelIds.sort().join(',')
+          newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
+          return newUnit
+        })
+        if (_.find(units, unit => !unit.treatmentId)) {
+          throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
+        }
+        return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
+          context, tx)
+      })
     })
 
   @notifyChanges('update', 0)

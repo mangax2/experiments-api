@@ -297,7 +297,7 @@ router.post('/sets/:setId/reset', (req, res, next) => new GroupExperimentalUnitC
   .catch(err => next(err)))
 
 router.put('/sets/:setId/set-entries', (req, res, next) => new ExperimentalUnitService().updateUnitsForSet(req.params.setId, req.body, req.context)
-  .then(value => res.json(value))
+  .then(() => res.sendStatus(200))
   .catch(err => next(err)))
 
 router.get('/sets/:setId/treatment-details', (req, res, next) => new ExperimentalUnitService().getTreatmentDetailsBySetId(req.params.setId)

@@ -566,10 +566,10 @@ describe('ExperimentalUnitService', () => {
         expect(AppError.badRequest).not.toBeCalled()
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
         expect(target.mergeSetEntriesToUnits).toBeCalledWith(7, [
-          { setEntryId: 15, factorLevelIds: [11, 13], treatmentId: 23 },
-          { setEntryId: 17, factorLevelIds: [12], treatmentId: 24 },
-          { setEntryId: 19, factorLevelIds: [], treatmentId: 20 },
-        ], 1, testTx)
+          { setEntryId: 15, treatmentId: 23 },
+          { setEntryId: 17, treatmentId: 24 },
+          { setEntryId: 19, treatmentId: 20 },
+        ], 1, {}, testTx)
       })
     })
 
@@ -615,10 +615,10 @@ describe('ExperimentalUnitService', () => {
       target.saveToDb = mockResolve()
       db.unit.batchFindAllByExperimentIdAndLocation = mockResolve('unitsFromDb')
 
-      return target.mergeSetEntriesToUnits(7, 'unitsToSave', 5, testTx).then(() => {
+      return target.mergeSetEntriesToUnits(7, 'unitsToSave', 5, {}, testTx).then(() => {
         expect(db.unit.batchFindAllByExperimentIdAndLocation).toBeCalledWith(7, 5, testTx)
         expect(target.getDbActions).toBeCalledWith('unitsToSave', 'unitsFromDb', 5)
-        expect(target.saveToDb).toBeCalledWith('unitsToBeCreated', 'unitsToBeUpdated', 'unitsToBeDeleted', testTx)
+        expect(target.saveToDb).toBeCalledWith('unitsToBeCreated', 'unitsToBeUpdated', 'unitsToBeDeleted', {}, testTx)
       })
     })
   })
@@ -700,7 +700,7 @@ describe('ExperimentalUnitService', () => {
         batchRemove: jest.fn(() => Promise.resolve()),
       }
 
-      return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], {}).then(() => {
+      return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, {}).then(() => {
         expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, {})
         expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
         expect(db.unit.batchRemove).toBeCalledWith([6], {})

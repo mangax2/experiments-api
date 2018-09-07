@@ -10,7 +10,7 @@ import ExperimentsService from './ExperimentsService'
 import GroupService from './GroupService'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
-import { sendKafkaNotification } from '../decorators/notifyChanges'
+import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -184,30 +184,30 @@ class ExperimentalUnitService {
             const key = factorLevelIds.sort().join(',')
             factorLevelIdsToTreatmentIdMapper[key] = Number(treatmentId)
           })
-          _.forEach(experimentalUnits, (unit) => {
+          const units = _.map(experimentalUnits, (unit) => {
+            const newUnit = _.pick(unit, 'rep', 'setEntryId', 'location')
             const factorLevelKey = unit.factorLevelIds.sort().join(',')
-            unit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
+            newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
+            return newUnit
           })
-          if (_.find(experimentalUnits, unit => !unit.treatmentId)) {
+          if (_.find(units, unit => !unit.treatmentId)) {
             throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
           }
-          return this.mergeSetEntriesToUnits(setInfo.experiment_id, experimentalUnits,
-            setInfo.location, tx)
+          return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
+            context, tx)
         })
     })
 
+  @notifyChanges('update', 0)
   @setErrorCode('17G000')
   @Transactional('mergeSetEntriesToUnits')
-  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, tx) =>
+  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, context, tx) =>
     db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
       .then((unitsFromDB) => {
         const {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
         } = this.getDbActions(unitsToSave, unitsFromDB, location)
-        return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx)
-      })
-      .then(() => {
-        sendKafkaNotification('update', experimentId)
+        return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
       })
 
   @setErrorCode('17H000')
@@ -236,8 +236,7 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('17I000')
-  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx) => {
-    const context = { userId: 'REP_PACKING' }
+  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
     const promises = []
     if (unitsToBeCreated.length > 0) {
       promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))

@@ -71,7 +71,7 @@ class ManageRepsAndUnitsListener {
         const { location } = assoc
         const experimentId = assoc.experiment_id
         return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
-          location, tx)
+          location, { userId: 'REP_PACKING' }, tx)
           .then(() => {
             ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
           })

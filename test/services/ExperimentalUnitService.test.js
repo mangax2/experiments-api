@@ -523,4 +523,203 @@ describe('ExperimentalUnitService', () => {
       expect(AppError.badRequest).not.toHaveBeenCalled()
     })
   })
+
+  describe('updateUnitsForSet', () => {
+    test('returns an error if the set is not found', () => {
+      target = new ExperimentalUnitService()
+      db.locationAssociation.findBySetId = mockResolve()
+      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve()
+      const testError = { message: 'error' }
+      AppError.notFound = mock(testError)
+
+      return target.updateUnitsForSet(5, [], {}, testTx).catch((err) => {
+        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(AppError.notFound).toBeCalledWith('No experiment found for Set Id 5', undefined, '17F001')
+        expect(err).toBe(testError)
+        expect(db.combinationElement.findAllByExperimentIdIncludingControls).not.toBeCalled()
+      })
+    })
+
+    test('saves units to database if they all have treatments', () => {
+      const entries = [
+        { setEntryId: 15, factorLevelIds: [13, 11] },
+        { setEntryId: 17, factorLevelIds: [12] },
+        { setEntryId: 19, factorLevelIds: [] },
+      ]
+      target = new ExperimentalUnitService()
+      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1 })
+      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+        { factor_level_id: 13, treatment_id: 23 },
+        { factor_level_id: 11, treatment_id: 23 },
+        { factor_level_id: 12, treatment_id: 24 },
+        { factor_level_id: 12, treatment_id: 25 },
+        { factor_level_id: 13, treatment_id: 25 },
+        { treatment_id: 20 },
+      ])
+      AppError.notFound = mock()
+      AppError.badRequest = mock()
+      target.mergeSetEntriesToUnits = mockResolve()
+
+      return target.updateUnitsForSet(5, entries, {}, testTx).then(() => {
+        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(AppError.notFound).not.toBeCalled()
+        expect(AppError.badRequest).not.toBeCalled()
+        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
+        expect(target.mergeSetEntriesToUnits).toBeCalledWith(7, [
+          { setEntryId: 15, treatmentId: 23 },
+          { setEntryId: 17, treatmentId: 24 },
+          { setEntryId: 19, treatmentId: 20 },
+        ], 1, {}, testTx)
+      })
+    })
+
+    test('returns an error if a matching treatment is not found', () => {
+      const entries = [
+        { setEntryId: 15, factorLevelIds: [13, 11] },
+        { setEntryId: 17, factorLevelIds: [12] },
+        { setEntryId: 19, factorLevelIds: [] },
+      ]
+      const testError = { message: 'error' }
+      target = new ExperimentalUnitService()
+      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1 })
+      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+        { factor_level_id: 13, treatment_id: 23 },
+        { factor_level_id: 11, treatment_id: 23 },
+        { factor_level_id: 12, treatment_id: 24 },
+        { factor_level_id: 12, treatment_id: 25 },
+        { factor_level_id: 13, treatment_id: 25 },
+      ])
+      AppError.notFound = mock()
+      AppError.badRequest = mock(testError)
+      target.mergeSetEntriesToUnits = mockResolve()
+
+      return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
+        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(AppError.notFound).not.toBeCalled()
+        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
+        expect(target.mergeSetEntriesToUnits).not.toBeCalled()
+        expect(AppError.badRequest).toBeCalledWith('One or more entries had an invalid set of factor level ids.', undefined, '17F002')
+        expect(err).toBe(testError)
+      })
+    })
+  })
+
+  describe('mergeSetEntriesToUnits', () => {
+    test('correctly handles the flow', () => {
+      target = new ExperimentalUnitService()
+      target.getDbActions = mock({
+        unitsToBeCreated: 'unitsToBeCreated',
+        unitsToBeDeleted: 'unitsToBeDeleted',
+        unitsToBeUpdated: 'unitsToBeUpdated',
+      })
+      target.saveToDb = mockResolve()
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve('unitsFromDb')
+
+      return target.mergeSetEntriesToUnits(7, 'unitsToSave', 5, {}, testTx).then(() => {
+        expect(db.unit.batchFindAllByExperimentIdAndLocation).toBeCalledWith(7, 5, testTx)
+        expect(target.getDbActions).toBeCalledWith('unitsToSave', 'unitsFromDb', 5)
+        expect(target.saveToDb).toBeCalledWith('unitsToBeCreated', 'unitsToBeUpdated', 'unitsToBeDeleted', {}, testTx)
+      })
+    })
+  })
+
+  describe('getDbActions', () => {
+    test('correctly categorizes units', () => {
+      const unitsFromMessage = [{
+        rep: 1,
+        setEntryId: 234,
+        treatmentId: 7,
+      }, {
+        rep: 1,
+        setEntryId: 235,
+        treatmentId: 8,
+      }, {
+        rep: 1,
+        setEntryId: 236,
+        treatmentId: 9,
+      }, {
+        rep: 2,
+        setEntryId: 237,
+        treatmentId: 7,
+      }]
+      const unitsFromDb = [{
+        id: 55,
+        rep: 1,
+        setEntryId: 233,
+        treatmentId: 8,
+        location: 1,
+      }, {
+        id: 66,
+        rep: 1,
+        setEntryId: 234,
+        treatmentId: 7,
+        location: 1,
+      }, {
+        id: 77,
+        rep: 1,
+        setEntryId: 235,
+        treatmentId: 9,
+        location: 1,
+      }]
+
+      target = new ExperimentalUnitService()
+
+      const result = target.getDbActions(unitsFromMessage, unitsFromDb, 1)
+
+      expect(result).toEqual({
+        unitsToBeCreated: [{
+          rep: 1,
+          setEntryId: 236,
+          treatmentId: 9,
+          location: 1,
+        }, {
+          rep: 2,
+          setEntryId: 237,
+          treatmentId: 7,
+          location: 1,
+        }],
+        unitsToBeUpdated: [{
+          id: 77,
+          rep: 1,
+          setEntryId: 235,
+          treatmentId: 8,
+          location: 1,
+        }],
+        unitsToBeDeleted: [55],
+      })
+    })
+  })
+
+  describe('saveToDb', () => {
+    test('calls everything correctly when values are present', () => {
+      target = new ExperimentalUnitService()
+      const context = { userId: 'REP_PACKING' }
+      db.unit = {
+        batchCreate: jest.fn(() => Promise.resolve()),
+        batchUpdate: jest.fn(() => Promise.resolve()),
+        batchRemove: jest.fn(() => Promise.resolve()),
+      }
+
+      return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, {}).then(() => {
+        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, {})
+        expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
+        expect(db.unit.batchRemove).toBeCalledWith([6], {})
+      })
+    })
+
+    test('calls everything correctly when values are not present', () => {
+      target = new ExperimentalUnitService()
+      db.unit = {
+        batchCreate: jest.fn(() => Promise.resolve()),
+        batchUpdate: jest.fn(() => Promise.resolve()),
+        batchRemove: jest.fn(() => Promise.resolve()),
+      }
+
+      return target.saveToDb(9, [], [], [], [], {}).then(() => {
+        expect(db.unit.batchCreate).not.toBeCalled()
+        expect(db.unit.batchUpdate).not.toBeCalled()
+        expect(db.unit.batchRemove).not.toBeCalled()
+      })
+    })
+  })
 })

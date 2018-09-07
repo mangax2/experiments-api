@@ -1,17 +1,18 @@
 import Kafka from 'no-kafka'
 import log4js from 'log4js'
 import _ from 'lodash'
-import inflector from 'json-inflector'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 import db from '../../db/DbManager'
 import Transactional from '../../decorators/transactional'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
-import { sendKafkaNotification } from '../../decorators/notifyChanges'
+import ExperimentalUnitService from '../ExperimentalUnitService'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
+  experimentalUnitService = new ExperimentalUnitService()
+
   listen() {
     const params = {
       client_id: VaultUtil.clientId,
@@ -69,14 +70,9 @@ class ManageRepsAndUnitsListener {
         }
         const { location } = assoc
         const experimentId = assoc.experiment_id
-        return db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
-          .then((unitsFromDB) => {
-            const {
-              unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
-            } = this.getDbActions(unitsFromMessage, unitsFromDB, location)
-            return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx)
-          }).then(() => {
-            sendKafkaNotification('update', experimentId)
+        return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
+          location, { userId: 'REP_PACKING' }, tx)
+          .then(() => {
             ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
           })
       }).catch((err) => {
@@ -87,48 +83,6 @@ class ManageRepsAndUnitsListener {
     ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
 
     return Promise.reject(AppError.badRequest('The rep pack message was in an invalid format.'))
-  }
-
-  getDbActions = (unitsFromMessage, unitsFromDB, location) => {
-    const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
-    _.forEach(unitsFromMessage, (unitM) => {
-      unitM.location = location
-    })
-    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'location'))
-    const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
-    const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
-    const unitsThatAlreadyExist = _.difference(unitsFromMessage, unitsToBeCreated)
-    const unitsThatNeedUpdating = _.differenceWith(unitsThatAlreadyExist,
-      unitsFromDbSlim, _.isEqual)
-    const unitsToBeUpdated = _.map(unitsThatNeedUpdating, (unitToBeUpdated) => {
-      unitToBeUpdated.id = _.find(unitsFromDbCamelizeLower, unitFromDb =>
-        unitFromDb.setEntryId === unitToBeUpdated.setEntryId).id
-      return unitToBeUpdated
-    })
-
-    return {
-      unitsToBeCreated,
-      unitsToBeUpdated,
-      unitsToBeDeleted,
-    }
-  }
-
-  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, tx) => {
-    const context = { userId: 'REP_PACKING' }
-    const promises = []
-    if (unitsToBeCreated.length > 0) {
-      promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))
-    }
-    if (unitsToBeUpdated.length > 0) {
-      promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
-    }
-    return Promise.all(promises)
-      .then(() => {
-        if (unitsToBeDeleted.length > 0) {
-          return db.unit.batchRemove(unitsToBeDeleted, tx)
-        }
-        return Promise.resolve()
-      })
   }
 
   static sendResponseMessage = (setId, isSuccess) => {

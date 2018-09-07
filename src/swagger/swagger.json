@@ -2757,6 +2757,64 @@
         }
       }
     },
+    "/sets/{setId}/set-entries": {
+      "put": {
+        "summary": "Specifies the experimental units to be used in a set",
+        "description": "Specifies the experimental units to be used in a set.",
+        "operationId": "setEntriesForSetPut",
+        "tags": ["Set Entry"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "setEntries",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetEntryPUTBody"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/sets/{setId}/treatment-details": {
       "get": {
         "summary": "Gets all levels for each treatment in a set",
@@ -5685,6 +5743,26 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "SetEntryPUTBody": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "factorLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "rep": {
+            "type": "integer"
+          },
+          "setEntryId": {
+            "type": "integer"
+          }
         }
       }
     },

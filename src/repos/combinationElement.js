@@ -100,6 +100,9 @@ class combinationElementRepo {
     const query = `WITH d(treatment_id, factor_level_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['treatment_id', 'factor_level_id', 'id'])}) select ce.treatment_id, ce.factor_level_id from public.combination_element ce inner join d on ce.treatment_id = CAST(d.treatment_id as integer) and ce.factor_level_id =  CAST(d.factor_level_id as integer) and (d.id is null or ce.id != CAST(d.id as integer))`
     return tx.any(query)
   }
+
+  @setErrorCode('50B000')
+  findAllByExperimentIdIncludingControls = (experimentId, tx = this.rep) => tx.any('SELECT ce.id, ce.factor_level_id, t.id AS treatment_id FROM combination_element ce RIGHT OUTER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId)
 }
 
 module.exports = (rep, pgp) => new combinationElementRepo(rep, pgp)

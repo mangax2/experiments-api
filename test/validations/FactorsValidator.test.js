@@ -28,12 +28,6 @@ describe('FactorsValidator', () => {
         { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
-        {
-          paramName: 'Factor',
-          type: 'businessKey',
-          keys: ['experimentId', 'name'],
-          entity: {},
-        },
       ]
 
       expect(FactorsValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -69,12 +63,6 @@ describe('FactorsValidator', () => {
         { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
-        {
-          paramName: 'Factor',
-          type: 'businessKey',
-          keys: ['experimentId', 'name'],
-          entity: {},
-        },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -96,12 +84,6 @@ describe('FactorsValidator', () => {
         { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
-        {
-          paramName: 'Factor',
-          type: 'businessKey',
-          keys: ['experimentId', 'name'],
-          entity: {},
-        },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]
@@ -157,6 +139,14 @@ describe('FactorsValidator', () => {
 
       return target.preValidate([]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Factor request object needs to be an array', undefined, '392001')
+      })
+    })
+
+    test('rejects when there are duplicate factor names', () => {
+      AppError.badRequest = mock()
+
+      return target.preValidate([{ name: 'A' }, { name: 'A' }]).then(null, () => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Factor names must be unique', undefined, '392002')
       })
     })
   })

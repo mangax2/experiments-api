@@ -25,12 +25,6 @@ class FactorsValidator extends SchemaValidator {
       { paramName: 'refDataSourceId', type: 'refData', entity: db.refDataSource },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
-      {
-        paramName: 'Factor',
-        type: 'businessKey',
-        keys: ['experimentId', 'name'],
-        entity: db.factor,
-      },
     ]
   }
 
@@ -66,6 +60,13 @@ class FactorsValidator extends SchemaValidator {
     if (!_.isArray(factorObj) || factorObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('Factor request object needs to be an array', undefined, getFullErrorCode('392001')))
+    }
+
+    const factorNames = _.map(factorObj, 'name')
+
+    if (_.uniq(factorNames).length !== factorNames.length) {
+      return Promise.reject(
+        AppError.badRequest('Factor names must be unique', undefined, getFullErrorCode('392002')))
     }
     return Promise.resolve()
   }

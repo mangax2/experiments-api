@@ -10,7 +10,7 @@ module.exports = (cfDeploy) ->
     ENV: process.env.ENV
     CLOUDFRONT_PK: process.env.CLOUDFRONT_PK
   route: 'experiments-api'
-  startupCommand: 'npm start'
+  startupCommand: 'node sql-migration.js && npm start'
   services: [
     'expSys',
     "#{velocityHome}",

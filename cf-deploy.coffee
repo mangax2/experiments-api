@@ -9,6 +9,8 @@ module.exports = (cfDeploy) ->
   environment:
     ENV: process.env.ENV
     CLOUDFRONT_PK: process.env.CLOUDFRONT_PK
+    vaultRoleId: process.env.vaultRoleId
+    vaultSecretId: process.env.vaultSecretId
   route: 'experiments-api'
   startupCommand: 'node sql-migration.js && npm start'
   services: [

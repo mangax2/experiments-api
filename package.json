@@ -4,7 +4,7 @@
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {
-    "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files && babel ./akana --out-dir ./build --copy-files && babel ./src/graphql --out-dir ./build/graphql --copy-files",
+    "build-server": "babel -d ./build src && babel ./src/swagger --out-dir ./build/swagger --copy-files && babel ./akana --out-dir ./build --copy-files && babel ./src/graphql --out-dir ./build/graphql --copy-files && babel ./migration-scripts --out-dir ./build/migration-scripts --copy-files && babel ./sqlMigration.js --out-dir ./build --copy-files",
     "clean": "rm -rf build && mkdir build && rm -rf doc",
     "debug": "cross-env NODE_ENV=development nodemon --debug ./src/app.js",
     "dev": "cross-env NODE_ENV=development nodemon ./src/app.js",

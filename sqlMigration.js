@@ -21,7 +21,7 @@ body.role_id = process.env.vaultRoleId
 body.secret_id = process.env.vaultSecretId
 
 if (process.env.ENV === 'np' || process.env.ENV === 'prod') {
-  return HttpUtil.post('https://vault.agro.services/v1/auth/approle/login', [{
+  HttpUtil.post('https://vault.agro.services/v1/auth/approle/login', [{
     headerName: 'Accept',
     headerValue: 'application/json',
   }], JSON.stringify(body))
@@ -68,6 +68,6 @@ if (process.env.ENV === 'np' || process.env.ENV === 'prod') {
       console.error(error)
       process.exit(-1)
     })
+} else {
+  process.exit(0)
 }
-
-return process.exit(0)

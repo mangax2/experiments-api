@@ -193,7 +193,7 @@ class ExperimentalUnitService {
       ]).then(([combinationElements, selectedRandomizationStrategy, randomizationStrategies]) => {
         const customStrategy = _.find(randomizationStrategies, rs => rs.name === 'Custom')
         if (!customStrategy || !selectedRandomizationStrategy ||
-          selectedRandomizationStrategy.value !== customStrategy.id) {
+          selectedRandomizationStrategy.value !== customStrategy.id.toString()) {
           throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom" randomization strategy.', undefined, getFullErrorCode('17F004'))
         }
         const elementsByTreatmentId = _.groupBy(combinationElements, 'treatment_id')

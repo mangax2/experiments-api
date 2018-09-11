@@ -12,7 +12,7 @@ module.exports = (cfDeploy) ->
     vaultRoleId: process.env.vaultRoleId
     vaultSecretId: process.env.vaultSecretId
   route: 'experiments-api'
-  startupCommand: 'node sql-migration.js && npm start'
+  startupCommand: 'node sqlMigration.js && npm start'
   services: [
     'expSys',
     "#{velocityHome}",

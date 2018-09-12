@@ -10,7 +10,6 @@ import cfServices from './utility/ServiceConfig'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
-import GroupService from './GroupService'
 import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import { notifyChanges } from '../decorators/notifyChanges'
@@ -25,7 +24,6 @@ class ExperimentalUnitService {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
-    this.groupService = new GroupService()
   }
 
   @setErrorCode('171000')
@@ -63,11 +61,6 @@ class ExperimentalUnitService {
     return this.treatmentService.getTreatmentById(id, context, tx)
       .then(() => db.unit.findAllByTreatmentId(id, tx))
   }
-
-  @setErrorCode('175000')
-  @Transactional('batchGetExperimentalUnitByGroupIdsNoValidate')
-  batchGetExperimentalUnitsByGroupIdsNoValidate = (ids, tx) =>
-    db.unit.batchFindAllByGroupIds(ids, tx)
 
   @setErrorCode('176000')
   @Transactional('getExperimentalUnitById')

@@ -306,132 +306,100 @@ class GroupExperimentalUnitCompositeService {
     // get group by setId
     this.verifySetAndGetDetails(setId, context, tx).then((results) => {
       const {
-        experimentId, setGroup, numberOfReps, repGroupTypeId,
+        experimentId, location, numberOfReps,
       } = results
       return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
-        const newGroupsAndUnits = this.createRcbGroupStructure(setId, setGroup, numberOfReps,
-          treatments, repGroupTypeId)
-
-        return this.getGroupTree(experimentId, false, context, tx).then((experimentGroups) => {
-          const oldGroupsAndUnits =
-            [_.find(experimentGroups, group => group.set_id === Number(setId))]
-          const entries = []
-          while (entries.length < numberOfReps * treatments.length) {
-            entries.push({})
-          }
-
-          return this.persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits,
-            experimentId, context, tx)
-            .then(() => PingUtil.getMonsantoHeader()).then((header) => {
-              header.push({ headerName: 'oauth_resourceownerinfo', headerValue: `username=${context.userId},user_id=${context.userId}` })
-              return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
-                .then((originalSet) => {
-                  const originals = []
-                  _.forEach(originalSet.body.entries, (entry) => {
-                    originals.push({ entryId: entry.entryId, deleted: true })
-                  })
-
-                  const originalsDeletePromise = originals.length > 0
-                    ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
-                    : Promise.resolve()
-
-                  return originalsDeletePromise
-                    .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
-                      entries,
-                      layout: [],
-                    }))
+        const units = this.createUnits(location, treatments, numberOfReps)
+        return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
+          .then(() => PingUtil.getMonsantoHeader()).then((header) => {
+            header.push({
+              headerName: 'oauth_resourceownerinfo',
+              headerValue: `username=${context.userId},user_id=${context.userId}`,
+            })
+            return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+              .then((originalSet) => {
+                const originals = []
+                _.forEach(originalSet.body.entries, (entry) => {
+                  originals.push({ entryId: entry.entryId, deleted: true })
                 })
-            })
-            .catch((err) => {
-              logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
-              throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
-            })
-            .then((result) => {
-              const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
+
+                const originalsDeletePromise = originals.length > 0
+                  ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
+                  : Promise.resolve()
+
+                const entries = []
+                while (entries.length < numberOfReps * treatments.length) {
+                  entries.push({})
+                }
+                return originalsDeletePromise
+                  .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
+                    entries,
+                    layout: [],
+                  }))
+              })
+          })
+          .catch((err) => {
+            logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+            throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
+          })
+          .then(result => db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
+            .then((unitsInDB) => {
               const setEntryIds = _.map(result.body.entries, 'entryId')
-              _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
-              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
-                context, tx).then(sendKafkaNotification('update', experimentId))
-            })
-        })
+              _.forEach(units, (unit, index) => {
+                unit.setEntryId = setEntryIds[index]
+                const unitFromDB = _.find(unitsInDB, u => this.compareUnitWithUnitFromDB(u, unit))
+                if (unitFromDB) {
+                  unit.id = unitFromDB.id
+                }
+              })
+              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
+                units, context, tx).then(sendKafkaNotification('update', experimentId))
+            }))
       })
     })
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context, tx) =>
-    db.group.findGroupBySetId(setId, tx).then((setGroup) => {
-      if (!setGroup) {
+    db.locationAssociation.findBySetId(setId, tx).then((locAssociation) => {
+      if (!locAssociation) {
         logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
       }
-      const experimentId = setGroup.experiment_id
-      const factorsPromise = db.factor.findByExperimentId(experimentId, tx)
+      const experimentId = locAssociation.experiment_id
       const designSpecPromise = db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)
       const refDesignSpecPromise = db.refDesignSpecification.all()
-      const groupTypePromise = db.groupType.all()
 
-      return Promise.all([factorsPromise, designSpecPromise, refDesignSpecPromise,
-        groupTypePromise])
-        .then(([factors, designSpecs, refDesignSpecs, groupTypes]) => {
+      return Promise.all([designSpecPromise, refDesignSpecPromise])
+        .then(([designSpecs, refDesignSpecs]) => {
           const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
           const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
           const repDesignSpecDetail =
             _.find(designSpecs, sd => sd.ref_design_spec_id === minRepRefDesignSpec.id)
               || _.find(designSpecs, sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
 
-          if (_.find(factors, factor => factor.tier)) {
-            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) has tiering set up and cannot be reset.`)
-            throw AppError.badRequest(`The specified set (id ${setId}) has tiering set up and cannot be reset.`,
-              undefined, getFullErrorCode('1FK002'))
-          }
           if (!repDesignSpecDetail) {
             logger.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`,
-              undefined, getFullErrorCode('1FK003'))
+              undefined, getFullErrorCode('1FK002'))
           }
 
-          const repGroupType = _.find(groupTypes, groupType => groupType.type === 'Rep')
           const numberOfReps = Number(repDesignSpecDetail.value)
 
           return {
             experimentId,
-            setGroup,
+            location: locAssociation.location,
             numberOfReps,
-            repGroupTypeId: repGroupType.id,
           }
         })
     })
 
   @setErrorCode('1FN000')
-  createRcbGroupStructure = (setId, setGroup, numberOfReps, treatments, repRefGroupTypeId) => {
-    const newGroupsAndUnits = [{
-      refGroupTypeId: setGroup.ref_group_type_id,
-      groupValues: [{
-        name: 'locationNumber',
-        value: setGroup.location_number.toString(),
-      }],
-      setId,
-      childGroups: [],
-    }]
-    let currentRepNumber = 0
-    const createUnit = treatment => ({
+  createUnits = (location, treatments, numberOfReps) => _.flatMap(_.range(numberOfReps), repl =>
+    _.map(treatments, treatment => ({
+      location,
+      rep: repl + 1,
       treatmentId: treatment.id,
-      rep: currentRepNumber,
-    })
-    while (currentRepNumber < numberOfReps) {
-      currentRepNumber += 1
-      newGroupsAndUnits[0].childGroups.push({
-        refGroupTypeId: repRefGroupTypeId,
-        groupValues: [{
-          name: 'repNumber',
-          value: currentRepNumber.toString(),
-        }],
-        units: _.map(treatments, createUnit),
-      })
-    }
-
-    return newGroupsAndUnits
-  }
+    })))
 
   @setErrorCode('1FO000')
   @Transactional('getGroupsAndUnits')
@@ -553,6 +521,71 @@ class GroupExperimentalUnitCompositeService {
 
     return _.concat(children, _.flatMap(children, c => this.getAllChildGroups(groups, c.id)))
   }
+
+  @notifyChanges('update', 0)
+  @setErrorCode('1FV000')
+  @Transactional('saveDesignSpecsAndUnitDetails')
+  saveDesignSpecsAndUnits = (experimentId, designSpecsAndUnits, context, isTemplate, tx) => {
+    if (designSpecsAndUnits) {
+      const { designSpecifications, units } = designSpecsAndUnits
+      return Promise.all([
+        this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
+        this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
+          designSpecifications, experimentId, context, isTemplate, tx,
+        ),
+      ]).then(() => AppUtil.createCompositePostResponse())
+    }
+
+    throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
+  }
+
+  @setErrorCode('1FW000')
+  @Transactional('saveUnitsByExperimentId')
+  saveUnitsByExperimentId = (experimentId, units, isTemplate, context, tx) =>
+    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => this.compareWithExistingUnitsByExperiment(experimentId, units, tx)
+        .then(comparisonResults =>
+          this.saveComparedUnits(experimentId, comparisonResults, context, tx)),
+      )
+
+  @setErrorCode('1FX000')
+  saveUnitsBySetId = (setId, experimentId, units, context, tx) =>
+    this.compareWithExistingUnitsBySetId(setId, units, tx)
+      .then(comparisonResults =>
+        this.saveComparedUnits(experimentId, comparisonResults, context, tx))
+
+  @setErrorCode('1FY000')
+  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => Promise.all([
+    this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
+    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx)])
+
+  @setErrorCode('1FZ000')
+  compareWithExistingUnitsByExperiment = (experimentId, newUnits, tx) =>
+    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)
+      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
+
+  @setErrorCode('1Fa000')
+  compareWithExistingUnitsBySetId = (setId, newUnits, tx) =>
+    db.unit.batchFindAllBySetId(setId, tx)
+      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
+
+  @setErrorCode('1Fa000')
+  compareWithExistingUnits = (existingUnits, newUnits) => {
+    const adds = _.differenceWith(newUnits, existingUnits, (n, e) =>
+      this.compareUnitWithUnitFromDB(e, n))
+    const unitsToDeletesFromDB = _.differenceWith(existingUnits, newUnits, (n, e) =>
+      this.compareUnitWithUnitFromDB(n, e))
+    const deletes = _.map(unitsToDeletesFromDB, u => inflector.transform(u, 'camelizeLower'))
+    return {
+      adds,
+      deletes,
+    }
+  }
+
+  @setErrorCode('1Fb000')
+  compareUnitWithUnitFromDB = (unitFromDB, unit) =>
+    unitFromDB.treatment_id === unit.treatmentId &&
+    unitFromDB.rep === unit.rep && unitFromDB.location === unit.location
 }
 
 module.exports = GroupExperimentalUnitCompositeService

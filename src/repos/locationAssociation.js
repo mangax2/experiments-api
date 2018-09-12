@@ -95,6 +95,10 @@ class locationAssociationRepo {
 
     return tx.batch(promises)
   }
+
+  @setErrorCode('5P7000')
+  removeBySetId = (setId, tx = this.rep) =>
+    tx.none('DELETE FROM location_association WHERE set_idd = $1', setId)
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

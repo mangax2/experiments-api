@@ -104,16 +104,6 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('batchGetExperimentalUnitsByGroupIdsNoValidate', () => {
-    test('calls batchFindAllByGroupIds', () => {
-      db.unit.batchFindAllByGroupIds = mockResolve()
-
-      return target.batchGetExperimentalUnitsByGroupIdsNoValidate([1], testTx).then(() => {
-        expect(db.unit.batchFindAllByGroupIds).toHaveBeenCalledWith([1], testTx)
-      })
-    })
-  })
-
   describe('getExperimentalUnitInfoBySetId', () => {
     let originalMap
 

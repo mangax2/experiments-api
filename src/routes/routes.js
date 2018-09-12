@@ -244,6 +244,11 @@ router.post('/experiments/:id/composites/design-group-experimental-units', (req,
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/experiments/:id/composites/design-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, false)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -260,6 +265,10 @@ router.get('/experiments/:id/envision-datasets-data/', (req, res, next) => new E
   .catch(err => next(err)))
 
 router.get('/experiments/:id/envision-datasets-schema/', (req, res, next) => new EnvisionDatasetsService().getSchemaForEnvisionDatasets(req.params.id, req.context)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+
+router.get('/experiments/:id/location-association/', (req, res, next) => new LocationAssociationService().getLocationAssociationByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
@@ -396,6 +405,10 @@ router.post('/templates/:id/design-specification-details', (req, res, next) => n
   .catch(err => next(err)))
 
 router.post('/templates/:id/composites/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context, true)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.post('/templates/:id/composites/design-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

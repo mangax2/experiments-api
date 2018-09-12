@@ -55,6 +55,11 @@ class LocationAssociationService {
       return db.locationAssociation.batchRemoveByExperimentIdAndLocation(assocations, tx).then(() =>
         db.locationAssociation.batchCreate(assocations, context, tx))
     })
+
+  @setErrorCode('1Y2000')
+  @Transactional('getLocationAssociationByExperimentId')
+  getLocationAssociationByExperimentId = (experimentId, tx) =>
+    db.locationAssociation.findByExperimentId(experimentId, tx)
 }
 
 module.exports = LocationAssociationService

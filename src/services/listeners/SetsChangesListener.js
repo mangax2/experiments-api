@@ -76,7 +76,7 @@ class SetsChangesListener {
 
   @Transactional('ManageSetsChange')
   clearSet = (setId, tx) => db.unit.batchClearEntryIds(setId, tx)
-    .then(() => db.group.clearSetId(setId, tx))
+    .then(() => db.locationAssociation.removeBySetId(setId, tx))
 }
 
 const setsChangesListener = new SetsChangesListener()

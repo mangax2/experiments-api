@@ -133,7 +133,6 @@ function createLoaders(tx) {
     factorLevelAssociation: factorLevelAssociationByIdLoader,
     group: groupByIdLoader,
     groupsByExperimentIds: groupByExperimentIdLoader,
-    groupValue: createDataLoader(db.groupValue.batchFindAllByGroupId),
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
     owner: ownerByIdLoader,
     ownersByExperimentIds: ownerByExperimentIdLoader,

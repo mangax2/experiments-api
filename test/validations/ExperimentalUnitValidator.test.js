@@ -19,10 +19,11 @@ describe('ExperimentalUnitValidator', () => {
         {
           paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true,
         },
-        { paramName: 'groupId', type: 'refData', entity: db.group },
+        { paramName: 'groupId', type: 'numeric' },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'location', type: 'numeric' },
       ]
 
       expect(ExperimentalUnitValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -67,10 +68,11 @@ describe('ExperimentalUnitValidator', () => {
         {
           paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true,
         },
-        { paramName: 'groupId', type: 'refData', entity: db.group },
+        { paramName: 'groupId', type: 'numeric' },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'location', type: 'numeric' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -84,10 +86,11 @@ describe('ExperimentalUnitValidator', () => {
         {
           paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true,
         },
-        { paramName: 'groupId', type: 'refData', entity: db.group },
+        { paramName: 'groupId', type: 'numeric' },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
+        { paramName: 'location', type: 'numeric' },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

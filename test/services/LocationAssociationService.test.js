@@ -84,4 +84,13 @@ describe('GroupService', () => {
       })
     })
   })
+
+  describe('getLocationAssociationByExperimentId', () => {
+    test('locationAssociation repo should be called', () => {
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      return target.getLocationAssociationByExperimentId(3, testTx).then(() => {
+        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(3, testTx)
+      })
+    })
+  })
 })

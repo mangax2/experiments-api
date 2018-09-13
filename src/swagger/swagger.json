@@ -1397,7 +1397,10 @@
           "200": {
             "description": "Location associations",
             "schema": {
-              "$ref": "#/definitions/LocationAssociation"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LocationAssociation"
+              }
             }
           },
           "400": {
@@ -6479,9 +6482,20 @@
       }
     },
     "LocationAssociation": {
-      "type": "array",
-      "items": {
-        "type": "object"
+      "type": "object",
+      "properties": {
+        "experiment_id": {
+          "type": "integer",
+          "description": "Experiment Id"
+        },
+        "location": {
+          "type": "integer",
+          "description": "The location the Set is associated to"
+        },
+        "set_id": {
+          "type": "integer",
+          "description": "The Set Id that is associated to the location in the Experiment"
+        }
       }
     }
   }

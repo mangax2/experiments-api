@@ -200,7 +200,7 @@ router.get('/group-values/:id', (req, res, next) => new GroupValueService().getG
   .then(groupValue => res.json(groupValue))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/groups', (req, res, next) => new GroupService().getGroupsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/groups', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupsByExperimentId(req.params.id)
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
@@ -382,7 +382,7 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/templates/:id/groups', (req, res, next) => new GroupService().getGroupsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/groups', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupsByExperimentId(req.params.id)
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 

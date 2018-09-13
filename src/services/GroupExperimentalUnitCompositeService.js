@@ -311,51 +311,51 @@ class GroupExperimentalUnitCompositeService {
       return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
         const units = this.createUnits(location, treatments, numberOfReps)
         return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
-          .then(() => PingUtil.getMonsantoHeader()).then((header) => {
-            header.push({
-              headerName: 'oauth_resourceownerinfo',
-              headerValue: `username=${context.userId},user_id=${context.userId}`,
-            })
-            return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
-              .then((originalSet) => {
-                const originals = []
-                _.forEach(originalSet.body.entries, (entry) => {
-                  originals.push({ entryId: entry.entryId, deleted: true })
-                })
-
-                const originalsDeletePromise = originals.length > 0
-                  ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
-                  : Promise.resolve()
-
-                const entries = []
-                while (entries.length < numberOfReps * treatments.length) {
-                  entries.push({})
-                }
-                return originalsDeletePromise
-                  .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
-                    entries,
-                    layout: [],
-                  }))
-              })
-          })
-          .catch((err) => {
-            logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
-            throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
-          })
+          .then(() => this.getSetEntriesFromSet(setId, numberOfReps, treatments.length, context))
           .then(result => db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
             .then((unitsInDB) => {
               const setEntryIds = _.map(result.body.entries, 'entryId')
-              _.forEach(units, (unit, index) => {
+              _.forEach(unitsInDB, (unit, index) => {
                 unit.setEntryId = setEntryIds[index]
-                const unitFromDB = _.find(unitsInDB, u => this.compareUnitWithUnitFromDB(u, unit))
-                if (unitFromDB) {
-                  unit.id = unitFromDB.id
-                }
               })
+              const unitsFromDBCamlized = _.map(unitsInDB, u => inflector.transform(u, 'camelizeLower'))
               return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
-                units, context, tx).then(sendKafkaNotification('update', experimentId))
+                unitsFromDBCamlized, context, tx).then(sendKafkaNotification('update', experimentId))
             }))
       })
+    })
+
+  @setErrorCode('1Fd000')
+  getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
+    PingUtil.getMonsantoHeader().then((header) => {
+      header.push({
+        headerName: 'oauth_resourceownerinfo',
+        headerValue: `username=${context.userId},user_id=${context.userId}`,
+      })
+      return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+        .then((originalSet) => {
+          const originals = []
+          _.forEach(originalSet.body.entries, (entry) => {
+            originals.push({ entryId: entry.entryId, deleted: true })
+          })
+
+          const originalsDeletePromise = originals.length > 0
+            ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
+            : Promise.resolve()
+
+          const entries = []
+          while (entries.length < numberOfReps * treatmentLength) {
+            entries.push({})
+          }
+          return originalsDeletePromise
+            .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
+              entries,
+              layout: [],
+            }))
+        })
+    }).catch((err) => {
+      logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+      throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1Fd001'))
     })
 
   @setErrorCode('1FK000')
@@ -476,6 +476,17 @@ class GroupExperimentalUnitCompositeService {
         })
     })
 
+  @setErrorCode('1Fc000')
+  @Transactional('getGroupsAndUnits')
+  getGroupsByExperimentId = (experimentId, tx) => this.getGroupsAndUnits(experimentId, tx)
+    .then((groupsAndUnits) => {
+      _.forEach(groupsAndUnits, (gu) => {
+        delete gu.units
+        delete gu.groupValues
+      })
+      return groupsAndUnits
+    })
+
   @setErrorCode('1FP000')
   getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => Promise.all(_.map(experimentIds,
     experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))
@@ -573,8 +584,8 @@ class GroupExperimentalUnitCompositeService {
   compareWithExistingUnits = (existingUnits, newUnits) => {
     const adds = _.differenceWith(newUnits, existingUnits, (n, e) =>
       this.compareUnitWithUnitFromDB(e, n))
-    const unitsToDeletesFromDB = _.differenceWith(existingUnits, newUnits, (n, e) =>
-      this.compareUnitWithUnitFromDB(n, e))
+    const unitsToDeletesFromDB = _.differenceWith(existingUnits, newUnits, (e, n) =>
+      this.compareUnitWithUnitFromDB(e, n))
     const deletes = _.map(unitsToDeletesFromDB, u => inflector.transform(u, 'camelizeLower'))
     return {
       adds,

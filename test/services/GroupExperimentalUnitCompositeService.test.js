@@ -746,7 +746,36 @@ describe('GroupExperimentalUnitCompositeService', () => {
         numberOfReps: 5,
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([])
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+        location: 1, rep: 1, treatment_id: 1, id: 101,
+      },
+      {
+        location: 1, rep: 1, treatment_id: 2, id: 102,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 1, id: 103,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 2, id: 104,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 1, id: 105,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 2, id: 106,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 1, id: 107,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 2, id: 108,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 1, id: 109,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 2, id: 110,
+      }])
       target.saveUnitsBySetId = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve(header)
       HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
@@ -762,34 +791,34 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
         expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001,
+          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
         },
         {
-          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002,
+          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
         },
         {
-          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003,
+          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
         },
         {
-          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004,
+          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
         },
         {
-          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005,
+          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
         },
         {
-          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006,
+          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
         },
         {
-          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007,
+          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
         },
         {
-          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008,
+          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
         },
         {
-          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009,
+          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
         },
         {
-          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000,
+          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
         }], {}, testTx)
       })
     })
@@ -811,7 +840,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       AppError.internalServerError = mock()
 
       return target.resetSet(5, {}, testTx).catch(() => {
-        expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1FM001')
+        expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1Fd001')
         done()
       })
     })
@@ -829,7 +858,36 @@ describe('GroupExperimentalUnitCompositeService', () => {
         numberOfReps: 5,
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([])
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+        location: 1, rep: 1, treatment_id: 1, id: 101, setEntryId: 1001,
+      },
+      {
+        location: 1, rep: 1, treatment_id: 2, id: 102, setEntryId: 1002,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 1, id: 103, setEntryId: 1003,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 2, id: 104, setEntryId: 1004,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 1, id: 105, setEntryId: 1005,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 2, id: 106, setEntryId: 1006,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 1, id: 107, setEntryId: 1007,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 2, id: 108, setEntryId: 1008,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 1, id: 109, setEntryId: 1009,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 2, id: 110, setEntryId: 1000,
+      }])
       target.saveUnitsBySetId = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve(header)
       HttpUtil.getWithRetry = mockResolve({ body: { entries: [{ entryId: 1 }, { entryId: 2 }, { entryId: 3 }, { entryId: 4 }] } })
@@ -846,34 +904,34 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{ entryId: 1, deleted: true }, { entryId: 2, deleted: true }, { entryId: 3, deleted: true }, { entryId: 4, deleted: true }] })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001,
+          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
         },
         {
-          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002,
+          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
         },
         {
-          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003,
+          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
         },
         {
-          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004,
+          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
         },
         {
-          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005,
+          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
         },
         {
-          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006,
+          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
         },
         {
-          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007,
+          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
         },
         {
-          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008,
+          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
         },
         {
-          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009,
+          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
         },
         {
-          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000,
+          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
         }], {}, testTx)
 
         expect(AppError.internalServerError).not.toBeCalled()
@@ -1034,6 +1092,55 @@ describe('GroupExperimentalUnitCompositeService', () => {
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
         expect(target.lambdaPerformanceService.savePerformanceStats).not.toBeCalled()
       })
+    })
+  })
+
+  describe('getGroupsByExperimentId', () => {
+    test('units and groupValues are trimmed', () => {
+      target = new GroupExperimentalUnitCompositeService()
+      target.getGroupsAndUnits = mockResolve([
+        {
+          id: '1662.1',
+          experimentId: '1662',
+          parentId: null,
+          refRandomizationStrategyId: 3,
+          refGroupTypeId: 1,
+          setId: 9703,
+          units: [],
+          groupValues: [],
+        },
+        {
+          id: '1662.2',
+          experimentId: '1662',
+          parentId: null,
+          refRandomizationStrategyId: 3,
+          refGroupTypeId: 1,
+          setId: 9704,
+          units: [],
+          groupValues: [],
+        },
+      ])
+      return target.getGroupsByExperimentId(3, testTx)
+        .then((data) => {
+          expect(data).toEqual([
+            {
+              id: '1662.1',
+              experimentId: '1662',
+              parentId: null,
+              refRandomizationStrategyId: 3,
+              refGroupTypeId: 1,
+              setId: 9703,
+            },
+            {
+              id: '1662.2',
+              experimentId: '1662',
+              parentId: null,
+              refRandomizationStrategyId: 3,
+              refGroupTypeId: 1,
+              setId: 9704,
+            },
+          ])
+        })
     })
   })
 

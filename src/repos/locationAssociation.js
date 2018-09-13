@@ -96,7 +96,7 @@ class locationAssociationRepo {
     return tx.batch(promises)
   }
 
-  @setErrorCode('5P7000')
+  @setErrorCode('5P8000')
   removeBySetId = (setId, tx = this.rep) =>
     tx.none('DELETE FROM location_association WHERE set_idd = $1', setId)
 }

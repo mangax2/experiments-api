@@ -27,6 +27,11 @@ if (localEnv || testEnv) {
     clientId: VaultUtil.clientId,
     clientSecret: VaultUtil.clientSecret,
   }
+  services.aws = {
+    accessKeyId: VaultUtil.awsAccessKeyId,
+    secretAccessKey: VaultUtil.awsSecretAccessKey,
+    lambdaName: VaultUtil.awsLambdaName,
+  }
   cfServices = services
 }
 

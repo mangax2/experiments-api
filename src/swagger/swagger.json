@@ -1075,6 +1075,52 @@
         }
       }
     },
+    "/experiments/{id}/composites/design-experimental-units": {
+      "post": {
+        "summary": "posts design specification details and experimental units",
+        "description": "This service will update the design specification details and units",
+        "operationId": "postComposites_design-experimental-unitsByExperimentId",
+        "tags": [
+          "Composites"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "Composites Design Specifications And Units",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "composite design-experimental-units operation SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/experiments/{id}/dependent-variables": {
       "get": {
         "summary": "get all dependent variables for given experiment id.",
@@ -1305,6 +1351,56 @@
             "description": "Envision-Datasets schema",
             "schema": {
               "$ref": "#/definitions/EnvisonDatasetsSchema"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/experiments/{id}/location-association/": {
+      "get": {
+        "summary": "location associations from an experiment.",
+        "description": "Returns Sets associations to all locations in a given experiment",
+        "operationId": "getLocationAssociationByExperimentId",
+        "tags": [
+          "Location Association"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location associations",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LocationAssociation"
+              }
             }
           },
           "400": {
@@ -2757,6 +2853,64 @@
         }
       }
     },
+    "/sets/{setId}/set-entries": {
+      "put": {
+        "summary": "Specifies the experimental units to be used in a set",
+        "description": "Specifies the experimental units to be used in a set.",
+        "operationId": "setEntriesForSetPut",
+        "tags": ["Set Entry"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "setId",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "setEntries",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetEntryPUTBody"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/sets/{setId}/treatment-details": {
       "get": {
         "summary": "Gets all levels for each treatment in a set",
@@ -3409,6 +3563,52 @@
         "responses": {
           "200": {
             "description": "composite design-group-experimental-units operation SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/templates/{id}/composites/design-experimental-units": {
+      "post": {
+        "summary": "posts design specification details and experimental units",
+        "description": "This service will update the design specification details and units",
+        "operationId": "postComposites_design-experimental-unitsByTemplateId",
+        "tags": [
+          "Composites"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "Composites Design Specifications And Units",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "composite design-experimental-units operation SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input"
@@ -4558,15 +4758,21 @@
         }
       }
     },
+    "UnitsPOST": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
+      }
+    },
     "CompositeGroupsAndUnitsResponse": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
+          "type": "string",
           "description": "unique id for group entity"
         },
         "parentId": {
-          "type": "integer",
+          "type": "string",
           "description": "reference to parent Group"
         },
         "refRandomizationStrategyId": {
@@ -4574,7 +4780,7 @@
           "description": "This is now sourced from DesignSpecificationDetail (route /experiments/{id}/design-specification-details/) and is here only for backwards compatibility until the next major version release."
         },
         "experimentId": {
-          "type": "integer",
+          "type": "string",
           "description": "id of experimentId entity"
         },
         "groupValues": {
@@ -4800,6 +5006,17 @@
         }
       }
     },
+    "CompositeDesignSpecificationDetailAndUnitsPOST": {
+      "type": "object",
+      "properties": {
+        "units": {
+          "$ref": "#/definitions/UnitsPOST"
+        },
+        "designSpecifications": {
+          "$ref": "#/definitions/CompositeDesignSpecificationDetailPayloadForPOST"
+        }
+      }
+    },
     "CompositeUnitSpecificationDetailPayloadForPOST": {
       "type": "object",
       "properties": {
@@ -5001,6 +5218,10 @@
         "rep": {
           "type": "integer",
           "description": "rep number of experimental unit."
+        },
+        "location": {
+          "type": "integer",
+          "description": "location number of experimental unit."
         }
       }
     },
@@ -5531,10 +5752,6 @@
         "value": {
           "type": "string",
           "description": "Value of the entity associated to the group"
-        },
-        "groupId": {
-          "type": "integer",
-          "description": "Group Id"
         }
       }
     },
@@ -5689,6 +5906,26 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "SetEntryPUTBody": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "factorLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "rep": {
+            "type": "integer"
+          },
+          "setEntryId": {
+            "type": "integer"
+          }
         }
       }
     },
@@ -6241,6 +6478,23 @@
         "comment": {
           "type": "string",
           "description": "An optional description for reviewing an experiment"
+        }
+      }
+    },
+    "LocationAssociation": {
+      "type": "object",
+      "properties": {
+        "experiment_id": {
+          "type": "integer",
+          "description": "Experiment Id"
+        },
+        "location": {
+          "type": "integer",
+          "description": "The location the Set is associated to"
+        },
+        "set_id": {
+          "type": "integer",
+          "description": "The Set Id that is associated to the location in the Experiment"
         }
       }
     }

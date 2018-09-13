@@ -23,7 +23,7 @@ const cfServices = {
       setsAPIUrl: 'https://api01-np.agro.services/sets-api/v2',
       materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
       velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5',
-      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer/v3',
+      randomizationAPIUrl: 'https://api01-np.agro.services/randomizer/v3'
     },
   },
   experimentsKafka:{
@@ -49,6 +49,11 @@ const cfServices = {
   'velocity-home': {
     value: "dev.velocity-np.ag"
   },
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    lambdaName: "cosmos-group-generation-lambda-dev"
+  }
 }
 
 module.exports = cfServices

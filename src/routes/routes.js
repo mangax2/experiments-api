@@ -17,6 +17,7 @@ import FactorService from '../services/FactorService'
 import FactorTypeService from '../services/FactorTypeService'
 import GroupValueService from '../services/GroupValueService'
 import ListsService from '../services/ListsService'
+import LocationAssociationService from '../services/LocationAssociationService'
 import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentService from '../services/TreatmentService'
@@ -202,14 +203,14 @@ router.get('/group-values/:id', (req, res, next) => new GroupValueService().getG
   .then(groupValue => res.json(groupValue))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/groups', (req, res, next) => new GroupService().getGroupsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/groups', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupsByExperimentId(req.params.id)
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
-router.patch('/experiments/:id/groups', (req, res, next) => new GroupService().partiallyUpdateGroup(req.body, req.context)
-  .then((factors) => {
-    res.json(factors)
+router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
+  .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
+    return res.sendStatus(200)
   })
   .catch(err => next(err)))
 
@@ -227,7 +228,7 @@ router.get('/group-types/:id', (req, res, next) => new GroupTypeService().getGro
 router.post('/experiments/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.params.id, req.body, req.context, false)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.get('/experiments/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id, false, req.context)
+router.get('/experiments/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupsAndUnits(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -246,6 +247,11 @@ router.post('/experiments/:id/composites/design-group-experimental-units', (req,
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.post('/experiments/:id/composites/design-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, false)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -262,6 +268,10 @@ router.get('/experiments/:id/envision-datasets-data/', (req, res, next) => new E
   .catch(err => next(err)))
 
 router.get('/experiments/:id/envision-datasets-schema/', (req, res, next) => new EnvisionDatasetsService().getSchemaForEnvisionDatasets(req.params.id, req.context)
+  .then(values => res.json(values))
+  .catch(err => next(err)))
+
+router.get('/experiments/:id/location-association/', (req, res, next) => new LocationAssociationService().getLocationAssociationByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
@@ -296,6 +306,10 @@ router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSp
 
 router.post('/sets/:setId/reset', (req, res, next) => new GroupExperimentalUnitCompositeService().resetSet(req.params.setId, req.context)
   .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
+router.put('/sets/:setId/set-entries', (req, res, next) => new ExperimentalUnitService().updateUnitsForSet(req.params.setId, req.body, req.context)
+  .then(() => res.sendStatus(200))
   .catch(err => next(err)))
 
 router.get('/sets/:setId/treatment-details', (req, res, next) => new ExperimentalUnitService().getTreatmentDetailsBySetId(req.params.setId)
@@ -371,14 +385,14 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/templates/:id/groups', (req, res, next) => new GroupService().getGroupsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/groups', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupsByExperimentId(req.params.id)
   .then(factors => res.json(factors))
   .catch(err => next(err)))
 
 router.post('/templates/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveGroupAndUnitDetails(req.params.id, req.body, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.get('/templates/:id/composites/group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().getGroupAndUnitDetails(req.params.id, true, req.context)
+router.get('/templates/:id/composites/group-experimental-units', (req, res, next) => (new GroupExperimentalUnitCompositeService()).getGroupsAndUnits(req.params.id)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -394,6 +408,10 @@ router.post('/templates/:id/design-specification-details', (req, res, next) => n
   .catch(err => next(err)))
 
 router.post('/templates/:id/composites/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context, true)
+  .then(value => res.json(value))
+  .catch(err => next(err)))
+
+router.post('/templates/:id/composites/design-experimental-units', (req, res, next) => new GroupExperimentalUnitCompositeService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

@@ -132,12 +132,12 @@ describe('SetsChangesListener', () => {
     const testTx = { tx: {} }
     test('calls clearSetEntryIds and clearSetId', () => {
       db.unit.batchClearEntryIds = mockResolve()
-      db.group.clearSetId = mockResolve()
+      db.locationAssociation.removeBySetId = mockResolve()
 
       const target = new SetsChangesListener()
       return target.clearSet(1, testTx).then(() => {
         expect(db.unit.batchClearEntryIds).toHaveBeenCalledWith(1, testTx)
-        expect(db.group.clearSetId).toHaveBeenCalledWith(1, testTx)
+        expect(db.locationAssociation.removeBySetId).toHaveBeenCalledWith(1, testTx)
       })
     })
   })

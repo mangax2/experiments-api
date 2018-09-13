@@ -123,6 +123,11 @@ class designSpecificationDetailRepo {
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
+
+  @setErrorCode('52C000')
+  getRandomizationStrategyIdByExperimentId = (experimentId, tx = this.rep) => 
+    tx.oneOrNone('SELECT dsd.value FROM design_spec_detail dsd INNER JOIN ref_design_spec rds ON rds.id = dsd.ref_design_spec_id WHERE rds.name = \'Randomization Strategy ID\' AND experiment_id = $1', [experimentId])
+
 }
 
 module.exports = (rep, pgp) => new designSpecificationDetailRepo(rep, pgp)

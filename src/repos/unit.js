@@ -19,9 +19,6 @@ class unitRepo {
   @setErrorCode('5J2000')
   findAllByTreatmentId = (treatmentId, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId)
 
-  @setErrorCode('5J3000')
-  getGroupsWithNoUnits =(setId,tx=this.rep) => tx.any('select k.id from (select g.* from (select g1.* from "group" g1, "group" g2 where g1.parent_id = g2.id and g2.set_id = $1) g inner join group_value gv on gv.group_id = g.id and gv.name = \'repNumber\') k WHERE NOT EXISTS (SELECT 1 FROM unit  WHERE unit.group_id = k.id)',setId)
-
   @setErrorCode('5J4000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId)
 
@@ -37,23 +34,15 @@ class unitRepo {
   @setErrorCode('5J5000')
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
 
-  @setErrorCode('5J6000')
-  batchFindAllByGroupIds = (groupIds, tx = this.rep) => tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id, location FROM unit WHERE group_id IN ($1:csv)', [groupIds])
-
-  @setErrorCode('5JF000')
-  batchFindAllByGroupIdsAndGroupByGroupId = (groupIds, tx = this.rep) => {
-    return tx.any('SELECT id, group_id, treatment_id, rep, set_entry_id FROM unit WHERE group_id IN ($1:csv)', [groupIds])
-      .then(data => {
-        const dataByGroupId = _.groupBy(data, 'group_id')
-        return _.map(groupIds, groupId => dataByGroupId[groupId] || [])
-      })
-  }
-
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id INNER JOIN set_groups sg ON u.group_id = sg.id', setId)
+  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.treatment_id, u.rep, u.set_entry_id, u.location FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id\n' +
+    'INNER JOIN location_association la ON la.experiment_id = t.experiment_id AND la.location = u.location AND la.set_id = $1;', setId)
 
   @setErrorCode('5JE000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('WITH RECURSIVE set_groups AS (SELECT set_id, id FROM public.group WHERE set_id IN ($1:csv) UNION ALL SELECT sg.set_id, g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT sg.set_id, u.* FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id', [setIds]).then(data => {
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.* from location_association la\n' +
+    'INNER JOIN unit u on la.location = u.location \n' +
+    'INNER JOIN treatment t on t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
+    'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
     return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
   })
@@ -141,13 +130,20 @@ class unitRepo {
     return _.map(ids, id => keyedData[id])
   })
 
-  @setErrorCode('5JE000')
+  @setErrorCode('5JH000')
   batchClearEntryIds = (setId, tx = this.rep) => {
     if (!setId) {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit SET set_entry_id = NULL WHERE id IN (WITH RECURSIVE set_groups AS (SELECT id FROM public.group WHERE set_id = $1 UNION ALL SELECT g.id FROM public.group g INNER JOIN set_groups sg ON g.parent_id = sg.id) SELECT u.id FROM unit u INNER JOIN set_groups sg ON u.group_id = sg.id)', setId)
+    return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
+      'FROM treatment t, location_association la\n' +
+      'WHERE u.treatment_id = t.id AND u.location = la.location AND la.set_id = $1', setId)
+  }
+
+  @setErrorCode('5JI000')
+  batchFindAllByExperimentIdAndLocation = (experimentId, location, tx = this.rep) => {
+    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2', [experimentId, location])
   }
 }
 

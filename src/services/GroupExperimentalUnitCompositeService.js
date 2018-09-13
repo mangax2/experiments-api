@@ -1,15 +1,19 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import inflector from 'json-inflector'
 import Transactional from '../decorators/transactional'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 import GroupService from './GroupService'
 import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
+import FactorService from './FactorService'
+import LambdaPerformanceService from './LambdaPerformanceService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
+import AWSUtil from './utility/AWSUtil'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
@@ -28,6 +32,8 @@ class GroupExperimentalUnitCompositeService {
     this.experimentalUnitService = new ExperimentalUnitService()
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
+    this.factorService = new FactorService()
+    this.lambdaPerformanceService = new LambdaPerformanceService()
   }
 
   @notifyChanges('update', 0)
@@ -189,29 +195,10 @@ class GroupExperimentalUnitCompositeService {
     return groupAndUnitDetails
   }
 
-  @setErrorCode('1FE000')
-  @Transactional('getGroupAndUnitDetails')
-  getGroupAndUnitDetails(experimentId, isTemplate, context, tx) {
-    return Promise.all([this.groupService.getGroupsByExperimentId(experimentId, isTemplate,
-      context, tx),
-    this.groupValueService.batchGetGroupValuesByExperimentId(experimentId, tx),
-    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)])
-      .then((groupValuesAndUnits) => {
-        const groups = groupValuesAndUnits[0]
-        const groupValuesGroupByGroupId = _.groupBy(groupValuesAndUnits[1], d => d.group_id)
-        const unitsGroupByGroupId = _.groupBy(groupValuesAndUnits[2], u => u.group_id)
-        return _.map(groups, (group) => {
-          group.groupValues = groupValuesGroupByGroupId[group.id]
-          group.units = unitsGroupByGroupId[group.id]
-          return group
-        })
-      })
-  }
-
   @setErrorCode('1FF000')
   @Transactional('getGroupTree')
   getGroupTree(experimentId, isTemplate, context, tx) {
-    return this.getGroupAndUnitDetails(experimentId, isTemplate, context, tx)
+    return this.getGroupsAndUnits(experimentId, tx)
       .then((groups) => {
         const childGroupHash = _.groupBy(groups, 'parent_id')
         _.forEach(groups, (g) => {
@@ -319,132 +306,297 @@ class GroupExperimentalUnitCompositeService {
     // get group by setId
     this.verifySetAndGetDetails(setId, context, tx).then((results) => {
       const {
-        experimentId, setGroup, numberOfReps, repGroupTypeId,
+        experimentId, location, numberOfReps,
       } = results
       return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
-        const newGroupsAndUnits = this.createRcbGroupStructure(setId, setGroup, numberOfReps,
-          treatments, repGroupTypeId)
+        const units = this.createUnits(location, treatments, numberOfReps)
+        return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
+          .then(() => this.getSetEntriesFromSet(setId, numberOfReps, treatments.length, context))
+          .then(result => db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
+            .then((unitsInDB) => {
+              const setEntryIds = _.map(result.body.entries, 'entryId')
+              _.forEach(unitsInDB, (unit, index) => {
+                unit.setEntryId = setEntryIds[index]
+              })
+              const unitsFromDBCamlized = _.map(unitsInDB, u => inflector.transform(u, 'camelizeLower'))
+              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
+                unitsFromDBCamlized, context, tx).then(sendKafkaNotification('update', experimentId))
+            }))
+      })
+    })
 
-        return this.getGroupTree(experimentId, false, context, tx).then((experimentGroups) => {
-          const oldGroupsAndUnits =
-            [_.find(experimentGroups, group => group.set_id === Number(setId))]
+  @setErrorCode('1Fd000')
+  getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
+    PingUtil.getMonsantoHeader().then((header) => {
+      header.push({
+        headerName: 'oauth_resourceownerinfo',
+        headerValue: `username=${context.userId},user_id=${context.userId}`,
+      })
+      return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+        .then((originalSet) => {
+          const originals = []
+          _.forEach(originalSet.body.entries, (entry) => {
+            originals.push({ entryId: entry.entryId, deleted: true })
+          })
+
+          const originalsDeletePromise = originals.length > 0
+            ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
+            : Promise.resolve()
+
           const entries = []
-          while (entries.length < numberOfReps * treatments.length) {
+          while (entries.length < numberOfReps * treatmentLength) {
             entries.push({})
           }
-
-          return this.persistGroupUnitChanges(newGroupsAndUnits, oldGroupsAndUnits,
-            experimentId, context, tx)
-            .then(() => PingUtil.getMonsantoHeader()).then((header) => {
-              header.push({ headerName: 'oauth_resourceownerinfo', headerValue: `username=${context.userId},user_id=${context.userId}` })
-              return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
-                .then((originalSet) => {
-                  const originals = []
-                  _.forEach(originalSet.body.entries, (entry) => {
-                    originals.push({ entryId: entry.entryId, deleted: true })
-                  })
-
-                  const originalsDeletePromise = originals.length > 0
-                    ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
-                    : Promise.resolve()
-
-                  return originalsDeletePromise
-                    .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
-                      entries,
-                      layout: [],
-                    }))
-                })
-            })
-            .catch((err) => {
-              logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
-              throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1FM001'))
-            })
-            .then((result) => {
-              const units = _.flatMap(_.map(newGroupsAndUnits[0].childGroups, 'units'))
-              const setEntryIds = _.map(result.body.entries, 'entryId')
-              _.forEach(units, (unit, index) => { unit.setEntryId = setEntryIds[index] })
-              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(units,
-                context, tx).then(sendKafkaNotification('update', experimentId))
-            })
+          return originalsDeletePromise
+            .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
+              entries,
+              layout: [],
+            }))
         })
-      })
+    }).catch((err) => {
+      logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+      throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1Fd001'))
     })
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context, tx) =>
-    db.group.findGroupBySetId(setId, tx).then((setGroup) => {
-      if (!setGroup) {
+    db.locationAssociation.findBySetId(setId, tx).then((locAssociation) => {
+      if (!locAssociation) {
         logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
       }
-      const experimentId = setGroup.experiment_id
-      const factorsPromise = db.factor.findByExperimentId(experimentId, tx)
+      const experimentId = locAssociation.experiment_id
       const designSpecPromise = db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)
       const refDesignSpecPromise = db.refDesignSpecification.all()
-      const groupTypePromise = db.groupType.all()
 
-      return Promise.all([factorsPromise, designSpecPromise, refDesignSpecPromise,
-        groupTypePromise])
-        .then(([factors, designSpecs, refDesignSpecs, groupTypes]) => {
+      return Promise.all([designSpecPromise, refDesignSpecPromise])
+        .then(([designSpecs, refDesignSpecs]) => {
           const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
           const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
           const repDesignSpecDetail =
             _.find(designSpecs, sd => sd.ref_design_spec_id === minRepRefDesignSpec.id)
               || _.find(designSpecs, sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
 
-          if (_.find(factors, factor => factor.tier)) {
-            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) has tiering set up and cannot be reset.`)
-            throw AppError.badRequest(`The specified set (id ${setId}) has tiering set up and cannot be reset.`,
-              undefined, getFullErrorCode('1FK002'))
-          }
           if (!repDesignSpecDetail) {
             logger.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`,
-              undefined, getFullErrorCode('1FK003'))
+              undefined, getFullErrorCode('1FK002'))
           }
 
-          const repGroupType = _.find(groupTypes, groupType => groupType.type === 'Rep')
           const numberOfReps = Number(repDesignSpecDetail.value)
 
           return {
             experimentId,
-            setGroup,
+            location: locAssociation.location,
             numberOfReps,
-            repGroupTypeId: repGroupType.id,
           }
         })
     })
 
   @setErrorCode('1FN000')
-  createRcbGroupStructure = (setId, setGroup, numberOfReps, treatments, repRefGroupTypeId) => {
-    const newGroupsAndUnits = [{
-      refGroupTypeId: setGroup.ref_group_type_id,
-      groupValues: [{
-        name: 'locationNumber',
-        value: setGroup.location_number.toString(),
-      }],
-      setId,
-      childGroups: [],
-    }]
-    let currentRepNumber = 0
-    const createUnit = treatment => ({
+  createUnits = (location, treatments, numberOfReps) => _.flatMap(_.range(numberOfReps), repl =>
+    _.map(treatments, treatment => ({
+      location,
+      rep: repl + 1,
       treatmentId: treatment.id,
-      rep: currentRepNumber,
-    })
-    while (currentRepNumber < numberOfReps) {
-      currentRepNumber += 1
-      newGroupsAndUnits[0].childGroups.push({
-        refGroupTypeId: repRefGroupTypeId,
-        groupValues: [{
-          name: 'repNumber',
-          value: currentRepNumber.toString(),
-        }],
-        units: _.map(treatments, createUnit),
+    })))
+
+  @setErrorCode('1FO000')
+  @Transactional('getGroupsAndUnits')
+  getGroupsAndUnits = (experimentId, tx) =>
+    Promise.all([
+      PingUtil.getMonsantoHeader().then(header =>
+        HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header))
+        .then(data => data.body),
+      db.factor.findByExperimentId(experimentId, tx),
+      db.factorLevel.findByExperimentId(experimentId, tx),
+      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+      db.refDesignSpecification.all(tx),
+      db.treatment.findAllByExperimentId(experimentId, tx),
+      db.combinationElement.findAllByExperimentId(experimentId, tx),
+      db.unit.findAllByExperimentId(experimentId, tx),
+      db.locationAssociation.findByExperimentId(experimentId, tx),
+    ]).then(([
+      randomizationStrategies,
+      variables,
+      variableLevels,
+      designSpecs,
+      refDesignSpecs,
+      treatments,
+      combinationElements,
+      units,
+      setLocAssociations,
+    ]) => {
+      const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+      const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+      const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
+      const trimmedCombinations = _.map(combinationElements, comb => _.omit(comb, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'id']))
+      const trimmedUnits = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'group_id']))
+
+      const variableLevelsMap = _.groupBy(trimmedVariableLevels, 'factor_id')
+      const combinationElementsMap = _.groupBy(trimmedCombinations, 'treatment_id')
+
+      _.forEach(trimmedVariables, (variable) => {
+        variable.levels = variableLevelsMap[variable.id]
+        _.forEach(variable.levels, (level) => {
+          level.factorName = variable.name
+        })
       })
+
+      _.forEach(trimmedTreatments, (treatment) => {
+        treatment.combinationElements = combinationElementsMap[treatment.id]
+      })
+
+      _.forEach(trimmedVariableLevels, (level) => {
+        const levelItems = _.get(level, 'value.items') || []
+        level.items = levelItems.length === 1 ? levelItems[0] : levelItems
+        delete level.value
+        delete level.factorName
+      })
+
+      const body = JSON.stringify(inflector.transform({
+        experimentId,
+        variables: trimmedVariables,
+        designSpecs,
+        refDesignSpecs,
+        randomizationStrategies,
+        treatments: trimmedTreatments,
+        units: trimmedUnits,
+        setLocAssociations,
+      }, 'camelizeLower'))
+
+      const startTime = new Date()
+      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+        .then(data => this.lambdaPerformanceService.savePerformanceStats(body.length,
+          data.Payload.length, new Date() - startTime)
+          .then(() => JSON.parse(data.Payload)))
+        .catch((err) => {
+          console.error(err)
+          return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))
+        })
+    })
+
+  @setErrorCode('1Fc000')
+  @Transactional('getGroupsAndUnits')
+  getGroupsByExperimentId = (experimentId, tx) => this.getGroupsAndUnits(experimentId, tx)
+    .then((groupsAndUnits) => {
+      _.forEach(groupsAndUnits, (gu) => {
+        delete gu.units
+        delete gu.groupValues
+      })
+      return groupsAndUnits
+    })
+
+  @setErrorCode('1FP000')
+  getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => Promise.all(_.map(experimentIds,
+    experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))
+
+  @setErrorCode('1FQ000')
+  @Transactional('getGroupAndUnitsBySetId')
+  getGroupAndUnitsBySetId = (setId, tx) => db.locationAssociation.findBySetId(setId, tx)
+    .then((setAssocation) => {
+      if (!setAssocation) return {}
+      return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,
+        setAssocation.experiment_id, tx)
+    })
+    .catch(() => ({}))
+
+  @setErrorCode('1FR000')
+  getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, tx) =>
+    this.getGroupsAndUnits(experimentId, tx)
+      .then((groups) => {
+        const group = _.find(groups, g => g.setId === setId)
+        if (_.isNil(group)) return {}
+        group.setEntries = this.getUnitsFromGroupsBySetId(groups, setId)
+        return group
+      })
+      .catch(() => ({}))
+
+  @setErrorCode('1FS000')
+  getUnitsFromGroupsBySetId = (groups, setId) => {
+    const group = _.find(groups, g => g.setId === setId)
+    if (_.isNil(group)) return []
+    return _.compact(_.concat(group.units, this.getChildGroupUnits(groups, group.id)))
+  }
+
+  @setErrorCode('1FT000')
+  getChildGroupUnits = (groups, parentId) => {
+    const children = this.getAllChildGroups(groups, parentId)
+    return _.compact(_.flatMap(children, c => c.units))
+  }
+
+  @setErrorCode('1FU000')
+  getAllChildGroups = (groups, parentId) => {
+    const children = _.filter(groups, g => g.parentId === parentId)
+    if (_.isEmpty(children)) return []
+
+    return _.concat(children, _.flatMap(children, c => this.getAllChildGroups(groups, c.id)))
+  }
+
+  @notifyChanges('update', 0)
+  @setErrorCode('1FV000')
+  @Transactional('saveDesignSpecsAndUnitDetails')
+  saveDesignSpecsAndUnits = (experimentId, designSpecsAndUnits, context, isTemplate, tx) => {
+    if (designSpecsAndUnits) {
+      const { designSpecifications, units } = designSpecsAndUnits
+      return Promise.all([
+        this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
+        this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
+          designSpecifications, experimentId, context, isTemplate, tx,
+        ),
+      ]).then(() => AppUtil.createCompositePostResponse())
     }
 
-    return newGroupsAndUnits
+    throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
   }
+
+  @setErrorCode('1FW000')
+  @Transactional('saveUnitsByExperimentId')
+  saveUnitsByExperimentId = (experimentId, units, isTemplate, context, tx) =>
+    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => this.compareWithExistingUnitsByExperiment(experimentId, units, tx)
+        .then(comparisonResults =>
+          this.saveComparedUnits(experimentId, comparisonResults, context, tx)),
+      )
+
+  @setErrorCode('1FX000')
+  saveUnitsBySetId = (setId, experimentId, units, context, tx) =>
+    this.compareWithExistingUnitsBySetId(setId, units, tx)
+      .then(comparisonResults =>
+        this.saveComparedUnits(experimentId, comparisonResults, context, tx))
+
+  @setErrorCode('1FY000')
+  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => Promise.all([
+    this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
+    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx)])
+
+  @setErrorCode('1FZ000')
+  compareWithExistingUnitsByExperiment = (experimentId, newUnits, tx) =>
+    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)
+      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
+
+  @setErrorCode('1Fa000')
+  compareWithExistingUnitsBySetId = (setId, newUnits, tx) =>
+    db.unit.batchFindAllBySetId(setId, tx)
+      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
+
+  @setErrorCode('1Fa000')
+  compareWithExistingUnits = (existingUnits, newUnits) => {
+    const adds = _.differenceWith(newUnits, existingUnits, (n, e) =>
+      this.compareUnitWithUnitFromDB(e, n))
+    const unitsToDeletesFromDB = _.differenceWith(existingUnits, newUnits, (e, n) =>
+      this.compareUnitWithUnitFromDB(e, n))
+    const deletes = _.map(unitsToDeletesFromDB, u => inflector.transform(u, 'camelizeLower'))
+    return {
+      adds,
+      deletes,
+    }
+  }
+
+  @setErrorCode('1Fb000')
+  compareUnitWithUnitFromDB = (unitFromDB, unit) =>
+    unitFromDB.treatment_id === unit.treatmentId &&
+    unitFromDB.rep === unit.rep && unitFromDB.location === unit.location
 }
 
 module.exports = GroupExperimentalUnitCompositeService

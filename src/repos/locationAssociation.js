@@ -26,7 +26,6 @@ class locationAssociationRepo {
   batchFindExperimentBySetId = (setIds, tx = this.rep) => {
     const promises = []
 
-    console.log(setIds)
     if (setIds.includes('null')) {
       promises.push(tx.any('WITH experiment_location_pairs AS (\n' +
         'SELECT DISTINCT e.id, u.location FROM experiment e, unit u, treatment t\n' +

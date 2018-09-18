@@ -26,11 +26,11 @@ class locationAssociationRepo {
   batchFindExperimentBySetId = (setIds, tx = this.rep) => {
     const promises = []
 
-
+    console.log(setIds)
     if (setIds.includes('null')) {
       promises.push(tx.any('WITH experiment_location_pairs AS (\n' +
         'SELECT DISTINCT e.id, u.location FROM experiment e, unit u, treatment t\n' +
-        'WHERE u.treatment_id = t.id AND t.experiment_id = e.id ),\n' +
+        'WHERE u.treatment_id = t.id AND t.experiment_id = e.id AND e.is_template = false ),\n' +
         'experiment_ids_missing_setIds AS(\n' +
         'SELECT DISTINCT ela.id FROM experiment_location_pairs ela\n' +
         'LEFT JOIN location_association la ON ela.id = la.experiment_id AND ela.location = la.location WHERE la.experiment_id IS NULL)\n' +

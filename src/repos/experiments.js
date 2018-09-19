@@ -58,7 +58,7 @@ class experimentsRepo {
     [context.userId, id])
 
   @setErrorCode('559000')
-  batchFindExperimentsByName = (names, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE name IN ($1:csv)', [names]).then(data => {
+  batchFindExperimentsByName = (names, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE name IN ($1:csv) AND is_template = FALSE', [names]).then(data => {
     const groupedData = _.groupBy(data, 'name')
     return _.map(names, name => groupedData[name] || [])
   })

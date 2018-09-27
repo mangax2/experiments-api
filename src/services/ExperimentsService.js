@@ -220,19 +220,51 @@ class ExperimentsService {
           })))
   }
 
+  @notifyChanges('delete', 0, 2)
   @setErrorCode('15A000')
-  deleteExperiment =
-    (id, context, isTemplate, tx) => this.securityService.permissionsCheck(id, context,
-      isTemplate, tx)
-      .then(() => db.experiments.remove(id, isTemplate)
-        .then((data) => {
-          if (!data) {
-            logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
-            throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
-          } else {
-            return this.tagService.deleteTagsForExperimentId(id).then(() => data)
+  @Transactional('DeleteExperiment')
+  deleteExperiment(id, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(id, context, isTemplate, tx).then((permissions) => {
+      if (permissions.includes('write')) {
+        return db.locationAssociation.findByExperimentId(id).then((associations) => {
+          if (associations.length > 0) {
+            throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
+              ' set')
           }
-        }))
+          return db.experiments.remove(id, isTemplate)
+            .then((data) => {
+              if (!data) {
+                logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
+                throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
+              } else {
+                const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=field`
+                const promises = []
+                const requestPromise = PingUtil.getMonsantoHeader()
+                  .then(headers => HttpUtil.get(url, headers)
+                    .then((response) => {
+                      if (response) {
+                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}?type=field`
+                        const modifiedData = {
+                          request:
+                            {
+                              id: response.body[0].id,
+                              experiment_id: null,
+                            },
+                        }
+
+                        return HttpUtil.put(putUrl, headers, JSON.stringify(modifiedData))
+                      }
+                      return promises.push(requestPromise)
+                    }))
+                promises.push(this.tagService.deleteTagsForExperimentId(id, context, isTemplate).then(() => data))
+                return Promise.all(promises)
+              }
+            })
+        })
+      }
+      throw AppError.unauthorized('Unauthorized to delete')
+    })
+  }
 
   @setErrorCode('15B000')
   getExperimentsByFilters(queryString, isTemplate, context) {

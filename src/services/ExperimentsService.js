@@ -222,14 +222,14 @@ class ExperimentsService {
 
   @notifyChanges('delete', 0, 2)
   @setErrorCode('15A000')
-  @Transactional('DeleteExperiment')
+  @Transactional('deleteExperiment')
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate, tx).then((permissions) => {
       if (permissions.includes('write')) {
         return db.locationAssociation.findByExperimentId(id).then((associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
-              ' set')
+              ' set', undefined, getFullErrorCode('15A002'))
           }
           return db.experiments.remove(id, isTemplate)
             .then((data) => {
@@ -254,15 +254,23 @@ class ExperimentsService {
 
                         return HttpUtil.put(putUrl, headers, JSON.stringify(modifiedData))
                       }
-                      return promises.push(requestPromise)
-                    }))
+                      return Promise.resolve()
+                    })).catch((err) => {
+                    logger.error(`Unable to delete experiment. Reason: ${err.response.text}`)
+                    if (err.status !== 404 && err.response.text !== `No requests for experiment ${id} were found.`) {
+                      return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15R003')))
+                    }
+                    return Promise.resolve()
+                  })
+                promises.push(requestPromise)
                 promises.push(this.tagService.deleteTagsForExperimentId(id, context, isTemplate).then(() => data))
+
                 return Promise.all(promises)
               }
             })
         })
       }
-      throw AppError.unauthorized('Unauthorized to delete')
+      throw AppError.unauthorized('Unauthorized to delete', undefined, getFullErrorCode('15A003'))
     })
   }
 

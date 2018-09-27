@@ -820,7 +820,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
-        expect(data).toEqual([{}])
+        expect(data).toEqual([{}, {}])
       })
     })
 
@@ -838,7 +838,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
-        expect(data).toEqual([{}])
+        expect(data).toEqual([undefined, {}])
       })
     })
     test('throws an error  when user do not have write permission ', () => {
@@ -859,7 +859,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(1)
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to delete experiment as it is associated with a set')
+        expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
 

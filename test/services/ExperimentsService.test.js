@@ -823,6 +823,24 @@ describe('ExperimentsService', () => {
         expect(data).toEqual([{}])
       })
     })
+
+    test('returns data when successfully deleted experiment from the capacity request', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
+      const response = undefined
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      HttpUtil.get = jest.fn(() => Promise.resolve(response))
+      HttpUtil.put = jest.fn(() => Promise.resolve({}))
+      return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(data).toEqual([{}])
+      })
+    })
     test('throws an error  when user do not have write permission ', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['review'])
@@ -835,13 +853,13 @@ describe('ExperimentsService', () => {
     test('throws an error  when experiment is associated to a set', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
-      db.locationAssociation.findByExperimentId = mockResolve({ experiment_id: 1842, location: 1, set_id: 9888909 })
+      db.locationAssociation.findByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
       AppError.badRequest = mock()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(1)
-        // expect(AppError.badRequest).toHaveBeenCalledWith('Unable to delete')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to delete experiment as it is associated with a set')
       })
     })
 

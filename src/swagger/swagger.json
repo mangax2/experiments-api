@@ -623,6 +623,57 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "deletes a single experiment",
+        "description": "This endpoint allows a user to delete a experiment",
+        "operationId": "deleteExperiment",
+        "tags": [
+          "Experiments"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "type": "integer",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Experiment Deleted",
+            "schema": {
+              "$ref": "#/definitions/GenericDeleteSuccess"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/experiments/{id}/advanced-parameters": {
@@ -3181,6 +3232,57 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "deletes a single template",
+        "description": "This endpoint allows a user to delete a template",
+        "operationId": "deleteTemplate",
+        "tags": [
+          "Templates"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "type": "integer",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template Deleted",
+            "schema": {
+              "$ref": "#/definitions/GenericDeleteSuccess"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/templates/{id}/advanced-parameters": {
@@ -5112,6 +5214,15 @@
         "questionCode": {
           "type": "string",
           "description": "Refers to Q&A question Code"
+        }
+      }
+    },
+    "GenericDeleteSuccess":{
+      "type": "object",
+      "properties":{
+        "id": {
+          "type": "integer",
+          "description": "Experiment/Template id"
         }
       }
     },

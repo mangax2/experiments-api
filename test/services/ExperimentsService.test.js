@@ -824,6 +824,21 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('returns 404  when experiment is already deleted', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ response: {} }))
+      AppError.badRequest = mock({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      return target.deleteExperiment(1, testContext, false, testTx).catch(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
+    })
+
     test('returns data when successfully deleted experiment from the capacity request', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])

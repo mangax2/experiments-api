@@ -258,7 +258,7 @@ class ExperimentsService {
                     })).catch((err) => {
                     logger.error(`Unable to delete experiment. Reason: ${err.response.text}`)
                     if (err.status !== 404 && err.response.text !== `No requests for experiment ${id} were found.`) {
-                      return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15R003')))
+                      return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15A004')))
                     }
                     return Promise.resolve()
                   })

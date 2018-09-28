@@ -824,12 +824,12 @@ describe('ExperimentsService', () => {
       })
     })
 
-    test('returns 404  when experiment is already deleted', () => {
+    test('rejects and unable to delete experiment when there is an internal server ', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
       db.locationAssociation.findByExperimentId = mockResolve({})
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ response: {} }))
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ response: {}, status: 500 }))
       AppError.badRequest = mock({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
       return target.deleteExperiment(1, testContext, false, testTx).catch(() => {
@@ -838,7 +838,21 @@ describe('ExperimentsService', () => {
         expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
-
+    test(' unable to delete experiment when experiment is not found', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ status: 404, response: { text: '' } }))
+      AppError.badRequest = mock({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      return target.deleteExperiment(1, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalled()
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
+    })
     test('returns data when successfully deleted experiment from the capacity request', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])

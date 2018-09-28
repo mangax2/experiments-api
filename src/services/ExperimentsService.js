@@ -237,13 +237,12 @@ class ExperimentsService {
                 logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
                 throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
               } else {
-                const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=field`
                 const promises = []
                 const requestPromise = PingUtil.getMonsantoHeader()
-                  .then(headers => HttpUtil.get(url, headers)
+                  .then(headers => this.getRequestCapacity(id, headers)
                     .then((response) => {
-                      if (response) {
-                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}?type=field`
+                      if (response && response.body[0]) {
+                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}?type=${response.body[0].request_type}`
                         const modifiedData = {
                           request:
                             {
@@ -256,7 +255,6 @@ class ExperimentsService {
                       }
                       return Promise.resolve()
                     })).catch((err) => {
-                    logger.error(`Unable to delete experiment. Reason: ${err.response.text}`)
                     if (err.status !== 404 && err.response.text !== `No requests for experiment ${id} were found.`) {
                       return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15A004')))
                     }
@@ -272,6 +270,13 @@ class ExperimentsService {
       }
       throw AppError.unauthorized('Unauthorized to delete', undefined, getFullErrorCode('15A003'))
     })
+  }
+
+
+  getRequestCapacity=(id, headers) => {
+    const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=field`
+    const ceUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=ce`
+    return HttpUtil.get(url, headers).catch(() => HttpUtil.get(ceUrl, headers))
   }
 
   @setErrorCode('15B000')

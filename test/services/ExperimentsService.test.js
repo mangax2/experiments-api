@@ -801,22 +801,102 @@ describe('ExperimentsService', () => {
 
   describe('deleteExperiment', () => {
     test('returns data when successfully deleted data', () => {
-      target.securityService.permissionsCheck = mockResolve()
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
+      const response = {
+        body: [{
+          id: 198,
+          num_internal_sites: 2,
+          num_external_sites: 1,
+        }],
+      }
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      HttpUtil.get = jest.fn(() => Promise.resolve({ body: response.body }))
+      HttpUtil.put = jest.fn(() => Promise.resolve({}))
       target.tagService.deleteTagsForExperimentId = mockResolve()
-
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
-        expect(target.tagService.deleteTagsForExperimentId).toHaveBeenCalledWith(1)
-        expect(data).toEqual({})
+        expect(data).toEqual([{}, {}])
+      })
+    })
+
+    test('rejects and unable to delete experiment when there is an internal server ', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ response: {}, status: 500 }))
+      AppError.badRequest = mock({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      return target.deleteExperiment(1, testContext, false, testTx).catch(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
+    })
+    test(' unable to delete experiment when experiment is not found', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ status: 404, response: { text: '' } }))
+      AppError.badRequest = mock({})
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      return target.deleteExperiment(1, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalled()
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
+    })
+    test('returns data when successfully deleted experiment from the capacity request', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.experiments.remove = mockResolve({})
+      db.locationAssociation.findByExperimentId = mockResolve({})
+      const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
+      const response = undefined
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      HttpUtil.get = jest.fn(() => Promise.resolve(response))
+      HttpUtil.put = jest.fn(() => Promise.resolve({}))
+      return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
+        expect(data).toEqual([undefined, {}])
+      })
+    })
+    test('throws an error  when user do not have write permission ', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['review'])
+      AppError.unauthorized = mock()
+      return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(AppError.unauthorized).toHaveBeenCalled()
+      })
+    })
+    test('throws an error  when experiment is associated to a set', () => {
+      target.securityService.getUserPermissionsForExperiment = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.locationAssociation.findByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
+      AppError.badRequest = mock()
+
+      return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(1)
+        expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
 
     test('throws an error when data is undefined', () => {
       db.experiments.remove = mockResolve()
+      target.securityService.permissionsCheck = mockResolve(['write'])
+      db.locationAssociation.findByExperimentId = mockResolve({})
       AppError.notFound = mock()
-      target.securityService.permissionsCheck = mockResolve()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)

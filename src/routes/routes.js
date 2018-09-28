@@ -449,4 +449,12 @@ router.post('/kafka-publish', (req, res, next) => {
     .catch(err => next(err))
 })
 
+router.delete('/experiments/:id', (req, res, next) => new ExperimentsService().deleteExperiment(req.params.id, req.context, false)
+  .then(() => res.sendStatus(200))
+  .catch(err => next(err)))
+
+router.delete('/templates/:id', (req, res, next) => new ExperimentsService().deleteExperiment(req.params.id, req.context, true)
+  .then(() => res.sendStatus(200))
+  .catch(err => next(err)))
+
 module.exports = router

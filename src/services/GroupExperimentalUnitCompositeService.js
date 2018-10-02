@@ -582,21 +582,23 @@ class GroupExperimentalUnitCompositeService {
 
   @setErrorCode('1Fa000')
   compareWithExistingUnits = (existingUnits, newUnits) => {
-    const adds = _.differenceWith(newUnits, existingUnits, (n, e) =>
-      this.compareUnitWithUnitFromDB(e, n))
-    const unitsToDeletesFromDB = _.differenceWith(existingUnits, newUnits, (e, n) =>
-      this.compareUnitWithUnitFromDB(e, n))
+    const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
+      const matchingUnit = _.find(newUnits,
+        nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&
+          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
+      if (matchingUnit) {
+        matchingUnit.matched = true
+        return undefined
+      }
+      return eu
+    }))
+    const adds = _.filter(newUnits, nu => !nu.matched)
     const deletes = _.map(unitsToDeletesFromDB, u => inflector.transform(u, 'camelizeLower'))
     return {
       adds,
       deletes,
     }
   }
-
-  @setErrorCode('1Fb000')
-  compareUnitWithUnitFromDB = (unitFromDB, unit) =>
-    unitFromDB.treatment_id === unit.treatmentId &&
-    unitFromDB.rep === unit.rep && unitFromDB.location === unit.location
 }
 
 module.exports = GroupExperimentalUnitCompositeService

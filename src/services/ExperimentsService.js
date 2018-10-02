@@ -237,12 +237,14 @@ class ExperimentsService {
                 logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
                 throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
               } else {
+                const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}`
+
                 const promises = []
                 const requestPromise = PingUtil.getMonsantoHeader()
-                  .then(headers => this.getRequestCapacity(id, headers)
+                  .then(headers => HttpUtil.get(url, headers)
                     .then((response) => {
                       if (response && response.body[0]) {
-                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}?type=${response.body[0].request_type}`
+                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}`
                         const modifiedData = {
                           request:
                             {
@@ -270,13 +272,6 @@ class ExperimentsService {
       }
       throw AppError.unauthorized('Unauthorized to delete', undefined, getFullErrorCode('15A003'))
     })
-  }
-
-
-  getRequestCapacity=(id, headers) => {
-    const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=field`
-    const ceUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}?type=ce`
-    return HttpUtil.get(url, headers).catch(() => HttpUtil.get(ceUrl, headers))
   }
 
   @setErrorCode('15B000')

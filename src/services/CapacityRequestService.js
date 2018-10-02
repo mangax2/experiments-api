@@ -24,7 +24,8 @@ class CapacityRequestService {
 
   @setErrorCode('101000')
   static associateExperimentToCapacityRequest(experiment, context) {
-    const capacityRequestUri = `${cfServices.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${experiment.request.id}?type=${experiment.request.type}`
+    const capacityRequestUri =
+     `${cfServices.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${experiment.request.id}`
     return PingUtil.getMonsantoHeader()
       .then(headers => HttpUtil.get(capacityRequestUri, headers)
         .then((response) => {

@@ -829,7 +829,10 @@ describe('ExperimentsService', () => {
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
       db.locationAssociation.findByExperimentId = mockResolve({})
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ response: {}, status: 500 }))
+      const error = new Error()
+      error.status = 500
+      error.response = { }
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(error))
       AppError.badRequest = mock({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
       return target.deleteExperiment(1, testContext, false, testTx).catch(() => {
@@ -843,7 +846,10 @@ describe('ExperimentsService', () => {
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
       db.locationAssociation.findByExperimentId = mockResolve({})
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject({ status: 404, response: { text: '' } }))
+      const error = new Error()
+      error.status = 404
+      error.response = { text: '' }
+      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(error))
       AppError.badRequest = mock({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {

@@ -46,9 +46,9 @@ describe('CapacityRequestService', () => {
       return CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
         .then(() => {
           expect(PingUtil.getMonsantoHeader).toBeCalled()
-          expect(HttpUtil.get).toBeCalledWith('test/requests/53?type=ce', headers)
+          expect(HttpUtil.get).toBeCalledWith('test/requests/53', headers)
           expect(capacityRequest.experiment_id).toBe(100)
-          expect(HttpUtil.put).toBeCalledWith('test/requests/53?type=ce', headers, { currentUser: 'testUser', request: capacityRequest })
+          expect(HttpUtil.put).toBeCalledWith('test/requests/53', headers, { currentUser: 'testUser', request: capacityRequest })
           expect(CapacityRequestService.handleCapacityRequestError).not.toBeCalled()
         })
     })

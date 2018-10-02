@@ -1626,55 +1626,24 @@ describe('GroupExperimentalUnitCompositeService', () => {
         { treatmentId: 2, rep: 2, location: 3 }])
       expect(result.deletes).toEqual([])
     })
-  })
 
-  describe('compareUnitWithUnitFromDB', () => {
-    test('The unit from DB equals to the unit', () => {
+    test('existing units from DB contains duplicate treatment in rep', () => {
       target = new GroupExperimentalUnitCompositeService()
-      expect(target.compareUnitWithUnitFromDB(
-        { treatment_id: 1, rep: 2, location: 3 },
-        { treatmentId: 1, rep: 2, location: 3 },
-      )).toEqual(true)
-    })
+      const result = target.compareWithExistingUnits(
+        [{ treatment_id: 1, rep: 1, location: 3 },
+          { treatment_id: 2, rep: 1, location: 3 },
+          { treatment_id: 1, rep: 2, location: 3 },
+          { treatmentId: 1, rep: 2, location: 3 },
+          { treatment_id: 2, rep: 2, location: 3 },
+        ],
+        [{ treatmentId: 1, rep: 2, location: 3 }],
+      )
 
-    test('extra fields, still return true', () => {
-      target = new GroupExperimentalUnitCompositeService()
-      expect(target.compareUnitWithUnitFromDB(
-        {
-          treatment_id: 1, rep: 2, location: 3, id: 111, set_entry_id: 112,
-        },
+      expect(result.deletes).toEqual([{ treatmentId: 1, rep: 1, location: 3 },
+        { treatmentId: 2, rep: 1, location: 3 },
         { treatmentId: 1, rep: 2, location: 3 },
-      )).toEqual(true)
-    })
-
-    test('mismatched location, return false', () => {
-      target = new GroupExperimentalUnitCompositeService()
-      expect(target.compareUnitWithUnitFromDB(
-        {
-          treatment_id: 1, rep: 2, location: null, id: 111, set_entry_id: 112,
-        },
-        { treatmentId: 1, rep: 2, location: 3 },
-      )).toEqual(false)
-    })
-
-    test('mismatched rep, return false', () => {
-      target = new GroupExperimentalUnitCompositeService()
-      expect(target.compareUnitWithUnitFromDB(
-        {
-          treatment_id: 1, rep: 1, location: 3, id: 111, set_entry_id: 112,
-        },
-        { treatmentId: 1, rep: 2, location: 3 },
-      )).toEqual(false)
-    })
-
-    test('mismatched treatment id, return false', () => {
-      target = new GroupExperimentalUnitCompositeService()
-      expect(target.compareUnitWithUnitFromDB(
-        {
-          treatment_id: 2, rep: 1, location: 3, id: 111, set_entry_id: 112,
-        },
-        { treatmentId: 1, rep: 2, location: 3 },
-      )).toEqual(false)
+        { treatmentId: 2, rep: 2, location: 3 }])
+      expect(result.adds).toEqual([])
     })
   })
 })

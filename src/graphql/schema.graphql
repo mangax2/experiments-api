@@ -58,6 +58,7 @@ type Experiment {
   id: Int
   name: String
   description: String
+  randomizationStrategyCode: String
   status: String
   capacityRequestSyncDate: String
   auditInfo: AuditInfo

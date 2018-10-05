@@ -24,12 +24,12 @@ WITH strategy_mapper AS (
         ('19', 'strip-split-plot', 'no-randomization'),
         ('20', 'split-planter', null),
         ('21', '', null), -- NP custom
-        ('22', 'no-randomization', null),
+        ('22', 'no-randomization', null)
     ) s (randId, np_name, prod_name)
 )
 UPDATE experiment
 SET randomization_strategy_code = CASE WHEN current_database() = 'experiments_prod' THEN sm.prod_name ELSE sm.np_name END
-FROM INNER JOIN design_spec_detail dsd ON e.id = dsd.experiment_id
+FROM design_spec_detail dsd
     INNER JOIN ref_design_spec rds ON dsd.ref_design_spec_id = rds.id
     INNER JOIN strategy_mapper sm ON sm.randId = dsd.value
-WHERE rds.name = 'Randomization Strategy ID'
+WHERE experiment.id = dsd.experiment_id AND rds.name = 'Randomization Strategy ID'

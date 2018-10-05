@@ -243,12 +243,12 @@ class ExperimentsService {
                 const requestPromise = PingUtil.getMonsantoHeader()
                   .then(headers => HttpUtil.get(url, headers)
                     .then((response) => {
-                      if (response && response.body[0]) {
-                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body[0].id}`
+                      if (response && response.body) {
+                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body.id}?type=${response.body.request_type}`
                         const modifiedData = {
                           request:
                             {
-                              id: response.body[0].id,
+                              id: response.body.id,
                               experiment_id: null,
                             },
                         }

@@ -807,11 +807,11 @@ describe('ExperimentsService', () => {
       db.locationAssociation.findByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = {
-        body: [{
+        body: {
           id: 198,
           num_internal_sites: 2,
           num_external_sites: 1,
-        }],
+        },
       }
       PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: response.body }))

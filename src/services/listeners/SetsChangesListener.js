@@ -1,4 +1,4 @@
-import Kafka from 'no-kafka'
+import { ConsumerGroup } from 'kafka-node'
 import log4js from 'log4js'
 import avro from 'avsc'
 import _ from 'lodash'
@@ -15,34 +15,34 @@ class SetsChangesListener {
     const params = {
       client_id: VaultUtil.clientId,
       groupId: VaultUtil.clientId,
-      connectionString: cfServices.experimentsKafka.value.host,
-      reconnectionDelay: {
-        min: 100000,
-        max: 100000,
-      },
-      ssl: {
+      kafkaHost: cfServices.experimentsKafka.value.host,
+      ssl: true,
+      sslOptions: {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
       },
+      encoding: 'buffer',
     }
 
-    this.consumer = SetsChangesListener.createConsumer(params)
-    const strategies = [{
-      subscriptions: [cfServices.experimentsKafka.value.topics.setsChangesTopic],
-      handler: this.dataHandler,
-    }]
-    this.consumer.init(strategies)
+    const topics = [cfServices.experimentsKafka.value.topics.setsChangesTopic]
+    this.consumer = SetsChangesListener.createConsumer(params, topics)
+
+    // cannot test this event
+    // istanbul ignore next
+    this.consumer.on('message', (message) => {
+      this.dataHandler([message])
+    })
   }
 
-  static createConsumer(params) {
-    return new Kafka.GroupConsumer(params)
+  static createConsumer(params, topics) {
+    return new ConsumerGroup(params, topics)
   }
 
-  dataHandler = (messageSet, topic, partition) => Promise.all(_.map(messageSet, (m) => {
-    const message = m.message.value.slice(5)
+  dataHandler = messageSet => Promise.all(_.map(messageSet, (m) => {
+    const message = m.value
 
-    logger.info(topic, partition, m.offset)
+    logger.info(m.topic, m.partition, m.offset)
     const type = avro.Type.forSchema({
       type: 'record',
       fields: [
@@ -52,19 +52,16 @@ class SetsChangesListener {
       ],
     })
 
-    const data = type.fromBuffer(message)
+    const data = type.fromBuffer(message.slice(5))
     const eventCategory = data.event_category
 
     if (eventCategory === 'delete') {
       const setId = data.resource_id
       return this.clearSet(setId).then((setClearResults) => {
-        if (setClearResults.length > 0) {
+        if (!_.isNil(setClearResults)) {
           logger.info(`Successfully cleared SetId: ${setId} and related set entry ids`)
-          sendKafkaNotification('update', setClearResults[0].experiment_id)
+          sendKafkaNotification('update', setClearResults.experiment_id)
         }
-        this.consumer.commitOffset({
-          topic, partition, offset: m.offset, metadata: 'optional',
-        })
       }).catch((err) => {
         logger.error(`Failed to clear setId: ${setId}`, err)
         return Promise.reject(err)

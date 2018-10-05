@@ -10,7 +10,7 @@ function sendKafkaNotification(event, id) {
         time: new Date(Date.now()).toISOString(),
       }
 
-  KafkaProducer.publish(
+  return KafkaProducer.publish(
     {
       topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
       message,

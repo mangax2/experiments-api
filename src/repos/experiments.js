@@ -73,6 +73,14 @@ class experimentsRepo {
     const query = `UPDATE experiment SET (status, task_id, modified_user_id, modified_date) = ($2, $3, $4, CURRENT_TIMESTAMP) WHERE id = $1`
     return tx.oneOrNone(query, [experimentId, status, taskId, context.userId])
   }
+
+  @setErrorCode('55D000')
+  updateStrategyCode = (experimentId, strategy, context, tx) => {
+    if (!strategy) {
+      return Promise.resolve()
+    }
+    return tx.oneOrNone('UPDATE experiment SET (randomization_strategy_code, modified_user_id, modified_date) = ($2, $3, CURRENT_TIMESTAMP) WHERE id = $1', [experimentId, strategy.endpoint, context.userId])
+  }
 }
 
 module.exports = rep => new experimentsRepo(rep)

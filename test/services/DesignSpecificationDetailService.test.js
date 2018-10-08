@@ -199,6 +199,7 @@ describe('DesignSpecificationDetailService', () => {
       PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.get.mockReturnValueOnce(Promise.resolve({ body: [{ id: 8 }] }))
       target.factorService.updateFactorsForDesign = mockResolve()
+      db.experiment = { updateStrategyCode: mockResolve() }
 
       return target.manageAllDesignSpecificationDetails({
         deletes: [1],
@@ -211,6 +212,7 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.updateDesignSpecificationDetails).toHaveBeenCalledWith([{ refDesignSpecId: 1, value: '8' }], testContext, testTx)
         expect(target.createDesignSpecificationDetails).toHaveBeenCalledWith([{}, {}], testContext, testTx)
         expect(target.factorService.updateFactorsForDesign).toHaveBeenCalledWith(1, { id: 8 }, testTx)
+        expect(db.experiment.updateStrategyCode).toHaveBeenCalledWith(1, { id: 8 }, testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })

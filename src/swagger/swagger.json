@@ -5540,6 +5540,9 @@
             "type": "string"
           }
         },
+        "randomizationStrategyCode": {
+          "type": "string"
+        },
         "reviewers": {
           "type": "array",
           "items": {

@@ -15,7 +15,6 @@
   "collectCoverage": true,
   "collectCoverageFrom": [
     "**/src/**/*.{js,jsx}",
-    "!**/src/services/GroupExperimentalUnitCompositeService.js",
     "!**/envision/**",
     "!**/graphql/**",
     "!**/src/app.js",

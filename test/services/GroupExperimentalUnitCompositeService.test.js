@@ -1,5 +1,5 @@
 import {
-  mock, mockReject, mockResolve,
+  kafkaProducerMocker, mock, mockReject, mockResolve,
 } from '../jestUtil'
 import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
 import AppError from '../../src/services/utility/AppError'
@@ -11,9 +11,7 @@ import PingUtil from '../../src/services/utility/PingUtil'
 import cfServices from '../../src/services/utility/ServiceConfig'
 
 describe('GroupExperimentalUnitCompositeService', () => {
-  jest.mock('../../src/decorators/notifyChanges')
-  const { sendKafkaNotification } = require('../../src/decorators/notifyChanges')
-  sendKafkaNotification.mockReturnValue(Promise.resolve())
+  kafkaProducerMocker()
 
   let target
   const testContext = {}

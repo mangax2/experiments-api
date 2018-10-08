@@ -6,8 +6,7 @@ export const mock = returnValue => (typeof returnValue === 'function' ? jest.fn(
 export const mockResolve = resolveValue => jest.fn(() => Promise.resolve(resolveValue))
 export const mockReject = rejectValue => jest.fn(() => Promise.reject(rejectValue))
 export const kafkaProducerMocker = () => {
-  KafkaProducer.createProducer = () => ({
-    init: mockResolve(),
-    send: mock(),
-  })
+  const producer = { constructor() { return producer }, on: mock(), send: mock() }
+  KafkaProducer.createProducer = () => mock()
+  KafkaProducer.producerPromise = Promise.resolve(producer)
 }

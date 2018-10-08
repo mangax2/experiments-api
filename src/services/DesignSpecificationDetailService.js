@@ -108,7 +108,7 @@ class DesignSpecificationDetailService {
 
                                 return this.factorService
                                   .updateFactorsForDesign(experimentId, randStrategy, tx)
-                                  .then(() => db.experiment.updateStrategyCode(experimentId,
+                                  .then(() => db.experiments.updateStrategyCode(experimentId,
                                     randStrategy, context, tx))
                                   .then(() => AppUtil.createCompositePostResponse())
                               })

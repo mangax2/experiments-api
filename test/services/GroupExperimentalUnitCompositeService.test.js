@@ -12,6 +12,8 @@ import cfServices from '../../src/services/utility/ServiceConfig'
 
 describe('GroupExperimentalUnitCompositeService', () => {
   jest.mock('../../src/decorators/notifyChanges')
+  const { sendKafkaNotification } = require('../../src/decorators/notifyChanges')
+  sendKafkaNotification.mockReturnValue(Promise.resolve())
 
   let target
   const testContext = {}

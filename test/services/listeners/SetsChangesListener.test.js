@@ -15,15 +15,15 @@ describe('SetsChangesListener', () => {
     sendKafkaNotification.mockClear()
   })
 
-  describe('using actual kafka-node', () => {
-    describe('createConsumer', () => {
-      test('creates an object of type Kafka.GroupConsumer', () => {
-        const consumer = SetsChangesListener.createConsumer({}, [])
-        expect(consumer).not.toEqual(null)
-        expect(consumer.topics).toEqual([])
-      })
-    })
-  })
+  // describe('using actual kafka-node', () => {
+  //   describe('createConsumer', () => {
+  //     test('creates an object of type Kafka.GroupConsumer', () => {
+  //       const consumer = SetsChangesListener.createConsumer({}, [])
+  //       expect(consumer).not.toEqual(null)
+  //       expect(consumer.topics).toEqual([])
+  //     })
+  //   })
+  // })
 
   describe('using mocked kafka-node', () => {
     jest.mock('kafka-node')

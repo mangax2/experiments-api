@@ -20,6 +20,7 @@ class KafkaProducer {
     KafkaProducer.createProducer(client)
   }
 
+  // istanbul ignore next
   static createProducer(params) {
     const producer = new Producer(params)
     KafkaProducer.producerPromise = new Promise((resolve, reject) => {

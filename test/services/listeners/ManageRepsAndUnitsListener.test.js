@@ -1,29 +1,20 @@
-// import Kafka from 'no-kafka'
-import ManageRepsAndUnitsListener from '../../../src/services/listeners/ManageRepsAndUnitsListener'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
-import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
 import db from '../../../src/db/DbManager'
-import { kafkaProducerMocker } from '../../jestUtil'
+// import { kafkaProducerMocker } from '../../jestUtil'
+
+jest.mock('kafka-node')
+
+const ManageRepsAndUnitsListener = require('../../../src/services/listeners/ManageRepsAndUnitsListener').default
+const KafkaProducer = require('../../../src/services/kafka/KafkaProducer').default
 
 describe('ManageRepsAndUnitsListener', () => {
-  kafkaProducerMocker()
+  // kafkaProducerMocker()
 
-  jest.mock('kafka-node')
 
   beforeEach(() => {
     expect.hasAssertions()
   })
-
-  // describe('using actual kafka-node', () => {
-  //   describe('createConsumer', () => {
-  //     test('creates an object of type Kafka.GroupConsumer', () => {
-  //       const consumer = ManageRepsAndUnitsListener.createConsumer({}, [])
-  //       expect(consumer).not.toEqual(null)
-  //       expect(consumer.topics).toEqual([])
-  //     })
-  //   })
-  // })
 
   describe('using mocked kafka-node', () => {
     describe('sendResponseMessage', () => {

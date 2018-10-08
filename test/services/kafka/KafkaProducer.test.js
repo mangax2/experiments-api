@@ -1,24 +1,16 @@
-import { Producer, KafkaClient } from 'kafka-node'
-import { mock, mockResolve } from '../../jestUtil'
-import KafkaProducer from '../../../src/services/kafka/KafkaProducer'
+import { mock } from '../../jestUtil'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 
 jest.mock('kafka-node')
 
+const { KafkaClient } = require('kafka-node')
+const KafkaProducer = require('../../../src/services/kafka/KafkaProducer').default
+
 describe('KafkaProducer', () => {
   beforeEach(() => {
     expect.hasAssertions()
-  })
-
-  describe('createProducer', () => {
-    test('creates a Kafka.Producer object', () => {
-      const producer = { constructor() { return {} }, on: mock() }
-      Producer.mockImplementation(() => producer)
-      KafkaProducer.createProducer({})
-      expect(KafkaProducer.producerPromise).not.toEqual(undefined)
-    })
   })
 
   describe('init', () => {
@@ -28,8 +20,7 @@ describe('KafkaProducer', () => {
       VaultUtil.kafkaPassword = 'password'
       VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
       cfServices.experimentsKafka = { value: { host: 'host' } }
-      const producer = { on: mock() }
-      KafkaProducer.createProducer = mockResolve(producer)
+      KafkaProducer.createProducer = mock()
       const kafkaClient = { constructor() { return {} } }
       KafkaClient.mockImplementation(() => kafkaClient)
       KafkaProducer.init()

@@ -35,6 +35,7 @@ class SetsChangesListener {
     })
   }
 
+  // istanbul ignore next
   static createConsumer(params, topics) {
     return new ConsumerGroup(params, topics)
   }

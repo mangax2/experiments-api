@@ -1,13 +1,14 @@
-// import Kafka from 'no-kafka'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import db from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
-import SetsChangesListener from '../../../src/services/listeners/SetsChangesListener'
 import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
 import { sendKafkaNotification } from '../../../src/decorators/notifyChanges'
 
+jest.mock('kafka-node')
 jest.mock('../../../src/decorators/notifyChanges')
+
+const SetsChangesListener = require('../../../src/services/listeners/SetsChangesListener').default
 
 describe('SetsChangesListener', () => {
   beforeEach(() => {
@@ -15,19 +16,7 @@ describe('SetsChangesListener', () => {
     sendKafkaNotification.mockClear()
   })
 
-  // describe('using actual kafka-node', () => {
-  //   describe('createConsumer', () => {
-  //     test('creates an object of type Kafka.GroupConsumer', () => {
-  //       const consumer = SetsChangesListener.createConsumer({}, [])
-  //       expect(consumer).not.toEqual(null)
-  //       expect(consumer.topics).toEqual([])
-  //     })
-  //   })
-  // })
-
   describe('using mocked kafka-node', () => {
-    jest.mock('kafka-node')
-
     describe('listen', () => {
       test('calls things correctly', () => {
         const target = new SetsChangesListener()

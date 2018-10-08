@@ -1,3 +1,7 @@
+test('test', () => {
+  expect(true).toEqual(true)
+})
+
 // import VaultUtil from '../../../src/services/utility/VaultUtil'
 // import cfServices from '../../../src/services/utility/ServiceConfig'
 // import db from '../../../src/db/DbManager'

@@ -1,3 +1,6 @@
+test('test', () => {
+  expect(true).toEqual(true)
+})
 // import { mock } from '../../jestUtil'
 // import VaultUtil from '../../../src/services/utility/VaultUtil'
 // import cfServices from '../../../src/services/utility/ServiceConfig'

@@ -97,7 +97,7 @@ class locationAssociationRepo {
 
   @setErrorCode('5P8000')
   removeBySetId = (setId, tx = this.rep) =>
-    tx.none('DELETE FROM location_association WHERE set_idd = $1', setId)
+    tx.oneOrNone('DELETE FROM location_association WHERE set_id = $1 RETURNING experiment_id', setId)
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

@@ -1,5 +1,5 @@
 import {
-  kafkaProducerMocker, mock, mockReject, mockResolve,
+  mock, mockReject, mockResolve,
 } from '../jestUtil'
 import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
 import AppError from '../../src/services/utility/AppError'
@@ -14,7 +14,6 @@ describe('GroupExperimentalUnitCompositeService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }
-  kafkaProducerMocker()
 
   beforeEach(() => {
     expect.hasAssertions()

@@ -1,4 +1,4 @@
-import Kafka from 'no-kafka'
+import { ConsumerGroup } from 'kafka-node'
 import log4js from 'log4js'
 import _ from 'lodash'
 import VaultUtil from '../utility/VaultUtil'
@@ -17,31 +17,30 @@ class ManageRepsAndUnitsListener {
     const params = {
       client_id: VaultUtil.clientId,
       groupId: VaultUtil.clientId,
-      connectionString: cfServices.experimentsKafka.value.host,
-      reconnectionDelay: {
-        min: 100000,
-        max: 100000,
-      },
-      ssl: {
+      kafkaHost: cfServices.experimentsKafka.value.host,
+      ssl: true,
+      sslOptions: {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
       },
     }
-    this.consumer = ManageRepsAndUnitsListener.createConsumer(params)
-    const strategies = [{
-      subscriptions: [cfServices.experimentsKafka.value.topics.repPackingTopic],
-      handler: this.dataHandler,
-    }]
-    this.consumer.init(strategies)
+    const topics = [cfServices.experimentsKafka.value.topics.repPackingTopic]
+    this.consumer = ManageRepsAndUnitsListener.createConsumer(params, topics)
+
+    // cannot test this event
+    // istanbul ignore next
+    this.consumer.on('message', (message) => {
+      this.dataHandler([message])
+    })
   }
 
-  static createConsumer(params) {
-    return new Kafka.GroupConsumer(params)
+  static createConsumer(params, topics) {
+    return new ConsumerGroup(params, topics)
   }
 
   dataHandler = (messageSet, topic, partition) => Promise.all(_.map(messageSet, (m) => {
-    const message = m.message.value.toString('utf8')
+    const message = m.value.toString('utf8')
     logger.info(topic, partition, m.offset, message)
     const set = JSON.parse(message)
     set.entryChanges = _.map(_.filter(set.entryChanges, 'id'), entryChange => ({
@@ -49,11 +48,9 @@ class ManageRepsAndUnitsListener {
       setEntryId: entryChange.id,
       treatmentId: entryChange.value,
     }))
+
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
       logger.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
-      this.consumer.commitOffset({
-        topic, partition, offset: m.offset, metadata: 'optional',
-      })
     }).catch((err) => {
       logger.error(`Failed to update set "${set.setId}" with rep packing changes `, message, err)
     })

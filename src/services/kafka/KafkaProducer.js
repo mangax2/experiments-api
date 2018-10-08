@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Kafka from 'no-kafka'
+import { KafkaClient, Producer } from 'kafka-node'
 import { serializeKafkaAvroMsg } from '../utility/AvroUtil'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
@@ -8,40 +8,47 @@ class KafkaProducer {
   static init = () => {
     const params = {
       client_id: VaultUtil.clientId,
-      connectionString: cfServices.experimentsKafka.value.host,
-      reconnectionDelay: {
-        min: 100000,
-        max: 100000,
-      },
-      ssl: {
+      kafkaHost: cfServices.experimentsKafka.value.host,
+      sslOptions: {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
       },
     }
 
-    const producer = KafkaProducer.createProducer(params)
-    KafkaProducer.producerPromise = producer.init().then(() => producer)
+    const client = new KafkaClient(params)
+    KafkaProducer.createProducer(client)
   }
 
   static createProducer(params) {
-    return new Kafka.Producer(params)
+    const producer = new Producer(params)
+    KafkaProducer.producerPromise = new Promise((resolve, reject) => {
+      producer.on('ready', () => resolve(producer))
+
+      producer.on('error', err => reject(err))
+    })
   }
 
   static publish = ({ topic, message, schemaId }) => {
     if (!KafkaProducer.producerPromise) {
       KafkaProducer.init()
     }
+
     return KafkaProducer.producerPromise.then((producer) => {
       const messageToBePublished = {
         topic,
-        message: {
-          value: _.isNil(schemaId) ?
-            JSON.stringify(message) : serializeKafkaAvroMsg(message, schemaId),
-        },
+        messages: _.isNil(schemaId)
+          ? JSON.stringify(message)
+          : serializeKafkaAvroMsg(message, schemaId),
       }
 
-      return producer.send(messageToBePublished, {})
+      return producer.send([messageToBePublished], (err, data) => {
+        if (err) {
+          return Promise.reject(err)
+        }
+
+        return data
+      })
     })
   }
 }

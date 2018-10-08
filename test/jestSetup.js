@@ -8,5 +8,7 @@ log4js.getLogger = jest.fn(() => ({
   warn: jest.fn(),
 }))
 
+jest.setTimeout(1000)
+
 console.info = jest.fn()
 console.error = jest.fn()

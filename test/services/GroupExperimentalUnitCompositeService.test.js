@@ -644,302 +644,302 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
   })
 
-  // describe('resetSet', () => {
-  //   test('calls all the correct services', () => {
-  //     const header = ['header']
-  //     cfServices.experimentsExternalAPIUrls = {
-  //       value: {
-  //         setsAPIUrl: 'testUrl',
-  //       },
-  //     }
-  //     target.verifySetAndGetDetails = mockResolve({
-  //       experimentId: 3,
-  //       location: 2,
-  //       numberOfReps: 5,
-  //     })
-  //     db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-  //     db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
-  //       location: 2, rep: 1, treatment_id: 1, id: 101,
-  //     },
-  //     {
-  //       location: 2, rep: 1, treatment_id: 2, id: 102,
-  //     },
-  //     {
-  //       location: 2, rep: 2, treatment_id: 1, id: 103,
-  //     },
-  //     {
-  //       location: 2, rep: 2, treatment_id: 2, id: 104,
-  //     },
-  //     {
-  //       location: 2, rep: 3, treatment_id: 1, id: 105,
-  //     },
-  //     {
-  //       location: 2, rep: 3, treatment_id: 2, id: 106,
-  //     },
-  //     {
-  //       location: 2, rep: 4, treatment_id: 1, id: 107,
-  //     },
-  //     {
-  //       location: 2, rep: 4, treatment_id: 2, id: 108,
-  //     },
-  //     {
-  //       location: 2, rep: 5, treatment_id: 1, id: 109,
-  //     },
-  //     {
-  //       location: 2, rep: 5, treatment_id: 2, id: 110,
-  //     }])
-  //     target.saveUnitsBySetId = mockResolve()
-  //     PingUtil.getMonsantoHeader = mockResolve(header)
-  //     HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
-  //     HttpUtil.delete = mockResolve()
-  //     HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
-  //     target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
-  //
-  //     return target.resetSet(5, {}, testTx).then(() => {
-  //       expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-  //       expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-  //       expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-  //       expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-  //       expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
-  //       expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-  //         id: 101, location: 2, rep: 1, treatmentId: 1, setEntryId: 1001,
-  //       },
-  //       {
-  //         id: 102, location: 2, rep: 1, treatmentId: 2, setEntryId: 1002,
-  //       },
-  //       {
-  //         id: 103, location: 2, rep: 2, treatmentId: 1, setEntryId: 1003,
-  //       },
-  //       {
-  //         id: 104, location: 2, rep: 2, treatmentId: 2, setEntryId: 1004,
-  //       },
-  //       {
-  //         id: 105, location: 2, rep: 3, treatmentId: 1, setEntryId: 1005,
-  //       },
-  //       {
-  //         id: 106, location: 2, rep: 3, treatmentId: 2, setEntryId: 1006,
-  //       },
-  //       {
-  //         id: 107, location: 2, rep: 4, treatmentId: 1, setEntryId: 1007,
-  //       },
-  //       {
-  //         id: 108, location: 2, rep: 4, treatmentId: 2, setEntryId: 1008,
-  //       },
-  //       {
-  //         id: 109, location: 2, rep: 5, treatmentId: 1, setEntryId: 1009,
-  //       },
-  //       {
-  //         id: 110, location: 2, rep: 5, treatmentId: 2, setEntryId: 1000,
-  //       }], {}, testTx)
-  //     })
-  //   })
-  //
-  //   test('calls only the sets services it needs to', () => {
-  //     const header = ['header']
-  //     cfServices.experimentsExternalAPIUrls = {
-  //       value: {
-  //         setsAPIUrl: 'testUrl',
-  //       },
-  //     }
-  //     target.verifySetAndGetDetails = mockResolve({
-  //       experimentId: 3,
-  //       location: 1,
-  //       numberOfReps: 5,
-  //     })
-  //     db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-  //     db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
-  //       location: 1, rep: 1, treatment_id: 1, id: 101,
-  //     },
-  //     {
-  //       location: 1, rep: 1, treatment_id: 2, id: 102,
-  //     },
-  //     {
-  //       location: 1, rep: 2, treatment_id: 1, id: 103,
-  //     },
-  //     {
-  //       location: 1, rep: 2, treatment_id: 2, id: 104,
-  //     },
-  //     {
-  //       location: 1, rep: 3, treatment_id: 1, id: 105,
-  //     },
-  //     {
-  //       location: 1, rep: 3, treatment_id: 2, id: 106,
-  //     },
-  //     {
-  //       location: 1, rep: 4, treatment_id: 1, id: 107,
-  //     },
-  //     {
-  //       location: 1, rep: 4, treatment_id: 2, id: 108,
-  //     },
-  //     {
-  //       location: 1, rep: 5, treatment_id: 1, id: 109,
-  //     },
-  //     {
-  //       location: 1, rep: 5, treatment_id: 2, id: 110,
-  //     }])
-  //     target.saveUnitsBySetId = mockResolve()
-  //     PingUtil.getMonsantoHeader = mockResolve(header)
-  //     HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
-  //     HttpUtil.delete = mockResolve()
-  //     HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
-  //     target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
-  //
-  //     return target.resetSet(5, {}, testTx).then(() => {
-  //       expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-  //       expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-  //       expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-  //       expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-  //       expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
-  //       expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
-  //       expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-  //         location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
-  //       },
-  //       {
-  //         location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
-  //       },
-  //       {
-  //         location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
-  //       },
-  //       {
-  //         location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
-  //       },
-  //       {
-  //         location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
-  //       },
-  //       {
-  //         location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
-  //       },
-  //       {
-  //         location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
-  //       },
-  //       {
-  //         location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
-  //       },
-  //       {
-  //         location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
-  //       },
-  //       {
-  //         location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
-  //       }], {}, testTx)
-  //     })
-  //   })
-  //
-  //   test('sends the correct error and code back when sets error occurs', (done) => {
-  //     cfServices.experimentsExternalAPIUrls = {
-  //       value: {
-  //         setsAPIUrl: 'testUrl',
-  //       },
-  //     }
-  //     target.verifySetAndGetDetails = mockResolve({
-  //       experimentId: 3,
-  //       location: 1,
-  //       numberOfReps: 5,
-  //     })
-  //     db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-  //     target.saveUnitsBySetId = mockResolve()
-  //     PingUtil.getMonsantoHeader = mockReject()
-  //     AppError.internalServerError = mock()
-  //
-  //     return target.resetSet(5, {}, testTx).catch(() => {
-  //       expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1Fd001')
-  //       done()
-  //     })
-  //   })
-  //
-  //   test('does not send sets error when error occurs while saving setEntryIds', (done) => {
-  //     const header = ['header']
-  //     cfServices.experimentsExternalAPIUrls = {
-  //       value: {
-  //         setsAPIUrl: 'testUrl',
-  //       },
-  //     }
-  //     target.verifySetAndGetDetails = mockResolve({
-  //       experimentId: 3,
-  //       location: 1,
-  //       numberOfReps: 5,
-  //     })
-  //     db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-  //     db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
-  //       location: 1, rep: 1, treatment_id: 1, id: 101, setEntryId: 1001,
-  //     },
-  //     {
-  //       location: 1, rep: 1, treatment_id: 2, id: 102, setEntryId: 1002,
-  //     },
-  //     {
-  //       location: 1, rep: 2, treatment_id: 1, id: 103, setEntryId: 1003,
-  //     },
-  //     {
-  //       location: 1, rep: 2, treatment_id: 2, id: 104, setEntryId: 1004,
-  //     },
-  //     {
-  //       location: 1, rep: 3, treatment_id: 1, id: 105, setEntryId: 1005,
-  //     },
-  //     {
-  //       location: 1, rep: 3, treatment_id: 2, id: 106, setEntryId: 1006,
-  //     },
-  //     {
-  //       location: 1, rep: 4, treatment_id: 1, id: 107, setEntryId: 1007,
-  //     },
-  //     {
-  //       location: 1, rep: 4, treatment_id: 2, id: 108, setEntryId: 1008,
-  //     },
-  //     {
-  //       location: 1, rep: 5, treatment_id: 1, id: 109, setEntryId: 1009,
-  //     },
-  //     {
-  //       location: 1, rep: 5, treatment_id: 2, id: 110, setEntryId: 1000,
-  //     }])
-  //     target.saveUnitsBySetId = mockResolve()
-  //     PingUtil.getMonsantoHeader = mockResolve(header)
-  //     HttpUtil.getWithRetry = mockResolve({ body: { entries: [{ entryId: 1 }, { entryId: 2 }, { entryId: 3 }, { entryId: 4 }] } })
-  //     HttpUtil.delete = mockResolve()
-  //     HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
-  //     target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockReject()
-  //     AppError.internalServerError = mock()
-  //
-  //     return target.resetSet(5, {}, testTx).catch(() => {
-  //       expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-  //       expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-  //       expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-  //       expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-  //       expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
-  //       expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{ entryId: 1, deleted: true }, { entryId: 2, deleted: true }, { entryId: 3, deleted: true }, { entryId: 4, deleted: true }] })
-  //       expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-  //         location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
-  //       },
-  //       {
-  //         location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
-  //       },
-  //       {
-  //         location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
-  //       },
-  //       {
-  //         location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
-  //       },
-  //       {
-  //         location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
-  //       },
-  //       {
-  //         location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
-  //       },
-  //       {
-  //         location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
-  //       },
-  //       {
-  //         location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
-  //       },
-  //       {
-  //         location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
-  //       },
-  //       {
-  //         location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
-  //       }], {}, testTx)
-  //
-  //       expect(AppError.internalServerError).not.toBeCalled()
-  //       done()
-  //     })
-  //   })
-  // })
+  describe('resetSet', () => {
+    test('calls all the correct services', () => {
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        location: 2,
+        numberOfReps: 5,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+        location: 2, rep: 1, treatment_id: 1, id: 101,
+      },
+      {
+        location: 2, rep: 1, treatment_id: 2, id: 102,
+      },
+      {
+        location: 2, rep: 2, treatment_id: 1, id: 103,
+      },
+      {
+        location: 2, rep: 2, treatment_id: 2, id: 104,
+      },
+      {
+        location: 2, rep: 3, treatment_id: 1, id: 105,
+      },
+      {
+        location: 2, rep: 3, treatment_id: 2, id: 106,
+      },
+      {
+        location: 2, rep: 4, treatment_id: 1, id: 107,
+      },
+      {
+        location: 2, rep: 4, treatment_id: 2, id: 108,
+      },
+      {
+        location: 2, rep: 5, treatment_id: 1, id: 109,
+      },
+      {
+        location: 2, rep: 5, treatment_id: 2, id: 110,
+      }])
+      target.saveUnitsBySetId = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+
+      return target.resetSet(5, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
+          id: 101, location: 2, rep: 1, treatmentId: 1, setEntryId: 1001,
+        },
+        {
+          id: 102, location: 2, rep: 1, treatmentId: 2, setEntryId: 1002,
+        },
+        {
+          id: 103, location: 2, rep: 2, treatmentId: 1, setEntryId: 1003,
+        },
+        {
+          id: 104, location: 2, rep: 2, treatmentId: 2, setEntryId: 1004,
+        },
+        {
+          id: 105, location: 2, rep: 3, treatmentId: 1, setEntryId: 1005,
+        },
+        {
+          id: 106, location: 2, rep: 3, treatmentId: 2, setEntryId: 1006,
+        },
+        {
+          id: 107, location: 2, rep: 4, treatmentId: 1, setEntryId: 1007,
+        },
+        {
+          id: 108, location: 2, rep: 4, treatmentId: 2, setEntryId: 1008,
+        },
+        {
+          id: 109, location: 2, rep: 5, treatmentId: 1, setEntryId: 1009,
+        },
+        {
+          id: 110, location: 2, rep: 5, treatmentId: 2, setEntryId: 1000,
+        }], {}, testTx)
+      })
+    })
+
+    test('calls only the sets services it needs to', () => {
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        location: 1,
+        numberOfReps: 5,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+        location: 1, rep: 1, treatment_id: 1, id: 101,
+      },
+      {
+        location: 1, rep: 1, treatment_id: 2, id: 102,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 1, id: 103,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 2, id: 104,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 1, id: 105,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 2, id: 106,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 1, id: 107,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 2, id: 108,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 1, id: 109,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 2, id: 110,
+      }])
+      target.saveUnitsBySetId = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+
+      return target.resetSet(5, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
+          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
+        },
+        {
+          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
+        },
+        {
+          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
+        },
+        {
+          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
+        },
+        {
+          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
+        },
+        {
+          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
+        },
+        {
+          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
+        },
+        {
+          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
+        },
+        {
+          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
+        },
+        {
+          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
+        }], {}, testTx)
+      })
+    })
+
+    test('sends the correct error and code back when sets error occurs', (done) => {
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        location: 1,
+        numberOfReps: 5,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
+      target.saveUnitsBySetId = mockResolve()
+      PingUtil.getMonsantoHeader = mockReject()
+      AppError.internalServerError = mock()
+
+      return target.resetSet(5, {}, testTx).catch(() => {
+        expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1Fd001')
+        done()
+      })
+    })
+
+    test('does not send sets error when error occurs while saving setEntryIds', (done) => {
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        location: 1,
+        numberOfReps: 5,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
+      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+        location: 1, rep: 1, treatment_id: 1, id: 101, setEntryId: 1001,
+      },
+      {
+        location: 1, rep: 1, treatment_id: 2, id: 102, setEntryId: 1002,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 1, id: 103, setEntryId: 1003,
+      },
+      {
+        location: 1, rep: 2, treatment_id: 2, id: 104, setEntryId: 1004,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 1, id: 105, setEntryId: 1005,
+      },
+      {
+        location: 1, rep: 3, treatment_id: 2, id: 106, setEntryId: 1006,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 1, id: 107, setEntryId: 1007,
+      },
+      {
+        location: 1, rep: 4, treatment_id: 2, id: 108, setEntryId: 1008,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 1, id: 109, setEntryId: 1009,
+      },
+      {
+        location: 1, rep: 5, treatment_id: 2, id: 110, setEntryId: 1000,
+      }])
+      target.saveUnitsBySetId = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{ entryId: 1 }, { entryId: 2 }, { entryId: 3 }, { entryId: 4 }] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockReject()
+      AppError.internalServerError = mock()
+
+      return target.resetSet(5, {}, testTx).catch(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{ entryId: 1, deleted: true }, { entryId: 2, deleted: true }, { entryId: 3, deleted: true }, { entryId: 4, deleted: true }] })
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
+          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
+        },
+        {
+          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
+        },
+        {
+          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
+        },
+        {
+          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
+        },
+        {
+          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
+        },
+        {
+          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
+        },
+        {
+          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
+        },
+        {
+          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
+        },
+        {
+          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
+        },
+        {
+          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
+        }], {}, testTx)
+
+        expect(AppError.internalServerError).not.toBeCalled()
+        done()
+      })
+    })
+  })
 
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', () => {

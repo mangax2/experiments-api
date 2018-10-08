@@ -18,7 +18,7 @@ import setErrorDecorator from '../decorators/setErrorDecorator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
-import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
+import { notifyChanges /* sendKafkaNotification */ } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()
 
@@ -320,7 +320,7 @@ class GroupExperimentalUnitCompositeService {
               })
               const unitsFromDBCamlized = _.map(unitsInDB, u => inflector.transform(u, 'camelizeLower'))
               return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
-                unitsFromDBCamlized, context, tx).then(sendKafkaNotification('update', experimentId))
+                unitsFromDBCamlized, context, tx)
             }))
       })
     })

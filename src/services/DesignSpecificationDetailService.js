@@ -83,6 +83,8 @@ class DesignSpecificationDetailService {
         this.populateExperimentId(adds, experimentId)
 
         const updatedRefDesignSpecIds = _.map(updates, 'refDesignSpecId')
+        const createdRefDesignSpecIds = _.map(adds, 'refDesignSpecId')
+        const refDesignSpecIds = updatedRefDesignSpecIds.concat(createdRefDesignSpecIds)
         return this.refDesignSpecificationService.getAllRefDesignSpecs()
           .then(refSpecs =>
             this.deleteDesignSpecificationDetails(deletes, context, tx)
@@ -93,8 +95,9 @@ class DesignSpecificationDetailService {
                       .then(() => {
                         const randomizationRefSpecId = _.find(refSpecs, refSpec => refSpec.name === 'Randomization Strategy ID').id
 
-                        if (updatedRefDesignSpecIds.includes(randomizationRefSpecId)) {
-                          const randomizationStrategySpec = _.find(updates, update =>
+                        if (refDesignSpecIds.includes(randomizationRefSpecId)) {
+                          const designSpecs = updates.concat(adds)
+                          const randomizationStrategySpec = _.find(designSpecs, update =>
                             update.refDesignSpecId === randomizationRefSpecId)
 
                           return PingUtil.getMonsantoHeader().then((headers) => {

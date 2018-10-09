@@ -542,7 +542,7 @@ describe('ExperimentalUnitService', () => {
       db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1 })
       db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 2, name: 'Custom' }] })
+      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 2, name: 'Custom - Build on Map' }] })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
@@ -580,7 +580,7 @@ describe('ExperimentalUnitService', () => {
       db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1 })
       db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 2, name: 'Custom' }] })
+      HttpUtil.getWithRetry = mockResolve({ body: [{ id: 2, name: 'Custom - Build on Map' }] })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
@@ -603,7 +603,7 @@ describe('ExperimentalUnitService', () => {
       })
     })
 
-    test('returns an error if the randomization strategy is not custom', () => {
+    test('returns an error if the randomization strategy is not Custom - Build on Map', () => {
       const entries = [
         { setEntryId: 15, factorLevelIds: [13, 11] },
         { setEntryId: 17, factorLevelIds: [12] },
@@ -630,7 +630,7 @@ describe('ExperimentalUnitService', () => {
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
         expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
-        expect(AppError.badRequest).toBeCalledWith('This endpoint only supports sets/experiments with a "Custom" randomization strategy.', undefined, '17F004')
+        expect(AppError.badRequest).toBeCalledWith('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, '17F004')
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
         expect(db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId).toBeCalledWith(7, testTx)
         expect(target.mergeSetEntriesToUnits).not.toBeCalled()

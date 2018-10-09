@@ -184,10 +184,10 @@ class ExperimentalUnitService {
           tx),
         randomizationPromise,
       ]).then(([combinationElements, selectedRandomizationStrategy, randomizationStrategies]) => {
-        const customStrategy = _.find(randomizationStrategies, rs => rs.name === 'Custom')
-        if (!customStrategy || !selectedRandomizationStrategy ||
-          selectedRandomizationStrategy.value !== customStrategy.id.toString()) {
-          throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom" randomization strategy.', undefined, getFullErrorCode('17F004'))
+        const customBuildOnMapStrategy = _.find(randomizationStrategies, rs => rs.name === 'Custom - Build on Map')
+        if (!customBuildOnMapStrategy || !selectedRandomizationStrategy ||
+          selectedRandomizationStrategy.value !== customBuildOnMapStrategy.id.toString()) {
+          throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, getFullErrorCode('17F004'))
         }
         const elementsByTreatmentId = _.groupBy(combinationElements, 'treatment_id')
         const factorLevelIdsToTreatmentIdMapper = {}

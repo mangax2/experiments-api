@@ -630,40 +630,6 @@ describe('ExperimentalUnitService', () => {
         expect(err).toBe(testError)
       })
     })
-    // test('returns an error if the randomization strategy service throws an error', () => {
-    //   const entries = [
-    //     { setEntryId: 15, factorLevelIds: [13, 11] },
-    //     { setEntryId: 17, factorLevelIds: [12] },
-    //     { setEntryId: 19, factorLevelIds: [] },
-    //   ]
-    //   const testError = { message: 'error' }
-    //   target = new ExperimentalUnitService()
-    //   db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1 })
-    //   db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
-    //   db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
-    //     { factor_level_id: 13, treatment_id: 23 },
-    //     { factor_level_id: 11, treatment_id: 23 },
-    //     { factor_level_id: 12, treatment_id: 24 },
-    //     { factor_level_id: 12, treatment_id: 25 },
-    //     { factor_level_id: 13, treatment_id: 25 },
-    //     { treatment_id: 20 },
-    //   ])
-    //   AppError.notFound = mock()
-    //   AppError.badRequest = mock()
-    //   AppError.internalServerError = mock(testError)
-    //   target.mergeSetEntriesToUnits = mockResolve()
-    //
-    //   return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-    //     expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-    //     expect(AppError.notFound).not.toBeCalled()
-    //     expect(AppError.badRequest).not.toBeCalled()
-    //     expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the randomization service.', undefined, '17F003')
-    //     expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
-    //     expect(db.experiments.getRandomizationStrategyIdByExperimentId).toBeCalledWith(7, false, testTx)
-    //     expect(target.mergeSetEntriesToUnits).not.toBeCalled()
-    //     expect(err).toBe(testError)
-    //   })
-    // })
   })
 
   describe('mergeSetEntriesToUnits', () => {

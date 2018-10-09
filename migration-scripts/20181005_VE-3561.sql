@@ -22,9 +22,10 @@ WITH strategy_mapper AS (
         ('17', null, 'split-planter'),
         ('18', null, ''), -- Prod custom
         ('19', 'strip-split-plot', 'no-randomization'),
-        ('20', 'split-planter', null),
+        ('20', 'split-planter', 'custom-build-on-map'),
         ('21', '', null), -- NP custom
-        ('22', 'no-randomization', null)
+        ('22', 'no-randomization', null),
+        ('23', 'custom-build-on-map', null)
     ) s (randId, np_name, prod_name)
 )
 UPDATE experiment

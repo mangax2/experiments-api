@@ -96,6 +96,7 @@ type ExperimentInfo {
   description: String
   status: String
   capacityRequestSyncDate: String
+  randomizationStrategyCode: String
   auditInfo: AuditInfo
   owners: Owner
 }

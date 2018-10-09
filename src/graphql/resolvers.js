@@ -99,6 +99,7 @@ export default {
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),
+    randomizationStrategyCode: property('randomization_strategy_code'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
     owners: (entity, args, context) =>

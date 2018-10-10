@@ -3,10 +3,7 @@ import _ from 'lodash'
 import inflector from 'json-inflector'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
-import PingUtil from './utility/PingUtil'
-import HttpUtil from './utility/HttpUtil'
 import AppError from './utility/AppError'
-import cfServices from './utility/ServiceConfig'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
@@ -171,23 +168,12 @@ class ExperimentalUnitService {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }
-      const randomizationPromise = PingUtil.getMonsantoHeader().then(header =>
-        HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header))
-        .then(data => data.body)
-        .catch((err) => {
-          logger.error(`[[${context.requestId}]] An error occurred while communicating with the randomization service`, err)
-          throw AppError.internalServerError('An error occurred while communicating with the randomization service.', undefined, getFullErrorCode('17F003'))
-        })
       return Promise.all([
         db.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id, tx),
-        db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId(setInfo.experiment_id,
-          tx),
-        randomizationPromise,
-      ]).then(([combinationElements, selectedRandomizationStrategy, randomizationStrategies]) => {
-        const customStrategy = _.find(randomizationStrategies, rs => rs.name === 'Custom')
-        if (!customStrategy || !selectedRandomizationStrategy ||
-          selectedRandomizationStrategy.value !== customStrategy.id.toString()) {
-          throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom" randomization strategy.', undefined, getFullErrorCode('17F004'))
+        db.experiments.find(setInfo.experiment_id, false, tx),
+      ]).then(([combinationElements, experiment]) => {
+        if (experiment.randomization_strategy_code !== 'custom-build-on-map') {
+          throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, getFullErrorCode('17F004'))
         }
         const elementsByTreatmentId = _.groupBy(combinationElements, 'treatment_id')
         const factorLevelIdsToTreatmentIdMapper = {}

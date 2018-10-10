@@ -242,55 +242,6 @@ const duplicateDesignSpecificationScript =
   "INTO TEMP design_spec_detail_ids " +
   "FROM temp_design_spec_detail_ids;"
 
-const duplicateGroupScript =
-  "WITH temp_mapped_group_ids AS (" +
-    "INSERT INTO public.group " +
-    "SELECT (c).* FROM (" +
-      "SELECT g " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('group', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('parent_id', g.id::text) " +
-        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-        "#= hstore('set_id', null) " +
-      "AS c FROM public.group g " +
-    "WHERE experiment_id = $1) sub " +
-    "RETURNING id AS new_id, parent_id AS old_id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP mapped_group_ids " +
-  "FROM temp_mapped_group_ids;" +
-  "UPDATE public.group " +
-  "SET parent_id = mgi.new_id " +
-  "FROM public.group gtc " +
-    "LEFT OUTER JOIN mapped_group_ids mgi ON gtc.parent_id = mgi.old_id " +
-  "WHERE public.group.id IN (SELECT new_id FROM mapped_group_ids) " +
-    "AND public.group.parent_id = gtc.id;"
-
-const duplicateGroupValueScript =
-  "WITH temp_group_value_ids AS (" +
-    "INSERT INTO group_value " +
-    "SELECT (c).* FROM (" +
-      "SELECT gv " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('group_value', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('group_id', mgi.new_id::text) " +
-        "#= hstore('factor_level_id', mfli.new_id::text) " +
-      "AS c FROM group_value gv " +
-        "INNER JOIN mapped_group_ids mgi ON gv.group_id = mgi.old_id " +
-        "LEFT OUTER JOIN mapped_factor_level_ids mfli ON gv.factor_level_id = mfli.old_id " +
-        ") sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP group_value_ids " +
-  "FROM temp_group_value_ids;"
-
 const duplicateUnitScript =
   "WITH temp_unit_ids AS (" +
     "INSERT INTO unit " +
@@ -301,12 +252,11 @@ const duplicateUnitScript =
         "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
-        "#= hstore('group_id', mgi.new_id::text) " +
+        "#= hstore('group_id', null::text) " +
         "#= hstore('treatment_id', mti.new_id::text) " +
         "#= hstore('set_entry_id', null) " +
       "AS c FROM unit u " +
-        "INNER JOIN mapped_treatment_ids mti ON u.treatment_id = mti.old_id " +
-        "INNER JOIN mapped_group_ids mgi ON u.group_id = mgi.old_id) sub " +
+        "INNER JOIN mapped_treatment_ids mti ON u.treatment_id = mti.old_id) sub " +
     "RETURNING id" +
   ")" +
   "SELECT * " +
@@ -334,8 +284,6 @@ class duplicationRepo {
         duplicateCombinationElementScript +
         duplicateUnitSpecificationScript +
         duplicateDesignSpecificationScript +
-        duplicateGroupScript +
-        duplicateGroupValueScript +
         duplicateUnitScript +
       " SELECT * FROM experiment_parent;",
     [experimentId, context.userId,isTemplate.toString()],

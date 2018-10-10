@@ -42,6 +42,7 @@ describe('SetsChangesListener', () => {
             cert: 'cert',
             key: 'key',
             passphrase: 'password',
+            rejectUnauthorized: false,
           },
         }, ['topic'])
       })

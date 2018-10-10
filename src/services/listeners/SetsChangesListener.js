@@ -21,6 +21,7 @@ class SetsChangesListener {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
+        ca: VaultUtil.kafkaCA,
       },
       encoding: 'buffer',
     }

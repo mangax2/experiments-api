@@ -13,6 +13,7 @@ class KafkaProducer {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
+        ca: VaultUtil.kafkaCA,
       },
     }
 

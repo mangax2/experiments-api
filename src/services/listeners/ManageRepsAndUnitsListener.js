@@ -23,6 +23,7 @@ class ManageRepsAndUnitsListener {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
+        ca: VaultUtil.kafkaCA,
       },
     }
     const topics = [cfServices.experimentsKafka.value.topics.repPackingTopic]

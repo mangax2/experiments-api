@@ -22,6 +22,7 @@ class SetsChangesListener {
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
         ca: VaultUtil.kafkaCA,
+        rejectUnauthorized: false,
       },
       encoding: 'buffer',
     }

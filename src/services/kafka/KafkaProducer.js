@@ -14,6 +14,7 @@ class KafkaProducer {
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
         ca: VaultUtil.kafkaCA,
+        rejectUnauthorized: false,
       },
     }
 

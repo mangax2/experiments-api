@@ -36,7 +36,7 @@ describe('VaultUtil', () => {
       HttpUtil.get = mockResolve({
         body: {
           data: {
-            appUser: 'testUser', appUserPassword: 'testPassword', privateKey: '', clientCert: '',
+            appUser: 'testUser', appUserPassword: 'testPassword', privateKey: '', clientCert: '', ca: '',
           },
         },
       })

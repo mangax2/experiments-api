@@ -24,9 +24,10 @@ class ManageRepsAndUnitsListener {
         key: VaultUtil.kafkaPrivateKey,
         passphrase: VaultUtil.kafkaPassword,
         ca: VaultUtil.kafkaCA,
-        rejectUnauthorized: false,
       },
     }
+
+    console.info(JSON.stringify(params.sslOptions))
     const topics = [cfServices.experimentsKafka.value.topics.repPackingTopic]
     this.consumer = ManageRepsAndUnitsListener.createConsumer(params, topics)
 

@@ -74,7 +74,6 @@ describe('ManageRepsAndUnitsListener', () => {
             cert: 'cert',
             key: 'key',
             passphrase: 'password',
-            rejectUnauthorized: false,
           },
         }, ['topic'])
       })

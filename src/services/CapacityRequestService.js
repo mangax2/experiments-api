@@ -86,8 +86,16 @@ class CapacityRequestService {
   syncCapacityRequestDataWithExperiment(experimentId, capacityRequestData, context, tx) {
     return this.securityService.permissionsCheck(experimentId, context, false, tx).then(() => {
       const syncPromises = []
-
       const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
+      if (designSpecificationDetailValues.locations) {
+        return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
+          .then((response) => {
+            if (designSpecificationDetailValues.locations < response.count) {
+              throw AppError.badRequest('Cannot remove locations from an experiment that are' +
+                ' linked to sets', undefined, getFullErrorCode('1FV002'))
+            }
+          })
+      }
       const unitSpecificationDetailValues = _.pick(capacityRequestData, ['number of rows',
         'row length', 'row spacing', 'plot row length uom', 'row spacing uom'])
       if (_.keys(designSpecificationDetailValues).length > 0) {

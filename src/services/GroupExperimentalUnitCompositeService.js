@@ -539,12 +539,24 @@ class GroupExperimentalUnitCompositeService {
   saveDesignSpecsAndUnits = (experimentId, designSpecsAndUnits, context, isTemplate, tx) => {
     if (designSpecsAndUnits) {
       const { designSpecifications, units } = designSpecsAndUnits
+      if (units) {
+        const numberOfLocations = _.max(_.map(units, 'location'))
+        return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
+          .then((response) => {
+            if (numberOfLocations < response.count) {
+              throw AppError.badRequest('Cannot remove locations from an experiment that are' +
+                ' linked to sets', undefined, getFullErrorCode('1FV002'))
+            }
+          })
+      }
       return Promise.all([
         this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
         this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
           designSpecifications, experimentId, context, isTemplate, tx,
         ),
-      ]).then(() => AppUtil.createCompositePostResponse())
+      ]).then(() => {
+        AppUtil.createCompositePostResponse()
+      })
     }
 
     throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))

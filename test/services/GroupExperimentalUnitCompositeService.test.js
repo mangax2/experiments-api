@@ -1492,11 +1492,37 @@ describe('GroupExperimentalUnitCompositeService', () => {
         designSpecifications: [],
         units: [],
       }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+      }
 
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
         expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
         expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
+      })
+    })
+
+    test('throws and error when locations are less than set associated with locations', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockResolve(),
+      }
+      target.saveUnitsByExperimentId = mockResolve()
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndUnits = {
+        designSpecifications: [],
+        units: [{ location: 1 }, { location: 2 }],
+      }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+      }
+      AppError.badRequest = mock()
+
+      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
 
@@ -1513,7 +1539,12 @@ describe('GroupExperimentalUnitCompositeService', () => {
         units: [],
       }
 
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+      }
+
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
         expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
         expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()

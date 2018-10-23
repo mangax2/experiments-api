@@ -233,7 +233,7 @@ describe('CapacityRequestService', () => {
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
 
       db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
       }
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
@@ -264,7 +264,7 @@ describe('CapacityRequestService', () => {
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
 
       db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 5 }),
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 5 }),
       }
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),

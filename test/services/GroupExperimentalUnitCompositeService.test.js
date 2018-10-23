@@ -1493,7 +1493,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         units: [],
       }
       db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
       }
 
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {
@@ -1516,7 +1516,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         units: [{ location: 1 }, { location: 2 }],
       }
       db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
       }
       AppError.badRequest = mock()
 
@@ -1540,7 +1540,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       }
 
       db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ count: 3 }),
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
       }
 
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {

@@ -542,7 +542,7 @@ class GroupExperimentalUnitCompositeService {
       const numberOfLocations = _.max(_.map(units, 'location'))
       return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
         .then((response) => {
-          if (units && (numberOfLocations < response.count)) {
+          if (units && (numberOfLocations < response.max)) {
             throw AppError.badRequest('Cannot remove locations from an experiment that are' +
                 ' linked to sets', undefined, getFullErrorCode('1FV002'))
           }

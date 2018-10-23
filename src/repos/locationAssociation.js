@@ -101,7 +101,7 @@ class locationAssociationRepo {
 
   @setErrorCode('5P9000')
   findNumberOfLocationsAssociatedWithSets = (experimentId, tx = this.rep) =>
-    tx.oneOrNone('SELECT count(location) FROM location_association WHERE experiment_id =' +
+    tx.oneOrNone('SELECT max(location) FROM location_association WHERE experiment_id =' +
       ' $1', experimentId)
 }
 

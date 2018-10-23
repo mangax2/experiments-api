@@ -90,9 +90,9 @@ class CapacityRequestService {
       return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
         .then((response) => {
           if (designSpecificationDetailValues.locations &&
-            (designSpecificationDetailValues.locations < response.count)) {
+            (designSpecificationDetailValues.locations < response.max)) {
             throw AppError.badRequest('Cannot sync capacity request data because some' +
-              ' locations associated with sets are removed', undefined, getFullErrorCode('104001'))
+              ' locations associated with sets would be removed', undefined, getFullErrorCode('104001'))
           }
           const unitSpecificationDetailValues = _.pick(capacityRequestData, ['number of rows',
             'row length', 'row spacing', 'plot row length uom', 'row spacing uom'])

@@ -1,11 +1,11 @@
 import * as _ from 'lodash'
 import log4js from 'log4js'
+import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

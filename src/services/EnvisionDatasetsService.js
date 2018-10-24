@@ -1,6 +1,6 @@
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 import { SCHEMA, COLITEM } from '../envision/schema'
 

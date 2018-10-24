@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import log4js from 'log4js'
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfService from './utility/ServiceConfig'
@@ -14,7 +15,6 @@ import SecurityService from './SecurityService'
 import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import { notifyChanges } from '../decorators/notifyChanges'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

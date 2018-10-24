@@ -2,10 +2,10 @@ import { ConsumerGroup } from 'kafka-node'
 import log4js from 'log4js'
 import avro from 'avsc'
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 import db from '../../db/DbManager'
-import Transactional from '../../decorators/transactional'
 import { sendKafkaNotification } from '../../decorators/notifyChanges'
 
 const logger = log4js.getLogger('SetsChangesListener')

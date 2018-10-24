@@ -1,8 +1,8 @@
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
-import Transactional from '../decorators/transactional'
 import TagService from './TagService'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 

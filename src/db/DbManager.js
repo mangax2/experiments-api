@@ -1,6 +1,7 @@
 import promise from 'bluebird'
 import pgPromise from 'pg-promise'
 import log4js from 'log4js'
+import { setDbInstance } from '@monsantoit/pg-transactional'
 import config from '../../config'
 import CombinationElement from '../repos/combinationElement'
 import DependentVariable from '../repos/dependentVariable'
@@ -94,5 +95,7 @@ const pgp = pgPromise(options)
 
 // Create the database instance with extensions:
 const db = pgp(dbConfig)
+
+setDbInstance(db)
 
 module.exports = db

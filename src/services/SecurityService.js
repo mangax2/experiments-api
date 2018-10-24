@@ -1,5 +1,6 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import config from '../../config'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
@@ -7,7 +8,6 @@ import cfServices from './utility/ServiceConfig'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
 import db from '../db/DbManager'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

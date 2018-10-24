@@ -1,9 +1,9 @@
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import ExperimentalUnitService from './ExperimentalUnitService'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

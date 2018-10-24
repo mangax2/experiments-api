@@ -1,8 +1,8 @@
 import log4js from 'log4js'
+import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { getFullErrorCode, setErrorCode } = setErrorDecorator()

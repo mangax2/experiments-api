@@ -231,6 +231,10 @@ describe('CapacityRequestService', () => {
         syncUnitSpecificationDetails: mockResolve(),
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
+
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
+      }
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
@@ -239,10 +243,43 @@ describe('CapacityRequestService', () => {
         locations: 4,
         reps: 3,
       }
-
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
-        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+      })
+    })
+
+    test('Fails to call designSpecificationDetailService and update capacity request sync date ', () => {
+      const securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      const designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mockResolve(),
+      }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
+
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 5 }),
+      }
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
+      }
+
+      const capacityRequestData = {
+        locations: 4,
+        reps: 3,
+      }
+      AppError.badRequest = mock()
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).catch(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
+        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
     })

@@ -98,6 +98,11 @@ class locationAssociationRepo {
   @setErrorCode('5P8000')
   removeBySetId = (setId, tx = this.rep) =>
     tx.oneOrNone('DELETE FROM location_association WHERE set_id = $1 RETURNING experiment_id', setId)
+
+  @setErrorCode('5P9000')
+  findNumberOfLocationsAssociatedWithSets = (experimentId, tx = this.rep) =>
+    tx.oneOrNone('SELECT max(location) FROM location_association WHERE experiment_id =' +
+      ' $1', experimentId)
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

@@ -86,26 +86,33 @@ class CapacityRequestService {
   syncCapacityRequestDataWithExperiment(experimentId, capacityRequestData, context, tx) {
     return this.securityService.permissionsCheck(experimentId, context, false, tx).then(() => {
       const syncPromises = []
-
       const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
-      const unitSpecificationDetailValues = _.pick(capacityRequestData, ['number of rows',
-        'row length', 'row spacing', 'plot row length uom', 'row spacing uom'])
-      if (_.keys(designSpecificationDetailValues).length > 0) {
-        syncPromises.push(
-          this.designSpecificationDetailService.syncDesignSpecificationDetails(
-            designSpecificationDetailValues, experimentId, context, tx,
-          ))
-      }
-      if (_.keys(unitSpecificationDetailValues).length > 0) {
-        syncPromises.push(
-          this.unitSpecificationDetailService.syncUnitSpecificationDetails(
-            unitSpecificationDetailValues, experimentId, context, tx,
-          ))
-      }
+      return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
+        .then((response) => {
+          if (designSpecificationDetailValues.locations &&
+            (designSpecificationDetailValues.locations < response.max)) {
+            throw AppError.badRequest('Cannot sync capacity request data because some' +
+              ' locations associated with sets would be removed', undefined, getFullErrorCode('104001'))
+          }
+          const unitSpecificationDetailValues = _.pick(capacityRequestData, ['number of rows',
+            'row length', 'row spacing', 'plot row length uom', 'row spacing uom'])
+          if (_.keys(designSpecificationDetailValues).length > 0) {
+            syncPromises.push(
+              this.designSpecificationDetailService.syncDesignSpecificationDetails(
+                designSpecificationDetailValues, experimentId, context, tx,
+              ))
+          }
+          if (_.keys(unitSpecificationDetailValues).length > 0) {
+            syncPromises.push(
+              this.unitSpecificationDetailService.syncUnitSpecificationDetails(
+                unitSpecificationDetailValues, experimentId, context, tx,
+              ))
+          }
+          syncPromises.push(db
+            .experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
 
-      syncPromises.push(db.experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
-
-      return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
+          return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
+        })
     })
   }
 }

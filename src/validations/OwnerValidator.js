@@ -6,9 +6,8 @@ import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
 import cfServices from '../services/utility/ServiceConfig'
 import config from '../../config'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 
 function getPAPIResult(graphqlQuery, errorCode) {

@@ -1,6 +1,4 @@
-import setErrorDecorator from '../decorators/setErrorDecorator'
-
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS experiment_parent; " +
   "DROP TABLE IF EXISTS owner_ids; " +

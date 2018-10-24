@@ -1,7 +1,6 @@
 import _ from 'lodash'
-import setErrorDecorator from '../decorators/setErrorDecorator'
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
-const { setErrorCode } = setErrorDecorator()
 const columns = 'ce.id, ce.factor_level_id,ce.treatment_id, ce.created_user_id, ce.created_date, ce.modified_user_id, ce.modified_date'
 const genericSqlStatement = `SELECT ${columns} FROM combination_element ce`
 

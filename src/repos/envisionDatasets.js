@@ -1,6 +1,4 @@
-import setErrorDecorator from '../decorators/setErrorDecorator'
-
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 const grouplistScript =
   "DROP TABLE IF EXISTS grouplist;" +

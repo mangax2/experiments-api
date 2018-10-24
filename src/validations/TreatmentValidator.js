@@ -4,9 +4,8 @@ import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 function createLevelIdToFactorIdMap(levelDbEntities) {
   return _.zipObject(

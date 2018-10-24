@@ -1,9 +1,8 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 3EXXXX
 class TagValidator extends SchemaValidator {

@@ -3,9 +3,8 @@ import log4js from 'log4js'
 import validator from 'validator'
 import AppError from '../services/utility/AppError'
 import ReferentialIntegrityService from '../services/ReferentialIntegrityService'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode } = setErrorDecorator()
+const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('BaseValidator')
 

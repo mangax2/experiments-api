@@ -6,11 +6,10 @@ import AppUtil from './utility/AppUtil'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 import db from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('CapacityRequestService')
 

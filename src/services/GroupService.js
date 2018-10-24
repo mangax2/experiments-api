@@ -6,9 +6,8 @@ import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import GroupValidator from '../validations/GroupValidator'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('GroupService')
 

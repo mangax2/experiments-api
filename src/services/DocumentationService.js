@@ -3,9 +3,8 @@ import cf from 'aws-cloudfront-sign'
 import HttpUtil from './utility/HttpUtil'
 import VaultUtil from './utility/VaultUtil'
 import config from '../../config'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 14XXXX
 class DocumentationService {

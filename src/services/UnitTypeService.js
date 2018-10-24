@@ -1,9 +1,8 @@
 import log4js from 'log4js'
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('UnitTypeService')
 

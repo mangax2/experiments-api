@@ -1,11 +1,10 @@
 import * as _ from 'lodash'
 import AppError from './utility/AppError'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfService from './utility/ServiceConfig'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1WXXXX
 class ListsService {

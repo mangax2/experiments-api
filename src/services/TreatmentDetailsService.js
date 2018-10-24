@@ -7,9 +7,8 @@ import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1QXXXX
 class TreatmentDetailsService {

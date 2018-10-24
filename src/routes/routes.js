@@ -171,6 +171,9 @@ router.get('/design-specification-details/:id', (req, res, next) => new DesignSp
 router.get('/experiments/:id/treatments', (req, res, next) => new TreatmentService().getTreatmentsByExperimentId(req.params.id, false, req.context)
   .then(treatments => res.json(treatments))
   .catch(err => next(err)))
+router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentService().handleAllTreatments(req.params.id, req.body.treatments, req.context, false)
+  .then(result => res.json(result))
+  .catch(err => next(err)))
 router.get('/treatments/:id', (req, res, next) => new TreatmentService().getTreatmentById(req.params.id, req.context)
   .then(treatment => res.json(treatment))
   .catch(err => next(err)))
@@ -375,6 +378,9 @@ router.post('/templates/:id/composites/treatments', (req, res, next) => new Trea
 
 router.get('/templates/:id/treatments', (req, res, next) => new TreatmentService().getTreatmentsByExperimentId(req.params.id, true, req.context)
   .then(treatments => res.json(treatments))
+  .catch(err => next(err)))
+router.put('/templates/:id/treatments', (req, res, next) => new TreatmentService().handleAllTreatments(req.params.id, req.body.treatments, req.context, true)
+  .then(result => res.json(result))
   .catch(err => next(err)))
 
 router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, true, req.context)

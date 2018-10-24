@@ -51,7 +51,7 @@ class TreatmentDetailsService {
         treatment_number: treatment.treatment_number,
         is_control: treatment.is_control,
         notes: treatment.notes,
-        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id', 'factor_level_id'])),
+        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
     })
   }
@@ -68,6 +68,59 @@ class TreatmentDetailsService {
           .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
             .then(() => AppUtil.createCompositePostResponse())))
     })
+  }
+
+
+  handleAllTreatments(experimentId, treatments, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
+        .then((result) => {
+          if (result.length === 0 && treatments.length > 0) {
+            return this.createTreatments(treatments, context, tx)
+              .then(() => AppUtil.createNoContentResponse())
+          }
+
+          if (result.length > 0 && treatments.length === 0) {
+            return this.deleteTreatments(_.map(result, 'id'), context, tx)
+              .then(() => AppUtil.createNoContentResponse())
+          }
+
+          if (treatments.length > 0 && result.length > 0) {
+            _.forEach(result, (treatment) => {
+              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, 'factor_level_id').sort(), ',')
+            })
+
+            _.forEach(treatments, (treatment) => {
+              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
+            })
+
+            const adds = _.differenceBy(treatments, result, 'sortedFactorLevelIds')
+            const deletes = _.map(_.differenceBy(result, treatments, 'sortedFactorLevelIds'), 'id')
+
+            const updates = _.intersectionBy(treatments, result, 'sortedFactorLevelIds')
+            _.forEach(updates, (updateTreatment) => {
+              const dbTreatment = _.find(result, treatment =>
+                treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds)
+              updateTreatment.treatmentId = dbTreatment.id
+
+              _.forEach(updateTreatment.combinationElements, (ce) => {
+                const dbCombination = _.find(dbTreatment.combination_elements,
+                  dbCE => dbCE.factor_level_id === ce.factorLevelId)
+                ce.id = dbCombination.id
+              })
+            })
+
+            TreatmentDetailsService.populateExperimentId(updates, experimentId)
+            TreatmentDetailsService.populateExperimentId(adds, experimentId)
+
+            return this.deleteTreatments(deletes, context, tx)
+              .then(() => this.updateTreatments(updates, context, tx)
+                .then(() => this.createTreatments(adds, context, tx)
+                  .then(() => AppUtil.createNoContentResponse())))
+          }
+
+          return AppUtil.createNoContentResponse()
+        }))
   }
 
   @setErrorCode('1Q3000')

@@ -29,7 +29,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const promMetrics = require('@monsantoit/prom-metrics')
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
-  const setErrorDecorator = require('./decorators/setErrorDecorator')
+  const { setErrorPrefix, setPromiseLibrary } = require('@monsantoit/error-decorator')()
   const lambdaPerformanceService = require('./services/LambdaPerformanceService')
   const app = express()
 
@@ -37,7 +37,8 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   lambdaPerformanceService.setUpPrometheus(prometheusClient, 7)
   lambdaPerformanceService.setUpPrometheus(prometheusClient, 30)
 
-  setErrorDecorator().setErrorPrefix('EXP')
+  setPromiseLibrary(require('bluebird'))
+  setErrorPrefix('EXP')
   require('./services/utility/AWSUtil').configure(serviceConfig.aws.accessKeyId, serviceConfig.aws.secretAccessKey)
 
   const requestContext = require('./middleware/requestContext')

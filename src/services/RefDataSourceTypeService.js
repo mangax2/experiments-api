@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import db from '../db/DbManager'
 import RefDataSourceService from './RefDataSourceService'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1LXXXX
 class RefDataSourceTypeService {

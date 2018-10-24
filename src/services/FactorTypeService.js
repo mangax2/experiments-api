@@ -1,9 +1,8 @@
 import db from '../db/DbManager'
 import FactorTypesValidator from '../validations/FactorTypesValidator'
 import AppError from './utility/AppError'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1EXXXX
 class FactorTypeService {

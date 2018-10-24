@@ -6,9 +6,8 @@ import AppError from './utility/AppError'
 import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('FactorService')
 

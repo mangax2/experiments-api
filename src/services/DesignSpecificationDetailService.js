@@ -13,9 +13,8 @@ import FactorService from './FactorService'
 import PingUtil from './utility/PingUtil'
 import HttpUtil from './utility/HttpUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('DesignSpecificationDetailService')
 

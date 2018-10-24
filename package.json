@@ -27,6 +27,7 @@
   "dependencies": {
     "@monsantoit/cloud-foundry": "3.0.0",
     "@monsantoit/oauth-ping": "4.4.0",
+    "@monsantoit/error-decorator": "1.0.1",
     "@monsantoit/ping-page": "2.0.5",
     "@monsantoit/prom-metrics": "3.0.1",
     "@monsantoit/pg-transactional": "1.0.1",

@@ -4,9 +4,8 @@ import db from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import ExperimentalUnitService from './ExperimentalUnitService'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1YXXXX
 class LocationAssociationService {

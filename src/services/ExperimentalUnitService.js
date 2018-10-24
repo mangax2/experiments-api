@@ -8,10 +8,9 @@ import AppError from './utility/AppError'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 import { notifyChanges } from '../decorators/notifyChanges'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('ExperimentalUnitService')
 

@@ -4,9 +4,8 @@ import TagValidator from '../validations/TagValidator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('TagService')
 

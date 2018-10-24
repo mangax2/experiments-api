@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import BaseValidator from './BaseValidator'
 import AppError from '../services/utility/AppError'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { getFullErrorCode, setErrorCode } = setErrorDecorator()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 3HXXXX
 class VariablesValidator extends BaseValidator {

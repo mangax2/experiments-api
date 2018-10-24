@@ -2,9 +2,8 @@ import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import FactorLevelAssociationsValidator from '../validations/FactorLevelAssociationValidator'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1BXXXX
 class FactorLevelAssociationService {

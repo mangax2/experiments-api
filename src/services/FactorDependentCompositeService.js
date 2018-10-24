@@ -12,10 +12,9 @@ import SecurityService from './SecurityService'
 import RefDataSourceService from './RefDataSourceService'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 import { notifyChanges } from '../decorators/notifyChanges'
 
-const { addErrorHandling, setErrorCode } = setErrorDecorator()
+const { addErrorHandling, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
 // Error Codes 1AXXXX

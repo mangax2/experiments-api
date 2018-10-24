@@ -1,6 +1,4 @@
-import setErrorDecorator from '../decorators/setErrorDecorator'
-
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 56XXXX
 class experimentSummaryRepo {

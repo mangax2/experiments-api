@@ -1,7 +1,5 @@
 import _ from 'lodash'
-import setErrorDecorator from '../decorators/setErrorDecorator'
-
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 5EXXXX
 class ownerRepo {

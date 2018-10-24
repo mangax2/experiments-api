@@ -1,10 +1,9 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
-import setErrorDecorator from '../decorators/setErrorDecorator'
 import { SCHEMA, COLITEM } from '../envision/schema'
 
-const { setErrorCode } = setErrorDecorator()
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1VXXXX
 class EnvisionDatasetsService {

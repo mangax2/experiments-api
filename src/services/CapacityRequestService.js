@@ -1,12 +1,12 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import AppError from './utility/AppError'
 import AppUtil from './utility/AppUtil'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
 import setErrorDecorator from '../decorators/setErrorDecorator'
-import Transactional from '../decorators/transactional'
 import db from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 

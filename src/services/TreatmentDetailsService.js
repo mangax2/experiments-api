@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Transactional from '@monsantoit/pg-transactional'
 import TreatmentService from './TreatmentService'
 import CombinationElementService from './CombinationElementService'
 import FactorLevelService from './FactorLevelService'
@@ -6,7 +7,6 @@ import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
-import Transactional from '../decorators/transactional'
 import setErrorDecorator from '../decorators/setErrorDecorator'
 
 const { setErrorCode } = setErrorDecorator()

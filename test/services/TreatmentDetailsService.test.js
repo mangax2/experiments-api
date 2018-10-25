@@ -262,10 +262,10 @@ describe('TreatmentDetailsService', () => {
           id: 1,
           combination_elements: [
             {
-              factor_level_id: 100,
+              factor_level: { id: 100 },
             },
             {
-              factor_level_id: 101,
+              factor_level: { id: 101 },
             },
           ],
         },
@@ -273,10 +273,10 @@ describe('TreatmentDetailsService', () => {
           id: 2,
           combination_elements: [
             {
-              factor_level_id: 100,
+              factor_level: { id: 100 },
             },
             {
-              factor_level_id: 102,
+              factor_level: { id: 102 },
             },
           ],
         },
@@ -284,10 +284,10 @@ describe('TreatmentDetailsService', () => {
           id: 3,
           combination_elements: [
             {
-              factor_level_id: 100,
+              factor_level: { id: 100 },
             },
             {
-              factor_level_id: 103,
+              factor_level: { id: 103 },
             },
           ],
         },
@@ -338,6 +338,126 @@ describe('TreatmentDetailsService', () => {
         expect(target.createTreatments).toHaveBeenCalledWith([treatments[1], treatments[2]], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([1, 3], testContext, testTx)
+      })
+    })
+
+    test('handles duplicate passed in treatments when only one match is found in db', () => {
+      const dbTreatments = [
+        {
+          id: 1,
+          combination_elements: [
+            {
+              factor_level: { id: 100 },
+            },
+            {
+              factor_level: { id: 101 },
+            },
+          ],
+        },
+      ]
+      target.securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      target.getAllTreatmentDetails = mockResolve(dbTreatments)
+      target.createTreatments = mockResolve()
+      target.updateTreatments = mockResolve()
+      target.deleteTreatments = mockResolve()
+      AppUtil.createNoContentResponse = mock()
+
+      const treatments = [
+        {
+          notes: 'test notes',
+          isControl: true,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 100,
+            },
+            {
+              factorLevelId: 101,
+            },
+          ],
+        },
+        {
+          notes: 'test notes',
+          isControl: true,
+          treatmentNumber: 2,
+          combinationElements: [
+            {
+              factorLevelId: 100,
+            },
+            {
+              factorLevelId: 101,
+            },
+          ],
+        },
+      ]
+
+      return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
+        expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
+        expect(target.createTreatments).toHaveBeenCalledWith([treatments[1]], testContext, testTx)
+        expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([], testContext, testTx)
+      })
+    })
+
+    test('handles duplicate in db that is not used', () => {
+      const dbTreatments = [
+        {
+          id: 1,
+          treatment_number: 1,
+          combination_elements: [
+            {
+              factor_level: { id: 100 },
+            },
+            {
+              factor_level: { id: 101 },
+            },
+          ],
+        },
+        {
+          id: 2,
+          treatment_number: 2,
+          combination_elements: [
+            {
+              factor_level: { id: 100 },
+            },
+            {
+              factor_level: { id: 101 },
+            },
+          ],
+        },
+      ]
+      target.securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      target.getAllTreatmentDetails = mockResolve(dbTreatments)
+      target.createTreatments = mockResolve()
+      target.updateTreatments = mockResolve()
+      target.deleteTreatments = mockResolve()
+      AppUtil.createNoContentResponse = mock()
+
+      const treatments = [
+        {
+          notes: 'test notes',
+          isControl: true,
+          treatmentNumber: 1,
+          combinationElements: [
+            {
+              factorLevelId: 100,
+            },
+            {
+              factorLevelId: 101,
+            },
+          ],
+        },
+      ]
+
+      return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
+        expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
+        expect(target.createTreatments).toHaveBeenCalledWith([], testContext, testTx)
+        expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
+        expect(target.deleteTreatments).toHaveBeenCalledWith([2], testContext, testTx)
       })
     })
 

@@ -70,44 +70,78 @@ class TreatmentDetailsService {
     })
   }
 
-
+  @notifyChanges('update', 0, 3)
+  @setErrorCode('1QI000')
+  @Transactional('handleAllTreatments')
   handleAllTreatments(experimentId, treatments, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
       .then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
         .then((result) => {
-          if (result.length === 0 && treatments.length > 0) {
-            return this.createTreatments(treatments, context, tx)
+          const dbTreatments = _.sortBy(result, 'treatment_number')
+          const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
+
+          if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+            return this.createTreatments(sortedTreatments, context, tx)
               .then(() => AppUtil.createNoContentResponse())
           }
 
-          if (result.length > 0 && treatments.length === 0) {
-            return this.deleteTreatments(_.map(result, 'id'), context, tx)
+          if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+            return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
               .then(() => AppUtil.createNoContentResponse())
           }
 
-          if (treatments.length > 0 && result.length > 0) {
-            _.forEach(result, (treatment) => {
-              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, 'factor_level_id').sort(), ',')
+          if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+            _.forEach(dbTreatments, (treatment) => {
+              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
+              treatment.used = false
             })
 
-            _.forEach(treatments, (treatment) => {
+            _.forEach(sortedTreatments, (treatment) => {
               treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
             })
 
-            const adds = _.differenceBy(treatments, result, 'sortedFactorLevelIds')
-            const deletes = _.map(_.differenceBy(result, treatments, 'sortedFactorLevelIds'), 'id')
+            const adds = _.differenceBy(sortedTreatments, dbTreatments, 'sortedFactorLevelIds')
+            const deletes = _.map(_.differenceBy(dbTreatments, sortedTreatments, 'sortedFactorLevelIds'), 'id')
 
-            const updates = _.intersectionBy(treatments, result, 'sortedFactorLevelIds')
-            _.forEach(updates, (updateTreatment) => {
-              const dbTreatment = _.find(result, treatment =>
-                treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds)
-              updateTreatment.treatmentId = dbTreatment.id
+            const addFactorLevelIds = _.map(adds, 'sortedFactorLevelIds')
 
-              _.forEach(updateTreatment.combinationElements, (ce) => {
-                const dbCombination = _.find(dbTreatment.combination_elements,
-                  dbCE => dbCE.factor_level_id === ce.factorLevelId)
-                ce.id = dbCombination.id
-              })
+            _.forEach(dbTreatments, (treatment) => {
+              if (deletes.includes(treatment.id)) {
+                treatment.used = true
+              }
+            })
+
+            const updatesToCheck = _.filter(sortedTreatments, treatment =>
+              !addFactorLevelIds.includes(treatment.sortedFactorLevelIds))
+
+            const updates = []
+
+            _.forEach(updatesToCheck, (updateTreatment) => {
+              const dbTreatment = _.find(dbTreatments, treatment =>
+                treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
+                && treatment.used === false,
+              )
+
+              if (dbTreatment === undefined) {
+                adds.push(updateTreatment)
+              } else {
+                updateTreatment.id = dbTreatment.id
+                dbTreatment.used = true
+
+                _.forEach(updateTreatment.combinationElements, (ce) => {
+                  const dbCombination = _.find(dbTreatment.combination_elements,
+                    dbCE => dbCE.factor_level.id === ce.factorLevelId)
+                  ce.id = dbCombination.id
+                })
+
+                updates.push(updateTreatment)
+              }
+            })
+
+            _.forEach(dbTreatments, (treatment) => {
+              if (treatment.used === false) {
+                deletes.push(treatment.id)
+              }
             })
 
             TreatmentDetailsService.populateExperimentId(updates, experimentId)

@@ -100,19 +100,10 @@ class TreatmentDetailsService {
               treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
             })
 
-            const adds = _.differenceBy(sortedTreatments, dbTreatments, 'sortedFactorLevelIds')
-            const deletes = _.map(_.differenceBy(dbTreatments, sortedTreatments, 'sortedFactorLevelIds'), 'id')
+            const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
 
-            const addFactorLevelIds = _.map(adds, 'sortedFactorLevelIds')
-
-            _.forEach(dbTreatments, (treatment) => {
-              if (deletes.includes(treatment.id)) {
-                treatment.used = true
-              }
-            })
-
-            const updatesToCheck = _.filter(sortedTreatments, treatment =>
-              !addFactorLevelIds.includes(treatment.sortedFactorLevelIds))
+            const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
+              dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
 
             const updates = []
 
@@ -137,6 +128,8 @@ class TreatmentDetailsService {
                 updates.push(updateTreatment)
               }
             })
+
+            const deletes = []
 
             _.forEach(dbTreatments, (treatment) => {
               if (treatment.used === false) {

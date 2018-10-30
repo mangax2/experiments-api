@@ -51,7 +51,7 @@ class TreatmentDetailsService {
         treatment_number: treatment.treatment_number,
         is_control: treatment.is_control,
         notes: treatment.notes,
-        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id', 'factor_level_id'])),
+        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
     })
   }
@@ -68,6 +68,86 @@ class TreatmentDetailsService {
           .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
             .then(() => AppUtil.createCompositePostResponse())))
     })
+  }
+
+  @notifyChanges('update', 0, 3)
+  @setErrorCode('1QI000')
+  @Transactional('handleAllTreatments')
+  handleAllTreatments(experimentId, treatments, context, isTemplate, tx) {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
+        .then((result) => {
+          const dbTreatments = _.sortBy(result, 'treatment_number')
+          const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
+
+          if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+            return this.createTreatments(sortedTreatments, context, tx)
+              .then(() => AppUtil.createNoContentResponse())
+          }
+
+          if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+            return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
+              .then(() => AppUtil.createNoContentResponse())
+          }
+
+          if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+            _.forEach(dbTreatments, (treatment) => {
+              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
+              treatment.used = false
+            })
+
+            _.forEach(sortedTreatments, (treatment) => {
+              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
+            })
+
+            const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
+
+            const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
+              dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
+
+            const updates = []
+
+            _.forEach(updatesToCheck, (updateTreatment) => {
+              const dbTreatment = _.find(dbTreatments, treatment =>
+                treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
+                && treatment.used === false,
+              )
+
+              if (dbTreatment === undefined) {
+                adds.push(updateTreatment)
+              } else {
+                updateTreatment.id = dbTreatment.id
+                dbTreatment.used = true
+
+                _.forEach(updateTreatment.combinationElements, (ce) => {
+                  const dbCombination = _.find(dbTreatment.combination_elements,
+                    dbCE => dbCE.factor_level.id === ce.factorLevelId)
+                  ce.id = dbCombination.id
+                })
+
+                updates.push(updateTreatment)
+              }
+            })
+
+            const deletes = []
+
+            _.forEach(dbTreatments, (treatment) => {
+              if (treatment.used === false) {
+                deletes.push(treatment.id)
+              }
+            })
+
+            TreatmentDetailsService.populateExperimentId(updates, experimentId)
+            TreatmentDetailsService.populateExperimentId(adds, experimentId)
+
+            return this.deleteTreatments(deletes, context, tx)
+              .then(() => this.updateTreatments(updates, context, tx)
+                .then(() => this.createTreatments(adds, context, tx)
+                  .then(() => AppUtil.createNoContentResponse())))
+          }
+
+          return AppUtil.createNoContentResponse()
+        }))
   }
 
   @setErrorCode('1Q3000')

@@ -62,7 +62,8 @@ class SecurityService {
             throw AppError.badRequest('Profile API encountered an error', graphqlResult.errors, getFullErrorCode('1O2002'))
           }
           if (_.isNil(graphqlResult.data.getUserById)) {
-            throw AppError.badRequest('Unable to verify permissions. User not found', getFullErrorCode('1O2003'))
+            logger.error('Unable to verify permissions. User not found')
+            return []
           }
           return _.map(graphqlResult.data.getUserById.groups, 'id')
         })

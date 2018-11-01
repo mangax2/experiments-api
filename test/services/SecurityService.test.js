@@ -32,10 +32,10 @@ describe('SecurityService', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: null } } })
       AppError.badRequest = mock()
-      return target.getGroupsByUserId('kchit').then(() => {}, () => {
+      return target.getGroupsByUserId('kchit').then((data) => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify permissions. User not found', '1O2003')
+        expect(data).toEqual([])
         HttpUtil.post.mockReset()
         HttpUtil.post.mockClear()
       })

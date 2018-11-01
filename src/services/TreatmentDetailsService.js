@@ -81,6 +81,7 @@ class TreatmentDetailsService {
           const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
 
           if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+            TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
             return this.createTreatments(sortedTreatments, context, tx)
               .then(() => AppUtil.createNoContentResponse())
           }

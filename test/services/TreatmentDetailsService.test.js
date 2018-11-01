@@ -232,7 +232,7 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, [{}], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith([{ experimentId: 1 }], testContext, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.deleteTreatments).not.toHaveBeenCalled()
       })

@@ -1851,6 +1851,9 @@
         "tags": [
           "Treatments"
         ],
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -4211,6 +4214,9 @@
         "operationId": "getTreatmentsByTemplateId",
         "tags": [
           "Treatments"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "produces": [
           "application/json"

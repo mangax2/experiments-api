@@ -28,6 +28,19 @@ describe('SecurityService', () => {
       })
     })
 
+    test('throws an error  when getGroupsByUserId is null or undefined', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: null } } })
+      AppError.badRequest = mock()
+      return target.getGroupsByUserId('kchit').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify permissions. User not found', '1O2003')
+        HttpUtil.post.mockReset()
+        HttpUtil.post.mockClear()
+      })
+    })
+
     test('rejects when PAPI returns nothing', () => {
       PingUtil.getMonsantoHeader = mockResolve({})
       HttpUtil.post = mockResolve({})

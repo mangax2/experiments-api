@@ -8,6 +8,7 @@ import db from '../../db/DbManager'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
+import SetEntryRemovalService from '../prometheus/SetEntryRemovalService'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
@@ -46,11 +47,17 @@ class ManageRepsAndUnitsListener {
     const message = m.value.toString('utf8')
     logger.info(topic, partition, m.offset, message)
     const set = JSON.parse(message)
-    set.entryChanges = _.map(_.filter(set.entryChanges, 'id'), entryChange => ({
-      rep: entryChange.repNumber,
-      setEntryId: entryChange.id,
-      treatmentId: entryChange.value,
-    }))
+    set.entryChanges = _.map(_.filter(set.entryChanges, entry => entry.avail !== 0),
+      entryChange => ({
+        rep: entryChange.repNumber,
+        setEntryId: entryChange.id,
+        treatmentId: entryChange.value,
+      }))
+
+    if (_.filter(set.entryChanges, entry => !entry.setEntryId).length > 0) {
+      logger.warn('An error occurred while parsing the kafka message. At least one SetEntryId was not found.')
+      SetEntryRemovalService.addWarning()
+    }
 
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
       logger.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
@@ -71,7 +78,7 @@ class ManageRepsAndUnitsListener {
         const { location } = assoc
         const experimentId = assoc.experiment_id
         return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
-          location, { userId: 'REP_PACKING' }, tx)
+          location, { userId: 'REP_PACKING', isRepPacking: true }, tx)
           .then(() => {
             ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
           })

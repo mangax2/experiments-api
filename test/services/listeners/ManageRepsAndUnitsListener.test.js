@@ -1,6 +1,7 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import db from '../../../src/db/DbManager'
+import SetEntryRemovalService from '../../../src/services/prometheus/SetEntryRemovalService'
 
 jest.mock('kafka-node')
 
@@ -86,21 +87,25 @@ describe('ManageRepsAndUnitsListener', () => {
         const consumer = {}
         target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.resolve())
         target.consumer = consumer
+        SetEntryRemovalService.addWarning = jest.fn()
 
         return target.dataHandler([message], 'topic', 'partition').then(() => {
+          expect(SetEntryRemovalService.addWarning).not.toBeCalled()
           expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ setEntryId: 9886, rep: 1, treatmentId: 246 }] })
         })
       })
 
       test('swallows errors', () => {
         const target = new ManageRepsAndUnitsListener()
-        const message = { value: { toString: jest.fn(() => '{ "setId": "1234", "entryChanges": [{ "avail": 0 }, { "id": 9886, "repNumber": 1, "value": 246 }] }') }, offset: 3 }
+        const message = { value: { toString: jest.fn(() => '{ "setId": "1234", "entryChanges": [{ "avail": 0 }, { "repNumber": 1, "value": 246 }] }') }, offset: 3 }
         const consumer = {}
         target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.reject())
         target.consumer = consumer
+        SetEntryRemovalService.addWarning = jest.fn()
 
         return target.dataHandler([message], 'topic', 'partition').then(() => {
-          expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ setEntryId: 9886, rep: 1, treatmentId: 246 }] })
+          expect(SetEntryRemovalService.addWarning).toBeCalled()
+          expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ rep: 1, treatmentId: 246 }] })
         })
       })
     })
@@ -125,7 +130,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
           expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING' }, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
         })
       })
@@ -142,7 +147,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch(() => {
           expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING' }, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         })
       })

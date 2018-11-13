@@ -1,4 +1,4 @@
-const db = require('../db/DbManager')
+const db = require('../../db/DbManager')
 
 class LambdaPerformanceService {
   savePerformanceStats = (bodySize, responseSize, responseTime) =>

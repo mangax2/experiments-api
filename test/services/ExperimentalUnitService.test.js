@@ -3,6 +3,7 @@ import ExperimentalUnitService from '../../src/services/ExperimentalUnitService'
 import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
+import SetEntryRemovalService from '../../src/services/prometheus/SetEntryRemovalService'
 
 describe('ExperimentalUnitService', () => {
   let target
@@ -12,6 +13,47 @@ describe('ExperimentalUnitService', () => {
   beforeEach(() => {
     expect.hasAssertions()
     target = new ExperimentalUnitService()
+  })
+
+  describe('detectWarnableUnitUpdateConditions', () => {
+    test('detects set entry id being removed', () => {
+      SetEntryRemovalService.addWarning = mock()
+
+      target.detectWarnableUnitUpdateConditions([], [{ id: 5 }], [{ id: 5, setEntryId: 3 }], {})
+
+      expect(SetEntryRemovalService.addWarning).toBeCalled()
+    })
+    test('does not warn if no set entry id being removed', () => {
+      SetEntryRemovalService.addWarning = mock()
+
+      target.detectWarnableUnitUpdateConditions([], [{ id: 5, setEntryId: 3 }], [{ id: 5, setEntryId: 3 }], {})
+
+      expect(SetEntryRemovalService.addWarning).not.toBeCalled()
+    })
+
+    test('detects new units without set entry ids when rep packing', () => {
+      SetEntryRemovalService.addWarning = mock()
+
+      target.detectWarnableUnitUpdateConditions([{ id: 3 }], [], [], { isRepPacking: true })
+
+      expect(SetEntryRemovalService.addWarning).toBeCalled()
+    })
+
+    test('does not detect new units without set entry ids when not rep packing', () => {
+      SetEntryRemovalService.addWarning = mock()
+
+      target.detectWarnableUnitUpdateConditions([{ id: 3 }], [], [], { isRepPacking: false })
+
+      expect(SetEntryRemovalService.addWarning).not.toBeCalled()
+    })
+
+    test('does not warn if new units all have set entry ids when rep packing', () => {
+      SetEntryRemovalService.addWarning = mock()
+
+      target.detectWarnableUnitUpdateConditions([{ id: 3, setEntryId: 7 }], [], [], { isRepPacking: true })
+
+      expect(SetEntryRemovalService.addWarning).not.toBeCalled()
+    })
   })
 
   describe('batchCreateExperimentalUnits', () => {
@@ -641,6 +683,7 @@ describe('ExperimentalUnitService', () => {
         unitsToBeUpdated: 'unitsToBeUpdated',
       })
       target.saveToDb = mockResolve()
+      target.detectWarnableUnitUpdateConditions = mock()
       db.unit.batchFindAllByExperimentIdAndLocation = mockResolve('unitsFromDb')
 
       return target.mergeSetEntriesToUnits(7, 'unitsToSave', 5, {}, testTx).then(() => {

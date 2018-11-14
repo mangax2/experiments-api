@@ -9,6 +9,7 @@ import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
+import SetEntryRemovalService from './prometheus/SetEntryRemovalService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -204,8 +205,36 @@ class ExperimentalUnitService {
         const {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
         } = this.getDbActions(unitsToSave, unitsFromDB, location)
+
+        this.detectWarnableUnitUpdateConditions(unitsToBeCreated, unitsToBeUpdated, unitsFromDB,
+          context, experimentId, location)
+
         return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
       })
+
+  detectWarnableUnitUpdateConditions =
+    (unitsToBeCreated, unitsToBeUpdated, databaseUnits, context, experimentId, location) => {
+      const unitsHavingSetEntryIdsRemoved = _.filter(_.map(
+        _.filter(unitsToBeUpdated, x => !x.setEntryId),
+        unit => ({
+          id: unit.id,
+          setEntryId: _.find(databaseUnits, dbUnit => dbUnit.id === unit.id).setEntryId,
+        })), z => !!z.setEntryId)
+
+      if (unitsHavingSetEntryIdsRemoved.length > 0) {
+        logger.warn(`[[${context.requestId}]] Set Entry IDs are being overwritten by this change! ExperimentId: ${experimentId}, Location: ${location}, Overwritten data: ${JSON.stringify(unitsHavingSetEntryIdsRemoved)}`)
+        SetEntryRemovalService.addWarning()
+      }
+
+      if (context.isRepPacking) {
+        const numberOfUnitsCreatingWithoutSetEntryId =
+          _.filter(unitsToBeCreated, unit => !unit.setEntryId).length
+        if (numberOfUnitsCreatingWithoutSetEntryId > 0) {
+          logger.warn(`Rep packing is creating ${numberOfUnitsCreatingWithoutSetEntryId} unit(s) without set entries! ExperimentId: ${experimentId}, Location: ${location}`)
+          SetEntryRemovalService.addWarning()
+        }
+      }
+    }
 
   @setErrorCode('17H000')
   getDbActions = (unitsFromMessage, unitsFromDB, location) => {

@@ -8,7 +8,7 @@ import GroupValueService from './GroupValueService'
 import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
 import FactorService from './FactorService'
-import LambdaPerformanceService from './LambdaPerformanceService'
+import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'

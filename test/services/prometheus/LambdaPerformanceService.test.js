@@ -1,6 +1,6 @@
-import LambdaPerformanceService from '../../src/services/LambdaPerformanceService'
-import db from '../../src/db/DbManager'
-import { mock, mockResolve, mockReject } from '../jestUtil'
+import LambdaPerformanceService from '../../../src/services/prometheus/LambdaPerformanceService'
+import db from '../../../src/db/DbManager'
+import { mock, mockResolve, mockReject } from '../../jestUtil'
 
 LambdaPerformanceService.setInterval = () => {}
 

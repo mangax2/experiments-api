@@ -43,6 +43,7 @@ const cfServices = {
   },
   pingDataSource: {
     url: 'https://test.amp.monsanto.com/as/token.oauth2',
+    introspectionUrl: 'https://test.amp.monsanto.com/as/introspect.oauth2',
     clientId: process.env.EXPERIMENTS_API_CLIENT_ID,
     clientSecret: process.env.EXPERIMENTS_API_CLIENT_SECRET,
   },

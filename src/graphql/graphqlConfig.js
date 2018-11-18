@@ -49,6 +49,12 @@ function LimitNumQueries(maxQueries) {
   }
 }
 
+function LogQuery(request, context, logger) {
+  db.graphqlAudit.batchCreate([{ raw: request }], context).catch((err) => {
+    logger.warn(`Unable to persist GraphQL query to database. Reason: ${err.message}. Original query: ${JSON.stringify(request)}`)
+  })
+}
+
 function graphqlMiddlewareFunction(schema) {
   return function (request, response) {
     const logger = log4js.getLogger('experiments-api-graphql')
@@ -71,6 +77,7 @@ function graphqlMiddlewareFunction(schema) {
         validationRules: [LimitQueryDepth(10), LimitNumQueries(5)],
         graphiql: config.env === 'local',
       })
+      LogQuery(request.body, request.context, logger)
       return handler(request, response)
     })
   }

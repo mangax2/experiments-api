@@ -30,6 +30,7 @@ import UnitSpecification from '../repos/unitSpecification'
 import UnitSpecificationDetail from '../repos/unitSpecificationDetail'
 import UnitType from '../repos/unitType'
 import Comment from '../repos/comment'
+import GraphQLAudit from '../repos/graphqlAudit'
 
 const logger = log4js.getLogger('DbManager')
 
@@ -50,6 +51,7 @@ const options = {
     obj.factorLevel = FactorLevel(obj, pgp)
     obj.factorLevelAssociation = FactorLevelAssociation(obj, pgp)
     obj.factorType = FactorType(obj, pgp)
+    obj.graphqlAudit = GraphQLAudit(obj, pgp)
     obj.group = Group(obj, pgp)
     obj.groupType = GroupType(obj, pgp)
     obj.groupValue = GroupValue(obj, pgp)

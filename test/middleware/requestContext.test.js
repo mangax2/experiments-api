@@ -118,4 +118,30 @@ describe('requestContextMiddlewareFunction', () => {
     expect(res.set).toHaveBeenCalled()
     expect(nextFunc).not.toHaveBeenCalled()
   })
+
+  test('calls to get client id and sets user to SERVICE-USER when graphql call', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: {}, url: '/experiments-api/graphql' }
+    const res = { set: mock() }
+
+    return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      .then(() => {
+        expect(nextFunc).toHaveBeenCalled()
+        expect(req.context.userId).toEqual('SERVICE-USER')
+        expect(req.context.clientId).toEqual('PD-EXPERIMENTS-API-DEV-SVC')
+      })
+  })
+
+  test('calls to get client id when graphql call', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: validHeaders, url: '/experiments-api/graphql' }
+    const res = { set: mock() }
+
+    return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      .then(() => {
+        expect(nextFunc).toHaveBeenCalled()
+        expect(req.context.userId).toEqual('KMCCL')
+        expect(req.context.clientId).toEqual('PD-EXPERIMENTS-API-DEV-SVC')
+      })
+  })
 })

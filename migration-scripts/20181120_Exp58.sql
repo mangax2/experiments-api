@@ -1,0 +1,3 @@
+ALTER TABLE treatment
+ADD COLUMN in_all_blocks BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE treatment ADD COLUMN block INTEGER;

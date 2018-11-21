@@ -129,6 +129,8 @@ class TreatmentValidator extends SchemaValidator {
         keys: ['experimentId', 'treatmentNumber'],
         entity: db.treatment,
       },
+      { paramName: 'block', type: 'numeric' },
+      { paramName: 'inAllBlocks', type: 'boolean' },
     ]
   }
 
@@ -219,7 +221,7 @@ class TreatmentValidator extends SchemaValidator {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array', undefined, getFullErrorCode('3F2001')))
     }
-    return Promise.resolve()
+    return this.validateBlockValue(treatmentDTOs)
   }
 
   @setErrorCode('3F9000')
@@ -245,6 +247,40 @@ class TreatmentValidator extends SchemaValidator {
     this.checkForDuplicateBusinessKeys(treatmentDTOs)
     return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs, tx)
   }
+
+  @setErrorCode('3F4000')
+  validateBlockValue = (treatmentDTOs) => {
+    if (this.conflictBlocksExists(treatmentDTOs)) {
+      return Promise.reject(AppError.badRequest('Treatment request object contains conflicting blocking information',
+        undefined, getFullErrorCode('3F4001')))
+    }
+
+    if (this.blockForNotAllTreatments(treatmentDTOs)) {
+      return Promise.reject(AppError.badRequest('Only some of the treatments in the treatment request object contains the block information',
+        undefined, getFullErrorCode('3F4002')))
+    }
+
+    return Promise.resolve()
+  }
+
+  @setErrorCode('3F5000')
+  conflictBlocksExists = treatmentDTOs =>
+    _.find(treatmentDTOs, t => !_.isNil(t.block) && t.inAllBlocks === true) !== undefined
+
+  @setErrorCode('3F6000')
+  blockForNotAllTreatments = treatmentDTOs =>
+    this.noBlockTreamentExists(treatmentDTOs) && this.blockedTreatmentExists(treatmentDTOs)
+
+
+  @setErrorCode('3F7000')
+  noBlockTreamentExists = treatmentDTOs =>
+    _.find(treatmentDTOs,
+      t => _.isNil(t.block) && (_.isNil(t.inAllBlocks) || t.inAllBlocks === false)) !== undefined
+
+  @setErrorCode('3F8000')
+  blockedTreatmentExists = treatmentDTOs =>
+    _.find(treatmentDTOs, t => !_.isNil(t.block)) !== undefined
+    || _.find(treatmentDTOs, t => t.inAllBlocks === true) !== undefined
 }
 
 module.exports = TreatmentValidator

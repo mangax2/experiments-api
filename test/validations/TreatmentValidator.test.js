@@ -31,6 +31,8 @@ describe('TreatmentValidator', () => {
           keys: ['experimentId', 'treatmentNumber'],
           entity: {},
         },
+        { paramName: 'block', type: 'numeric' },
+        { paramName: 'inAllBlocks', type: 'boolean' },
       ]
 
       expect(TreatmentValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -74,6 +76,8 @@ describe('TreatmentValidator', () => {
             keys: ['experimentId', 'treatmentNumber'],
             entity: {},
           },
+          { paramName: 'block', type: 'numeric' },
+          { paramName: 'inAllBlocks', type: 'boolean' },
         ]
 
         expect(target.getSchema('POST')).toEqual(schema)
@@ -96,6 +100,8 @@ describe('TreatmentValidator', () => {
             keys: ['experimentId', 'treatmentNumber'],
             entity: {},
           },
+          { paramName: 'block', type: 'numeric' },
+          { paramName: 'inAllBlocks', type: 'boolean' },
           { paramName: 'id', type: 'numeric', required: true },
           { paramName: 'id', type: 'refData', entity: {} },
         ]
@@ -816,6 +822,90 @@ describe('TreatmentValidator', () => {
           { message: 'Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }', errorCode: '3F8001' },
         ])
       })
+    })
+  })
+
+  describe('validateBlockValue', () => {
+    test('treatments with conflict block info', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], block: 1, inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], block: 1,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], block: 1,
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+      return expect(target.validateBlockValue(treatments)).rejects.toEqual({ errorCode: '3F4000', message: 'error' })
+    })
+
+    test('treatments with some block info', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], block: 1,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], block: 1,
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+      return expect(target.validateBlockValue(treatments)).rejects.toEqual({ errorCode: '3F4000', message: 'error' })
+    })
+
+    test('treatments with no block info and treatments with all blocks', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }],
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+      return expect(target.validateBlockValue(treatments)).rejects.toEqual({ errorCode: '3F4000', message: 'error' })
+    })
+
+    test('all treatments with block info', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], block: 1,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], block: 1,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], block: 3,
+        },
+      ]
+      expect.assertions(1)
+      return expect(target.validateBlockValue(treatments)).resolves.toEqual()
+    })
+
+    test('all treatments with block info or in all blocks', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], block: 3,
+        },
+      ]
+      return expect(target.validateBlockValue(treatments)).resolves.toEqual()
     })
   })
 })

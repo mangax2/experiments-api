@@ -7,6 +7,7 @@ import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
+import TreatmentValidator from '../validations/TreatmentValidator'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -17,6 +18,7 @@ class TreatmentDetailsService {
     this.combinationElementService = new CombinationElementService()
     this.factorService = new FactorService()
     this.securityService = new SecurityService()
+    this.validator = new TreatmentValidator()
   }
 
   @setErrorCode('1Q1000')
@@ -50,6 +52,8 @@ class TreatmentDetailsService {
         id: treatment.id,
         treatment_number: treatment.treatment_number,
         is_control: treatment.is_control,
+        block: treatment.block,
+        in_all_blocks: treatment.in_all_blocks,
         notes: treatment.notes,
         combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
@@ -63,10 +67,13 @@ class TreatmentDetailsService {
     return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.updates, experimentId)
       TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.adds, experimentId)
-      return this.deleteTreatments(treatmentDetailsObj.deletes, context, tx)
-        .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
-          .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
-            .then(() => AppUtil.createCompositePostResponse())))
+      return this.validator.validateBlockValue(
+        _.concat(_.compact(treatmentDetailsObj.updates),
+          _.compact(treatmentDetailsObj.adds)))
+        .then(() => this.deleteTreatments(treatmentDetailsObj.deletes, context, tx)
+          .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
+            .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
+              .then(() => AppUtil.createCompositePostResponse()))))
     })
   }
 
@@ -141,10 +148,11 @@ class TreatmentDetailsService {
             TreatmentDetailsService.populateExperimentId(updates, experimentId)
             TreatmentDetailsService.populateExperimentId(adds, experimentId)
 
-            return this.deleteTreatments(deletes, context, tx)
-              .then(() => this.updateTreatments(updates, context, tx)
-                .then(() => this.createTreatments(adds, context, tx)
-                  .then(() => AppUtil.createNoContentResponse())))
+            return this.validator.validateBlockValue(_.concat(_.compact(updates), _.compact(adds)))
+              .then(() => this.deleteTreatments(deletes, context, tx)
+                .then(() => this.updateTreatments(updates, context, tx)
+                  .then(() => this.createTreatments(adds, context, tx)
+                    .then(() => AppUtil.createNoContentResponse()))))
           }
 
           return AppUtil.createNoContentResponse()

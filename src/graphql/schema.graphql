@@ -187,6 +187,8 @@ type Treatment {
   isControl: String
   treatmentNumber: Int
   notes: String
+  inAllBlocks: Boolean,
+  block: Int,
   auditInfo: AuditInfo
   combinationElements: [CombinationElement]
 }

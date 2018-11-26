@@ -2,8 +2,8 @@ CREATE TABLE audit.graphql_audit(
   raw VARCHAR NOT NULL,
   parsed jsonb[],
   request_time timestamp with time zone NOT NULL,
-  client_id VARCHAR (150) NOT NULL,
-  user_id VARCHAR (20)
+  client_id VARCHAR NOT NULL,
+  user_id VARCHAR
 );
 
 CREATE OR REPLACE FUNCTION process_graphql_audit()

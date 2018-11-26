@@ -50,9 +50,11 @@ function LimitNumQueries(maxQueries) {
 }
 
 function LogQuery(request, context, logger) {
-  db.graphqlAudit.batchCreate([{ raw: request }], context).catch((err) => {
-    logger.warn(`Unable to persist GraphQL query to database. Reason: ${err.message}. Original query: ${JSON.stringify(request)}`)
-  })
+  if (context.clientId) {
+    db.graphqlAudit.batchCreate([{ raw: request }], context).catch((err) => {
+      logger.warn(`Unable to persist GraphQL query to database. Reason: ${err.message}. Original query: ${JSON.stringify(request)}`)
+    })
+  }
 }
 
 function graphqlMiddlewareFunction(schema) {

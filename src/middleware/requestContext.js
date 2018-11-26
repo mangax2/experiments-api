@@ -1,8 +1,11 @@
+import log4js from 'log4js'
 import _ from 'lodash'
 import uuid from 'uuid/v4'
 import AppError from '../services/utility/AppError'
 import cfServices from '../services/utility/ServiceConfig'
 import HttpUtil from '../services/utility/HttpUtil'
+
+const logger = log4js.getLogger('experiments-api-request-context')
 
 function getUserIdFromOauthHeader(headers) {
   if (headers && headers.oauth_resourceownerinfo) {
@@ -67,7 +70,8 @@ function requestContextMiddlewareFunction(req, res, next) {
       req.context.clientId = clientId
       next()
     }).catch(/* istanbul ignore next */(err) => {
-      throw AppError.internalServerError('Unable to retrieve client id', err)
+      logger.warn(`[[${req.context.requestId}]] Error received when trying to retrieve client id.`, err)
+      next()
     })
   } else {
     if (userId === undefined && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {

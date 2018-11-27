@@ -24,6 +24,7 @@ if (localEnv || testEnv) {
   services.experimentsDataSource.password = VaultUtil.dbAppPassword
   services.pingDataSource = {
     url: services.experimentsExternalAPIUrls.value.pingAPIUrl,
+    introspectionUrl: services.experimentsExternalAPIUrls.value.pingIntrospectionAPIUrl,
     clientId: VaultUtil.clientId,
     clientSecret: VaultUtil.clientSecret,
   }

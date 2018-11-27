@@ -85,6 +85,21 @@ describe('HttpUtil', () => {
     })
   })
 
+  describe('postform', () => {
+    test('calls setHeaders and agent.post with form data', () => {
+      const httpCall = { send: mockResolve({}) }
+      httpCall.type = mock(httpCall)
+      agent.post = mock(httpCall)
+
+      HttpUtil.setHeaders = mock(httpCall)
+
+      HttpUtil.postform('testUrl', { key: 'value' }, [])
+
+      expect(agent.post).toHaveBeenCalledWith('testUrl')
+      expect(httpCall.send).toHaveBeenCalledWith({ key: 'value' })
+    })
+  })
+
   describe('put', () => {
     test('calls setHeaders and agent.put', () => {
       const httpCall = { send: mockResolve() }

@@ -27,7 +27,6 @@ class graphqlAuditRepo {
       user_id: context.userId,
     }))
     const query = `${this.pgp.helpers.insert(values, columnSet)}`
-    console.log(query)
     return tx.none(query)
   }
 }

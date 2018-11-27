@@ -33,7 +33,7 @@ class unitRepo {
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.treatment_id, u.rep, u.set_entry_id, u.location FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id\n' +
+  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.treatment_id, u.rep, u.set_entry_id, u.location, u.block FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id\n' +
     'INNER JOIN location_association la ON la.experiment_id = t.experiment_id AND la.location = u.location AND la.set_id = $1;', setId)
 
   @setErrorCode('5JE000')
@@ -51,7 +51,7 @@ class unitRepo {
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location'],
+      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
       { table: 'unit' },
     )
 
@@ -65,6 +65,7 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
+      block: u.block,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
@@ -78,7 +79,7 @@ class unitRepo {
       ['?id', { name: 'group_id', cast: 'int' }, 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
-      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }],
+      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, { name: 'block', cast: 'int' }],
       { table: 'unit' },
     )
 
@@ -91,6 +92,7 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
+      blcok: u.block,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 

@@ -5451,6 +5451,10 @@
         "location": {
           "type": "integer",
           "description": "location number of experimental unit."
+        },
+        "block": {
+          "type": "integer",
+          "description": "the block that the experimental unit belongs to."
         }
       }
     },
@@ -5493,6 +5497,10 @@
         "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
+        },
+        "block": {
+          "type": "integer",
+          "description": "the block that the experimental unit belongs to."
         },
         "createdDate": {
           "type": "string",
@@ -5538,6 +5546,10 @@
         "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
+        },
+        "block": {
+          "type": "integer",
+          "description": "the block that the experimental unit belongs to."
         }
       }
     },

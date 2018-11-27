@@ -539,12 +539,35 @@ class GroupExperimentalUnitCompositeService {
     if (designSpecsAndUnits) {
       const { designSpecifications, units } = designSpecsAndUnits
       const numberOfLocations = _.max(_.map(units, 'location'))
-      return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
-        .then((response) => {
-          if (units && (numberOfLocations < response.max)) {
+      return Promise.all([
+        db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
+        db.treatment.findAllByExperimentId(experimentId, tx),
+      ])
+        .then(([locations, treatments]) => {
+          if (units && (numberOfLocations < locations.max)) {
             throw AppError.badRequest('Cannot remove locations from an experiment that are' +
                 ' linked to sets', undefined, getFullErrorCode('1FV002'))
           }
+          const treatmentsMapper = {}
+          _.forEach(treatments, (treatment) => {
+            treatmentsMapper[treatment.id] = treatment
+          })
+          // NOTE: The below _.forEach should be removed when moving to v3 (block should always
+          // be filled out if appropriate in v3)
+          _.forEach(units, (unit) => {
+            unit.block = unit.block || treatmentsMapper[unit.treatmentId].block
+          })
+
+          const unitsWithInvalidBlock = _.filter(units, (unit) => {
+            const treatment = treatmentsMapper[unit.treatmentId]
+            return (unit.block !== treatment.block && !treatment.inAllBlocks)
+              || (treatment.inAllBlocks && !_.find(treatments, t => t.block === unit.block))
+          })
+
+          if (unitsWithInvalidBlock.length > 0) {
+            throw AppError.badRequest(`${unitsWithInvalidBlock.length} units have invalid block values.`, undefined, getFullErrorCode('1FV003'))
+          }
+
           return Promise.all([
             this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
             this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
@@ -594,7 +617,7 @@ class GroupExperimentalUnitCompositeService {
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,
         nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&
-          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
+          eu.rep === nu.rep && eu.location === nu.location && eu.block === nu.block && !nu.matched)
       if (matchingUnit) {
         matchingUnit.matched = true
         return undefined

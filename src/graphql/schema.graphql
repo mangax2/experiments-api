@@ -88,6 +88,7 @@ type ExperimentalUnit {
   location: Int
   rep: Int
   setEntryId: Int
+  block: Int
 }
 
 type ExperimentInfo {

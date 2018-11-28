@@ -92,7 +92,7 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
-      blcok: u.block,
+      block: u.block,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 

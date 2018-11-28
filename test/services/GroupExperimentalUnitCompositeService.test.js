@@ -20,6 +20,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   beforeEach(() => {
     expect.hasAssertions()
     target = new GroupExperimentalUnitCompositeService()
+    target.unitValidator = { validate: () => Promise.resolve() }
   })
 
   describe('saveDesignSpecsAndGroupUnitDetails', () => {
@@ -1596,7 +1597,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
       db.locationAssociation = {
         findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 2 }),
       }
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 3 }, { id: 3, inAllBlocks: true }])
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 3 }, { id: 3, in_all_blocks: true }])
       AppError.badRequest = mock()
 
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {

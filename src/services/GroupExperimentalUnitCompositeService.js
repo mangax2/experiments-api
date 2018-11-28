@@ -555,16 +555,12 @@ class GroupExperimentalUnitCompositeService {
           _.forEach(treatments, (treatment) => {
             treatmentsMapper[treatment.id] = treatment
           })
-          // NOTE: The below _.forEach should be removed when moving to v3 (block should always
-          // be filled out if appropriate in v3)
-          _.forEach(units, (unit) => {
-            unit.block = unit.block || treatmentsMapper[unit.treatmentId].block
-          })
 
           const unitsWithInvalidBlock = _.filter(units, (unit) => {
             const treatment = treatmentsMapper[unit.treatmentId]
             return (unit.block !== treatment.block && !treatment.in_all_blocks)
-              || (treatment.in_all_blocks && !_.find(treatments, t => t.block === unit.block))
+              || (treatment.in_all_blocks &&
+                !_.find(treatments, t => t.block === unit.block && !t.in_all_blocks))
           })
 
           if (unitsWithInvalidBlock.length > 0) {

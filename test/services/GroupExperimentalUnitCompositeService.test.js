@@ -20,6 +20,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
   beforeEach(() => {
     expect.hasAssertions()
     target = new GroupExperimentalUnitCompositeService()
+    target.unitValidator = { validate: () => Promise.resolve() }
   })
 
   describe('saveDesignSpecsAndGroupUnitDetails', () => {
@@ -1557,6 +1558,52 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
       const designSpecsAndUnits = null
       expect(() => target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, testTx)).toThrow()
+    })
+
+    test('rejects when a unit has a block value that does not match its treatment', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockResolve(),
+      }
+      target.saveUnitsByExperimentId = mockResolve()
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndUnits = {
+        designSpecifications: [],
+        units: [{ location: 1, treatmentId: 1, block: 1 }, { location: 2, treatmentId: 1, block: 2 }],
+      }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 2 }),
+      }
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }])
+      AppError.badRequest = mock()
+
+      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when a unit has a block value that is outside those on the treatments', () => {
+      target.designSpecificationDetailService = {
+        manageAllDesignSpecificationDetails: mockResolve(),
+      }
+      target.saveUnitsByExperimentId = mockResolve()
+      AppUtil.createCompositePostResponse = mock()
+
+      const designSpecsAndUnits = {
+        designSpecifications: [],
+        units: [{ location: 1, treatmentId: 1, block: 1 }, { location: 2, treatmentId: 3, block: 2 }, { location: 2, treatmentId: 3 }],
+      }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 2 }),
+      }
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 3 }, { id: 3, in_all_blocks: true }])
+      AppError.badRequest = mock()
+
+      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalled()
+      })
     })
   })
 

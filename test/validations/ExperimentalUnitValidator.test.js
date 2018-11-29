@@ -24,6 +24,7 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
+        { paramName: 'block', type: 'numeric' },
       ]
 
       expect(ExperimentalUnitValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -73,6 +74,7 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
+        { paramName: 'block', type: 'numeric' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -91,6 +93,7 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
+        { paramName: 'block', type: 'numeric' },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]
@@ -141,6 +144,13 @@ describe('ExperimentalUnitValidator', () => {
 
       return target.preValidate([]).then(() => {}, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('ExperimentalUnit request object needs to be an array', undefined, '342001')
+      })
+    })
+
+    test('rejects when only some units have block values', () => {
+      AppError.badRequest = mock()
+      return target.preValidate([{}, { block: 1 }]).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Either all experimental units must have a block or no experimental units can have a block.', undefined, '342002')
       })
     })
   })

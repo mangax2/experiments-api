@@ -9,6 +9,7 @@ import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
 import FactorService from './FactorService'
 import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
+import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -33,6 +34,7 @@ class GroupExperimentalUnitCompositeService {
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
     this.lambdaPerformanceService = new LambdaPerformanceService()
+    this.unitValidator = new ExperimentalUnitValidator()
   }
 
   @notifyChanges('update', 0)
@@ -539,12 +541,32 @@ class GroupExperimentalUnitCompositeService {
     if (designSpecsAndUnits) {
       const { designSpecifications, units } = designSpecsAndUnits
       const numberOfLocations = _.max(_.map(units, 'location'))
-      return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
-        .then((response) => {
-          if (units && (numberOfLocations < response.max)) {
+      return this.unitValidator.validate(units, 'POST', tx)
+        .then(() => Promise.all([
+          db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
+          db.treatment.findAllByExperimentId(experimentId, tx),
+        ]))
+        .then(([locations, treatments]) => {
+          if (units && (numberOfLocations < locations.max)) {
             throw AppError.badRequest('Cannot remove locations from an experiment that are' +
                 ' linked to sets', undefined, getFullErrorCode('1FV002'))
           }
+          const treatmentsMapper = {}
+          _.forEach(treatments, (treatment) => {
+            treatmentsMapper[treatment.id] = treatment
+          })
+
+          const unitsWithInvalidBlock = _.filter(units, (unit) => {
+            const treatment = treatmentsMapper[unit.treatmentId]
+            return (unit.block !== treatment.block && !treatment.in_all_blocks)
+              || (treatment.in_all_blocks &&
+                !_.find(treatments, t => t.block === unit.block && !t.in_all_blocks))
+          })
+
+          if (unitsWithInvalidBlock.length > 0) {
+            throw AppError.badRequest(`${unitsWithInvalidBlock.length} units have invalid block values.`, undefined, getFullErrorCode('1FV003'))
+          }
+
           return Promise.all([
             this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
             this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
@@ -594,7 +616,7 @@ class GroupExperimentalUnitCompositeService {
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,
         nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&
-          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
+          eu.rep === nu.rep && eu.location === nu.location && eu.block === nu.block && !nu.matched)
       if (matchingUnit) {
         matchingUnit.matched = true
         return undefined

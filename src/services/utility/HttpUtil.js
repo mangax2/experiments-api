@@ -42,6 +42,15 @@ class HttpUtil {
     })
   }
 
+  static postform(url, formData, headers, threshold = 20000) {
+    const startTimeMillis = new Date().getTime()
+    return HttpUtil.setHeaders(agent.post(url).type('form'), headers).send(formData)
+      .then((result) => {
+        HttpUtil.logExternalTime(startTimeMillis, threshold, url, 'POSTFORM')
+        return result
+      })
+  }
+
   static put(url, headers, data, threshold = 20000) {
     const startTimeMillis = new Date().getTime()
     return HttpUtil.setHeaders(agent.put(url), headers).send(data).then((result) => {

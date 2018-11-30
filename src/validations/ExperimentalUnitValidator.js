@@ -22,6 +22,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
       { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
       { paramName: 'setEntryId', type: 'numeric' },
       { paramName: 'location', type: 'numeric' },
+      { paramName: 'block', type: 'numeric' },
     ]
   }
 
@@ -59,10 +60,15 @@ class ExperimentalUnitValidator extends SchemaValidator {
   }
 
   @setErrorCode('342000')
-  preValidate = (combinationElementObj) => {
-    if (!_.isArray(combinationElementObj) || combinationElementObj.length === 0) {
+  preValidate = (unitsObj) => {
+    if (!_.isArray(unitsObj) || unitsObj.length === 0) {
       return Promise.reject(
         AppError.badRequest('ExperimentalUnit request object needs to be an array', undefined, getFullErrorCode('342001')))
+    }
+
+    const numberOfUnitsWithBlockNumber = _.compact(_.map(unitsObj, 'block')).length
+    if (numberOfUnitsWithBlockNumber !== 0 && numberOfUnitsWithBlockNumber !== unitsObj.length) {
+      return Promise.reject(AppError.badRequest('Either all experimental units must have a block or no experimental units can have a block.', undefined, getFullErrorCode('342002')))
     }
     return Promise.resolve()
   }

@@ -275,6 +275,33 @@ describe('BaseValidator', () => {
     })
   })
 
+  describe('integer', () => {
+    test('adds a message if the value is not integer', () => {
+      target.checkInteger('t', 'block')
+
+      expect(target.messages[0]).toEqual({ message: 'block must be an integer', errorCode: 'ZZ10' })
+    })
+
+    test('adds a message if the value is an integer but in string format', () => {
+      target.checkInteger('1', 'block')
+
+      expect(target.messages[0]).toEqual({ message: 'block must be an integer', errorCode: 'ZZ10' })
+    })
+
+    test('adds a message if the value is a floating point', () => {
+      target.checkInteger(1.1, 'block')
+
+      expect(target.messages[0]).toEqual({ message: 'block must be an integer', errorCode: 'ZZ10' })
+    })
+
+
+    test('does not add a message if the value is an integer', () => {
+      target.checkInteger(1, 'block')
+
+      expect(target.messages.length).toEqual(0)
+    })
+  })
+
   describe('checkNumericRange', () => {
     test('adds a message if the value is too low', () => {
       target.checkNumericRange(0, { min: 1, max: 2 }, 'test')

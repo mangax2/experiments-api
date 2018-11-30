@@ -48,6 +48,8 @@ class SchemaValidator extends BaseValidator {
             this.checkBoolean(elementValue, elementSchema.paramName)
           } else if (elementSchema.type === 'array') {
             this.checkArray(elementValue, elementSchema.paramName, elementSchema.entityCount)
+          } else if (elementSchema.type === 'integer') {
+            this.checkInteger(elementValue, elementSchema.paramName)
           }
         }
       }

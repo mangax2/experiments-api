@@ -91,6 +91,12 @@ class BaseValidator {
     }
   }
 
+  checkInteger(value, name) {
+    if (!_.isInteger(value)) {
+      this.messages.push({ message: `${name} must be an integer`, errorCode: getFullErrorCode(`${this.fileCode}ZZ10`) })
+    }
+  }
+
   checkNumericRange(value, numericRange, name) {
     if (value < numericRange.min || value > numericRange.max) {
       this.messages.push({ message: `${name} value is out of numeric range(min=${numericRange.min} max=${numericRange.max})`, errorCode: getFullErrorCode(`${this.fileCode}ZZ06`) })

@@ -31,7 +31,7 @@ describe('TreatmentValidator', () => {
           keys: ['experimentId', 'treatmentNumber'],
           entity: {},
         },
-        { paramName: 'block', type: 'numeric' },
+        { paramName: 'block', type: 'integer' },
         { paramName: 'inAllBlocks', type: 'boolean' },
       ]
 
@@ -76,7 +76,7 @@ describe('TreatmentValidator', () => {
             keys: ['experimentId', 'treatmentNumber'],
             entity: {},
           },
-          { paramName: 'block', type: 'numeric' },
+          { paramName: 'block', type: 'integer' },
           { paramName: 'inAllBlocks', type: 'boolean' },
         ]
 
@@ -100,7 +100,7 @@ describe('TreatmentValidator', () => {
             keys: ['experimentId', 'treatmentNumber'],
             entity: {},
           },
-          { paramName: 'block', type: 'numeric' },
+          { paramName: 'block', type: 'integer' },
           { paramName: 'inAllBlocks', type: 'boolean' },
           { paramName: 'id', type: 'numeric', required: true },
           { paramName: 'id', type: 'refData', entity: {} },

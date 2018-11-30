@@ -260,6 +260,11 @@ class TreatmentValidator extends SchemaValidator {
         undefined, getFullErrorCode('3F4002')))
     }
 
+    if (this.allTreatmentsInAllBlocks(treatmentDTOs)) {
+      return Promise.reject(AppError.badRequest('All treatments apply to all blocks is not allowed',
+        undefined, getFullErrorCode('3F4003')))
+    }
+
     return Promise.resolve()
   }
 
@@ -281,6 +286,10 @@ class TreatmentValidator extends SchemaValidator {
   blockedTreatmentExists = treatmentDTOs =>
     _.find(treatmentDTOs, t => !_.isNil(t.block)) !== undefined
     || _.find(treatmentDTOs, t => t.inAllBlocks === true) !== undefined
+
+  @setErrorCode('3F9000')
+  allTreatmentsInAllBlocks = treatmentDTOs =>
+    _.find(treatmentDTOs, t => _.isNil(t.inAllBlocks) || t.inAllBlocks === false) === undefined
 }
 
 module.exports = TreatmentValidator

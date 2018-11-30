@@ -907,5 +907,22 @@ describe('TreatmentValidator', () => {
       ]
       return expect(target.validateBlockValue(treatments)).resolves.toEqual()
     })
+
+    test('all treatments are in all blocks', () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], inAllBlocks: true,
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+      return expect(target.validateBlockValue(treatments)).rejects.toEqual({ errorCode: '3F4000', message: 'error' })
+    })
   })
 })

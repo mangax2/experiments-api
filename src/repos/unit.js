@@ -143,7 +143,7 @@ class unitRepo {
 
   @setErrorCode('5JI000')
   batchFindAllByExperimentIdLocationAndBlock = (experimentId, location, block, tx = this.rep) => {
-    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2 AND u.block=$3', [experimentId, location, block])
+    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2 AND u.block IS NOT DISTINCT FROM $3', [experimentId, location, block])
   }
 }
 

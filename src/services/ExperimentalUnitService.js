@@ -191,29 +191,37 @@ class ExperimentalUnitService {
         if (_.find(units, unit => !unit.treatmentId)) {
           throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
         }
-        return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
-          context, tx)
+        const treatmentIdsUsed = _.uniq(_.map(units, 'treatmentId'))
+        return db.treatment.batchFind(treatmentIdsUsed, tx).then((treatments) => {
+          const treatmentWithMismatchedBlock = _.find(treatments,
+            treatment => treatment.block !== setInfo.block && !treatment.in_all_blocks)
+          if (treatmentWithMismatchedBlock) {
+            throw AppError.badRequest('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, getFullErrorCode('17F003'))
+          }
+          return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
+            setInfo.block, context, tx)
+        })
       })
     })
 
   @notifyChanges('update', 0)
   @setErrorCode('17G000')
   @Transactional('mergeSetEntriesToUnits')
-  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, context, tx) =>
-    db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
+  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, block, context, tx) =>
+    db.unit.batchFindAllByExperimentIdLocationAndBlock(experimentId, location, block, tx)
       .then((unitsFromDB) => {
         const {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
-        } = this.getDbActions(unitsToSave, unitsFromDB, location)
+        } = this.getDbActions(unitsToSave, unitsFromDB, location, block)
 
         this.detectWarnableUnitUpdateConditions(unitsToBeCreated, unitsToBeUpdated, unitsFromDB,
-          context, experimentId, location)
+          context, experimentId, location, block)
 
         return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
       })
 
   detectWarnableUnitUpdateConditions =
-    (unitsToBeCreated, unitsToBeUpdated, databaseUnits, context, experimentId, location) => {
+    (unitsToBeCreated, unitsToBeUpdated, databaseUnits, context, experimentId, location, block) => {
       const unitsHavingSetEntryIdsRemoved = _.filter(_.map(
         _.filter(unitsToBeUpdated, x => !x.setEntryId),
         unit => ({
@@ -222,7 +230,7 @@ class ExperimentalUnitService {
         })), z => !!z.setEntryId)
 
       if (unitsHavingSetEntryIdsRemoved.length > 0) {
-        logger.warn(`[[${context.requestId}]] Set Entry IDs are being overwritten by this change! ExperimentId: ${experimentId}, Location: ${location}, Overwritten data: ${JSON.stringify(unitsHavingSetEntryIdsRemoved)}`)
+        logger.warn(`[[${context.requestId}]] Set Entry IDs are being overwritten by this change! ExperimentId: ${experimentId}, Location: ${location}, Block: ${block}, Overwritten data: ${JSON.stringify(unitsHavingSetEntryIdsRemoved)}`)
         SetEntryRemovalService.addWarning()
       }
 
@@ -230,19 +238,20 @@ class ExperimentalUnitService {
         const numberOfUnitsCreatingWithoutSetEntryId =
           _.filter(unitsToBeCreated, unit => !unit.setEntryId).length
         if (numberOfUnitsCreatingWithoutSetEntryId > 0) {
-          logger.warn(`Rep packing is creating ${numberOfUnitsCreatingWithoutSetEntryId} unit(s) without set entries! ExperimentId: ${experimentId}, Location: ${location}`)
+          logger.warn(`Rep packing is creating ${numberOfUnitsCreatingWithoutSetEntryId} unit(s) without set entries! ExperimentId: ${experimentId}, Location: ${location}, Block: ${block}`)
           SetEntryRemovalService.addWarning()
         }
       }
     }
 
   @setErrorCode('17H000')
-  getDbActions = (unitsFromMessage, unitsFromDB, location) => {
+  getDbActions = (unitsFromMessage, unitsFromDB, location, block) => {
     const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
     _.forEach(unitsFromMessage, (unitM) => {
       unitM.location = location
+      unitM.block = block
     })
-    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'location'))
+    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'location', 'block'))
     const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
     const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
     const unitsThatAlreadyExist = _.difference(unitsFromMessage, unitsToBeCreated)

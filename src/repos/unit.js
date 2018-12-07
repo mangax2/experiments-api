@@ -34,12 +34,12 @@ class unitRepo {
 
   @setErrorCode('5J7000')
   batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.treatment_id, u.rep, u.set_entry_id, u.location, u.block FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id\n' +
-    'INNER JOIN location_association la ON la.experiment_id = t.experiment_id AND la.location = u.location AND la.set_id = $1;', setId)
+    'INNER JOIN location_association la ON la.experiment_id = t.experiment_id AND la.location = u.location AND la.block IS NOT DISTINCT FROM u.block AND la.set_id = $1;', setId)
 
   @setErrorCode('5JE000')
   batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.* from location_association la\n' +
-    'INNER JOIN unit u on la.location = u.location \n' +
-    'INNER JOIN treatment t on t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
+    'INNER JOIN unit u ON la.location = u.location AND la.block IS NOT DISTINCT FROM u.block\n' +
+    'INNER JOIN treatment t ON t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
     'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
     return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
@@ -138,7 +138,7 @@ class unitRepo {
 
     return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
       'FROM treatment t, location_association la\n' +
-      'WHERE u.treatment_id = t.id AND u.location = la.location AND la.set_id = $1', setId)
+      'WHERE u.treatment_id = t.id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
   }
 
   @setErrorCode('5JI000')

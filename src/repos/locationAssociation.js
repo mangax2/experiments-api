@@ -25,11 +25,11 @@ class locationAssociationRepo {
     const promises = []
 
     if (setIds.includes('null')) {
-      promises.push(tx.any('WITH experiment_location_pairs AS\n' +
+      promises.push(tx.any('WITH experiment_location_blocks AS\n' +
       '(SELECT DISTINCT e.id, u.location, u.block FROM experiment e, unit u, treatment t WHERE u.treatment_id = t.id AND t.experiment_id = e.id AND e.is_template = false AND t.in_all_blocks IS FALSE),\n' +
         'experiment_ids_missing_setIds AS(\n' +
-        'SELECT DISTINCT ela.id FROM experiment_location_pairs ela\n' +
-        'LEFT JOIN location_association la ON ela.id = la.experiment_id AND ela.location = la.location AND ela.block IS NOT DISTINCT FROM la.block WHERE la.experiment_id IS NULL)\n' +
+        'SELECT DISTINCT elb.id FROM experiment_location_blocks elb\n' +
+        'LEFT JOIN location_association la ON elb.id = la.experiment_id AND elb.location = la.location AND elb.block IS NOT DISTINCT FROM la.block WHERE la.experiment_id IS NULL)\n' +
         'SELECT e.id from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
     } else {
       promises.push(Promise.resolve())
@@ -84,7 +84,7 @@ class locationAssociationRepo {
   batchRemoveByExperimentIdAndLocationAndBlock = (experimentIdsAndLocationsAndBlocks, tx = this.rep) => {
     const promises = _.map(experimentIdsAndLocationsAndBlocks, association => {
       if (_.isNil(association.block)) {
-        return tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2', [association.experimentId, association.location])
+        return tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2 AND block IS NULL', [association.experimentId, association.location])
       }
 
       return tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2 AND block = $3', [association.experimentId, association.location, association.block])

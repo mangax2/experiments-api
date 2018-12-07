@@ -75,10 +75,10 @@ class ManageRepsAndUnitsListener {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }
-        const { location } = assoc
+        const { location, block } = assoc
         const experimentId = assoc.experiment_id
         return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
-          location, { userId: 'REP_PACKING', isRepPacking: true }, tx)
+          location, block, { userId: 'REP_PACKING', isRepPacking: true }, tx)
           .then(() => {
             ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
           })

@@ -130,7 +130,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
           expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, undefined, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
         })
       })
@@ -147,7 +147,7 @@ describe('ManageRepsAndUnitsListener', () => {
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch(() => {
           expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, undefined, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         })
       })

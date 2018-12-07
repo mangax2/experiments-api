@@ -659,7 +659,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         numberOfReps: 5,
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
         location: 2, rep: 1, treatment_id: 1, id: 101,
       },
       {
@@ -748,7 +748,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         numberOfReps: 5,
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
         location: 1, rep: 1, treatment_id: 1, id: 101,
       },
       {
@@ -825,6 +825,65 @@ describe('GroupExperimentalUnitCompositeService', () => {
       })
     })
 
+    test('calls only the sets services it needs to with blocking', () => {
+      const header = ['header']
+      cfServices.experimentsExternalAPIUrls = {
+        value: {
+          setsAPIUrl: 'testUrl',
+        },
+      }
+      target.verifySetAndGetDetails = mockResolve({
+        experimentId: 3,
+        location: 1,
+        numberOfReps: 2,
+        block: 2,
+      })
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 2 }, { id: 3, in_all_blocks: true }])
+      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([
+        {
+          location: 1, rep: 1, treatment_id: 2, id: 102, block: 2,
+        },
+        {
+          location: 1, rep: 1, treatment_id: 3, id: 104, block: 2,
+        },
+        {
+          location: 1, rep: 2, treatment_id: 2, id: 106, block: 2,
+        },
+        {
+          location: 1, rep: 2, treatment_id: 3, id: 108, block: 2,
+        },
+      ])
+      target.saveUnitsBySetId = mockResolve()
+      PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }] } })
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+
+      return target.resetSet(5, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
+        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([
+          {
+            location: 1, rep: 1, treatmentId: 2, setEntryId: 1001, id: 102, block: 2,
+          },
+          {
+            location: 1, rep: 1, treatmentId: 3, setEntryId: 1002, id: 104, block: 2,
+          },
+          {
+            location: 1, rep: 2, treatmentId: 2, setEntryId: 1003, id: 106, block: 2,
+          },
+          {
+            location: 1, rep: 2, treatmentId: 3, setEntryId: 1004, id: 108, block: 2,
+          },
+        ], {}, testTx)
+      })
+    })
+
     test('sends the correct error and code back when sets error occurs', (done) => {
       cfServices.experimentsExternalAPIUrls = {
         value: {
@@ -860,7 +919,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         numberOfReps: 5,
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdAndLocation = mockResolve([{
+      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
         location: 1, rep: 1, treatment_id: 1, id: 101, setEntryId: 1001,
       },
       {

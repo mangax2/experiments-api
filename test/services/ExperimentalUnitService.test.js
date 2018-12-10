@@ -576,7 +576,7 @@ describe('ExperimentalUnitService', () => {
       const entries = [
         { setEntryId: 15, factorLevelIds: [13, 11] },
         { setEntryId: 17, factorLevelIds: [12] },
-        { setEntryId: 19, factorLevelIds: [] },
+        { setEntryId: 19 },
       ]
       target = new ExperimentalUnitService()
       db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
@@ -619,7 +619,7 @@ describe('ExperimentalUnitService', () => {
       const entries = [
         { setEntryId: 15, factorLevelIds: [13, 11] },
         { setEntryId: 17, factorLevelIds: [12] },
-        { setEntryId: 19, factorLevelIds: [] },
+        { setEntryId: 19 },
       ]
       target = new ExperimentalUnitService()
       db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: 3 })
@@ -703,7 +703,7 @@ describe('ExperimentalUnitService', () => {
       const entries = [
         { setEntryId: 15, factorLevelIds: [13, 11] },
         { setEntryId: 17, factorLevelIds: [12] },
-        { setEntryId: 19, factorLevelIds: [] },
+        { setEntryId: 19 },
       ]
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()

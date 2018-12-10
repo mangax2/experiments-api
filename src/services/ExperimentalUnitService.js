@@ -184,7 +184,8 @@ class ExperimentalUnitService {
         })
         const units = _.map(experimentalUnits, (unit) => {
           const newUnit = _.pick(unit, 'rep', 'setEntryId', 'location')
-          const factorLevelKey = unit.factorLevelIds.sort().join(',')
+          const factorLevelIds = unit.factorLevelIds || []
+          const factorLevelKey = factorLevelIds.sort().join(',')
           newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
           return newUnit
         })

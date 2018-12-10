@@ -307,22 +307,30 @@ class GroupExperimentalUnitCompositeService {
     // get group by setId
     this.verifySetAndGetDetails(setId, context, tx).then((results) => {
       const {
-        experimentId, location, numberOfReps,
+        experimentId, location, numberOfReps, block,
       } = results
       return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
-        const units = this.createUnits(location, treatments, numberOfReps)
+        const treatmentsForBlock =
+          _.isNil(block)
+            ? treatments
+            : _.filter(treatments, t => t.block === block || t.in_all_blocks)
+
+        const units = this.createUnits(location, treatmentsForBlock, numberOfReps, block)
         return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
-          .then(() => this.getSetEntriesFromSet(setId, numberOfReps, treatments.length, context))
-          .then(result => db.unit.batchFindAllByExperimentIdAndLocation(experimentId, location, tx)
-            .then((unitsInDB) => {
-              const setEntryIds = _.map(result.body.entries, 'entryId')
-              _.forEach(unitsInDB, (unit, index) => {
-                unit.setEntryId = setEntryIds[index]
-              })
-              const unitsFromDBCamlized = _.map(unitsInDB, u => inflector.transform(u, 'camelizeLower'))
-              return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
-                unitsFromDBCamlized, context, tx).then(sendKafkaNotification('update', experimentId))
-            }))
+          .then(() =>
+            this.getSetEntriesFromSet(setId, numberOfReps, treatmentsForBlock.length, context))
+          .then(result =>
+            db.unit.batchFindAllByExperimentIdLocationAndBlock(experimentId, location, block, tx)
+              .then((unitsInDB) => {
+                const setEntryIds = _.map(result.body.entries, 'entryId')
+                _.forEach(unitsInDB, (unit, index) => {
+                  unit.setEntryId = setEntryIds[index]
+                })
+                const unitsFromDBCamlized = _.map(unitsInDB, u => inflector.transform(u, 'camelizeLower'))
+                return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
+                  unitsFromDBCamlized, context, tx)
+                  .then(sendKafkaNotification('update', experimentId))
+              }))
       })
     })
 
@@ -390,17 +398,20 @@ class GroupExperimentalUnitCompositeService {
             experimentId,
             location: locAssociation.location,
             numberOfReps,
+            block: locAssociation.block,
           }
         })
     })
 
   @setErrorCode('1FN000')
-  createUnits = (location, treatments, numberOfReps) => _.flatMap(_.range(numberOfReps), repl =>
-    _.map(treatments, treatment => ({
-      location,
-      rep: repl + 1,
-      treatmentId: treatment.id,
-    })))
+  createUnits = (location, treatments, numberOfReps, block) =>
+    _.flatMap(_.range(numberOfReps), repl =>
+      _.map(treatments, treatment => ({
+        location,
+        rep: repl + 1,
+        treatmentId: treatment.id,
+        block,
+      })))
 
   @setErrorCode('1FO000')
   @Transactional('getGroupsAndUnits')

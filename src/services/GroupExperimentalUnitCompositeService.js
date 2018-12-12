@@ -565,7 +565,10 @@ class GroupExperimentalUnitCompositeService {
           const treatmentsMapper = {}
           _.forEach(treatments, (treatment) => {
             treatmentsMapper[treatment.id] = treatment
-            treatment.block = treatment.block || undefined
+            treatment.block = treatment.block || null
+          })
+          _.forEach(units, (unit) => {
+            unit.block = unit.block || null
           })
 
           const unitsWithInvalidBlock = _.filter(units, (unit) => {

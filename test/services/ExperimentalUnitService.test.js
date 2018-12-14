@@ -395,27 +395,6 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('getExperimentalUnitById', () => {
-    test('calls find and returns data', () => {
-      db.unit.find = mockResolve({})
-
-      return target.getExperimentalUnitById(1, {}, testTx).then((data) => {
-        expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when data is undefined', () => {
-      db.unit.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getExperimentalUnitById(1, {}, testTx).then(() => {}, () => {
-        expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for requested id', undefined, '176001')
-      })
-    })
-  })
-
   describe('getExperimentalUnitsByExperimentId', () => {
     test('calls getExperimentById and findAllByExperimentId', () => {
       target.experimentService.getExperimentById = mockResolve()

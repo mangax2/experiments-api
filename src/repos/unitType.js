@@ -10,9 +10,6 @@ class unitTypeRepo {
   @setErrorCode('5M0000')
   repository = () => this.rep
 
-  @setErrorCode('5M1000')
-  find = id => this.rep.oneOrNone('SELECT * FROM ref_unit_type WHERE id = $1', id)
-
   @setErrorCode('5M2000')
   all = () => this.rep.any('SELECT * FROM ref_unit_type')
 

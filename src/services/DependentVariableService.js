@@ -1,15 +1,10 @@
-import log4js from 'log4js'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
-import AppError from './utility/AppError'
 import DependentVariablesValidator from '../validations/DependentVariablesValidator'
 import ExperimentsService from './ExperimentsService'
 
-const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('DependentVariableService')
-
+const { setErrorCode } = require('@monsantoit/error-decorator')()
 // Error Codes 12XXXX
 class DependentVariableService {
   constructor() {
@@ -24,9 +19,9 @@ class DependentVariableService {
       .then(() => db.dependentVariable.batchCreate(tx, dependentVariables, context)
         .then(data => AppUtil.createPostResponse(data)))
   }
-
-  @setErrorCode('122000')
-  getAllDependentVariables = () => db.dependentVariable.all()
+  //
+  // @setErrorCode('122000')
+  // getAllDependentVariables = () => db.dependentVariable.all()
 
   @setErrorCode('123000')
   @Transactional('getDependentVariablesByExperimentId')
@@ -40,17 +35,6 @@ class DependentVariableService {
   static getDependentVariablesByExperimentIdNoExistenceCheck(experimentId, tx) {
     return db.dependentVariable.findByExperimentId(experimentId, tx)
   }
-
-  @setErrorCode('125000')
-  getDependentVariableById = (id, context) => db.dependentVariable.find(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Dependent Variable Not Found for requested id = ${id}`)
-        throw AppError.notFound('Dependent Variable Not Found for requested id', undefined, getFullErrorCode('125001'))
-      } else {
-        return data
-      }
-    })
 
   @setErrorCode('126000')
   batchUpdateDependentVariables(dependentVariables, context) {

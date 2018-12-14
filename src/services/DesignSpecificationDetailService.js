@@ -35,18 +35,6 @@ class DesignSpecificationDetailService {
       .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
-  @setErrorCode('132000')
-  @Transactional('getDesignSpecificationDetailById')
-  getDesignSpecificationDetailById = (id, context, tx) => db.designSpecificationDetail.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Design Specification Detail Not Found for requested id = ${id}`)
-        throw AppError.notFound('Design Specification Detail Not Found for requested id', undefined, getFullErrorCode('132001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('133000')
   @Transactional('batchCreateDesignSpecificationDetails')
   batchCreateDesignSpecificationDetails(specificationDetails, context, tx) {

@@ -15,9 +15,6 @@ class groupValueRepo {
   @setErrorCode('5D0000')
   repository = () => this.rep
 
-  @setErrorCode('5D1000')
-  find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE gv.id = $1`, id)
-
   @setErrorCode('5D2000')
   batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE gv.id IN ($1:csv)`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

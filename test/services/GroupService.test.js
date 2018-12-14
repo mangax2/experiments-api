@@ -88,38 +88,6 @@ describe('GroupService', () => {
       })
     })
   })
-
-  describe('getGroupById', () => {
-    test('returns a group', () => {
-      db.group.find = mockResolve({})
-
-      return target.getGroupById(1, {}, testTx).then((data) => {
-        expect(db.group.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when group is not found', () => {
-      db.group.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getGroupById(1, {}, testTx).then(() => {}, () => {
-        expect(db.group.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Group Not Found for requested id', undefined, '1G3001')
-      })
-    })
-
-    test('rejects when find fails', () => {
-      const error = { message: 'error' }
-      db.group.find = mockReject(error)
-
-      return target.getGroupById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.group.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchUpdateGroups', () => {
     test('updates groups', () => {
       target.validator.validate = mockResolve()

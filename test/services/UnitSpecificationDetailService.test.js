@@ -52,37 +52,6 @@ describe('UnitSpecificationDetailService', () => {
     })
   })
 
-  describe('getUnitSpecificationDetailById', () => {
-    test('gets a unit specification detail', () => {
-      db.unitSpecificationDetail.find = mockResolve({})
-
-      return target.getUnitSpecificationDetailById(1, testContext, testTx).then((data) => {
-        expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when find returns empty', () => {
-      db.unitSpecificationDetail.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getUnitSpecificationDetailById(1, testContext, testTx).then(() => {}, () => {
-        expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Unit Specification Detail Not Found for requested id', undefined, '1S2001')
-      })
-    })
-
-    test('rejects when find fails', () => {
-      const error = { message: 'error' }
-      db.unitSpecificationDetail.find = mockReject(error)
-
-      return target.getUnitSpecificationDetailById(1, testContext, testTx).then(() => {}, (err) => {
-        expect(db.unitSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchCreateUnitSpecificationDetails', () => {
     test('creates unit specification details', () => {
       target.validator.validate = mockResolve()

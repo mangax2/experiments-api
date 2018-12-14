@@ -26,13 +26,6 @@ class CombinationElementService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
-  @setErrorCode('112000')
-  @Transactional('getCombinationElementsByTreatmentId')
-  getCombinationElementsByTreatmentId(id, context, tx) {
-    return this.treatmentService.getTreatmentById(id, context, tx)
-      .then(() => db.combinationElement.findAllByTreatmentId(id, tx))
-  }
-
   @setErrorCode('113000')
   @Transactional('getCombinationElementsByExperimentId')
   getCombinationElementsByExperimentId = (experimentId, tx) =>
@@ -49,18 +42,6 @@ class CombinationElementService {
   @Transactional('batchGetCombinationElementsByTreatmentIdsNoValidate')
   batchGetCombinationElementsByTreatmentIdsNoValidate = (ids, tx) =>
     db.combinationElement.batchFindAllByTreatmentIds(ids, tx)
-
-  @setErrorCode('116000')
-  @Transactional('getCombinationElementById')
-  getCombinationElementById = (id, context, tx) => db.combinationElement.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Combination Element Not Found for requested id = ${id}`)
-        throw AppError.notFound('Combination Element Not Found for requested id', undefined, getFullErrorCode('116001'))
-      } else {
-        return data
-      }
-    })
 
   @setErrorCode('117000')
   @Transactional('batchUpdateCombinationElements')

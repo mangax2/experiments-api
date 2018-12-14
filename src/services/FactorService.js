@@ -41,18 +41,6 @@ class FactorService {
     return db.factor.findByExperimentId(id, tx)
   }
 
-  @setErrorCode('1D5000')
-  @Transactional('getFactorById')
-  getFactorById = (id, context, tx) => db.factor.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Factor Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Not Found for requested id', undefined, getFullErrorCode('1D5001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('1D6000')
   @Transactional('batchUpdateFactors')
   batchUpdateFactors = (factors, context, tx) => this.validator.validate(factors, 'PUT', tx)

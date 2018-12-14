@@ -11,6 +11,9 @@ class factorTypeRepo {
   @setErrorCode('5A0000')
   repository = () => this.rep
 
+  @setErrorCode('5A3000')
+  all = () => this.rep.any('SELECT * FROM ref_factor_type')
+
   @setErrorCode('5A2000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

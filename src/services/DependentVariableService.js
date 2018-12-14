@@ -19,9 +19,6 @@ class DependentVariableService {
       .then(() => db.dependentVariable.batchCreate(tx, dependentVariables, context)
         .then(data => AppUtil.createPostResponse(data)))
   }
-  //
-  // @setErrorCode('122000')
-  // getAllDependentVariables = () => db.dependentVariable.all()
 
   @setErrorCode('123000')
   @Transactional('getDependentVariablesByExperimentId')

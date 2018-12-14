@@ -83,13 +83,6 @@ router.get('/experiments/:id/dependent-variables', (req, res, next) => {
     .then(dependentVariables => res.json(dependentVariables))
     .catch(err => next(err))
 })
-//
-// router.get('/dependent-variables/:id', (req, res, next) => {
-//   new DependentVariableService().getDependentVariableById(req.params.id, req.context)
-//     .then(dependentVariable => res.json(dependentVariable))
-//     .catch(err => next(err))
-// })
-
 router.post('/experiments/:id/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.params.id, req.context, false)
   .then(success => res.json(success))
   .catch(err => next(err)))

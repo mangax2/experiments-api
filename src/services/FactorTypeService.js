@@ -9,6 +9,10 @@ class FactorTypeService {
     this.validator = new FactorTypesValidator()
   }
 
+  @setErrorCode('1E2000')
+  getAllFactorTypes = () => db.factorType.all()
+
+
   @setErrorCode('1E1000')
   createFactorType(factorType, context) {
     return this.validator.validate([factorType])

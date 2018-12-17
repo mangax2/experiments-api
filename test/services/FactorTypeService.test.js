@@ -49,4 +49,25 @@ describe('factorTypeService', () => {
       })
     })
   })
+
+  describe('getAllFactorTypes', () => {
+    test('returns factorTypes', () => {
+      db.factorType.all = mockResolve([{}])
+
+      return target.getAllFactorTypes().then((data) => {
+        expect(db.factorType.all).toHaveBeenCalled()
+        expect(data).toEqual([{}])
+      })
+    })
+
+    test('rejects when get all fails', () => {
+      const error = { message: 'error' }
+      db.factorType.all = mockReject(error)
+
+      return target.getAllFactorTypes().then(() => {}, (err) => {
+        expect(db.factorType.all).toHaveBeenCalled()
+        expect(err).toEqual(error)
+      })
+    })
+  })
 })

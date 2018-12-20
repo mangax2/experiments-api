@@ -56,7 +56,6 @@ function createLoaders(tx) {
   const refDataSourceByIdLoader = createDataLoader(db.refDataSource.batchFind)
   const refDataSourceTypeByIdLoader = createDataLoader(db.refDataSourceType.batchFind)
   const refDesignSpecByIdLoader = createDataLoader(db.refDesignSpecification.batchFind)
-  const refExperimentDesignByIdLoader = createDataLoader(db.experimentDesign.batchFind)
   const refFactorTypeByIdLoader = createDataLoader(db.factorType.batchFind)
   const refUnitSpecByIdLoader = createDataLoader(db.unitSpecification.batchFind)
   const refUnitTypeByIdLoader = createDataLoader(db.unitType.batchFind)
@@ -139,7 +138,6 @@ function createLoaders(tx) {
     refDataSource: refDataSourceByIdLoader,
     refDataSourceType: refDataSourceTypeByIdLoader,
     refDesignSpec: refDesignSpecByIdLoader,
-    refExperimentDesign: refExperimentDesignByIdLoader,
     refFactorType: refFactorTypeByIdLoader,
     refUnitSpec: refUnitSpecByIdLoader,
     refUnitType: refUnitTypeByIdLoader,

@@ -551,7 +551,7 @@
         "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
         "operationId": "getComposites_TreatmentsByExperimentId",
         "tags": [
-          "Composites"
+          "Treatments"
         ],
         "produces": [
           "application/json"
@@ -605,7 +605,7 @@
         "description": "This endpoint accepts treatments and merges existing treatments",
         "operationId": "handleTreatmentsForExperiment",
         "tags": [
-          "Composites"
+          "Treatments"
         ],
         "consumes": [
           "application/json"
@@ -666,7 +666,7 @@
         "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with an Experiment",
         "operationId": "getComposites_Group-experimental-unitsByExperimentId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -720,7 +720,7 @@
         "description": "This Service would delete the existing groups groupValues and ExperimentalUnits for the experimentId and then recreates them based on request Payload",
         "operationId": "postComposites_Group-experimental-unitsByExperimentId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -781,7 +781,7 @@
         "description": "Creates, updates and deletes UnitSpecificationDetail",
         "operationId": "post_compositesUnitSpecificationDetail",
         "tags": [
-          "Composites"
+          "Unit Specification Details"
         ],
         "produces": [
           "application/json"
@@ -842,7 +842,7 @@
         "description": "This service will update the design specification details, groups and units",
         "operationId": "postComposites_Design-Group-experimental-unitsByExperimentId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -858,7 +858,7 @@
             "required": true
           },
           {
-            "name": "Composites Design Specifications, Groups, And Units",
+            "name": "Design Specifications, Groups, And Units",
             "in": "body",
             "required": true,
             "schema": {
@@ -888,7 +888,7 @@
         "description": "This service will update the design specification details and units",
         "operationId": "postComposites_design-experimental-unitsByExperimentId",
         "tags": [
-          "Composites"
+          "Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -2548,7 +2548,7 @@
         "description": "This endpoint returns information about the treatment and and combination elements entities associated with a Template",
         "operationId": "getComposites_TreatmentsByTemplateId",
         "tags": [
-          "Composites"
+          "Treatments"
         ],
         "produces": [
           "application/json"
@@ -2597,17 +2597,14 @@
           }
         }
       },
-      "post": {
-        "summary": "post one or more treatments and combination elements entities",
-        "description": "Creates/updates treatments and combination elements in templates System.\n Request json has add , delete and update sections for treatments. API does action on a section with values and empty sections are ignored. So if add and delete sections are empty and update has treatments then only update action will happen. Combination elements within treatments needs to be complete. New combination element without id will be added and combination element with id will be updated, any combination element not included within treatment will be deleted.",
-        "operationId": "postTemplateComposites_treatments",
+      "put": {
+        "summary": "updates all treatments for a template",
+        "description": "This endpoint accepts treatments and merges existing treatments",
+        "operationId": "handleTreatmentsForTemplate",
         "tags": [
-          "Composites"
+          "Treatments"
         ],
         "produces": [
-          "application/json"
-        ],
-        "consumes": [
           "application/json"
         ],
         "parameters": [
@@ -2618,32 +2615,32 @@
             "required": true
           },
           {
-            "name": "Composites Treatments",
+            "name": "treatments",
             "in": "body",
-            "required": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeTreatmentsPayloadForPOST"
-              }
-            }
+              "$ref": "#/definitions/TreatmentPUTPayload"
+            },
+            "required": true
           }
         ],
         "responses": {
-          "200": {
-            "description": "Composite-Treatments operation SUCCESS"
+          "204": {
+            "description": "Success"
           },
           "400": {
-            "description": "Invalid/Problematic Input",
+            "description": "Invalid ID",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Error"
-              }
+              "$ref": "#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No Template Found For ID",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -2656,6 +2653,7 @@
           }
         }
       }
+
     },
     "/templates/{id}/group-experimental-units": {
       "get": {
@@ -2663,7 +2661,7 @@
         "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with a Template",
         "operationId": "getComposites_Group-experimental-unitsByTemplateId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -2717,7 +2715,7 @@
         "description": "This Service would delete the existing groups groupValues and experimentalUnits for the TemplateId and then recreates them based on request Payload",
         "operationId": "postComposites_Group-experimental-unitsByTemplateId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -2778,7 +2776,7 @@
         "description": "Creates, updates and deletes UnitSpecificationDetail",
         "operationId": "postTemplate_compositesUnitSpecificationDetail",
         "tags": [
-          "Composites"
+          "Unit Specification Details"
         ],
         "produces": [
           "application/json"
@@ -2839,7 +2837,7 @@
         "description": "This service will update the design specification details, groups and units",
         "operationId": "postComposites_Design-Group-experimental-unitsByTemplateId",
         "tags": [
-          "Composites"
+          "Group Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -2885,7 +2883,7 @@
         "description": "This service will update the design specification details and units",
         "operationId": "postComposites_design-experimental-unitsByTemplateId",
         "tags": [
-          "Composites"
+          "Experimental Units"
         ],
         "produces": [
           "application/json"
@@ -3349,6 +3347,7 @@
         }
       }
     },
+
     "/templates/{id}/unit-specification-details/": {
       "get": {
         "summary": "Get all unit specification details for a Template",

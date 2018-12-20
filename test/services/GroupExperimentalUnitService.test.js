@@ -1,7 +1,7 @@
 import {
   kafkaProducerMocker, mock, mockReject, mockResolve,
 } from '../jestUtil'
-import GroupExperimentalUnitCompositeService from '../../src/services/GroupExperimentalUnitCompositeService'
+import GroupExperimentalUnitService from '../../src/services/GroupExperimentalUnitService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
@@ -10,7 +10,7 @@ import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import cfServices from '../../src/services/utility/ServiceConfig'
 
-describe('GroupExperimentalUnitCompositeService', () => {
+describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
 
   let target
@@ -19,7 +19,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   beforeEach(() => {
     expect.hasAssertions()
-    target = new GroupExperimentalUnitCompositeService()
+    target = new GroupExperimentalUnitService()
     target.unitValidator = { validate: () => Promise.resolve() }
   })
 
@@ -1053,7 +1053,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('getGroupsAndUnits', () => {
     test('properly sends and retrieves data to lambda', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
       PingUtil.getMonsantoHeader = mockResolve()
       HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
@@ -1122,7 +1122,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('properly handles lambda errors', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
       PingUtil.getMonsantoHeader = mockResolve()
       HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
@@ -1158,7 +1158,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('getGroupsByExperimentId', () => {
     test('units and groupValues are trimmed', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockResolve([
         {
           id: '1662.1',
@@ -1207,7 +1207,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('getGroupsAndUnitsByExperimentIds', () => {
     test('multiple experiments, getting groups succeeded', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockResolve([{ id: 1 }, { id: 2 }])
       return target.getGroupsAndUnitsByExperimentIds([111, 112], testTx).then((data) => {
         expect(target.getGroupsAndUnits).toHaveBeenCalled()
@@ -1217,7 +1217,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('multiple experiments, getting groups failed', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockReject('An error occurred')
       return target.getGroupsAndUnitsByExperimentIds([111, 112], testTx).then((data) => {
         expect(target.getGroupsAndUnits).toHaveBeenCalled()
@@ -1229,7 +1229,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('getGroupAndUnitsBySetId', () => {
     test('getting a group and units with a valid set id', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
@@ -1253,7 +1253,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('getting a group and units with an invalid set id', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({})
       return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
@@ -1263,7 +1263,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('getting a group and units with an empty return of the db query', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       db.locationAssociation.findBySetId = mockResolve(null)
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
@@ -1280,7 +1280,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('getting a group and units with a failed db query', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       db.locationAssociation.findBySetId = mockReject('error')
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
@@ -1299,7 +1299,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('getGroupAndUnitsBySetIdAndExperimentId', () => {
     test('get a group and units from a set id and experiment id', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockResolve([
         {
           id: 1,
@@ -1344,7 +1344,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('get a group and units from an invalid set id and experiment id', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockResolve([
         {
           id: 1,
@@ -1382,7 +1382,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('get a group and units from a failed AWS lambda called', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.getGroupsAndUnits = mockReject('error')
       return target.getGroupAndUnitsBySetIdAndExperimentId(4782, 112, testTx).then((group) => {
         expect(group).toEqual({})
@@ -1424,7 +1424,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         },
       ]
 
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       expect(target.getUnitsFromGroupsBySetId(groups, 4781))
         .toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }])
       expect(target.getUnitsFromGroupsBySetId(groups, 4782)).toEqual([])
@@ -1464,7 +1464,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
         },
       ]
 
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       expect(target.getChildGroupUnits(groups, 1))
         .toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }])
       expect(target.getChildGroupUnits(groups, 7)).toEqual([])
@@ -1499,7 +1499,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
           parentId: 5,
         },
       ]
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       expect(target.getAllChildGroups(groups, 1)).toEqual([{
         id: 2,
         parentId: 1,
@@ -1668,7 +1668,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('saveUnitsByExperimentId', () => {
     test('check functions are called and with correct parameters', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.securityService.permissionsCheck = mockResolve()
       target.compareWithExistingUnitsByExperiment = mockResolve({ adds: [], deletes: [] })
       target.saveComparedUnits = mockResolve()
@@ -1683,7 +1683,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('saveUnitsBySetId', () => {
     test('check functions are called and with correct parameters', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.compareWithExistingUnitsBySetId = mockResolve({ adds: [], deletes: [] })
       target.saveComparedUnits = mockResolve()
       return target.saveUnitsBySetId(5, 3, [], {}, testTx)
@@ -1696,7 +1696,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('saveComparedUnits', () => {
     test('check functions are called and with correct parameters', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.createExperimentalUnits = mockResolve()
       target.batchDeleteExperimentalUnits = mockResolve()
       return target.saveComparedUnits(3, { adds: [], deletes: [] }, {}, testTx)
@@ -1709,7 +1709,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('compareWithExistingUnitsByExperiment', () => {
     test('check functions are called and with correct parameters', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       target.compareWithExistingUnits = mockResolve([{}])
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ treatment_id: 2 }])
       return target.compareWithExistingUnitsByExperiment(3, [{ treatmentId: 3 }], testTx).then(() => {
@@ -1721,7 +1721,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('compareWithExistingUnitsBySetId', () => {
     test('check functions are called and with correct parameters', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       db.unit.batchFindAllBySetId = mockResolve([{ treatment_id: 2 }])
       target.compareWithExistingUnits = mockResolve([{}])
       return target.compareWithExistingUnitsBySetId(3, [{ treatmentId: 3 }], testTx).then(() => {
@@ -1733,7 +1733,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
 
   describe('compareWithExistingUnits', () => {
     test('existing units from DB contains more units', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
         [{ treatment_id: 1, rep: 1, location: 3 },
           { treatment_id: 2, rep: 1, location: 3 },
@@ -1750,7 +1750,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('existing units from DB contains less units', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
         [{ treatment_id: 1, rep: 1, location: 3 }],
         [{ treatmentId: 1, rep: 1, location: 3 },
@@ -1766,7 +1766,7 @@ describe('GroupExperimentalUnitCompositeService', () => {
     })
 
     test('existing units from DB contains duplicate treatment in rep', () => {
-      target = new GroupExperimentalUnitCompositeService()
+      target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
         [{ treatment_id: 1, rep: 1, location: 3 },
           { treatment_id: 2, rep: 1, location: 3 },

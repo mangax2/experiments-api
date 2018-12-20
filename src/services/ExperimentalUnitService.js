@@ -52,12 +52,12 @@ class ExperimentalUnitService {
     }
   }
 
-  @setErrorCode('174000')
-  @Transactional('getExperimentalUnitsByTreatmentId')
-  getExperimentalUnitsByTreatmentId(id, context, tx) {
-    return this.treatmentService.getTreatmentById(id, context, tx)
-      .then(() => db.unit.findAllByTreatmentId(id, tx))
-  }
+  // @setErrorCode('174000')
+  // @Transactional('getExperimentalUnitsByTreatmentId')
+  // getExperimentalUnitsByTreatmentId(id, context, tx) {
+  //   return this.treatmentService.getTreatmentById(id, context, tx)
+  //     .then(() => db.unit.findAllByTreatmentId(id, tx))
+  // }
 
   @setErrorCode('177000')
   @Transactional('getExperimentalUnitsByExperimentId')

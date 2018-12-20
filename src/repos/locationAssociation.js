@@ -30,7 +30,7 @@ class locationAssociationRepo {
         'experiment_ids_missing_setIds AS(\n' +
         'SELECT DISTINCT elb.id FROM experiment_location_blocks elb\n' +
         'LEFT JOIN location_association la ON elb.id = la.experiment_id AND elb.location = la.location AND elb.block IS NOT DISTINCT FROM la.block WHERE la.experiment_id IS NULL)\n' +
-        'SELECT e.id from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
+        'SELECT e.* from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
     } else {
       promises.push(Promise.resolve())
     }

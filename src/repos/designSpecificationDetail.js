@@ -11,9 +11,6 @@ class designSpecificationDetailRepo {
   @setErrorCode('520000')
   repository = () => this.rep
 
-  @setErrorCode('521000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM design_spec_detail WHERE id = $1', id)
-
   @setErrorCode('522000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

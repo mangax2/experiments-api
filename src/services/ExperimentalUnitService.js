@@ -52,24 +52,12 @@ class ExperimentalUnitService {
     }
   }
 
-  @setErrorCode('174000')
-  @Transactional('getExperimentalUnitsByTreatmentId')
-  getExperimentalUnitsByTreatmentId(id, context, tx) {
-    return this.treatmentService.getTreatmentById(id, context, tx)
-      .then(() => db.unit.findAllByTreatmentId(id, tx))
-  }
-
-  @setErrorCode('176000')
-  @Transactional('getExperimentalUnitById')
-  getExperimentalUnitById = (id, context, tx) => db.unit.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Experimental Unit Not Found for requested id = ${id}`)
-        throw AppError.notFound('Experimental Unit Not Found for requested id', undefined, getFullErrorCode('176001'))
-      } else {
-        return data
-      }
-    })
+  // @setErrorCode('174000')
+  // @Transactional('getExperimentalUnitsByTreatmentId')
+  // getExperimentalUnitsByTreatmentId(id, context, tx) {
+  //   return this.treatmentService.getTreatmentById(id, context, tx)
+  //     .then(() => db.unit.findAllByTreatmentId(id, tx))
+  // }
 
   @setErrorCode('177000')
   @Transactional('getExperimentalUnitsByExperimentId')

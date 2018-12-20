@@ -11,9 +11,6 @@ class factorRepo {
   @setErrorCode('570000')
   repository = () => this.rep
 
-  @setErrorCode('571000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE id = $1', id)
-
   @setErrorCode('572000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

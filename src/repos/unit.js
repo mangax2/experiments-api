@@ -11,12 +11,6 @@ class unitRepo {
   @setErrorCode('5J0000')
   repository = () => this.rep
 
-  @setErrorCode('5J1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id)
-
-  @setErrorCode('5J2000')
-  findAllByTreatmentId = (treatmentId, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId)
-
   @setErrorCode('5J4000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId)
 

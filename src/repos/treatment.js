@@ -10,10 +10,6 @@ class treatmentRepo {
 
   @setErrorCode('5I0000')
   repository = () => this.rep
-
-  @setErrorCode('5I1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE id = $1', id)
-
   @setErrorCode('5I2000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

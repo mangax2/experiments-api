@@ -56,38 +56,6 @@ describe('DesignSpecificationDetailService', () => {
       })
     })
   })
-
-  describe('getDesignSpecificationDetailById', () => {
-    test('gets a design specification detail', () => {
-      db.designSpecificationDetail.find = mockResolve({})
-
-      return target.getDesignSpecificationDetailById(1, {}, testTx).then((data) => {
-        expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when find returns empty', () => {
-      db.designSpecificationDetail.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, () => {
-        expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Design Specification Detail Not Found for requested id', undefined, '132001')
-      })
-    })
-
-    test('rejects when find fails', () => {
-      const error = { message: 'error' }
-      db.designSpecificationDetail.find = mockReject(error)
-
-      return target.getDesignSpecificationDetailById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.designSpecificationDetail.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchCreateDesignSpecificationDetails', () => {
     test('creates design specification details', () => {
       target.validator.validate = mockResolve()

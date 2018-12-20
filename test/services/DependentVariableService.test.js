@@ -1,7 +1,6 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import AppUtil from '../../src/services/utility/AppUtil'
-import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('DependentVariableService', () => {
@@ -56,17 +55,6 @@ describe('DependentVariableService', () => {
       })
     })
   })
-
-  describe('getAllDependentVariables', () => {
-    test('calls dependentVariable all', () => {
-      db.dependentVariable.all = mockResolve()
-
-      return target.getAllDependentVariables().then(() => {
-        expect(db.dependentVariable.all).toHaveBeenCalled()
-      })
-    })
-  })
-
   describe('getDependentVariablesByExperimentId', () => {
     test('calls getExperimentById and findByExperimentId', () => {
       target.experimentService.getExperimentById = mockResolve()
@@ -100,39 +88,6 @@ describe('DependentVariableService', () => {
       })
     })
   })
-
-  describe('getDependentVariableById', () => {
-    test('calls dependentVariable find', () => {
-      db.dependentVariable.find = mockResolve({})
-
-      return target.getDependentVariableById(1).then(() => {
-        expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
-      })
-    })
-
-    test('throws an error when data is undefined', () => {
-      db.dependentVariable.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getDependentVariableById(1, { requestId: 5 }).then(() => {}, () => {
-        expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).toHaveBeenCalledWith('Dependent Variable Not Found for requested id', undefined, '125001')
-      })
-    })
-
-    test('rejects when dependentVariable find fails', () => {
-      const error = { message: 'error' }
-      db.dependentVariable.find = mockReject(error)
-      AppError.notFound = mock()
-
-      return target.getDependentVariableById(1).then(() => {}, (err) => {
-        expect(db.dependentVariable.find).toHaveBeenCalledWith(1)
-        expect(AppError.notFound).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchUpdateDependentVariables', () => {
     test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()

@@ -88,38 +88,6 @@ describe('TreatmentService', () => {
       })
     })
   })
-
-  describe('getTreatmentById', () => {
-    test('gets a treatment', () => {
-      db.treatment.find = mockResolve({})
-
-      return target.getTreatmentById(1, {}, testTx).then((data) => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when treatment is empty', () => {
-      db.treatment.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getTreatmentById(1, {}, testTx).then(() => {}, () => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Treatment Not Found for requested id', undefined, '1R3001')
-      })
-    })
-
-    test('rejects when find fails', () => {
-      const error = { message: 'error' }
-      db.treatment.find = mockReject(error)
-
-      return target.getTreatmentById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchGetTreatmentByIds', () => {
     test('gets treatments', () => {
       db.treatment.batchFind = mockResolve([{}, {}])

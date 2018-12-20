@@ -33,18 +33,6 @@ class GroupService {
       .then(() => db.group.findAllByExperimentId(id, tx))
   }
 
-  @setErrorCode('1G3000')
-  @Transactional('getGroupsById')
-  getGroupById = (id, context, tx) => db.group.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Group Not Found for requested id = ${id}`)
-        throw AppError.notFound('Group Not Found for requested id', undefined, getFullErrorCode('1G3001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('1G4000')
   @Transactional('batchUpdateGroups')
   batchUpdateGroups(groups, context, tx) {

@@ -33,18 +33,6 @@ class TreatmentService {
       .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
-  @setErrorCode('1R3000')
-  @Transactional('getTreatmentById')
-  getTreatmentById = (id, context, tx) => db.treatment.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Treatment Not Found for requested id = ${id}`)
-        throw AppError.notFound('Treatment Not Found for requested id', undefined, getFullErrorCode('1R3001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('1R4000')
   @Transactional('getTreatmentById')
   batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)

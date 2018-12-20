@@ -98,42 +98,6 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('getExperimentalUnitsByTreatmentId', () => {
-    test('calls getTreatmentById and findAllByTreatmentId', () => {
-      target.treatmentService.getTreatmentById = mockResolve()
-      db.unit.findAllByTreatmentId = mockResolve()
-
-      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(db.unit.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
-      })
-    })
-
-    test('rejects when call to findAllByTreatmentId fails', () => {
-      const error = { message: 'error' }
-      target.treatmentService.getTreatmentById = mockResolve()
-      db.unit.findAllByTreatmentId = mockReject(error)
-
-      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(db.unit.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('rejects when call to getTreatmentById fails', () => {
-      const error = { message: 'error' }
-      target.treatmentService.getTreatmentById = mockReject(error)
-      db.unit.findAllByTreatmentId = mock()
-
-      return target.getExperimentalUnitsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(db.unit.findAllByTreatmentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('getExperimentalUnitsByExperimentIdNoValidate', () => {
     test('calls findAllByExperimentId', () => {
       db.unit.findAllByExperimentId = mockResolve()
@@ -392,27 +356,6 @@ describe('ExperimentalUnitService', () => {
           ],
         },
       ])
-    })
-  })
-
-  describe('getExperimentalUnitById', () => {
-    test('calls find and returns data', () => {
-      db.unit.find = mockResolve({})
-
-      return target.getExperimentalUnitById(1, {}, testTx).then((data) => {
-        expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when data is undefined', () => {
-      db.unit.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getExperimentalUnitById(1, {}, testTx).then(() => {}, () => {
-        expect(db.unit.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experimental Unit Not Found for requested id', undefined, '176001')
-      })
     })
   })
 

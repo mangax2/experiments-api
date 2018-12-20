@@ -9,7 +9,6 @@ import DesignSpecificationDetail from '../repos/designSpecificationDetail'
 import Duplication from '../repos/duplication'
 import EnvisionDatasets from '../repos/envisionDatasets'
 import Experiments from '../repos/experiments'
-import ExperimentDesign from '../repos/experimentDesign'
 import ExperimentSummary from '../repos/experimentSummary'
 import Factor from '../repos/factor'
 import FactorLevel from '../repos/factorLevel'
@@ -45,7 +44,6 @@ const options = {
     obj.duplication = Duplication(obj, pgp)
     obj.experiments = Experiments(obj, pgp)
     obj.envisionDatasets = EnvisionDatasets(obj, pgp)
-    obj.experimentDesign = ExperimentDesign(obj, pgp)
     obj.experimentSummary = ExperimentSummary(obj, pgp)
     obj.factor = Factor(obj, pgp)
     obj.factorLevel = FactorLevel(obj, pgp)

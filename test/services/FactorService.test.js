@@ -134,40 +134,6 @@ describe('FactorService', () => {
       })
     })
   })
-
-  describe('getFactorById', () => {
-    test('returns factor found by id', () => {
-      db.factor.find = mockResolve({})
-
-      return target.getFactorById(1, {}, testTx).then((data) => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when no data is returned', () => {
-      db.factor.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getFactorById(1, {}, testTx).then(() => {}, () => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Not Found for requested id', undefined, '1D5001')
-      })
-    })
-
-    test('rejects when factor find fails', () => {
-      const error = { message: 'error' }
-      db.factor.find = mockReject(error)
-      AppError.notFound = mock()
-
-      return target.getFactorById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchUpdateFactors', () => {
     test('validates, batchUpdates and returns put resposne', () => {
       target.validator.validate = mockResolve()

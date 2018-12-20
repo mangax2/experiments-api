@@ -56,30 +56,6 @@ describe('CombinationElementService', () => {
     })
   })
 
-  describe('getCombinationElementsByTreatmentId', () => {
-    test('calls combinationElement findAllByTreatmentId', () => {
-      target.treatmentService.getTreatmentById = mockResolve()
-      db.combinationElement.findAllByTreatmentId = mock()
-
-      return target.getCombinationElementsByTreatmentId(1, {}, testTx).then(() => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(db.combinationElement.findAllByTreatmentId).toHaveBeenCalledWith(1, testTx)
-      })
-    })
-
-    test('rejects when treatmentService fails', () => {
-      const error = { message: 'error' }
-      target.treatmentService.getTreatmentById = mockReject(error)
-      db.combinationElement.findAllByTreatmentId = mock()
-
-      return target.getCombinationElementsByTreatmentId(1, {}, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentById).toHaveBeenCalledWith(1, {}, testTx)
-        expect(db.combinationElement.findAllByTreatmentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('getCombinationElementsByExperimentId', () => {
     test('calls findAllByExperimentId', () => {
       db.combinationElement.findAllByExperimentId = mockResolve()
@@ -135,36 +111,6 @@ describe('CombinationElementService', () => {
       })
     })
   })
-
-  describe('getCombinationElementById', () => {
-    test('returns data when call returns data', () => {
-      db.combinationElement.find = mockResolve({})
-
-      return target.getCombinationElementById(1, testContext, testTx).then((data) => {
-        expect(db.combinationElement.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when call returns no data', () => {
-      db.combinationElement.find = mockResolve()
-      AppError.notFound = jest.fn(() => ({}))
-
-      return target.getCombinationElementById(1, testContext, testTx).then(() => {}, () => {
-        expect(AppError.notFound).toHaveBeenCalledWith('Combination Element Not Found for requested id', undefined, '116001')
-      })
-    })
-
-    test('rejects when combinationElement find fails', () => {
-      const error = { message: 'error' }
-      db.combinationElement.find = mockReject(error)
-
-      return target.getCombinationElementById(1, testContext, testTx).then(() => {}, (err) => {
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchUpdateCombinationElements', () => {
     test('calls createPutResponse when validated and updated', () => {
       target.validator.validate = mockResolve()

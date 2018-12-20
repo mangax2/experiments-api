@@ -14,9 +14,6 @@ class combinationElementRepo {
   @setErrorCode('500000')
   repository = () => this.rep
 
-  @setErrorCode('501000')
-  find = (id, tx = this.rep) => tx.oneOrNone(`${genericSqlStatement} WHERE ce.id = $1`, id)
-
   @setErrorCode('502000')
   batchFind = (ids, tx = this.rep) => tx.any(`${genericSqlStatement} WHERE ce.id IN ($1:csv)`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

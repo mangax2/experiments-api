@@ -660,121 +660,6 @@
         }
       }
     },
-    "/experiments/{id}/group-experimental-units": {
-      "get": {
-        "summary": "get all Groups, Group Values, and Experimental Units for a given experiment id",
-        "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with an Experiment",
-        "operationId": "getComposites_Group-experimental-unitsByExperimentId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "GroupsAndUnits",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeGroupsAndUnitsResponse"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "No Experiment Found For ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "post one or more Groups, Group Values, and Experimental Units entities",
-        "description": "This Service would delete the existing groups groupValues and ExperimentalUnits for the experimentId and then recreates them based on request Payload",
-        "operationId": "postComposites_Group-experimental-unitsByExperimentId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Composites Groups And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite group-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Error"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/experiments/{id}/unit-specification-details": {
       "post": {
         "summary": "Creates, updates and deletes UnitSpecificationDetail",
@@ -832,52 +717,6 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
-          }
-        }
-      }
-    },
-    "/experiments/{id}/design-group-experimental-units": {
-      "post": {
-        "summary": "posts design specification details, groups, group values, and experimental units",
-        "description": "This service will update the design specification details, groups and units",
-        "operationId": "postComposites_Design-Group-experimental-unitsByExperimentId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Design Specifications, Groups, And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CompositeDesignSpecificationDetailGroupsAndUnitsPOST"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite design-group-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -2658,121 +2497,6 @@
       }
 
     },
-    "/templates/{id}/group-experimental-units": {
-      "get": {
-        "summary": "get all Groups, Group Values, and experimental Units for a given Template id",
-        "description": "This endpoint returns information about the group,groupValues and experimental Units entities associated with a Template",
-        "operationId": "getComposites_Group-experimental-unitsByTemplateId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "GroupsAndUnits",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeGroupsAndUnitsResponse"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "No Template Found For ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "post one or more Groups, Group Values, and experimental Units entities",
-        "description": "This Service would delete the existing groups groupValues and experimentalUnits for the TemplateId and then recreates them based on request Payload",
-        "operationId": "postComposites_Group-experimental-unitsByTemplateId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Composites Groups And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite group-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Error"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/templates/{id}/unit-specification-details": {
       "post": {
         "summary": "Creates, updates and deletes UnitSpecificationDetail",
@@ -2830,52 +2554,6 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
-          }
-        }
-      }
-    },
-    "/templates/{id}/design-group-experimental-units": {
-      "post": {
-        "summary": "posts design specification details, groups, group values, and experimental units",
-        "description": "This service will update the design specification details, groups and units",
-        "operationId": "postComposites_Design-Group-experimental-unitsByTemplateId",
-        "tags": [
-          "Group Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Composites Design Specifications, Groups, And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CompositeDesignSpecificationDetailGroupsAndUnitsPOST"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite design-group-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -3715,82 +3393,10 @@
         }
       }
     },
-    "CompositeGroupsAndUnitsPOST": {
-      "type": "object",
-      "properties": {
-        "refRandomizationStrategyId": {
-          "type": "integer",
-          "description": "This is a deprecated field that is no longer needed and will be removed in the next major version release."
-        },
-        "refGroupTypeId": {
-          "type": "integer",
-          "description": "reference to GroupType Table"
-        },
-        "groupValues": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/GroupValueCompositeOperation"
-          }
-        },
-        "units": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
-          }
-        },
-        "setId": {
-          "type": "integer",
-          "description": "The set id for the group"
-        },
-        "childGroups": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
-          }
-        }
-      }
-    },
     "UnitsPOST": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
-      }
-    },
-    "CompositeGroupsAndUnitsResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "unique id for group entity"
-        },
-        "parentId": {
-          "type": "string",
-          "description": "reference to parent Group"
-        },
-        "refRandomizationStrategyId": {
-          "type": "integer",
-          "description": "This is now sourced from DesignSpecificationDetail (route /experiments/{id}/design-specification-details/) and is here only for backwards compatibility until the next major version release."
-        },
-        "experimentId": {
-          "type": "string",
-          "description": "id of experimentId entity"
-        },
-        "groupValues": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/GroupValueResponseWithoutAuditKeys"
-          }
-        },
-        "setId": {
-          "type": "integer",
-          "description": "The set id for the group"
-        },
-        "units": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ExperimentalUnitResponseWithoutAuditKeys"
-          }
-        }
       }
     },
     "CompositeTreatmentsCombinationElement": {
@@ -4294,40 +3900,6 @@
         }
       }
     },
-    "ExperimentalUnitResponseWithoutAuditKeys": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "unique id for entity"
-        },
-        "groupId": {
-          "type": "integer",
-          "description": "experimental unit's group id."
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatment entity"
-        },
-        "location": {
-          "type": "integer",
-          "description": "the location of the experimental unit"
-        },
-        "rep": {
-          "type": "integer",
-          "description": "rep number of experimental unit"
-        },
-        "setEntryId": {
-          "type": "integer",
-          "description": "the set entry id for the experimental unit"
-        },
-        "block": {
-          "type": "integer",
-          "description": "the block that the experimental unit belongs to."
-        }
-      }
-    },
-
     "ExperimentPayload": {
       "type": "object",
       "properties": {
@@ -4637,44 +4209,6 @@
         "setId": {
           "type": "integer",
           "description": "set id for the group."
-        }
-      }
-    },
-    "GroupValueResponseWithoutAuditKeys": {
-      "type": "object",
-      "properties": {
-        "factorLevelId":{
-          "type": "integer",
-          "description": "Factor Level Id"
-        },
-        "factorLevelValue":{
-          "type": "object",
-          "description": "The value of the factor level"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the entity the group is associated to"
-        },
-        "value": {
-          "type": "string",
-          "description": "Value of the entity associated to the group"
-        }
-      }
-    },
-    "GroupValueCompositeOperation": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of the entity the group is associated to"
-        },
-        "value": {
-          "type": "string",
-          "description": "Value of the entity associated to the group"
-        },
-        "factorLevelId": {
-          "type": "integer",
-          "description": "Factor Level this entity is associated with"
         }
       }
     },

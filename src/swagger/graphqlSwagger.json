@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Experiments GraphQL API",
-    "description": "Experiment GraphQL APIs to query experiment data, requires oauth_resourceownerinfo http header",
+    "description": "Experiment GraphQL APIs to query experiment data",
     "version": "v1"
   },
   "host": "api01-np.agro.services",
@@ -78,7 +78,7 @@
       "properties": {
         "data": {
           "type": "object",
-          "example": "{getExperimentById: {id: 123 }}"
+          "example": "{getExperimentById:{id:123}}"
         },
         "errors": {
           "type": "array",

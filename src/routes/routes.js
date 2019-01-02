@@ -126,10 +126,6 @@ router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummary
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/groups', (req, res, next) => new GroupExperimentalUnitService().getGroupsByExperimentId(req.params.id)
-  .then(factors => res.json(factors))
-  .catch(err => next(err)))
-
 router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
   .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
@@ -271,10 +267,6 @@ router.get('/templates/:id/experimental-units', (req, res, next) => new Experime
 
 router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id, true, req.context)
   .then(summary => res.json(summary))
-  .catch(err => next(err)))
-
-router.get('/templates/:id/groups', (req, res, next) => new GroupExperimentalUnitService().getGroupsByExperimentId(req.params.id)
-  .then(factors => res.json(factors))
   .catch(err => next(err)))
 
 router.get('/templates/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, true, req.context)

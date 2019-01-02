@@ -624,55 +624,6 @@ describe('GroupExperimentalUnitService', () => {
     })
   })
 
-  describe('getGroupsByExperimentId', () => {
-    test('units and groupValues are trimmed', () => {
-      target = new GroupExperimentalUnitService()
-      target.getGroupsAndUnits = mockResolve([
-        {
-          id: '1662.1',
-          experimentId: '1662',
-          parentId: null,
-          refRandomizationStrategyId: 3,
-          refGroupTypeId: 1,
-          setId: 9703,
-          units: [],
-          groupValues: [],
-        },
-        {
-          id: '1662.2',
-          experimentId: '1662',
-          parentId: null,
-          refRandomizationStrategyId: 3,
-          refGroupTypeId: 1,
-          setId: 9704,
-          units: [],
-          groupValues: [],
-        },
-      ])
-      return target.getGroupsByExperimentId(3, testTx)
-        .then((data) => {
-          expect(data).toEqual([
-            {
-              id: '1662.1',
-              experimentId: '1662',
-              parentId: null,
-              refRandomizationStrategyId: 3,
-              refGroupTypeId: 1,
-              setId: 9703,
-            },
-            {
-              id: '1662.2',
-              experimentId: '1662',
-              parentId: null,
-              refRandomizationStrategyId: 3,
-              refGroupTypeId: 1,
-              setId: 9704,
-            },
-          ])
-        })
-    })
-  })
-
   describe('getGroupsAndUnitsByExperimentIds', () => {
     test('multiple experiments, getting groups succeeded', () => {
       target = new GroupExperimentalUnitService()

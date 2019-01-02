@@ -241,17 +241,6 @@ class GroupExperimentalUnitService {
         })
     })
 
-  @setErrorCode('1Fc000')
-  @Transactional('getGroupsByExperimentId')
-  getGroupsByExperimentId = (experimentId, tx) => this.getGroupsAndUnits(experimentId, tx)
-    .then((groupsAndUnits) => {
-      _.forEach(groupsAndUnits, (gu) => {
-        delete gu.units
-        delete gu.groupValues
-      })
-      return groupsAndUnits
-    })
-
   @setErrorCode('1FP000')
   getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => Promise.all(_.map(experimentIds,
     experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))

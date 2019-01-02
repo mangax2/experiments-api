@@ -26,6 +26,13 @@ class TreatmentService {
         .then(data => AppUtil.createPostResponse(data)))
   }
 
+  @setErrorCode('1R2000')
+  @Transactional('getTreatmentsByExperimentId')
+  getTreatmentsByExperimentId(id, isTemplate, context, tx) {
+    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
+      .then(() => db.treatment.findAllByExperimentId(id, tx))
+  }
+
   @setErrorCode('1R4000')
   @Transactional('getTreatmentById')
   batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)

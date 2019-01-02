@@ -3517,17 +3517,6 @@
         }
       }
     },
-    "CompositeDesignSpecificationDetailGroupsAndUnitsPOST": {
-      "type": "object",
-      "properties": {
-        "groupAndUnitDetails": {
-          "$ref": "#/definitions/CompositeGroupsAndUnitsPOST"
-        },
-        "designSpecifications": {
-          "$ref": "#/definitions/CompositeDesignSpecificationDetailPayloadForPOST"
-        }
-      }
-    },
     "CompositeDesignSpecificationDetailAndUnitsPOST": {
       "type": "object",
       "properties": {

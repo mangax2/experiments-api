@@ -126,21 +126,11 @@ router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummary
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/groups', (req, res, next) => new GroupExperimentalUnitService().getGroupsByExperimentId(req.params.id)
-  .then(factors => res.json(factors))
-  .catch(err => next(err)))
-
 router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
   .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
     return res.sendStatus(200)
   })
-  .catch(err => next(err)))
-router.post('/experiments/:id/group-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveGroupAndUnitDetails(req.params.id, req.body, req.context, false)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-router.get('/experiments/:id/group-experimental-units', (req, res, next) => new GroupExperimentalUnitService().getGroupsAndUnits(req.params.id)
-  .then(value => res.json(value))
   .catch(err => next(err)))
 
 router.get('/experiments/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, false, req.context)
@@ -151,10 +141,6 @@ router.get('/experiments/:id/design-specification-details/', (req, res, next) =>
   .then(values => res.json(values))
   .catch(err => next(err)))
 router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, false)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.post('/experiments/:id/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context, false)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -283,17 +269,6 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/templates/:id/groups', (req, res, next) => new GroupExperimentalUnitService().getGroupsByExperimentId(req.params.id)
-  .then(factors => res.json(factors))
-  .catch(err => next(err)))
-
-router.post('/templates/:id/group-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveGroupAndUnitDetails(req.params.id, req.body, req.context, true)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-router.get('/templates/:id/group-experimental-units', (req, res, next) => (new GroupExperimentalUnitService()).getGroupsAndUnits(req.params.id)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
 router.get('/templates/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, true, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
@@ -302,10 +277,6 @@ router.get('/templates/:id/design-specification-details/', (req, res, next) => n
   .then(values => res.json(values))
   .catch(err => next(err)))
 router.post('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, true)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.post('/templates/:id/design-group-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveDesignSpecsAndGroupUnitDetails(req.params.id, req.body, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

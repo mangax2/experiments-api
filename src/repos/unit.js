@@ -45,12 +45,11 @@ class unitRepo {
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
+      ['treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
       { table: 'unit' },
     )
 
     const values = units.map(u => ({
-      group_id: u.groupId,
       treatment_id: u.treatmentId,
       rep: u.rep,
       set_entry_id: u.setEntryId,
@@ -70,7 +69,7 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', { name: 'group_id', cast: 'int' }, 'treatment_id', 'rep', {
+      ['?id', 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
       }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, { name: 'block', cast: 'int' }],
@@ -79,7 +78,6 @@ class unitRepo {
 
     const data = units.map(u => ({
       id: u.id,
-      group_id: u.groupId,
       treatment_id: u.treatmentId,
       rep: u.rep,
       set_entry_id: u.setEntryId,

@@ -60,23 +60,6 @@ class TreatmentDetailsService {
     })
   }
 
-  @notifyChanges('update', 0)
-  @setErrorCode('1Q2000')
-  @Transactional('manageAllTreatmentDetails')
-  manageAllTreatmentDetails(experimentId, treatmentDetailsObj, context, isTemplate, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
-      TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.updates, experimentId)
-      TreatmentDetailsService.populateExperimentId(treatmentDetailsObj.adds, experimentId)
-      return this.validator.validateBlockValue(
-        _.concat(_.compact(treatmentDetailsObj.updates),
-          _.compact(treatmentDetailsObj.adds)))
-        .then(() => this.deleteTreatments(treatmentDetailsObj.deletes, context, tx)
-          .then(() => this.updateTreatments(treatmentDetailsObj.updates, context, tx)
-            .then(() => this.createTreatments(treatmentDetailsObj.adds, context, tx)
-              .then(() => AppUtil.createCompositePostResponse()))))
-    })
-  }
-
   @notifyChanges('update', 0, 3)
   @setErrorCode('1QI000')
   @Transactional('handleAllTreatments')

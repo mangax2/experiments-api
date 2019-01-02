@@ -2,7 +2,7 @@ import _ from 'lodash'
 import DataLoader from 'dataloader'
 import db from '../db/DbManager'
 import ExperimentsService from '../services/ExperimentsService'
-import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
+import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 
 function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
@@ -35,12 +35,12 @@ function createLoaders(tx) {
   const groupByIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitCompositeService().getGroupsAndUnits(arg))))
+        new GroupExperimentalUnitService().getGroupsAndUnits(arg))))
 
   const groupBySetIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitCompositeService().getGroupAndUnitsBySetId(arg, tx))))
+        new GroupExperimentalUnitService().getGroupAndUnitsBySetId(arg, tx))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
@@ -95,7 +95,7 @@ function createLoaders(tx) {
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)
 
   const groupByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    new GroupExperimentalUnitCompositeService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
+    new GroupExperimentalUnitService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
 
   const nestedFactorLevelByAssociatedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindNestedLevels, factorLevelByIdLoader)

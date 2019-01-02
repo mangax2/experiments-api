@@ -22,10 +22,10 @@ import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChange
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
-const logger = log4js.getLogger('GroupExperimentalUnitCompositeService')
+const logger = log4js.getLogger('GroupExperimentalUnitService')
 
 // Error Codes 1FXXXX
-class GroupExperimentalUnitCompositeService {
+class GroupExperimentalUnitService {
   constructor() {
     this.groupService = new GroupService()
     this.groupValueService = new GroupValueService()
@@ -647,4 +647,4 @@ class GroupExperimentalUnitCompositeService {
   }
 }
 
-module.exports = GroupExperimentalUnitCompositeService
+module.exports = GroupExperimentalUnitService

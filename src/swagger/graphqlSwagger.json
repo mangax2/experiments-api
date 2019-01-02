@@ -9,7 +9,7 @@
   "schemes": [
     "https"
   ],
-  "basePath": "/experiments-api",
+  "basePath": "/experiments-api-graphql",
   "paths": {
     "/graphql": {
       "post": {

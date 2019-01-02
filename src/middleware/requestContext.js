@@ -58,7 +58,7 @@ function requestContextMiddlewareFunction(req, res, next) {
   res.set('X-Request-Id', req.context.requestId)
   res.set('Access-Control-Expose-Headers', 'X-Request-Id')
 
-  if (_.startsWith(req.url, '/experiments-api/graphql')) {
+  if (_.startsWith(req.url, '/experiments-api-graphql/graphql')) {
     // Need to set a user if undefined for audit
     // Need to retrieve client id for audit
 

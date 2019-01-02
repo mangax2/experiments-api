@@ -1,0 +1,97 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Experiments GraphQL API",
+    "description": "Experiment GraphQL APIs to query experiment data, requires oauth_resourceownerinfo http header",
+    "version": "v1"
+  },
+  "host": "api01-np.agro.services",
+  "schemes": [
+    "https"
+  ],
+  "basePath": "/experiments-api",
+  "paths": {
+    "/graphql": {
+      "post": {
+        "summary": "Sends query request to graphql endpoint",
+        "description": "Sends a graphql query that asks for specific data from the system",
+        "operationId": "graphQL",
+        "tags": ["graphql"],
+        "produces": ["application/json"],
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/GraphQLQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response of the graphql query",
+            "schema": {
+              "$ref": "#/definitions/GraphQLResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "code": {
+          "type": "string"
+        },
+        "errorCode": {
+          "type": "string"
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    },
+    "GraphQLQuery": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "example": "{getExperimentById(id:1275){id}}"
+        }
+      }
+    },
+    "GraphQLResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "example": "{getExperimentById: {id: 123 }}"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

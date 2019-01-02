@@ -2,6 +2,7 @@ const swaggerTools = require('swagger-tools')
 require('../log4js-conf')()
 const config = require('../config')
 const swaggerDoc = require('./swagger/swagger.json')
+const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')
 const vaultUtil = require('./services/utility/VaultUtil')
 
 process.on('unhandledRejection', (reason) => {
@@ -29,6 +30,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
   const promMetrics = require('@monsantoit/prom-metrics')
   const logger = log4js.getLogger('app')
   const appBaseUrl = '/experiments-api'
+  const graphqlBaseUrl = '/experiments-api-graphql'
   const { setErrorPrefix, setPromiseLibrary } = require('@monsantoit/error-decorator')()
   const lambdaPerformanceService = require('./services/prometheus/LambdaPerformanceService')
   const setEntryRemovalService = require('./services/prometheus/SetEntryRemovalService')
@@ -77,7 +79,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const cors = require('cors')
 
-  app.use('/experiments-api/graphql', cors(), bodyParser.json({ limit: 1024 * 1024 * 40 }), require('./graphql/graphqlConfig')(schema))
+  app.use(graphqlBaseUrl, cors(), bodyParser.json({ limit: 1024 * 1024 * 40 }), require('./graphql/graphqlConfig')(schema))
 
   app.use(inflector())
 
@@ -103,6 +105,10 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
     app.use(appBaseUrl, middleware.swaggerUi())
+  })
+
+  swaggerTools.initializeMiddleware(graphqlSwaggerDoc, (middleware) => {
+    app.use(graphqlBaseUrl, middleware.swaggerUi())
   })
 
   // Disabling lint for this app.use, removing 'next' parameter causes the errors to be

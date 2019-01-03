@@ -1627,95 +1627,6 @@
         }
       }
     },
-    "/ref-design-specifications": {
-      "get": {
-        "summary": "Gets all ref-design-specifications and all their defined Data Sources",
-        "description": "Returns an array of reference data source types and their data sources",
-        "operationId": "getRefDesignSpecifications",
-        "tags": [
-          "Ref Design Specifications"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "All Reference Design specifications",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/RefDesignSpecifications"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/ref-design-specifications/{id}": {
-      "get": {
-        "summary": "Gets one ref-design-specification entity",
-        "description": "Returns ref-design-specification entity by id",
-        "operationId": "getRefDesignSpecificationsById",
-        "tags": [
-          "Ref Design Specifications"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All Reference Design specifications",
-            "schema": {
-              "$ref": "#/definitions/RefDesignSpecifications"
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/set-entries": {
       "get": {
         "summary": "Gets all set entries for a set.",
@@ -4140,35 +4051,6 @@
           "items": {
             "$ref": "#/definitions/RefDataSource"
           }
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        }
-      }
-    },
-    "RefDesignSpecifications": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "id of ref design spec"
-        },
-        "name": {
-          "type": "string",
-          "description": "name of ref design spec"
         },
         "createdDate": {
           "type": "string",

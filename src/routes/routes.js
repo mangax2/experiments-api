@@ -18,7 +18,6 @@ import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
-import RefDesignSpecificationService from '../services/RefDesignSpecificationService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
@@ -181,14 +180,6 @@ router.post('/preferences/factors/lists', (req, res, next) => new ListsService(n
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecificationService().getAllRefDesignSpecs()
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

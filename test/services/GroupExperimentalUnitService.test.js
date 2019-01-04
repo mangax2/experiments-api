@@ -724,30 +724,36 @@ describe('GroupExperimentalUnitService', () => {
           id: 1,
           setId: 4781,
           parentId: null,
-        },
-        {
-          id: 2,
-          parentId: 1,
-          units: [{ id: 1 }, { id: 2 }],
-        },
-        {
-          id: 3,
-          parentId: 1,
-        },
-        {
-          id: 4,
-          parentId: 2,
-          units: [{ id: 3 }],
-        },
-        {
-          id: 5,
-          parentId: 2,
-          units: [{ id: 4 }, { id: 5 }],
-        },
-        {
-          id: 6,
-          parentId: 5,
-          units: [{ id: 6 }],
+          childGroups: [
+            {
+              id: 2,
+              parentId: 1,
+              childGroups: [
+                {
+                  id: 4,
+                  parentId: 2,
+                  units: [{ id: 3 }],
+                },
+                {
+                  id: 5,
+                  parentId: 2,
+                  childGroups: [
+                    {
+                      id: 6,
+                      parentId: 5,
+                      units: [{ id: 6 }],
+                    },
+                  ],
+                  units: [{ id: 4 }, { id: 5 }],
+                },
+              ],
+              units: [{ id: 1 }, { id: 2 }],
+            },
+            {
+              id: 3,
+              parentId: 1,
+            },
+          ],
         },
       ])
       return target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, testTx).then((group) => {
@@ -757,6 +763,36 @@ describe('GroupExperimentalUnitService', () => {
           parentId: null,
           setEntries: [
             { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
+          ],
+          childGroups: [
+            {
+              id: 2,
+              parentId: 1,
+              childGroups: [
+                {
+                  id: 4,
+                  parentId: 2,
+                  units: [{ id: 3 }],
+                },
+                {
+                  id: 5,
+                  parentId: 2,
+                  childGroups: [
+                    {
+                      id: 6,
+                      parentId: 5,
+                      units: [{ id: 6 }],
+                    },
+                  ],
+                  units: [{ id: 4 }, { id: 5 }],
+                },
+              ],
+              units: [{ id: 1 }, { id: 2 }],
+            },
+            {
+              id: 3,
+              parentId: 1,
+            },
           ],
         })
       })
@@ -816,30 +852,36 @@ describe('GroupExperimentalUnitService', () => {
           id: 1,
           setId: 4781,
           parentId: null,
-        },
-        {
-          id: 2,
-          parentId: 1,
-          units: [{ id: 1 }, { id: 2 }],
-        },
-        {
-          id: 3,
-          parentId: 1,
-        },
-        {
-          id: 4,
-          parentId: 2,
-          units: [{ id: 3 }],
-        },
-        {
-          id: 5,
-          parentId: 2,
-          units: [{ id: 4 }, { id: 5 }],
-        },
-        {
-          id: 6,
-          parentId: 5,
-          units: [{ id: 6 }],
+          childGroups: [
+            {
+              id: 2,
+              parentId: 1,
+              childGroups: [
+                {
+                  id: 4,
+                  parentId: 2,
+                  units: [{ id: 3 }],
+                },
+                {
+                  id: 5,
+                  parentId: 2,
+                  childGroups: [
+                    {
+                      id: 6,
+                      parentId: 5,
+                      units: [{ id: 6 }],
+                    },
+                  ],
+                  units: [{ id: 4 }, { id: 5 }],
+                },
+              ],
+              units: [{ id: 1 }, { id: 2 }],
+            },
+            {
+              id: 3,
+              parentId: 1,
+            },
+          ],
         },
       ]
 
@@ -852,110 +894,45 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('getChildGroupUnits', () => {
     test('get units from child groups', () => {
-      const groups = [
+      const group =
         {
           id: 1,
           parentId: null,
-        },
-        {
-          id: 2,
-          parentId: 1,
-          units: [{ id: 1 }, { id: 2 }],
-        },
-        {
-          id: 3,
-          parentId: 1,
-        },
-        {
-          id: 4,
-          parentId: 2,
-          units: [{ id: 3 }],
-        },
-        {
-          id: 5,
-          parentId: 2,
-          units: [{ id: 4 }, { id: 5 }],
-        },
-        {
-          id: 6,
-          parentId: 5,
-          units: [{ id: 6 }],
-        },
-      ]
+          childGroups: [
+            {
+              id: 2,
+              parentId: 1,
+              childGroups: [
+                {
+                  id: 4,
+                  parentId: 2,
+                  units: [{ id: 3 }],
+                },
+                {
+                  id: 5,
+                  parentId: 2,
+                  childGroups: [
+                    {
+                      id: 6,
+                      parentId: 5,
+                      units: [{ id: 6 }],
+                    },
+                  ],
+                  units: [{ id: 4 }, { id: 5 }],
+                },
+              ],
+              units: [{ id: 1 }, { id: 2 }],
+            },
+            {
+              id: 3,
+              parentId: 1,
+            },
+          ],
+        }
 
       target = new GroupExperimentalUnitService()
-      expect(target.getChildGroupUnits(groups, 1))
+      expect(target.getChildGroupUnits(group))
         .toEqual([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }])
-      expect(target.getChildGroupUnits(groups, 7)).toEqual([])
-    })
-  })
-
-  describe('getAllChildGroups', () => {
-    test('get all child groups', () => {
-      const groups = [
-        {
-          id: 1,
-          parentId: null,
-        },
-        {
-          id: 2,
-          parentId: 1,
-        },
-        {
-          id: 3,
-          parentId: 1,
-        },
-        {
-          id: 4,
-          parentId: 2,
-        },
-        {
-          id: 5,
-          parentId: 2,
-        },
-        {
-          id: 6,
-          parentId: 5,
-        },
-      ]
-      target = new GroupExperimentalUnitService()
-      expect(target.getAllChildGroups(groups, 1)).toEqual([{
-        id: 2,
-        parentId: 1,
-      },
-      {
-        id: 3,
-        parentId: 1,
-      },
-      {
-        id: 4,
-        parentId: 2,
-      },
-      {
-        id: 5,
-        parentId: 2,
-      },
-      {
-        id: 6,
-        parentId: 5,
-      },
-      ])
-
-      expect(target.getAllChildGroups(groups, 2)).toEqual([
-        {
-          id: 4,
-          parentId: 2,
-        },
-        {
-          id: 5,
-          parentId: 2,
-        },
-        {
-          id: 6,
-          parentId: 5,
-        },
-      ])
-      expect(target.getAllChildGroups(groups, 7)).toEqual([])
     })
   })
 

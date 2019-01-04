@@ -66,6 +66,7 @@ type Experiment {
   designSpecifications: [DesignSpecificationDetail]
   factors: [Factor]
   groups: [Group]
+  groupsJSON: JSON
   owners: Owner
   treatments: [Treatment]
   unitSpecificationDetails: [UnitSpecificationDetail]
@@ -141,6 +142,7 @@ type Group {
   refRandomizationStrategyId: Int @deprecated(reason: "This is now sourced from DesignSpecificationDetail and is here only for backwards compatibility until the next major version release.")
   refGroupTypeId: Int
   setId: Int
+  childGroups: [Group]
   groupValues: [GroupValue]
 }
 

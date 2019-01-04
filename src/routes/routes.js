@@ -10,7 +10,6 @@ import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentSummaryService from '../services/ExperimentSummaryService'
 import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
-import FactorLevelService from '../services/FactorLevelService'
 import FactorService from '../services/FactorService'
 import ListsService from '../services/ListsService'
 import LocationAssociationService from '../services/LocationAssociationService'
@@ -90,15 +89,8 @@ router.post('/templates/:id/variables', (req, res, next) => new FactorDependentC
 router.get('/experiments/:id/variables', (req, res, next) => new FactorDependentCompositeService().getAllVariablesByExperimentId(req.params.id, false, req.context)
   .then(success => res.json(success))
   .catch(err => next(err)))
-
-router.get('/treatment-variables', (req, res, next) => new FactorService().getAllFactors()
-  .then(factors => res.json(factors))
-  .catch(err => next(err)))
 router.get('/experiments/:id/treatment-variables', (req, res, next) => new FactorService().getFactorsByExperimentId(req.params.id, false, req.context)
   .then(factors => res.json(factors))
-  .catch(err => next(err)))
-router.get('/treatment-variable-levels', (req, res, next) => new FactorLevelService().getAllFactorLevels()
-  .then(factorLevels => res.json(factorLevels))
   .catch(err => next(err)))
 router.get('/experiments/:id/treatments', (req, res, next) => new TreatmentDetailsService().getAllTreatmentDetails(req.params.id, false, req.context)
   .then(value => res.json(value))

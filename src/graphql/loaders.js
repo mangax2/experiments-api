@@ -43,10 +43,15 @@ function createLoaders(tx) {
       Promise.all(_.map(args, arg =>
         new GroupExperimentalUnitService().getGroupAndUnitsBySetId(arg, tx))))
 
+  const designSpecDetailByExperimentIdLoader =
+    new DataLoader(args =>
+      Promise.all(_.map(args, arg =>
+        new DesignSpecificationDetailService().getAdvancedParameters(arg, tx)
+          .then(result => [result]))))
+
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
-  const designSpecDetailByIdLoader = createDataLoader(db.designSpecificationDetail.batchFind)
   const experimentByIdLoader = createDataLoader(experimentBatchLoaderCallback)
   const experimentBySetIdLoader =
     createDataLoader(db.locationAssociation.batchFindExperimentBySetId)
@@ -89,9 +94,6 @@ function createLoaders(tx) {
   const dependentVariableByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.dependentVariable.batchFindByExperimentId, dependentVariableByIdLoader)
 
-  const designSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    new DesignSpecificationDetailService().getAdvancedParameters, designSpecDetailByIdLoader)
-
   const factorLevelByFactorIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)
 
@@ -119,7 +121,6 @@ function createLoaders(tx) {
     combinationElementByTreatmentIds: combinationElementsByTreatmentIdLoader,
     dependentVariable: dependentVariableByIdLoader,
     dependentVariableByExperimentIds: dependentVariableByExperimentIdLoader,
-    designSpecDetail: designSpecDetailByIdLoader,
     designSpecDetailByExperimentIds: designSpecDetailByExperimentIdLoader,
     experiment: experimentByIdLoader,
     experimentBySetId: experimentBySetIdLoader,

@@ -3289,11 +3289,9 @@
           "$ref": "#/definitions/UnitsPOST"
         },
         "designSpecifications": {
-          "schema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/DesignSpecificationDetail"
-            }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DesignSpecificationDetail"
           }
         }
       }

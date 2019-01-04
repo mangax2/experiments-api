@@ -110,10 +110,6 @@ export default {
     refTreatmentVariableTypeId: property('ref_factor_type_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
-    treatmentVariableType: (entity, args, context) =>
-      (entity.ref_factor_type_id
-        ? context.loaders.refFactorType.load(entity.ref_factor_type_id)
-        : Promise.resolve(null)),
     treatmentVariableLevels: (entity, args, context) =>
       context.loaders.factorLevelByFactorIds.load(entity.id),
   },

@@ -75,7 +75,6 @@ router.get('/experiments/:id/permissions', (req, res, next) => {
     .then(permissions => res.json(permissions))
     .catch(err => next(err))
 })
-
 router.get('/experiments/:id/response-variables', (req, res, next) => {
   const { id } = req.params
   return new DependentVariableService().getDependentVariablesByExperimentId(id, false, req.context)

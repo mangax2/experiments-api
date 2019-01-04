@@ -270,21 +270,15 @@ class GroupExperimentalUnitService {
   getUnitsFromGroupsBySetId = (groups, setId) => {
     const group = _.find(groups, g => g.setId === setId)
     if (_.isNil(group)) return []
-    return _.compact(_.concat(group.units, this.getChildGroupUnits(groups, group.id)))
+    return _.compact(_.concat(group.units, this.getChildGroupUnits(group)))
   }
 
   @setErrorCode('1FT000')
-  getChildGroupUnits = (groups, parentId) => {
-    const children = this.getAllChildGroups(groups, parentId)
-    return _.compact(_.flatMap(children, c => c.units))
-  }
+  getChildGroupUnits = (group) => {
+    const children = group.childGroups
+    const childGroupUnits = _.flatMap(children, childGroup => this.getChildGroupUnits(childGroup))
 
-  @setErrorCode('1FU000')
-  getAllChildGroups = (groups, parentId) => {
-    const children = _.filter(groups, g => g.parentId === parentId)
-    if (_.isEmpty(children)) return []
-
-    return _.concat(children, _.flatMap(children, c => this.getAllChildGroups(groups, c.id)))
+    return _.compact(_.concat(group.units, childGroupUnits))
   }
 
   @notifyChanges('update', 0)

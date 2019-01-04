@@ -81,6 +81,8 @@ export default {
       context.loaders.factorByExperimentIds.load(entity.id),
     groups: (entity, args, context) =>
       context.loaders.groupsByExperimentIds.load(entity.id),
+    groupsJSON: (entity, args, context) =>
+      context.loaders.groupsByExperimentIds.load(entity.id),
     owners: (entity, args, context) =>
       context.loaders.ownersByExperimentIds.load(entity.id),
     treatments: (entity, args, context) =>
@@ -130,6 +132,9 @@ export default {
       context.loaders.nestedFactorLevel.load(entity.id),
     associatedLevels: (entity, args, context) =>
       context.loaders.associatedFactorLevel.load(entity.id),
+  },
+  Group: {
+    childGroups: entity => entity.childGroups,
   },
   Owner: {
     experimentId: property('experiment_id'),

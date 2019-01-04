@@ -51,6 +51,39 @@ describe('TreatmentService', () => {
       })
     })
   })
+
+  describe('getTreatmentsByExperimentId', () => {
+    test('finds all treatments for an experiment', () => {
+      target.experimentService.getExperimentById = mockResolve()
+      db.treatment.findAllByExperimentId = mockResolve([{}])
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then((data) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([{}])
+      })
+    })
+    test('rejects when findAllByExperimentId fails', () => {
+      const error = { message: 'error' }
+      target.experimentService.getExperimentById = mockResolve()
+      db.treatment.findAllByExperimentId = mockReject(error)
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(err).toEqual(error)
+      })
+    })
+    test('rejects when getExperimentById fails', () => {
+      const error = { message: 'error' }
+      target.experimentService.getExperimentById = mockReject(error)
+      db.treatment.findAllByExperimentId = mockReject(error)
+      return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.treatment.findAllByExperimentId).not.toHaveBeenCalled()
+        expect(err).toEqual(error)
+      })
+    })
+  })
+
   describe('batchGetTreatmentByIds', () => {
     test('gets treatments', () => {
       db.treatment.batchFind = mockResolve([{}, {}])

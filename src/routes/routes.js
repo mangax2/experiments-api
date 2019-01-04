@@ -132,14 +132,10 @@ router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociat
   })
   .catch(err => next(err)))
 
-router.get('/experiments/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, false, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, false)
+router.put('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, false, req.context, false)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -260,14 +256,10 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/templates/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, true, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/templates/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.post('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, true)
+router.put('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, true, req.context, true)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

@@ -40,18 +40,14 @@ type DependentVariable {
   auditInfo: AuditInfo
 }
 
-type DesignSpecification {
-  id: Int
-  name: String
-}
-
 type DesignSpecificationDetail {
-  id: Int
-  value: String
-  refDesignSpecId: Int
-  experimentId: Int
-  auditInfo: AuditInfo
-  designSpecification: DesignSpecification
+  locations: String
+  minRep: String
+  repDimensionX: String
+  repDimensionY: String
+  repRangeMin: String
+  repRangeMax: String
+  reps: String
 }
 
 type Experiment {

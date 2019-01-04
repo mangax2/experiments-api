@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import DataLoader from 'dataloader'
 import db from '../db/DbManager'
+import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
 import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 
@@ -89,7 +90,7 @@ function createLoaders(tx) {
     db.dependentVariable.batchFindByExperimentId, dependentVariableByIdLoader)
 
   const designSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.designSpecificationDetail.batchFindAllByExperimentId, designSpecDetailByIdLoader)
+    new DesignSpecificationDetailService().getAdvancedParameters, designSpecDetailByIdLoader)
 
   const factorLevelByFactorIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)

@@ -123,12 +123,6 @@ class TreatmentValidator extends SchemaValidator {
       },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
-      {
-        paramName: 'Treatment',
-        type: 'businessKey',
-        keys: ['experimentId', 'treatmentNumber'],
-        entity: db.treatment,
-      },
       { paramName: 'block', type: 'integer' },
       { paramName: 'inAllBlocks', type: 'boolean' },
     ]

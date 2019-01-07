@@ -3589,6 +3589,10 @@
             "id",
             "type"
           ]
+        },
+        "randomizationStrategyCode": {
+          "type": "string",
+          "description": "The type of randomization to be used for this experiment"
         }
       }
     },
@@ -3634,7 +3638,8 @@
           }
         },
         "randomizationStrategyCode": {
-          "type": "string"
+          "type": "string",
+          "description": "The type of randomization to be used for this experiment"
         },
         "reviewers": {
           "type": "array",

@@ -38,6 +38,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -84,6 +85,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       AppError.badRequest = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -136,6 +138,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -156,6 +159,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -176,6 +180,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject(error)
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -197,6 +202,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockReject(error)
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -218,6 +224,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -238,6 +245,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
@@ -601,6 +609,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {
         owners: ['KMCCL '],
@@ -658,6 +667,7 @@ describe('ExperimentsService', () => {
       target.tagService.saveTags = mock()
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -687,6 +697,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockReject(error)
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -714,6 +725,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock()
       target.tagService.saveTags = mock()
       AppError.notFound = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -732,6 +744,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock()
       target.tagService.saveTags = mock()
       AppError.notFound = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, true, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, true, testTx)
@@ -750,6 +763,7 @@ describe('ExperimentsService', () => {
       db.experiments.update = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -768,6 +782,7 @@ describe('ExperimentsService', () => {
       db.experiments.update = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -779,7 +794,6 @@ describe('ExperimentsService', () => {
       })
     })
 
-
     test('rejects when comment validate fails', () => {
       const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
@@ -787,6 +801,7 @@ describe('ExperimentsService', () => {
       db.comment.update = mock()
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -796,6 +811,21 @@ describe('ExperimentsService', () => {
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
+    })
+  })
+
+  describe('updateExperimentsRandomizationStrategyId', () => {
+    test('saves the matching randomizationStrategyId', () => {
+      PingUtil.getMonsantoHeader = mockResolve()
+      HttpUtil.get = mockResolve({ body: [{ endpoint: 'rcb', id: 1 }, { endpoint: 'crd', id: 2 }, { endpoint: 'custom', id: 4 }] })
+      target.factorService = { updateFactorsForDesign: mockResolve() }
+      db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId = mockResolve()
+
+      return target.updateExperimentsRandomizationStrategyId(5, 'crd', testContext, testTx)
+        .then(() => {
+          expect(target.factorService.updateFactorsForDesign).toBeCalledWith(5, { endpoint: 'crd', id: 2 }, testTx)
+          expect(db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId).toBeCalledWith(5, 2, testContext, testTx)
+        })
     })
   })
 

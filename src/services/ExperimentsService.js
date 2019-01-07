@@ -57,6 +57,7 @@ class ExperimentsService {
                 context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
+              .then(() => Promise.all(_.map(experiments, experiment => this.updateExperimentsRandomizationStrategyId(experiment.id, experiment.randomizationStrategyCode, context, tx))))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
@@ -203,6 +204,7 @@ class ExperimentsService {
                 const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)
               }
+              promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, context, tx))
               return Promise.all(promises)
                 .then(() => {
                   experiment.id = id
@@ -217,6 +219,23 @@ class ExperimentsService {
                 )
             }
           })))
+  }
+
+  @setErrorCode('15T000')
+  updateExperimentsRandomizationStrategyId(experimentId, strategyCode, context, tx) {
+    return PingUtil.getMonsantoHeader().then((headers) => {
+      const { randomizationAPIUrl } =
+        cfService.experimentsExternalAPIUrls.value
+      return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
+        .then((strategies) => {
+          const randStrategy = _.find(strategies.body, strategy =>
+            strategy.endpoint === strategyCode)
+          return this.factorService
+            .updateFactorsForDesign(experimentId, randStrategy, tx)
+            .then(() => db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId(experimentId,
+              randStrategy.id, context, tx))
+        })
+    })
   }
 
   @notifyChanges('delete', 0, 2)

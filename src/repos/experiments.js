@@ -32,21 +32,23 @@ class experimentsRepo {
   batchCreate = (experiments, context, tx = this.rep) => tx.batch(
     experiments.map(
       experiment => tx.one(
-        'insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date, modified_user_id, modified_date, is_template) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP,$6)  RETURNING id',
+        'insert into experiment(name, description, ref_experiment_design_id, status,created_user_id, created_date, modified_user_id, modified_date, is_template, randomization_strategy_code) values($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP, $6, $7)  RETURNING id',
         [experiment.name,
           experiment.description,
           experiment.refExperimentDesignId,
           experiment.status || 'DRAFT',
           context.userId,
-          experiment.isTemplate || false],
+          experiment.isTemplate || false,
+          experiment.randomizationStrategyCode
+        ],
       ),
     ),
   )
 
   @setErrorCode('556000')
   update = (id, experimentObj, context, tx = this.rep) => tx.oneOrNone(
-    'UPDATE experiment SET (name, description, ref_experiment_design_id,status, modified_user_id, modified_date) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP) WHERE id=$6 AND is_template=$7 RETURNING *',
-    [experimentObj.name, experimentObj.description, experimentObj.refExperimentDesignId, experimentObj.status, context.userId, id,experimentObj.isTemplate])
+    'UPDATE experiment SET (name, description, ref_experiment_design_id,status, modified_user_id, modified_date, randomization_strategy_code) = ($1,$2,$3,$4,$5,CURRENT_TIMESTAMP,$8) WHERE id=$6 AND is_template=$7 RETURNING *',
+    [experimentObj.name, experimentObj.description, experimentObj.refExperimentDesignId, experimentObj.status, context.userId, id,experimentObj.isTemplate, experimentObj.randomizationStrategyCode])
 
   @setErrorCode('557000')
   remove = (id, isTemplate) => this.rep.oneOrNone('delete from experiment where id=$1 AND is_template = $2 RETURNING id', [id, isTemplate])

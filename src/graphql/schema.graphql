@@ -21,17 +21,17 @@ type ClusterComposite {
 
 type CombinationElement {
   id: Int
-  factorLevelId: Int
+  treatmentVariableLevelId: Int
   treatmentId: Int
   auditInfo: AuditInfo
-  factorLevel: FactorLevel
+  treatmentVariableLevel: TreatmentVariableLevel
 }
 
 enum Criteria {
   owner
 }
 
-type DependentVariable {
+type ResponseVariable {
   id: Int
   name: String
   required: Boolean
@@ -62,9 +62,9 @@ type Experiment {
   status: String
   capacityRequestSyncDate: String
   auditInfo: AuditInfo
-  dependentVariables: [DependentVariable]
+  responseVariables: [ResponseVariable]
   designSpecifications: [DesignSpecificationDetail]
-  factors: [Factor]
+  treatmentVariables: [TreatmentVariable]
   groups: [Group]
   groupsJSON: JSON
   owners: Owner
@@ -103,34 +103,34 @@ type ExperimentInfo {
   owners: Owner
 }
 
-type Factor {
+type TreatmentVariable {
   id: Int
   name: String
   experimentId: Int
-  refFactorTypeId: Int
+  refTreatmentVariableTypeId: Int
   tier: Int
   auditInfo: AuditInfo
-  factorType: FactorType
-  factorLevels: [FactorLevel]
+  treatmentVariableType: TreatmentVariableType
+  treatmentVariableLevels: [TreatmentVariableLevel]
 }
 
-type FactorLevel {
+type TreatmentVariableLevel {
   id: Int
-  value: FactorLevelValue
+  value: TreatmentVariableLevelValue
   valueJSON: JSON
-  factorId: Int
+  treatmentVariableId: Int
   auditInfo: AuditInfo
-  factor: Factor
-  nestedLevels: [FactorLevel]
-  associatedLevels: [FactorLevel]
+  treatmentVariable: TreatmentVariable
+  nestedLevels: [TreatmentVariableLevel]
+  associatedLevels: [TreatmentVariableLevel]
 }
 
-type FactorLevelValue {
+type TreatmentVariableLevelValue {
   items: [ClusterComposite]
   objectType: String
 }
 
-type FactorType {
+type TreatmentVariableType {
   id: Int
   type: String
 }
@@ -150,7 +150,7 @@ type GroupValue {
   id: Int
   name: String
   value: String
-  factorLevelId: Int
+  treatmentVariableLevelId: Int
   groupId: String
 }
 
@@ -173,7 +173,7 @@ type Query {
   getAllExperiments: [ExperimentInfo]
   getAllTemplates: [ExperimentInfo]
   getTemplatesByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
-  getFactorsByExperimentId(experimentId: Int!): [Factor]
+  getTreatmentVariablesByExperimentId(experimentId: Int!): [TreatmentVariable]
   getTreatmentsByExperimentId(experimentId: Int!): [Treatment]
   getUnitSpecificationDetailsByExperimentId(experimentId: Int!): [UnitSpecificationDetail]
   getDesignSpecificationDetailsByExperimentId(experimentId: Int!): [DesignSpecificationDetail]

@@ -25,7 +25,7 @@ export default {
       context.loaders.experiments.load(-1),
     getAllTemplates: (entity, args, context) =>
       context.loaders.templates.load(-1),
-    getFactorsByExperimentId: (entity, args, context) =>
+    getTreatmentVariablesByExperimentId: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(args.experimentId),
     getTreatmentsByExperimentId: (entity, args, context) =>
       context.loaders.treatmentByExperimentIds.load(args.experimentId),
@@ -45,14 +45,14 @@ export default {
       context.loaders.treatmentBySetIds.load(args.setId),
   },
   CombinationElement: {
-    factorLevelId: property('factor_level_id'),
+    treatmentVariableLevelId: property('factor_level_id'),
     treatmentId: property('treatment_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
-    factorLevel: (entity, args, context) =>
+    treatmentVariableLevel: (entity, args, context) =>
       context.loaders.factorLevel.load(entity.factor_level_id),
   },
-  DependentVariable: {
+  ResponseVariable: {
     questionCode: property('question_code'),
     experimentId: property('experiment_id'),
     auditInfo: (entity, args, context) =>
@@ -73,11 +73,11 @@ export default {
     randomizationStrategyCode: property('randomization_strategy_code'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
-    dependentVariables: (entity, args, context) =>
+    responseVariables: (entity, args, context) =>
       context.loaders.dependentVariableByExperimentIds.load(entity.id),
     designSpecifications: (entity, args, context) =>
       context.loaders.designSpecDetailByExperimentIds.load(entity.id),
-    factors: (entity, args, context) =>
+    treatmentVariables: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(entity.id),
     groups: (entity, args, context) =>
       context.loaders.groupsByExperimentIds.load(entity.id),
@@ -107,24 +107,20 @@ export default {
     owners: (entity, args, context) =>
       context.loaders.ownersByExperimentIds.load(entity.id),
   },
-  Factor: {
+  TreatmentVariable: {
     experimentId: property('experiment_id'),
-    refFactorTypeId: property('ref_factor_type_id'),
+    refTreatmentVariableTypeId: property('ref_factor_type_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
-    factorType: (entity, args, context) =>
-      (entity.ref_factor_type_id
-        ? context.loaders.refFactorType.load(entity.ref_factor_type_id)
-        : Promise.resolve(null)),
-    factorLevels: (entity, args, context) =>
+    treatmentVariableLevels: (entity, args, context) =>
       context.loaders.factorLevelByFactorIds.load(entity.id),
   },
-  FactorLevel: {
+  TreatmentVariableLevel: {
     valueJSON: property('value'),
-    factorId: property('factor_id'),
+    treatmentVariableId: property('factor_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
-    factor: (entity, args, context) =>
+    treatmentVariable: (entity, args, context) =>
       (entity.factor_id
         ? context.loaders.factor.load(entity.factor_id)
         : Promise.resolve(null)),

@@ -505,7 +505,7 @@
     },
     "/experiments/{id}/treatments": {
       "get": {
-        "summary": "get all treatment details, including combination elements with factor and level information for an experiment",
+        "summary": "get all treatment details, including combination elements with treatment variable and level information for an experiment",
         "description": "This endpoint returns information about the treatment and and combination elements entities associated with an Experiment",
         "operationId": "getComposites_TreatmentsByExperimentId",
         "tags": [
@@ -725,13 +725,13 @@
         }
       }
     },
-    "/experiments/{id}/dependent-variables": {
+    "/experiments/{id}/response-variables": {
       "get": {
-        "summary": "get all dependent variables for given experiment id.",
-        "description": "This endpoint returns information about the dependent variable entities associated with one Experiment.\n",
-        "operationId": "getDependentVariablesByExperimentId",
+        "summary": "get all response variables for given experiment id.",
+        "description": "This endpoint returns information about the response variable entities associated with one Experiment.\n",
+        "operationId": "getResponseVariablesByExperimentId",
         "tags": [
-          "Dependent Variables"
+          "Response Variables"
         ],
         "produces": [
           "application/json"
@@ -746,11 +746,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Dependent Variables",
+            "description": "Response Variables",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/DependentVariableResponse"
+                "$ref": "#/definitions/ResponseVariableResponse"
               }
             }
           },
@@ -1133,13 +1133,13 @@
         }
       }
     },
-    "/experiments/{id}/factors": {
+    "/experiments/{id}/treatment-variables": {
       "get": {
-        "summary": "get all factors for given experiment id.",
-        "description": "This endpoint returns information about the factor entities associated with one Experiment.\n",
-        "operationId": "getFactorsByExperimentId",
+        "summary": "get all treatment variables for given experiment id.",
+        "description": "This endpoint returns information about the treatment variable entities associated with one Experiment.\n",
+        "operationId": "getTreatmentVariablesByExperimentId",
         "tags": [
-          "Factors"
+          "Treatment Variables"
         ],
         "produces": [
           "application/json"
@@ -1154,11 +1154,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Factors",
+            "description": "TreatmentVariables",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/FactorResponse"
+                "$ref": "#/definitions/TreatmentVariableResponse"
               }
             }
           },
@@ -1534,9 +1534,9 @@
         }
       }
     },
-    "/preferences/factors/lists": {
+    "/preferences/treatment-variables/lists": {
       "post": {
-        "summary": "Adds list ids to user preferences for factors",
+        "summary": "Adds list ids to user preferences for treatment variables",
         "description": "Accepts an array of list ids to set for the user preferences for material lists",
         "operationId": "postMaterialListPreferences",
         "tags": ["Preferences"],
@@ -2528,13 +2528,13 @@
         }
       }
     },
-    "/templates/{id}/dependent-variables": {
+    "/templates/{id}/response-variables": {
       "get": {
-        "summary": "get all dependent variables for given Template id.",
-        "description": "This endpoint returns information about the dependent variable entities associated with one Template.\n",
-        "operationId": "getDependentVariablesByTemplateId",
+        "summary": "get all Response variables for given Template id.",
+        "description": "This endpoint returns information about the response variable entities  associated with one Template.\n",
+        "operationId": "getResponseVariablesByTemplateId",
         "tags": [
-          "Dependent Variables"
+          "Response Variables"
         ],
         "produces": [
           "application/json"
@@ -2549,11 +2549,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Dependent Variables",
+            "description": "Response Variables",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/DependentVariableResponse"
+                "$ref": "#/definitions/ResponseVariableResponse"
               }
             }
           },
@@ -2743,13 +2743,13 @@
         }
       }
     },
-    "/templates/{id}/factors": {
+    "/templates/{id}/treatment-variables": {
       "get": {
-        "summary": "get all factors for given Template id.",
-        "description": "This endpoint returns information about the factor entities associated with one Template.\n",
-        "operationId": "getFactorsByTemplateId",
+        "summary": "get all treatment variables for given Template id.",
+        "description": "This endpoint returns information about the treatment varaible entities associated with one Template.\n",
+        "operationId": "getTreatmentVariablesByTemplateId",
         "tags": [
-          "Factors"
+          "Treatment Variables"
         ],
         "produces": [
           "application/json"
@@ -2764,11 +2764,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Factors",
+            "description": "Treatment Variables",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/FactorResponse"
+                "$ref": "#/definitions/TreatmentVariableResponse"
               }
             }
           },
@@ -3291,9 +3291,9 @@
           "type": "integer",
           "description": "unique id for entity"
         },
-        "factorLevelId": {
+        "treatmentVariableLevelId": {
           "type": "integer",
-          "description": "factorLevelId"
+          "description": "treatmentVariableLevelId"
         },
         "treatmentId": {
           "type": "integer",
@@ -3330,9 +3330,9 @@
           "type": "integer",
           "description": "id of combination element if updating existing else empty."
         },
-        "factorLevelId": {
+        "treatmentVariableLevelId": {
           "type": "integer",
-          "description": "Factor level ID"
+          "description": "Treatment Variable level ID"
         }
       }
     },
@@ -3416,20 +3416,20 @@
           "type": "integer",
           "description": "unique id for combination element"
         },
-        "factorId": {
+        "treatmentVariableId": {
           "type": "integer",
-          "description": "Id of the factor this combination element refers to"
+          "description": "Id of the treatment variable this combination element refers to"
         },
-        "factorName": {
+        "treatmentVariableName": {
           "type": "string",
-          "description": "Name of the factor this combination element refers to"
+          "description": "Name of the treatment variable this combination element refers to"
         },
-        "factorLevel": {
+        "treatmentVariableLevel": {
           "type": "object",
           "properties": {
             "id": {
               "type": "integer",
-              "description": "Id of the factor level"
+              "description": "Id of the treatment variable level"
             },
             "value": {
               "type": "object",
@@ -3441,7 +3441,7 @@
                   }
                 }
               },
-              "description": "value of the factor level"
+              "description": "value of the treatment variable level"
             }
           }
         }
@@ -3568,7 +3568,7 @@
         }
       }
     },
-    "DependentVariable": {
+    "ResponseVariable": {
       "type": "object",
       "properties": {
         "name": {
@@ -3586,7 +3586,7 @@
       }
     },
 
-    "DependentVariableResponse": {
+    "ResponseVariableResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -3595,11 +3595,11 @@
         },
         "required": {
           "type": "boolean",
-          "description": "boolean value to specify dependent variable is required or not."
+          "description": "boolean value to specify response variable is required or not."
         },
         "name": {
           "type": "string",
-          "description": "name of dependent variable."
+          "description": "name of response variable."
         },
         "experimentId": {
           "type": "integer",
@@ -3975,13 +3975,13 @@
           "type": "string",
           "description": "Name of experimental unit associated with the experiment."
         },
-        "numberOfIndependentVariables": {
+        "numberOfTreatmentVariables": {
           "type": "integer",
-          "description": "the number of independent variables associated with the experiment."
+          "description": "the number of treatment variables associated with the experiment."
         },
-        "numberOfDependentVariables": {
+        "numberOfResponseVariables": {
           "type": "integer",
-          "description": "the number of dependent variables associated with the experiment."
+          "description": "the number of response variables associated with the experiment."
         },
         "status": {
           "type": "string",
@@ -3993,7 +3993,7 @@
         }
       }
     },
-    "FactorResponse": {
+    "TreatmentVariableResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -4002,11 +4002,11 @@
         },
         "name": {
           "type": "string",
-          "description": "name of the factor."
+          "description": "name of the treatment variable."
         },
-        "refFactorTypeId": {
+        "refTreatmentVariableType": {
           "type": "integer",
-          "description": "id of FactorType entity"
+          "description": "id of TreatmentVariableType entity"
         },
         "refDataSourceId": {
           "type": "integer",
@@ -4034,7 +4034,7 @@
         },
         "tier": {
           "type": "integer",
-          "description": "tier is used categorize factors in to main/sub/sub-sub etc plots (valid Range : 1 to 10)"
+          "description": "tier is used categorize treatment variables in to main/sub/sub-sub etc  plots (valid Range : 1 to 10)"
         }
       }
     },
@@ -4193,7 +4193,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "factorLevelIds": {
+          "treatmentVariableType": {
             "type": "array",
             "items": {
               "type": "integer"
@@ -4271,7 +4271,7 @@
             "items": {
               "type": "object",
               "properties": {
-                "factorLevelId": {
+                "treatmentVariableLevelId": {
                   "type": "number"
                 }
               }
@@ -4293,11 +4293,11 @@
         },
         "label": {
           "type": "string",
-          "description": "The name of the property.  In the case of simple factors, this will be the same as the name of the factor.  In the case of complex factors, this will be the name of the property."
+          "description": "The name of the property.  In the case of simple treatment variables, this will be the same as the name of the treatment variables.  In the case of complex treatment variables, this will be the name of the property."
         },
         "text": {
           "type": "string",
-          "description": "In the case of a simple factor, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
+          "description": "In the case of a simple treatment variable, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
         },
         "refId": {
           "type": "string",
@@ -4314,7 +4314,7 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Id of the factor level."
+          "description": "Id of the treatment variable level."
         },
         "items": {
           "type": "array",
@@ -4333,11 +4333,11 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Id of the factor level."
+          "description": "Id of the treatment variable level."
         },
         "_refId": {
           "type": "integer",
-          "description": "Reference ID for the level.  This may be references by an independent variable association."
+          "description": "Reference ID for the level.  This may be references by an treatmrntvariableassociation."
         },
         "items": {
           "type": "array",
@@ -4366,12 +4366,12 @@
         }
       }
     },
-    "IndependentVariableRequest": {
+    "TreatmentVariableRequest": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Id of the factor"
+          "description": "Id of the treatment variable"
         },
         "name": {
           "type": "string",
@@ -4389,12 +4389,12 @@
         }
       }
     },
-    "IndependentVariableResponse": {
+    "TreatmentVariable": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Id of the factor"
+          "description": "Id of the treatment variable"
         },
         "name": {
           "type": "string",
@@ -4429,11 +4429,11 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Id of the associated factor."
+          "description": "Id of the associated treatment variable."
         },
         "name": {
           "type": "string",
-          "description": "Name of the associated factor."
+          "description": "Name of the associated treatment variable."
         }
       }
     },
@@ -4442,11 +4442,11 @@
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Id of the nested factor."
+          "description": "Id of the nested treatment variable."
         },
         "name": {
           "type": "string",
-          "description": "Name of the nested factor."
+          "description": "Name of the nested treatment variable."
         }
       }
     },
@@ -4459,11 +4459,11 @@
         },
         "associatedLevelId": {
           "type": "integer",
-          "description": "Id of the factor level on the associated side of relationship"
+          "description": "Id of the treatment variable level on the associated side of relationship"
         },
         "nestedLevelId": {
           "type": "integer",
-          "description": "Id of the factor level on the nested side of relationship"
+          "description": "Id of the treatment variable level on the nested side of relationship"
         }
       }
     },
@@ -4472,11 +4472,11 @@
       "properties": {
         "associatedLevelRefId": {
           "type": "integer",
-          "description": "RefId of the factor level on the associated side of relationship.  This should reference a _refId defined on a level"
+          "description": "RefId of the treatment variable level on the associated side of relationship.  This should reference a _refId defined on a level"
         },
         "nestedLevelRefId": {
           "type": "integer",
-          "description": "RefId of the factor level on the nested side of relationship.  This should reference a _refId defined on a level"
+          "description": "RefId of the treatment variable level on the nested side of relationship.  This should reference a _refId defined on a level"
         }
       }
     },
@@ -4486,7 +4486,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariableRequest"
+            "$ref": "#/definitions/TreatmentVariableRequest"
           }
         },
         "exogenous": {
@@ -4498,7 +4498,7 @@
         "dependent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DependentVariable"
+            "$ref": "#/definitions/ResponseVariable"
           }
         },
         "independentAssociations": {
@@ -4515,7 +4515,7 @@
         "independent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentVariableResponse"
+            "$ref": "#/definitions/TreatmentVariable"
           }
         },
         "exogenous": {
@@ -4527,7 +4527,7 @@
         "dependent": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DependentVariable"
+            "$ref": "#/definitions/ResponseVariable"
           }
         },
         "independentAssociations": {
@@ -4739,12 +4739,12 @@
         "treatmentId": {
           "type": "integer"
         },
-        "factorLevels": {
+        "treatmentVariableLevels": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "factorName": {
+              "treatmentVariableName": {
                 "type": "integer"
               },
               "items": {

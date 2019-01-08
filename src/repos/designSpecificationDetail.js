@@ -125,7 +125,7 @@ class designSpecificationDetailRepo {
 
   @setErrorCode('52D000')
   setRandomizationStrategyIdByExperimentId = (experimentId, randomizationStrategyId, context, tx) => {
-    tx.oneOrNone('INSERT INTO design_spec_detail (value, ref_design_spec_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date) VALUES ($1, SELECT id FROM ref_design_spec WHERE name = \'Randomization Strategy ID\', $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP) ON CONFLICT ON CONSTRAINT design_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date', [randomizationStrategyId, experimentId, context.userId])
+    tx.oneOrNone('INSERT INTO design_spec_detail (value, ref_design_spec_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date) SELECT $1, id, $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP FROM ref_design_spec WHERE name = \'Randomization Strategy ID\' ON CONFLICT ON CONSTRAINT design_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date', [randomizationStrategyId, experimentId, context.userId])
   }
 }
 

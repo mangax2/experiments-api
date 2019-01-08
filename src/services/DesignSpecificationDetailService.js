@@ -98,7 +98,7 @@ class DesignSpecificationDetailService {
 
         const newDesignSpecs = _.filter(_.map(designSpecifications, (value, key) => ({
           value,
-          experimentId,
+          experimentId: Number(experimentId),
           refDesignSpecId: refMapper[key.toLowerCase()],
         })), ds => !(_.isNil(ds.value) || ds.value === ''))
 
@@ -109,16 +109,16 @@ class DesignSpecificationDetailService {
           const match = _.find(newDesignSpecs,
             nds => nds.refDesignSpecId === eds.ref_design_spec_id)
           eds.value = _.get(match, 'value')
-          eds.refDesignSpecId = eds.ref_design_spec_id
           eds.hasMatch = !!match
         })
 
         const [updates, deletes] = _.partition(existingDesignSpecs, eds => eds.hasMatch)
-        const idsToDelete = _.map(_.filter(deletes, d => d.refDesignSpecId !== refMapper.randomizationstrategyid), 'id')
+        const inflectedUpdates = inflector.transform(updates, 'camelizeLower', true)
+        const idsToDelete = _.map(_.filter(deletes, d => d.ref_design_spec_id !== refMapper.randomizationstrategyid), 'id')
 
         return Promise.all([
           this.deleteDesignSpecificationDetails(idsToDelete, context, tx),
-          this.batchUpdateDesignSpecificationDetails(updates, context, tx),
+          this.batchUpdateDesignSpecificationDetails(inflectedUpdates, context, tx),
           this.batchCreateDesignSpecificationDetails(adds, context, tx),
         ])
       })

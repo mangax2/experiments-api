@@ -4,7 +4,6 @@ import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import db from '../db/DbManager'
-import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -15,7 +14,6 @@ const logger = log4js.getLogger('FactorService')
 class FactorService {
   constructor() {
     this.validator = new FactorsValidator()
-    this.experimentService = new ExperimentsService()
   }
 
   @setErrorCode('1D1000')
@@ -30,10 +28,9 @@ class FactorService {
 
   @setErrorCode('1D3000')
   @Transactional('getFactorsByExperimentId')
-  getFactorsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
+  getFactorsByExperimentId = (id, isTemplate, context, tx) =>
+    db.experiments.find(id, isTemplate, tx)
       .then(() => db.factor.findByExperimentId(id, tx))
-  }
 
   @setErrorCode('1D4000')
   @Transactional('getFactorsByExperimentIdNoExistenceCheck')

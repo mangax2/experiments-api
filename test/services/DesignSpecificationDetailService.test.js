@@ -203,7 +203,7 @@ describe('DesignSpecificationDetailService', () => {
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(target.deleteDesignSpecificationDetails).toBeCalledWith([3, 6], testContext, testTx)
         expect(target.batchUpdateDesignSpecificationDetails).toBeCalledWith([{
-          id: 4, ref_design_spec_id: 12, refDesignSpecId: 12, value: '5', hasMatch: true,
+          id: 4, refDesignSpecId: 12, value: '5', hasMatch: true,
         }], testContext, testTx)
         expect(target.batchCreateDesignSpecificationDetails).toBeCalledWith([
           { value: '3', experimentId: 5, refDesignSpecId: 13 },

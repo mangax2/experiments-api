@@ -135,7 +135,7 @@ router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociat
 router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.put('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, false, req.context, false)
+router.put('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, false, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -259,7 +259,7 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
 router.get('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.put('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, true, req.context, true)
+router.put('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, true, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

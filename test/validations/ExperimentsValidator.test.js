@@ -27,7 +27,7 @@ describe('ExperimentsValidator', () => {
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
         { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
-        { paramName: 'randomizationStrategyCode', type: 'text' },
+        { paramName: 'randomizationStrategyCode', type: 'text', lengthRange: { min: 1, max: 1000 } },
       ]
 
       expect(ExperimentsValidator.POST_AND_PUT_SCHEMA_ELEMENTS).toEqual(schema)
@@ -71,7 +71,7 @@ describe('ExperimentsValidator', () => {
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
         { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
-        { paramName: 'randomizationStrategyCode', type: 'text' },
+        { paramName: 'randomizationStrategyCode', type: 'text', lengthRange: { min: 1, max: 1000 } },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -92,7 +92,7 @@ describe('ExperimentsValidator', () => {
         { paramName: 'refExperimentDesignId', type: 'refData', entity: {} },
         { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
         { paramName: 'is_template', type: 'boolean' },
-        { paramName: 'randomizationStrategyCode', type: 'text' },
+        { paramName: 'randomizationStrategyCode', type: 'text', lengthRange: { min: 1, max: 1000 } },
       ]
 
       expect(target.getSchema('PUT')).toEqual(schema)

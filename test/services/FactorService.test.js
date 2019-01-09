@@ -79,7 +79,7 @@ describe('FactorService', () => {
 
   describe('getFactorsByExperimentId', () => {
     test('gets an experiment, and finds factors by that id', () => {
-      db.experiments.find = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockResolve([])
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then((data) => {
@@ -91,7 +91,7 @@ describe('FactorService', () => {
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      db.experiments.find = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockReject(error)
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
@@ -103,13 +103,12 @@ describe('FactorService', () => {
 
     test('rejects when getExperimentById fails', () => {
       const error = { message: 'error' }
-      db.experiments.find = mockReject(error)
+      db.experiments.find = mockResolve()
       db.factor.findByExperimentId = mockReject(error)
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
+      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, () => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
       })
     })
   })

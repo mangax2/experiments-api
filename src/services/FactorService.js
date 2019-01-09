@@ -30,7 +30,12 @@ class FactorService {
   @Transactional('getFactorsByExperimentId')
   getFactorsByExperimentId = (id, isTemplate, context, tx) =>
     db.experiments.find(id, isTemplate, tx)
-      .then(() => db.factor.findByExperimentId(id, tx))
+      .then((experiment) => {
+        if (experiment) {
+          return db.factor.findByExperimentId(id, tx)
+        }
+        throw AppError.notFound(`No experiment found for id '${id}'.`, undefined, getFullErrorCode('1D3001'))
+      })
 
   @setErrorCode('1D4000')
   @Transactional('getFactorsByExperimentIdNoExistenceCheck')

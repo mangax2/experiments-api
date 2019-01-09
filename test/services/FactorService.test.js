@@ -79,11 +79,11 @@ describe('FactorService', () => {
 
   describe('getFactorsByExperimentId', () => {
     test('gets an experiment, and finds factors by that id', () => {
-      target.experimentService.getExperimentById = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockResolve([])
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
       })
@@ -91,11 +91,11 @@ describe('FactorService', () => {
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      target.experimentService.getExperimentById = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockReject(error)
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
@@ -103,13 +103,12 @@ describe('FactorService', () => {
 
     test('rejects when getExperimentById fails', () => {
       const error = { message: 'error' }
-      target.experimentService.getExperimentById = mockReject(error)
+      db.experiments.find = mockResolve()
       db.factor.findByExperimentId = mockReject(error)
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, () => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
       })
     })
   })

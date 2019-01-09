@@ -17,7 +17,6 @@ import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
-import RefDesignSpecificationService from '../services/RefDesignSpecificationService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
@@ -120,14 +119,10 @@ router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociat
   })
   .catch(err => next(err)))
 
-router.get('/experiments/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, false, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.post('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, false)
+router.put('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, false, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -168,14 +163,6 @@ router.post('/preferences/treatment-variables/lists', (req, res, next) => new Li
   .catch(err => next(err)))
 
 router.get('/ref-data-source-types', (req, res, next) => new RefDataSourceTypeService().getRefDataSourceTypesWithDataSources()
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/ref-design-specifications', (req, res, next) => new RefDesignSpecificationService().getAllRefDesignSpecs()
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/ref-design-specifications/:id', (req, res, next) => new RefDesignSpecificationService().getDesignSpecById(req.params.id, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -256,14 +243,10 @@ router.get('/templates/:id/summary', (req, res, next) => new ExperimentSummarySe
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.get('/templates/:id/advanced-parameters', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id, true, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
-
-router.get('/templates/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getDesignSpecificationDetailsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
-router.post('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().manageAllDesignSpecificationDetails(req.body, req.params.id, req.context, true)
+router.put('/templates/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, true, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
 

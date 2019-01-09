@@ -58,16 +58,6 @@ export default {
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
   },
-  DesignSpecificationDetail: {
-    refDesignSpecId: property('ref_design_spec_id'),
-    experimentId: property('experiment_id'),
-    auditInfo: (entity, args, context) =>
-      context.getAuditInfo(entity),
-    designSpecification: (entity, args, context) =>
-      (entity.ref_design_spec_id
-        ? context.loaders.refDesignSpec.load(entity.ref_design_spec_id)
-        : Promise.resolve(null)),
-  },
   Experiment: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),
     randomizationStrategyCode: property('randomization_strategy_code'),

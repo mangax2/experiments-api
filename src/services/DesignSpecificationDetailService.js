@@ -1,17 +1,12 @@
 import log4js from 'log4js'
 import _ from 'lodash'
+import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
-import cfServices from './utility/ServiceConfig'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
-import ExperimentsService from './ExperimentsService'
 import SecurityService from './SecurityService'
 import DesignSpecificationDetailValidator from '../validations/DesignSpecificationDetailValidator'
-import RefDesignSpecificationService from './RefDesignSpecificationService'
-import FactorService from './FactorService'
-import PingUtil from './utility/PingUtil'
-import HttpUtil from './utility/HttpUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -22,100 +17,32 @@ const logger = log4js.getLogger('DesignSpecificationDetailService')
 class DesignSpecificationDetailService {
   constructor() {
     this.validator = new DesignSpecificationDetailValidator()
-    this.experimentService = new ExperimentsService()
-    this.refDesignSpecificationService = new RefDesignSpecificationService()
     this.securityService = new SecurityService()
-    this.factorService = new FactorService()
   }
 
   @setErrorCode('131000')
-  @Transactional('getDesignSpecificationDetailsByExperimentId')
-  getDesignSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.designSpecificationDetail.findAllByExperimentId(id, tx))
-  }
-
-  @setErrorCode('133000')
   @Transactional('batchCreateDesignSpecificationDetails')
-  batchCreateDesignSpecificationDetails(specificationDetails, context, tx) {
-    return this.validator.validate(specificationDetails, 'POST', tx)
-      .then(() => db.designSpecificationDetail.batchCreate(specificationDetails, context, tx)
+  batchCreateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
+    if (_.compact(designSpecificationDetails).length === 0) {
+      return Promise.resolve()
+    }
+    return this.validator.validate(designSpecificationDetails, 'POST', tx)
+      .then(() => db.designSpecificationDetail.batchCreate(designSpecificationDetails, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
-  @setErrorCode('134000')
+  @setErrorCode('132000')
   @Transactional('batchUpdateDesignSpecificationDetails')
   batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
+    if (_.compact(designSpecificationDetails).length === 0) {
+      return Promise.resolve()
+    }
     return this.validator.validate(designSpecificationDetails, 'PUT', tx)
       .then(() => db.designSpecificationDetail.batchUpdate(designSpecificationDetails, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
 
-  @setErrorCode('135000')
-  populateExperimentId = (designSpecs, experimentId) => {
-    _.forEach(designSpecs, (ds) => {
-      ds.experimentId = Number(experimentId)
-    })
-  }
-
-  @notifyChanges('update', 1)
-  @setErrorCode('136000')
-  @Transactional('manageAllDesignSpecificationDetails')
-  manageAllDesignSpecificationDetails(designSpecificationDetailsObj, experimentId, context,
-    isTemplate, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
-      if (designSpecificationDetailsObj) {
-        const { adds, updates, deletes } = designSpecificationDetailsObj
-        this.populateExperimentId(updates, experimentId)
-        this.populateExperimentId(adds, experimentId)
-
-        const updatedRefDesignSpecIds = _.map(updates, 'refDesignSpecId')
-        const createdRefDesignSpecIds = _.map(adds, 'refDesignSpecId')
-        const refDesignSpecIds = updatedRefDesignSpecIds.concat(createdRefDesignSpecIds)
-        return this.refDesignSpecificationService.getAllRefDesignSpecs()
-          .then(refSpecs =>
-            this.deleteDesignSpecificationDetails(deletes, context, tx)
-              .then(() =>
-                this.updateDesignSpecificationDetails(updates, context, tx)
-                  .then(() =>
-                    this.createDesignSpecificationDetails(adds, context, tx)
-                      .then(() => {
-                        const randomizationRefSpecId = _.find(refSpecs, refSpec => refSpec.name === 'Randomization Strategy ID').id
-
-                        if (refDesignSpecIds.includes(randomizationRefSpecId)) {
-                          const designSpecs = updates.concat(adds)
-                          const randomizationStrategySpec = _.find(designSpecs, update =>
-                            update.refDesignSpecId === randomizationRefSpecId)
-
-                          return PingUtil.getMonsantoHeader().then((headers) => {
-                            const { randomizationAPIUrl } =
-                              cfServices.experimentsExternalAPIUrls.value
-
-                            return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
-                              .then((strategies) => {
-                                const randStrategy = _.find(strategies.body, strategy =>
-                                  strategy.id.toString() === randomizationStrategySpec.value)
-
-                                return this.factorService
-                                  .updateFactorsForDesign(experimentId, randStrategy, tx)
-                                  .then(() => db.experiments.updateStrategyCode(experimentId,
-                                    randStrategy, context, tx))
-                                  .then(() => AppUtil.createCompositePostResponse())
-                              })
-                          })
-                        }
-                        return AppUtil.createCompositePostResponse()
-                      }),
-                  ),
-              ),
-          )
-      }
-
-      return Promise.resolve()
-    })
-  }
-
-  @setErrorCode('137000')
+  @setErrorCode('133000')
   @Transactional('deleteDesignSpecificationDetails')
   deleteDesignSpecificationDetails = (idsToDelete, context, tx) => {
     if (_.compact(idsToDelete).length === 0) {
@@ -133,47 +60,76 @@ class DesignSpecificationDetailService {
       })
   }
 
-  @setErrorCode('138000')
-  updateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
-    if (_.compact(designSpecificationDetails).length === 0) {
-      return Promise.resolve()
-    }
-    return this.batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx)
-  }
-
-  @setErrorCode('139000')
-  createDesignSpecificationDetails(designSpecificationDetails, context, tx) {
-    if (_.compact(designSpecificationDetails).length === 0) {
-      return Promise.resolve()
-    }
-    return this.batchCreateDesignSpecificationDetails(designSpecificationDetails, context, tx)
-  }
-
-  @setErrorCode('13A000')
+  @setErrorCode('134000')
   @Transactional('getAdvancedParameters')
-  getAdvancedParameters(experimentId, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
-      .then(() => Promise.all([db.refDesignSpecification.all(),
-        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)]))
-      .then((results) => {
-        const mappedDesignSpecs = {}
-        const advancedParameters = {}
+  getAdvancedParameters = (experimentId, tx) =>
+    Promise.all([
+      db.refDesignSpecification.all(),
+      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+    ]).then((results) => {
+      const mappedDesignSpecs = {}
+      const advancedParameters = {}
 
-        _.forEach(results[0], (ds) => { mappedDesignSpecs[ds.id] = ds.name.replace(/\s/g, '') })
-        _.forEach(results[1], (dsd) => {
-          advancedParameters[mappedDesignSpecs[dsd.ref_design_spec_id]] = dsd.value
+      _.forEach(results[0], (ds) => { mappedDesignSpecs[ds.id] = ds.name.replace(/\s/g, '') })
+      _.forEach(results[1], (dsd) => {
+        advancedParameters[mappedDesignSpecs[dsd.ref_design_spec_id]] = dsd.value
+      })
+
+      delete advancedParameters.randomizationStrategyId
+      delete advancedParameters.blockByRep
+
+      return inflector.transform(advancedParameters, 'camelizeLower', true)
+    })
+
+  @setErrorCode('135000')
+  @notifyChanges('update', 1)
+  @Transactional('saveDesignSpecifications')
+  saveDesignSpecifications = (designSpecifications, experimentId, isTemplate, context, tx) =>
+    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
+      .then(() => Promise.all([
+        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+        db.refDesignSpecification.all(),
+      ]))
+      .then(([existingDesignSpecs, refDesignSpecs]) => {
+        const refMapper = {}
+        _.forEach(refDesignSpecs, (refSpec) => {
+          refMapper[refSpec.name.replace(/\s/g, '').toLowerCase()] = refSpec.id
         })
 
-        return advancedParameters
-      })
-  }
+        const newDesignSpecs = _.filter(_.map(designSpecifications, (value, key) => ({
+          value,
+          experimentId: Number(experimentId),
+          refDesignSpecId: refMapper[key.toLowerCase()],
+        })), ds => !(_.isNil(ds.value) || ds.value === ''))
 
-  @setErrorCode('13A000')
+        const adds = _.differenceBy(newDesignSpecs, existingDesignSpecs,
+          ds => ds.refDesignSpecId || ds.ref_design_spec_id)
+
+        _.forEach(existingDesignSpecs, (eds) => {
+          const match = _.find(newDesignSpecs,
+            nds => nds.refDesignSpecId === eds.ref_design_spec_id)
+          eds.value = _.get(match, 'value')
+          eds.hasMatch = !!match
+        })
+
+        const [updates, deletes] = _.partition(existingDesignSpecs, eds => eds.hasMatch)
+        const inflectedUpdates = inflector.transform(updates, 'camelizeLower', true)
+        const idsToDelete = _.map(_.filter(deletes, d => d.ref_design_spec_id !== refMapper.randomizationstrategyid), 'id')
+
+        return Promise.all([
+          this.deleteDesignSpecificationDetails(idsToDelete, context, tx),
+          this.batchUpdateDesignSpecificationDetails(inflectedUpdates, context, tx),
+          this.batchCreateDesignSpecificationDetails(adds, context, tx),
+        ])
+      })
+      .then(() => AppUtil.createCompositePostResponse())
+
+  @setErrorCode('136000')
   @Transactional('syncDesignSpecificationDetails')
   syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
     return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
       .then(currentDesignSpecDetails =>
-        this.refDesignSpecificationService.getAllRefDesignSpecs().then((refDesignSpecs) => {
+        db.refDesignSpecification.all().then((refDesignSpecs) => {
           const upsertValues = []
 
           if (capacitySyncDesignSpecDetails.locations) {

@@ -320,8 +320,8 @@ class GroupExperimentalUnitService {
 
           return Promise.all([
             this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
-            this.designSpecificationDetailService.manageAllDesignSpecificationDetails(
-              designSpecifications, experimentId, context, isTemplate, tx,
+            this.designSpecificationDetailService.saveDesignSpecifications(
+              designSpecifications, experimentId, isTemplate, context, tx,
             ),
           ]).then(() => {
             AppUtil.createCompositePostResponse()

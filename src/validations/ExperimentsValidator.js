@@ -26,6 +26,7 @@ class ExperimentsValidator extends SchemaValidator {
       { paramName: 'refExperimentDesignId', type: 'refData', entity: db.experimentDesign },
       { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
       { paramName: 'is_template', type: 'boolean' },
+      { paramName: 'randomizationStrategyCode', type: 'text', lengthRange: { min: 1, max: 1000 } },
     ]
   }
 

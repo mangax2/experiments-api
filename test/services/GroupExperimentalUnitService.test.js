@@ -939,7 +939,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('saveDesignSpecsAndUnits', () => {
     test('saves design specifications and units', () => {
       target.designSpecificationDetailService = {
-        manageAllDesignSpecificationDetails: mockResolve(),
+        saveDesignSpecifications: mockResolve(),
       }
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -955,14 +955,14 @@ describe('GroupExperimentalUnitService', () => {
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {
         expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
         expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
+        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith([], 1, false, testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
 
     test('throws and error when locations are less than set associated with locations', () => {
       target.designSpecificationDetailService = {
-        manageAllDesignSpecificationDetails: mockResolve(),
+        saveDesignSpecifications: mockResolve(),
       }
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -985,7 +985,7 @@ describe('GroupExperimentalUnitService', () => {
     test('rejects when design specification call fails', () => {
       const error = { message: 'error' }
       target.designSpecificationDetailService = {
-        manageAllDesignSpecificationDetails: mockReject(error),
+        saveDesignSpecifications: mockReject(error),
       }
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -1002,7 +1002,7 @@ describe('GroupExperimentalUnitService', () => {
       return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {
         expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
         expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
-        expect(target.designSpecificationDetailService.manageAllDesignSpecificationDetails).toHaveBeenCalledWith([], 1, testContext, false, testTx)
+        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith([], 1, false, testContext, testTx)
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -1017,7 +1017,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('rejects when a unit has a block value that does not match its treatment', () => {
       target.designSpecificationDetailService = {
-        manageAllDesignSpecificationDetails: mockResolve(),
+        saveDesignSpecifications: mockResolve(),
       }
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -1040,7 +1040,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('rejects when a unit has a block value that is outside those on the treatments', () => {
       target.designSpecificationDetailService = {
-        manageAllDesignSpecificationDetails: mockResolve(),
+        saveDesignSpecifications: mockResolve(),
       }
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()

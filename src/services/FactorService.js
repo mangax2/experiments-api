@@ -4,7 +4,6 @@ import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import db from '../db/DbManager'
-import ExperimentsService from './ExperimentsService'
 import FactorsValidator from '../validations/FactorsValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -15,7 +14,6 @@ const logger = log4js.getLogger('FactorService')
 class FactorService {
   constructor() {
     this.validator = new FactorsValidator()
-    this.experimentService = new ExperimentsService()
   }
 
   @setErrorCode('1D1000')
@@ -30,28 +28,20 @@ class FactorService {
 
   @setErrorCode('1D3000')
   @Transactional('getFactorsByExperimentId')
-  getFactorsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.factor.findByExperimentId(id, tx))
-  }
+  getFactorsByExperimentId = (id, isTemplate, context, tx) =>
+    db.experiments.find(id, isTemplate, tx)
+      .then((experiment) => {
+        if (experiment) {
+          return db.factor.findByExperimentId(id, tx)
+        }
+        throw AppError.notFound(`No experiment found for id '${id}'.`, undefined, getFullErrorCode('1D3001'))
+      })
 
   @setErrorCode('1D4000')
   @Transactional('getFactorsByExperimentIdNoExistenceCheck')
   static getFactorsByExperimentIdNoExistenceCheck(id, tx) {
     return db.factor.findByExperimentId(id, tx)
   }
-
-  @setErrorCode('1D5000')
-  @Transactional('getFactorById')
-  getFactorById = (id, context, tx) => db.factor.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Factor Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Not Found for requested id', undefined, getFullErrorCode('1D5001'))
-      } else {
-        return data
-      }
-    })
 
   @setErrorCode('1D6000')
   @Transactional('batchUpdateFactors')

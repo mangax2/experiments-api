@@ -33,23 +33,6 @@ class FactorLevelService {
     return db.factorLevel.findByExperimentId(id, tx)
   }
 
-  @setErrorCode('1C4000')
-  getFactorLevelsByFactorId(id, context) {
-    return this.factorService.getFactorById(id, context)
-      .then(() => db.factorLevel.findByFactorId(id))
-  }
-
-  @setErrorCode('1C5000')
-  getFactorLevelById = (id, context) => db.factorLevel.find(id)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Factor Level Not Found for requested id = ${id}`)
-        throw AppError.notFound('Factor Level Not Found for requested id', undefined, getFullErrorCode('1C5001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('1C6000')
   @Transactional('batchUpdateFactorLevels')
   batchUpdateFactorLevels = (factorLevels, context, tx) => this.validator.validate(factorLevels, 'PUT', tx)

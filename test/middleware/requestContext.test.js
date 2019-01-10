@@ -121,7 +121,7 @@ describe('requestContextMiddlewareFunction', () => {
 
   test('calls to get client id and sets user to SERVICE-USER when graphql call', () => {
     const nextFunc = mock()
-    const req = { method: 'POST', headers: {}, url: '/experiments-api/graphql' }
+    const req = { method: 'POST', headers: {}, url: '/experiments-api-graphql/graphql' }
     const res = { set: mock() }
 
     return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
@@ -134,7 +134,7 @@ describe('requestContextMiddlewareFunction', () => {
 
   test('calls to get client id when graphql call', () => {
     const nextFunc = mock()
-    const req = { method: 'POST', headers: validHeaders, url: '/experiments-api/graphql' }
+    const req = { method: 'POST', headers: validHeaders, url: '/experiments-api-graphql/graphql' }
     const res = { set: mock() }
 
     return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))

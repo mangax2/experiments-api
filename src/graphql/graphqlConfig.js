@@ -76,7 +76,7 @@ function graphqlMiddlewareFunction(schema) {
         },
         // NOTE: Depth must be greater than schema depth or
         // GraphiQL will fail to retrieve documentation.
-        validationRules: [LimitQueryDepth(10), LimitNumQueries(5)],
+        validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
         graphiql: config.env === 'local',
       })
       LogQuery(request.body, request.context, logger)

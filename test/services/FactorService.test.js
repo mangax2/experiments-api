@@ -79,11 +79,11 @@ describe('FactorService', () => {
 
   describe('getFactorsByExperimentId', () => {
     test('gets an experiment, and finds factors by that id', () => {
-      target.experimentService.getExperimentById = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockResolve([])
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
       })
@@ -91,11 +91,11 @@ describe('FactorService', () => {
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      target.experimentService.getExperimentById = mockResolve()
+      db.experiments.find = mockResolve({})
       db.factor.findByExperimentId = mockReject(error)
 
       return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
@@ -103,13 +103,12 @@ describe('FactorService', () => {
 
     test('rejects when getExperimentById fails', () => {
       const error = { message: 'error' }
-      target.experimentService.getExperimentById = mockReject(error)
+      db.experiments.find = mockResolve()
       db.factor.findByExperimentId = mockReject(error)
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
+      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, () => {
+        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.factor.findByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
       })
     })
   })
@@ -134,40 +133,6 @@ describe('FactorService', () => {
       })
     })
   })
-
-  describe('getFactorById', () => {
-    test('returns factor found by id', () => {
-      db.factor.find = mockResolve({})
-
-      return target.getFactorById(1, {}, testTx).then((data) => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when no data is returned', () => {
-      db.factor.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getFactorById(1, {}, testTx).then(() => {}, () => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Factor Not Found for requested id', undefined, '1D5001')
-      })
-    })
-
-    test('rejects when factor find fails', () => {
-      const error = { message: 'error' }
-      db.factor.find = mockReject(error)
-      AppError.notFound = mock()
-
-      return target.getFactorById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.factor.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchUpdateFactors', () => {
     test('validates, batchUpdates and returns put resposne', () => {
       target.validator.validate = mockResolve()

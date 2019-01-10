@@ -14,6 +14,7 @@ import OwnerService from './OwnerService'
 import SecurityService from './SecurityService'
 import DuplicationService from './DuplicationService'
 import TagService from './TagService'
+import FactorService from './FactorService'
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -28,6 +29,7 @@ class ExperimentsService {
     this.tagService = new TagService()
     this.securityService = new SecurityService()
     this.duplicationService = new DuplicationService()
+    this.factorService = new FactorService()
   }
 
   @setErrorCode('151000')
@@ -57,6 +59,7 @@ class ExperimentsService {
                 context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
+              .then(() => Promise.all(_.map(experiments, experiment => this.updateExperimentsRandomizationStrategyId(experiment.id, experiment.randomizationStrategyCode, true, context, tx))))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
@@ -203,6 +206,7 @@ class ExperimentsService {
                 const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)
               }
+              promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, false, context, tx))
               return Promise.all(promises)
                 .then(() => {
                   experiment.id = id
@@ -217,6 +221,26 @@ class ExperimentsService {
                 )
             }
           })))
+  }
+
+  @setErrorCode('15T000')
+  updateExperimentsRandomizationStrategyId(experimentId, strategyCode, isCreate, context, tx) {
+    return PingUtil.getMonsantoHeader().then((headers) => {
+      const { randomizationAPIUrl } =
+        cfService.experimentsExternalAPIUrls.value
+      return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
+        .then((strategies) => {
+          const randStrategy = _.find(strategies.body, strategy =>
+            strategy.endpoint === strategyCode)
+          const updateDesignPromise = isCreate ? Promise.resolve()
+            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx)
+          return Promise.all([
+            updateDesignPromise,
+            db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId(experimentId,
+              randStrategy.id, context, tx),
+          ])
+        })
+    })
   }
 
   @notifyChanges('delete', 0, 2)

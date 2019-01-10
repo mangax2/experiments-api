@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import DataLoader from 'dataloader'
 import db from '../db/DbManager'
+import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
 import ExperimentsService from '../services/ExperimentsService'
-import GroupExperimentalUnitCompositeService from '../services/GroupExperimentalUnitCompositeService'
+import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 
 function experimentBatchLoaderCallback(ids, tx) {
   return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
@@ -35,17 +36,22 @@ function createLoaders(tx) {
   const groupByIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitCompositeService().getGroupsAndUnits(arg))))
+        new GroupExperimentalUnitService().getGroupsAndUnits(arg))))
 
   const groupBySetIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitCompositeService().getGroupAndUnitsBySetId(arg, tx))))
+        new GroupExperimentalUnitService().getGroupAndUnitsBySetId(arg, tx))))
+
+  const designSpecDetailByExperimentIdLoader =
+    new DataLoader(args =>
+      Promise.all(_.map(args, arg =>
+        new DesignSpecificationDetailService().getAdvancedParameters(arg, tx)
+          .then(result => [result]))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
-  const designSpecDetailByIdLoader = createDataLoader(db.designSpecificationDetail.batchFind)
   const experimentByIdLoader = createDataLoader(experimentBatchLoaderCallback)
   const experimentBySetIdLoader =
     createDataLoader(db.locationAssociation.batchFindExperimentBySetId)
@@ -56,7 +62,6 @@ function createLoaders(tx) {
   const refDataSourceByIdLoader = createDataLoader(db.refDataSource.batchFind)
   const refDataSourceTypeByIdLoader = createDataLoader(db.refDataSourceType.batchFind)
   const refDesignSpecByIdLoader = createDataLoader(db.refDesignSpecification.batchFind)
-  const refExperimentDesignByIdLoader = createDataLoader(db.experimentDesign.batchFind)
   const refFactorTypeByIdLoader = createDataLoader(db.factorType.batchFind)
   const refUnitSpecByIdLoader = createDataLoader(db.unitSpecification.batchFind)
   const refUnitTypeByIdLoader = createDataLoader(db.unitType.batchFind)
@@ -89,14 +94,11 @@ function createLoaders(tx) {
   const dependentVariableByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.dependentVariable.batchFindByExperimentId, dependentVariableByIdLoader)
 
-  const designSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.designSpecificationDetail.batchFindAllByExperimentId, designSpecDetailByIdLoader)
-
   const factorLevelByFactorIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factorLevel.batchFindByFactorId, factorLevelByIdLoader)
 
   const groupByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    new GroupExperimentalUnitCompositeService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
+    new GroupExperimentalUnitService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
 
   const nestedFactorLevelByAssociatedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindNestedLevels, factorLevelByIdLoader)
@@ -119,7 +121,6 @@ function createLoaders(tx) {
     combinationElementByTreatmentIds: combinationElementsByTreatmentIdLoader,
     dependentVariable: dependentVariableByIdLoader,
     dependentVariableByExperimentIds: dependentVariableByExperimentIdLoader,
-    designSpecDetail: designSpecDetailByIdLoader,
     designSpecDetailByExperimentIds: designSpecDetailByExperimentIdLoader,
     experiment: experimentByIdLoader,
     experimentBySetId: experimentBySetIdLoader,
@@ -139,7 +140,6 @@ function createLoaders(tx) {
     refDataSource: refDataSourceByIdLoader,
     refDataSourceType: refDataSourceTypeByIdLoader,
     refDesignSpec: refDesignSpecByIdLoader,
-    refExperimentDesign: refExperimentDesignByIdLoader,
     refFactorType: refFactorTypeByIdLoader,
     refUnitSpec: refUnitSpecByIdLoader,
     refUnitType: refUnitTypeByIdLoader,

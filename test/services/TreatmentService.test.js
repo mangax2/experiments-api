@@ -56,65 +56,29 @@ describe('TreatmentService', () => {
     test('finds all treatments for an experiment', () => {
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockResolve([{}])
-
       return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then((data) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([{}])
       })
     })
-
     test('rejects when findAllByExperimentId fails', () => {
       const error = { message: 'error' }
       target.experimentService.getExperimentById = mockResolve()
       db.treatment.findAllByExperimentId = mockReject(error)
-
       return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
     })
-
     test('rejects when getExperimentById fails', () => {
       const error = { message: 'error' }
       target.experimentService.getExperimentById = mockReject(error)
       db.treatment.findAllByExperimentId = mockReject(error)
-
       return target.getTreatmentsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(db.treatment.findAllByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
-  describe('getTreatmentById', () => {
-    test('gets a treatment', () => {
-      db.treatment.find = mockResolve({})
-
-      return target.getTreatmentById(1, {}, testTx).then((data) => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({})
-      })
-    })
-
-    test('throws an error when treatment is empty', () => {
-      db.treatment.find = mockResolve()
-      AppError.notFound = mock()
-
-      return target.getTreatmentById(1, {}, testTx).then(() => {}, () => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
-        expect(AppError.notFound).toHaveBeenCalledWith('Treatment Not Found for requested id', undefined, '1R3001')
-      })
-    })
-
-    test('rejects when find fails', () => {
-      const error = { message: 'error' }
-      db.treatment.find = mockReject(error)
-
-      return target.getTreatmentById(1, {}, testTx).then(() => {}, (err) => {
-        expect(db.treatment.find).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
     })

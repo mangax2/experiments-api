@@ -9,15 +9,11 @@ import DesignSpecificationDetail from '../repos/designSpecificationDetail'
 import Duplication from '../repos/duplication'
 import EnvisionDatasets from '../repos/envisionDatasets'
 import Experiments from '../repos/experiments'
-import ExperimentDesign from '../repos/experimentDesign'
 import ExperimentSummary from '../repos/experimentSummary'
 import Factor from '../repos/factor'
 import FactorLevel from '../repos/factorLevel'
 import FactorLevelAssociation from '../repos/factorLevelAssociation'
 import FactorType from '../repos/factorType'
-import Group from '../repos/group'
-import GroupType from '../repos/groupType'
-import GroupValue from '../repos/groupValue'
 import lambdaPerformance from '../repos/lambdaPerformance'
 import LocationAssociation from '../repos/locationAssociation'
 import Owner from '../repos/owner'
@@ -45,16 +41,12 @@ const options = {
     obj.duplication = Duplication(obj, pgp)
     obj.experiments = Experiments(obj, pgp)
     obj.envisionDatasets = EnvisionDatasets(obj, pgp)
-    obj.experimentDesign = ExperimentDesign(obj, pgp)
     obj.experimentSummary = ExperimentSummary(obj, pgp)
     obj.factor = Factor(obj, pgp)
     obj.factorLevel = FactorLevel(obj, pgp)
     obj.factorLevelAssociation = FactorLevelAssociation(obj, pgp)
     obj.factorType = FactorType(obj, pgp)
     obj.graphqlAudit = GraphQLAudit(obj, pgp)
-    obj.group = Group(obj, pgp)
-    obj.groupType = GroupType(obj, pgp)
-    obj.groupValue = GroupValue(obj, pgp)
     obj.lambdaPerformance = lambdaPerformance(obj, pgp)
     obj.owner = Owner(obj, pgp)
     obj.refDataSource = RefDataSource(obj, pgp)

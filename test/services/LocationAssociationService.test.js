@@ -3,7 +3,7 @@ import LocationAssociationService from '../../src/services/LocationAssociationSe
 import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
-describe('GroupService', () => {
+describe('LocationAssociationService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {} }

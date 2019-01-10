@@ -11,9 +11,6 @@ class designSpecificationDetailRepo {
   @setErrorCode('520000')
   repository = () => this.rep
 
-  @setErrorCode('521000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM design_spec_detail WHERE id = $1', id)
-
   @setErrorCode('522000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
@@ -126,6 +123,10 @@ class designSpecificationDetailRepo {
   getRandomizationStrategyIdByExperimentId = (experimentId, tx = this.rep) => 
     tx.oneOrNone('SELECT dsd.value FROM design_spec_detail dsd INNER JOIN ref_design_spec rds ON rds.id = dsd.ref_design_spec_id WHERE rds.name = \'Randomization Strategy ID\' AND experiment_id = $1', [experimentId])
 
+  @setErrorCode('52D000')
+  setRandomizationStrategyIdByExperimentId = (experimentId, randomizationStrategyId, context, tx) => {
+    tx.oneOrNone('INSERT INTO design_spec_detail (value, ref_design_spec_id, experiment_id, created_user_id, created_date, modified_user_id, modified_date) SELECT $1, id, $2, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP FROM ref_design_spec WHERE name = \'Randomization Strategy ID\' ON CONFLICT ON CONSTRAINT design_spec_detail_ak_1 DO UPDATE SET value = EXCLUDED.value, modified_user_id = EXCLUDED.modified_user_id, modified_date=EXCLUDED.modified_date', [randomizationStrategyId, experimentId, context.userId])
+  }
 }
 
 module.exports = (rep, pgp) => new designSpecificationDetailRepo(rep, pgp)

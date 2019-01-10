@@ -30,18 +30,6 @@ class UnitSpecificationDetailService {
       .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
   }
 
-  @setErrorCode('1S2000')
-  @Transactional('getUnitSpecificationDetailById')
-  getUnitSpecificationDetailById = (id, context, tx) => db.unitSpecificationDetail.find(id, tx)
-    .then((data) => {
-      if (!data) {
-        logger.error(`[[${context.requestId}]] Unit Specification Detail Not Found for requested id = ${id}`)
-        throw AppError.notFound('Unit Specification Detail Not Found for requested id', undefined, getFullErrorCode('1S2001'))
-      } else {
-        return data
-      }
-    })
-
   @setErrorCode('1S3000')
   @Transactional('batchCreateUnitSpecificationDetails')
   batchCreateUnitSpecificationDetails(specificationDetails, context, tx) {

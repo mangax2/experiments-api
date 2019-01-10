@@ -10,10 +10,6 @@ class unitSpecificationDetailRepo {
 
   @setErrorCode('5L0000')
   repository = () => this.rep
-
-  @setErrorCode('5L1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit_spec_detail WHERE id = $1', id)
-
   @setErrorCode('5L2000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM unit_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')

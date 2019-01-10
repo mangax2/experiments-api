@@ -11,12 +11,6 @@ class unitRepo {
   @setErrorCode('5J0000')
   repository = () => this.rep
 
-  @setErrorCode('5J1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM unit WHERE id = $1', id)
-
-  @setErrorCode('5J2000')
-  findAllByTreatmentId = (treatmentId, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id = $1', treatmentId)
-
   @setErrorCode('5J4000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId)
 
@@ -51,12 +45,11 @@ class unitRepo {
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['group_id', 'treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
+      ['treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
       { table: 'unit' },
     )
 
     const values = units.map(u => ({
-      group_id: u.groupId,
       treatment_id: u.treatmentId,
       rep: u.rep,
       set_entry_id: u.setEntryId,
@@ -76,7 +69,7 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', { name: 'group_id', cast: 'int' }, 'treatment_id', 'rep', {
+      ['?id', 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
       }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, { name: 'block', cast: 'int' }],
@@ -85,7 +78,6 @@ class unitRepo {
 
     const data = units.map(u => ({
       id: u.id,
-      group_id: u.groupId,
       treatment_id: u.treatmentId,
       rep: u.rep,
       set_entry_id: u.setEntryId,

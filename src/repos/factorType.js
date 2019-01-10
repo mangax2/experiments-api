@@ -11,17 +11,14 @@ class factorTypeRepo {
   @setErrorCode('5A0000')
   repository = () => this.rep
 
-  @setErrorCode('5A1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM ref_factor_type WHERE id = $1', id)
+  @setErrorCode('5A3000')
+  all = () => this.rep.any('SELECT * FROM ref_factor_type')
 
   @setErrorCode('5A2000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
-
-  @setErrorCode('5A3000')
-  all = () => this.rep.any('SELECT * FROM ref_factor_type')
 
   @setErrorCode('5A4000')
   create = (t, factorTypeObj, context) => t.one('INSERT into ref_factor_type(type, created_user_id, created_date, modified_user_id, modified_date) values($1, $2, CURRENT_TIMESTAMP, $2, CURRENT_TIMESTAMP) RETURNING id', [factorTypeObj.type, context.userId])

@@ -25,7 +25,7 @@ class VariablesValidator extends BaseValidator {
 
     // Common data
     const refIdsGroupedByFactor =
-      _.map(variables.independent, factor => _.compact(_.map(factor.levels, '_refId')))
+      _.map(variables.treatmentVariables, factor => _.compact(_.map(factor.levels, '_refId')))
     const allRefIds = _.flatten(refIdsGroupedByFactor)
 
     // Check for duplicate ref ids
@@ -36,27 +36,27 @@ class VariablesValidator extends BaseValidator {
     }
 
     // Check that associations are valid
-    const allAssociationRefIds = _.flatMap(variables.independentAssociations,
+    const allAssociationRefIds = _.flatMap(variables.treatmentVariableAssociations,
       association => [association.associatedLevelRefId, association.nestedLevelRefId])
     const invalidAssociationRefIds = _.uniq(_.difference(allAssociationRefIds, allRefIds)).sort()
     if (!_.isEmpty(invalidAssociationRefIds)) {
       return Promise.reject(
-        AppError.badRequest(`The following _refIds are referenced within an independentAssociation, but the _refId is not valid: ${invalidAssociationRefIds.join(', ')}`, undefined, getFullErrorCode('3H2003')))
+        AppError.badRequest(`The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: ${invalidAssociationRefIds.join(', ')}`, undefined, getFullErrorCode('3H2003')))
     }
 
     // Check that associations have no duplicates
     const associationStrings =
-      _.map(variables.independentAssociations,
+      _.map(variables.treatmentVariableAssociations,
         association => `{associatedLevelRefId: ${association.associatedLevelRefId}, nestedLevelRefId: ${association.nestedLevelRefId}}`)
     const duplicateAssociations = _.uniq(this.findDuplicates(associationStrings)).sort()
     if (!_.isEmpty(duplicateAssociations)) {
       return Promise.reject(
-        AppError.badRequest(`The following independent associations are not unique: ${duplicateAssociations.join(', ')}`, undefined, getFullErrorCode('3H2004')))
+        AppError.badRequest(`The following treatment variable associations are not unique: ${duplicateAssociations.join(', ')}`, undefined, getFullErrorCode('3H2004')))
     }
 
     // Check that associations do not nest within factors
     const invalidNestingAssociations =
-      _.compact(_.map(variables.independentAssociations, (association) => {
+      _.compact(_.map(variables.treatmentVariableAssociations, (association) => {
         const associatedFactorIndex =
           _.findIndex(refIdsGroupedByFactor,
             factorRefIds => _.includes(factorRefIds, association.associatedLevelRefId))
@@ -70,14 +70,14 @@ class VariablesValidator extends BaseValidator {
         _.map(invalidNestingAssociations,
           association => `{associatedLevelRefId: ${association.associatedLevelRefId}, nestedLevelRefId: ${association.nestedLevelRefId}}`)
       return Promise.reject(
-        AppError.badRequest(`Nesting levels within a single factor is not allowed.  The following associations violate this: ${invalidNestingAssociationStrings.join(', ')}`, undefined, getFullErrorCode('3H2005')))
+        AppError.badRequest(`Nesting levels within a single treatment variable is not allowed.  The following associations violate this: ${invalidNestingAssociationStrings.join(', ')}`, undefined, getFullErrorCode('3H2005')))
     }
 
     // Check for missing association
     const allNestedRefIds =
-      _.map(variables.independentAssociations, 'nestedLevelRefId')
+      _.map(variables.treatmentVariableAssociations, 'nestedLevelRefId')
     const levelCountGroupedByFactor =
-      _.map(variables.independent, factor => _.size(factor.levels))
+      _.map(variables.treatmentVariables, factor => _.size(factor.levels))
     const nestedRefIdCountGroupedByFactor =
       _.map(refIdsGroupedByFactor, refIds =>
         _.size(_.uniq(_.filter(refIds, refId => _.includes(allNestedRefIds, refId)))))
@@ -93,7 +93,7 @@ class VariablesValidator extends BaseValidator {
 
   @setErrorCode('3H3000')
   validateEntity = (variables) => {
-    const independentVariables = variables.independent
+    const independentVariables = variables.treatmentVariables
     if (!_.isUndefined(independentVariables) && !_.isNull(independentVariables)) {
       const factorsWithoutLevels =
         _.filter(independentVariables,
@@ -101,7 +101,7 @@ class VariablesValidator extends BaseValidator {
             || _.isUndefined(variable)
             || _.size(variable.levels) === 0))
       if (_.size(factorsWithoutLevels) > 0) {
-        this.messages.push({ message: 'Factors must contain at least one level.', errorCode: getFullErrorCode('3H3001') })
+        this.messages.push({ message: 'Treatment variables must contain at least one level.', errorCode: getFullErrorCode('3H3001') })
       }
     }
     return Promise.resolve()

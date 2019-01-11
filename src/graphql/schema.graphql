@@ -103,10 +103,8 @@ type TreatmentVariable {
   id: Int
   name: String
   experimentId: Int
-  refTreatmentVariableTypeId: Int
   tier: Int
   auditInfo: AuditInfo
-  treatmentVariableType: TreatmentVariableType
   treatmentVariableLevels: [TreatmentVariableLevel]
 }
 
@@ -124,11 +122,6 @@ type TreatmentVariableLevel {
 type TreatmentVariableLevelValue {
   items: [ClusterComposite]
   objectType: String
-}
-
-type TreatmentVariableType {
-  id: Int
-  type: String
 }
 
 type Group {

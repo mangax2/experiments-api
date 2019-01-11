@@ -99,7 +99,6 @@ export default {
   },
   TreatmentVariable: {
     experimentId: property('experiment_id'),
-    refTreatmentVariableTypeId: property('ref_factor_type_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
     treatmentVariableLevels: (entity, args, context) =>

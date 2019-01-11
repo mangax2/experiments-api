@@ -230,8 +230,9 @@ class FactorDependentCompositeService {
       return {
         id: factor.id,
         name: factor.name,
-        nestedFactors: _.isEmpty(nestedFactorDTOs) ? undefined : nestedFactorDTOs,
-        associatedFactors: _.isEmpty(associatedFactorDTOs) ? undefined : associatedFactorDTOs,
+        nestedTreatmentVariables: _.isEmpty(nestedFactorDTOs) ? undefined : nestedFactorDTOs,
+        associatedTreatmentVariables:
+          _.isEmpty(associatedFactorDTOs) ? undefined : associatedFactorDTOs,
         type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
         levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factorLevels),
         tier: factor.tier,
@@ -259,11 +260,13 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1AR000')
   static createVariablesObject(
-    { independent = [], exogenous = [] },
-    dependent = [],
-    independentAssociations = []) {
+    { independent = [] },
+    responseVariables = [],
+    treatmentVariableAssociations = []) {
     return {
-      independent, exogenous, dependent, independentAssociations,
+      treatmentVariables: independent,
+      responseVariables,
+      treatmentVariableAssociations,
     }
   }
 
@@ -536,10 +539,10 @@ class FactorDependentCompositeService {
   persistIndependentAndDependentVariables = (
     experimentId, variables, context, isTemplate, tx) => Promise.all([
     this.persistIndependentAndAssociations(
-      experimentId, variables.independent,
-      variables.independentAssociations, context, tx),
+      experimentId, variables.treatmentVariables,
+      variables.treatmentVariableAssociations, context, tx),
     this.persistDependentVariables(
-      variables.dependent, experimentId, context, isTemplate, tx)])
+      variables.responseVariables, experimentId, context, isTemplate, tx)])
 
   @notifyChanges('update', 1)
   @setErrorCode('1Al000')

@@ -39,17 +39,17 @@ class DependentVariablesValidator extends SchemaValidator {
     }
   }
 
-  getEntityName = () => 'DependentVariable'
+  getEntityName = () => 'ResponseVariable'
 
   getBusinessKeyPropertyNames = () => ['experimentId', 'name']
 
-  getDuplicateBusinessKeyError = () => ({ message: 'duplicate dependent variable name in request payload with same experiment id', errorCode: getFullErrorCode('324001') })
+  getDuplicateBusinessKeyError = () => ({ message: 'duplicate response variable name in request payload with same experiment id', errorCode: getFullErrorCode('324001') })
 
   @setErrorCode('322000')
   preValidate = (dependentObj) => {
     if (!_.isArray(dependentObj) || dependentObj.length === 0) {
       return Promise.reject(
-        AppError.badRequest('Dependent Variables request object needs to be an array', undefined, getFullErrorCode('322001')))
+        AppError.badRequest('Response Variables request object needs to be an array', undefined, getFullErrorCode('322001')))
     }
     return Promise.resolve()
   }

@@ -66,7 +66,7 @@ describe('DependentVariablesValidator', () => {
 
   describe('getEntityName', () => {
     test('returns name', () => {
-      expect(target.getEntityName()).toEqual('DependentVariable')
+      expect(target.getEntityName()).toEqual('ResponseVariable')
     })
   })
 
@@ -78,7 +78,7 @@ describe('DependentVariablesValidator', () => {
 
   describe('getDuplicateBusinessKeyError', () => {
     test('returns duplicate business key error', () => {
-      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'duplicate dependent variable name in request payload with same experiment id', errorCode: '324001' })
+      expect(target.getDuplicateBusinessKeyError()).toEqual({ message: 'duplicate response variable name in request payload with same experiment id', errorCode: '324001' })
     })
   })
 
@@ -95,7 +95,7 @@ describe('DependentVariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate(undefined).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Dependent Variables request object needs to be an array', undefined, '322001')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Response Variables request object needs to be an array', undefined, '322001')
       })
     })
 
@@ -103,7 +103,7 @@ describe('DependentVariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate([]).then(() => {}, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Dependent Variables request object needs to be an array', undefined, '322001')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Response Variables request object needs to be an array', undefined, '322001')
       })
     })
   })

@@ -29,7 +29,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -51,7 +51,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -69,7 +69,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -106,7 +106,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -140,7 +140,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -186,7 +186,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -208,7 +208,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 99,
             nestedLevelRefId: 2,
@@ -217,7 +217,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 99', undefined, '3H2003')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 99', undefined, '3H2003')
         },
       )
     })
@@ -226,7 +226,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -248,7 +248,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 99,
             nestedLevelRefId: 2,
@@ -269,7 +269,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an independentAssociation, but the _refId is not valid: 42, 99', undefined, '3H2003')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 42, 99', undefined, '3H2003')
         },
       )
     })
@@ -278,7 +278,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -300,7 +300,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -317,7 +317,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}', undefined, '3H2004')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}', undefined, '3H2004')
         },
       )
     })
@@ -326,7 +326,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -348,7 +348,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -373,7 +373,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following independent associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}', undefined, '3H2004')
+          expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}', undefined, '3H2004')
         },
       )
     })
@@ -382,7 +382,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -404,7 +404,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 2,
@@ -413,7 +413,7 @@ describe('VariablesValidator', () => {
       }).then(
         () => TEST_FAILED,
         () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single factor is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}', undefined, '3H2005')
+          expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single treatment variable is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}', undefined, '3H2005')
         },
       )
     })
@@ -422,7 +422,7 @@ describe('VariablesValidator', () => {
       AppError.badRequest = mock()
 
       return target.preValidate({
-        independent: [
+        treatmentVariables: [
           {
             levels: [
               {
@@ -444,7 +444,7 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -463,7 +463,7 @@ describe('VariablesValidator', () => {
   describe('validateEntity', () => {
     test('resolves when all independent variables have at least one level', () => {
       const variables = {
-        independent: [
+        treatmentVariables: [
           {
             levels: [{}],
           },
@@ -476,7 +476,7 @@ describe('VariablesValidator', () => {
 
     test('resolves when no independent variables specified', () => {
       const variables = {
-        independent: [],
+        treatmentVariables: [],
       }
       return target.validateEntity(variables).then(() => {
         expect(target.hasErrors()).toEqual(false)
@@ -492,7 +492,7 @@ describe('VariablesValidator', () => {
 
     test('pushes message when at least one independent variable has no levels', () => {
       const variables = {
-        independent: [
+        treatmentVariables: [
           {
             levels: [{}],
           },
@@ -503,7 +503,7 @@ describe('VariablesValidator', () => {
       }
       return target.validateEntity(variables).then(() => {
         expect(target.hasErrors()).toEqual(true)
-        expect(target.messages[0]).toEqual({ message: 'Factors must contain at least one level.', errorCode: '3H3001' })
+        expect(target.messages[0]).toEqual({ message: 'Treatment variables must contain at least one level.', errorCode: '3H3001' })
       })
     })
   })

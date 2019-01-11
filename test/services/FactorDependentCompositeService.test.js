@@ -207,22 +207,19 @@ describe('FactorDependentCompositeService', () => {
   describe('createVariablesObject', () => {
     test('creates default object with empty arrays when empty object passed in', () => {
       expect(FactorDependentCompositeService.createVariablesObject({})).toEqual({
-        independent: [],
-        exogenous: [],
-        dependent: [],
-        independentAssociations: [],
+        treatmentVariables: [],
+        responseVariables: [],
+        treatmentVariableAssociations: [],
       })
     })
 
     test('builds object with supplied data', () => {
       expect(FactorDependentCompositeService.createVariablesObject({
         independent: [1, 2, 3],
-        exogenous: [4, 5, 6],
       }, [7, 8, 9], [10, 11, 12])).toEqual({
-        independent: [1, 2, 3],
-        exogenous: [4, 5, 6],
-        dependent: [7, 8, 9],
-        independentAssociations: [10, 11, 12],
+        treatmentVariables: [1, 2, 3],
+        responseVariables: [7, 8, 9],
+        treatmentVariableAssociations: [10, 11, 12],
       })
     })
   })
@@ -368,10 +365,10 @@ describe('FactorDependentCompositeService', () => {
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockResolve(dependentVariables)
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve(factorLevelAssociations)
       const expectedReturn = {
-        independent: [{
+        treatmentVariables: [{
           id: 42,
           name: 'GermPlasm',
-          nestedFactors: [
+          nestedTreatmentVariables: [
             {
               id: 43,
               name: 'RM',
@@ -414,7 +411,7 @@ describe('FactorDependentCompositeService', () => {
         {
           id: 43,
           name: 'RM',
-          associatedFactors: [
+          associatedTreatmentVariables: [
             {
               id: 42,
               name: 'GermPlasm',
@@ -444,7 +441,7 @@ describe('FactorDependentCompositeService', () => {
           ],
           tier: undefined,
         }],
-        independentAssociations: [
+        treatmentVariableAssociations: [
           {
             id: 1,
             associatedLevelId: 1,
@@ -461,8 +458,7 @@ describe('FactorDependentCompositeService', () => {
             nestedLevelId: 5,
           },
         ],
-        exogenous: [],
-        dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
+        responseVariables: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
       return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
@@ -583,120 +579,121 @@ describe('FactorDependentCompositeService', () => {
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockResolve(dependentVariables)
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve(factorLevelAssociations)
       const expectedReturn = {
-        independent: [{
-          id: 42,
-          name: 'GermPlasm',
-          nestedFactors: [
-            {
-              id: 43,
-              name: 'RM',
-            },
-            {
-              id: 44,
-              name: 'PlantHeight',
-            },
-          ],
-          levels: [
-            {
-              id: 1,
-              items: [
-                {
-                  label: 'GermPlasm',
-                  text: 'GermPlasm1',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-            {
-              id: 2,
-              items: [
-                {
-                  label: 'GermPlasm',
-                  text: 'GermPlasm2',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-            {
-              id: 3,
-              items: [
-                {
-                  label: 'GermPlasm',
-                  text: 'GermPlasm3',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-          ],
-          tier: undefined,
-        },
-        {
-          id: 43,
-          name: 'RM',
-          associatedFactors: [
-            {
-              id: 42,
-              name: 'GermPlasm',
-            },
-          ],
-          levels: [
-            {
-              id: 4,
-              items: [
-                {
-                  label: 'RM',
-                  text: 'RM1',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-            {
-              id: 5,
-              items: [
-                {
-                  label: 'RM',
-                  text: 'RM2',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-          ],
-          tier: undefined,
-        },
-        {
-          id: 44,
-          name: 'PlantHeight',
-          associatedFactors: [
-            {
-              id: 42,
-              name: 'GermPlasm',
-            },
-          ],
-          levels: [
-            {
-              id: 6,
-              items: [
-                {
-                  label: 'PlantHeight',
-                  text: 'Tall',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-            {
-              id: 7,
-              items: [
-                {
-                  label: 'PlantHeight',
-                  text: 'Dwarf',
-                  propertyTypeId: 1,
-                },
-              ],
-            },
-          ],
-          tier: undefined,
-        }],
-        independentAssociations: [
+        treatmentVariables: [
+          {
+            id: 42,
+            name: 'GermPlasm',
+            nestedTreatmentVariables: [
+              {
+                id: 43,
+                name: 'RM',
+              },
+              {
+                id: 44,
+                name: 'PlantHeight',
+              },
+            ],
+            levels: [
+              {
+                id: 1,
+                items: [
+                  {
+                    label: 'GermPlasm',
+                    text: 'GermPlasm1',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+              {
+                id: 2,
+                items: [
+                  {
+                    label: 'GermPlasm',
+                    text: 'GermPlasm2',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+              {
+                id: 3,
+                items: [
+                  {
+                    label: 'GermPlasm',
+                    text: 'GermPlasm3',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+            ],
+            tier: undefined,
+          },
+          {
+            id: 43,
+            name: 'RM',
+            associatedTreatmentVariables: [
+              {
+                id: 42,
+                name: 'GermPlasm',
+              },
+            ],
+            levels: [
+              {
+                id: 4,
+                items: [
+                  {
+                    label: 'RM',
+                    text: 'RM1',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+              {
+                id: 5,
+                items: [
+                  {
+                    label: 'RM',
+                    text: 'RM2',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+            ],
+            tier: undefined,
+          },
+          {
+            id: 44,
+            name: 'PlantHeight',
+            associatedTreatmentVariables: [
+              {
+                id: 42,
+                name: 'GermPlasm',
+              },
+            ],
+            levels: [
+              {
+                id: 6,
+                items: [
+                  {
+                    label: 'PlantHeight',
+                    text: 'Tall',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+              {
+                id: 7,
+                items: [
+                  {
+                    label: 'PlantHeight',
+                    text: 'Dwarf',
+                    propertyTypeId: 1,
+                  },
+                ],
+              },
+            ],
+            tier: undefined,
+          }],
+        treatmentVariableAssociations: [
           {
             id: 1,
             associatedLevelId: 1,
@@ -728,8 +725,7 @@ describe('FactorDependentCompositeService', () => {
             nestedLevelId: 7,
           },
         ],
-        exogenous: [],
-        dependent: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
+        responseVariables: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
       return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
@@ -873,7 +869,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             name: 'Factor1',
             levels: [
@@ -933,8 +929,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [],
+        responseVariables: [],
+        treatmentVariableAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1046,7 +1042,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             name: 'Factor1',
             levels: [
@@ -1100,8 +1096,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [
+        responseVariables: [],
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -1245,7 +1241,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -1313,8 +1309,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [],
+        responseVariables: [],
+        treatmentVariableAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1467,7 +1463,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -1527,8 +1523,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [
+        responseVariables: [],
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -1669,7 +1665,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -1700,8 +1696,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [],
+        responseVariables: [],
+        treatmentVariableAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1788,7 +1784,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -1808,8 +1804,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [],
+        responseVariables: [],
+        treatmentVariableAssociations: [],
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
@@ -1975,7 +1971,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -2035,8 +2031,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [
+        responseVariables: [],
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -2193,7 +2189,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -2253,8 +2249,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [
+        responseVariables: [],
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 1,
             nestedLevelRefId: 3,
@@ -2397,7 +2393,7 @@ describe('FactorDependentCompositeService', () => {
       target.factorLevelAssociationService.batchCreateFactorLevelAssociations = mockResolve()
 
       const experimentVariables = {
-        independent: [
+        treatmentVariables: [
           {
             id: 1,
             name: 'Factor1',
@@ -2457,8 +2453,8 @@ describe('FactorDependentCompositeService', () => {
             tier: null,
           },
         ],
-        dependent: [],
-        independentAssociations: [
+        responseVariables: [],
+        treatmentVariableAssociations: [
           {
             associatedLevelRefId: 2,
             nestedLevelRefId: 4,

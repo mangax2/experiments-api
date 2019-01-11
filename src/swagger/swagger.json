@@ -3,7 +3,7 @@
   "info": {
     "title": "Experiments API",
     "description": "Experiment APIs to create experiment model, requires oauth_resourceownerinfo http header",
-    "version": "v2"
+    "version": "v3"
   },
   "host": "api01-np.agro.services",
   "schemes": [

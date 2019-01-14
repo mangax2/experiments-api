@@ -104,9 +104,18 @@ router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentDetai
 router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, false, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
-router.patch('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().batchPartialUpdateExperimentalUnits(req.body, req.context)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
+router.patch('/experiments/:id/experimental-units', (req, res, next) => {
+  logger.info(`[[${req.context.requestId}]] Attempting to associate units to entries for experiment "${req.params.id}". Values: ${JSON.stringify(req.body)}`)
+  return new ExperimentalUnitService().batchPartialUpdateExperimentalUnits(req.body, req.context)
+    .then((value) => {
+      logger.info(`[[${req.context.requestId}]] Association succeeded.`)
+      return res.json(value)
+    })
+    .catch((err) => {
+      logger.warn(`[[${req.context.requestId}]] Association FAILED.`, err)
+      return next(err)
+    })
+})
 
 router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummaryService().getExperimentSummaryById(req.params.id, false, req.context)
   .then(summary => res.json(summary))

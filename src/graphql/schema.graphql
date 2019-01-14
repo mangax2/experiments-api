@@ -72,7 +72,6 @@ type Experiment {
 type ExperimentalSet {
   groupId: String
   experimentId: Int
-  refRandomizationStrategyId: Int
   refGroupTypeId: Int
   setId: Int
   groupValues: [GroupValue]

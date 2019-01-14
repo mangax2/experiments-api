@@ -3,7 +3,7 @@
   "info": {
     "title": "Experiments API",
     "description": "Experiment APIs to create experiment model, requires oauth_resourceownerinfo http header",
-    "version": "v2"
+    "version": "v3"
   },
   "host": "api01-np.agro.services",
   "schemes": [
@@ -4101,16 +4101,16 @@
           "type": "string",
           "description": "name of variable"
         },
-        "associatedFactors": {
+        "associatedTreatmentVariables": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AssociatedFactor"
+            "$ref": "#/definitions/AssociatedTreatmentVariable"
           }
         },
-        "nestedFactors": {
+        "nestedTreatmentVariables": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/NestedFactor"
+            "$ref": "#/definitions/NestedTreatmentVariable"
           }
         },
         "levels": {
@@ -4125,7 +4125,7 @@
         }
       }
     },
-    "AssociatedFactor": {
+    "AssociatedTreatmentVariable": {
       "type": "object",
       "properties": {
         "id": {
@@ -4138,7 +4138,7 @@
         }
       }
     },
-    "NestedFactor": {
+    "NestedTreatmentVariable": {
       "type": "object",
       "properties": {
         "id": {
@@ -4151,7 +4151,7 @@
         }
       }
     },
-    "IndependentAssociationResponse": {
+    "TreatmentVariableAssociationResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -4168,7 +4168,7 @@
         }
       }
     },
-    "IndependentAssociationRequest": {
+    "TreatmentVariableAssociationRequest": {
       "type": "object",
       "properties": {
         "associatedLevelRefId": {
@@ -4184,28 +4184,22 @@
     "VariablesRequestPayload": {
       "type": "object",
       "properties": {
-        "independent": {
+        "treatmentVariables": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/TreatmentVariableRequest"
           }
         },
-        "exogenous": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Variable"
-          }
-        },
-        "dependent": {
+        "responseVariables": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/ResponseVariable"
           }
         },
-        "independentAssociations": {
+        "treatmentVariableAssociations": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentAssociationRequest"
+            "$ref": "#/definitions/TreatmentVariableAssociationRequest"
           }
         }
       }
@@ -4213,28 +4207,22 @@
     "VariablesResponse": {
       "type": "object",
       "properties": {
-        "independent": {
+        "treatmentVariables": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/TreatmentVariable"
           }
         },
-        "exogenous": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Variable"
-          }
-        },
-        "dependent": {
+        "responseVariables": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/ResponseVariable"
           }
         },
-        "independentAssociations": {
+        "treatmentVariableAssociations": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IndependentAssociationResponse"
+            "$ref": "#/definitions/TreatmentVariableAssociationResponse"
           }
         }
       }

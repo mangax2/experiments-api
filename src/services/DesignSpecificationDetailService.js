@@ -75,8 +75,8 @@ class DesignSpecificationDetailService {
         advancedParameters[mappedDesignSpecs[dsd.ref_design_spec_id]] = dsd.value
       })
 
-      delete advancedParameters.randomizationStrategyId
-      delete advancedParameters.blockByRep
+      delete advancedParameters.RandomizationStrategyID
+      delete advancedParameters.BlockByRep
 
       return inflector.transform(advancedParameters, 'camelizeLower', true)
     })

@@ -154,32 +154,6 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
     }
   }
 
-  const repPackingMessageConsume = () => {
-    if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
-      try {
-        require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
-      } catch (error) {
-        logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
-      }
-    } else {
-      logger.info('Experiments Kafka has been disabled for this session.')
-    }
-  }
-  const setsChangesMessageConsume = () => {
-    if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
-      try {
-        require('./services/listeners/SetsChangesListener').setsChangesListener.listen()
-      } catch (error) {
-        logger.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
-      }
-    } else {
-      logger.info('Sets Changes Kafka has been disabled for this session.')
-    }
-  }
-  repPackingMessageConsume()
-  setsChangesMessageConsume()
-
-
   server.timeout = 300000
 
   module.exports = app

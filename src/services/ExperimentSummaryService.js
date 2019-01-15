@@ -24,10 +24,10 @@ class ExperimentSummaryService {
             logger.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Summary Not Found for requested experimentId', undefined, getFullErrorCode('191001'))
           } else {
-            data.numberOfTreatmentVariables = data.numberOfIndependentVariables
-            data.numberOfResponseVariables = data.numberofDependentVariables
-            delete data.numberOfIndependentVariables
-            delete data.numberofDependentVariables
+            data.numberOfTreatmentVariables = data.number_of_independent_variables
+            data.numberOfResponseVariables = data.number_of_dependent_variables
+            delete data.number_of_independent_variables
+            delete data.number_of_dependent_variables
             return data
           }
         }),

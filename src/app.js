@@ -79,7 +79,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {
 
   const cors = require('cors')
 
-  app.use(graphqlBaseUrl, cors(), bodyParser.json({ limit: 1024 * 1024 * 40 }), require('./graphql/graphqlConfig')(schema))
+  app.use(`${graphqlBaseUrl}/graphql`, cors(), bodyParser.json({ limit: 1024 * 1024 * 40 }), require('./graphql/graphqlConfig')(schema))
 
   app.use(inflector())
 

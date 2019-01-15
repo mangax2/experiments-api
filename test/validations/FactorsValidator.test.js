@@ -24,8 +24,6 @@ describe('FactorsValidator', () => {
         { paramName: 'tier', type: 'numeric', numericRange: { min: 1, max: 10 } },
         { paramName: 'refFactorTypeId', type: 'numeric', required: true },
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
-        { paramName: 'refDataSourceId', type: 'numeric', required: true },
-        { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
       ]
@@ -59,8 +57,6 @@ describe('FactorsValidator', () => {
         { paramName: 'tier', type: 'numeric', numericRange: { min: 1, max: 10 } },
         { paramName: 'refFactorTypeId', type: 'numeric', required: true },
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
-        { paramName: 'refDataSourceId', type: 'numeric', required: true },
-        { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
       ]
@@ -80,8 +76,6 @@ describe('FactorsValidator', () => {
         { paramName: 'tier', type: 'numeric', numericRange: { min: 1, max: 10 } },
         { paramName: 'refFactorTypeId', type: 'numeric', required: true },
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
-        { paramName: 'refDataSourceId', type: 'numeric', required: true },
-        { paramName: 'refDataSourceId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
         { paramName: 'id', type: 'numeric', required: true },

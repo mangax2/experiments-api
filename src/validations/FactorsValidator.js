@@ -20,8 +20,6 @@ class FactorsValidator extends SchemaValidator {
       { paramName: 'tier', type: 'numeric', numericRange: { min: 1, max: 10 } },
       { paramName: 'refFactorTypeId', type: 'numeric', required: true },
       { paramName: 'refFactorTypeId', type: 'refData', entity: db.factorType },
-      { paramName: 'refDataSourceId', type: 'numeric', required: true },
-      { paramName: 'refDataSourceId', type: 'refData', entity: db.refDataSource },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
     ]

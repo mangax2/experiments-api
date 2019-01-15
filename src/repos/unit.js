@@ -130,7 +130,7 @@ class unitRepo {
 
     return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
       'FROM treatment t, location_association la\n' +
-      'WHERE u.treatment_id = t.id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
+      'WHERE u.treatment_id = t.id AND t.experiment_id = la.experiment_id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
   }
 
   @setErrorCode('5JI000')

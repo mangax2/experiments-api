@@ -9,7 +9,6 @@ import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociati
 import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
-import RefDataSourceService from './RefDataSourceService'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import { notifyChanges } from '../decorators/notifyChanges'
@@ -45,10 +44,9 @@ const batchDeleteDbEntitiesWithoutMatchingDTO = addErrorHandling('1A7000',
       determineIdsToDelete(dbEntities, DTOs), context, tx))
 
 const formDbEntitiesObject = addErrorHandling('1A8000',
-  ([allDbRefDataSources, allDbFactors, allDbLevels, allDbFactorLevelAssociations,
+  ([allDbFactors, allDbLevels, allDbFactorLevelAssociations,
     allFactorTypes]) =>
     ({
-      allDbRefDataSources,
       allDbFactors,
       allDbLevels,
       allDbFactorLevelAssociations,
@@ -116,15 +114,13 @@ const mapFactorLevelDTOsToFactorLevelEntities = addErrorHandling('1AF000',
   })))
 
 const mapFactorDTOsToFactorEntities = addErrorHandling('1AG000',
-  (experimentId, factorDTOs, refFactorTypeId, allDataSources) =>
+  (experimentId, factorDTOs, refFactorTypeId) =>
     _.map(factorDTOs, factorDTO => ({
       id: factorDTO.id,
       name: factorDTO.name,
       refFactorTypeId,
       experimentId,
       tier: factorDTO.tier,
-      refDataSourceId:
-        FactorDependentCompositeService.determineDataSourceId(factorDTO.levels, allDataSources),
     })))
 
 const appendParentIdToChildren = addErrorHandling('1AH000',
@@ -148,7 +144,6 @@ class FactorDependentCompositeService {
     this.dependentVariableService = new DependentVariableService()
     this.factorTypeService = new FactorTypeService()
     this.securityService = new SecurityService()
-    this.refDataSourceService = new RefDataSourceService()
     this.variablesValidator = new VariablesValidator()
   }
 
@@ -337,27 +332,6 @@ class FactorDependentCompositeService {
       })
   }
 
-  @setErrorCode('1AX000')
-  static determineDataSourceId(factorLevelDTOs, allDataSources) {
-    const maxItemCount =
-      _.chain(factorLevelDTOs)
-        .map(factorLevelDTO => _.size(factorLevelDTO.items))
-        .max()
-        .value()
-
-    const distinctPropertyTypes =
-      _.chain(factorLevelDTOs)
-        .map(factorLevelDTO => factorLevelDTO.items)
-        .flatten()
-        .map('propertyTypeId')
-        .uniq()
-        .value()
-
-    return _.size(distinctPropertyTypes) === 1 && maxItemCount === 1
-      ? distinctPropertyTypes[0] : _.find(allDataSources,
-        dataSource => dataSource.name === 'Custom').id
-  }
-
   @setErrorCode('1AY000')
   persistDependentVariables(dependentVariables, experimentId, context, isTemplate, tx) {
     const dependentVariableEntities =
@@ -384,14 +358,13 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1Aa000')
   updateFactors =
-    (experimentId, allFactorDTOs, allDataSources, allFactorTypes, context, tx) =>
+    (experimentId, allFactorDTOs, allFactorTypes, context, tx) =>
       applyAsyncBatchToNonEmptyArray(
         this.factorService.batchUpdateFactors,
         mapFactorDTOsToFactorEntities(
           experimentId,
           determineDTOsForUpdate(allFactorDTOs),
-          getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE),
-          allDataSources),
+          getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE)),
         context,
         tx)
 
@@ -404,24 +377,23 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1Ac000')
   updateFactorsAndLevels = ({
-    experimentId, allDbRefDataSources, allIndependentDTOs: allFactorDTOs,
+    experimentId, allIndependentDTOs: allFactorDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx,
   }) => Promise.all([
     this.updateFactors(
-      experimentId, allFactorDTOs, allDbRefDataSources, allFactorTypes, context, tx),
+      experimentId, allFactorDTOs, allFactorTypes, context, tx),
     this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
   ])
 
   @setErrorCode('1Ad000')
   createFactorsAndDependentLevels = (
     {
-      experimentId, allDbRefDataSources, factorDTOsForCreate, allFactorTypes, context, tx,
+      experimentId, factorDTOsForCreate, allFactorTypes, context, tx,
     }) => {
     const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
       experimentId,
       factorDTOsForCreate,
-      getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE),
-      allDbRefDataSources)
+      getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE))
     return applyAsyncBatchToNonEmptyArray(
       this.factorService.batchCreateFactors,
       factorEntitiesForCreate,
@@ -462,7 +434,6 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1Ag000')
   getCurrentDbEntities = ({ experimentId, tx }) => Promise.all([
-    this.refDataSourceService.getRefDataSources(),
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),

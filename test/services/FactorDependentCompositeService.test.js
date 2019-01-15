@@ -311,27 +311,27 @@ describe('FactorDependentCompositeService', () => {
         levels: [
           {
             id: 1,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
             factor_id: 42,
           },
           {
             id: 2,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
             factor_id: 42,
           },
           {
             id: 3,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
             factor_id: 42,
           },
           {
             id: 4,
-            value: { items: [{ label: 'RM', text: 'RM1', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'RM', text: 'RM1' }] },
             factor_id: 43,
           },
           {
             id: 5,
-            value: { items: [{ label: 'RM', text: 'RM2', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'RM', text: 'RM2' }] },
             factor_id: 43,
           },
         ],
@@ -381,7 +381,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm1',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -391,7 +390,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm2',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -401,7 +399,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'GermPlasm',
                   text: 'GermPlasm3',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -424,7 +421,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'RM',
                   text: 'RM1',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -434,7 +430,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'RM',
                   text: 'RM2',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -500,37 +495,37 @@ describe('FactorDependentCompositeService', () => {
         levels: [
           {
             id: 1,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
             factor_id: 42,
           },
           {
             id: 2,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
             factor_id: 42,
           },
           {
             id: 3,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
             factor_id: 42,
           },
           {
             id: 4,
-            value: { items: [{ label: 'RM', text: 'RM1', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'RM', text: 'RM1' }] },
             factor_id: 43,
           },
           {
             id: 5,
-            value: { items: [{ label: 'RM', text: 'RM2', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'RM', text: 'RM2' }] },
             factor_id: 43,
           },
           {
             id: 6,
-            value: { items: [{ label: 'PlantHeight', text: 'Tall', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'PlantHeight', text: 'Tall' }] },
             factor_id: 44,
           },
           {
             id: 7,
-            value: { items: [{ label: 'PlantHeight', text: 'Dwarf', propertyTypeId: 1 }] },
+            value: { items: [{ label: 'PlantHeight', text: 'Dwarf' }] },
             factor_id: 44,
           },
         ],
@@ -600,7 +595,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'GermPlasm',
                     text: 'GermPlasm1',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -610,7 +604,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'GermPlasm',
                     text: 'GermPlasm2',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -620,7 +613,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'GermPlasm',
                     text: 'GermPlasm3',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -643,7 +635,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'RM',
                     text: 'RM1',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -653,7 +644,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'RM',
                     text: 'RM2',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -676,7 +666,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'PlantHeight',
                     text: 'Tall',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -686,7 +675,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'PlantHeight',
                     text: 'Dwarf',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -840,17 +828,8 @@ describe('FactorDependentCompositeService', () => {
           type: 'Independent',
         },
       ])
-      target.refDataSourceService.getRefDataSources = mockResolve([
-        { name: 'Other', id: 1 },
-        { name: 'Catalog', id: 2 },
-        { name: 'Custom', id: 3 },
-      ])
       target.securityService.permissionsCheck = mockResolve()
       target.variablesValidator.validate = mockResolve()
-    })
-
-    afterEach(() => {
-      expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalledTimes(1)
     })
 
     test('persists new factors and levels without associations', () => {
@@ -878,7 +857,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -887,7 +865,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -902,12 +879,10 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
-                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -916,12 +891,10 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON456',
-                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -943,14 +916,12 @@ describe('FactorDependentCompositeService', () => {
           {
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
           {
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 3,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -963,7 +934,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -975,7 +945,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -987,12 +956,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
-                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1004,12 +971,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
-                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1052,7 +1017,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1062,7 +1026,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1078,7 +1041,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1088,7 +1050,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1119,14 +1080,12 @@ describe('FactorDependentCompositeService', () => {
           {
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
           {
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1139,7 +1098,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1151,7 +1109,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1163,7 +1120,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1175,7 +1131,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1253,7 +1208,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1264,7 +1218,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1281,12 +1234,10 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
-                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1296,12 +1247,10 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON456',
-                    propertyTypeId: 2,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1326,7 +1275,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1334,7 +1282,6 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 3,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1348,7 +1295,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1361,7 +1307,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1374,12 +1319,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
-                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1392,12 +1335,10 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
-                  propertyTypeId: 2,
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1475,7 +1416,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1486,7 +1426,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1504,7 +1443,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1515,7 +1453,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1549,7 +1486,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1557,7 +1493,6 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1571,7 +1506,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1584,7 +1518,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1597,7 +1530,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1610,7 +1542,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1677,7 +1608,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1688,7 +1618,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1713,7 +1642,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1727,7 +1655,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1740,7 +1667,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1796,7 +1722,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1821,7 +1746,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -1835,7 +1759,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -1983,7 +1906,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -1994,7 +1916,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2012,7 +1933,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2023,7 +1943,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2057,7 +1976,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2065,7 +1983,6 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2079,7 +1996,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2092,7 +2008,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2105,7 +2020,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2118,7 +2032,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2201,7 +2114,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2212,7 +2124,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2230,7 +2141,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2241,7 +2151,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2271,7 +2180,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2279,7 +2187,6 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2293,7 +2200,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2306,7 +2212,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2319,7 +2224,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2332,7 +2236,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2405,7 +2308,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2416,7 +2318,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2434,7 +2335,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2445,7 +2345,6 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
-                    propertyTypeId: 1,
                   },
                 ],
               },
@@ -2475,7 +2374,6 @@ describe('FactorDependentCompositeService', () => {
             id: 1,
             experimentId: 42,
             name: 'Factor1',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2483,7 +2381,6 @@ describe('FactorDependentCompositeService', () => {
             id: 2,
             experimentId: 42,
             name: 'Factor2',
-            refDataSourceId: 1,
             refFactorTypeId: 1,
             tier: null,
           },
@@ -2497,7 +2394,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2510,7 +2406,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2523,7 +2418,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
-                  propertyTypeId: 1,
                 },
               ],
             },
@@ -2536,7 +2430,6 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
-                  propertyTypeId: 1,
                 },
               ],
             },

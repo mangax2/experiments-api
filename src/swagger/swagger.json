@@ -3984,10 +3984,6 @@
     "LevelItem": {
       "type": "object",
       "properties": {
-        "propertyTypeId": {
-          "type": "integer",
-          "description": "DEPRECATED: This will be removed in a future version.  Indicates what type of property this item is."
-        },
         "objectType": {
           "type": "string",
           "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"

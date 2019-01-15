@@ -72,7 +72,6 @@ type Experiment {
 type ExperimentalSet {
   groupId: String
   experimentId: Int
-  refRandomizationStrategyId: Int
   refGroupTypeId: Int
   setId: Int
   groupValues: [GroupValue]
@@ -128,7 +127,6 @@ type Group {
   id: String
   experimentId: Int
   parentId: String
-  refRandomizationStrategyId: Int @deprecated(reason: "This is now sourced from DesignSpecificationDetail and is here only for backwards compatibility until the next major version release.")
   refGroupTypeId: Int
   setId: Int
   childGroups: [Group]

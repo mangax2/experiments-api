@@ -421,8 +421,23 @@
                 "locations": {
                   "type": "integer"
                 },
+                "number of rows": {
+                  "type": "integer"
+                },
+                "plot row length uom": {
+                  "type": "string"
+                },
                 "reps": {
                   "type": "integer"
+                },
+                "row length": {
+                  "type": "integer"
+                },
+                "row spacing": {
+                  "type": "integer"
+                },
+                "row spacing uom": {
+                  "type": "string"
                 }
               }
             }

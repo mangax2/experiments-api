@@ -127,45 +127,28 @@ class DesignSpecificationDetailService {
   @setErrorCode('136000')
   @Transactional('syncDesignSpecificationDetails')
   syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
-    return this.getDesignSpecificationDetailsByExperimentId(experimentId, false, context, tx)
-      .then(currentDesignSpecDetails =>
-        db.refDesignSpecification.all().then((refDesignSpecs) => {
-          const upsertValues = []
+    return this.getAdvancedParameters(experimentId, tx)
+      .then((currentDesignSpecDetails) => {
+        let shouldUpdate = false
 
-          if (capacitySyncDesignSpecDetails.locations) {
-            const refLocationId = _.find(refDesignSpecs, dS => dS.name === 'Locations').id
+        if (!_.isNil(capacitySyncDesignSpecDetails.locations)) {
+          shouldUpdate = true
+          currentDesignSpecDetails.locations = capacitySyncDesignSpecDetails.locations
+        }
 
-            upsertValues.push({
-              refDesignSpecId: refLocationId,
-              value: capacitySyncDesignSpecDetails.locations,
-            })
-          }
+        if (!_.isNil(capacitySyncDesignSpecDetails.reps) && !currentDesignSpecDetails.minRep) {
+          shouldUpdate = true
+          currentDesignSpecDetails.reps = capacitySyncDesignSpecDetails.reps
+        }
 
-          if (capacitySyncDesignSpecDetails.reps) {
-            const refMinRepsId = _.find(refDesignSpecs, dS => dS.name === 'Min Rep').id
-            const currentMinReps = _.find(
-              currentDesignSpecDetails, dSD => dSD.ref_design_spec_id === refMinRepsId,
-            )
+        if (shouldUpdate) {
+          return this.saveDesignSpecifications(
+            currentDesignSpecDetails, experimentId, false, context, tx,
+          )
+        }
 
-            if (!currentMinReps) {
-              const refRepId = _.find(refDesignSpecs, dS => dS.name === 'Reps').id
-
-              upsertValues.push({
-                refDesignSpecId: refRepId,
-                value: capacitySyncDesignSpecDetails.reps,
-              })
-            }
-          }
-
-          if (upsertValues.length > 0) {
-            return db.designSpecificationDetail.syncDesignSpecificationDetails(
-              experimentId, upsertValues, context, tx,
-            )
-          }
-
-          return Promise.resolve()
-        }),
-      )
+        return Promise.resolve()
+      })
   }
 }
 

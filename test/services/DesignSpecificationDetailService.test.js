@@ -246,7 +246,7 @@ describe('DesignSpecificationDetailService', () => {
 
       return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
         expect(target.saveDesignSpecifications).toHaveBeenCalledWith(
-          { locations: 5, reps: 4 },
+          { locations: '5', reps: '4' },
           1,
           false,
           testContext,
@@ -267,7 +267,7 @@ describe('DesignSpecificationDetailService', () => {
 
       return target.syncDesignSpecificationDetails(capacityRequestDesignSpecificationDetails, 1, testContext, testTx).then(() => {
         expect(target.saveDesignSpecifications).toHaveBeenCalledWith(
-          { locations: 5, minRep: '8' },
+          { locations: '5', minRep: '8' },
           1,
           false,
           testContext,

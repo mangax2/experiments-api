@@ -133,12 +133,12 @@ class DesignSpecificationDetailService {
 
         if (!_.isNil(capacitySyncDesignSpecDetails.locations)) {
           shouldUpdate = true
-          currentDesignSpecDetails.locations = capacitySyncDesignSpecDetails.locations
+          currentDesignSpecDetails.locations = capacitySyncDesignSpecDetails.locations.toString()
         }
 
         if (!_.isNil(capacitySyncDesignSpecDetails.reps) && !currentDesignSpecDetails.minRep) {
           shouldUpdate = true
-          currentDesignSpecDetails.reps = capacitySyncDesignSpecDetails.reps
+          currentDesignSpecDetails.reps = capacitySyncDesignSpecDetails.reps.toString()
         }
 
         if (shouldUpdate) {

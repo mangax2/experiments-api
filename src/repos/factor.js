@@ -29,7 +29,6 @@ class factorRepo {
       [
         'name',
         'ref_factor_type_id',
-        'ref_data_source_id',
         'experiment_id',
         'created_user_id',
         'created_date:raw',
@@ -41,7 +40,6 @@ class factorRepo {
     const values = factors.map(factor => ({
       name: factor.name,
       ref_factor_type_id: factor.refFactorTypeId,
-      ref_data_source_id: factor.refDataSourceId,
       experiment_id: factor.experimentId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
@@ -60,7 +58,6 @@ class factorRepo {
         '?id',
         'name',
         'ref_factor_type_id',
-        'ref_data_source_id',
         'experiment_id',
         'modified_user_id',
         'modified_date:raw',
@@ -71,7 +68,6 @@ class factorRepo {
       id: factor.id,
       name: factor.name,
       ref_factor_type_id: factor.refFactorTypeId,
-      ref_data_source_id: factor.refDataSourceId,
       experiment_id: factor.experimentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',

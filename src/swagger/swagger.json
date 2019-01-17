@@ -3786,10 +3786,6 @@
           "type": "integer",
           "description": "id of TreatmentVariableType entity"
         },
-        "refDataSourceId": {
-          "type": "integer",
-          "description": "id of the dataSource entity"
-        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity"

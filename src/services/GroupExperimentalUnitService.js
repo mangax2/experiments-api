@@ -170,9 +170,6 @@ class GroupExperimentalUnitService {
   @Transactional('getGroupsAndUnits')
   getGroupsAndUnits = (experimentId, tx) =>
     Promise.all([
-      PingUtil.getMonsantoHeader().then(header =>
-        HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl}/strategies`, header))
-        .then(data => data.body),
       db.factor.findByExperimentId(experimentId, tx),
       db.factorLevel.findByExperimentId(experimentId, tx),
       db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
@@ -181,8 +178,8 @@ class GroupExperimentalUnitService {
       db.combinationElement.findAllByExperimentId(experimentId, tx),
       db.unit.findAllByExperimentId(experimentId, tx),
       db.locationAssociation.findByExperimentId(experimentId, tx),
+      db.experiments.find(experimentId, false, tx),
     ]).then(([
-      randomizationStrategies,
       variables,
       variableLevels,
       designSpecs,
@@ -191,6 +188,7 @@ class GroupExperimentalUnitService {
       combinationElements,
       units,
       setLocAssociations,
+      experiment,
     ]) => {
       const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
@@ -221,10 +219,10 @@ class GroupExperimentalUnitService {
 
       const body = JSON.stringify(inflector.transform({
         experimentId,
+        randomizationStrategyCode: experiment.randomization_strategy_code,
         variables: trimmedVariables,
         designSpecs,
         refDesignSpecs,
-        randomizationStrategies,
         treatments: trimmedTreatments,
         units: trimmedUnits,
         setLocAssociations,

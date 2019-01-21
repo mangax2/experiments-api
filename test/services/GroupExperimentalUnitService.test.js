@@ -522,9 +522,6 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupsAndUnits', () => {
     test('properly sends and retrieves data to lambda', () => {
       target = new GroupExperimentalUnitService()
-      cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
-      PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -533,6 +530,7 @@ describe('GroupExperimentalUnitService', () => {
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
       db.unit.findAllByExperimentId = mockResolve([])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
+      db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
       AppError.internalServerError = mock()
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
@@ -551,7 +549,6 @@ describe('GroupExperimentalUnitService', () => {
         ],
         designSpecs: 'designSpecs',
         refDesignSpecs: 'refDesignSpecs',
-        randomizationStrategies: 'randStrats',
         treatments: [
           {
             id: 7,
@@ -572,8 +569,6 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
-        expect(HttpUtil.getWithRetry).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -582,6 +577,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
         expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(db.experiments.find).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
         expect(data).toEqual({ test: 'message' })
@@ -591,9 +587,6 @@ describe('GroupExperimentalUnitService', () => {
 
     test('properly handles lambda errors', () => {
       target = new GroupExperimentalUnitService()
-      cfServices.experimentsExternalAPIUrls.value.randomizationAPIUrl = 'randomization'
-      PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.getWithRetry = mockResolve({ body: 'randStrats' })
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -602,13 +595,12 @@ describe('GroupExperimentalUnitService', () => {
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
       db.unit.findAllByExperimentId = mockResolve('units')
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
+      db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockReject()
       AppError.internalServerError = mock({ message: 'error result' })
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
       return target.getGroupsAndUnits(5, testTx).catch(() => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
-        expect(HttpUtil.getWithRetry).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -617,6 +609,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
         expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(db.experiments.find).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
         expect(target.lambdaPerformanceService.savePerformanceStats).not.toBeCalled()

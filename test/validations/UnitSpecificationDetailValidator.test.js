@@ -20,7 +20,7 @@ describe('UnitSpecificationDetailValidator', () => {
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
         },
-        { paramName: 'uomId', type: 'numeric', required: false },
+        { paramName: 'uomId', type: 'text', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
@@ -64,7 +64,7 @@ describe('UnitSpecificationDetailValidator', () => {
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
         },
-        { paramName: 'uomId', type: 'numeric', required: false },
+        { paramName: 'uomId', type: 'text', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
@@ -88,7 +88,7 @@ describe('UnitSpecificationDetailValidator', () => {
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
         },
-        { paramName: 'uomId', type: 'numeric', required: false },
+        { paramName: 'uomId', type: 'text', required: false },
         { paramName: 'refUnitSpecId', type: 'numeric', required: true },
         { paramName: 'refUnitSpecId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },

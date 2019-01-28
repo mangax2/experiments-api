@@ -298,17 +298,56 @@ describe('CapacityRequestService', () => {
       db.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 0 }),
+      }
 
       const capacityRequestData = {
+        'number of rows': 4,
         'row length': 4,
         'row spacing': 5,
-
+        'plot row length uom': 1,
+        'row spacing uom': 2,
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
         expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).toHaveBeenCalled()
+      })
+    })
+
+    test('rejects when some unit specification values are missing in request', () => {
+      const securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      const designSpecificationDetailService = {
+        syncDesignSpecificationDetails: mockResolve(),
+      }
+      const unitSpecificationDetailService = {
+        syncUnitSpecificationDetails: mockResolve(),
+      }
+      const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
+      db.experiments = {
+        updateCapacityRequestSyncDate: mockResolve(),
+      }
+      db.locationAssociation = {
+        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 0 }),
+      }
+      AppError.badRequest = mock()
+
+      const capacityRequestData = {
+        'number of rows': 4,
+        'row length': 4,
+        'row spacing': 5,
+        'row spacing uom': 2,
+      }
+
+      return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
+        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
+        expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Cannot sync capacity request data because some Unit Specification values are missing', undefined, '104002')
       })
     })
 

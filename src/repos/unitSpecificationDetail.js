@@ -28,7 +28,7 @@ class unitSpecificationDetailRepo {
 
     const values = unitSpecificationDetails.map(detail => ({
       value: detail.value,
-      uom_code: usd.uomCode,
+      uom_code: detail.uomCode,
       uom_id: detail.uomId,
       ref_unit_spec_id: detail.refUnitSpecId,
       experiment_id: detail.experimentId,

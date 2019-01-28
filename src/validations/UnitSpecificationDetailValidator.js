@@ -17,7 +17,9 @@ class UnitSpecificationDetailValidator extends SchemaValidator {
       {
         paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
       },
-      { paramName: 'uomCode', type: 'text', required: false },
+      {
+        paramName: 'uomCode', type: 'text', lengthRange: { min: 1, max: 50 }, required: false,
+      },
       { paramName: 'refUnitSpecId', type: 'numeric', required: true },
       { paramName: 'refUnitSpecId', type: 'refData', entity: db.unitSpecification },
       { paramName: 'experimentId', type: 'numeric', required: true },

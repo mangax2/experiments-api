@@ -1,17 +1,17 @@
-ALTER TABLE unit_spec_detail ALTER COLUMN uom_id TYPE varchar(50) USING (uom_id::varchar);
+ALTER TABLE unit_spec_detail ADD COLUMN uom_code varchar(50);
 
 UPDATE unit_spec_detail
-SET uom_id = 'ft'
+SET uom_code = 'ft'
 WHERE uom_id = '1';
 
 UPDATE unit_spec_detail
-SET uom_id = 'in'
+SET uom_code = 'in'
 WHERE uom_id = '2';
 
 UPDATE unit_spec_detail
-SET uom_id = 'm'
+SET uom_code = 'm'
 WHERE uom_id = '3';
 
 UPDATE unit_spec_detail
-SET uom_id = 'cm'
+SET uom_code = 'cm'
 WHERE uom_id = '4';

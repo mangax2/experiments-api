@@ -4324,7 +4324,7 @@
           "type": "string",
           "description": "Value of the unit specification detail"
         },
-        "uomId": {
+        "uomCode": {
           "type": "string",
           "description": "Id of the Unit of Measure reference"
         },
@@ -4361,7 +4361,7 @@
           "type": "string",
           "description": "Value of the unit specification detail"
         },
-        "uomId": {
+        "uomCode": {
           "type": "string",
           "description": "Reference to Unit of Measure"
         },
@@ -4382,7 +4382,7 @@
           "type": "string",
           "description": "Value of the unit specification detail"
         },
-        "uomId": {
+        "uomCode": {
           "type": "string",
           "description": "Reference to Unit of Measure"
         },

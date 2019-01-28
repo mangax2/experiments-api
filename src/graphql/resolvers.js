@@ -146,7 +146,7 @@ export default {
         : Promise.resolve(null)),
   },
   UnitSpecificationDetail: {
-    uomId: property('uom_id'),
+    uomCode: property('uom_code'),
     refUnitSpecId: property('ref_unit_spec_id'),
     experimentId: property('experiment_id'),
     auditInfo: (entity, args, context) =>

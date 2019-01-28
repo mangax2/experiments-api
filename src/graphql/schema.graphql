@@ -194,7 +194,7 @@ type UnitSpecification {
 type UnitSpecificationDetail {
   id: Int
   value: String
-  uomId: String
+  uomCode: String
   refUnitSpecId: Int
   experimentId: Int
   auditInfo: AuditInfo

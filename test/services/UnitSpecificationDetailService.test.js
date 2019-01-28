@@ -57,6 +57,7 @@ describe('UnitSpecificationDetailService', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchCreateUnitSpecificationDetails([{}], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
@@ -69,6 +70,7 @@ describe('UnitSpecificationDetailService', () => {
       target.validator.validate = mockResolve()
       const error = { message: 'error' }
       db.unitSpecificationDetail.batchCreate = mockReject(error)
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchCreateUnitSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
@@ -81,6 +83,7 @@ describe('UnitSpecificationDetailService', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
       db.unitSpecificationDetail.batchCreate = mockReject(error)
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchCreateUnitSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
@@ -95,6 +98,7 @@ describe('UnitSpecificationDetailService', () => {
       target.validator.validate = mockResolve()
       db.unitSpecificationDetail.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchUpdateUnitSpecificationDetails([{}], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -107,6 +111,7 @@ describe('UnitSpecificationDetailService', () => {
       target.validator.validate = mockResolve()
       const error = { message: 'error' }
       db.unitSpecificationDetail.batchUpdate = mockReject(error)
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchUpdateUnitSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
@@ -119,12 +124,28 @@ describe('UnitSpecificationDetailService', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
       db.unitSpecificationDetail.batchUpdate = mockReject(error)
+      target.backfillUnitSpecificationRecord = mock()
 
       return target.batchUpdateUnitSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
         expect(db.unitSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
+    })
+  })
+
+  describe('backfillUnitSpecificationRecord', () => {
+    test('correctly maps values', () => {
+      target = new UnitSpecificationDetailService()
+      const data = [{ uomCode: 'm' }, { uomCode: 'bad value' }, { uomCode: 'in' }, { uomCode: 'ft' }, { uomCode: 'cm' }]
+
+      target.backfillUnitSpecificationRecord(data)
+
+      expect(data[0].uomId).toBe(3)
+      expect(data[1].uomId).toBe(undefined)
+      expect(data[2].uomId).toBe(2)
+      expect(data[3].uomId).toBe(1)
+      expect(data[4].uomId).toBe(4)
     })
   })
 

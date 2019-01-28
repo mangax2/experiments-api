@@ -28,6 +28,7 @@ class unitSpecificationDetailRepo {
 
     const values = unitSpecificationDetails.map(detail => ({
       value: detail.value,
+      uom_code: usd.uomCode,
       uom_id: detail.uomId,
       ref_unit_spec_id: detail.refUnitSpecId,
       experiment_id: detail.experimentId,
@@ -52,6 +53,7 @@ class unitSpecificationDetailRepo {
     const data = unitSpecificationDetails.map(usd => ({
       id: usd.id,
       value: usd.value,
+      uom_code: usd.uomCode,
       uom_id: usd.uomId,
       ref_unit_spec_id: usd.refUnitSpecId,
       experiment_id: usd.experimentId,

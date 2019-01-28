@@ -14,6 +14,13 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 
 const logger = log4js.getLogger('UnitSpecificationDetailService')
 
+const backfillMapper = {
+  ft: 1,
+  in: 2,
+  m: 3,
+  cm: 4,
+}
+
 // Error Codes 1SXXXX
 class UnitSpecificationDetailService {
   constructor() {
@@ -33,6 +40,7 @@ class UnitSpecificationDetailService {
   @setErrorCode('1S3000')
   @Transactional('batchCreateUnitSpecificationDetails')
   batchCreateUnitSpecificationDetails(specificationDetails, context, tx) {
+    this.backfillUnitSpecificationRecord(specificationDetails)
     return this.validator.validate(specificationDetails, 'POST', tx)
       .then(() => db.unitSpecificationDetail.batchCreate(specificationDetails, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
@@ -41,6 +49,7 @@ class UnitSpecificationDetailService {
   @setErrorCode('1S4000')
   @Transactional('batchUpdateUnitSpecificationDetails')
   batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
+    this.backfillUnitSpecificationRecord(unitSpecificationDetails)
     return this.validator.validate(unitSpecificationDetails, 'PUT', tx)
       .then(() => db.unitSpecificationDetail.batchUpdate(unitSpecificationDetails, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
@@ -62,6 +71,14 @@ class UnitSpecificationDetailService {
             .then(() =>
               this.createUnitSpecificationDetails(unitSpecificationDetailsObj.adds, context, tx)
                 .then(() => AppUtil.createCompositePostResponse())))
+    })
+  }
+
+  // The below function should go away after v2 is retired, along with the backfillMapper and the
+  // uom_id column in the database
+  backfillUnitSpecificationRecord = (specificationDetails) => {
+    _.forEach(specificationDetails, (spec) => {
+      spec.uomId = backfillMapper[spec.uomCode]
     })
   }
 

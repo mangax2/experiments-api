@@ -143,7 +143,7 @@ class UnitSpecificationDetailService {
            unitSpecUpsertValues.push({
              refUnitSpecId: refPlotRowLengthId,
              value: capacitySyncUnitSpecDetails['row length'],
-             uomId: capacitySyncUnitSpecDetails['plot row length uom'],
+             uomCode: capacitySyncUnitSpecDetails['plot row length uom'],
              experimentId,
            })
          }
@@ -153,7 +153,7 @@ class UnitSpecificationDetailService {
            unitSpecUpsertValues.push({
              refUnitSpecId: refRowSpacingId,
              value: capacitySyncUnitSpecDetails['row spacing'],
-             uomId: capacitySyncUnitSpecDetails['row spacing uom'],
+             uomCode: capacitySyncUnitSpecDetails['row spacing uom'],
              experimentId,
 
            })

@@ -217,21 +217,23 @@ class GroupExperimentalUnitService {
         delete level.factorName
       })
 
-      const groupPromises = _.map(_.groupBy(trimmedUnits, 'location'), (g) => {
+      const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
+        const treatmentsByBlock = u.length === 0 ? trimmedTreatments :
+          _.filter(trimmedTreatments, t => t.block === u[0].block || t.in_all_blocks)
         const body = JSON.stringify(inflector.transform({
           experimentId,
           randomizationStrategyCode: experiment.randomization_strategy_code,
           variables: trimmedVariables,
           designSpecs,
           refDesignSpecs,
-          treatments: trimmedTreatments,
-          units: g,
+          treatments: treatmentsByBlock,
+          units: u,
           setLocAssociations,
         }, 'camelizeLower'))
 
         // return AWSUtil.callLambdaLocal(body)
         return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
-      })
+      }))
 
       return Promise.all(groupPromises)
         .then(data => _.map(data, (d) => {

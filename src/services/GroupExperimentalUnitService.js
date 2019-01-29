@@ -217,22 +217,30 @@ class GroupExperimentalUnitService {
         delete level.factorName
       })
 
-      const body = JSON.stringify(inflector.transform({
-        experimentId,
-        randomizationStrategyCode: experiment.randomization_strategy_code,
-        variables: trimmedVariables,
-        designSpecs,
-        refDesignSpecs,
-        treatments: trimmedTreatments,
-        units: trimmedUnits,
-        setLocAssociations,
-      }, 'camelizeLower'))
+      const groupPromises = _.map(_.groupBy(trimmedUnits, 'location'), (g) => {
+        const body = JSON.stringify(inflector.transform({
+          experimentId,
+          randomizationStrategyCode: experiment.randomization_strategy_code,
+          variables: trimmedVariables,
+          designSpecs,
+          refDesignSpecs,
+          treatments: trimmedTreatments,
+          units: g,
+          setLocAssociations,
+        }, 'camelizeLower'))
 
-      const startTime = new Date()
-      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
-        .then(data => this.lambdaPerformanceService.savePerformanceStats(body.length,
-          data.Payload.length, new Date() - startTime)
-          .then(() => JSON.parse(data.Payload)))
+        // return AWSUtil.callLambdaLocal(body)
+        return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+      })
+
+      return Promise.all(groupPromises)
+        .then(data => _.map(data, (d) => {
+          const response = JSON.parse(d.text)
+          /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+          this.lambdaPerformanceService.savePerformanceStats(d.request._data.length,
+            d.text.length, response.responseTime)
+          return response.locationGroups[0]
+        }))
         .catch((err) => {
           console.error(err)
           return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))

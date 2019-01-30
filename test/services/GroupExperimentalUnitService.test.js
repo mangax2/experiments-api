@@ -526,12 +526,12 @@ describe('GroupExperimentalUnitService', () => {
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.unit.findAllByExperimentId = mockResolve([])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
-      AWSUtil.callLambda = mockResolve({ Payload: '{ "test": "message" }' })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
@@ -552,6 +552,7 @@ describe('GroupExperimentalUnitService', () => {
         treatments: [
           {
             id: 7,
+            block: null,
             combinationElements: [
               {
                 treatmentId: 7,
@@ -564,7 +565,7 @@ describe('GroupExperimentalUnitService', () => {
             ],
           },
         ],
-        units: [],
+        units: [{ location: 1, block: null }],
         setLocAssociations: 'setIds',
       }
 
@@ -580,7 +581,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(db.experiments.find).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
-        expect(data).toEqual({ test: 'message' })
+        expect(data).toContainEqual({ test: 'message' })
         expect(target.lambdaPerformanceService.savePerformanceStats).toBeCalled()
       })
     })
@@ -591,7 +592,7 @@ describe('GroupExperimentalUnitService', () => {
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7 }])
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
       db.unit.findAllByExperimentId = mockResolve('units')
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
@@ -613,6 +614,175 @@ describe('GroupExperimentalUnitService', () => {
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
         expect(target.lambdaPerformanceService.savePerformanceStats).not.toBeCalled()
+      })
+    })
+
+    test('test multiple locations and lambda are called multiple times', () => {
+      target = new GroupExperimentalUnitService()
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
+      db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
+      db.locationAssociation.findByExperimentId = mockResolve('setIds')
+      db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }], inputSize: 3003, responseTime: 1 }) })
+      AppError.internalServerError = mock()
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
+
+      const expectedLambdaPayload = {
+        experimentId: 5,
+        variables: [
+          {
+            id: 1,
+            name: 'var1',
+            levels: [
+              { id: 3, factorId: 1, items: {} },
+              { id: 5, factorId: 1, items: [{}, {}] },
+            ],
+          },
+        ],
+        designSpecs: 'designSpecs',
+        refDesignSpecs: 'refDesignSpecs',
+        treatments: [
+          {
+            id: 7,
+            block: null,
+            combinationElements: [
+              {
+                treatmentId: 7,
+                factorLevelId: 3,
+              },
+              {
+                treatmentId: 7,
+                factorLevelId: 5,
+              },
+            ],
+          },
+        ],
+        units: [{ location: 1, block: null }],
+        setLocAssociations: 'setIds',
+      }
+
+      return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.treatment.findAllByExperimentId).toBeCalled()
+        expect(db.combinationElement.findAllByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
+        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(db.experiments.find).toHaveBeenCalled()
+        expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
+        expectedLambdaPayload.units = [{ location: 2, block: null }]
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
+        expect(AppError.internalServerError).not.toBeCalled()
+        expect(data).toContainEqual({ test: 'message' })
+        expect(target.lambdaPerformanceService.savePerformanceStats).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    test('test multiple locations and blocks', () => {
+      target = new GroupExperimentalUnitService()
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, in_all_blocks: true }])
+      db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 },
+        { treatment_id: 8, factor_level_id: 4 }, { treatment_id: 8, factor_level_id: 6 }])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
+      db.locationAssociation.findByExperimentId = mockResolve('setIds')
+      db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
+      AppError.internalServerError = mock()
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
+
+      const expectedLambdaPayload = {
+        experimentId: 5,
+        variables: [
+          {
+            id: 1,
+            name: 'var1',
+            levels: [
+              { id: 3, factorId: 1, items: {} },
+              { id: 5, factorId: 1, items: [{}, {}] },
+            ],
+          },
+        ],
+        designSpecs: 'designSpecs',
+        refDesignSpecs: 'refDesignSpecs',
+        treatments: [
+          {
+            id: 7,
+            block: 3,
+            combinationElements: [
+              {
+                treatmentId: 7,
+                factorLevelId: 3,
+              },
+              {
+                treatmentId: 7,
+                factorLevelId: 5,
+              },
+            ],
+          },
+          {
+            id: 8,
+            inAllBlocks: true,
+            combinationElements: [
+              {
+                treatmentId: 8,
+                factorLevelId: 4,
+              },
+              {
+                treatmentId: 8,
+                factorLevelId: 6,
+              },
+            ],
+          },
+        ],
+        units: [{ location: 1, block: 3 }],
+        setLocAssociations: 'setIds',
+      }
+
+      return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.treatment.findAllByExperimentId).toBeCalled()
+        expect(db.combinationElement.findAllByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
+        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(db.experiments.find).toHaveBeenCalled()
+        expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
+        expectedLambdaPayload.units = [{ location: 2, block: 1 }]
+        expectedLambdaPayload.treatments = [
+          {
+            id: 8,
+            inAllBlocks: true,
+            combinationElements: [
+              {
+                treatmentId: 8,
+                factorLevelId: 4,
+              },
+              {
+                treatmentId: 8,
+                factorLevelId: 6,
+              },
+            ],
+          },
+        ]
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
+        expect(AppError.internalServerError).not.toBeCalled()
+        expect(data).toContainEqual({ test: 'message' })
+        expect(target.lambdaPerformanceService.savePerformanceStats).toHaveBeenCalledTimes(2)
       })
     })
   })

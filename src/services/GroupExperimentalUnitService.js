@@ -217,22 +217,32 @@ class GroupExperimentalUnitService {
         delete level.factorName
       })
 
-      const body = JSON.stringify(inflector.transform({
-        experimentId,
-        randomizationStrategyCode: experiment.randomization_strategy_code,
-        variables: trimmedVariables,
-        designSpecs,
-        refDesignSpecs,
-        treatments: trimmedTreatments,
-        units: trimmedUnits,
-        setLocAssociations,
-      }, 'camelizeLower'))
+      const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
+        const treatmentsByBlock = _.filter(trimmedTreatments,
+          t => t.block === u[0].block || t.in_all_blocks)
+        const body = JSON.stringify(inflector.transform({
+          experimentId,
+          randomizationStrategyCode: experiment.randomization_strategy_code,
+          variables: trimmedVariables,
+          designSpecs,
+          refDesignSpecs,
+          treatments: treatmentsByBlock,
+          units: u,
+          setLocAssociations,
+        }, 'camelizeLower'))
 
-      const startTime = new Date()
-      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
-        .then(data => this.lambdaPerformanceService.savePerformanceStats(body.length,
-          data.Payload.length, new Date() - startTime)
-          .then(() => JSON.parse(data.Payload)))
+        // return AWSUtil.callLambdaLocal(body)
+        // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
+        return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+      }))
+
+      return Promise.all(groupPromises)
+        .then(data => _.map(data, (d) => {
+          const response = JSON.parse(d.Payload)
+          this.lambdaPerformanceService.savePerformanceStats(response.inputSize,
+            d.Payload.length, response.responseTime)
+          return response.locationGroups[0]
+        }))
         .catch((err) => {
           console.error(err)
           return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FO001')))

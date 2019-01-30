@@ -531,7 +531,7 @@ describe('GroupExperimentalUnitService', () => {
       db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
-      AWSUtil.callLambda = mockResolve({ text: JSON.stringify({ locationGroups: [{ test: 'message' }] }), request: { _data: {} } })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
@@ -628,7 +628,7 @@ describe('GroupExperimentalUnitService', () => {
       db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
-      AWSUtil.callLambda = mockResolve({ text: JSON.stringify({ locationGroups: [{ test: 'message' }] }), request: { _data: {} } })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }], inputSize: 3003, responseTime: 1 }) })
       AppError.internalServerError = mock()
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
@@ -698,7 +698,7 @@ describe('GroupExperimentalUnitService', () => {
       db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
       db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.find = mockResolve({ randomizationStrategyCode: 'rcb' })
-      AWSUtil.callLambda = mockResolve({ text: JSON.stringify({ locationGroups: [{ test: 'message' }] }), request: { _data: {} } })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 

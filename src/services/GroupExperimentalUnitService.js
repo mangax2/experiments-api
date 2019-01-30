@@ -218,8 +218,8 @@ class GroupExperimentalUnitService {
       })
 
       const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
-        const treatmentsByBlock = u.length === 0 ? trimmedTreatments :
-          _.filter(trimmedTreatments, t => t.block === u[0].block || t.in_all_blocks)
+        const treatmentsByBlock = _.filter(trimmedTreatments,
+          t => t.block === u[0].block || t.in_all_blocks)
         const body = JSON.stringify(inflector.transform({
           experimentId,
           randomizationStrategyCode: experiment.randomization_strategy_code,
@@ -232,15 +232,15 @@ class GroupExperimentalUnitService {
         }, 'camelizeLower'))
 
         // return AWSUtil.callLambdaLocal(body)
+        // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
         return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
       }))
 
       return Promise.all(groupPromises)
         .then(data => _.map(data, (d) => {
-          const response = JSON.parse(d.text)
-          /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
-          this.lambdaPerformanceService.savePerformanceStats(d.request._data.length,
-            d.text.length, response.responseTime)
+          const response = JSON.parse(d.Payload)
+          this.lambdaPerformanceService.savePerformanceStats(response.inputSize,
+            d.Payload.length, response.responseTime)
           return response.locationGroups[0]
         }))
         .catch((err) => {

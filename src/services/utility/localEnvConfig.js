@@ -23,7 +23,7 @@ const cfServices = {
       setsAPIUrl: 'https://api01-np.agro.services/sets-api/v2',
       materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
       velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5',
-      randomizationAPIUrl: 'https://velocity-np.ag/randomize-treatments-api'
+      randomizeTreatmentsAPIUrl: 'https://velocity-np.ag/randomize-treatments-api'
     },
   },
   experimentsKafka:{

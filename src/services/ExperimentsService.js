@@ -226,9 +226,9 @@ class ExperimentsService {
   @setErrorCode('15T000')
   updateExperimentsRandomizationStrategyId(experimentId, strategyCode, isCreate, context, tx) {
     return PingUtil.getMonsantoHeader().then((headers) => {
-      const { randomizationAPIUrl } =
+      const { randomizeTreatmentsAPIUrl } =
         cfService.experimentsExternalAPIUrls.value
-      return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
+      return HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)
         .then((strategies) => {
           const randStrategy = _.find(strategies.body, strategy =>
             strategy.strategyCode === strategyCode)

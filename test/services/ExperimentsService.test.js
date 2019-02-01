@@ -817,27 +817,22 @@ describe('ExperimentsService', () => {
   describe('updateExperimentsRandomizationStrategyId', () => {
     test('saves the matching randomizationStrategyId', () => {
       PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.get = mockResolve({ body: [{ endpoint: 'rcb', id: 1 }, { endpoint: 'crd', id: 2 }, { endpoint: 'custom', id: 4 }] })
+      HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
       target.factorService = { updateFactorsForDesign: mockResolve() }
-      db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId = mockResolve()
-
       return target.updateExperimentsRandomizationStrategyId(5, 'crd', false, testContext, testTx)
         .then(() => {
-          expect(target.factorService.updateFactorsForDesign).toBeCalledWith(5, { endpoint: 'crd', id: 2 }, testTx)
-          expect(db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId).toBeCalledWith(5, 2, testContext, testTx)
+          expect(target.factorService.updateFactorsForDesign).toBeCalledWith(5, { strategyCode: 'crd' }, testTx)
         })
     })
 
     test('does not call factorService on creates', () => {
       PingUtil.getMonsantoHeader = mockResolve()
-      HttpUtil.get = mockResolve({ body: [{ endpoint: 'rcb', id: 1 }, { endpoint: 'crd', id: 2 }, { endpoint: 'custom', id: 4 }] })
+      HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
       target.factorService = { updateFactorsForDesign: mockResolve() }
-      db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId = mockResolve()
 
       return target.updateExperimentsRandomizationStrategyId(5, 'crd', true, testContext, testTx)
         .then(() => {
           expect(target.factorService.updateFactorsForDesign).not.toBeCalled()
-          expect(db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId).toBeCalledWith(5, 2, testContext, testTx)
         })
     })
   })

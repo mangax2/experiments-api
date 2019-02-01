@@ -231,14 +231,10 @@ class ExperimentsService {
       return HttpUtil.get(`${randomizationAPIUrl}/strategies`, headers)
         .then((strategies) => {
           const randStrategy = _.find(strategies.body, strategy =>
-            strategy.endpoint === strategyCode)
+            strategy.strategyCode === strategyCode)
           const updateDesignPromise = isCreate ? Promise.resolve()
             : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx)
-          return Promise.all([
-            updateDesignPromise,
-            db.designSpecificationDetail.setRandomizationStrategyIdByExperimentId(experimentId,
-              randStrategy.id, context, tx),
-          ])
+          return updateDesignPromise
         })
     })
   }

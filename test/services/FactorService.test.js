@@ -196,7 +196,7 @@ describe('FactorService', () => {
     test('calls removeTiersForExperiment when there is no split', () => {
       db.factor.removeTiersForExperiment = mockResolve()
 
-      return target.updateFactorsForDesign(1, { rules: '{}' }, testTx).then(() => {
+      return target.updateFactorsForDesign(1, { rules: {} }, testTx).then(() => {
         expect(db.factor.removeTiersForExperiment).toHaveBeenCalledWith(1, testTx)
       })
     })
@@ -204,7 +204,7 @@ describe('FactorService', () => {
     test('does not call removeTiersForExperiment when there is splits', () => {
       db.factor.removeTiersForExperiment = mockResolve()
 
-      return target.updateFactorsForDesign(1, { rules: '{"groupedAttribute1":true}' }, testTx).then(() => {
+      return target.updateFactorsForDesign(1, { rules: { grouping: { min: 1, max: 10 } } }, testTx).then(() => {
         expect(db.factor.removeTiersForExperiment).not.toHaveBeenCalled()
       })
     })

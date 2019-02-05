@@ -6,7 +6,7 @@ import db from '../../src/db/DbManager'
 describe('LocationAssociationService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     expect.hasAssertions()

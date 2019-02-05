@@ -4,7 +4,7 @@ import AppError from '../../src/services/utility/AppError'
 
 describe('BaseValidator', () => {
   let target
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     expect.hasAssertions()

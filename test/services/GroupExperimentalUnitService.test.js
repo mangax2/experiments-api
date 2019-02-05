@@ -15,7 +15,7 @@ describe('GroupExperimentalUnitService', () => {
 
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     expect.hasAssertions()

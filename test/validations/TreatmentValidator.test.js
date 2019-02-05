@@ -4,7 +4,7 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('TreatmentValidator', () => {
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   let target
 
   beforeEach(() => {
@@ -154,7 +154,7 @@ describe('TreatmentValidator', () => {
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
-      return target.postValidate(targetObject).then(() => {
+      return target.postValidate(targetObject, {}, testTx).then(() => {
         expect(target.messages.length).toEqual(0)
       })
     })
@@ -165,7 +165,7 @@ describe('TreatmentValidator', () => {
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
-      return target.postValidate(targetObject).then(() => {
+      return target.postValidate(targetObject, {}, testTx).then(() => {
         expect(target.messages.length).toEqual(1)
       })
     })

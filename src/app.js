@@ -5,14 +5,14 @@ const swaggerDoc = require('./swagger/swagger.json')
 const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')
 const vaultUtil = require('./services/utility/VaultUtil')
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', (reason, p) => {
   // NOTE: THIS SHOULD BE A TEMPORARY METHOD UNTIL WE CAN FIGURE OUT HOW TO FIX ALL UNHANDLED!
   // THE MOST COMMON UNHANDLED IS Promise.all() WHERE THE CALLS ARE MAKING DB CALLS AND ONE FAILS
   // THIS CANCELS THE TRANSACTION AND CAUSES ANY OTHER CALLS TO TRY AND MAKE CALLS AGAINST
   // THE CLOSED CONNECTION. THAT THROWS UNHANDLED REJECTIONS.
 
   // IF WE DON'T HANDLE THESE REJECTIONS, FUTURE NODE VERSIONS WILL CRASH THE APP WHEN ONE HITS
-  console.error('Unhandled Rejection:', reason.message)
+  console.error('Unhandled Rejection at:', p, 'reason:', reason)
 })
 
 vaultUtil.configureDbCredentials(config.env, config.vaultConfig).then(() => {

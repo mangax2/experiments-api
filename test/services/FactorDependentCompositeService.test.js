@@ -11,7 +11,7 @@ import FactorLevelAssociationService from '../../src/services/FactorLevelAssocia
 describe('FactorDependentCompositeService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   kafkaProducerMocker()
 
   let verifyExperimentExistsOriginal

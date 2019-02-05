@@ -59,7 +59,7 @@ class ExperimentsService {
                 context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
-              .then(() => Promise.all(_.map(experiments, experiment => this.updateExperimentsRandomizationStrategyId(experiment.id, experiment.randomizationStrategyCode, true, context, tx))))
+              .then(() => tx.batch(_.map(experiments, experiment => this.updateExperimentsRandomizationStrategyId(experiment.id, experiment.randomizationStrategyCode, true, context, tx))))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
@@ -155,7 +155,7 @@ class ExperimentsService {
         promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
         // Dont Change the order of the promises
         promises.push(db.comment.findRecentByExperimentId(data.id, tx))
-        return Promise.all(promises).then(([owners, tags, comment]) => {
+        return tx.batch(promises).then(([owners, tags, comment]) => {
           data.owners = owners.user_ids
           data.ownerGroups = owners.group_ids
           data.reviewers = owners.reviewer_ids
@@ -207,7 +207,7 @@ class ExperimentsService {
                 promises.push(createExperimentCommentPromise)
               }
               promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, false, context, tx))
-              return Promise.all(promises)
+              return tx.batch(promises)
                 .then(() => {
                   experiment.id = id
                   const tags = this.assignExperimentIdToTags([experiment])
@@ -488,10 +488,11 @@ class ExperimentsService {
   }
 
   @setErrorCode('15O000')
-  getExperimentsByCriteria = ({ criteria, value, isTemplate }) => {
+  @Transactional('getExperimentsByCriteria')
+  getExperimentsByCriteria = ({ criteria, value, isTemplate }, tx) => {
     switch (criteria) {
       case 'owner':
-        return this.getExperimentsByUser(value, isTemplate)
+        return this.getExperimentsByUser(value, isTemplate, tx)
       default:
         return Promise.reject(AppError.badRequest('Invalid criteria provided', undefined, getFullErrorCode('15O001')))
     }
@@ -524,7 +525,7 @@ class ExperimentsService {
 
   @setErrorCode('15Q000')
   submitForReview = (experimentId, isTemplate, timestamp, context, tx) =>
-    Promise.all([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
+    tx.batch([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
       .then(([experiment]) => {
         if (!_.isNil(experiment.task_id)) {
           return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has already been submitted for review. To submit a new review, please cancel the existing review.`, null, getFullErrorCode('15Q001')))
@@ -576,7 +577,7 @@ class ExperimentsService {
 
   @setErrorCode('15R000')
   submitReview = (experimentId, isTemplate, status, comment, context, tx) =>
-    Promise.all([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.getUserPermissionsForExperiment(experimentId, context, tx)])
+    tx.batch([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.getUserPermissionsForExperiment(experimentId, context, tx)])
       .then(([experiment, permissions]) => {
         if (!permissions.includes('review')) {
           return Promise.reject(AppError.forbidden('Only reviewers are allowed to submit a review', null, getFullErrorCode('15R001')))
@@ -594,7 +595,7 @@ class ExperimentsService {
         }
 
         if (_.isNil(taskID)) {
-          return Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
+          return tx.batch([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
         }
 
         return PingUtil.getMonsantoHeader().then(headers =>
@@ -607,13 +608,13 @@ class ExperimentsService {
 
               return Promise.resolve()
             })
-            .then(() => Promise.all([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])),
+            .then(() => tx.batch([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])),
         )
       })
 
   @setErrorCode('15S000')
   cancelReview = (experimentId, isTemplate, context, tx) =>
-    Promise.all([this.getExperimentById(experimentId, isTemplate, context), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
+    tx.batch([this.getExperimentById(experimentId, isTemplate, context), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
       .then(([experiment]) => {
         const taskID = experiment.task_id
 

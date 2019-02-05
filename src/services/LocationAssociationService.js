@@ -17,7 +17,7 @@ class LocationAssociationService {
   @setErrorCode('1Y1000')
   @Transactional('associateSetsToLocations')
   associateSetsToLocations = (experimentId, groups, context, tx) =>
-    Promise.all([
+    tx.batch([
       this.experimentalUnitService
         .getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
       this.experimentService.getExperimentById(experimentId, false, context, tx),

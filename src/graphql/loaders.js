@@ -31,21 +31,21 @@ function createLoaders(tx) {
 
   const experimentsByCriteriaLoader =
     new DataLoader(args =>
-      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
+      tx.batch(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg, tx))))
 
   const groupByIdLoader =
     new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupsAndUnits(arg))))
+      tx.batch(_.map(args, arg =>
+        new GroupExperimentalUnitService().getGroupsAndUnits(arg, tx))))
 
   const groupBySetIdLoader =
     new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
+      tx.batch(_.map(args, arg =>
         new GroupExperimentalUnitService().getGroupAndUnitsBySetId(arg, tx))))
 
   const designSpecDetailByExperimentIdLoader =
     new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
+      tx.batch(_.map(args, arg =>
         new DesignSpecificationDetailService().getAdvancedParameters(arg, tx)
           .then(result => [result]))))
 

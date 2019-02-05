@@ -8,7 +8,7 @@ import AppUtil from '../../src/services/utility/AppUtil'
 describe('TreatmentDetailsService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   kafkaProducerMocker()
 
   let getFactorLevelsByExperimentIdNoExistenceCheckOriginal

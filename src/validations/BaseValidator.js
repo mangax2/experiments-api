@@ -8,6 +8,15 @@ const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
 const logger = log4js.getLogger('BaseValidator')
 
+/* istanbul ignore next */
+function promiseAllOrTransactionBatch(promises, optionalTransaction) {
+  if (_.isNil(optionalTransaction)) {
+    return Promise.all(promises)
+  }
+
+  return optionalTransaction.batch(promises)
+}
+
 // Error Codes 30XXXX
 // Decorator isn't used because it would be less helpful compared to the child validator's file code
 class BaseValidator {
@@ -25,10 +34,10 @@ class BaseValidator {
   }
 
   validateArray(objectArray, operationName, optionalTransaction) {
-    return Promise.all(
+    return promiseAllOrTransactionBatch(
       _.map(objectArray, element =>
         this.validateEntity(element, operationName, optionalTransaction),
-      )).then(() => {
+      ), optionalTransaction).then(() => {
       if (!this.hasErrors()) {
         return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
       }
@@ -125,11 +134,12 @@ class BaseValidator {
   }
 
   checkRIBatch(riBatchOfGroups, optionalTransaction) {
-    return Promise.all(
+    return promiseAllOrTransactionBatch(
       _.map(riBatchOfGroups, groupSet =>
         // Note: It is assumed that all elements in the group set are either referential integrity
         // checks, or business key uniqueness checks
         this.getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)),
+      optionalTransaction,
     )
   }
 

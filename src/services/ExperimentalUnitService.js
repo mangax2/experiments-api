@@ -179,8 +179,9 @@ class ExperimentalUnitService {
         })
         const unitsWithoutTreatmentId = _.filter(units, unit => !unit.treatmentId)
         if (unitsWithoutTreatmentId.length > 0) {
-          logger.error(`[[${context.requestId}]] Attempted to save the following invalid factor level combinations to Set Id ${setId}: ${JSON.stringify(_.map(unitsWithoutTreatmentId, 'factorLevelKey'))}`)
-          throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
+          const stringifiedCombinations = JSON.stringify(_.map(unitsWithoutTreatmentId, 'factorLevelKey'))
+          logger.error(`[[${context.requestId}]] Attempted to save the following invalid factor level combinations to Set Id ${setId}: ${stringifiedCombinations}`)
+          throw AppError.badRequest(`One or more entries had an invalid combination of factor level ids. The invalid combinations are: ${stringifiedCombinations}`, undefined, getFullErrorCode('17F002'))
         }
         _.forEach(units, (unit) => {
           delete unit.factorLevelKey

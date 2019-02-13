@@ -156,12 +156,12 @@ class TreatmentValidator extends SchemaValidator {
   getDuplicateBusinessKeyError = () => ({ message: 'Duplicate treatment number in request payload with same experiment id', errorCode: getFullErrorCode('3FA001') })
 
   @setErrorCode('3F4000')
-  getLevelsForExperiments = (experimentIds, tx) => Promise.all(
+  getLevelsForExperiments = (experimentIds, tx) => tx.batch(
     _.map(experimentIds,
       experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
 
   @setErrorCode('3F5000')
-  getAssociationsForExperiments = (experimentIds, tx) => Promise.all(
+  getAssociationsForExperiments = (experimentIds, tx) => tx.batch(
     _.map(experimentIds,
       experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
 
@@ -174,7 +174,7 @@ class TreatmentValidator extends SchemaValidator {
     const treatmentDTOsForEachExperiment =
       _.map(experimentIds, experimentId =>
         _.filter(treatmentDTOs, dto => dto.experimentId === experimentId))
-    return Promise.all([
+    return tx.batch([
       this.getLevelsForExperiments(experimentIds, tx),
       this.getAssociationsForExperiments(experimentIds, tx),
     ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => _.zip(

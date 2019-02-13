@@ -8,7 +8,7 @@ import SetEntryRemovalService from '../../src/services/prometheus/SetEntryRemova
 describe('ExperimentalUnitService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     expect.hasAssertions()
@@ -817,10 +817,10 @@ describe('ExperimentalUnitService', () => {
         batchRemove: jest.fn(() => Promise.resolve()),
       }
 
-      return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, {}).then(() => {
-        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, {})
-        expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, {})
-        expect(db.unit.batchRemove).toBeCalledWith([6], {})
+      return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, testTx).then(() => {
+        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
+        expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, testTx)
+        expect(db.unit.batchRemove).toBeCalledWith([6], testTx)
       })
     })
 
@@ -832,7 +832,7 @@ describe('ExperimentalUnitService', () => {
         batchRemove: jest.fn(() => Promise.resolve()),
       }
 
-      return target.saveToDb(9, [], [], [], [], {}).then(() => {
+      return target.saveToDb(9, [], [], [], testTx).then(() => {
         expect(db.unit.batchCreate).not.toBeCalled()
         expect(db.unit.batchUpdate).not.toBeCalled()
         expect(db.unit.batchRemove).not.toBeCalled()

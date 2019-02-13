@@ -117,7 +117,7 @@ class CapacityRequestService {
           syncPromises.push(db
             .experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
 
-          return Promise.all(syncPromises).then(() => AppUtil.createNoContentResponse())
+          return tx.batch(syncPromises).then(() => AppUtil.createNoContentResponse())
         })
     })
   }

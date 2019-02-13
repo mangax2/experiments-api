@@ -131,7 +131,7 @@ class GroupExperimentalUnitService {
       const designSpecPromise = db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)
       const refDesignSpecPromise = db.refDesignSpecification.all()
 
-      return Promise.all([designSpecPromise, refDesignSpecPromise])
+      return tx.batch([designSpecPromise, refDesignSpecPromise])
         .then(([designSpecs, refDesignSpecs]) => {
           const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
           const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
@@ -169,7 +169,7 @@ class GroupExperimentalUnitService {
   @setErrorCode('1FO000')
   @Transactional('getGroupsAndUnits')
   getGroupsAndUnits = (experimentId, tx) =>
-    Promise.all([
+    tx.batch([
       db.factor.findByExperimentId(experimentId, tx),
       db.factorLevel.findByExperimentId(experimentId, tx),
       db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
@@ -250,7 +250,7 @@ class GroupExperimentalUnitService {
     })
 
   @setErrorCode('1FP000')
-  getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => Promise.all(_.map(experimentIds,
+  getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => tx.batch(_.map(experimentIds,
     experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))
 
   @setErrorCode('1FQ000')
@@ -297,7 +297,7 @@ class GroupExperimentalUnitService {
       const { designSpecifications, units } = designSpecsAndUnits
       const numberOfLocations = _.max(_.map(units, 'location'))
       return this.unitValidator.validate(units, 'POST', tx)
-        .then(() => Promise.all([
+        .then(() => tx.batch([
           db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
           db.treatment.findAllByExperimentId(experimentId, tx),
         ]))
@@ -326,7 +326,7 @@ class GroupExperimentalUnitService {
             throw AppError.badRequest(`${unitsWithInvalidBlock.length} units have invalid block values.`, undefined, getFullErrorCode('1FV003'))
           }
 
-          return Promise.all([
+          return tx.batch([
             this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
             this.designSpecificationDetailService.saveDesignSpecifications(
               designSpecifications, experimentId, isTemplate, context, tx,
@@ -356,7 +356,7 @@ class GroupExperimentalUnitService {
         this.saveComparedUnits(experimentId, comparisonResults, context, tx))
 
   @setErrorCode('1FY000')
-  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => Promise.all([
+  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => tx.batch([
     this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
     this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx)])
 

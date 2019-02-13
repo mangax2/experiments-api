@@ -150,7 +150,7 @@ class FactorDependentCompositeService {
   @setErrorCode('1AJ000')
   @Transactional('getFactorsWithLevels')
   static getFactorsWithLevels(experimentId, tx) {
-    return Promise.all([
+    return tx.batch([
       FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
     ]).then(data => ({
@@ -289,7 +289,7 @@ class FactorDependentCompositeService {
   @setErrorCode('1AU000')
   @Transactional('getAllVariablesByExperimentId')
   getAllVariablesByExperimentId(experimentId, isTemplate, context, tx) {
-    return Promise.all(
+    return tx.batch(
       [
         ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context, tx),
         FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
@@ -379,7 +379,7 @@ class FactorDependentCompositeService {
   updateFactorsAndLevels = ({
     experimentId, allIndependentDTOs: allFactorDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx,
-  }) => Promise.all([
+  }) => tx.batch([
     this.updateFactors(
       experimentId, allFactorDTOs, allFactorTypes, context, tx),
     this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
@@ -433,7 +433,7 @@ class FactorDependentCompositeService {
     tx)
 
   @setErrorCode('1Ag000')
-  getCurrentDbEntities = ({ experimentId, tx }) => Promise.all([
+  getCurrentDbEntities = ({ experimentId, tx }) => tx.batch([
     FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
     FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),
@@ -460,7 +460,7 @@ class FactorDependentCompositeService {
   }
 
   @setErrorCode('1Ai000')
-  createFactorsAndLevels = params => Promise.all([
+  createFactorsAndLevels = params => params.tx.batch([
     this.createFactorsAndDependentLevels(params),
     this.createFactorLevels(
       params.factorIndependentLevelDTOsForCreate,
@@ -498,7 +498,7 @@ class FactorDependentCompositeService {
               ...inputsAndDbEntities,
               refIdToIdMap,
             }
-            return Promise.all([
+            return tx.batch([
               deleteFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
               this.createFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
             ])
@@ -508,7 +508,7 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1Ak000')
   persistIndependentAndDependentVariables = (
-    experimentId, variables, context, isTemplate, tx) => Promise.all([
+    experimentId, variables, context, isTemplate, tx) => tx.batch([
     this.persistIndependentAndAssociations(
       experimentId, variables.treatmentVariables,
       variables.treatmentVariableAssociations, context, tx),

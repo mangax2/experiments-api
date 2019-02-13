@@ -24,7 +24,7 @@ class TreatmentDetailsService {
   @setErrorCode('1Q1000')
   @Transactional('getAllTreatmentDetails')
   getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
-    return Promise.all([
+    return tx.batch([
       this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, context, tx),
       this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),

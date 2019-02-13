@@ -189,7 +189,7 @@ describe('CapacityRequestService', () => {
 
   describe('syncCapacityRequestDataWithExperiment', () => {
     const testContext = {}
-    const testTx = { tx: {} }
+    const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
     test('it rejects when security service rejects', () => {
       const securityService = {

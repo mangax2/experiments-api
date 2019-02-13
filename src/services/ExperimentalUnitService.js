@@ -156,7 +156,7 @@ class ExperimentalUnitService {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }
-      return Promise.all([
+      return tx.batch([
         db.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id, tx),
         db.experiments.find(setInfo.experiment_id, false, tx),
       ]).then(([combinationElements, experiment]) => {
@@ -268,7 +268,7 @@ class ExperimentalUnitService {
     if (unitsToBeUpdated.length > 0) {
       promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
     }
-    return Promise.all(promises)
+    return tx.batch(promises)
       .then(() => {
         if (unitsToBeDeleted.length > 0) {
           return db.unit.batchRemove(unitsToBeDeleted, tx)

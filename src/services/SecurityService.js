@@ -68,16 +68,10 @@ class SecurityService {
         })
     })
 
-  @setErrorCode('1O3000')
-  @Transactional('permissionsCheckForExperiments')
-  permissionsCheckForExperiments(ids, context, tx) {
-    return Promise.all(_.map(ids, id => this.permissionsCheck(id, context, tx)))
-  }
-
   @setErrorCode('1O4000')
   getUserPermissionsForExperiment(id, context, tx) {
     const userPermissions = []
-    return Promise.all([
+    return tx.batch([
       this.ownerService.getOwnersByExperimentId(id, tx),
       this.getGroupsByUserId(context.userId)]).then((data) => {
       if (data[0] && data[1]) {

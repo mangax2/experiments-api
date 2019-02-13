@@ -7,7 +7,7 @@ import db from '../../src/db/DbManager'
 
 describe('SecurityService', () => {
   let target
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   const testContext = { userId: 'AK' }
 
   beforeEach(() => {
@@ -90,7 +90,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -103,7 +103,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -116,7 +116,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['reviewer_1', 'reviewer_2'])
       const expectedResult = ['review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -131,7 +131,7 @@ describe('SecurityService', () => {
         ['group_1', 'group_2', 'group_3', 'reviewer_1', 'reviewer_3'])
       const expectedResult = ['write', 'review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -142,7 +142,7 @@ describe('SecurityService', () => {
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).catch((data) => {
         expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
@@ -156,7 +156,7 @@ describe('SecurityService', () => {
         error: 'error',
       })
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).catch((data) => {
         expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
@@ -169,7 +169,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -181,7 +181,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = []
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -190,7 +190,7 @@ describe('SecurityService', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve(null)
       const expectedResult = []
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
-      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }, testTx).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -251,18 +251,6 @@ describe('SecurityService', () => {
       expect(() => target.permissionsCheck(1, {}, true, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing', undefined, '1O1003')
       expect(db.experiments.find).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('permissionsCheckForExperiments', () => {
-    test('calls permissionsCheck for each experiment', () => {
-      target.permissionsCheck = mockResolve()
-      db.experiments.find = mockResolve({})
-      return target.permissionsCheckForExperiments([1, 2], testContext, testTx).then(() => {
-        expect(target.permissionsCheck).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(target.permissionsCheck).toHaveBeenLastCalledWith(2, testContext, testTx)
-        expect(target.permissionsCheck).toHaveBeenCalledTimes(2)
-      })
     })
   })
 })

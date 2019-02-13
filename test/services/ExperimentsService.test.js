@@ -15,7 +15,7 @@ jest.mock('../../src/services/utility/HttpUtil')
 describe('ExperimentsService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   kafkaProducerMocker()
 
   beforeEach(() => {
@@ -1349,8 +1349,8 @@ describe('ExperimentsService', () => {
       target.getExperimentsByUser = mockResolve()
       AppError.badRequest = mock()
 
-      return target.getExperimentsByCriteria({ criteria: 'owner', value: 'testUser', isTemplate: true }).then(() => {
-        expect(target.getExperimentsByUser).toBeCalledWith('testUser', true)
+      return target.getExperimentsByCriteria({ criteria: 'owner', value: 'testUser', isTemplate: true }, testTx).then(() => {
+        expect(target.getExperimentsByUser).toBeCalledWith('testUser', true, testTx)
         expect(AppError.badRequest).not.toBeCalled()
       })
     })
@@ -1359,7 +1359,7 @@ describe('ExperimentsService', () => {
       target.getExperimentsByUser = mockResolve()
       AppError.badRequest = mock()
 
-      return target.getExperimentsByCriteria({ criteria: 'badCriteria', value: 'testUser', isTemplate: true }).catch(() => {
+      return target.getExperimentsByCriteria({ criteria: 'badCriteria', value: 'testUser', isTemplate: true }, testTx).catch(() => {
         expect(target.getExperimentsByUser).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('Invalid criteria provided', undefined, '15O001')
         done()

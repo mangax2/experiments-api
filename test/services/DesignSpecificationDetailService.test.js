@@ -12,7 +12,7 @@ jest.mock('../../src/services/utility/PingUtil')
 describe('DesignSpecificationDetailService', () => {
   let target
   const testContext = {}
-  const testTx = { tx: {} }
+  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   kafkaProducerMocker()
 
   beforeEach(() => {
@@ -159,7 +159,7 @@ describe('DesignSpecificationDetailService', () => {
         id: 3,
       }])
 
-      return target.getAdvancedParameters(1, false, testTx).then((result) => {
+      return target.getAdvancedParameters(1, testTx).then((result) => {
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(result).toEqual({

@@ -63,8 +63,8 @@ class DesignSpecificationDetailService {
   @setErrorCode('134000')
   @Transactional('getAdvancedParameters')
   getAdvancedParameters = (experimentId, tx) =>
-    Promise.all([
-      db.refDesignSpecification.all(),
+    tx.batch([
+      db.refDesignSpecification.all(tx),
       db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
     ]).then((results) => {
       const mappedDesignSpecs = {}
@@ -86,7 +86,7 @@ class DesignSpecificationDetailService {
   @Transactional('saveDesignSpecifications')
   saveDesignSpecifications = (designSpecifications, experimentId, isTemplate, context, tx) =>
     this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
-      .then(() => Promise.all([
+      .then(() => tx.batch([
         db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
         db.refDesignSpecification.all(),
       ]))
@@ -116,7 +116,7 @@ class DesignSpecificationDetailService {
         const inflectedUpdates = inflector.transform(updates, 'camelizeLower', true)
         const idsToDelete = _.map(_.filter(deletes, d => d.ref_design_spec_id !== refMapper.randomizationstrategyid), 'id')
 
-        return Promise.all([
+        return tx.batch([
           this.deleteDesignSpecificationDetails(idsToDelete, context, tx),
           this.batchUpdateDesignSpecificationDetails(inflectedUpdates, context, tx),
           this.batchCreateDesignSpecificationDetails(adds, context, tx),

@@ -4,7 +4,7 @@ schema {
 
 enum DateFormat {
     full
-    MMDDYYYY
+    YYYYMM
 }
 
 type AuditInfo {

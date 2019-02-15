@@ -58,7 +58,7 @@ function LogQuery(request, context, logger) {
 }
 
 function formatDate(args, date) {
-  if (args.format === 'MMDDYYYY') {
+  if (args.format === 'YYYYMM') {
     return `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}`
   }
   return date

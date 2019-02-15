@@ -58,10 +58,7 @@ function LogQuery(request, context, logger) {
 }
 
 function formatDate(args, date) {
-  if (args.format === 'YYYYMM') {
-    return `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}`
-  }
-  return date
+  return args.format === 'YYYYMM' ? new Date(date).toISOString().slice(0, 7) : date
 }
 
 function graphqlMiddlewareFunction(schema) {

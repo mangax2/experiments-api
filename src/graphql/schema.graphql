@@ -2,10 +2,15 @@ schema {
   query: Query
 }
 
+enum DateFormat {
+    full
+    MMDDYYYY
+}
+
 type AuditInfo {
   createdUserId: String
   modifiedUserId: String
-  createdDate: String
+  createdDate(format: DateFormat = full): String
   modifiedDate: String
 }
 

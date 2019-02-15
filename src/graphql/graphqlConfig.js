@@ -57,6 +57,13 @@ function LogQuery(request, context, logger) {
   }
 }
 
+function formatDate(args, date) {
+  if (args.format === 'YYYYMM') {
+    return `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}`
+  }
+  return date
+}
+
 function graphqlMiddlewareFunction(schema) {
   return function (request, response) {
     const logger = log4js.getLogger('experiments-api-graphql')
@@ -68,7 +75,7 @@ function graphqlMiddlewareFunction(schema) {
         context: {
           loaders: loaders.createLoaders(tx),
           getAuditInfo: entity => ({
-            createdDate: entity.created_date,
+            createdDate: args => formatDate(args, entity.created_date),
             createdUserId: entity.created_user_id,
             modifiedDate: entity.modified_date,
             modifiedUserId: entity.modified_user_id,

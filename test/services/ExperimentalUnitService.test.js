@@ -675,7 +675,7 @@ describe('ExperimentalUnitService', () => {
         expect(db.experiments.find).toBeCalledWith(7, false, testTx)
         expect(db.treatment.batchFind).not.toBeCalled()
         expect(target.mergeSetEntriesToUnits).not.toBeCalled()
-        expect(AppError.badRequest).toBeCalledWith('One or more entries had an invalid set of factor level ids.', undefined, '17F002')
+        expect(AppError.badRequest).toBeCalledWith('One or more entries had an invalid combination of factor level ids. The invalid combinations are: [""]', undefined, '17F002')
         expect(err).toBe(testError)
       })
     })

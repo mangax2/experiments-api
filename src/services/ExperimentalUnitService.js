@@ -173,13 +173,19 @@ class ExperimentalUnitService {
         const units = _.map(experimentalUnits, (unit) => {
           const newUnit = _.pick(unit, 'rep', 'setEntryId', 'location')
           const factorLevelIds = unit.factorLevelIds || []
-          const factorLevelKey = factorLevelIds.sort().join(',')
-          newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[factorLevelKey]
+          newUnit.factorLevelKey = factorLevelIds.sort().join(',')
+          newUnit.treatmentId = factorLevelIdsToTreatmentIdMapper[newUnit.factorLevelKey]
           return newUnit
         })
-        if (_.find(units, unit => !unit.treatmentId)) {
-          throw AppError.badRequest('One or more entries had an invalid set of factor level ids.', undefined, getFullErrorCode('17F002'))
+        const unitsWithoutTreatmentId = _.filter(units, unit => !unit.treatmentId)
+        if (unitsWithoutTreatmentId.length > 0) {
+          const stringifiedCombinations = JSON.stringify(_.map(unitsWithoutTreatmentId, 'factorLevelKey'))
+          logger.error(`[[${context.requestId}]] Attempted to save the following invalid factor level combinations to Set Id ${setId}: ${stringifiedCombinations}`)
+          throw AppError.badRequest(`One or more entries had an invalid combination of factor level ids. The invalid combinations are: ${stringifiedCombinations}`, undefined, getFullErrorCode('17F002'))
         }
+        _.forEach(units, (unit) => {
+          delete unit.factorLevelKey
+        })
         const treatmentIdsUsed = _.uniq(_.map(units, 'treatmentId'))
         return db.treatment.batchFind(treatmentIdsUsed, tx).then((treatments) => {
           const treatmentWithMismatchedBlock = _.find(treatments,

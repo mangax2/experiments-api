@@ -15,6 +15,7 @@ import SecurityService from './SecurityService'
 import DuplicationService from './DuplicationService'
 import TagService from './TagService'
 import FactorService from './FactorService'
+import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -30,6 +31,7 @@ class ExperimentsService {
     this.securityService = new SecurityService()
     this.duplicationService = new DuplicationService()
     this.factorService = new FactorService()
+    this.analysisModelService = new AnalysisModelService()
   }
 
   @setErrorCode('151000')
@@ -52,8 +54,15 @@ class ExperimentsService {
               experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerIds: reviewers,
             }
           })
-
-          return this.ownerService.batchCreateOwners(experimentsOwners, context, tx).then(() => {
+          const analysisModelInfo = _.map(experiments, exp => ({
+            experimentId: exp.id,
+            analysisModelCode: exp.analysisModelCode,
+            analysisModelSubType: exp.analysisModelSubType,
+          }))
+          const promises = []
+          promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
+          promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
+          return Promise.all(promises).then(() => {
             const capacityRequestPromises = !isTemplate ?
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
                 context) : []
@@ -153,9 +162,9 @@ class ExperimentsService {
 
         promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
         promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
-        // Dont Change the order of the promises
         promises.push(db.comment.findRecentByExperimentId(data.id, tx))
-        return tx.batch(promises).then(([owners, tags, comment]) => {
+        promises.push(this.analysisModelService.getAnalysisModelByExperimentId(id, tx))
+        return tx.batch(promises).then(([owners, tags, comment, analysisModel]) => {
           data.owners = owners.user_ids
           data.ownerGroups = owners.group_ids
           data.reviewers = owners.reviewer_ids
@@ -163,6 +172,7 @@ class ExperimentsService {
           if (!_.isNil(comment)) {
             data.comment = comment.description
           }
+          data.analysisModel = `${analysisModel.analysis_model_code} ${analysisModel.analysis_model_sub_type}`
           return data
         })
       }
@@ -199,9 +209,16 @@ class ExperimentsService {
                 groupIds: trimmedOwnerGroups,
                 reviewerIds: trimmedReviewers,
               }
+              const analysisModelInfo = {
+                analysisModelCode: experiment.analysisModelCode,
+                analysisModelSubType: experiment.analysisModelSubType,
+                experimentId: id,
+              }
               const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
+              const updateAnalysisModelService = this.analysisModelService.batchUpdateAnalysisModel([analysisModelInfo], context, tx)
               const promises = []
               promises.push(updateOwnerPromise)
+              promises.push(updateAnalysisModelService)
               if (experiment.comment && experiment.status === 'REJECTED') {
                 const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)

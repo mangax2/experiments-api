@@ -38,6 +38,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -85,6 +86,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       AppError.badRequest = mock()
@@ -138,6 +140,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -159,6 +162,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -180,6 +184,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject(error)
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -202,6 +207,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockReject(error)
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -224,6 +230,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -244,6 +251,7 @@ describe('ExperimentsService', () => {
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.tagService.batchCreateTags = mock()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -515,14 +523,31 @@ describe('ExperimentsService', () => {
         description: 'rejected',
       })
       target.tagService.getTagsByExperimentId = mockResolve([])
-      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['KMCCL'],
+        group_ids: ['cosmos-dev-team'],
+        reviewer_ids: ['cosmos-admin'],
+      })
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
+        analysis_model_code: 'RCB',
+        analysis_model_sub_type: 'BLUE',
+      })
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ status: 'REJECTED', comment: 'rejected', tags: [] })
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual({
+          analysisModel: 'RCB BLUE',
+          comment: 'rejected',
+          ownerGroups: ['cosmos-dev-team'],
+          owners: ['KMCCL'],
+          reviewers: ['cosmos-admin'],
+          status: 'REJECTED',
+          tags: [],
+        })
       })
     })
 
@@ -532,14 +557,32 @@ describe('ExperimentsService', () => {
       })
       db.comment.findRecentByExperimentId = mockResolve(undefined)
       target.tagService.getTagsByExperimentId = mockResolve([])
-      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['KMCCL'],
+        group_ids: ['cosmos-dev-team'],
+        reviewer_ids: ['cosmos-admin'],
+      })
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
+        analysis_model_code: 'RCB',
+        analysis_model_sub_type: 'BLUE',
+      })
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ status: 'REJECTED', tags: [] })
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual(
+          {
+            analysisModel: 'RCB BLUE',
+            ownerGroups: ['cosmos-dev-team'],
+            owners: ['KMCCL'],
+            reviewers: ['cosmos-admin'],
+            status: 'REJECTED',
+            tags: [],
+          },
+        )
       })
     })
 
@@ -548,11 +591,13 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockReject(error)
       target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -562,11 +607,13 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockResolve([])
       target.ownerService.getOwnersByExperimentId = mockReject(error)
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -609,6 +656,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {
@@ -667,6 +715,7 @@ describe('ExperimentsService', () => {
       target.tagService.saveTags = mock()
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then((data) => {
@@ -697,6 +746,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockReject(error)
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {

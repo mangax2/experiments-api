@@ -15,10 +15,12 @@ class analysisModelRepo {
     ' analysis_model WHERE' +
     ' experiment_id = $1', experimentId)
 
+  @setErrorCode('5N9000')
+  removeByExperimentId = (id, tx = this.rep) => tx.oneOrNone('DELETE FROM analysis_model WHERE experiment_id = $1 RETURNING id', id)
+
 
   @setErrorCode('5N2000')
   batchCreate = (analysisModelInfo, context, tx = this.rep) =>{
-    console.log('analysisModelInfo in batch create',analysisModelInfo)
     return tx.batch(
     analysisModelInfo.map(
       analysisModel => tx.one(

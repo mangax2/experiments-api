@@ -54,14 +54,16 @@ class ExperimentsService {
               experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerIds: reviewers,
             }
           })
+          const promises = []
+          promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
           const analysisModelInfo = _.map(experiments, exp => ({
             experimentId: exp.id,
             analysisModelCode: exp.analysisModelCode,
             analysisModelSubType: exp.analysisModelSubType,
           }))
-          const promises = []
-          promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
-          promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
+          if (analysisModelInfo.analysisModelCode) {
+            promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
+          }
           return Promise.all(promises).then(() => {
             const capacityRequestPromises = !isTemplate ?
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
@@ -172,7 +174,10 @@ class ExperimentsService {
           if (!_.isNil(comment)) {
             data.comment = comment.description
           }
-          data.analysisModel = `${analysisModel.analysis_model_code} ${analysisModel.analysis_model_sub_type}`
+          if (analysisModel) {
+            data.analysisModelCode = analysisModel.analysis_model_code
+            data.analysisModelSubType = analysisModel.analysis_model_sub_type
+          }
           return data
         })
       }
@@ -209,16 +214,27 @@ class ExperimentsService {
                 groupIds: trimmedOwnerGroups,
                 reviewerIds: trimmedReviewers,
               }
-              const analysisModelInfo = {
-                analysisModelCode: experiment.analysisModelCode,
-                analysisModelSubType: experiment.analysisModelSubType,
-                experimentId: id,
-              }
               const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
-              const updateAnalysisModelService = this.analysisModelService.batchUpdateAnalysisModel([analysisModelInfo], context, tx)
               const promises = []
-              promises.push(updateOwnerPromise)
+              let updateAnalysisModelService = null
+              if (experiment.analysisModelCode) {
+                const analysisModelInfo = {
+                  analysisModelCode: experiment.analysisModelCode,
+                  analysisModelSubType: experiment.analysisModelSubType,
+                  experimentId: id,
+                }
+                this.analysisModelService.getAnalysisModelByExperimentId(id, tx).then((res) => {
+                  if (!res) {
+                    updateAnalysisModelService = this.analysisModelService.batchCreateAnalysisModel([analysisModelInfo], context, tx)
+                  }
+                  updateAnalysisModelService = this.analysisModelService.batchUpdateAnalysisModel([analysisModelInfo], context, tx)
+                })
+              } else {
+                updateAnalysisModelService = this.analysisModelService.deleteAnalysisModelByExperimentId(id)
+              }
               promises.push(updateAnalysisModelService)
+              promises.push(updateOwnerPromise)
+
               if (experiment.comment && experiment.status === 'REJECTED') {
                 const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)

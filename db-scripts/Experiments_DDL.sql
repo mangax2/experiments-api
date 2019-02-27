@@ -407,6 +407,31 @@ CREATE TABLE group_value
   CONSTRAINT group_value_ak_1 UNIQUE (factor_name, factor_level, group_id)
 );
 
+--analysis_model table
+CREATE TABLE public.analysis_model
+(
+    id integer NOT NULL DEFAULT nextval('analysis_model_id_seq'::regclass),
+    experiment_id integer NOT NULL,
+    analysis_model_code character varying COLLATE pg_catalog."default" NOT NULL,
+    analysis_model_sub_type character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT analysis_model_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.analysis_model
+    OWNER to experiments_user_s;
+
+GRANT DELETE, INSERT, UPDATE ON TABLE public.analysis_model TO auto_sql_user;
+
+GRANT INSERT, UPDATE, DELETE ON TABLE public.analysis_model TO experiments_dev_app_user;
+
+GRANT ALL ON TABLE public.analysis_model TO experiments_user_s;
+
+GRANT SELECT ON TABLE public.analysis_model TO PUBLIC;
+
 
 
 -- Drop Hypothesis Table

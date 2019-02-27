@@ -16,6 +16,10 @@ class AnalysisModelService {
   @Transactional('getAnalysisModelByExperimentId')
   getAnalysisModelByExperimentId = (id, tx) => db.analysisModel.findByExperimentId(id, tx)
 
+  @setErrorCode('1W3000')
+  @Transactional('deleteAnalysisModelById')
+  deleteAnalysisModelByExperimentId = (id, tx) => db.analysisModel.removeByExperimentId(id, tx)
+
   @setErrorCode('1W4000')
   @Transactional('batchUpdateAnalysisModel')
   batchUpdateAnalysisModel=(analysisModelInfo, context, tx) =>

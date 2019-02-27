@@ -56,6 +56,16 @@ describe('AnalysisModelService', () => {
     })
   })
 
+  describe('deleteAnalysisModelByExperimentId', () => {
+    test('deleted AnalysisModel for an experimentId', () => {
+      db.analysisModel.removeByExperimentId = mockResolve(1)
+      return target.deleteAnalysisModelByExperimentId(1, testTx).then((data) => {
+        expect(db.analysisModel.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual(1)
+      })
+    })
+  })
+
   describe('batchUpdateAnalysisModel', () => {
     test('updates AnalysisModel for experiments', () => {
       db.analysisModel.batchUpdate = mockResolve({})

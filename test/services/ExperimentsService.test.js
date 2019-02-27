@@ -605,12 +605,11 @@ describe('ExperimentsService', () => {
       target.tagService.getTagsByExperimentId = mockResolve([])
       target.ownerService.getOwnersByExperimentId = mockReject(error)
       target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
-
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
+        target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
         expect(err).toEqual(error)
       })
     })
@@ -655,9 +654,10 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
       target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {
-        owners: ['KMCCL '],
+        owners: ['KMCCL'],
         ownerGroups: ['group1'],
         reviewers: ['group2'],
         status: 'REJECTED',
@@ -667,7 +667,7 @@ describe('ExperimentsService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -677,7 +677,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -693,7 +693,7 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -714,6 +714,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
       target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -840,6 +841,7 @@ describe('ExperimentsService', () => {
       target.ownerService.batchUpdateOwners = mockResolve()
       target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)

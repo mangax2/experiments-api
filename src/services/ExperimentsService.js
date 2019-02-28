@@ -56,14 +56,18 @@ class ExperimentsService {
           })
           const promises = []
           promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
-          const analysisModelInfo = _.map(experiments, exp => ({
-            experimentId: exp.id,
-            analysisModelCode: exp.analysisModelCode,
-            analysisModelSubType: exp.analysisModelSubType,
+          const analysisModelInfo = _.compact(_.map(experiments, (exp) => {
+            if (exp.analysisModelCode) {
+              const obj = {
+                experimentId: exp.id,
+                analysisModelCode: exp.analysisModelCode,
+                analysisModelSubType: exp.analysisModelSubType,
+              }
+              return obj
+            }
+            return null
           }))
-          if (analysisModelInfo.analysisModelCode) {
-            promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
-          }
+          promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
           return Promise.all(promises).then(() => {
             const capacityRequestPromises = !isTemplate ?
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,

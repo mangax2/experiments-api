@@ -176,6 +176,69 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('calls validate, batchCreates an analysis model', () => {
+      target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
+      db.experiments.batchCreate = mockResolve([{
+        id: 1,
+        owners: ['KMCCL'],
+        analysisModelCode: 'RCB',
+        analysisModelSubType: 'BLUE',
+      }])
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      AppUtil.createPostResponse = mock()
+      const experiments = [{
+        id: 1,
+        analysisModelCode: 'RCB',
+        analysisModelSubType: 'BLUE',
+      }]
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
+
+      return target.batchCreateExperiments(experiments, testContext, false, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ analysisModelCode: 'RCB', analysisModelSubType: 'BLUE', id: 1 }], 'POST', testTx)
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([{ analysisModelCode: 'RCB', analysisModelSubType: 'BLUE', experimentId: 1 }], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL'],
+          analysisModelCode: 'RCB',
+          analysisModelSubType: 'BLUE',
+        }])
+      })
+    })
+
+    test('calls validate, does not create analysis model  when it is external ', () => {
+      target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
+      db.experiments.batchCreate = mockResolve([{
+        id: 1,
+        owners: ['KMCCL'],
+      }])
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      const experiments = [{
+        id: 1,
+      }]
+      AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
+
+      return target.batchCreateExperiments(experiments, testContext, false, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ id: 1 }], 'POST', testTx)
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL'],
+        }])
+      })
+    })
+
+
     test('rejects when batchCreateTags fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()

@@ -414,7 +414,7 @@ CREATE TABLE public.analysis_model
     id integer NOT NULL DEFAULT nextval('analysis_model_id_seq'::regclass),
     experiment_id integer NOT NULL,
     analysis_model_code character varying COLLATE pg_catalog."default" NOT NULL,
-    analysis_model_sub_type character varying COLLATE pg_catalog."default" NOT NULL,
+    analysis_model_sub_type character varying COLLATE pg_catalog."default",
     CONSTRAINT analysis_model_pkey PRIMARY KEY (id),
     CONSTRAINT experiment_uniq_key UNIQUE (experiment_id),
     CONSTRAINT experiment_id FOREIGN KEY (experiment_id)

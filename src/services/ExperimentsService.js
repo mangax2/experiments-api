@@ -68,7 +68,7 @@ class ExperimentsService {
             return null
           }))
           promises.push(this.analysisModelService.batchCreateAnalysisModel(analysisModelInfo, context, tx))
-          return Promise.all(promises).then(() => {
+          return tx.batch(promises).then(() => {
             const capacityRequestPromises = !isTemplate ?
               CapacityRequestService.batchAssociateExperimentsToCapacityRequests(experiments,
                 context) : []

@@ -68,6 +68,7 @@ function createLoaders(tx) {
   const templateByIdLoader = createDataLoader(templateBatchLoaderCallback)
   const treatmentByIdLoader = createDataLoader(db.treatment.batchFind)
   const unitSpecDetailByIdLoader = createDataLoader(db.unitSpecificationDetail.batchFind)
+  const analysisModelByIdLoader = createDataLoader(db.analysisModel.batchFindByExperimentIds)
 
   // Loaders that load by parent ID.  These prime the caches of loaders that load by entity ID.
   function createLoaderToPrimeCacheOfChildren(dbCallback, loaderPrimeTarget) {
@@ -114,6 +115,8 @@ function createLoaders(tx) {
 
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
+  const analysisModelByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
+    db.analysisModel.batchFindByExperimentIds, analysisModelByIdLoader)
 
   return {
     associatedFactorLevel: associatedFactorLevelsByNestedFactorLevelIds,
@@ -153,6 +156,8 @@ function createLoaders(tx) {
     unitsBySetId: createDataLoader(db.unit.batchFindAllBySetIds),
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,
+    analysisModel: analysisModelByIdLoader,
+    analysisModelByExperimentIds: analysisModelByExperimentIdLoader,
   }
 }
 

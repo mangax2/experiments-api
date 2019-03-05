@@ -81,6 +81,8 @@ export default {
       context.loaders.unitSpecDetailByExperimentIds.load(entity.id),
     units: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(entity.id),
+    analysisModel: (entity, args, context) =>
+      context.loaders.analysisModelByExperimentIds.load(entity.id),
   },
   ExperimentalSet: {
     groupId: property('id'),
@@ -96,6 +98,8 @@ export default {
       context.getAuditInfo(entity),
     owners: (entity, args, context) =>
       context.loaders.ownersByExperimentIds.load(entity.id),
+    analysisModel: (entity, args, context) =>
+      context.loaders.analysisModelByExperimentIds.load(entity.id),
   },
   TreatmentVariable: {
     experimentId: property('experiment_id'),
@@ -155,5 +159,10 @@ export default {
       (entity.ref_unit_spec_id
         ? context.loaders.refUnitSpec.load(entity.ref_unit_spec_id)
         : Promise.resolve(null)),
+  },
+  AnalysisModel: {
+    experimentId: property('experiment_id'),
+    analysisModelCode: property('analysis_model_code'),
+    analysisModelSubType: property('analysis_model_sub_type'),
   },
 }

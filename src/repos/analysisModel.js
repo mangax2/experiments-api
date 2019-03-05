@@ -1,4 +1,5 @@
 const { setErrorCode } = require('@monsantoit/error-decorator')()
+import _ from 'lodash'
 
 // Error Codes 5NXXXX
 class analysisModelRepo {
@@ -14,6 +15,14 @@ class analysisModelRepo {
     ' analysis_model_code, analysis_model_sub_type FROM' +
     ' analysis_model WHERE' +
     ' experiment_id = $1', experimentId)
+
+  @setErrorCode('5N4000')
+  batchFindByExperimentIds = (ids, tx = this.rep) => tx.any('SELECT * FROM "analysis_model" WHERE' +
+    ' experiment_id IN' +
+    ' ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'experiment_id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5N9000')
   removeByExperimentId = (id, tx = this.rep) => tx.oneOrNone('DELETE FROM analysis_model WHERE experiment_id = $1 RETURNING id', id)

@@ -162,6 +162,8 @@ export default {
   },
   AnalysisModel: {
     experimentId: property('experiment_id'),
+    auditInfo: (entity, args, context) =>
+      context.getAuditInfo(entity),
     analysisModelType: property('analysis_model_type'),
     analysisModelSubType: property('analysis_model_sub_type'),
   },

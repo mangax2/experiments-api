@@ -12,7 +12,7 @@ class analysisModelRepo {
 
   @setErrorCode('5N1000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT experiment_id,' +
-    ' analysis_model_code, analysis_model_sub_type FROM' +
+    ' analysis_model_type, analysis_model_sub_type FROM' +
     ' analysis_model WHERE' +
     ' experiment_id = $1', experimentId)
 
@@ -30,16 +30,20 @@ class analysisModelRepo {
 
   @setErrorCode('5N2000')
   batchCreate = (analysisModelInfo, context, tx = this.rep) =>{
+    console.log('analysisModelInfo',analysisModelInfo,context.userId)
     return tx.batch(
     analysisModelInfo.map(
-      analysisModel => tx.one(
-        'insert into analysis_model(experiment_id, analysis_model_code,analysis_model_sub_type)' +
-        ' values($1, $2, $3 )  RETURNING *',
+      analysisModel => {
+        return tx.one(
+        'insert into' +
+          ' analysis_model(experiment_id,analysis_model_type,analysis_model_sub_type,created_user_id,created_date,modified_user_id,modified_date) values($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP )' +
+        '  RETURNING *',
          [analysisModel.experimentId,
-          analysisModel.analysisModelCode,
+          analysisModel.analysisModelType,
           analysisModel.analysisModelSubType,
+           context.userId,
           ],
-      ),
+      )},
     ),
   )
 }
@@ -49,10 +53,10 @@ class analysisModelRepo {
     return tx.batch(
       analysisModelInfo.map(
       analysisModel => tx.oneOrNone(
-        'UPDATE analysis_model SET (analysis_model_code,analysis_model_sub_type)' +
-        ' = ($1, $2 ) WHERE experiment_id=$3 RETURNING *',
-        [analysisModel.analysisModelCode,
+        'UPDATE analysis_model SET (analysis_model_type,analysis_model_sub_type,modified_user_id, modified_date)= ($1, $2, $3, CURRENT_TIMESTAMP ) WHERE experiment_id=$4 RETURNING *',
+        [analysisModel.analysisModelType,
           analysisModel.analysisModelSubType,
+          context.userId,
           analysisModel.experimentId,
         ],
       )

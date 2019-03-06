@@ -201,7 +201,7 @@ type UnitSpecification {
 type AnalysisModel {
   id: Int
   experimentId: Int
-  analysisModelCode: String
+  analysisModelType: String
   analysisModelSubType: String
   }
 

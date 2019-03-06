@@ -57,10 +57,10 @@ class ExperimentsService {
           const promises = []
           promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
           const analysisModelInfo = _.compact(_.map(experiments, (exp) => {
-            if (exp.analysisModelCode) {
+            if (exp.analysisModelType) {
               const obj = {
                 experimentId: exp.id,
-                analysisModelCode: exp.analysisModelCode,
+                analysisModelType: exp.analysisModelType,
                 analysisModelSubType: exp.analysisModelSubType,
               }
               return obj
@@ -179,7 +179,7 @@ class ExperimentsService {
             data.comment = comment.description
           }
           if (analysisModel) {
-            data.analysisModelCode = analysisModel.analysis_model_code
+            data.analysisModelType = analysisModel.analysis_model_type
             data.analysisModelSubType = analysisModel.analysis_model_sub_type
           }
           return data
@@ -221,9 +221,9 @@ class ExperimentsService {
               const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
               const promises = []
               let updateAnalysisModelService = null
-              if (experiment.analysisModelCode) {
+              if (experiment.analysisModelType) {
                 const analysisModelInfo = {
-                  analysisModelCode: experiment.analysisModelCode,
+                  analysisModelType: experiment.analysisModelType,
                   analysisModelSubType: experiment.analysisModelSubType,
                   experimentId: id,
                 }

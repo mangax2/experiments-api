@@ -162,7 +162,7 @@ export default {
   },
   AnalysisModel: {
     experimentId: property('experiment_id'),
-    analysisModelCode: property('analysis_model_code'),
+    analysisModelType: property('analysis_model_type'),
     analysisModelSubType: property('analysis_model_sub_type'),
   },
 }

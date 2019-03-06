@@ -182,7 +182,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mockResolve([{
         id: 1,
         owners: ['KMCCL'],
-        analysisModelCode: 'RCB',
+        analysisModelType: 'RCB',
         analysisModelSubType: 'BLUE',
       }])
       target.assignExperimentIdToTags = mock()
@@ -193,18 +193,18 @@ describe('ExperimentsService', () => {
       AppUtil.createPostResponse = mock()
       const experiments = [{
         id: 1,
-        analysisModelCode: 'RCB',
+        analysisModelType: 'RCB',
         analysisModelSubType: 'BLUE',
       }]
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
 
       return target.batchCreateExperiments(experiments, testContext, false, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{ analysisModelCode: 'RCB', analysisModelSubType: 'BLUE', id: 1 }], 'POST', testTx)
-        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([{ analysisModelCode: 'RCB', analysisModelSubType: 'BLUE', experimentId: 1 }], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{ analysisModelType: 'RCB', analysisModelSubType: 'BLUE', id: 1 }], 'POST', testTx)
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([{ analysisModelType: 'RCB', analysisModelSubType: 'BLUE', experimentId: 1 }], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL'],
-          analysisModelCode: 'RCB',
+          analysisModelType: 'RCB',
           analysisModelSubType: 'BLUE',
         }])
       })
@@ -592,7 +592,7 @@ describe('ExperimentsService', () => {
         reviewer_ids: ['cosmos-admin'],
       })
       target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
-        analysis_model_code: 'RCB',
+        analysis_model_type: 'RCB',
         analysis_model_sub_type: 'BLUE',
       })
 
@@ -603,7 +603,7 @@ describe('ExperimentsService', () => {
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual({
-          analysisModelCode: 'RCB',
+          analysisModelType: 'RCB',
           analysisModelSubType: 'BLUE',
           comment: 'rejected',
           ownerGroups: ['cosmos-dev-team'],
@@ -811,13 +811,13 @@ describe('ExperimentsService', () => {
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
         id: 1,
-        analysisModelCode: 'RCB',
+        analysisModelType: 'RCB',
         analysisModelSubType: 'BLUE',
       })
       target.analysisModelService.batchCreateAnalysisModel = mockResolve()
       const experiment = {
         name: 'test',
-        analysisModelCode: 'RCB',
+        analysisModelType: 'RCB',
         analysisModelSubType: 'BLUP',
       }
 
@@ -825,7 +825,7 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalled()
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
-          analysisModelCode: 'RCB',
+          analysisModelType: 'RCB',
           analysisModelSubType: 'BLUP',
           id: 1,
           isTemplate: false,
@@ -850,7 +850,7 @@ describe('ExperimentsService', () => {
       target.analysisModelService.batchCreateAnalysisModel = mockResolve()
       const experiment = {
         name: 'test',
-        analysisModelCode: 'RCB',
+        analysisModelType: 'RCB',
         analysisModelSubType: 'BLUP',
       }
 
@@ -858,7 +858,7 @@ describe('ExperimentsService', () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(target.validator.validate).toHaveBeenCalled()
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
-          analysisModelCode: 'RCB',
+          analysisModelType: 'RCB',
           analysisModelSubType: 'BLUP',
           id: 1,
           isTemplate: false,
@@ -883,7 +883,7 @@ describe('ExperimentsService', () => {
       target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
       const experiment = {
         name: 'test',
-        analysisModelCode: null,
+        analysisModelType: null,
         analysisModelSubType: null,
       }
 

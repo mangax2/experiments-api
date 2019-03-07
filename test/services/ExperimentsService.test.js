@@ -38,6 +38,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -85,6 +86,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockResolve({})
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       AppError.badRequest = mock()
@@ -138,6 +140,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -159,6 +162,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -172,6 +176,69 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('calls validate, batchCreates an analysis model', () => {
+      target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
+      db.experiments.batchCreate = mockResolve([{
+        id: 1,
+        owners: ['KMCCL'],
+        analysisModelType: 'RCB',
+        analysisModelSubType: 'BLUE',
+      }])
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      AppUtil.createPostResponse = mock()
+      const experiments = [{
+        id: 1,
+        analysisModelType: 'RCB',
+        analysisModelSubType: 'BLUE',
+      }]
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
+
+      return target.batchCreateExperiments(experiments, testContext, false, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ analysisModelType: 'RCB', analysisModelSubType: 'BLUE', id: 1 }], 'POST', testTx)
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([{ analysisModelType: 'RCB', analysisModelSubType: 'BLUE', experimentId: 1 }], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL'],
+          analysisModelType: 'RCB',
+          analysisModelSubType: 'BLUE',
+        }])
+      })
+    })
+
+    test('calls validate, does not create analysis model  when it is external ', () => {
+      target.validator.validate = mockResolve()
+      target.validateAssociatedRequests = mockResolve()
+      db.experiments.batchCreate = mockResolve([{
+        id: 1,
+        owners: ['KMCCL'],
+      }])
+      target.assignExperimentIdToTags = mock()
+      target.tagService.batchCreateTags = mock()
+      target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      const experiments = [{
+        id: 1,
+      }]
+      AppUtil.createPostResponse = mock()
+      CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
+
+      return target.batchCreateExperiments(experiments, testContext, false, testTx).then(() => {
+        expect(target.validator.validate).toHaveBeenCalledWith([{ id: 1 }], 'POST', testTx)
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalledWith([], testContext, testTx)
+        expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{
+          id: 1,
+          owners: ['KMCCL'],
+        }])
+      })
+    })
+
+
     test('rejects when batchCreateTags fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
@@ -180,6 +247,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mockReject(error)
       target.ownerService.batchCreateOwners = mockResolve({})
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -202,6 +270,7 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.batchCreateTags = mock()
       target.ownerService.batchCreateOwners = mockReject(error)
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -224,6 +293,7 @@ describe('ExperimentsService', () => {
       db.experiments.batchCreate = mockReject(error)
       target.assignExperimentIdToTags = mock()
       target.tagService.batchCreateTags = mock()
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
       CapacityRequestService.batchAssociateExperimentsToCapacityRequests = jest.fn(() => [Promise.resolve()])
@@ -244,6 +314,7 @@ describe('ExperimentsService', () => {
       target.validateAssociatedRequests = mockResolve()
       db.experiments.batchCreate = mock()
       target.assignExperimentIdToTags = mock()
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve({})
       target.tagService.batchCreateTags = mock()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
       AppUtil.createPostResponse = mock()
@@ -515,14 +586,32 @@ describe('ExperimentsService', () => {
         description: 'rejected',
       })
       target.tagService.getTagsByExperimentId = mockResolve([])
-      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['KMCCL'],
+        group_ids: ['cosmos-dev-team'],
+        reviewer_ids: ['cosmos-admin'],
+      })
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
+        analysis_model_type: 'RCB',
+        analysis_model_sub_type: 'BLUE',
+      })
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ status: 'REJECTED', comment: 'rejected', tags: [] })
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual({
+          analysisModelType: 'RCB',
+          analysisModelSubType: 'BLUE',
+          comment: 'rejected',
+          ownerGroups: ['cosmos-dev-team'],
+          owners: ['KMCCL'],
+          reviewers: ['cosmos-admin'],
+          status: 'REJECTED',
+          tags: [],
+        })
       })
     })
 
@@ -532,14 +621,28 @@ describe('ExperimentsService', () => {
       })
       db.comment.findRecentByExperimentId = mockResolve(undefined)
       target.tagService.getTagsByExperimentId = mockResolve([])
-      target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: ['KMCCL'],
+        group_ids: ['cosmos-dev-team'],
+        reviewer_ids: ['cosmos-admin'],
+      })
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve()
 
       return target.getExperimentById(1, false, testContext, testTx).then((data) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(db.comment.findRecentByExperimentId).toHaveBeenCalled()
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(data).toEqual({ status: 'REJECTED', tags: [] })
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual(
+          {
+            ownerGroups: ['cosmos-dev-team'],
+            owners: ['KMCCL'],
+            reviewers: ['cosmos-admin'],
+            status: 'REJECTED',
+            tags: [],
+          },
+        )
       })
     })
 
@@ -548,11 +651,13 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockReject(error)
       target.ownerService.getOwnersByExperimentId = mockResolve(['KMCCL'])
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
 
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -562,11 +667,12 @@ describe('ExperimentsService', () => {
       db.experiments.find = mockResolve({})
       target.tagService.getTagsByExperimentId = mockResolve([])
       target.ownerService.getOwnersByExperimentId = mockReject(error)
-
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
       return target.getExperimentById(1, false, testContext, testTx).then(() => {}, (err) => {
         expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
         expect(target.tagService.getTagsByExperimentId).toHaveBeenCalledWith(1, false, testContext)
         expect(target.ownerService.getOwnersByExperimentId).toHaveBeenCalledWith(1, testTx)
+        target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({})
         expect(err).toEqual(error)
       })
     })
@@ -609,10 +715,12 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {
-        owners: ['KMCCL '],
+        owners: ['KMCCL'],
         ownerGroups: ['group1'],
         reviewers: ['group2'],
         status: 'REJECTED',
@@ -622,7 +730,7 @@ describe('ExperimentsService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -632,7 +740,7 @@ describe('ExperimentsService', () => {
         expect(db.experiments.update).toHaveBeenCalledWith(1, {
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -648,7 +756,7 @@ describe('ExperimentsService', () => {
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           isTemplate: false,
-          owners: ['KMCCL '],
+          owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
           status: 'REJECTED',
@@ -667,7 +775,9 @@ describe('ExperimentsService', () => {
       target.tagService.saveTags = mock()
       target.tagService.deleteTagsForExperimentId = mockResolve()
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
@@ -689,6 +799,101 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('when analysis model is updated to existing model,record is updated in db', () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
+        id: 1,
+        analysisModelType: 'RCB',
+        analysisModelSubType: 'BLUE',
+      })
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve()
+      const experiment = {
+        name: 'test',
+        analysisModelType: 'RCB',
+        analysisModelSubType: 'BLUP',
+      }
+
+      return target.updateExperiment(1, experiment, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.validator.validate).toHaveBeenCalled()
+        expect(db.experiments.update).toHaveBeenCalledWith(1, {
+          analysisModelType: 'RCB',
+          analysisModelSubType: 'BLUP',
+          id: 1,
+          isTemplate: false,
+          name: 'test',
+        }, testContext, testTx)
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalled()
+        expect(target.analysisModelService.batchUpdateAnalysisModel).toHaveBeenCalled()
+      })
+    })
+
+    test('when analysis model is updated from null to existing model,record is inserted in db', () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve()
+      target.analysisModelService.batchCreateAnalysisModel = mockResolve()
+      const experiment = {
+        name: 'test',
+        analysisModelType: 'RCB',
+        analysisModelSubType: 'BLUP',
+      }
+
+      return target.updateExperiment(1, experiment, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.validator.validate).toHaveBeenCalled()
+        expect(db.experiments.update).toHaveBeenCalledWith(1, {
+          analysisModelType: 'RCB',
+          analysisModelSubType: 'BLUP',
+          id: 1,
+          isTemplate: false,
+          name: 'test',
+        }, testContext, testTx)
+        expect(target.analysisModelService.getAnalysisModelByExperimentId).toHaveBeenCalled()
+        expect(target.analysisModelService.batchCreateAnalysisModel).toHaveBeenCalled()
+      })
+    })
+
+    test('when analysis model is updated to External,record is deleted in db', () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      db.experiments.update = mockResolve({})
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.getAnalysisModelByExperimentId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
+      const experiment = {
+        name: 'test',
+        analysisModelType: null,
+        analysisModelSubType: null,
+      }
+
+      return target.updateExperiment(1, experiment, testContext, false, testTx).then(() => {
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
+        expect(target.validator.validate).toHaveBeenCalled()
+        expect(db.experiments.update).toHaveBeenCalled()
+        expect(target.analysisModelService.deleteAnalysisModelByExperimentId).toHaveBeenCalled()
+      })
+    })
     test('rejects when batchCreateTags fails', () => {
       const error = { message: 'error' }
       target.securityService.permissionsCheck = mockResolve()
@@ -697,7 +902,9 @@ describe('ExperimentsService', () => {
       target.assignExperimentIdToTags = mock([{}])
       target.tagService.saveTags = mockReject(error)
       target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
       target.updateExperimentsRandomizationStrategyId = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
 
       return target.updateExperiment(1, {}, testContext, false, testTx).then(() => {}, (err) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)

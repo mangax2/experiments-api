@@ -407,8 +407,6 @@ CREATE TABLE group_value
   CONSTRAINT group_value_ak_1 UNIQUE (factor_name, factor_level, group_id)
 );
 
-
-
 -- Drop Hypothesis Table
 --Alter Subject Type Column to Descriptiuon in Experiment Table
 ALTER TABLE IF EXISTS ONLY experiment

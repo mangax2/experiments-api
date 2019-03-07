@@ -15,6 +15,7 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS mapped_group_ids; " +
   "DROP TABLE IF EXISTS group_value_ids; " +
   "DROP TABLE IF EXISTS unit_ids; " +
+  "DROP TABLE IF EXISTS analysis_model_ids; " +
   "WITH temp_experiment_parent AS (" +
     "INSERT INTO experiment " +
     "SELECT (e1).* FROM (" +
@@ -261,6 +262,23 @@ const duplicateUnitScript =
   "INTO TEMP unit_ids " +
   "FROM temp_unit_ids;"
 
+const duplicateAnalysisModelScript =
+  "WITH temp_analysis_model_ids AS (" +
+  "INSERT INTO analysis_model " +
+  "SELECT (c).* FROM (" +
+  "SELECT am " +
+  "#= hstore('id', nextval(pg_get_serial_sequence('analysis_model', 'id'))::text) " +
+  "#= hstore('analysis_model_code', am.analysis_model_code) " +
+  "#= hstore('analysis_model_sub_type', am.analysis_model_sub_type) " +
+  "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
+  "AS c FROM analysis_model am " +
+  "WHERE experiment_id = $1 ) sub " +
+  "RETURNING id" +
+  ")" +
+  "SELECT * " +
+  "INTO TEMP analysis_model_ids " +
+  "FROM temp_analysis_model_ids;"
+
 // Error Codes 53XXXX
 class duplicationRepo {
   constructor(rep) {
@@ -283,6 +301,7 @@ class duplicationRepo {
         duplicateUnitSpecificationScript +
         duplicateDesignSpecificationScript +
         duplicateUnitScript +
+        duplicateAnalysisModelScript +
       " SELECT * FROM experiment_parent;",
     [experimentId, context.userId,isTemplate.toString()],
   )

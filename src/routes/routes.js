@@ -1,6 +1,7 @@
 import express from 'express'
 import log4js from 'log4js'
 import pt from 'promise-timeout'
+import _ from 'lodash'
 import CapacityRequestService from '../services/CapacityRequestService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
@@ -128,7 +129,7 @@ router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociat
   })
   .catch(err => next(err)))
 
-router.get('/experiments/:id/design-specification-details/', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
+router.get('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().getAdvancedParameters(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 router.put('/experiments/:id/design-specification-details', (req, res, next) => new DesignSpecificationDetailService().saveDesignSpecifications(req.body, req.params.id, false, req.context)
@@ -144,19 +145,19 @@ router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTy
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/unit-specification-details/', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, false, req.context)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/envision-datasets-data/', (req, res, next) => new EnvisionDatasetsService().getDataForEnvisionDatasets(req.params.id, req.context)
+router.get('/experiments/:id/envision-datasets-data', (req, res, next) => new EnvisionDatasetsService().getDataForEnvisionDatasets(req.params.id, req.context)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/envision-datasets-schema/', (req, res, next) => new EnvisionDatasetsService().getSchemaForEnvisionDatasets(req.params.id, req.context)
+router.get('/experiments/:id/envision-datasets-schema', (req, res, next) => new EnvisionDatasetsService().getSchemaForEnvisionDatasets(req.params.id, req.context)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/location-association/', (req, res, next) => new LocationAssociationService().getLocationAssociationByExperimentId(req.params.id)
+router.get('/experiments/:id/location-association', (req, res, next) => new LocationAssociationService().getLocationAssociationByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
@@ -263,7 +264,7 @@ router.post('/templates/:id/design-experimental-units', (req, res, next) => new 
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.get('/templates/:id/unit-specification-details/', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, true, req.context)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
@@ -276,13 +277,6 @@ router.patch('/templates/:id/review', (req, res, next) => new ExperimentsService
   .catch(err => next(err)))
 
 
-router.get('/getImage/:topic/:imageName', (req, res, next) => {
-  DocumentationService.getImage(req.params.topic, req.params.imageName).then((data) => {
-    res.set('Content-Type', 'image/png')
-    res.set('Content-Transfer-Encoding', 'binary')
-    res.send(data.body)
-  }).catch(err => next(err))
-})
 router.get('/getDoc/:fileName', (req, res, next) => {
   DocumentationService.getDoc(req.params.fileName).then((data) => {
     res.set('Content-Type', 'text/markdown')
@@ -304,5 +298,14 @@ router.delete('/experiments/:id', (req, res, next) => new ExperimentsService().d
 router.delete('/templates/:id', (req, res, next) => new ExperimentsService().deleteExperiment(req.params.id, req.context, true)
   .then(() => res.sendStatus(200))
   .catch(err => next(err)))
+
+const swaggerfiedRoutes = _.compact(_.map(router.stack, (r) => {
+  if (r.route && r.route.path && r.route.path !== '/ping' && r.route.path !== '/kafka-publish') {
+    return _.replace(r.route.path, /:[a-zA-z]+/g, string => `{${string.substring(1)}}`)
+  }
+  return null
+}))
+
+require('../swagger/validateSwagger').validateSwaggerRoutes(swaggerfiedRoutes)
 
 module.exports = router

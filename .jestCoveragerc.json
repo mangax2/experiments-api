@@ -23,6 +23,7 @@
     "!**/src/repos/*.js",
     "!**/src/routes/*.js",
     "!**/src/services/utility/*Config.js",
+    "!**/src/swagger/**",
     "!**/node_modules/**"
   ],
   "setupTestFrameworkScriptFile": "./test/jestSetup.js"

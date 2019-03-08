@@ -22,17 +22,17 @@ class treatmentRepo {
   @setErrorCode('5I4000')
   batchCreate = (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['is_control', 'treatment_number', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date',
-      'block', 'in_all_blocks'],
+      ['treatment_number', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date',
+      'block', 'in_all_blocks', 'control_types'],
       { table: 'treatment' },
     )
     const values = treatments.map(t => ({
-      is_control: t.isControl,
       treatment_number: t.treatmentNumber,
       notes: t.notes,
       experiment_id: t.experimentId,
       block: t.block,
       in_all_blocks: t.inAllBlocks || false,
+      control_types: t.controlTypes || [],
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
@@ -46,18 +46,18 @@ class treatmentRepo {
   @setErrorCode('5I5000')
   batchUpdate = (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'is_control', 'treatment_number', 'notes', 'experiment_id', 'modified_user_id', 'modified_date',
-        { name: 'block', cast: 'int' }, 'in_all_blocks'],
+      ['?id', 'treatment_number', 'notes', 'experiment_id', 'modified_user_id', 'modified_date',
+        { name: 'block', cast: 'int' }, 'in_all_blocks', 'control_types'],
       { table: 'treatment' },
     )
     const data = treatments.map(t => ({
       id: t.id,
-      is_control: t.isControl,
       treatment_number: t.treatmentNumber,
       notes: t.notes,
       experiment_id: t.experimentId,
       block: t.block,
       in_all_blocks: t.inAllBlocks || false,
+      control_types: t.controlTypes || [],
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))

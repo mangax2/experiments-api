@@ -18,7 +18,6 @@ describe('TreatmentValidator', () => {
       db.treatment = {}
 
       const schema = [
-        { paramName: 'isControl', type: 'boolean', required: true },
         { paramName: 'treatmentNumber', type: 'numeric', required: true },
         {
           paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
@@ -57,7 +56,6 @@ describe('TreatmentValidator', () => {
         db.experiments = {}
         db.treatment = {}
         const schema = [
-          { paramName: 'isControl', type: 'boolean', required: true },
           { paramName: 'treatmentNumber', type: 'numeric', required: true },
           {
             paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
@@ -75,7 +73,6 @@ describe('TreatmentValidator', () => {
         db.experiments = {}
         db.treatment = {}
         const schema = [
-          { paramName: 'isControl', type: 'boolean', required: true },
           { paramName: 'treatmentNumber', type: 'numeric', required: true },
           {
             paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,

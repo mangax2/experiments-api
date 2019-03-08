@@ -51,10 +51,11 @@ class TreatmentDetailsService {
       return _.map(fullTreatmentDetails[0], treatment => ({
         id: treatment.id,
         treatment_number: treatment.treatment_number,
-        is_control: treatment.is_control,
+        is_control: (treatment.control_types || []).length > 0,
         block: treatment.block,
         in_all_blocks: treatment.in_all_blocks,
         notes: treatment.notes,
+        control_types: treatment.control_types || [],
         combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
     })

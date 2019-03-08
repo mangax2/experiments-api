@@ -18,7 +18,8 @@
     "test": "jest --config .jestrc.json --detectOpenHandles",
     "testCoverage": "jest --config .jestCoveragerc.json --detectOpenHandles",
     "testDev": "jest --config .jestrc.json --watch",
-    "validateSchema": "node ./src/graphql/scripts/verifySchema.js"
+    "validateSchema": "node ./src/graphql/scripts/verifySchema.js",
+    "validateSwagger": "node ./src/swagger/validateSwagger.js"
   },
   "repository": {
     "type": "git",

@@ -8,25 +8,6 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 14XXXX
 class DocumentationService {
-  @setErrorCode('141000')
-  static getImage(topic, imageName) {
-    const cookies = DocumentationService.getCloudfrontCookies()
-
-    const cloudFrontCookies = _.map(cookies, (value, key) => `${key}=${value}`)
-    const joinedCookies = cloudFrontCookies.join('; ')
-
-    const headers = [{
-      headerName: 'Accept',
-      headerValue: 'image/png',
-    },
-    {
-      headerName: 'Cookie',
-      headerValue: joinedCookies,
-    }]
-
-    return HttpUtil.get(`http://dcb6g58iy3guq.cloudfront.net/experiments/images/${topic}/${imageName}`, headers)
-  }
-
   @setErrorCode('142000')
   static getDoc(fileName) {
     const cookies = DocumentationService.getCloudfrontCookies()

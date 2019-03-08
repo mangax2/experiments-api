@@ -34,9 +34,10 @@ describe('TreatmentDetailsService', () => {
       const expectedData = [
         {
           id: 1,
-          is_control: undefined,
+          is_control: false,
           notes: undefined,
           treatment_number: 1,
+          control_types: [],
           combination_elements: [
             {
               id: 1,

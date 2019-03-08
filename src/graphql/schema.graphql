@@ -188,6 +188,7 @@ type Treatment {
   block: Int,
   auditInfo: AuditInfo
   combinationElements: [CombinationElement]
+  controlTypes: [String]
 }
 
 type UnitSpecification {

@@ -134,7 +134,8 @@ export default {
   },
   Treatment: {
     experimentId: property('experiment_id'),
-    isControl: property('is_control'),
+    isControl: entity => entity.control_types.length > 0,
+    controlTypes: property('control_types'),
     treatmentNumber: property('treatment_number'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),

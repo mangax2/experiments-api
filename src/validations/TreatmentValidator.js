@@ -116,7 +116,6 @@ class TreatmentValidator extends SchemaValidator {
 
   static get POST_VALIDATION_SCHEMA() {
     return [
-      { paramName: 'isControl', type: 'boolean', required: true },
       { paramName: 'treatmentNumber', type: 'numeric', required: true },
       {
         paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,

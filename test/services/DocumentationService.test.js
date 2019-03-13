@@ -36,18 +36,6 @@ describe('DocumentationService', () => {
     })
   })
 
-  describe('getImage', () => {
-    test('calls getCloudfrontCookies and HttpUtil get', () => {
-      DocumentationService.getCloudfrontCookies = mock({ header: 'value', header2: 'value2' })
-      HttpUtil.get = mockResolve()
-      const headers = [{ headerName: 'Accept', headerValue: 'image/png' }, { headerName: 'Cookie', headerValue: 'header=value; header2=value2' }]
-
-      return DocumentationService.getImage('topic', 'image').then(() => {
-        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/experiments/images/topic/image', headers)
-      })
-    })
-  })
-
   describe('getDoc', () => {
     test('calls getCloudfrontCookies and HttpUtil get', () => {
       DocumentationService.getCloudfrontCookies = mock({ header: 'value', header2: 'value2' })

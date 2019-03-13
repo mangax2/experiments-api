@@ -11,59 +11,6 @@
   ],
   "basePath": "/experiments-api",
   "paths": {
-    "/experimental-units/{id}": {
-      "get": {
-        "summary": "get one experimental unit entity",
-        "description": "The experimental-units endpoint returns information about the experimental unit entity in Experiments System.\n",
-        "operationId": "getExperimental-unitsById",
-        "tags": [
-          "Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Experimental Unit entity",
-            "schema": {
-              "$ref": "#/definitions/ExperimentalUnitResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "No Experimental Unit Found For ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/experiments/{id}/groups": {
       "patch": {
         "summary": "partially update group",
@@ -578,6 +525,54 @@
       }
     },
     "/experiments/{id}/unit-specification-details": {
+      "get": {
+        "summary": "Get all unit specification details for an experiment",
+        "description": "Returns all unit specification details for an experiment\n",
+        "operationId": "getUnit-specification-detailsByExperimentId",
+        "tags": [
+          "Unit Specification Detail"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unit Specification Detail Entities",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitSpecificationDetail"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Creates, updates and deletes UnitSpecificationDetail",
         "description": "Creates, updates and deletes UnitSpecificationDetail",
@@ -740,7 +735,7 @@
         }
       }
     },
-    "/experiments/{id}/design-specification-details/": {
+    "/experiments/{id}/design-specification-details": {
       "get": {
         "summary": "Get all design specification details for an experiment",
         "description": "Returns all design specification details for an experiment\n",
@@ -846,7 +841,7 @@
         }
       }
     },
-    "/experiments/{id}/envision-datasets-data/": {
+    "/experiments/{id}/envision-datasets-data": {
       "get": {
         "summary": "Generate input data for the envision datasets report from an experiment.",
         "description": "Returns experiment data in a format that can be used to generate a envision datasets report",
@@ -893,7 +888,7 @@
         }
       }
     },
-    "/experiments/{id}/envision-datasets-schema/": {
+    "/experiments/{id}/envision-datasets-schema": {
       "get": {
         "summary": "Generate schema data for the envision datasets report from an experiment.",
         "description": "Returns schema data in a format that can be used to generate a envision datasets report",
@@ -940,7 +935,7 @@
         }
       }
     },
-    "/experiments/{id}/location-association/": {
+    "/experiments/{id}/location-association": {
       "get": {
         "summary": "location associations from an experiment.",
         "description": "Returns Sets associations to all locations in a given experiment",
@@ -1304,57 +1299,6 @@
         }
       }
     },
-
-    "/experiments/{id}/unit-specification-details/": {
-      "get": {
-        "summary": "Get all unit specification details for an experiment",
-        "description": "Returns all unit specification details for an experiment\n",
-        "operationId": "getUnit-specification-detailsByExperimentId",
-        "tags": [
-          "Unit Specification Detail"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Unit Specification Detail Entities",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UnitSpecificationDetail"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/experiments/{id}/variables": {
       "get": {
         "summary": "get all variables for given experiment id.",
@@ -1589,6 +1533,7 @@
         }
       }
     },
+
     "/set-entries": {
       "get": {
         "summary": "Gets all set entries for a set.",
@@ -1848,6 +1793,7 @@
         }
       }
     },
+
     "/templates": {
       "get": {
         "summary": "get all Template entities",
@@ -2239,6 +2185,54 @@
 
     },
     "/templates/{id}/unit-specification-details": {
+      "get": {
+        "summary": "Get all unit specification details for a Template",
+        "description": "Returns all unit specification details for a Template\n",
+        "operationId": "getUnit-specification-detailsByTemplateId",
+        "tags": [
+          "Unit Specification Detail"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unit Specification Detail Entities",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UnitSpecificationDetail"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Creates, updates and deletes UnitSpecificationDetail",
         "description": "Creates, updates and deletes UnitSpecificationDetail",
@@ -2401,7 +2395,7 @@
         }
       }
     },
-    "/templates/{id}/design-specification-details/": {
+    "/templates/{id}/design-specification-details": {
       "get": {
         "summary": "Get all design specification details for a Template",
         "description": "Returns all design specification details for a Template\n",
@@ -2772,57 +2766,6 @@
         }
       }
     },
-
-    "/templates/{id}/unit-specification-details/": {
-      "get": {
-        "summary": "Get all unit specification details for a Template",
-        "description": "Returns all unit specification details for a Template\n",
-        "operationId": "getUnit-specification-detailsByTemplateId",
-        "tags": [
-          "Unit Specification Detail"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Unit Specification Detail Entities",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UnitSpecificationDetail"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/templates/{id}/variables": {
       "get": {
         "summary": "get all variables for given Template id.",
@@ -2934,116 +2877,8 @@
         }
       }
     },
-    "/treatments/{id}": {
-      "get": {
-        "summary": "Get one treatment entity",
-        "description": "Gets a treatment entity for the given treatment id",
-        "operationId": "getTreatmentById",
-        "tags": [
-          "Treatments"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "type": "string",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Single Treatment Entity",
-            "schema": {
-              "$ref": "#/definitions/Treatment"
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Treatment Does Not Exist",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/treatments/{id}/combination-elements": {
-      "get": {
-        "summary": "get all combination elements for given treatment id.",
-        "description": "This endpoint returns information about the combination-elements entities associated with one treatment.\n",
-        "operationId": "getCombination-elementsByTreatmentId",
-        "tags": [
-          "Combination Elements"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "CombinationElements",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CombinationElementResponse"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "No Treatment Found For ID",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/unit-specifications/": {
+
+    "/unit-specifications": {
       "get": {
         "summary": "Get all unit specification entities",
         "description": "Returns all unit specifications\n",
@@ -3085,7 +2920,7 @@
         }
       }
     },
-    "/unit-types/": {
+    "/unit-types": {
       "get": {
         "summary": "Get all unit type entities",
         "description": "Returns all unit types\n",
@@ -3129,127 +2964,71 @@
     }
   },
   "definitions": {
-    "CombinationElementResponse": {
+    "AssociatedTreatmentVariable": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
-          "description": "unique id for entity"
+          "description": "Id of the associated treatment variable."
         },
-        "treatmentVariableLevelId": {
-          "type": "integer",
-          "description": "treatmentVariableLevelId"
-        },
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatment entity"
-        },
-        "createdDate": {
+        "name": {
           "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
+          "description": "Name of the associated treatment variable."
         }
       }
     },
-    "UnitsPOST": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
-      }
-    },
-    "CompositeTreatmentsCombinationElement": {
+    "ClusterResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
-          "description": "id of combination element if updating existing else empty."
+          "description": "Id of the treatment variable level."
         },
-        "treatmentVariableLevelId": {
-          "type": "integer",
-          "description": "Treatment Variable level ID"
-        }
-      }
-    },
-    "CompositeTreatmentsPayloadAdd": {
-      "type": "object",
-      "properties": {
-        "isControl": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LevelItem"
+          }
+        },
+        "objectType": {
           "type": "string",
-          "description": "boolean value isControl to mark treatment as control."
-        },
-        "treatmentNumber": {
-          "type": "integer",
-          "description": "number of the treatment."
-        },
-        "notes": {
-          "type": "string",
-          "description": "notes related to treatment."
-        },
-        "combinationElements": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
-          }
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
         }
       }
     },
-    "CompositeTreatmentsPayloadForPOST": {
-      "type": "object",
-      "properties": {
-        "adds": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CompositeTreatmentsPayloadAdd"
-          }
-        },
-        "deletes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ids"
-          }
-        },
-        "updates": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CompositeTreatmentsPayloadUpdate"
-          }
-        }
-      }
-    },
-    "CompositeTreatmentsPayloadUpdate": {
+    "ClusterRequest": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
-          "description": "id of treatment id to update."
+          "description": "Id of the treatment variable level."
         },
-        "isControl": {
-          "type": "string",
-          "description": "boolean value isControl to mark treatment as control."
-        },
-        "treatmentNumber": {
+        "_refId": {
           "type": "integer",
-          "description": "number of the treatment."
+          "description": "Reference ID for the level.  This may be references by an treatmrntvariableassociation."
         },
-        "notes": {
-          "type": "string",
-          "description": "notes related to treatment."
-        },
-        "combinationElements": {
+        "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CompositeTreatmentsCombinationElement"
+            "$ref": "#/definitions/LevelItem"
+          }
+        },
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
+        }
+      }
+    },
+    "CompositeDesignSpecificationDetailAndUnitsPOST": {
+      "type": "object",
+      "properties": {
+        "units": {
+          "$ref": "#/definitions/UnitsPOST"
+        },
+        "designSpecifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DesignSpecificationDetail"
           }
         }
       }
@@ -3315,6 +3094,12 @@
           "type": "integer",
           "description": "id of experimentId entity"
         },
+        "controlTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "createdDate": {
           "type": "string",
           "description": "created timestamp in UTC."
@@ -3335,20 +3120,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/CompositeTreatmentsCombinationElementGET"
-          }
-        }
-      }
-    },
-    "CompositeDesignSpecificationDetailAndUnitsPOST": {
-      "type": "object",
-      "properties": {
-        "units": {
-          "$ref": "#/definitions/UnitsPOST"
-        },
-        "designSpecifications": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DesignSpecificationDetail"
           }
         }
       }
@@ -3393,65 +3164,6 @@
         }
       }
     },
-    "ResponseVariable": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of variable"
-        },
-        "required": {
-          "type": "boolean",
-          "description": "required or optional boolean value"
-        },
-        "questionCode": {
-          "type": "string",
-          "description": "refers to Q&A application , its an optional field"
-        }
-      }
-    },
-
-    "ResponseVariableResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "unique id for entity"
-        },
-        "required": {
-          "type": "boolean",
-          "description": "boolean value to specify response variable is required or not."
-        },
-        "name": {
-          "type": "string",
-          "description": "name of response variable."
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "ExperimentId of experiment entity"
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        },
-        "questionCode": {
-          "type": "string",
-          "description": "Refers to Q&A question Code"
-        }
-      }
-    },
     "DesignSpecificationDetail": {
       "type": "object",
       "properties": {
@@ -3484,6 +3196,15 @@
           "description": "the maximum number of units/entries allowed in a rep"
         }
       }
+    },
+    "EnvisonDatasetsData": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "EnvisonDatasetsSchema": {
+      "type": "object"
     },
     "Error": {
       "type": "object",
@@ -3787,47 +3508,6 @@
         }
       }
     },
-    "TreatmentVariableResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "unique id for entity"
-        },
-        "name": {
-          "type": "string",
-          "description": "name of the treatment variable."
-        },
-        "refTreatmentVariableType": {
-          "type": "integer",
-          "description": "id of TreatmentVariableType entity"
-        },
-        "experimentId": {
-          "type": "integer",
-          "description": "id of experiment entity"
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        },
-        "tier": {
-          "type": "integer",
-          "description": "tier is used categorize treatment variables in to main/sub/sub-sub etc  plots (valid Range : 1 to 10)"
-        }
-      }
-    },
     "GenericDeleteSuccess":{
       "type": "object",
       "properties":{
@@ -3853,8 +3533,30 @@
     "ids": {
       "type": "integer"
     },
-    "Levels": {
-      "type": "string"
+    "LevelItem": {
+      "type": "object",
+      "properties": {
+        "objectType": {
+          "type": "string",
+          "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"
+        },
+        "label": {
+          "type": "string",
+          "description": "The name of the property.  In the case of simple treatment variables, this will be the same as the name of the treatment variables.  In the case of complex treatment variables, this will be the name of the property."
+        },
+        "text": {
+          "type": "string",
+          "description": "In the case of a simple treatment variable, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
+        },
+        "refId": {
+          "type": "string",
+          "description": "Used in the case when the property type is catalog.  This is the ID of the referenced item in the catalog."
+        },
+        "catalogType": {
+          "type": "string",
+          "description": "Indicates the which source the catalog is referencing.  Catalog sources may be found here: https://inventory-api.velocity-np.ag/types/"
+        }
+      }
     },
     "ListPreferencesPayload": {
       "type": "object",
@@ -3881,6 +3583,36 @@
         },
         "method": {
           "type": "string"
+        }
+      }
+    },
+    "LocationAssociation": {
+      "type": "object",
+      "properties": {
+        "experiment_id": {
+          "type": "integer",
+          "description": "Experiment Id"
+        },
+        "location": {
+          "type": "integer",
+          "description": "The location the Set is associated to"
+        },
+        "set_id": {
+          "type": "integer",
+          "description": "The Set Id that is associated to the location in the Experiment"
+        }
+      }
+    },
+    "NestedTreatmentVariable": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Id of the nested treatment variable."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the nested treatment variable."
         }
       }
     },
@@ -3958,6 +3690,82 @@
         }
       }
     },
+    "ResponseVariable": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name of variable"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "required or optional boolean value"
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "refers to Q&A application , its an optional field"
+        }
+      }
+    },
+    "ResponseVariableResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "unique id for entity"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "boolean value to specify response variable is required or not."
+        },
+        "name": {
+          "type": "string",
+          "description": "name of response variable."
+        },
+        "experimentId": {
+          "type": "integer",
+          "description": "ExperimentId of experiment entity"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        },
+        "questionCode": {
+          "type": "string",
+          "description": "Refers to Q&A question Code"
+        }
+      }
+    },
+    "ReviewInput": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Status to set the experiment to. Examples are: DRAFT, SUBMITTED, APPROVED, REJECTED"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp required for submitting a review. Must be greater than the current date"
+        },
+        "comment": {
+          "type": "string",
+          "description": "An optional description for reviewing an experiment"
+        }
+      }
+    },
     "SetEntryPUTBody": {
       "type": "array",
       "items": {
@@ -4000,28 +3808,78 @@
         }
       }
     },
-    "Treatment": {
+    "TagPayloadForPOST": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "category of the tag."
+        },
+        "value": {
+          "type": "string",
+          "description": "value of the tag."
+        }
+      }
+    },
+    "Tags": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Treatment Id"
+          "description": "Tag Id"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the tag"
+        },
+        "value": {
+          "type": "string",
+          "description": "Value of the tag"
         },
         "experimentId": {
-          "type": "integer",
-          "description": "Experiment Id of the treatment"
-        },
-        "treatmentNumber": {
-          "type": "integer",
-          "description": "Number of the treatment"
-        },
-        "isControl": {
-          "type": "boolean",
-          "description": "Specifies if treatment is a control treatment"
-        },
-        "notes": {
           "type": "string",
-          "description": "Used to specify treatment information"
+          "description": "tag associated to experiment "
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        }
+      }
+    },
+    "TreatmentLevelDetails": {
+      "type": "object",
+      "properties": {
+        "treatmentId": {
+          "type": "integer"
+        },
+        "treatmentVariableLevels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "treatmentVariableName": {
+                "type": "integer"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -4030,8 +3888,11 @@
       "items": {
         "type": "object",
         "properties": {
-          "isControl": {
-            "type": "boolean"
+          "controlTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "notes": {
             "type": "string"
@@ -4047,111 +3908,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "LevelItem": {
-      "type": "object",
-      "properties": {
-        "objectType": {
-          "type": "string",
-          "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"
-        },
-        "label": {
-          "type": "string",
-          "description": "The name of the property.  In the case of simple treatment variables, this will be the same as the name of the treatment variables.  In the case of complex treatment variables, this will be the name of the property."
-        },
-        "text": {
-          "type": "string",
-          "description": "In the case of a simple treatment variable, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
-        },
-        "refId": {
-          "type": "string",
-          "description": "Used in the case when the property type is catalog.  This is the ID of the referenced item in the catalog."
-        },
-        "catalogType": {
-          "type": "string",
-          "description": "Indicates the which source the catalog is referencing.  Catalog sources may be found here: https://inventory-api.velocity-np.ag/types/"
-        }
-      }
-    },
-    "ClusterResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Id of the treatment variable level."
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LevelItem"
-          }
-        },
-        "objectType": {
-          "type": "string",
-          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
-        }
-      }
-    },
-    "ClusterRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Id of the treatment variable level."
-        },
-        "_refId": {
-          "type": "integer",
-          "description": "Reference ID for the level.  This may be references by an treatmrntvariableassociation."
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LevelItem"
-          }
-        },
-        "objectType": {
-          "type": "string",
-          "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
-        }
-      }
-    },
-    "Variable": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "name of variable"
-        },
-        "levels": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Levels"
-          }
-        }
-      }
-    },
-    "TreatmentVariableRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Id of the treatment variable"
-        },
-        "name": {
-          "type": "string",
-          "description": "name of variable"
-        },
-        "levels": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ClusterRequest"
-          }
-        },
-        "tier": {
-          "type": "integer",
-          "description": "the tier of the split that the variable is part of"
         }
       }
     },
@@ -4190,32 +3946,6 @@
         }
       }
     },
-    "AssociatedTreatmentVariable": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Id of the associated treatment variable."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the associated treatment variable."
-        }
-      }
-    },
-    "NestedTreatmentVariable": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Id of the nested treatment variable."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the nested treatment variable."
-        }
-      }
-    },
     "TreatmentVariableAssociationResponse": {
       "type": "object",
       "properties": {
@@ -4246,49 +3976,67 @@
         }
       }
     },
-    "VariablesRequestPayload": {
+    "TreatmentVariableRequest": {
       "type": "object",
       "properties": {
-        "treatmentVariables": {
+        "id": {
+          "type": "string",
+          "description": "Id of the treatment variable"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of variable"
+        },
+        "levels": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/TreatmentVariableRequest"
+            "$ref": "#/definitions/ClusterRequest"
           }
         },
-        "responseVariables": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ResponseVariable"
-          }
-        },
-        "treatmentVariableAssociations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TreatmentVariableAssociationRequest"
-          }
+        "tier": {
+          "type": "integer",
+          "description": "the tier of the split that the variable is part of"
         }
       }
     },
-    "VariablesResponse": {
+    "TreatmentVariableResponse": {
       "type": "object",
       "properties": {
-        "treatmentVariables": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TreatmentVariable"
-          }
+        "id": {
+          "type": "integer",
+          "description": "unique id for entity"
         },
-        "responseVariables": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ResponseVariable"
-          }
+        "name": {
+          "type": "string",
+          "description": "name of the treatment variable."
         },
-        "treatmentVariableAssociations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TreatmentVariableAssociationResponse"
-          }
+        "refTreatmentVariableType": {
+          "type": "integer",
+          "description": "id of TreatmentVariableType entity"
+        },
+        "experimentId": {
+          "type": "integer",
+          "description": "id of experiment entity"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
+        },
+        "tier": {
+          "type": "integer",
+          "description": "tier is used categorize treatment variables in to main/sub/sub-sub etc  plots (valid Range : 1 to 10)"
         }
       }
     },
@@ -4408,6 +4156,12 @@
         }
       }
     },
+    "UnitsPOST": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
+      }
+    },
     "UnitType": {
       "type": "object",
       "properties": {
@@ -4437,122 +4191,49 @@
         }
       }
     },
-    "TagPayloadForPOST": {
+    "VariablesRequestPayload": {
       "type": "object",
       "properties": {
-        "category": {
-          "type": "string",
-          "description": "category of the tag."
-        },
-        "value": {
-          "type": "string",
-          "description": "value of the tag."
-        }
-      }
-    },
-    "Tags": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Tag Id"
-        },
-        "category": {
-          "type": "string",
-          "description": "Category of the tag"
-        },
-        "value": {
-          "type": "string",
-          "description": "Value of the tag"
-        },
-        "experimentId": {
-          "type": "string",
-          "description": "tag associated to experiment "
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        }
-      }
-    },
-    "TreatmentLevelDetails": {
-      "type": "object",
-      "properties": {
-        "treatmentId": {
-          "type": "integer"
-        },
-        "treatmentVariableLevels": {
+        "treatmentVariables": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "treatmentVariableName": {
-                "type": "integer"
-              },
-              "items": {
-                "type": "array",
-                "items": {
-                  "type": "object"
-                }
-              }
-            }
+            "$ref": "#/definitions/TreatmentVariableRequest"
+          }
+        },
+        "responseVariables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseVariable"
+          }
+        },
+        "treatmentVariableAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TreatmentVariableAssociationRequest"
           }
         }
       }
     },
-    "EnvisonDatasetsData": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "EnvisonDatasetsSchema": {
-      "type": "object"
-    },
-    "ReviewInput": {
-      "type": "object",
-      "required": ["status"],
-      "properties": {
-        "status": {
-          "type": "string",
-          "description": "Status to set the experiment to. Examples are: DRAFT, SUBMITTED, APPROVED, REJECTED"
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp required for submitting a review. Must be greater than the current date"
-        },
-        "comment": {
-          "type": "string",
-          "description": "An optional description for reviewing an experiment"
-        }
-      }
-    },
-    "LocationAssociation": {
+    "VariablesResponse": {
       "type": "object",
       "properties": {
-        "experiment_id": {
-          "type": "integer",
-          "description": "Experiment Id"
+        "treatmentVariables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TreatmentVariable"
+          }
         },
-        "location": {
-          "type": "integer",
-          "description": "The location the Set is associated to"
+        "responseVariables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResponseVariable"
+          }
         },
-        "set_id": {
-          "type": "integer",
-          "description": "The Set Id that is associated to the location in the Experiment"
+        "treatmentVariableAssociations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TreatmentVariableAssociationResponse"
+          }
         }
       }
     }

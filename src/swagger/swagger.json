@@ -3589,6 +3589,14 @@
     "ExperimentPayload": {
       "type": "object",
       "properties": {
+        "analysisModelSubType": {
+          "type": "string",
+          "example": "BLUE"
+        },
+        "analysisModelType": {
+          "type": "string",
+          "example": "RCB"
+        },
         "name": {
           "type": "string",
           "description": "name of the experiment entity."
@@ -3656,6 +3664,14 @@
     "ExperimentResponse": {
       "type": "object",
       "properties": {
+        "analysisModelSubType": {
+          "type": "string",
+          "example": "BLUE"
+        },
+        "analysisModelType": {
+          "type": "string",
+          "example": "RCB"
+        },
         "id": {
           "type": "integer",
           "description": "unique id for experiment entity"

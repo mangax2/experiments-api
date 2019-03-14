@@ -23,7 +23,7 @@ class treatmentRepo {
   batchCreate = (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['treatment_number', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date',
-      'block', 'in_all_blocks', 'control_types'],
+      'block', 'in_all_blocks', { name: 'control_types', cast: 'text[]' }],
       { table: 'treatment' },
     )
     const values = treatments.map(t => ({
@@ -47,7 +47,7 @@ class treatmentRepo {
   batchUpdate = (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['?id', 'treatment_number', 'notes', 'experiment_id', 'modified_user_id', 'modified_date',
-        { name: 'block', cast: 'int' }, 'in_all_blocks', 'control_types'],
+        { name: 'block', cast: 'int' }, 'in_all_blocks', { name: 'control_types', cast: 'text[]' }],
       { table: 'treatment' },
     )
     const data = treatments.map(t => ({

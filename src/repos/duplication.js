@@ -268,7 +268,7 @@ const duplicateAnalysisModelScript =
   "SELECT (c).* FROM (" +
   "SELECT am " +
   "#= hstore('id', nextval(pg_get_serial_sequence('analysis_model', 'id'))::text) " +
-  "#= hstore('analysis_model_code', am.analysis_model_code) " +
+  "#= hstore('analysis_model_type', am.analysis_model_type) " +
   "#= hstore('analysis_model_sub_type', am.analysis_model_sub_type) " +
   "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
   "AS c FROM analysis_model am " +

@@ -65,82 +65,83 @@ class TreatmentDetailsService {
   @setErrorCode('1QI000')
   @Transactional('handleAllTreatments')
   handleAllTreatments(experimentId, treatments, context, isTemplate, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
-      .then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
-        .then((result) => {
-          const dbTreatments = _.sortBy(result, 'treatment_number')
-          const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
+    return Promise.all([
+      this.securityService.permissionsCheck(experimentId, context, isTemplate, tx),
+      this.validator.validateBlockValue(treatments),
+    ]).then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
+      .then((result) => {
+        const dbTreatments = _.sortBy(result, 'treatment_number')
+        const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
 
-          if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
-            TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
-            return this.createTreatments(sortedTreatments, context, tx)
-              .then(() => AppUtil.createNoContentResponse())
-          }
+        if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+          TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
+          return this.createTreatments(sortedTreatments, context, tx)
+            .then(() => AppUtil.createNoContentResponse())
+        }
 
-          if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
-            return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
-              .then(() => AppUtil.createNoContentResponse())
-          }
+        if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+          return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
+            .then(() => AppUtil.createNoContentResponse())
+        }
 
-          if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
-            _.forEach(dbTreatments, (treatment) => {
-              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
-              treatment.used = false
-            })
+        if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+          _.forEach(dbTreatments, (treatment) => {
+            treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
+            treatment.used = false
+          })
 
-            _.forEach(sortedTreatments, (treatment) => {
-              treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
-            })
+          _.forEach(sortedTreatments, (treatment) => {
+            treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
+          })
 
-            const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
+          const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
 
-            const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
-              dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
+          const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
+            dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
 
-            const updates = []
+          const updates = []
 
-            _.forEach(updatesToCheck, (updateTreatment) => {
-              const dbTreatment = _.find(dbTreatments, treatment =>
-                treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
+          _.forEach(updatesToCheck, (updateTreatment) => {
+            const dbTreatment = _.find(dbTreatments, treatment =>
+              treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
                 && treatment.used === false,
-              )
+            )
 
-              if (dbTreatment === undefined) {
-                adds.push(updateTreatment)
-              } else {
-                updateTreatment.id = dbTreatment.id
-                dbTreatment.used = true
+            if (dbTreatment === undefined) {
+              adds.push(updateTreatment)
+            } else {
+              updateTreatment.id = dbTreatment.id
+              dbTreatment.used = true
 
-                _.forEach(updateTreatment.combinationElements, (ce) => {
-                  const dbCombination = _.find(dbTreatment.combination_elements,
-                    dbCE => dbCE.factor_level.id === ce.factorLevelId)
-                  ce.id = dbCombination.id
-                })
+              _.forEach(updateTreatment.combinationElements, (ce) => {
+                const dbCombination = _.find(dbTreatment.combination_elements,
+                  dbCE => dbCE.factor_level.id === ce.factorLevelId)
+                ce.id = dbCombination.id
+              })
 
-                updates.push(updateTreatment)
-              }
-            })
+              updates.push(updateTreatment)
+            }
+          })
 
-            const deletes = []
+          const deletes = []
 
-            _.forEach(dbTreatments, (treatment) => {
-              if (treatment.used === false) {
-                deletes.push(treatment.id)
-              }
-            })
+          _.forEach(dbTreatments, (treatment) => {
+            if (treatment.used === false) {
+              deletes.push(treatment.id)
+            }
+          })
 
-            TreatmentDetailsService.populateExperimentId(updates, experimentId)
-            TreatmentDetailsService.populateExperimentId(adds, experimentId)
+          TreatmentDetailsService.populateExperimentId(updates, experimentId)
+          TreatmentDetailsService.populateExperimentId(adds, experimentId)
 
-            return this.validator.validateBlockValue(_.concat(_.compact(updates), _.compact(adds)))
-              .then(() => this.deleteTreatments(deletes, context, tx)
-                .then(() => this.updateTreatments(updates, context, tx)
-                  .then(() => this.createTreatments(adds, context, tx)
-                    .then(() => AppUtil.createNoContentResponse()))))
-          }
+          return this.deleteTreatments(deletes, context, tx)
+            .then(() => this.updateTreatments(updates, context, tx)
+              .then(() => this.createTreatments(adds, context, tx)
+                .then(() => AppUtil.createNoContentResponse())))
+        }
 
-          return AppUtil.createNoContentResponse()
-        }))
+        return AppUtil.createNoContentResponse()
+      }))
   }
 
   @setErrorCode('1Q3000')

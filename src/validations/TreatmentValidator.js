@@ -282,6 +282,7 @@ class TreatmentValidator extends SchemaValidator {
 
   @setErrorCode('3F9000')
   allTreatmentsInAllBlocks = treatmentDTOs =>
+    treatmentDTOs.length > 0 &&
     _.find(treatmentDTOs, t => _.isNil(t.inAllBlocks) || t.inAllBlocks === false) === undefined
 }
 

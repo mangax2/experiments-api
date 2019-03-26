@@ -214,7 +214,7 @@ class TreatmentValidator extends SchemaValidator {
       return Promise.reject(
         AppError.badRequest('Treatment request object needs to be an array', undefined, getFullErrorCode('3F2001')))
     }
-    return this.validateBlockValue(treatmentDTOs)
+    return Promise.resolve()
   }
 
   @setErrorCode('3F9000')
@@ -282,6 +282,7 @@ class TreatmentValidator extends SchemaValidator {
 
   @setErrorCode('3F9000')
   allTreatmentsInAllBlocks = treatmentDTOs =>
+    treatmentDTOs.length > 0 &&
     _.find(treatmentDTOs, t => _.isNil(t.inAllBlocks) || t.inAllBlocks === false) === undefined
 }
 

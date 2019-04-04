@@ -55,14 +55,20 @@ class TreatmentService {
 
   @setErrorCode('1R6000')
   @Transactional('batchDeleteTreatments')
-  batchDeleteTreatments = (ids, context, tx) => db.treatment.batchRemove(ids, tx)
-    .then((data) => {
-      if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
-        throw AppError.notFound('Not all treatments requested for delete were found', undefined, getFullErrorCode('1R6001'))
-      } else {
-        return data
+  batchDeleteTreatments = (ids, context, tx) => db.unit.batchFindAllByTreatmentIds(ids, tx)
+    .then((units) => {
+      if (_.some(units, u => !_.isNil(u.set_entry_id))) {
+        throw AppError.badRequest('Cannot delete treatments that are used in sets', undefined, getFullErrorCode('1R6002'))
       }
+      return db.treatment.batchRemove(ids, tx)
+        .then((data) => {
+          if (_.filter(data, element => element !== null).length !== ids.length) {
+            logger.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
+            throw AppError.notFound('Not all treatments requested for delete were found', undefined, getFullErrorCode('1R6001'))
+          } else {
+            return data
+          }
+        })
     })
 }
 

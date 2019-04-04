@@ -154,7 +154,19 @@ describe('TreatmentService', () => {
   })
 
   describe('batchDeleteTreatments', () => {
+    test('throws an error when some treatments are used for units connected to sets', () => {
+      db.unit.batchFindAllByTreatmentIds = mockResolve([{ set_entry_id: 123 }])
+      db.treatment.batchRemove = mock()
+      AppError.badRequest = mock()
+
+      return target.batchDeleteTreatments([1, 2], {}, testTx).then(() => {}, () => {
+        expect(db.treatment.batchRemove).not.toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Cannot delete treatments that are used in sets', undefined, '1R6002')
+      })
+    })
+
     test('deletes treatments', () => {
+      db.unit.batchFindAllByTreatmentIds = mockResolve([])
       db.treatment.batchRemove = mockResolve([1, 2])
 
       return target.batchDeleteTreatments([1, 2], {}, testTx).then((data) => {

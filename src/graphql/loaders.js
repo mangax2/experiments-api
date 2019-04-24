@@ -118,9 +118,6 @@ function createLoaders(tx) {
   const treatmentByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.treatment.batchFindAllByExperimentId, treatmentByIdLoader)
 
-  // const treatmentBySetIdLoader = createLoaderToPrimeCacheOfChildren(
-  //   db.treatment.batchFindAllBySetId, treatmentByIdLoader)
-
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
   const analysisModelByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(

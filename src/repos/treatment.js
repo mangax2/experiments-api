@@ -110,8 +110,8 @@ class treatmentRepo {
     return tx.any('SELECT es.set_id, t.* FROM (SELECT DISTINCT la.set_id, la.experiment_id, la.block FROM public.location_association la WHERE la.set_id IN ($1:csv)) es INNER JOIN treatment t on es.experiment_id = t.experiment_id AND ((t.in_all_blocks IS TRUE) OR (es.block IS NOT DISTINCT FROM t.block))', [setIds])
       .then(data => {
         const dataBySetId = _.groupBy(data, 'set_id')
-        return _.map(setIds, setId =>
-          _.map(dataBySetId[setId] || [], treatment => _.omit(treatment, ['set_id'])))
+        return _.compact(_.flatMap(setIds, setId =>
+          _.map(dataBySetId[setId] || [], treatment => _.omit(treatment, ['set_id']))))
       })
   }
 }

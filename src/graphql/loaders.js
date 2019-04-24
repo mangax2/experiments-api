@@ -33,6 +33,14 @@ function createLoaders(tx) {
     new DataLoader(args =>
       tx.batch(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg, tx))))
 
+  const treatmentBySetIdLoader =
+      new DataLoader(args =>
+        tx.batch(_.map(args, arg => db.treatment.batchFindAllBySetId(arg, tx))))
+
+  const unitsBySetIdLoader =
+      new DataLoader(args =>
+        tx.batch(_.map(args, arg => db.unit.batchFindAllBySetIds(arg, tx))))
+
   const groupByIdLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg =>
@@ -110,8 +118,8 @@ function createLoaders(tx) {
   const treatmentByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.treatment.batchFindAllByExperimentId, treatmentByIdLoader)
 
-  const treatmentBySetIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.treatment.batchFindAllBySetId, treatmentByIdLoader)
+  // const treatmentBySetIdLoader = createLoaderToPrimeCacheOfChildren(
+  //   db.treatment.batchFindAllBySetId, treatmentByIdLoader)
 
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
@@ -153,7 +161,7 @@ function createLoaders(tx) {
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
     treatmentBySetIds: treatmentBySetIdLoader,
     unitByExperimentIds: createDataLoader(db.unit.batchfindAllByExperimentIds),
-    unitsBySetId: createDataLoader(db.unit.batchFindAllBySetIds),
+    unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,
     analysisModel: analysisModelByIdLoader,

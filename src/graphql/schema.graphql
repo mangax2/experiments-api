@@ -174,8 +174,8 @@ type Query {
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
   getSetBySetId(setId: Int!): ExperimentalSet
-  getSetEntriesBySetId(setId: Int!): [ExperimentalUnit]
-  getTreatmentsBySetId(setId: Int!): [Treatment]
+  getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
+  getTreatmentsBySetId(setId: [Int!]!): [Treatment]
 }
 
 type Treatment {

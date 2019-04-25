@@ -36,7 +36,8 @@ class unitRepo {
     'INNER JOIN treatment t ON t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
     'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
-    return _.map(setIds, setId => _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id'])))
+    return _.compact(_.flatMap(setIds, setId => 
+      _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id']))))
   })
 
   @setErrorCode('5J8000')

@@ -3,7 +3,7 @@ import { has, property } from 'lodash'
 export default {
   Query: {
     getExperimentById: (entity, args, context) =>
-      context.loaders.experiment.load(args.id),
+      context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
     getExperimentsByCriteria: (entity, args, context) =>
       context.loaders.experimentsByCriteria.load(
         { criteria: args.criteria, value: args.value, isTemplate: false }),

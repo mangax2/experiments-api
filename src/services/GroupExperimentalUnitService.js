@@ -178,7 +178,7 @@ class GroupExperimentalUnitService {
       db.combinationElement.findAllByExperimentId(experimentId, tx),
       db.unit.findAllByExperimentId(experimentId, tx),
       db.locationAssociation.findByExperimentId(experimentId, tx),
-      db.experiments.find(experimentId, false, tx),
+      db.experiments.find(experimentId, tx),
     ]).then(([
       variables,
       variableLevels,
@@ -251,7 +251,8 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FP000')
   getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => tx.batch(_.map(experimentIds,
-    experimentId => this.getGroupsAndUnits(experimentId, tx).catch(() => [])))
+    experimentId => this.getGroupsAndUnits(experimentId, tx)
+      .catch(err => console.error(err) || [])))
 
   @setErrorCode('1FQ000')
   @Transactional('getGroupAndUnitsBySetId')

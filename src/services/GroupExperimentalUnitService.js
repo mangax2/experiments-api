@@ -252,7 +252,11 @@ class GroupExperimentalUnitService {
   @setErrorCode('1FP000')
   getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => tx.batch(_.map(experimentIds,
     experimentId => this.getGroupsAndUnits(experimentId, tx)
-      .catch(err => console.error(err) || [])))
+      .catch((err) => {
+        console.error(err)
+        return []
+      }),
+  ))
 
   @setErrorCode('1FQ000')
   @Transactional('getGroupAndUnitsBySetId')

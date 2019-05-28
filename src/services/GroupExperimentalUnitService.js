@@ -178,7 +178,8 @@ class GroupExperimentalUnitService {
       db.combinationElement.findAllByExperimentId(experimentId, tx),
       db.unit.findAllByExperimentId(experimentId, tx),
       db.locationAssociation.findByExperimentId(experimentId, tx),
-      db.experiments.find(experimentId, tx),
+      db.experiments.findExperimentOrTemplate(experimentId, tx),
+
     ]).then(([
       variables,
       variableLevels,

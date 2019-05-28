@@ -11,7 +11,10 @@ class experimentsRepo {
   repository = () => this.rep
 
   @setErrorCode('551000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1', [id])
+  find = (id, isTemplate, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1 AND is_template = $2', [id, isTemplate])
+ 
+  @setErrorCode('55E000')
+  findExperimentOrTemplate = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1', [id]) 
 
   @setErrorCode('552000')
   batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids]).then(data => {

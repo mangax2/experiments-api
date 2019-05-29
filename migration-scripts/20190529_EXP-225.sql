@@ -1,0 +1,1 @@
+ALTER table unit ADD column deactivation_reason varchar

@@ -5,8 +5,18 @@ import DesignSpecificationDetailService from '../services/DesignSpecificationDet
 import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 
-function experimentBatchLoaderCallback(ids, tx) {
-  return db.experiments.batchFindExperimentOrTemplate(ids, false, tx)
+function experimentBatchLoaderCallback(args, tx) {
+  const ids = _.map(args, arg => arg.id)
+  const result = db.experiments.batchFind(ids, tx).then(data => _.map(data, (individualData) => {
+    if (!individualData.is_template) {
+      return individualData
+    }
+    if (_.find(args, { id: individualData.id, allowTemplate: true })) {
+      return individualData
+    }
+    return null
+  }))
+  return result
 }
 
 function experimentsBatchLoaderCallback(tx) {

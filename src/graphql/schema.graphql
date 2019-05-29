@@ -159,7 +159,7 @@ type Owner {
 }
 
 type Query {
-  getExperimentById(id: Int!): Experiment
+  getExperimentById(id: Int!, allowTemplate: Boolean): Experiment
   getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!): [Experiment]
   getExperimentBySetId(setId: Int): [ExperimentInfo]

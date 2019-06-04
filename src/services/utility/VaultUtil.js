@@ -22,9 +22,11 @@ class VaultUtil {
         .then((data) => { this.kafkaPrivateKey = data })
       const clientCertPromise = fs.readFileAsync('./src/experiments-api-cosmos.cert', 'utf8')
         .then((data) => { this.kafkaClientCert = data })
+      const kafkaCaPromise = fs.readFileAsync('./src/kafka_ca.cert', 'utf8')
+        .then((data) => { this.kafkaCA = data })
       this.kafkaPassword = vaultConfig.kafkaPassword
 
-      return Promise.all([privateKeyPromise, clientCertPromise])
+      return Promise.all([privateKeyPromise, clientCertPromise, kafkaCaPromise])
     }
     const vaultEnv = env
     const body = {}

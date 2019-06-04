@@ -27,7 +27,7 @@ describe('VaultUtil', () => {
     test('returns a resolved promise when env is local', () => {
       bluebird.promisifyAll = () => ({ readFileAsync: mockResolve() })
       return VaultUtil.configureDbCredentials('local', {}).then((value) => {
-        expect(value).toEqual([undefined, undefined])
+        expect(value).toEqual([undefined, undefined, undefined])
       })
     })
 

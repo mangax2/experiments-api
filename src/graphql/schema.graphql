@@ -91,6 +91,7 @@ type ExperimentalUnit {
   rep: Int
   setEntryId: Int
   block: Int
+  "deactivationReason is the Answer key corresponding to Question code ADEACTR"
   deactivationReason: String
 }
 

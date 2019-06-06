@@ -275,6 +275,40 @@ class ExperimentalUnitService {
         return Promise.resolve()
       })
   }
+
+  @setErrorCode('17J000')
+  @Transactional('deactivateExperimentalUnitsTx')
+  deactivateExperimentalUnits = (experimentalUnits, context, tx) => {
+    const eachHasDeactivationReason = _.every(experimentalUnits, experimentalUnit => _.has(experimentalUnit, 'deactivationReason'))
+    if (!eachHasDeactivationReason) {
+      throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
+    }
+    const [setIdEntries, idEntries] = _.partition(experimentalUnits, 'setEntryId')
+    const setEntryIds = _.map(setIdEntries, value => value.setEntryId)
+    const experimentalUnitIds = _.map(idEntries, value => value.id)
+
+    const queryByIds = (queryFn, idArray) => (idArray.length > 0 ? queryFn(idArray) : [])
+    const unitsFromSetEntryIds = queryByIds(db.unit.batchFindAllBySetEntryIds, setEntryIds)
+    const unitsFromIds = queryByIds(db.unit.batchFindAllByIds, experimentalUnitIds)
+
+    return Promise.all([unitsFromSetEntryIds, unitsFromIds])
+      .then(([setEntriesFromDb, euEntriesFromDb]) => {
+        const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
+          const correspondingUnit = _.find(experimentalUnits,
+            experimentalUnit => experimentalUnit.setEntryId === unit.set_entry_id)
+          return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
+        })
+
+        const byIdWithNewReason = _.map(euEntriesFromDb, (unit) => {
+          const correspondingUnit = _.find(experimentalUnits,
+            experimentalUnit => experimentalUnit.id === unit.id)
+          return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
+        })
+        const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
+        db.unit.batchUpdateDeactivationReasons(results, context, tx)
+        return results
+      })
+  }
 }
 
 module.exports = ExperimentalUnitService

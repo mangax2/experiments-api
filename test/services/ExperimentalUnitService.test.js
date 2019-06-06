@@ -845,37 +845,28 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
-      const idMockReturnValue = [{ id: 2, deactivation_reason: null }]
 
       db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
-      db.unit.batchFindAllByIds = mockResolve(idMockReturnValue)
       db.unit.batchUpdateDeactivationReasons = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
 
     test('it does not query db unnecessarily if no units of a specific id type are given', () => {
       const payload = [
-        { setEntryId: 1, deactivationReason: 'foo' },
-        { setEntryId: 2, deactivationReason: 'bar' },
-      ]
-      const setEntryIdMockReturnValue = [
-        { set_entry_id: 1, deactivation_reason: null },
-        { set_entry_id: 2, deactivation_reason: null },
+        { id: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: 'bar' },
       ]
 
 
-      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
-      db.unit.batchFindAllByIds = mockResolve([])
+      db.unit.batchFindAllBySetEntryIds = mockResolve()
       db.unit.batchUpdateDeactivationReasons = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
-        expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
+        expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
         expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
@@ -886,14 +877,12 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       db.unit.batchFindAllBySetEntryIds = mockResolve()
-      db.unit.batchFindAllByIds = mockResolve()
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       AppError.badRequest = mock('')
 
       expect(() => target.deactivateExperimentalUnits(payload, context, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledTimes(1)
       expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
-      expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
       expect(db.unit.batchUpdateDeactivationReasons).not.toHaveBeenCalled()
     })
   })

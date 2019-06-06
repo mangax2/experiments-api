@@ -3206,7 +3206,8 @@
           "type": "integer",
           "description": "The unit id to be deactivated"
         }
-      }
+      },
+      "required": ["deactivationReason"]
     },
     "ExperimentalUnitPayloadForPATCH": {
       "type": "object",

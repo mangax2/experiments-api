@@ -283,27 +283,24 @@ class ExperimentalUnitService {
     if (!eachHasDeactivationReason) {
       throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
     }
-    const [setIdEntries, idEntries] = _.partition(experimentalUnits, 'setEntryId')
-    const setEntryIds = _.map(setIdEntries, value => value.setEntryId)
-    const experimentalUnitIds = _.map(idEntries, value => value.id)
+    const [setEntryIdSubset, idSubset] = _.partition(experimentalUnits, 'setEntryId')
+    const setEntryIds = _.map(setEntryIdSubset, value => value.setEntryId)
 
-    const queryByIds = (queryFn, idArray) => (idArray.length > 0 ? queryFn(idArray) : [])
-    const unitsFromSetEntryIds = queryByIds(db.unit.batchFindAllBySetEntryIds, setEntryIds)
-    const unitsFromIds = queryByIds(db.unit.batchFindAllByIds, experimentalUnitIds)
+    const unitsFromSetEntryIds = setEntryIds.length > 0
+      ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
+      : []
 
-    return Promise.all([unitsFromSetEntryIds, unitsFromIds])
-      .then(([setEntriesFromDb, euEntriesFromDb]) => {
+    return Promise.resolve(unitsFromSetEntryIds)
+      .then((setEntriesFromDb) => {
         const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
           const correspondingUnit = _.find(experimentalUnits,
             experimentalUnit => experimentalUnit.setEntryId === unit.set_entry_id)
           return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
         })
 
-        const byIdWithNewReason = _.map(euEntriesFromDb, (unit) => {
-          const correspondingUnit = _.find(experimentalUnits,
-            experimentalUnit => experimentalUnit.id === unit.id)
-          return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
-        })
+        const byIdWithNewReason = _.map(idSubset, unit => (
+          { id: unit.id, deactivationReason: unit.deactivationReason }),
+        )
         const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
         db.unit.batchUpdateDeactivationReasons(results, context, tx)
         return results

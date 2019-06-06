@@ -91,7 +91,6 @@ type ExperimentalUnit {
   rep: Int
   setEntryId: Int
   block: Int
-  deactivationReason: String
 }
 
 type ExperimentInfo {

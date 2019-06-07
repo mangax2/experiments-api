@@ -811,11 +811,9 @@ describe('ExperimentalUnitService', () => {
     test('calls everything correctly when values are present', () => {
       target = new ExperimentalUnitService()
       const context = { userId: 'REP_PACKING' }
-      db.unit = {
-        batchCreate: jest.fn(() => Promise.resolve()),
-        batchUpdate: jest.fn(() => Promise.resolve()),
-        batchRemove: jest.fn(() => Promise.resolve()),
-      }
+      db.unit.batchCreate = mockResolve()
+      db.unit.batchUpdate = mockResolve()
+      db.unit.batchRemove = mockResolve()
 
       return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, testTx).then(() => {
         expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
@@ -826,17 +824,66 @@ describe('ExperimentalUnitService', () => {
 
     test('calls everything correctly when values are not present', () => {
       target = new ExperimentalUnitService()
-      db.unit = {
-        batchCreate: jest.fn(() => Promise.resolve()),
-        batchUpdate: jest.fn(() => Promise.resolve()),
-        batchRemove: jest.fn(() => Promise.resolve()),
-      }
+      db.unit.batchCreate = mockResolve()
+      db.unit.batchUpdate = mockResolve()
+      db.unit.batchRemove = mockResolve()
 
       return target.saveToDb(9, [], [], [], testTx).then(() => {
         expect(db.unit.batchCreate).not.toBeCalled()
         expect(db.unit.batchUpdate).not.toBeCalled()
         expect(db.unit.batchRemove).not.toBeCalled()
       })
+    })
+  })
+
+  describe('deactivateExperimentalUnits', () => {
+    const context = { userId: 'FooBar Baz' }
+
+    test('it returns deactivated units given valid input', () => {
+      const payload = [
+        { setEntryId: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+
+      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      db.unit.batchUpdateDeactivationReasons = mockResolve()
+
+      return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
+        expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
+        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    test('it does not query db unnecessarily if no units of a specific id type are given', () => {
+      const payload = [
+        { id: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+
+
+      db.unit.batchFindAllBySetEntryIds = mockResolve()
+      db.unit.batchUpdateDeactivationReasons = mockResolve()
+
+      return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
+        expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
+        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    test('it throws if not every unit in payload has a deactivationReason', () => {
+      const payload = [
+        { setEntryId: 1 },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+      db.unit.batchFindAllBySetEntryIds = mockResolve()
+      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      AppError.badRequest = mock('')
+
+      expect(() => target.deactivateExperimentalUnits(payload, context, testTx)).toThrow()
+      expect(AppError.badRequest).toHaveBeenCalledTimes(1)
+      expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
+      expect(db.unit.batchUpdateDeactivationReasons).not.toHaveBeenCalled()
     })
   })
 })

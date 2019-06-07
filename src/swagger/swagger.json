@@ -2867,6 +2867,55 @@
           }
         }
       }
+    },
+    "/deactivations": {
+      "post": {
+        "summary": "Deactivate experimental units for analysis",
+        "description": "Save analysis deactivation reason for provided unit/entry ids",
+        "operationId": "deactivateExperimentalUnits",
+        "tags": ["Deactivate Units"],
+        "produces": ["application/json"],
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "ExperimentalUnitDeactivation",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ExperimentalUnitDeactivationPayloadForPOST"
+              }
+            }
+          }
+          ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -3141,6 +3190,24 @@
           "description": "the block that the experimental unit belongs to."
         }
       }
+    },
+    "ExperimentalUnitDeactivationPayloadForPOST": {
+      "type": "object",
+      "properties": {
+        "deactivationReason": {
+          "type": "string",
+          "description": "The reason for deactivation. This is the Answer key for Question code ADEACTR."
+        },
+        "setEntryId": {
+          "type": "integer",
+          "description": "If applicable, the setEntryId for the unit to be deactivated. If present, this takes priority over the unit id"
+        },
+        "id": {
+          "type": "integer",
+          "description": "The unit id to be deactivated"
+        }
+      },
+      "required": ["deactivationReason"]
     },
     "ExperimentalUnitPayloadForPATCH": {
       "type": "object",

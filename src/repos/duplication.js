@@ -254,6 +254,7 @@ const duplicateUnitScript =
         "#= hstore('group_id', null::text) " +
         "#= hstore('treatment_id', mti.new_id::text) " +
         "#= hstore('set_entry_id', null) " +
+        "#= hstore('deactivation_reason', null) " +
       "AS c FROM unit u " +
         "INNER JOIN mapped_treatment_ids mti ON u.treatment_id = mti.old_id) sub " +
     "RETURNING id" +

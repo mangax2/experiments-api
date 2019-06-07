@@ -1,6 +1,6 @@
 {
   "name": "experiments-api",
-  "version": "3.6.0",
+  "version": "3.6.2",
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {
@@ -79,7 +79,7 @@
     "pg-monitor": "1.0.0"
   },
   "engines": {
-    "node": "8.11.1"
+    "node": "8.11.3"
   },
   "license": "ISC"
 }

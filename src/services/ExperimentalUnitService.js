@@ -278,12 +278,12 @@ class ExperimentalUnitService {
 
   @setErrorCode('17J000')
   @Transactional('deactivateExperimentalUnitsTx')
-  deactivateExperimentalUnits = (experimentalUnits, context, tx) => {
-    const eachHasDeactivationReason = _.every(experimentalUnits, experimentalUnit => _.has(experimentalUnit, 'deactivationReason'))
+  deactivateExperimentalUnits = (requestBody, context, tx) => {
+    const eachHasDeactivationReason = _.every(requestBody, requestObject => _.has(requestObject, 'deactivationReason'))
     if (!eachHasDeactivationReason) {
       throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
     }
-    const [setEntryIdSubset, idSubset] = _.partition(experimentalUnits, 'setEntryId')
+    const [setEntryIdSubset, idSubset] = _.partition(requestBody, 'setEntryId')
     const setEntryIds = _.map(setEntryIdSubset, value => value.setEntryId)
 
     const unitsFromSetEntryIds = setEntryIds.length > 0
@@ -293,15 +293,15 @@ class ExperimentalUnitService {
     return Promise.resolve(unitsFromSetEntryIds)
       .then((setEntriesFromDb) => {
         const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
-          const correspondingUnit = _.find(experimentalUnits,
-            experimentalUnit => experimentalUnit.setEntryId === unit.set_entry_id)
+          const correspondingUnit = _.find(requestBody,
+            requestObject => requestObject.setEntryId === unit.set_entry_id)
           return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
         })
 
         const byIdWithNewReason = _.map(idSubset, unit => (
           { id: unit.id, deactivationReason: unit.deactivationReason }),
         )
-        const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
+        const results = [...byIdWithNewReason, ...bySetEntryIdWithNewReason]
         db.unit.batchUpdateDeactivationReasons(results, context, tx)
         return results
       })

@@ -301,7 +301,7 @@ class ExperimentalUnitService {
         const byIdWithNewReason = _.map(idSubset, unit => (
           { id: unit.id, deactivationReason: unit.deactivationReason }),
         )
-        const results = [...byIdWithNewReason, ...bySetEntryIdWithNewReason]
+        const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
         db.unit.batchUpdateDeactivationReasons(results, context, tx)
         return results
       })

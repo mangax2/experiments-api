@@ -365,7 +365,7 @@ describe('GroupExperimentalUnitService', () => {
       })
       db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
       target.saveUnitsBySetId = mockResolve()
-      PingUtil.getMonsantoHeader = mockReject()
+      PingUtil.getMonsantoHeader = mockReject({ response: { error: {} } })
       AppError.internalServerError = mock()
 
       return target.resetSet(5, {}, testTx).catch(() => {

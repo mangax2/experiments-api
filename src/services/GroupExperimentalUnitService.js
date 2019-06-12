@@ -116,7 +116,7 @@ class GroupExperimentalUnitService {
             }))
         })
     }).catch((err) => {
-      logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err)
+      logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err.response.error)
       throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1Fd001'))
     })
 

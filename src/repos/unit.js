@@ -41,7 +41,7 @@ class unitRepo {
   })
 
   @setErrorCode('5J8000')
-  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
+  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id, u.id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
 
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
@@ -137,6 +137,22 @@ class unitRepo {
   @setErrorCode('5JI000')
   batchFindAllByExperimentIdLocationAndBlock = (experimentId, location, block, tx = this.rep) => {
     return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2 AND u.block IS NOT DISTINCT FROM $3', [experimentId, location, block])
+  }
+
+  @setErrorCode('5JK000')
+  batchUpdateDeactivationReasons = (units, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
+      ['?id', 'deactivation_reason', 'modified_user_id', 'modified_date'],
+      { table: 'unit' },
+    )
+    const data = units.map(u => ({
+      id: u.id,
+      deactivation_reason: u.deactivationReason,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+    const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
+    return tx.any(query)
   }
 }
 

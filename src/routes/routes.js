@@ -290,6 +290,11 @@ router.delete('/templates/:id', (req, res, next) => new ExperimentsService().del
   .then(() => res.sendStatus(200))
   .catch(err => next(err)))
 
+router.post('/deactivations', (req, res, next) => new ExperimentalUnitService().deactivateExperimentalUnits(req.body, req.context)
+  .then(value => res.json(value))
+  .catch(err => next(err)),
+)
+
 const swaggerfiedRoutes = _.compact(_.map(router.stack, (r) => {
   if (r.route && r.route.path && r.route.path !== '/ping' && r.route.path !== '/kafka-publish') {
     return _.replace(r.route.path, /:[a-zA-z]+/g, string => `{${string.substring(1)}}`)

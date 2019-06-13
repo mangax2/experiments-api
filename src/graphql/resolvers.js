@@ -90,6 +90,7 @@ export default {
   ExperimentalUnit: {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),
     setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
+    deactivationReason: entity => (has(entity, 'deactivation_reason') ? entity.deactivation_reason : entity.deactivationReason),
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),

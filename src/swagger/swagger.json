@@ -3268,6 +3268,10 @@
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
+        },
+        "deactivationReason": {
+          "type": "string",
+          "description": "The reason for deactivation. This is the Answer key for Question code ADEACTR."
         }
       }
     },

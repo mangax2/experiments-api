@@ -1,12 +1,24 @@
 const log4js = require('log4js')
 const logger = log4js.getLogger('app')
-const { ENV, PORT, NODE_ENV, ADMIN_GROUP, KAFKA_PASSWORD, EXPERIMENTS_API_CLIENT_ID } = process.env
+const {
+  ENV,
+  PORT,
+  NODE_ENV,
+  ADMIN_GROUP,
+  KAFKA_PASSWORD,
+  EXPERIMENTS_API_CLIENT_ID,
+  vaultRoleId,
+  vaultSecretId,
+} = process.env
+
 let config = { vaultConfig: {} }
 
 config.env = ENV || 'local'
 config.port = PORT || 3001
 config.node_env = NODE_ENV || 'local'
 config.admin_group = ADMIN_GROUP || 'COSMOS-ADMIN'
+config.vaultRoleId = vaultRoleId
+config.vaultSecretId = vaultSecretId
 
 if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {
   const cfServices = require('@monsantoit/cloud-foundry').services
@@ -14,8 +26,6 @@ if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env 
   config.vaultConfig.baseUrl = vaultCfService.baseUrl
   config.vaultConfig.authUri = vaultCfService.authUri
   config.vaultConfig.secretUri = vaultCfService.secretUri
-  config.vaultConfig.roleId = vaultCfService.roleId
-  config.vaultConfig.secretId = vaultCfService.secretId
 }
 
 if (config.env !== 'prod' && config.env !== 'np' && config.env !== 'dev') {

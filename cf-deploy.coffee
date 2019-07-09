@@ -1,5 +1,5 @@
 module.exports = (cfDeploy) ->
-  {experimentsDataSource, experimentsExternalAPIUrls, experimentsVault, experimentsKafka, velocityHome} = cfDeploy.args
+  {experimentsDataSource, experimentsExternalAPIUrls, experimentsKafka, velocityHome} = cfDeploy.args
   deployable: '.'
   deployer: cfDeploy.deployers.awsDeployment
   diskLimit: "1G"
@@ -11,13 +11,15 @@ module.exports = (cfDeploy) ->
     CLOUDFRONT_PK: process.env.CLOUDFRONT_PK
     vaultRoleId: process.env.vaultRoleId
     vaultSecretId: process.env.vaultSecretId
+    vaultMigrationRoleId: process.env.vaultMigrationRoleId
+    vaultMigrationSecretId: process.env.vaultMigrationSecretId
   route: 'experiments-api'
   startupCommand: 'node sqlMigration.js && npm start'
   services: [
     'expSys',
+    'vault',
     "#{velocityHome}",
     "#{experimentsDataSource}",
-    "#{experimentsVault}",
     "#{experimentsExternalAPIUrls}",
     "#{experimentsKafka}",
   ]

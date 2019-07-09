@@ -15,7 +15,7 @@ class VaultUtil {
     this.kafkaCA = ''
   }
 
-  static configureDbCredentials(env, vaultConfig) {
+  static configureDbCredentials(env, vaultRoleId, vaultSecretId, vaultConfig) {
     if (env === 'local') {
       const fs = require('bluebird').promisifyAll(require('fs'))
       const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
@@ -30,8 +30,8 @@ class VaultUtil {
     }
     const vaultEnv = env
     const body = {}
-    body.role_id = vaultConfig.roleId
-    body.secret_id = vaultConfig.secretId
+    body.role_id = vaultRoleId
+    body.secret_id = vaultSecretId
 
     return HttpUtil.post(`${vaultConfig.baseUrl}${vaultConfig.authUri}`, [{
       headerName: 'Accept',
@@ -39,26 +39,26 @@ class VaultUtil {
     }], JSON.stringify(body))
       .then((result) => {
         const vaultToken = result.body.auth.client_token
-        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.dbAppUser = vaultObj.body.data.appUser
           this.dbAppPassword = vaultObj.body.data.appUserPassword
         })
-        const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })
-        const cloudFrontPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/cloudFront`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const cloudFrontPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/cloudFront`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.cloudFrontKeyPair = vaultObj.body.data.keyPair
           this.cloudFrontPrivateKey = vaultObj.body.data.privateKey
           this.cloudFrontUrl = vaultObj.body.data.url
         })
-        const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.kafkaPrivateKey = Buffer.from(vaultObj.body.data.privateKey, 'base64').toString()
           this.kafkaPassword = vaultObj.body.data.password
           this.kafkaClientCert = Buffer.from(vaultObj.body.data.clientCert, 'base64').toString()
           this.kafkaCA = Buffer.from(vaultObj.body.data.ca, 'base64').toString()
         })
-        const awsPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/${vaultEnv}/aws`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const awsPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/aws`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.awsAccessKeyId = vaultObj.body.data.accessKeyId
           this.awsSecretAccessKey = vaultObj.body.data.secretAccessKey
           this.awsLambdaName = vaultObj.body.data.lambdaNameV2

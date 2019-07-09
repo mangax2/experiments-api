@@ -26,7 +26,7 @@ describe('VaultUtil', () => {
   describe('configureDbCredentials', () => {
     test('returns a resolved promise when env is local', () => {
       bluebird.promisifyAll = () => ({ readFileAsync: mockResolve() })
-      return VaultUtil.configureDbCredentials('local', {}).then((value) => {
+      return VaultUtil.configureDbCredentials('local', undefined, undefined, {}).then((value) => {
         expect(value).toEqual([undefined, undefined, undefined])
       })
     })
@@ -41,7 +41,7 @@ describe('VaultUtil', () => {
         },
       })
 
-      return VaultUtil.configureDbCredentials('np', { roleId: 'id', secretId: 'id' }).then(() => {
+      return VaultUtil.configureDbCredentials('np', 'roleId', 'secretId', { roleId: 'id', secretId: 'id' }).then(() => {
         expect(VaultUtil.dbAppPassword).toEqual('testPassword')
         expect(VaultUtil.dbAppUser).toEqual('testUser')
       })
@@ -51,7 +51,7 @@ describe('VaultUtil', () => {
       HttpUtil.post = mockReject('error')
       HttpUtil.get = mock()
 
-      return VaultUtil.configureDbCredentials('np', {}).then(() => {}, () => {
+      return VaultUtil.configureDbCredentials('np', 'roleId', 'secretId', {}).then(() => {}, () => {
         expect(HttpUtil.get).not.toHaveBeenCalled()
       })
     })
@@ -60,9 +60,9 @@ describe('VaultUtil', () => {
       HttpUtil.post = mockResolve({ body: { auth: { client_token: 'testToken' } } })
       HttpUtil.get = mock()
 
-      return VaultUtil.configureDbCredentials('prod', { baseUrl: 'localhost/', secretUri: 'vault' }).then(() => {}, () => {
+      return VaultUtil.configureDbCredentials('prod', 'roleId', 'secretId', { baseUrl: 'localhost/', secretUri: 'vault' }).then(() => {}, () => {
         expect(HttpUtil.get).toHaveBeenCalledWith(
-          'localhost/vault/prod/db',
+          'localhost/vault/experiments/api/prod/db',
           [{ headerName: 'X-Vault-Token', headerValue: 'testToken' }],
         )
       })

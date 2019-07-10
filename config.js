@@ -22,7 +22,7 @@ config.vaultSecretId = vaultSecretId
 
 if (config.env !== 'local' && config.node_env !== 'UNITTEST' && config.node_env !== 'test') {
   const cfServices = require('@monsantoit/cloud-foundry').services
-  const vaultCfService = cfServices['experimentsVault']
+  const vaultCfService = cfServices['vault']
   config.vaultConfig.baseUrl = vaultCfService.baseUrl
   config.vaultConfig.authUri = vaultCfService.authUri
   config.vaultConfig.secretUri = vaultCfService.secretUri

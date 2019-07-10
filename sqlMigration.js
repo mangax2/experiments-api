@@ -17,8 +17,8 @@ const dbConfig = {
 
 // call vault to get DB creds/info
 const body = {}
-body.role_id = process.env.vaultRoleId
-body.secret_id = process.env.vaultSecretId
+body.role_id = process.env.vaultMigrationRoleId
+body.secret_id = process.env.vaultMigrationSecretId
 
 if (process.env.ENV === 'np' || process.env.ENV === 'prod') {
   HttpUtil.post('https://vault.agro.services/v1/auth/approle/login', [{
@@ -27,7 +27,7 @@ if (process.env.ENV === 'np' || process.env.ENV === 'prod') {
   }], JSON.stringify(body))
     .then((result) => {
       const vaultToken = result.body.auth.client_token
-      return HttpUtil.get(`https://vault.agro.services/v1/secret/cosmos/migration/experiments/${process.env.ENV}/db`, [{
+      return HttpUtil.get(`https://vault.agro.services/v1/secret/cosmos/experiments/migration/${process.env.ENV}/db`, [{
         headerName: 'X-Vault-Token',
         headerValue: vaultToken,
       }])

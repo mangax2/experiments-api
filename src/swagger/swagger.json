@@ -1102,6 +1102,9 @@
         "description": "Allows updating the review status of an experiment",
         "operationId": "reviewExperimentById",
         "tags": ["Experiments"],
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],

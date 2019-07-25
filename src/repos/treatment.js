@@ -19,6 +19,7 @@ class treatmentRepo {
   @setErrorCode('5I3000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
 
+  // TODO remove block column creation
   @setErrorCode('5I4000')
   batchCreate = (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(

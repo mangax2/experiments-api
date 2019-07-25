@@ -101,7 +101,7 @@ router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentDetai
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromExperimentByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 router.patch('/experiments/:id/experimental-units', (req, res, next) => {
@@ -236,7 +236,7 @@ router.put('/templates/:id/treatments', (req, res, next) => new TreatmentDetails
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromTemplateByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 

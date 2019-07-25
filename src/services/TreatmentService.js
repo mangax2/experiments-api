@@ -5,6 +5,7 @@ import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
+import TreatmentBlockService from './TreatmentBlockService'
 import TreatmentValidator from '../validations/TreatmentValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -16,6 +17,7 @@ class TreatmentService {
   constructor() {
     this.validator = new TreatmentValidator()
     this.experimentService = new ExperimentsService()
+    this.treatmentBlockService = new TreatmentBlockService()
   }
 
   @setErrorCode('1R1000')
@@ -24,13 +26,6 @@ class TreatmentService {
     return this.validator.validate(treatments, 'POST', tx)
       .then(() => db.treatment.batchCreate(treatments, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
-  }
-
-  @setErrorCode('1R2000')
-  @Transactional('getTreatmentsByExperimentId')
-  getTreatmentsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.treatment.findAllByExperimentId(id, tx))
   }
 
   @setErrorCode('1R4000')

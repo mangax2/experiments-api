@@ -8,12 +8,14 @@ import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
 import TreatmentValidator from '../validations/TreatmentValidator'
+import TreatmentWithBlockService from './TreatmentWithBlockService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1QXXXX
 class TreatmentDetailsService {
   constructor() {
+    this.treatmentWithBlockService = new TreatmentWithBlockService()
     this.treatmentService = new TreatmentService()
     this.combinationElementService = new CombinationElementService()
     this.factorService = new FactorService()
@@ -25,7 +27,8 @@ class TreatmentDetailsService {
   @Transactional('getAllTreatmentDetails')
   getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
     return tx.batch([
-      this.treatmentService.getTreatmentsByExperimentId(experimentId, isTemplate, context, tx),
+      this.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck(experimentId,
+        isTemplate, context, tx),
       this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
       this.factorService.getFactorsByExperimentId(experimentId, isTemplate, context, tx),

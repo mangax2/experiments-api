@@ -4,10 +4,12 @@ import db from '../db/DbManager'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
 import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
+import TreatmentWithBlockService from '../services/TreatmentWithBlockService'
+import ExperimentalUnitService from '../services/ExperimentalUnitService'
 
 function experimentBatchLoaderCallback(args, tx) {
   const ids = _.map(args, arg => arg.id)
-  const result = db.experiments.batchFind(ids, tx).then(data => _.map(data, (individualData) => {
+  return db.experiments.batchFind(ids, tx).then(data => _.map(data, (individualData) => {
     if (!individualData.is_template) {
       return individualData
     }
@@ -16,7 +18,6 @@ function experimentBatchLoaderCallback(args, tx) {
     }
     return null
   }))
-  return result
 }
 
 function experimentsBatchLoaderCallback(tx) {
@@ -45,11 +46,13 @@ function createLoaders(tx) {
 
   const treatmentBySetIdLoader =
       new DataLoader(args =>
-        tx.batch(_.map(args, arg => db.treatment.batchFindAllBySetId(arg, tx))))
+        tx.batch(_.map(args, arg =>
+          new TreatmentWithBlockService().getTreatmentsByBySetId(arg, tx))))
 
   const unitsBySetIdLoader =
       new DataLoader(args =>
-        tx.batch(_.map(args, arg => db.unit.batchFindAllBySetIds(arg, tx))))
+        tx.batch(_.map(args, arg =>
+          new ExperimentalUnitService().getExperimentalUnitsBySetId(arg, tx))))
 
   const groupByIdLoader =
     new DataLoader(args =>
@@ -66,6 +69,16 @@ function createLoaders(tx) {
       tx.batch(_.map(args, arg =>
         new DesignSpecificationDetailService().getAdvancedParameters(arg, tx)
           .then(result => [result]))))
+
+  const treatmentByExperimentIdLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg =>
+        new TreatmentWithBlockService().getTreatmentsByExperimentId(arg, tx))))
+
+  const unitsByExperimentIdLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg =>
+        new ExperimentalUnitService().getExperimentalUnitsByExperimentId(arg, tx))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
@@ -84,7 +97,6 @@ function createLoaders(tx) {
   const refUnitSpecByIdLoader = createDataLoader(db.unitSpecification.batchFind)
   const refUnitTypeByIdLoader = createDataLoader(db.unitType.batchFind)
   const templateByIdLoader = createDataLoader(templateBatchLoaderCallback)
-  const treatmentByIdLoader = createDataLoader(db.treatment.batchFind)
   const unitSpecDetailByIdLoader = createDataLoader(db.unitSpecificationDetail.batchFind)
   const analysisModelByIdLoader = createDataLoader(db.analysisModel.batchFindByExperimentIds)
 
@@ -125,9 +137,6 @@ function createLoaders(tx) {
   const ownerByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.owner.batchFindByExperimentIds, ownerByIdLoader)
 
-  const treatmentByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.treatment.batchFindAllByExperimentId, treatmentByIdLoader)
-
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
   const analysisModelByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
@@ -164,10 +173,9 @@ function createLoaders(tx) {
     setBySetIds: groupBySetIdLoader,
     template: templateByIdLoader,
     templates: createDataLoader(templatesBatchLoaderCallback),
-    treatment: treatmentByIdLoader,
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
     treatmentBySetIds: treatmentBySetIdLoader,
-    unitByExperimentIds: createDataLoader(db.unit.batchfindAllByExperimentIds),
+    unitByExperimentIds: unitsByExperimentIdLoader,
     unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,

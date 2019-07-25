@@ -10,6 +10,7 @@ import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import SetEntryRemovalService from './prometheus/SetEntryRemovalService'
+import TreatmentBlockService from './TreatmentBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -21,6 +22,7 @@ class ExperimentalUnitService {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
+    this.treatmentBlockService = new TreatmentBlockService()
   }
 
   @setErrorCode('171000')
@@ -53,11 +55,41 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('177000')
-  @Transactional('getExperimentalUnitsByExperimentId')
-  getExperimentalUnitsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.unit.findAllByExperimentId(id, tx))
+  @Transactional('getUnitsFromTemplateByExperimentId')
+  getUnitsFromTemplateByExperimentId(id, context, tx) {
+    return this.experimentService.getExperimentById(id, true, context, tx)
+      .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
   }
+
+  @setErrorCode('17L000')
+  @Transactional('getUnitsFromExperimentByExperimentId')
+  getUnitsFromExperimentByExperimentId(id, context, tx) {
+    return this.experimentService.getExperimentById(id, false, context, tx)
+      .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
+  }
+
+  @setErrorCode('17K000')
+  @Transactional('getExperimentalUnitsByExperimentId')
+  getExperimentalUnitsByExperimentId(id, tx) {
+    return Promise.all([db.unit.findAllByExperimentId(id, tx),
+      this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx)])
+      .then(([units, treatmentBlocks]) => this.addBlockInfoToUnit(units, treatmentBlocks))
+  }
+
+  @setErrorCode('17M000')
+  @Transactional('getExperimentalUnitsBySetId')
+  getExperimentalUnitsBySetId(id, tx) {
+    return Promise.all([db.unit.batchFindAllBySetIds(id, tx),
+      this.treatmentBlockService.getTreatmentBlocksBySetId(id, tx)])
+      .then(([units, treatmentBlocks]) => this.addBlockInfoToUnit(units, treatmentBlocks))
+  }
+
+  @setErrorCode('17N000')
+  addBlockInfoToUnit = (units, treatmentBlocks) => _.map(units, (unit) => {
+    const block = _.find(treatmentBlocks, tb => tb.id === unit.treatment_block_id)
+    unit.block = _.isNil(block) ? '' : block.name
+    return unit
+  })
 
   @setErrorCode('178000')
   @Transactional('getExperimentalUnitsByExperimentIdNoValidate')

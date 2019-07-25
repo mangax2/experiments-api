@@ -27,6 +27,8 @@ import UnitType from '../repos/unitType'
 import Comment from '../repos/comment'
 import GraphQLAudit from '../repos/graphqlAudit'
 import AnalysisModel from '../repos/analysisModel'
+import Block from '../repos/block'
+import TreatmentBlock from '../repos/treatmentBlock'
 
 const logger = log4js.getLogger('DbManager')
 
@@ -59,6 +61,8 @@ const options = {
     obj.comment = Comment(obj, pgp)
     obj.locationAssociation = LocationAssociation(obj, pgp)
     obj.analysisModel = AnalysisModel(obj, pgp)
+    obj.block = Block(obj, pgp)
+    obj.treatmentBlock = TreatmentBlock(obj, pgp)
   },
 }
 

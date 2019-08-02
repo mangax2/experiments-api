@@ -8,6 +8,7 @@ import SecurityService from './SecurityService'
 import FactorService from './FactorService'
 import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
+import TreatmentWithBlockService from './TreatmentWithBlockService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -26,6 +27,7 @@ const logger = log4js.getLogger('GroupExperimentalUnitService')
 class GroupExperimentalUnitService {
   constructor() {
     this.experimentalUnitService = new ExperimentalUnitService()
+    this.treatmentWithBlockService = new TreatmentWithBlockService()
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
@@ -169,27 +171,31 @@ class GroupExperimentalUnitService {
   @setErrorCode('1FO000')
   @Transactional('getGroupsAndUnits')
   getGroupsAndUnits = (experimentId, tx) =>
-    tx.batch([
-      db.factor.findByExperimentId(experimentId, tx),
-      db.factorLevel.findByExperimentId(experimentId, tx),
-      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
-      db.refDesignSpecification.all(tx),
-      db.treatment.findAllByExperimentId(experimentId, tx),
-      db.combinationElement.findAllByExperimentId(experimentId, tx),
-      db.unit.findAllByExperimentId(experimentId, tx),
-      db.locationAssociation.findByExperimentId(experimentId, tx),
-      db.experiments.findExperimentOrTemplate(experimentId, tx),
+    Promise.all([
+      tx.batch([
+        db.factor.findByExperimentId(experimentId, tx),
+        db.factorLevel.findByExperimentId(experimentId, tx),
+        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+        db.refDesignSpecification.all(tx),
+        db.combinationElement.findAllByExperimentId(experimentId, tx),
+        db.locationAssociation.findByExperimentId(experimentId, tx),
+        db.experiments.findExperimentOrTemplate(experimentId, tx),
 
+      ]),
+      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
+      this.experimentalUnitService.getExperimentalUnitsByExperimentId(experimentId, tx),
     ]).then(([
-      variables,
-      variableLevels,
-      designSpecs,
-      refDesignSpecs,
+      [
+        variables,
+        variableLevels,
+        designSpecs,
+        refDesignSpecs,
+        combinationElements,
+        setLocAssociations,
+        experiment,
+      ],
       treatments,
-      combinationElements,
       units,
-      setLocAssociations,
-      experiment,
     ]) => {
       const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))

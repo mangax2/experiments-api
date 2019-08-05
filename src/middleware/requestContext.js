@@ -21,6 +21,10 @@ function getUserIdFromOauthHeader(headers) {
 
         return (extractedUserId.length > 0 ? extractedUserId.toUpperCase() : undefined)
       }
+    } else {
+      return (headers.username && headers.username.length > 0
+        ? headers.username.toUpperCase()
+        : undefined)
     }
   }
 

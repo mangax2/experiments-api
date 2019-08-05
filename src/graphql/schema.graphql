@@ -16,11 +16,13 @@ type AuditInfo {
 
 type ClusterComposite {
   text: String
+  value: ID
   label: String
-  questionCode: String
-  isPlaceholder: Boolean
-  uomCode: String
   objectType: String
+  questionCode: String
+  uomCode: String
+  catalogType: String
+  isPlaceholder: Boolean
   items: [ClusterComposite]
 }
 

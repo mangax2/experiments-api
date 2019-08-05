@@ -7,25 +7,28 @@ import HttpUtil from '../services/utility/HttpUtil'
 
 const logger = log4js.getLogger('experiments-api-request-context')
 
-function getUserIdFromOauthHeader(headers) {
-  if (headers && headers.oauth_resourceownerinfo) {
-    const header = headers.oauth_resourceownerinfo
-    const tokens = header.split(',')
-    const userIdToken = _.find(tokens, token => token.startsWith('username'))
+const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
+  const tokens = oauthresourceownerinfo.split(',')
+  const userIdToken = _.find(tokens, token => token.startsWith('username'))
 
-    if (userIdToken) {
-      const userIdTokens = userIdToken.split('=')
+  if (userIdToken) {
+    const userIdTokens = userIdToken.split('=')
 
-      if (userIdTokens.length === 2) {
-        const extractedUserId = userIdTokens[1].trim()
+    if (userIdTokens.length === 2) {
+      const extractedUserId = userIdTokens[1].trim()
 
-        return (extractedUserId.length > 0 ? extractedUserId.toUpperCase() : undefined)
-      }
-    } else {
-      return (headers.username && headers.username.length > 0
-        ? headers.username.toUpperCase()
-        : undefined)
+      return extractedUserId
     }
+  }
+  return undefined
+}
+
+function getUserIdFromHeaders(headers) {
+  if (headers && headers.oauth_resourceownerinfo) {
+    const username = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo) || headers.username
+    return (username && username.length > 0
+      ? username.toUpperCase()
+      : undefined)
   }
 
   return undefined
@@ -54,7 +57,7 @@ function getClientIdFromToken(headers) {
 }
 
 function requestContextMiddlewareFunction(req, res, next) {
-  const userId = getUserIdFromOauthHeader(req.headers)
+  const userId = getUserIdFromHeaders(req.headers)
   req.context = {
     userId,
     requestId: (req.headers ? req.headers['X-Request-Id'] : null) || uuid(),

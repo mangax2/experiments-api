@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Experiments API",
-    "description": "Experiment APIs to create experiment model, requires oauth_resourceownerinfo http header",
+    "description": "Experiment APIs to create experiment model, managed by the Cosmos team. Reach out in the #experiments channel on Slack for support.",
     "version": "v3"
   },
   "host": "api01-np.agro.services",
@@ -44,6 +44,13 @@
               }
             },
             "description": "The Group to patch"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -132,6 +139,13 @@
             "name": "source",
             "type": "string",
             "in": "query"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -247,6 +261,13 @@
             "schema": {
               "$ref": "#/definitions/ExperimentPayload"
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -301,6 +322,13 @@
             "type": "integer",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -388,6 +416,13 @@
                 }
               }
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -491,6 +526,13 @@
               "$ref": "#/definitions/TreatmentPUTPayload"
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -603,6 +645,13 @@
                 "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
               }
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -661,6 +710,13 @@
             "schema": {
               "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -814,6 +870,13 @@
               }
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -978,6 +1041,13 @@
               }
             },
             "description": "Numeric Id of the Experimental Unit to patch"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1122,6 +1192,13 @@
               "$ref": "#/definitions/ReviewInput"
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1289,6 +1366,13 @@
             "in": "path",
             "type": "integer",
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1367,6 +1451,13 @@
             "schema": {
               "$ref": "#/definitions/ListPreferencesPayload"
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1518,6 +1609,13 @@
                 "type": "integer"
               }
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1565,6 +1663,13 @@
             "in": "path",
             "type": "integer",
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1617,6 +1722,13 @@
               "$ref": "#/definitions/SetEntryPUTBody"
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1772,6 +1884,13 @@
             "name": "source",
             "type": "string",
             "in": "query"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1887,6 +2006,13 @@
             "schema": {
               "$ref": "#/definitions/ExperimentPayload"
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -1941,6 +2067,13 @@
             "type": "integer",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2059,6 +2192,13 @@
               "$ref": "#/definitions/TreatmentPUTPayload"
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2172,6 +2312,13 @@
                 "$ref": "#/definitions/CompositeUnitSpecificationDetailPayloadForPOST"
               }
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2230,6 +2377,13 @@
             "schema": {
               "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2383,6 +2537,13 @@
               }
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2592,6 +2753,13 @@
               "$ref": "#/definitions/ReviewInput"
             },
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2759,6 +2927,13 @@
             "in": "path",
             "type": "integer",
             "required": true
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
         ],
         "responses": {
@@ -2893,8 +3068,15 @@
                 "$ref": "#/definitions/ExperimentalUnitDeactivationPayloadForPOST"
               }
             }
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
           }
-          ],
+        ],
         "responses": {
           "200": {
             "description": "Success",

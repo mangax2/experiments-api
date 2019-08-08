@@ -22,7 +22,6 @@ class ExperimentalUnitValidator extends SchemaValidator {
       { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
       { paramName: 'setEntryId', type: 'numeric' },
       { paramName: 'location', type: 'numeric' },
-      { paramName: 'block', type: 'numeric' },
     ]
   }
 

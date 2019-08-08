@@ -14,94 +14,130 @@ class TreatmentBlockService {
   @setErrorCode('1V1000')
   @Transactional('getTreatmentBlocksByExperimentId')
   getTreatmentBlocksByExperimentId = (id, tx) => db.block.findByExperimentId(id, tx)
-    .then(blocks => (_.isEmpty(blocks) ? [] :
+    .then(blocks => (_.isEmpty(blocks) ? Promise.resolve([]) :
       db.treatmentBlock.batchFindByBlockIds(_.map(blocks, 'id'), tx)
-        .then(treatmentBlocks => this.addBlockInfoToTreatmentBlocks(treatmentBlocks, blocks))))
+        .then(treatmentBlocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks))))
 
   @setErrorCode('1V2000')
   @Transactional('getTreatmentBlocksBySetId')
   getTreatmentBlocksBySetId = (setId, tx) =>
     db.locationAssociation.findBySetId(setId, tx)
-      .then(locAssociation => (_.isNil(locAssociation) ? [] :
-        Promise.all([db.block.batchFindByBlockIds(locAssociation.block_id, tx),
-          db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id, tx)])
+      .then(locAssociation => (_.isNil(locAssociation) ? Promise.resolve([]) :
+        tx.batch([db.block.batchFindByBlockIds(locAssociation.block_id),
+          db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id)])
           .then(([blocks, treatmentBlocks]) =>
-            this.addBlockInfoToTreatmentBlocks(treatmentBlocks, blocks))))
+            this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks))))
 
 
   @setErrorCode('1V3000')
-  addBlockInfoToTreatmentBlocks = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {
+  getTreatmentBlocksWithBlockInfo = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {
     const block = _.find(blocks, b => b.id === tb.block_id)
     return { ...tb, name: _.isNil(block) ? null : block.name }
   })
 
-
-  // TODO handle in all block
   @setErrorCode('1V4000')
   @Transactional('createTreatmentBlocksByExperimentId')
   createTreatmentBlocksByExperimentId = (experimentId, treatments, context, tx) =>
-    db.block.findByExperimentId(experimentId).then((blocks) => {
-      const noBlockTreatments = _.filter(treatments,
-        t => _.isNil(_.find(blocks, b => b.name === t.block)))
-      if (!_.isEmpty(noBlockTreatments)) {
-        return db.block.batchCreateByExperimentId(experimentId, _.map(noBlockTreatments, 'block'), context, tx)
-          .then(db.block.findByExperimentId(experimentId)
-            .then(updatedBlocksInDB =>
-              this.batchCreateTreatmentBlocks(treatments, updatedBlocksInDB, context, tx)),
-          )
-      }
-      return this.batchCreateTreatmentBlocks(treatments, blocks, context, tx)
-    })
+    db.block.findByExperimentId(experimentId, tx).then(blocks =>
+      this.createTreatmentBlocks(treatments, blocks, context, tx),
+    )
 
   @setErrorCode('1V5000')
-  @Transactional('batchCreateTreatmentBlocks')
-  batchCreateTreatmentBlocks = (treatments, blocks, context, tx) => {
-    const treatmentBlocks = _.map(treatments, (t) => {
-      const block = _.find(blocks, b => b.name === t.block)
-      return { blockId: block.id, treatmentId: t.id }
-    })
+  createTreatmentBlocks = (treatments, blocks, context, tx) => {
+    if (_.isEmpty(treatments)) {
+      return Promise.resolve([])
+    }
+
+    const [allBlockTM, oneBlockTM] = _.partition(treatments, t => t.inAllBlocks)
+    const treatmentBlocks = _.concat(this.assembleNewTreatmentBlocks(oneBlockTM, blocks),
+      this.assembleNewInAllTreatmentBlocks(allBlockTM, blocks))
 
     return db.treatmentBlock.batchCreate(treatmentBlocks, context, tx)
   }
 
-  // TODO handle in all block
   @setErrorCode('1V6000')
-  @Transactional('updateTreatmentBlocksByExperimentId')
-  updateTreatmentBlocksByExperimentId = (experimentId, treatments, context, tx) =>
-    Promise.all([db.block.findByExperimentId(experimentId),
-      db.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id')),
-    ]).then(([blocks, treatmentBlocks]) => {
-      const noBlockTreatments = _.filter(treatments,
-        t => _.isNil(_.find(blocks, b => b.name === t.block)))
-      if (!_.isEmpty(noBlockTreatments)) {
-        return db.block.batchCreateByExperimentId(experimentId, _.map(noBlockTreatments, 'block'), context, tx)
-          .then(() => db.block.findByExperimentId(experimentId)
-            .then(updatedBlocksInDB => this.batchUpdateTreatmentBlocks(treatments,
-              treatmentBlocks, updatedBlocksInDB, context, tx)))
-      }
+  @Transactional('handleTreatmentBlocksForExistingTreatments')
+  handleTreatmentBlocksForExistingTreatments = (experimentId, treatments, context, tx) =>
+    tx.batch([db.block.findByExperimentId(experimentId, tx),
+      db.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id'))])
+      .then(([blocks, tbsInDB]) => {
+        const [tmWithNoTBs, tmWithTBs] = _.partition(treatments, t =>
+          _.isNil(this.findTBByTreatmentId(tbsInDB, t.id)))
+        const removes = this.getTBsToRemoveForExistingTreatments(tmWithTBs, tbsInDB, blocks)
+        const addsFromUpdatedTBs = this.getNewTBsForExistingTreatments(tmWithTBs, tbsInDB, blocks)
 
-      return this.batchUpdateTreatmentBlocks(treatments, treatmentBlocks, blocks, context, tx)
-    })
+        return db.treatmentBlock.batchRemove(removes)
+          .then((removalResponse) => {
+            const tbs = _.filter(tbsInDB, tb =>
+              _.isNil(_.find(removalResponse, r => r.id === tb.id)))
+            return this.batchUpdateOneBlockTreatmentBlocks(tmWithTBs, tbs, blocks, context, tx)
+              .then(() => db.treatmentBlock.batchCreate(addsFromUpdatedTBs, context, tx))
+              .then(() => this.createTreatmentBlocks(tmWithNoTBs, blocks, context, tx))
+          })
+      })
 
   @setErrorCode('1V7000')
-  @Transactional('batchUpdateTreatmentBlocks')
-  batchUpdateTreatmentBlocks = (treatments, treatmentBlocks, blocks, context, tx) => {
-    const [adds, updates] = _.partition(treatments, t =>
-      _.isNil(_.find(treatmentBlocks, tb => tb.treatment_id === t.id)))
-
-    return Promise.all([
-      db.treatmentBlock.batchCreate(this.assembleNewTreatmentBlocks(adds, blocks), context, tx),
-      db.treatmentBlock.batchUpdate(
-        this.assembleTreatmentBlocks(updates, treatmentBlocks, blocks), context, tx),
-    ])
+  getTBsToRemoveForExistingTreatments = (treatments, existingTBs, blocks) => {
+    const oneBlockTBs = this.getTBsToRemoveForOneBlockTreatments(treatments, existingTBs)
+    const allBlockTBs = this.getTBsToRemoveForAllBlockTreatments(treatments, existingTBs, blocks)
+    return _.map(_.concat(oneBlockTBs, allBlockTBs), 'id')
   }
 
   @setErrorCode('1V8000')
-  assembleTreatmentBlocks = (treatments, treatmentBlocks, blocks) =>
+  getTBsToRemoveForOneBlockTreatments = (treatments, existingTBs) => {
+    const oneBlockTMs = _.filter(treatments, t => !t.inAllBlocks)
+    return _.compact(
+      _.flatMap(oneBlockTMs, (tm) => {
+        const treatmentBlocks = _.filter(existingTBs, tb => tb.treatment_id === tm.id)
+
+        if (treatmentBlocks && treatmentBlocks.length > 1) {
+          return _.tail(treatmentBlocks)
+        }
+        return null
+      }))
+  }
+
+  @setErrorCode('1V9000')
+  getTBsToRemoveForAllBlockTreatments = (treatments, existingTBs, blocks) => {
+    const { newAllBlockTBs, existingAllBlockTBs } =
+      this.getExistingAndNewAllBlockTBs(treatments, existingTBs, blocks)
+    return _.filter(existingAllBlockTBs, existingTB =>
+      _.isNil(
+        _.find(newAllBlockTBs, tb => this.treatmentBlocksEqual(tb, existingTB))))
+  }
+
+  @setErrorCode('1VA000')
+  getNewTBsForExistingTreatments = (treatments, existingTBs, blocks) => {
+    const { newAllBlockTBs, existingAllBlockTBs } =
+      this.getExistingAndNewAllBlockTBs(treatments, existingTBs, blocks)
+    return _.filter(newAllBlockTBs, newTB =>
+      _.isNil(
+        _.find(existingAllBlockTBs, tb => this.treatmentBlocksEqual(newTB, tb))))
+  }
+
+  @setErrorCode('1VB000')
+  getExistingAndNewAllBlockTBs = (treatments, existingTBs, blocks) => {
+    const allBlockTMs = _.filter(treatments, t => t.inAllBlocks)
+    const newAllBlockTBs = this.assembleNewInAllTreatmentBlocks(allBlockTMs, blocks)
+    const existingAllBlockTBs = _.filter(existingTBs, tb =>
+      !_.isNil(_.find(allBlockTMs, t => t.id === tb.treatment_id)))
+    return { newAllBlockTBs, existingAllBlockTBs }
+  }
+
+  @setErrorCode('1VC000')
+  @Transactional('batchUpdateOneBlockTreatmentBlocks')
+  batchUpdateOneBlockTreatmentBlocks = (treatments, treatmentBlocks, blocks, context, tx) => {
+    const oneBlockTMs = _.filter(treatments, t => !t.inAllBlocks)
+    const oneBlockTBs = this.assembleTBsForExistingTreatments(oneBlockTMs, treatmentBlocks, blocks)
+    return db.treatmentBlock.batchUpdate(oneBlockTBs, context, tx)
+  }
+
+  @setErrorCode('1VD000')
+  assembleTBsForExistingTreatments = (treatments, treatmentBlocks, blocks) =>
     _.compact(_.map(treatments, (t) => {
-      const treatmentBlock = _.find(treatmentBlocks, tb => tb.treatment_id === t.id)
+      const treatmentBlock = this.findTBByTreatmentId(treatmentBlocks, t.id)
       const block = _.find(blocks, b => b.name === t.block)
-      if (!_.isNil(treatmentBlock) && !_.isNil(block)) {
+      if (!_.isNil(treatmentBlock) && !_.isNil(block) && treatmentBlock.block_id !== block.id) {
         return {
           id: treatmentBlock.id,
           treatmentId: t.id,
@@ -111,18 +147,31 @@ class TreatmentBlockService {
       return null
     }))
 
-  @setErrorCode('1V9000')
+  @setErrorCode('1VE000')
   assembleNewTreatmentBlocks = (treatments, blocks) =>
     _.compact(_.map(treatments, (t) => {
       const block = _.find(blocks, b => b.name === t.block)
-      if (!_.isNil(block)) {
-        return {
-          treatmentId: t.id,
-          blockId: block.id,
-        }
-      }
-      return null
+      return (_.isNil(block) ? null : {
+        treatmentId: t.id,
+        blockId: block.id,
+      })
     }))
+
+  @setErrorCode('1VF000')
+  assembleNewInAllTreatmentBlocks = (allBlockTreatments, blocks) =>
+    _.flatMap(allBlockTreatments, t => _.map(blocks, b => ({
+      treatmentId: t.id,
+      blockId: b.id,
+    }),
+    ))
+
+  @setErrorCode('1VG000')
+  treatmentBlocksEqual = (tb, tbInDB) =>
+    tbInDB.treatment_id === tb.treatmentId && tbInDB.block_id === tb.blockId
+
+  @setErrorCode('1VH000')
+  findTBByTreatmentId = (treatmentBlocks, treatmentId) =>
+    _.find(treatmentBlocks, tb => tb.treatment_id === treatmentId)
 }
 
 

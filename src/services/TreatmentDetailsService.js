@@ -9,12 +9,14 @@ import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
 import TreatmentValidator from '../validations/TreatmentValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
+import BlockService from './BlockService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1QXXXX
 class TreatmentDetailsService {
   constructor() {
+    this.blockService = new BlockService()
     this.treatmentWithBlockService = new TreatmentWithBlockService()
     this.treatmentService = new TreatmentService()
     this.combinationElementService = new CombinationElementService()
@@ -64,93 +66,117 @@ class TreatmentDetailsService {
     })
   }
 
+  updateTreatmentBlockInfo = treatments => _.map(treatments, (t) => {
+    const block = _.isNil(t.block) ? null : _.toString(t.block)
+    return {
+      ...t,
+      block,
+    }
+  })
+
   @notifyChanges('update', 0, 3)
   @setErrorCode('1QI000')
   @Transactional('handleAllTreatments')
-  handleAllTreatments(experimentId, treatments, context, isTemplate, tx) {
+  handleAllTreatments(experimentIdStr, inputTreatments, context, isTemplate, tx) {
+    const experimentId = _.toNumber(experimentIdStr)
     return Promise.all([
       this.securityService.permissionsCheck(experimentId, context, isTemplate, tx),
-      this.validator.validateBlockValue(treatments),
-    ]).then(() => this.getAllTreatmentDetails(experimentId, isTemplate, context, tx)
+      this.validator.validateBlockValue(inputTreatments),
+    ]).then(() => this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
       .then((result) => {
-        const dbTreatments = _.sortBy(result, 'treatment_number')
-        const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
+        const treatments = this.updateTreatmentBlockInfo(inputTreatments)
+        const blockNames = _.map(_.filter(treatments, t => !t.inAllBlocks), 'block')
+        return this.blockService.createBlocksByExperimentId(experimentId, blockNames, context, tx)
+          .then(() => {
+            const dbTreatments = _.sortBy(result, 'treatment_number')
+            const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
 
-        if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
-          TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
-          return this.createTreatments(sortedTreatments, context, tx)
-            .then(() => AppUtil.createNoContentResponse())
-        }
+            if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+              TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
+              return this.createTreatments(experimentId, sortedTreatments, context, tx)
+                .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
+                  blockNames, context, tx))
+                .then(() => AppUtil.createNoContentResponse())
+            }
 
-        if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
-          return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
-            .then(() => AppUtil.createNoContentResponse())
-        }
+            if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+              return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
+                .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
+                  blockNames, context, tx))
+                .then(() => AppUtil.createNoContentResponse())
+            }
 
-        if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
-          _.forEach(dbTreatments, (treatment) => {
-            treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
-            treatment.used = false
-          })
-
-          _.forEach(sortedTreatments, (treatment) => {
-            treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
-          })
-
-          const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
-
-          const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
-            dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
-
-          const updates = []
-
-          _.forEach(updatesToCheck, (updateTreatment) => {
-            const dbTreatment = _.find(dbTreatments, treatment =>
-              treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
-                && treatment.used === false,
-            )
-
-            if (dbTreatment === undefined) {
-              adds.push(updateTreatment)
-            } else {
-              updateTreatment.id = dbTreatment.id
-              dbTreatment.used = true
-
-              _.forEach(updateTreatment.combinationElements, (ce) => {
-                const dbCombination = _.find(dbTreatment.combination_elements,
-                  dbCE => dbCE.factor_level.id === ce.factorLevelId)
-                ce.id = dbCombination.id
+            if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+              _.forEach(dbTreatments, (treatment) => {
+                treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
+                treatment.used = false
               })
 
-              updates.push(updateTreatment)
+              _.forEach(sortedTreatments, (treatment) => {
+                treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
+              })
+
+              const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
+
+              const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
+                dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
+
+              const updates = []
+
+              _.forEach(updatesToCheck, (updateTreatment) => {
+                const dbTreatment = _.find(dbTreatments, treatment =>
+                  treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
+                  && treatment.used === false,
+                )
+
+                if (dbTreatment === undefined) {
+                  adds.push(updateTreatment)
+                } else {
+                  updateTreatment.id = dbTreatment.id
+                  dbTreatment.used = true
+
+                  _.forEach(updateTreatment.combinationElements, (ce) => {
+                    const dbCombination = _.find(dbTreatment.combination_elements,
+                      dbCE => dbCE.factor_level.id === ce.factorLevelId)
+                    ce.id = dbCombination.id
+                  })
+
+                  updates.push(updateTreatment)
+                }
+              })
+
+              const deletes = []
+
+              _.forEach(dbTreatments, (treatment) => {
+                if (treatment.used === false) {
+                  deletes.push(treatment.id)
+                }
+              })
+
+              TreatmentDetailsService.populateExperimentId(updates, experimentId)
+              TreatmentDetailsService.populateExperimentId(adds, experimentId)
+
+              return this.deleteTreatments(deletes, context, tx)
+                .then(() => this.updateTreatments(experimentId, updates, context, tx)
+                  .then(() => this.createTreatments(experimentId, adds, context, tx)
+                    .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
+                      blockNames, context, tx))
+                    .then(() => AppUtil.createNoContentResponse()),
+                  ))
             }
+
+            return this.blockService.removeBlocksByExperimentId(experimentId,
+              blockNames, context, tx)
+              .then(() => AppUtil.createNoContentResponse())
           })
-
-          const deletes = []
-
-          _.forEach(dbTreatments, (treatment) => {
-            if (treatment.used === false) {
-              deletes.push(treatment.id)
-            }
-          })
-
-          TreatmentDetailsService.populateExperimentId(updates, experimentId)
-          TreatmentDetailsService.populateExperimentId(adds, experimentId)
-
-          return this.deleteTreatments(deletes, context, tx)
-            .then(() => this.updateTreatments(updates, context, tx)
-              .then(() => this.createTreatments(adds, context, tx)
-                .then(() => AppUtil.createNoContentResponse())))
-        }
-
-        return AppUtil.createNoContentResponse()
-      }))
+      }),
+    )
   }
 
   @setErrorCode('1Q3000')
   static populateExperimentId(treatments, experimentId) {
     _.forEach(treatments, (t) => {
-      t.experimentId = Number(experimentId)
+      t.experimentId = experimentId
     })
   }
 
@@ -163,11 +189,12 @@ class TreatmentDetailsService {
   }
 
   @setErrorCode('1Q5000')
-  createTreatments(treatmentAdds, context, tx) {
+  createTreatments(experimentId, treatmentAdds, context, tx) {
     if (_.compact(treatmentAdds).length === 0) {
       return Promise.resolve()
     }
-    return this.treatmentService.batchCreateTreatments(treatmentAdds, context, tx)
+
+    return this.treatmentWithBlockService.createTreatments(experimentId, treatmentAdds, context, tx)
       .then((createTreatmentsResponses) => {
         const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
         return this.createCombinationElements(
@@ -206,11 +233,12 @@ class TreatmentDetailsService {
   removeUndefinedElements = elements => _.filter(elements, element => !_.isUndefined(element))
 
   @setErrorCode('1QA000')
-  updateTreatments(treatmentUpdates, context, tx) {
+  updateTreatments(experimentId, treatmentUpdates, context, tx) {
     if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
     }
-    return this.treatmentService.batchUpdateTreatments(treatmentUpdates, context, tx)
+    return this.treatmentWithBlockService.updateTreatments(experimentId,
+      treatmentUpdates, context, tx)
       .then(() => this.deleteCombinationElements(treatmentUpdates, context, tx)
         .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
   }

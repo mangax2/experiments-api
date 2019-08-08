@@ -8,8 +8,6 @@ import BlockService from './BlockService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
-// TODO need to add @notifyChanges to the calls
-
 // Error Codes 1ZXXXX
 class TreatmentWithBlockService {
   constructor() {
@@ -19,6 +17,7 @@ class TreatmentWithBlockService {
     this.blockService = new BlockService()
   }
 
+  // TODO should we clean this up?
   @setErrorCode('1Z1000')
   @Transactional('getTreatmentsByExperimentIdWithTemplateCheck')
   getTreatmentsByExperimentIdWithTemplateCheck(id, isTemplate, context, tx) {
@@ -29,61 +28,52 @@ class TreatmentWithBlockService {
   @setErrorCode('1Z2000')
   @Transactional('getTreatmentsByExperimentId')
   getTreatmentsByExperimentId(id, tx) {
-    return Promise.all([db.treatment.findAllByExperimentId(id, tx),
-      this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx)],
-    ).then(([treatments, treatmentBlocks]) => _.map(treatments, (t) => {
-      const blocks = _.filter(treatmentBlocks, tb => tb.treatment_id === t.id)
-      return this.addBlockInfoToTreatment(t, blocks)
-    }))
+    return tx.batch([db.treatment.findAllByExperimentId(id, tx),
+      this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx)])
+      .then(([treatments, treatmentBlocks]) =>
+        this.getTreatmentsWithBlockInfo(treatments, treatmentBlocks))
   }
 
   @setErrorCode('1Z3000')
   @Transactional('getTreatmentsByBySetId')
   getTreatmentsByBySetId(id, tx) {
-    return Promise.all([db.treatment.batchFindAllBySetId(id, tx),
+    return tx.batch([db.treatment.batchFindAllBySetId(id, tx),
       this.treatmentBlockService.getTreatmentBlocksBySetId(id, tx)])
-      .then(([treatments, treatmentBlocks]) => _.map(treatments, (t) => {
-        const blocks = _.filter(treatmentBlocks, tb => tb.treatment_id === t.id)
-        return this.addBlockInfoToTreatment(t, blocks)
-      }))
+      .then(([treatments, treatmentBlocks]) =>
+        this.getTreatmentsWithBlockInfo(treatments, treatmentBlocks))
   }
 
   @setErrorCode('1Z4000')
-  addBlockInfoToTreatment = (treatment, blocks) => {
-    treatment.in_all_blocks = false
-    treatment.block = ''
-    if (blocks.length > 1) {
-      treatment.in_all_blocks = true
-    } else if (blocks.length === 1) {
-      treatment.block = blocks[0].name
-    }
+  getTreatmentsWithBlockInfo = (treatments, treatmentBlocks) => _.map(treatments, (t) => {
+    const treatmentTBs = _.filter(treatmentBlocks, tb => tb.treatment_id === t.id)
+    return this.associateBlockInfoToTreatment(t, treatmentTBs)
+  })
+
+  @setErrorCode('1Z5000')
+  associateBlockInfoToTreatment = (t, treatmentBlocks) => {
+    const treatment = Object.assign({}, t)
+    treatment.in_all_blocks = treatmentBlocks.length > 1
+    treatment.block = treatmentBlocks.length === 1 ? treatmentBlocks[0].name : null
     return treatment
   }
 
-  @setErrorCode('1Z5000')
-  @Transactional('updateBlocksInfoByExperimentId')
-  updateBlocksInfoByExperimentId(experimentId, treatments, context, tx) {
-    const blockNames = _.map(_.filter(treatments, t => t.experimentId === experimentId), 'block')
-    return this.blockService.updateBlockNamesByExperimentId(experimentId, blockNames, context, tx)
-  }
-
-  // TODO there is nothing to do with delete treatments, treatment block will be deleted
-  // TODO block table clean up will happen after everything else
-
-  // TODO create block and treatment block first, so we have the treatment block id
-  @setErrorCode('1Z5000')
+  @setErrorCode('1Z6000')
   @Transactional('createTreatments')
   createTreatments(experimentId, treatments, context, tx) {
     return this.treatmentService.batchCreateTreatments(treatments, context, tx)
-      .then(() => this.treatmentBlockService.createTreatmentBlocksByExperimentId(experimentId,
-        treatments, context, tx))
+      .then((responses) => {
+        const newTreatments = _.map(responses, (r, index) => ({ ...treatments[index], id: r.id }))
+        return this.treatmentBlockService.createTreatmentBlocksByExperimentId(experimentId,
+          newTreatments, context, tx)
+          .then(() => responses)
+      })
   }
 
-  @setErrorCode('1Z5000')
+  @setErrorCode('1Z7000')
   @Transactional('updateTreatments')
   updateTreatments(experimentId, treatments, context, tx) {
     return this.treatmentService.batchUpdateTreatments(treatments, context, tx)
-      .then(() => this.treatmentBlockService.updateTreatmentBlocksByExperimentId(
+      .then(() => this.treatmentBlockService.handleTreatmentBlocksForExistingTreatments(
         experimentId, treatments, context, tx))
   }
 }

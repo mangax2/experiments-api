@@ -1,3 +1,4 @@
+import _ from 'lodash'
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 5SXXXX
@@ -19,6 +20,10 @@ class blockRepo {
 
   @setErrorCode('5S3000')
   batchCreateByExperimentId = (experimentId, blockNames, context, tx = this.rep) => {
+    if (_.isEmpty(blockNames)) {
+      return Promise.resolve([])
+    }
+
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['experiment_id', 'name', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'block' },
@@ -38,7 +43,7 @@ class blockRepo {
 
   @setErrorCode('5S4000')
   batchRemove = (ids, tx = this.rep) => {
-    if (!ids || ids.length === 0) {
+    if (_.isEmpty(ids)) {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM block WHERE id IN ($1:csv) RETURNING id', [ids])

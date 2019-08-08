@@ -9,6 +9,7 @@ import FactorService from './FactorService'
 import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
+import UnitWithBlockService from './UnitWithBlockService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -33,6 +34,7 @@ class GroupExperimentalUnitService {
     this.factorService = new FactorService()
     this.lambdaPerformanceService = new LambdaPerformanceService()
     this.unitValidator = new ExperimentalUnitValidator()
+    this.unitWithBlockService = new UnitWithBlockService()
   }
 
   @setErrorCode('1F5000')
@@ -183,7 +185,7 @@ class GroupExperimentalUnitService {
 
       ]),
       this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
-      this.experimentalUnitService.getExperimentalUnitsByExperimentId(experimentId, tx),
+      this.unitWithBlockService.getExperimentalUnitsByExperimentId(experimentId, tx),
     ]).then(([
       [
         variables,
@@ -384,6 +386,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1Fa000')
   compareWithExistingUnits = (existingUnits, newUnits) => {
+    // TODO the existing units are treatment_block_id instead of block
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,
         nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&

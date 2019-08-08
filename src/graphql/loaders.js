@@ -5,7 +5,7 @@ import DesignSpecificationDetailService from '../services/DesignSpecificationDet
 import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 import TreatmentWithBlockService from '../services/TreatmentWithBlockService'
-import ExperimentalUnitService from '../services/ExperimentalUnitService'
+import UnitWithBlockService from '../services/UnitWithBlockService'
 
 function experimentBatchLoaderCallback(args, tx) {
   const ids = _.map(args, arg => arg.id)
@@ -52,7 +52,7 @@ function createLoaders(tx) {
   const unitsBySetIdLoader =
       new DataLoader(args =>
         tx.batch(_.map(args, arg =>
-          new ExperimentalUnitService().getExperimentalUnitsBySetId(arg, tx))))
+          new UnitWithBlockService().getExperimentalUnitsBySetId(arg, tx))))
 
   const groupByIdLoader =
     new DataLoader(args =>
@@ -78,7 +78,7 @@ function createLoaders(tx) {
   const unitsByExperimentIdLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg =>
-        new ExperimentalUnitService().getExperimentalUnitsByExperimentId(arg, tx))))
+        new UnitWithBlockService().getExperimentalUnitsByExperimentId(arg, tx))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)

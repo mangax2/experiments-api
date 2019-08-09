@@ -36,7 +36,7 @@ class unitRepo {
     'INNER JOIN treatment t ON t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
     'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
-    return _.compact(_.flatMap(setIds, setId => 
+    return _.compact(_.flatMap(setIds, setId =>
       _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id']))))
   })
 
@@ -45,8 +45,9 @@ class unitRepo {
 
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
+    // TODO remove treatment_id as well
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
+      ['treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'treatment_block_id'],
       { table: 'unit' },
     )
 
@@ -59,7 +60,7 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
-      block: u.block,
+      treatment_block_id: u.treatmentBlockId,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
@@ -73,7 +74,7 @@ class unitRepo {
       ['?id', 'treatment_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
-      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, { name: 'block', cast: 'int' }],
+      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, 'treatment_block_id'],
       { table: 'unit' },
     )
 
@@ -85,7 +86,7 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
-      block: u.block,
+      treatment_block_id: u.treatmentBlockId,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
@@ -129,9 +130,8 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
-      'FROM treatment t, location_association la\n' +
-      'WHERE u.treatment_id = t.id AND t.experiment_id = la.experiment_id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
+    return tx.none('UPDATE unit u SET set_entry_id = NULL ' +
+      'From treatment_block tb, location_association la WHERE tb.id = u.treatment_block_id AND tb.block_id = la.block_id AND la.set_id = $1', setId)
   }
 
   @setErrorCode('5JI000')

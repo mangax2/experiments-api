@@ -3,6 +3,7 @@ import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
 import TreatmentBlockService from './TreatmentBlockService'
+import ExperimentalUnitService from './ExperimentalUnitService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -10,6 +11,7 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 class UnitWithBlockService {
   constructor() {
     this.experimentService = new ExperimentsService()
+    this.experimentalUnitService = new ExperimentalUnitService()
     this.treatmentBlockService = new TreatmentBlockService()
   }
 
@@ -49,6 +51,26 @@ class UnitWithBlockService {
     unit.block = _.isNil(block) ? '' : block.name
     return unit
   })
+
+  createUnits = (experimentId, units, context, tx) =>
+    this.matchUnitsWithTreatmentBlocks(experimentId, units, tx)
+      .then(unitWithTBs =>
+        this.experimentalUnitService.batchCreateExperimentalUnits(unitWithTBs, context, tx))
+
+  matchUnitsWithTreatmentBlocks = (experimentId, units, tx) =>
+    this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId, tx)
+      .then(treatmentBlocks => this.addTreatmentBlocksToUnits(units, treatmentBlocks))
+
+  addTreatmentBlocksToUnits = (units, treatmentBlocks) => _.map(units, (unit) => {
+    const treatmentBlockId = this.findTreatmentBlockId(unit, treatmentBlocks)
+    return ({ ...unit, treatmentBlockId })
+  })
+
+  findTreatmentBlockId = (unit, treatmentBlocks) => {
+    const treatmentBlock = _.find(treatmentBlocks,
+      tb => tb.treatment_id === unit.treatmentId && tb.name === unit.block)
+    return treatmentBlock ? treatmentBlock.id : null
+  }
 }
 
 module.exports = UnitWithBlockService

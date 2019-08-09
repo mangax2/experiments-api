@@ -55,7 +55,7 @@ class GroupExperimentalUnitService {
       if (experimentIds.length > 1 || Number(experimentIds[0]) !== Number(experimentId)) {
         throw AppError.badRequest('Treatments not associated with same experiment', undefined, getFullErrorCode('1FA001'))
       } else {
-        return this.experimentalUnitService.batchCreateExperimentalUnits(units, context, tx)
+        return this.unitWithBlockService.createUnits(experimentId, units, context, tx)
       }
     })
   }
@@ -312,7 +312,7 @@ class GroupExperimentalUnitService {
       return this.unitValidator.validate(units, 'POST', tx)
         .then(() => tx.batch([
           db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
-          db.treatment.findAllByExperimentId(experimentId, tx),
+          this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
         ]))
         .then(([locations, treatments]) => {
           if (units && (numberOfLocations < locations.max)) {
@@ -325,7 +325,7 @@ class GroupExperimentalUnitService {
             treatment.block = treatment.block || null
           })
           _.forEach(units, (unit) => {
-            unit.block = unit.block || null
+            unit.block = _.toString(unit.block) || null
           })
 
           const unitsWithInvalidBlock = _.filter(units, (unit) => {
@@ -375,6 +375,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FZ000')
   compareWithExistingUnitsByExperiment = (experimentId, newUnits, tx) =>
+    // TODO check if this needs block info
     this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)
       .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
 
@@ -385,7 +386,6 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1Fa000')
   compareWithExistingUnits = (existingUnits, newUnits) => {
-    // TODO the existing units are treatment_block_id instead of block
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,
         nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&

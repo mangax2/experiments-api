@@ -1049,7 +1049,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
-      db.locationAssociation.findByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = {
         body: {
@@ -1073,7 +1073,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
-      db.locationAssociation.findByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 500
       error.response = { }
@@ -1090,7 +1090,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
-      db.locationAssociation.findByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 404
       error.response = { text: '' }
@@ -1100,7 +1100,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
         expect(db.experiments.remove).toHaveBeenCalledWith(1, false)
-        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toHaveBeenCalled()
         expect(AppError.badRequest).not.toHaveBeenCalled()
       })
     })
@@ -1108,7 +1108,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       db.experiments.remove = mockResolve({})
-      db.locationAssociation.findByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = undefined
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -1133,12 +1133,12 @@ describe('ExperimentsService', () => {
     test('throws an error  when experiment is associated to a set', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
-      db.locationAssociation.findByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
       AppError.badRequest = mock()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false, testTx)
-        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.locationAssocWithBlockService.getByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
@@ -1146,7 +1146,7 @@ describe('ExperimentsService', () => {
     test('throws an error when data is undefined', () => {
       db.experiments.remove = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
-      db.locationAssociation.findByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       AppError.notFound = mock()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {

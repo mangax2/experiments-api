@@ -10,6 +10,7 @@ import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import SetEntryRemovalService from './prometheus/SetEntryRemovalService'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -21,6 +22,7 @@ class ExperimentalUnitService {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('171000')
@@ -138,7 +140,7 @@ class ExperimentalUnitService {
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')
   updateUnitsForSet = (setId, experimentalUnits, context, tx) =>
-    db.locationAssociation.findBySetId(setId, tx).then((setInfo) => {
+    this.locationAssocWithBlockService.getBySetId(setId, tx).then((setInfo) => {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }

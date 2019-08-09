@@ -471,12 +471,12 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', () => {
-      db.locationAssociation.findBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       db.refDesignSpecification.all = mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }])
 
       return target.verifySetAndGetDetails(3, {}, testTx).then((result) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
 
@@ -489,12 +489,12 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when set is not found', (done) => {
-      db.locationAssociation.findBySetId = mockResolve()
+      target.locationAssocWithBlockService.getBySetId = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       AppError.notFound = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toBeCalled()
         expect(AppError.notFound).toBeCalledWith('No set found for id 3', undefined, '1FK001')
 
@@ -503,13 +503,13 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when number of reps not found', (done) => {
-      db.locationAssociation.findBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
       AppError.badRequest = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
         expect(AppError.badRequest).toBeCalledWith('The specified set (id 3) does not have a minimum number of reps and cannot be reset.', undefined, '1FK002')
@@ -522,14 +522,14 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupsAndUnits', () => {
     test('properly sends and retrieves data to lambda', () => {
       target = new GroupExperimentalUnitService()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }])
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
@@ -571,13 +571,13 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
@@ -588,14 +588,14 @@ describe('GroupExperimentalUnitService', () => {
 
     test('properly handles lambda errors', () => {
       target = new GroupExperimentalUnitService()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentId = mockResolve('units')
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve('units')
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockReject()
       AppError.internalServerError = mock({ message: 'error result' })
@@ -603,13 +603,13 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).catch(() => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
@@ -619,14 +619,14 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and lambda are called multiple times', () => {
       target = new GroupExperimentalUnitService()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }], inputSize: 3003, responseTime: 1 }) })
       AppError.internalServerError = mock()
@@ -668,13 +668,13 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -688,15 +688,15 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and blocks', () => {
       target = new GroupExperimentalUnitService()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, in_all_blocks: true }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 },
         { treatment_id: 8, factor_level_id: 4 }, { treatment_id: 8, factor_level_id: 6 }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
@@ -752,13 +752,13 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.experimentalUnitService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -812,7 +812,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupAndUnitsBySetId', () => {
     test('getting a group and units with a valid set id', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,
@@ -836,7 +836,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an invalid set id', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({})
       return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
         expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
@@ -846,7 +846,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an empty return of the db query', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve(null)
+      target.locationAssocWithBlockService.getBySetId = mockResolve(null)
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,
@@ -863,7 +863,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with a failed db query', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockReject('error')
+      target.locationAssocWithBlockService.getBySetId = mockReject('error')
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,

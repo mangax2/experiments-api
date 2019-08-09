@@ -4,15 +4,17 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
-import db from '../../db/DbManager'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
 import SetEntryRemovalService from '../prometheus/SetEntryRemovalService'
+import LocationAssociationWithBlockService from '../LocationAssociationWithBlockService'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
   experimentalUnitService = new ExperimentalUnitService()
+
+  locationAssocWithBlockService = new LocationAssociationWithBlockService()
 
   listen() {
     const params = {
@@ -71,7 +73,7 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
-      return db.locationAssociation.findBySetId(setId, tx).then((assoc) => {
+      return this.locationAssocWithBlockService.getBySetId(setId, tx).then((assoc) => {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }

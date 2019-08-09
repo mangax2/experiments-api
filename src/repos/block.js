@@ -18,6 +18,9 @@ class blockRepo {
   @setErrorCode('5S2000')
   batchFindByBlockIds = (ids, tx = this.rep) => tx.any('SELECT * FROM block WHERE id IN ($1:csv)', ids)
 
+  @setErrorCode('5S5000')
+  batchFindByBlockId = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM block WHERE id = $1', id)
+
   @setErrorCode('5S3000')
   batchCreateByExperimentId = (experimentId, blockNames, context, tx = this.rep) => {
     if (_.isEmpty(blockNames)) {

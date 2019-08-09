@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import BlockService from './BlockService'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -9,6 +10,7 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 class TreatmentBlockService {
   constructor() {
     this.blockService = new BlockService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('1V1000')
@@ -21,7 +23,7 @@ class TreatmentBlockService {
   @setErrorCode('1V2000')
   @Transactional('getTreatmentBlocksBySetId')
   getTreatmentBlocksBySetId = (setId, tx) =>
-    db.locationAssociation.findBySetId(setId, tx)
+    this.locationAssocWithBlockService.getBySetId(setId, tx)
       .then(locAssociation => (_.isNil(locAssociation) ? Promise.resolve([]) :
         tx.batch([db.block.batchFindByBlockIds(locAssociation.block_id),
           db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id)])

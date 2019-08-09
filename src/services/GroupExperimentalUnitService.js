@@ -10,6 +10,7 @@ import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import UnitWithBlockService from './UnitWithBlockService'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -35,6 +36,7 @@ class GroupExperimentalUnitService {
     this.lambdaPerformanceService = new LambdaPerformanceService()
     this.unitValidator = new ExperimentalUnitValidator()
     this.unitWithBlockService = new UnitWithBlockService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('1F5000')
@@ -126,7 +128,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context, tx) =>
-    db.locationAssociation.findBySetId(setId, tx).then((locAssociation) => {
+    this.locationAssocWithBlockService.getBySetId(setId, tx).then((locAssociation) => {
       if (!locAssociation) {
         logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
@@ -173,32 +175,29 @@ class GroupExperimentalUnitService {
   @setErrorCode('1FO000')
   @Transactional('getGroupsAndUnits')
   getGroupsAndUnits = (experimentId, tx) =>
-    Promise.all([
-      tx.batch([
-        db.factor.findByExperimentId(experimentId, tx),
-        db.factorLevel.findByExperimentId(experimentId, tx),
-        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
-        db.refDesignSpecification.all(tx),
-        db.combinationElement.findAllByExperimentId(experimentId, tx),
-        db.locationAssociation.findByExperimentId(experimentId, tx),
-        db.experiments.findExperimentOrTemplate(experimentId, tx),
-
-      ]),
+    tx.batch([
+      db.factor.findByExperimentId(experimentId, tx),
+      db.factorLevel.findByExperimentId(experimentId, tx),
+      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+      db.refDesignSpecification.all(tx),
+      db.combinationElement.findAllByExperimentId(experimentId, tx),
+      db.experiments.findExperimentOrTemplate(experimentId, tx),
       this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
       this.unitWithBlockService.getExperimentalUnitsByExperimentId(experimentId, tx),
-    ]).then(([
+      this.locationAssocWithBlockService.getByExperimentId(experimentId, tx),
+    ]).then((
       [
         variables,
         variableLevels,
         designSpecs,
         refDesignSpecs,
         combinationElements,
-        setLocAssociations,
         experiment,
+        treatments,
+        units,
+        setLocAssociations,
       ],
-      treatments,
-      units,
-    ]) => {
+    ) => {
       const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
@@ -269,7 +268,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FQ000')
   @Transactional('getGroupAndUnitsBySetId')
-  getGroupAndUnitsBySetId = (setId, tx) => db.locationAssociation.findBySetId(setId, tx)
+  getGroupAndUnitsBySetId = (setId, tx) => this.locationAssocWithBlockService.getBySetId(setId, tx)
     .then((setAssocation) => {
       if (!setAssocation) return {}
       return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,

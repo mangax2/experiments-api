@@ -17,6 +17,7 @@ import TagService from './TagService'
 import FactorService from './FactorService'
 import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -32,6 +33,7 @@ class ExperimentsService {
     this.duplicationService = new DuplicationService()
     this.factorService = new FactorService()
     this.analysisModelService = new AnalysisModelService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('151000')
@@ -282,7 +284,7 @@ class ExperimentsService {
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate, tx).then((permissions) => {
       if (permissions.includes('write')) {
-        return db.locationAssociation.findByExperimentId(id).then((associations) => {
+        return this.locationAssocWithBlockService.getByExperimentId(id, tx).then((associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))

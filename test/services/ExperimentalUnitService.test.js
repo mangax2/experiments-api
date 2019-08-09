@@ -502,13 +502,13 @@ describe('ExperimentalUnitService', () => {
   describe('updateUnitsForSet', () => {
     test('returns an error if the set is not found', () => {
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve()
+      target.locationAssocWithBlockService.getBySetId = mockResolve()
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve()
       const testError = { message: 'error' }
       AppError.notFound = mock(testError)
 
       return target.updateUnitsForSet(5, [], {}, testTx).catch((err) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).toBeCalledWith('No experiment found for Set Id 5', undefined, '17F001')
         expect(err).toBe(testError)
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).not.toBeCalled()
@@ -522,7 +522,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 19 },
       ]
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
       db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
@@ -544,7 +544,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).then(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).not.toBeCalled()
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
@@ -565,7 +565,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 19 },
       ]
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: 3 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: 3 })
       db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
@@ -587,7 +587,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).then(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).not.toBeCalled()
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
@@ -608,7 +608,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 19, factorLevelIds: [] },
       ]
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: 5 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: 5 })
       db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
@@ -631,7 +631,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, '17F003')
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
@@ -650,7 +650,7 @@ describe('ExperimentalUnitService', () => {
       ]
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
       db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
@@ -669,7 +669,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
         expect(db.experiments.find).toBeCalledWith(7, false, testTx)
@@ -688,7 +688,7 @@ describe('ExperimentalUnitService', () => {
       ]
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
       db.experiments.find = mockResolve({ randomization_strategy_code: 'custom' })
       db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
@@ -703,7 +703,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, '17F004')
         expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)

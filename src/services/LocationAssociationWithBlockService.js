@@ -35,9 +35,9 @@ class LocationAssociationWithBlockService {
   @Transactional('getLocationAssociationBySetId')
   getBySetId(id, tx) {
     return db.locationAssociation.findBySetId(id, tx)
-      .then(locationAssociation =>
+      .then(locationAssociation => (_.isNil(locationAssociation) ? null :
         db.block.batchFindByBlockId(locationAssociation.block_id, tx)
-          .then(block => this.addBlockInfoToLocationAssociation(locationAssociation, block)),
+          .then(block => this.addBlockInfoToLocationAssociation(locationAssociation, block))),
       )
   }
 

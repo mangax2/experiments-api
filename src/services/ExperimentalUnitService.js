@@ -95,39 +95,6 @@ class ExperimentalUnitService {
     return setEntryUnitMap
   }
 
-  @setErrorCode('17C000')
-  @Transactional('getTreatmentDetailsBySetId')
-  getTreatmentDetailsBySetId = (setId, tx) => {
-    if (setId) {
-      return db.unit.batchFindAllBySetId(setId, tx).then((units) => {
-        const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
-
-        if (treatmentIds && treatmentIds.length > 0) {
-          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
-            .then(this.mapTreatmentLevelsToOutputFormat)
-        }
-
-        throw AppError.notFound(`No treatments found for set id: ${setId}.`, undefined, getFullErrorCode('17C001'))
-      })
-    }
-
-    throw AppError.badRequest('A setId is required', undefined, getFullErrorCode('17C002'))
-  }
-
-  @setErrorCode('17D000')
-  mapTreatmentLevelsToOutputFormat = (response) => {
-    const groupedValues = _.groupBy(response, 'treatment_id')
-
-    return _.map(groupedValues, (treatmentDetails, treatmentId) => (
-      {
-        treatmentId: Number(treatmentId),
-        factorLevels: _.map(treatmentDetails, detail => ({
-          items: detail.value.items,
-          factorName: detail.name,
-        })),
-      }))
-  }
-
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')
   updateUnitsForSet = (setId, experimentalUnits, context, tx) =>

@@ -1,10 +1,11 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
+import AppError from './utility/AppError'
 import BlockService from './BlockService'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
-const { setErrorCode } = require('@monsantoit/error-decorator')()
+const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1VXXXX
 class TreatmentBlockService {
@@ -174,6 +175,39 @@ class TreatmentBlockService {
   @setErrorCode('1VH000')
   findTBByTreatmentId = (treatmentBlocks, treatmentId) =>
     _.find(treatmentBlocks, tb => tb.treatment_id === treatmentId)
+
+  @setErrorCode('1VI000')
+  @Transactional('getTreatmentDetailsBySetId')
+  getTreatmentDetailsBySetId = (setId, tx) => {
+    if (setId) {
+      return this.getTreatmentBlocksBySetId(setId, tx).then((treatmentBlocks) => {
+        const treatmentIds = _.uniq(_.map(treatmentBlocks, 'treatment_id'))
+
+        if (treatmentIds && treatmentIds.length > 0) {
+          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
+            .then(this.mapTreatmentLevelsToOutputFormat)
+        }
+
+        throw AppError.notFound(`No treatments found for set id: ${setId}.`, undefined, getFullErrorCode('1VI001'))
+      })
+    }
+
+    throw AppError.badRequest('A setId is required', undefined, getFullErrorCode('1VI002'))
+  }
+
+  @setErrorCode('1VJ000')
+  mapTreatmentLevelsToOutputFormat = (response) => {
+    const groupedValues = _.groupBy(response, 'treatment_id')
+
+    return _.map(groupedValues, (treatmentDetails, treatmentId) => (
+      {
+        treatmentId: Number(treatmentId),
+        factorLevels: _.map(treatmentDetails, detail => ({
+          items: detail.value.items,
+          factorName: detail.name,
+        })),
+      }))
+  }
 }
 
 

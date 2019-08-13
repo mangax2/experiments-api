@@ -2,6 +2,7 @@ import { ConsumerGroup } from 'kafka-node'
 import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
+import db from '../../db/DbManager'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
 import KafkaProducer from '../kafka/KafkaProducer'
@@ -77,13 +78,16 @@ class ManageRepsAndUnitsListener {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }
-        const { location, block } = assoc
+        const { location } = assoc
+        const blockId = assoc.block_id
         const experimentId = assoc.experiment_id
-        return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
-          location, block, { userId: 'REP_PACKING', isRepPacking: true }, tx)
-          .then(() => {
-            ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
-          })
+        return db.treatmentBlock.batchFindByBlockIds(blockId, tx)
+          .then(treatmentBlocks =>
+            this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
+              location, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, tx)
+              .then(() => {
+                ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
+              }))
       }).catch((err) => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
         return Promise.reject(err)

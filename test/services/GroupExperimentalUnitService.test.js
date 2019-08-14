@@ -851,6 +851,7 @@ describe('GroupExperimentalUnitService', () => {
     beforeEach(() => {
       db.locationAssociation.findNumberOfLocationsAssociatedWithSets = mockResolve({ max: 2 })
       target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve(treatmentBlocks)
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock([])
       target.designSpecificationDetailService.saveDesignSpecifications = mockResolve()
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -873,6 +874,12 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('saves a list of units', () => {
+      const unitsForDB = [{
+        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: 222, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: 111, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
       const designSpecsAndUnits = {
         designSpecifications,
         units: [{
@@ -881,11 +888,6 @@ describe('GroupExperimentalUnitService', () => {
           rep: 1, treatmentId: 11, block: 1, location: 2,
         }],
       }
-      const unitsForDB = [{
-        rep: 1, treatmentBlockId: 222, location: 1,
-      }, {
-        rep: 1, treatmentBlockId: 111, location: 2,
-      }]
 
       return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
         expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(experimentId, unitsForDB, false, testContext, testTx)
@@ -893,6 +895,12 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws an error when treatment block combination is not valid for experiment', () => {
+      const unitsForDB = [{
+        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: undefined, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: undefined, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
       const designSpecsAndUnits = {
         designSpecifications,
         units: [{
@@ -903,7 +911,7 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('2 units have invalid treatment block values for experimentId 1.', undefined, '1FV003')
+        expect(AppError.badRequest).toHaveBeenCalledWith('2 units have invalid treatment block values.', undefined, '1FV003')
       })
     })
 

@@ -51,7 +51,6 @@ class GroupExperimentalUnitService {
     if (units.length === 0) {
       return Promise.resolve()
     }
-    // TODO what happens when you pass in units as an empty string?
     return db.unit.batchCreate(units, context, tx)
   }
 
@@ -310,25 +309,15 @@ class GroupExperimentalUnitService {
           }
 
           _.forEach(units, (unit) => {
-            unit.block = unit.block || null
+            unit.block = unit.block.toString() || null
           })
-          const unitsForDB = units.map((unit) => {
-            const treatmentBlock = treatmentBlocks.find(tb =>
-              tb.name === unit.block.toString() && tb.treatment_id === unit.treatmentId)
-            const treatmentBlockId = _.get(treatmentBlock, 'id')
-            return {
-              rep: unit.rep, location: unit.location, treatmentBlockId,
-            }
-          })
-          const unitsWithInvalidTreatmentBlock =
-            _.filter(unitsForDB, unit => !unit.treatmentBlockId)
 
-          if (unitsWithInvalidTreatmentBlock.length > 0) {
-            throw AppError.badRequest(`${unitsWithInvalidTreatmentBlock.length} units have invalid treatment block values for experimentId ${experimentId}.`, undefined, getFullErrorCode('1FV003'))
-          }
+          const unitsWithTBs =
+            this.unitWithBlockService.addTreatmentBlocksToUnits(units, treatmentBlocks)
+          this.validateUnitsTBs(unitsWithTBs)
 
           return tx.batch([
-            this.saveUnitsByExperimentId(experimentId, unitsForDB, isTemplate, context, tx),
+            this.saveUnitsByExperimentId(experimentId, unitsWithTBs, isTemplate, context, tx),
             this.designSpecificationDetailService.saveDesignSpecifications(
               designSpecifications, experimentId, isTemplate, context, tx,
             ),
@@ -339,6 +328,13 @@ class GroupExperimentalUnitService {
     }
 
     throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
+  }
+
+  validateUnitsTBs = (unitWithTBs) => {
+    const unitsWithInvalidTreatmentBlock = _.filter(unitWithTBs, unit => !unit.treatmentBlockId)
+    if (unitsWithInvalidTreatmentBlock.length > 0) {
+      throw AppError.badRequest(`${unitsWithInvalidTreatmentBlock.length} units have invalid treatment block values.`, undefined, getFullErrorCode('1FV003'))
+    }
   }
 
   @setErrorCode('1FW000')

@@ -17,11 +17,10 @@ class TreatmentWithBlockService {
     this.blockService = new BlockService()
   }
 
-  // TODO should we clean this up?
   @setErrorCode('1Z1000')
   @Transactional('getTreatmentsByExperimentIdWithTemplateCheck')
   getTreatmentsByExperimentIdWithTemplateCheck(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
+    return this.experimentService.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
       .then(() => this.getTreatmentsByExperimentId(id, tx))
   }
 

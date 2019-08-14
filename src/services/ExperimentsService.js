@@ -60,12 +60,11 @@ class ExperimentsService {
           promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
           const analysisModelInfo = _.compact(_.map(experiments, (exp) => {
             if (exp.analysisModelType) {
-              const obj = {
+              return {
                 experimentId: exp.id,
                 analysisModelType: exp.analysisModelType,
                 analysisModelSubType: exp.analysisModelSubType,
               }
-              return obj
             }
             return null
           }))
@@ -156,16 +155,24 @@ class ExperimentsService {
     })
   }
 
-  @setErrorCode('158000')
-  @Transactional('getExperimentById')
-  getExperimentById(id, isTemplate, context, tx) {
-    return db.experiments.find(id, isTemplate, tx).then((data) => {
+  @setErrorCode('15U000')
+  @Transactional('findExperimentWithTemplateCheck')
+  findExperimentWithTemplateCheck = (id, isTemplate, context, tx) =>
+    db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
-      } else {
+      }
+      return data
+    })
+
+  @setErrorCode('158000')
+  @Transactional('getExperimentById')
+  getExperimentById = (id, isTemplate, context, tx) =>
+    this.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
+      .then((data) => {
         const promises = []
 
         promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
@@ -186,9 +193,7 @@ class ExperimentsService {
           }
           return data
         })
-      }
-    })
-  }
+      })
 
   @notifyChanges('update', 0, 3)
   @setErrorCode('159000')
@@ -271,9 +276,8 @@ class ExperimentsService {
         .then((strategies) => {
           const randStrategy = _.find(strategies.body, strategy =>
             strategy.strategyCode === strategyCode)
-          const updateDesignPromise = isCreate ? Promise.resolve()
-            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx)
-          return updateDesignPromise
+          return (isCreate ? Promise.resolve()
+            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx))
         })
     })
   }

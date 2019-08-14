@@ -61,13 +61,13 @@ describe('TreatmentDetailsService', () => {
         },
       ]
 
-      target.treatmentService.getTreatmentsByExperimentId = mockResolve(treatments)
+      target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck = mockResolve(treatments)
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve(combinationElements)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve(factorLevels)
       target.factorService.getFactorsByExperimentId = mockResolve(factors)
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then((data) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
@@ -77,13 +77,13 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when it fails to get treatments', () => {
       const error = { message: 'error' }
-      target.treatmentService.getTreatmentsByExperimentId = mockReject(error)
+      target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck = mockReject(error)
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
@@ -93,13 +93,13 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when it fails to get combinationElements', () => {
       const error = { message: 'error' }
-      target.treatmentService.getTreatmentsByExperimentId = mockResolve()
+      target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck = mockResolve()
       target.combinationElementService.getCombinationElementsByExperimentId = mockReject(error)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockResolve()
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
@@ -109,13 +109,13 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when it fails to get factorLevels', () => {
       const error = { message: 'error' }
-      target.treatmentService.getTreatmentsByExperimentId = mockResolve()
+      target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck = mockResolve()
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject(error)
       target.factorService.getFactorsByExperimentId = mockResolve()
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
@@ -125,13 +125,13 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when it fails to get factors', () => {
       const error = { message: 'error' }
-      target.treatmentService.getTreatmentsByExperimentId = mockResolve()
+      target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck = mockResolve()
       target.combinationElementService.getCombinationElementsByExperimentId = mockResolve()
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve()
       target.factorService.getFactorsByExperimentId = mockReject(error)
 
       return target.getAllTreatmentDetails(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck).toHaveBeenCalledWith(1, false, testContext, testTx)
         expect(target.combinationElementService.getCombinationElementsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
         expect(target.factorService.getFactorsByExperimentId).toHaveBeenCalledWith(1, false, testContext, testTx)
@@ -149,12 +149,14 @@ describe('TreatmentDetailsService', () => {
       target.createTreatments = mockResolve()
       target.updateTreatments = mock()
       target.deleteTreatments = mock()
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       AppUtil.createNoContentResponse = mock()
 
       return target.handleAllTreatments(1, [{}], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith([{ experimentId: 1 }], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [{ block: null, experimentId: 1 }], testContext, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.deleteTreatments).not.toHaveBeenCalled()
       })
@@ -169,6 +171,8 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mock()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       return target.handleAllTreatments(1, [], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
@@ -222,6 +226,8 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
         {
@@ -257,8 +263,18 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith([treatments[1], treatments[2]], testContext, testTx)
-        expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [
+          {
+            ...treatments[1], block: null, experimentId: 1, sortedFactorLevelIds: '100,104',
+          },
+          {
+            ...treatments[2], block: null, experimentId: 1, sortedFactorLevelIds: '102',
+          }], testContext, testTx)
+        expect(target.updateTreatments).toHaveBeenCalledWith(1,
+          [{
+            ...treatments[0], block: null, experimentId: 1, id: 2, sortedFactorLevelIds: '100,102',
+          }],
+          testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([1, 3], testContext, testTx)
       })
     })
@@ -269,9 +285,11 @@ describe('TreatmentDetailsService', () => {
           id: 1,
           combination_elements: [
             {
+              id: 1,
               factor_level: { id: 100 },
             },
             {
+              id: 2,
               factor_level: { id: 101 },
             },
           ],
@@ -285,6 +303,8 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
         {
@@ -293,9 +313,11 @@ describe('TreatmentDetailsService', () => {
           treatmentNumber: 1,
           combinationElements: [
             {
+              id: 1,
               factorLevelId: 100,
             },
             {
+              id: 2,
               factorLevelId: 101,
             },
           ],
@@ -317,8 +339,12 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith([treatments[1]], testContext, testTx)
-        expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [{
+          ...treatments[1], block: null, experimentId: 1, sortedFactorLevelIds: '100,101',
+        }], testContext, testTx)
+        expect(target.updateTreatments).toHaveBeenCalledWith(1, [{
+          ...treatments[0], block: null, id: 1, experimentId: 1, sortedFactorLevelIds: '100,101',
+        }], testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([], testContext, testTx)
       })
     })
@@ -358,6 +384,8 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
         {
@@ -377,8 +405,10 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith([], testContext, testTx)
-        expect(target.updateTreatments).toHaveBeenCalledWith([treatments[0]], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [], testContext, testTx)
+        expect(target.updateTreatments).toHaveBeenCalledWith(1, [{
+          ...treatments[0], block: null, id: 1, experimentId: 1, sortedFactorLevelIds: '100,101',
+        }], testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([2], testContext, testTx)
       })
     })
@@ -392,6 +422,8 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mock()
       target.deleteTreatments = mock()
       AppUtil.createNoContentResponse = mock('')
+      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
 
       return target.handleAllTreatments(1, [], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
@@ -405,7 +437,7 @@ describe('TreatmentDetailsService', () => {
   describe('populateExperimentId', () => {
     test('populates experimentId as a number', () => {
       const treatments = [{ id: 1 }, { id: 2 }]
-      TreatmentDetailsService.populateExperimentId(treatments, '-1')
+      TreatmentDetailsService.populateExperimentId(treatments, -1)
       expect(treatments).toEqual([{ id: 1, experimentId: -1 }, { id: 2, experimentId: -1 }])
     })
   })
@@ -441,21 +473,21 @@ describe('TreatmentDetailsService', () => {
 
   describe('createTreatments', () => {
     test('returns without creating treatments if none are given', () => {
-      target.treatmentService.batchCreateTreatments = mock()
+      target.treatmentWithBlockService.batchCreateTreatments = mock()
 
       return target.createTreatments([], testContext, testTx).then(() => {
-        expect(target.treatmentService.batchCreateTreatments).not.toHaveBeenCalled()
+        expect(target.treatmentWithBlockService.batchCreateTreatments).not.toHaveBeenCalled()
       })
     })
 
     test('calls batchCreateTreatments, createCombinationElements, and' +
       ' assembleBatchCreateCombincationElementsRequestFromAdds', () => {
-      target.treatmentService.batchCreateTreatments = mockResolve([{ id: 1 }])
+      target.treatmentWithBlockService.createTreatments = mockResolve([{ id: 1 }])
       target.createCombinationElements = mockResolve()
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
-      return target.createTreatments([{ id: 1, experimentId: 10 }], testContext, testTx).then(() => {
-        expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{ id: 1, experimentId: 10 }], testContext, testTx)
+      return target.createTreatments(1, [{ id: 1, experimentId: 10 }], testContext, testTx).then(() => {
+        expect(target.treatmentWithBlockService.createTreatments).toHaveBeenCalledWith(1, [{ id: 1, experimentId: 10 }], testContext, testTx)
         expect(target.createCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).toHaveBeenCalledWith([{ id: 1, experimentId: 10 }], [1])
       })
@@ -464,12 +496,12 @@ describe('TreatmentDetailsService', () => {
     test('rejects when createCombinationElements fails', () => {
       const error = { message: 'error' }
       target.securityService.permissionsCheckForExperiments = mockResolve()
-      target.treatmentService.batchCreateTreatments = mockResolve([{ id: 1 }])
+      target.treatmentWithBlockService.createTreatments = mockResolve([{ id: 1 }])
       target.createCombinationElements = mockReject(error)
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
-      return target.createTreatments([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.createTreatments(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentWithBlockService.createTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.createCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).toHaveBeenCalledWith([{}], [1])
         expect(err).toEqual(error)
@@ -479,12 +511,12 @@ describe('TreatmentDetailsService', () => {
     test('rejects when batchCreateTreatments fails', () => {
       const error = { message: 'error' }
       target.securityService.permissionsCheckForExperiments = mockResolve()
-      target.treatmentService.batchCreateTreatments = mockReject(error)
+      target.treatmentWithBlockService.createTreatments = mockReject(error)
       target.createCombinationElements = mockReject(error)
       target.assembleBatchCreateCombinationElementsRequestFromAdds = mock([{}])
 
-      return target.createTreatments([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchCreateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.createTreatments(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentWithBlockService.createTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.createCombinationElements).not.toHaveBeenCalled()
         expect(target.assembleBatchCreateCombinationElementsRequestFromAdds).not.toHaveBeenCalled()
         expect(err).toEqual(error)
@@ -536,12 +568,12 @@ describe('TreatmentDetailsService', () => {
     })
 
     test('updates treatments, deletes, and creates combination elements', () => {
-      target.treatmentService.batchUpdateTreatments = mockResolve()
+      target.treatmentWithBlockService.updateTreatments = mockResolve()
       target.deleteCombinationElements = mockResolve()
       target.createAndUpdateCombinationElements = mockResolve()
 
-      return target.updateTreatments([{}], testContext, testTx).then(() => {
-        expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.updateTreatments(1, [{}], testContext, testTx).then(() => {
+        expect(target.treatmentWithBlockService.updateTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.createAndUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
       })
@@ -549,12 +581,12 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when createAndUpdateCombinationElements fails', () => {
       const error = { message: 'error' }
-      target.treatmentService.batchUpdateTreatments = mockResolve()
+      target.treatmentWithBlockService.updateTreatments = mockResolve()
       target.deleteCombinationElements = mockResolve()
       target.createAndUpdateCombinationElements = mockReject(error)
 
-      return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.updateTreatments(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentWithBlockService.updateTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.createAndUpdateCombinationElements).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(err).toEqual(error)
@@ -563,12 +595,12 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when deleteCombinationElements fails', () => {
       const error = { message: 'error' }
-      target.treatmentService.batchUpdateTreatments = mockResolve()
+      target.treatmentWithBlockService.updateTreatments = mockResolve()
       target.deleteCombinationElements = mockReject(error)
       target.createAndUpdateCombinationElements = mockReject(error)
 
-      return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.updateTreatments(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentWithBlockService.updateTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.deleteCombinationElements).toHaveBeenCalledWith([{}], {}, testTx)
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()
         expect(err).toEqual(error)
@@ -577,12 +609,12 @@ describe('TreatmentDetailsService', () => {
 
     test('rejects when batchUpdateTreatments fails', () => {
       const error = { message: 'error' }
-      target.treatmentService.batchUpdateTreatments = mockReject(error)
+      target.treatmentWithBlockService.updateTreatments = mockReject(error)
       target.deleteCombinationElements = mockReject(error)
       target.createAndUpdateCombinationElements = mockReject(error)
 
-      return target.updateTreatments([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([{}], testContext, testTx)
+      return target.updateTreatments(1, [{}], testContext, testTx).then(() => {}, (err) => {
+        expect(target.treatmentWithBlockService.updateTreatments).toHaveBeenCalledWith(1, [{}], testContext, testTx)
         expect(target.deleteCombinationElements).not.toHaveBeenCalled()
         expect(target.createAndUpdateCombinationElements).not.toHaveBeenCalled()
         expect(err).toEqual(error)

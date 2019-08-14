@@ -52,6 +52,7 @@ class UnitWithBlockService {
     return unit
   })
 
+  // TODO this is not used, check
   createUnits = (experimentId, units, context, tx) =>
     this.matchUnitsWithTreatmentBlocks(experimentId, units, tx)
       .then(unitWithTBs =>

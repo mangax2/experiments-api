@@ -168,30 +168,6 @@ describe('ExperimentalUnitService', () => {
     })
   })
 
-  describe('getExperimentalUnitsByExperimentId', () => {
-    test('calls getExperimentById and findAllByExperimentId', () => {
-      target.experimentService.getExperimentById = mockResolve()
-      db.unit.findAllByExperimentId = mock()
-
-      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
-      })
-    })
-
-    test('rejects when getExperimentById fails', () => {
-      const error = { message: 'error' }
-      target.experimentService.getExperimentById = mockReject(error)
-      db.unit.findAllByExperimentId = mock()
-
-      return target.getExperimentalUnitsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(db.unit.findAllByExperimentId).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('batchPartialUpdateExperimentalUnits', () => {
     test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()

@@ -154,8 +154,9 @@ class ExperimentalUnitService {
     db.unit.batchFindAllByLocationAndTreatmentBlocks(location, _.map(treatmentBlocks, 'id'), tx)
       .then((unitsFromDB) => {
         unitsToSave.forEach((unit) => {
-          unit.treatmentBlockId = treatmentBlocks.find(
+          const matchingTreatmentBlock = treatmentBlocks.find(
             treatmentBlock => treatmentBlock.treatment_id === unit.treatmentId)
+          unit.treatmentBlockId = _.get(matchingTreatmentBlock, 'id')
           delete unit.treatmentId
         })
         const {

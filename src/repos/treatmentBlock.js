@@ -21,6 +21,11 @@ class treatmentBlockRepo {
     return tx.any('SELECT * FROM treatment_block WHERE block_id IN ($1:csv)', [blockIds])
   }
 
+  @setErrorCode('5T7000')
+  findByBlockId = (blockId, tx = this.rep) => {
+    return tx.any('SELECT * FROM treatment_block WHERE block_id = $1', [blockId])
+  }
+
   @setErrorCode('5T4000')
   batchCreate = (treatmentBlocks, context, tx = this.rep) => {
     if(_.isEmpty(treatmentBlocks)) {

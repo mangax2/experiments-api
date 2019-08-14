@@ -102,9 +102,11 @@ class treatmentRepo {
       })
   }
 
-  // TODO check the block in these query
   batchFindAllBySetId = (setIds, tx = this.rep) => {
-    return tx.any('SELECT es.set_id, t.* FROM (SELECT DISTINCT la.set_id, la.experiment_id, la.block FROM public.location_association la WHERE la.set_id IN ($1:csv)) es INNER JOIN treatment t on es.experiment_id = t.experiment_id AND ((t.in_all_blocks IS TRUE) OR (es.block IS NOT DISTINCT FROM t.block))', [setIds])
+    return tx.any('SELECT es.set_id, t.* FROM (SELECT la.set_id, tb.treatment_id \n' +
+      'FROM public.location_association la, public.treatment_block tb WHERE \n' +
+      'la.block_id = tb.block_id and la.set_id IN ($1:csv)) es\n' +
+      'INNER JOIN treatment t on es.treatment_id = t.id;', [setIds])
       .then(data => {
         const dataBySetId = _.groupBy(data, 'set_id')
         return _.compact(_.flatMap(setIds, setId =>

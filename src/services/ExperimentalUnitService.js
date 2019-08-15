@@ -24,16 +24,6 @@ class ExperimentalUnitService {
     this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
-  @setErrorCode('171000')
-  @Transactional('createExperimentalUnitsTx')
-  batchCreateExperimentalUnits(experimentalUnits, context, tx) {
-    // TODO this validation no longer makes sense and shouldn't work here
-    // TODO is this method still being used? This is from Kassidy
-    return this.validator.validate(experimentalUnits, 'POST', tx)
-      .then(() => db.unit.batchCreate(experimentalUnits, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
-  }
-
   @setErrorCode('172000')
   @Transactional('partialUpdateExperimentalUnitsTx')
   batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {

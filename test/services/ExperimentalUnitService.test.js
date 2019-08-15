@@ -14,48 +14,6 @@ describe('ExperimentalUnitService', () => {
     target = new ExperimentalUnitService()
   })
 
-  describe('batchCreateExperimentalUnits', () => {
-    test('calls validate, batchCreate, and createPostResponse on success', () => {
-      target.validator.validate = mockResolve()
-      db.unit.batchCreate = mockResolve({})
-      AppUtil.createPostResponse = mock()
-
-      return target.batchCreateExperimentalUnits([], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.unit.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(AppUtil.createPostResponse).toHaveBeenCalledWith({})
-      })
-    })
-
-    test('rejects when batchCreate fails', () => {
-      const error = { message: 'error' }
-      target.validator.validate = mockResolve()
-      db.unit.batchCreate = mockReject(error)
-      AppUtil.createPostResponse = mock()
-
-      return target.batchCreateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.unit.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('rejects when validator fails', () => {
-      const error = { message: 'error' }
-      target.validator.validate = mockReject(error)
-      db.unit.batchCreate = mock()
-      AppUtil.createPostResponse = mock()
-
-      return target.batchCreateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.unit.batchCreate).not.toHaveBeenCalled()
-        expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-  })
-
   describe('getExperimentalUnitsByExperimentIdNoValidate', () => {
     test('calls findAllByExperimentId', () => {
       db.unit.findAllByExperimentId = mockResolve()

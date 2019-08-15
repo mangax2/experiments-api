@@ -52,16 +52,6 @@ class UnitWithBlockService {
     return unit
   })
 
-  // TODO this is not used, check
-  createUnits = (experimentId, units, context, tx) =>
-    this.matchUnitsWithTreatmentBlocks(experimentId, units, tx)
-      .then(unitWithTBs =>
-        this.experimentalUnitService.batchCreateExperimentalUnits(unitWithTBs, context, tx))
-
-  matchUnitsWithTreatmentBlocks = (experimentId, units, tx) =>
-    this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId, tx)
-      .then(treatmentBlocks => this.addTreatmentBlocksToUnits(units, treatmentBlocks))
-
   addTreatmentBlocksToUnits = (units, treatmentBlocks) => _.map(units, (unit) => {
     const treatmentBlockId = this.findTreatmentBlockId(unit, treatmentBlocks)
     return ({ ...unit, treatmentBlockId })

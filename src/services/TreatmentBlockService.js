@@ -26,8 +26,8 @@ class TreatmentBlockService {
   getTreatmentBlocksBySetId = (setId, tx) =>
     this.locationAssocWithBlockService.getBySetId(setId, tx)
       .then(locAssociation => (_.isNil(locAssociation) ? Promise.resolve([]) :
-        tx.batch([db.block.batchFindByBlockIds(locAssociation.block_id),
-          db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id)])
+        tx.batch([db.block.batchFindByBlockIds(locAssociation.block_id, tx),
+          db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id, tx)])
           .then(([blocks, treatmentBlocks]) =>
             this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks))))
 

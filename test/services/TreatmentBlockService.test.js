@@ -157,7 +157,7 @@ describe('TreatmentBlockService', () => {
         treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
       }]
       const allBlockTM = [{
-        treatmentId: 112, treatmentNumber: 1, block: null, inAllBlocks: true,
+        treatmentId: 112, treatmentNumber: 2, block: null, inAllBlocks: true,
       }]
       const treatments = oneBlockTM.concat(allBlockTM)
       const oneBlockTB = [{ blockId: 11, treatmentId: 111, name: 'block1' }]

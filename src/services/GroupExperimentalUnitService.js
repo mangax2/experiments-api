@@ -309,7 +309,7 @@ class GroupExperimentalUnitService {
           }
 
           _.forEach(units, (unit) => {
-            unit.block = unit.block.toString() || null
+            unit.block = _.toString(unit.block) || null
           })
 
           const unitsWithTBs =

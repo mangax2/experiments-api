@@ -894,6 +894,27 @@ describe('GroupExperimentalUnitService', () => {
       })
     })
 
+    test('converts undefined block to null', () => {
+      const expectedUnits = [{
+        rep: 1, treatmentId: 22, block: null, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: null, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock()
+      const designSpecsAndUnits = {
+        designSpecifications,
+        units: [{
+          rep: 1, treatmentId: 22, block: undefined, location: 1,
+        }, {
+          rep: 1, treatmentId: 11, block: undefined, location: 2,
+        }],
+      }
+
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
+        expect(target.unitWithBlockService.addTreatmentBlocksToUnits).toHaveBeenCalledWith(expectedUnits, treatmentBlocks)
+      })
+    })
+
     test('throws an error when treatment block combination is not valid for experiment', () => {
       const unitsForDB = [{
         rep: 1, treatmentId: 22, block: '2', treatmentBlockId: undefined, location: 1,

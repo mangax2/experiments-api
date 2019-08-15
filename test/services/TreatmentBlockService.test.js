@@ -142,7 +142,7 @@ describe('TreatmentBlockService', () => {
   describe('createTreatmentBlocks', () => {
     test('empty treatment, return with []', () => {
       const target = new TreatmentBlockService()
-      return target.createTreatmentBlocks([]).then((data) => {
+      return target.createTreatmentBlocks(1, [], {}, testTx).then((data) => {
         expect(data).toEqual([])
       })
     })

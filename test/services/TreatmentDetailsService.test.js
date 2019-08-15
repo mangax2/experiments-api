@@ -140,6 +140,46 @@ describe('TreatmentDetailsService', () => {
     })
   })
 
+  describe('updateTreatmentBlockInfo', () => {
+    test('when the block is missing, it is a null block', () => {
+      const treatments = [
+        {
+          treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+        },
+        {
+          treatmentId: 112, treatmentNumber: 1, inAllBlocks: false,
+        },
+      ]
+      expect(target.updateTreatmentBlockInfo(treatments)).toEqual([
+        {
+          treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+        },
+        {
+          treatmentId: 112, treatmentNumber: 1, block: null, inAllBlocks: false,
+        },
+      ])
+    })
+
+    test('when the block is a number, converts it to a string', () => {
+      const treatments = [
+        {
+          treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+        },
+        {
+          treatmentId: 112, treatmentNumber: 1, block: 1, inAllBlocks: false,
+        },
+      ]
+      expect(target.updateTreatmentBlockInfo(treatments)).toEqual([
+        {
+          treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+        },
+        {
+          treatmentId: 112, treatmentNumber: 1, block: '1', inAllBlocks: false,
+        },
+      ])
+    })
+  })
+
   describe('handleAllTreatments', () => {
     test('only calls to create when treatments are passed in and db has no data', () => {
       target.securityService = {

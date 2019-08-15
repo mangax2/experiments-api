@@ -95,14 +95,14 @@ class TreatmentDetailsService {
               TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
               return this.createTreatments(experimentId, sortedTreatments, context, tx)
                 .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                  blockNames, context, tx))
+                  blockNames, tx))
                 .then(() => AppUtil.createNoContentResponse())
             }
 
             if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
               return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
                 .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                  blockNames, context, tx))
+                  blockNames, tx))
                 .then(() => AppUtil.createNoContentResponse())
             }
 
@@ -160,13 +160,12 @@ class TreatmentDetailsService {
                 .then(() => this.updateTreatments(experimentId, updates, context, tx)
                   .then(() => this.createTreatments(experimentId, adds, context, tx)
                     .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                      blockNames, context, tx))
+                      blockNames, tx))
                     .then(() => AppUtil.createNoContentResponse()),
                   ))
             }
 
-            return this.blockService.removeBlocksByExperimentId(experimentId,
-              blockNames, context, tx)
+            return this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
               .then(() => AppUtil.createNoContentResponse())
           })
       }),

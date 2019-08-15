@@ -46,6 +46,7 @@ class TreatmentBlockService {
     )
 
   @setErrorCode('1V5000')
+  @Transactional('createTreatmentBlocks')
   createTreatmentBlocks = (treatments, blocks, context, tx) => {
     if (_.isEmpty(treatments)) {
       return Promise.resolve([])

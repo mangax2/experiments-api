@@ -40,7 +40,7 @@ class UnitWithBlockService {
   @setErrorCode('204000')
   @Transactional('getExperimentalUnitsBySetId')
   getExperimentalUnitsBySetId(id, tx) {
-    return Promise.all([db.unit.batchFindAllBySetIds(id, tx),
+    return tx.batch([db.unit.batchFindAllBySetIds(id, tx),
       this.treatmentBlockService.getTreatmentBlocksBySetId(id, tx)])
       .then(([units, treatmentBlocks]) => this.addBlockInfoToUnit(units, treatmentBlocks))
   }

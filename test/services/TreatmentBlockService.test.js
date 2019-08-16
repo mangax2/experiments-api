@@ -74,6 +74,15 @@ describe('TreatmentBlockService', () => {
   })
 
   describe('getTreatmentBlocksByTreatmentIds', () => {
+    test('empty treatmentIds, return []', () => {
+      const target = new TreatmentBlockService()
+
+      return target.getTreatmentBlocksByTreatmentIds([], testTx)
+        .then((data) => {
+          expect(data).toEqual([])
+        })
+    })
+
     test('treatment block should be returned with block info', () => {
       const blocks = [{ id: 11, name: 'block1' }]
       const treatmentBlocks = [
@@ -96,6 +105,15 @@ describe('TreatmentBlockService', () => {
   })
 
   describe('getTreatmentBlocksByIds', () => {
+    test('empty ids, return []', () => {
+      const target = new TreatmentBlockService()
+
+      return target.getTreatmentBlocksByIds([], testTx)
+        .then((data) => {
+          expect(data).toEqual([])
+        })
+    })
+
     test('treatment block should be returned with block info', () => {
       const blocks = [{ id: 11, name: 'block1' }]
       const treatmentBlocks = [

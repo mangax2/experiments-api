@@ -18,14 +18,14 @@ class UnitWithBlockService {
   @setErrorCode('201000')
   @Transactional('getUnitsFromTemplateByExperimentId')
   getUnitsFromTemplateByExperimentId(id, context, tx) {
-    return this.experimentService.getExperimentById(id, true, context, tx)
+    return this.experimentService.findExperimentWithTemplateCheck(id, true, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
   }
 
   @setErrorCode('202000')
   @Transactional('getUnitsFromExperimentByExperimentId')
   getUnitsFromExperimentByExperimentId(id, context, tx) {
-    return this.experimentService.getExperimentById(id, false, context, tx)
+    return this.experimentService.findExperimentWithTemplateCheck(id, false, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
   }
 

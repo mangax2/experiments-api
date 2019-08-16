@@ -8,20 +8,20 @@ describe('UnitWithBlockService', () => {
   describe('getUnitsFromTemplateByExperimentId', () => {
     test('The call fails getExperimentById check', () => {
       const target = new UnitWithBlockService()
-      target.experimentService.getExperimentById = mockReject()
+      target.experimentService.findExperimentWithTemplateCheck = mockReject()
       target.getExperimentalUnitsByExperimentId = mockResolve([])
       return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).catch(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).not.toHaveBeenCalled()
       })
     })
 
     test('The call passes getExperimentById check', () => {
       const target = new UnitWithBlockService()
-      target.experimentService.getExperimentById = mockResolve()
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
       target.getExperimentalUnitsByExperimentId = mockResolve([])
       return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
       })
@@ -31,20 +31,20 @@ describe('UnitWithBlockService', () => {
   describe('getUnitsFromExperimentByExperimentId', () => {
     test('The call fails getExperimentById check', () => {
       const target = new UnitWithBlockService()
-      target.experimentService.getExperimentById = mockReject()
+      target.experimentService.findExperimentWithTemplateCheck = mockReject()
       target.getExperimentalUnitsByExperimentId = mockResolve([])
       return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).catch(() => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, {}, testTx)
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).not.toHaveBeenCalled()
       })
     })
 
     test('The call passes getExperimentById check', () => {
       const target = new UnitWithBlockService()
-      target.experimentService.getExperimentById = mockResolve()
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
       target.getExperimentalUnitsByExperimentId = mockResolve([])
       return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).then((data) => {
-        expect(target.experimentService.getExperimentById).toHaveBeenCalledWith(1, false, {}, testTx)
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
       })

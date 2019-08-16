@@ -35,20 +35,23 @@ class TreatmentBlockService {
   @setErrorCode('1VK000')
   @Transactional('getTreatmentBlocksByTreatmentIds')
   getTreatmentBlocksByTreatmentIds = (treatmentIds, tx) =>
-    db.treatmentBlock.batchFindByTreatmentIds(treatmentIds, tx)
-      .then(treatmentBlocks =>
-        db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
-          .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
-      )
+    (_.isEmpty(treatmentIds) ? Promise.resolve([]) :
+      db.treatmentBlock.batchFindByTreatmentIds(treatmentIds, tx)
+        .then(treatmentBlocks =>
+          db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+            .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
+        ))
 
   @setErrorCode('1VL000')
   @Transactional('getTreatmentBlocksByIds')
   getTreatmentBlocksByIds = (ids, tx) =>
-    db.treatmentBlock.batchFindByIds(ids, tx)
-      .then(treatmentBlocks =>
-        db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
-          .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
-      )
+    (_.isEmpty(ids) ? Promise.resolve([]) :
+      db.treatmentBlock.batchFindByIds(ids, tx)
+        .then(treatmentBlocks =>
+          db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+            .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
+        )
+    )
 
   @setErrorCode('1V3000')
   getTreatmentBlocksWithBlockInfo = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {

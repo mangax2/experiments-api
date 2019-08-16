@@ -66,7 +66,7 @@ class TreatmentDetailsService {
     })
   }
 
-  updateTreatmentBlockInfo = treatments => _.map(treatments, (t) => {
+  stringifyBlock = treatments => _.map(treatments, (t) => {
     const block = _.isNil(t.block) ? null : _.toString(t.block)
     return {
       ...t,
@@ -84,9 +84,10 @@ class TreatmentDetailsService {
       this.validator.validateBlockValue(inputTreatments),
     ]).then(() => this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
       .then((result) => {
-        const treatments = this.updateTreatmentBlockInfo(inputTreatments)
+        const treatments = this.stringifyBlock(inputTreatments)
         const blockNames = _.map(_.filter(treatments, t => !t.inAllBlocks), 'block')
-        return this.blockService.createBlocksByExperimentId(experimentId, blockNames, context, tx)
+        return this.blockService.createOnlyNewBlocksByExperimentId(experimentId,
+          blockNames, context, tx)
           .then(() => {
             const dbTreatments = _.sortBy(result, 'treatment_number')
             const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
@@ -165,8 +166,7 @@ class TreatmentDetailsService {
                   ))
             }
 
-            return this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
-              .then(() => AppUtil.createNoContentResponse())
+            return AppUtil.createNoContentResponse()
           })
       }),
     )

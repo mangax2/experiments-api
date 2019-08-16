@@ -140,7 +140,7 @@ describe('TreatmentDetailsService', () => {
     })
   })
 
-  describe('updateTreatmentBlockInfo', () => {
+  describe('stringifyBlock', () => {
     test('when the block is missing, it is a null block', () => {
       const treatments = [
         {
@@ -150,7 +150,7 @@ describe('TreatmentDetailsService', () => {
           treatmentId: 112, treatmentNumber: 1, inAllBlocks: false,
         },
       ]
-      expect(target.updateTreatmentBlockInfo(treatments)).toEqual([
+      expect(target.stringifyBlock(treatments)).toEqual([
         {
           treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
         },
@@ -169,7 +169,7 @@ describe('TreatmentDetailsService', () => {
           treatmentId: 112, treatmentNumber: 1, block: 1, inAllBlocks: false,
         },
       ]
-      expect(target.updateTreatmentBlockInfo(treatments)).toEqual([
+      expect(target.stringifyBlock(treatments)).toEqual([
         {
           treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
         },
@@ -189,7 +189,7 @@ describe('TreatmentDetailsService', () => {
       target.createTreatments = mockResolve()
       target.updateTreatments = mock()
       target.deleteTreatments = mock()
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       AppUtil.createNoContentResponse = mock()
@@ -211,7 +211,7 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mock()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       return target.handleAllTreatments(1, [], testContext, false, testTx).then(() => {
@@ -266,7 +266,7 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
@@ -343,7 +343,7 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
@@ -424,7 +424,7 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mockResolve()
       target.deleteTreatments = mockResolve()
       AppUtil.createNoContentResponse = mock()
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       const treatments = [
@@ -462,7 +462,7 @@ describe('TreatmentDetailsService', () => {
       target.updateTreatments = mock()
       target.deleteTreatments = mock()
       AppUtil.createNoContentResponse = mock('')
-      target.blockService.createBlocksByExperimentId = mockResolve()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
       target.blockService.removeBlocksByExperimentId = mockResolve()
 
       return target.handleAllTreatments(1, [], testContext, false, testTx).then(() => {

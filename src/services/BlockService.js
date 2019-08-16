@@ -7,8 +7,8 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 // Error Codes 21XXXX
 class BlockService {
   @setErrorCode('211000')
-  @Transactional('createBlocksByExperimentId')
-  createBlocksByExperimentId = (experimentId, blockNames, context, tx) =>
+  @Transactional('createOnlyNewBlocksByExperimentId')
+  createOnlyNewBlocksByExperimentId = (experimentId, blockNames, context, tx) =>
     db.block.findByExperimentId(experimentId, tx)
       .then((blocksInDB) => {
         const inputBlockNames = _.uniqWith(blockNames, _.isEqual)
@@ -20,10 +20,10 @@ class BlockService {
 
   @setErrorCode('212000')
   @Transactional('removeBlocksByExperimentId')
-  removeBlocksByExperimentId = (experimentId, blockNames, tx) =>
+  removeBlocksByExperimentId = (experimentId, blockNamesToKeep, tx) =>
     db.block.findByExperimentId(experimentId, tx)
       .then((blocksInDB) => {
-        const inputBlockNames = _.uniqWith(blockNames, _.isEqual)
+        const inputBlockNames = _.uniqWith(blockNamesToKeep, _.isEqual)
         const blocksToRemove = _.filter(blocksInDB, b => !_.includes(inputBlockNames, b.name))
 
         return db.block.batchRemove(_.map(blocksToRemove, 'id'), tx)

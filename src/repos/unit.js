@@ -30,8 +30,7 @@ class unitRepo {
   batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
     'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
-    'INNER JOIN block b ON tb.block_id = b.id\n' +
-    'INNER JOIN location_association la ON b.id = la.block_id AND la.location = u.location AND la.set_id = $1;', setId)
+    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1;', setId)
 
   @setErrorCode('5JE000')
   batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, b.name AS block FROM location_association la\n' +
@@ -40,7 +39,7 @@ class unitRepo {
     'INNER JOIN block b ON tb.block_id = b.id\n' +
     'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
-    return _.compact(_.flatMap(setIds, setId => 
+    return _.compact(_.flatMap(setIds, setId =>
       _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id']))))
   })
 

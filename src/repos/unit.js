@@ -14,15 +14,6 @@ class unitRepo {
   @setErrorCode('5J4000')
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.experiment_id=$1', experimentId)
 
-  @setErrorCode('5JE000')
-  batchfindAllByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, t.experiment_id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.experiment_id IN ($1:csv)', experimentIds)
-    .then(data => {
-      const unitByExperimentId = _.groupBy(data, 'experiment_id')
-      return _.map(experimentIds, experimentId => {
-        return unitByExperimentId[experimentId] || []
-      })
-    })
-
   @setErrorCode('5J5000')
   batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])

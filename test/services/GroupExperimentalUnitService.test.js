@@ -211,7 +211,9 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', () => {
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3, block_id: 44 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({
+        location: 1, experiment_id: 5, set_id: 3, block_id: 44,
+      })
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       db.refDesignSpecification.all = mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }])
 
@@ -244,7 +246,9 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when number of reps not found', (done) => {
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3, block_id: 44 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({
+        location: 1, experiment_id: 5, set_id: 3, block_id: 44,
+      })
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
       AppError.badRequest = mock()
@@ -430,7 +434,7 @@ describe('GroupExperimentalUnitService', () => {
     test('test multiple locations and blocks', () => {
       target = new GroupExperimentalUnitService()
       target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
-      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, in_all_blocks: true }])
+      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, inAllBlocks: true }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])

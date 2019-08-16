@@ -51,7 +51,7 @@ class TreatmentWithBlockService {
   @setErrorCode('1Z5000')
   associateBlockInfoToTreatment = (treatment, treatmentBlocks) => {
     const treatmentWithBlock = Object.assign({}, treatment)
-    treatmentWithBlock.in_all_blocks = treatmentBlocks.length > 1
+    treatmentWithBlock.inAllBlocks = treatmentBlocks.length > 1
     treatmentWithBlock.block = treatmentBlocks.length === 1 ? treatmentBlocks[0].name : null
     return treatmentWithBlock
   }

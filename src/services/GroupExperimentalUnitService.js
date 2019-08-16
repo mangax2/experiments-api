@@ -215,7 +215,7 @@ class GroupExperimentalUnitService {
 
       const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
         const treatmentsByBlock = _.filter(trimmedTreatments,
-          t => t.block === u[0].block || t.in_all_blocks)
+          t => t.block === u[0].block || t.inAllBlocks)
         const body = JSON.stringify(inflector.transform({
           experimentId,
           randomizationStrategyCode: experiment.randomization_strategy_code,

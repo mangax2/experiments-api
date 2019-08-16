@@ -23,12 +23,11 @@ class locationAssociationRepo {
 
     if (setIds.includes('null')) {
       promises.push(tx.any('WITH experiment_location_blocks AS\n' +
-      '(SELECT DISTINCT e.id, u.location, b.name as block FROM experiment e, unit u, treatment t, treatment_block tb, block b ' +
-        'WHERE u.treatment_block_id = tb.id and tb.treatment_id = t.id AND tb.block_id = b.id AND t.experiment_id = e.id AND e.is_template = false AND t.in_all_blocks IS FALSE\n),\n' +
+      '(SELECT DISTINCT e.id, u.location, b.id as block_id FROM experiment e, unit u, treatment_block tb, block b ' +
+        'WHERE u.treatment_block_id = tb.id AND tb.block_id = b.id AND b.experiment_id = e.id AND e.is_template = false),\n' +
         'experiment_ids_missing_setIds AS(\n' +
         'SELECT DISTINCT elb.id FROM experiment_location_blocks elb\n' +
-        'LEFT JOIN block b ON b.experiment_id = elb.id\n' +
-        'LEFT JOIN location_association la ON b.id = la.block_id AND elb.location = la.location AND elb.block IS NOT DISTINCT FROM b.name WHERE la.experiment_id IS NULL)\n' +
+        'LEFT JOIN location_association la ON la.block_id = elb.block_id AND elb.location = la.location WHERE la.set_id IS NULL)\n' +
         'SELECT e.* from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
     } else {
       promises.push(Promise.resolve())

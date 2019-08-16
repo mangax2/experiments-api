@@ -15,20 +15,18 @@ class LocationAssociationWithBlockService {
   @Transactional('getLocationAssociationByExperimentId')
   getByExperimentId(id, tx) {
     return db.locationAssociation.findByExperimentId(id, tx)
-      .then(locationAssociations =>
-        (
-          locationAssociations.length > 0
-            ? (db.block.batchFindByBlockIds(_.uniq(_.map(locationAssociations, 'block_id')), tx)
-              .then(blocks =>
-                _.map(locationAssociations, (la) => {
-                  const block = _.find(blocks, { id: la.block_id })
-                  return this.addBlockInfoToLocationAssociation(la, block)
-                }),
-              )
-            )
-            : []
-        ),
-      )
+      .then((locationAssociations) => {
+        if (locationAssociations.length === 0) {
+          return []
+        }
+        return db.block.batchFindByBlockIds(_.uniq(_.map(locationAssociations, 'block_id')), tx)
+          .then(blocks =>
+            _.map(locationAssociations, (la) => {
+              const block = _.find(blocks, { id: la.block_id })
+              return this.addBlockInfoToLocationAssociation(la, block)
+            }),
+          )
+      })
   }
 
   @setErrorCode('2Z2000')

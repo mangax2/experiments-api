@@ -37,10 +37,11 @@ class TreatmentWithBlockService {
   @Transactional('getTreatmentsByBySetId')
   getTreatmentsByBySetId = (id, tx) =>
     db.treatment.batchFindAllBySetId(id, tx)
-      .then(treatments =>
-        this.treatmentBlockService.getTreatmentBlocksByTreatmentIds(_.map(treatments, 'id'), tx)
-          .then(treatmentBlocks => this.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)),
-      )
+      .then((treatments) => {
+        const uniqTreatments = _.uniqBy(treatments, 'id')
+        return this.treatmentBlockService.getTreatmentBlocksByTreatmentIds(_.map(uniqTreatments, 'id'), tx)
+          .then(treatmentBlocks => this.getTreatmentsWithBlockInfo(uniqTreatments, treatmentBlocks))
+      })
 
   @setErrorCode('1Z4000')
   getTreatmentsWithBlockInfo = (treatments, treatmentBlocks) => _.map(treatments, (t) => {

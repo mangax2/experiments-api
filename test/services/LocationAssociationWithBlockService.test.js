@@ -104,11 +104,11 @@ describe('LocationAssociationWithBlockService', () => {
 
     test('returns a locationAssociation with block info', () => {
       db.locationAssociation.findBySetId = mockResolve(locationAssociation)
-      db.block.batchFindByBlockId = mockResolve(block1)
+      db.block.findByBlockId = mockResolve(block1)
 
       return target.getBySetId(setId, testTx).then((data) => {
         expect(db.locationAssociation.findBySetId).toHaveBeenCalledWith(setId, testTx)
-        expect(db.block.batchFindByBlockId).toHaveBeenCalledWith(block1.id, testTx)
+        expect(db.block.findByBlockId).toHaveBeenCalledWith(block1.id, testTx)
         expect(data).toEqual({
           location: locationAssociation.location,
           set_id: locationAssociation.set_id,

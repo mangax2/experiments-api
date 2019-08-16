@@ -35,12 +35,12 @@ class TreatmentWithBlockService {
 
   @setErrorCode('1Z3000')
   @Transactional('getTreatmentsByBySetId')
-  getTreatmentsByBySetId(id, tx) {
-    return tx.batch([db.treatment.batchFindAllBySetId(id, tx),
-      this.treatmentBlockService.getTreatmentBlocksBySetId(id, tx)])
-      .then(([treatments, treatmentBlocks]) =>
-        this.getTreatmentsWithBlockInfo(treatments, treatmentBlocks))
-  }
+  getTreatmentsByBySetId = (id, tx) =>
+    db.treatment.batchFindAllBySetId(id, tx)
+      .then(treatments =>
+        this.treatmentBlockService.getTreatmentBlocksByTreatmentIds(_.map(treatments, 'id'), tx)
+          .then(treatmentBlocks => this.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)),
+      )
 
   @setErrorCode('1Z4000')
   getTreatmentsWithBlockInfo = (treatments, treatmentBlocks) => _.map(treatments, (t) => {

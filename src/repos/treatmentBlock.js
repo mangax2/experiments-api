@@ -23,7 +23,7 @@ class treatmentBlockRepo {
 
   @setErrorCode('5T7000')
   findByBlockId = (blockId, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment_block WHERE block_id = $1', [blockId])
+    return tx.any('SELECT * FROM treatment_block WHERE block_id = $1', blockId)
   }
 
   @setErrorCode('5T4000')

@@ -26,11 +26,20 @@ class TreatmentBlockService {
   getTreatmentBlocksBySetId = (setId, tx) =>
     this.locationAssocWithBlockService.getBySetId(setId, tx)
       .then(locAssociation => (_.isNil(locAssociation) ? Promise.resolve([]) :
-        tx.batch([db.block.batchFindByBlockIds(locAssociation.block_id, tx),
-          db.treatmentBlock.batchFindByBlockIds(locAssociation.block_id, tx)])
-          .then(([blocks, treatmentBlocks]) =>
-            this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks))))
+        tx.batch([db.block.findByBlockId(locAssociation.block_id, tx),
+          db.treatmentBlock.findByBlockId(locAssociation.block_id, tx)])
+          .then(([block, treatmentBlocks]) =>
+            this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, [block]))
+      ))
 
+  @setErrorCode('1VK000')
+  @Transactional('getTreatmentBlocksByTreatmentIds')
+  getTreatmentBlocksByTreatmentIds = (treatmentIds, tx) =>
+    db.treatmentBlock.batchFindByTreatmentIds(treatmentIds, tx)
+      .then(treatmentBlocks =>
+        db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
+      )
 
   @setErrorCode('1V3000')
   getTreatmentBlocksWithBlockInfo = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {

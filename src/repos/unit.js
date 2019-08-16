@@ -24,13 +24,14 @@ class unitRepo {
     })
 
   @setErrorCode('5J5000')
-  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
+  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id\n' +
+    'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
   batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
     'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
-    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1;', setId)
+    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)
 
   @setErrorCode('5JE000')
   batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, b.name AS block FROM location_association la\n' +
@@ -130,9 +131,8 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
-      'FROM treatment t, location_association la\n' +
-      'WHERE u.treatment_id = t.id AND t.experiment_id = la.experiment_id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
+    return tx.none('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
+      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1', setId)
   }
 
   @setErrorCode('5JI000')

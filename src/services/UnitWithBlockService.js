@@ -38,11 +38,13 @@ class UnitWithBlockService {
   }
 
   @setErrorCode('204000')
-  @Transactional('getExperimentalUnitsBySetId')
-  getExperimentalUnitsBySetId(id, tx) {
-    return tx.batch([db.unit.batchFindAllBySetIds(id, tx),
-      this.treatmentBlockService.getTreatmentBlocksBySetId(id, tx)])
-      .then(([units, treatmentBlocks]) => this.addBlockInfoToUnit(units, treatmentBlocks))
+  @Transactional('getExperimentalUnitsBySetIds')
+  getExperimentalUnitsBySetIds(ids, tx) {
+    return db.unit.batchFindAllBySetIds(ids, tx)
+      .then(units =>
+        this.treatmentBlockService.getTreatmentBlocksByIds(_.map(units, 'treatment_block_id'), tx)
+          .then(treatmentBlocks => this.addBlockInfoToUnit(units, treatmentBlocks)),
+      )
   }
 
   @setErrorCode('205000')

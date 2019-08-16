@@ -34,9 +34,9 @@ class TreatmentWithBlockService {
   }
 
   @setErrorCode('1Z3000')
-  @Transactional('getTreatmentsByBySetId')
-  getTreatmentsByBySetId = (id, tx) =>
-    db.treatment.batchFindAllBySetId(id, tx)
+  @Transactional('getTreatmentsByBySetIds')
+  getTreatmentsByBySetIds = (ids, tx) =>
+    db.treatment.batchFindAllBySetId(ids, tx)
       .then((treatments) => {
         const uniqTreatments = _.uniqBy(treatments, 'id')
         return this.treatmentBlockService.getTreatmentBlocksByTreatmentIds(_.map(uniqTreatments, 'id'), tx)

@@ -65,15 +65,15 @@ describe('UnitWithBlockService', () => {
     })
   })
 
-  describe('getExperimentalUnitsBySetId', () => {
+  describe('getExperimentalUnitsBySetIds', () => {
     test('get units with treatment block info', () => {
       db.unit.batchFindAllBySetIds = mockResolve([])
       const target = new UnitWithBlockService()
-      target.treatmentBlockService.getTreatmentBlocksBySetId = mockResolve([])
+      target.treatmentBlockService.getTreatmentBlocksByIds = mockResolve([])
       target.addBlockInfoToUnit = mock([])
-      return target.getExperimentalUnitsBySetId(1, testTx).then(() => {
+      return target.getExperimentalUnitsBySetIds(1, testTx).then(() => {
         expect(db.unit.batchFindAllBySetIds).toHaveBeenCalledWith(1, testTx)
-        expect(target.treatmentBlockService.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1, testTx)
+        expect(target.treatmentBlockService.getTreatmentBlocksByIds).toHaveBeenCalledWith([], testTx)
         expect(target.addBlockInfoToUnit).toHaveBeenCalledWith([], [])
       })
     })

@@ -41,6 +41,15 @@ class TreatmentBlockService {
           .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
       )
 
+  @setErrorCode('1VL000')
+  @Transactional('getTreatmentBlocksByIds')
+  getTreatmentBlocksByIds = (ids, tx) =>
+    db.treatmentBlock.batchFindByIds(ids, tx)
+      .then(treatmentBlocks =>
+        db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
+      )
+
   @setErrorCode('1V3000')
   getTreatmentBlocksWithBlockInfo = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {
     const block = _.find(blocks, b => b.id === tb.block_id)

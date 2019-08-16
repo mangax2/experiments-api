@@ -95,6 +95,28 @@ describe('TreatmentBlockService', () => {
     })
   })
 
+  describe('getTreatmentBlocksByIds', () => {
+    test('treatment block should be returned with block info', () => {
+      const blocks = [{ id: 11, name: 'block1' }]
+      const treatmentBlocks = [
+        { id: 1, block_id: 11, treatment_id: 111 },
+        { id: 2, block_id: 11, treatment_id: 112 },
+      ]
+
+      db.block.batchFindByBlockIds = mockResolve(blocks)
+      db.treatmentBlock.batchFindByIds = mockResolve(treatmentBlocks)
+
+      const target = new TreatmentBlockService()
+      target.getTreatmentBlocksWithBlockInfo = mock()
+
+      return target.getTreatmentBlocksByIds([1, 2], testTx).then(() => {
+        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([11], testTx)
+        expect(db.treatmentBlock.batchFindByIds).toHaveBeenCalledWith([1, 2], testTx)
+        expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
+      })
+    })
+  })
+
   describe('getTreatmentBlocksWithBlockInfo', () => {
     test('get the treatment blocks with null block when the matching block is not found', () => {
       const blocks = [

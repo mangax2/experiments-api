@@ -47,12 +47,12 @@ function createLoaders(tx) {
   const treatmentBySetIdLoader =
       new DataLoader(args =>
         tx.batch(_.map(args, arg =>
-          new TreatmentWithBlockService().getTreatmentsByBySetId(arg, tx))))
+          new TreatmentWithBlockService().getTreatmentsByBySetIds(arg, tx))))
 
   const unitsBySetIdLoader =
       new DataLoader(args =>
         tx.batch(_.map(args, arg =>
-          new UnitWithBlockService().getExperimentalUnitsBySetId(arg, tx))))
+          new UnitWithBlockService().getExperimentalUnitsBySetIds(arg, tx))))
 
   const groupByIdLoader =
     new DataLoader(args =>

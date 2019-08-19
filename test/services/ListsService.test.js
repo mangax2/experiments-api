@@ -78,8 +78,8 @@ describe('ListsService', () => {
 
       return target.setUserLists('kmccl', [1, 2], { authorization: '' }, {}).then(() => {
         expect(target.getLists).toHaveBeenCalledWith('kmccl', [1, 2])
-        expect(target.preferencesService.getPreferences).toHaveBeenCalledWith('experiments-ui', 'factors', '', {})
-        expect(target.preferencesService.setPreferences).toHaveBeenCalledWith('experiments-ui', 'factors', { listIds: [1, 2] }, '', {})
+        expect(target.preferencesService.getPreferences).toHaveBeenCalledWith('material-lists-integration', 'experiments-ui', '', {})
+        expect(target.preferencesService.setPreferences).toHaveBeenCalledWith('material-lists-integration', 'experiments-ui', { listIds: [1, 2] }, '', {})
       })
     })
   })

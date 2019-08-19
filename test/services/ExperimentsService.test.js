@@ -1964,4 +1964,33 @@ describe('ExperimentsService', () => {
       })
     })
   })
+
+  describe('rejectIfExperimentDoesNotExist', () => {
+    test('throws if no experiment is found', () => {
+      db.experiments.find = mockResolve(null)
+      AppError.notFound = mock()
+
+      return target.rejectIfExperimentDoesNotExist(1, false, testContext, testTx).catch(() => {
+        expect(AppError.notFound).toHaveBeenCalled()
+      })
+    })
+
+    test('throws if no template is found', () => {
+      db.experiments.find = mockResolve(null)
+      AppError.notFound = mock()
+
+      return target.rejectIfExperimentDoesNotExist(1, true, testContext, testTx).catch(() => {
+        expect(AppError.notFound).toHaveBeenCalled()
+      })
+    })
+
+    test('does not throw if the experiment is found', () => {
+      db.experiments.find = mockResolve({})
+      AppError.notFound = mock()
+
+      return target.rejectIfExperimentDoesNotExist(1, false, testContext, testTx).then(() => {
+        expect(AppError.notFound).not.toHaveBeenCalled()
+      })
+    })
+  })
 })

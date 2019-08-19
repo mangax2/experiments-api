@@ -18,7 +18,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Unable to determine location from group id', null, '1Y1001')
@@ -29,7 +29,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.2' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 2 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(2, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Id from Group Id does not match Experiment Id on route', null, '1Y1003')
@@ -40,7 +40,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.abc' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Unable to determine location from group id', null, '1Y1001')
@@ -51,7 +51,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.1' }, { id: '1.9' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Location does not match valid locations for this experiment', null, '1Y1002')
@@ -62,7 +62,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.1.2' }, { id: '1.9' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Invalid block value passed for association', null, '1Y1005')
@@ -73,7 +73,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.1.2' }, { id: '1.9.1' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1, block: 4 }, { location: 1 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Invalid block value passed for association', null, '1Y1004')
@@ -84,7 +84,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.1', setId: 123 }, { id: '1.2', setId: 456 }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
       db.locationAssociation = {
         batchCreate: mockResolve(),
         batchRemoveByExperimentIdAndLocationAndBlock: mockResolve(),
@@ -112,7 +112,7 @@ describe('LocationAssociationService', () => {
       const groups = [{ id: '1.1.1', setId: 123 }, { id: '1.2.2', setId: 456 }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1, block: 1 }, { location: 2, block: 2 }])
-      target.experimentService.getExperimentById = mockResolve({})
+      target.experimentService.rejectIfExperimentDoesNotExist = mockResolve({})
       db.locationAssociation = {
         batchCreate: mockResolve(),
         batchRemoveByExperimentIdAndLocationAndBlock: mockResolve(),

@@ -20,7 +20,7 @@ class LocationAssociationService {
     tx.batch([
       this.experimentalUnitService
         .getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
-      this.experimentService.getExperimentById(experimentId, false, context, tx),
+      this.experimentService.rejectIfExperimentDoesNotExist(experimentId, false, context, tx),
     ]).then(([units]) => {
       const locations = _.uniq(_.map(units, 'location'))
       const blocks = _.uniq(_.compact(_.map(units, 'block')))

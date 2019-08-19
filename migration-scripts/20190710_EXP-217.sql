@@ -99,7 +99,7 @@ JOIN public.block ON block.id = treatment_block.block_id
 WHERE unit.treatment_id = treatment_block.treatment_id
 AND (unit.block = to_number(block.name, '999999999') OR block.name IS NULL);
 
-update view to not rely on treatment_id in unit table
+-- update view to not rely on treatment_id in unit table
 CREATE OR REPLACE VIEW public.experiment_summary AS
  WITH treatment_numbers AS (
          SELECT e_1.id AS experiment_id,

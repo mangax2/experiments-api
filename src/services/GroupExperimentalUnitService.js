@@ -8,6 +8,10 @@ import SecurityService from './SecurityService'
 import FactorService from './FactorService'
 import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
+import TreatmentWithBlockService from './TreatmentWithBlockService'
+import TreatmentBlockService from './TreatmentBlockService'
+import UnitWithBlockService from './UnitWithBlockService'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -26,11 +30,15 @@ const logger = log4js.getLogger('GroupExperimentalUnitService')
 class GroupExperimentalUnitService {
   constructor() {
     this.experimentalUnitService = new ExperimentalUnitService()
+    this.treatmentWithBlockService = new TreatmentWithBlockService()
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
     this.lambdaPerformanceService = new LambdaPerformanceService()
     this.unitValidator = new ExperimentalUnitValidator()
+    this.unitWithBlockService = new UnitWithBlockService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
+    this.treatmentBlockService = new TreatmentBlockService()
   }
 
   @setErrorCode('1F5000')
@@ -39,41 +47,28 @@ class GroupExperimentalUnitService {
     : Promise.resolve())
 
   @setErrorCode('1FA000')
-  createExperimentalUnits(experimentId, units, context, tx) {
+  createExperimentalUnits = (experimentId, units, context, tx) => {
     if (units.length === 0) {
       return Promise.resolve()
     }
-    const treatmentIds = _.uniq(_.map(units, 'treatmentId'))
-    return db.treatment.getDistinctExperimentIds(treatmentIds, tx).then((experimentIdsResp) => {
-      const experimentIds = _.compact(_.map(experimentIdsResp, 'experiment_id'))
-      if (experimentIds.length > 1 || Number(experimentIds[0]) !== Number(experimentId)) {
-        throw AppError.badRequest('Treatments not associated with same experiment', undefined, getFullErrorCode('1FA001'))
-      } else {
-        return this.experimentalUnitService.batchCreateExperimentalUnits(units, context, tx)
-      }
-    })
+    return db.unit.batchCreate(units, context, tx)
   }
 
   @setErrorCode('1FM000')
   @Transactional('resetSet')
   resetSet = (setId, context, tx) =>
-    // get group by setId
-    this.verifySetAndGetDetails(setId, context, tx).then((results) => {
-      const {
-        experimentId, location, numberOfReps, block,
-      } = results
-      return db.treatment.findAllByExperimentId(experimentId, tx).then((treatments) => {
-        const treatmentsForBlock =
-          _.isNil(block)
-            ? treatments
-            : _.filter(treatments, t => t.block === block || t.in_all_blocks)
+    this.verifySetAndGetDetails(setId, context, tx).then(({
+      experimentId, location, numberOfReps, blockId,
+    }) =>
+      db.treatmentBlock.findByBlockId(blockId, tx).then((treatmentBlocks) => {
+        const units = this.createUnits(location, treatmentBlocks, numberOfReps)
 
-        const units = this.createUnits(location, treatmentsForBlock, numberOfReps, block)
         return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
           .then(() =>
-            this.getSetEntriesFromSet(setId, numberOfReps, treatmentsForBlock.length, context))
-          .then(result =>
-            db.unit.batchFindAllByExperimentIdLocationAndBlock(experimentId, location, block, tx)
+            this.getSetEntriesFromSet(setId, numberOfReps, treatmentBlocks.length, context))
+          .then((result) => {
+            const treatmentBlockIds = _.map(treatmentBlocks, 'id')
+            return db.unit.batchFindAllByLocationAndTreatmentBlocks(location, treatmentBlockIds, tx)
               .then((unitsInDB) => {
                 const setEntryIds = _.map(result.body.entries, 'entryId')
                 _.forEach(unitsInDB, (unit, index) => {
@@ -83,9 +78,9 @@ class GroupExperimentalUnitService {
                 return this.experimentalUnitService.batchPartialUpdateExperimentalUnits(
                   unitsFromDBCamlized, context, tx)
                   .then(sendKafkaNotification('update', experimentId))
-              }))
-      })
-    })
+              })
+          })
+      }))
 
   @setErrorCode('1Fd000')
   getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
@@ -122,7 +117,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context, tx) =>
-    db.locationAssociation.findBySetId(setId, tx).then((locAssociation) => {
+    this.locationAssocWithBlockService.getBySetId(setId, tx).then((locAssociation) => {
       if (!locAssociation) {
         logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
@@ -151,19 +146,18 @@ class GroupExperimentalUnitService {
             experimentId,
             location: locAssociation.location,
             numberOfReps,
-            block: locAssociation.block,
+            blockId: locAssociation.block_id,
           }
         })
     })
 
   @setErrorCode('1FN000')
-  createUnits = (location, treatments, numberOfReps, block) =>
+  createUnits = (location, treatmentBlocks, numberOfReps) =>
     _.flatMap(_.range(numberOfReps), repl =>
-      _.map(treatments, treatment => ({
+      _.map(treatmentBlocks, treatmentBlock => ({
         location,
         rep: repl + 1,
-        treatmentId: treatment.id,
-        block,
+        treatmentBlockId: treatmentBlock.id,
       })))
 
   @setErrorCode('1FO000')
@@ -174,23 +168,24 @@ class GroupExperimentalUnitService {
       db.factorLevel.findByExperimentId(experimentId, tx),
       db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
       db.refDesignSpecification.all(tx),
-      db.treatment.findAllByExperimentId(experimentId, tx),
       db.combinationElement.findAllByExperimentId(experimentId, tx),
-      db.unit.findAllByExperimentId(experimentId, tx),
-      db.locationAssociation.findByExperimentId(experimentId, tx),
       db.experiments.findExperimentOrTemplate(experimentId, tx),
-
-    ]).then(([
-      variables,
-      variableLevels,
-      designSpecs,
-      refDesignSpecs,
-      treatments,
-      combinationElements,
-      units,
-      setLocAssociations,
-      experiment,
-    ]) => {
+      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
+      this.unitWithBlockService.getExperimentalUnitsByExperimentId(experimentId, tx),
+      this.locationAssocWithBlockService.getByExperimentId(experimentId, tx),
+    ]).then((
+      [
+        variables,
+        variableLevels,
+        designSpecs,
+        refDesignSpecs,
+        combinationElements,
+        experiment,
+        treatments,
+        units,
+        setLocAssociations,
+      ],
+    ) => {
       const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
@@ -220,7 +215,7 @@ class GroupExperimentalUnitService {
 
       const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
         const treatmentsByBlock = _.filter(trimmedTreatments,
-          t => t.block === u[0].block || t.in_all_blocks)
+          t => t.block === u[0].block || t.inAllBlocks)
         const body = JSON.stringify(inflector.transform({
           experimentId,
           randomizationStrategyCode: experiment.randomization_strategy_code,
@@ -261,7 +256,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FQ000')
   @Transactional('getGroupAndUnitsBySetId')
-  getGroupAndUnitsBySetId = (setId, tx) => db.locationAssociation.findBySetId(setId, tx)
+  getGroupAndUnitsBySetId = (setId, tx) => this.locationAssocWithBlockService.getBySetId(setId, tx)
     .then((setAssocation) => {
       if (!setAssocation) return {}
       return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,
@@ -305,35 +300,24 @@ class GroupExperimentalUnitService {
       return this.unitValidator.validate(units, 'POST', tx)
         .then(() => tx.batch([
           db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
-          db.treatment.findAllByExperimentId(experimentId, tx),
+          this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId, tx),
         ]))
-        .then(([locations, treatments]) => {
+        .then(([locations, treatmentBlocks]) => {
           if (units && (numberOfLocations < locations.max)) {
             throw AppError.badRequest('Cannot remove locations from an experiment that are' +
                 ' linked to sets', undefined, getFullErrorCode('1FV002'))
           }
-          const treatmentsMapper = {}
-          _.forEach(treatments, (treatment) => {
-            treatmentsMapper[treatment.id] = treatment
-            treatment.block = treatment.block || null
-          })
+
           _.forEach(units, (unit) => {
-            unit.block = unit.block || null
+            unit.block = _.toString(unit.block) || null
           })
 
-          const unitsWithInvalidBlock = _.filter(units, (unit) => {
-            const treatment = treatmentsMapper[unit.treatmentId]
-            return (unit.block !== treatment.block && !treatment.in_all_blocks)
-              || (treatment.in_all_blocks &&
-                !_.find(treatments, t => t.block === unit.block && !t.in_all_blocks))
-          })
-
-          if (unitsWithInvalidBlock.length > 0) {
-            throw AppError.badRequest(`${unitsWithInvalidBlock.length} units have invalid block values.`, undefined, getFullErrorCode('1FV003'))
-          }
+          const unitsWithTBs =
+            this.unitWithBlockService.addTreatmentBlocksToUnits(units, treatmentBlocks)
+          this.validateUnitsTBs(unitsWithTBs)
 
           return tx.batch([
-            this.saveUnitsByExperimentId(experimentId, units, isTemplate, context, tx),
+            this.saveUnitsByExperimentId(experimentId, unitsWithTBs, isTemplate, context, tx),
             this.designSpecificationDetailService.saveDesignSpecifications(
               designSpecifications, experimentId, isTemplate, context, tx,
             ),
@@ -344,6 +328,13 @@ class GroupExperimentalUnitService {
     }
 
     throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
+  }
+
+  validateUnitsTBs = (unitWithTBs) => {
+    const unitsWithInvalidTreatmentBlock = _.filter(unitWithTBs, unit => !unit.treatmentBlockId)
+    if (unitsWithInvalidTreatmentBlock.length > 0) {
+      throw AppError.badRequest(`${unitsWithInvalidTreatmentBlock.length} units have invalid treatment block values.`, undefined, getFullErrorCode('1FV003'))
+    }
   }
 
   @setErrorCode('1FW000')
@@ -380,8 +371,8 @@ class GroupExperimentalUnitService {
   compareWithExistingUnits = (existingUnits, newUnits) => {
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,
-        nu => (eu.treatment_id || eu.treatmentId) === nu.treatmentId &&
-          eu.rep === nu.rep && eu.location === nu.location && eu.block === nu.block && !nu.matched)
+        nu => (eu.treatment_block_id || eu.treatmentBlockId) === nu.treatmentBlockId &&
+          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
       if (matchingUnit) {
         matchingUnit.matched = true
         return undefined

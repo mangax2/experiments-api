@@ -1,7 +1,8 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
-import db from '../../../src/db/DbManager'
 import SetEntryRemovalService from '../../../src/services/prometheus/SetEntryRemovalService'
+import db from '../../../src/db/DbManager'
+import { mockResolve } from '../../jestUtil'
 
 jest.mock('kafka-node')
 
@@ -121,16 +122,25 @@ describe('ManageRepsAndUnitsListener', () => {
           },
         }
         const message = { setId: 5, entryChanges: [] }
-        db.locationAssociation = { findBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })) }
+        target.locationAssocWithBlockService = {
+          getBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })),
+        }
         target.experimentalUnitService = {
           mergeSetEntriesToUnits: jest.fn(() => Promise.resolve()),
         }
+        const treatmentBlocks = [
+          { treatment_id: 23, block_id: 3 },
+          { treatment_id: 24, block_id: 3 },
+          { treatment_id: 25, block_id: 3 },
+          { treatment_id: 20, block_id: 3 },
+        ]
+        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
-          expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, undefined, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
+          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
         })
       })
@@ -138,16 +148,25 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when on error', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5, entryChanges: [] }
-        db.locationAssociation = { findBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })) }
+        target.locationAssocWithBlockService = {
+          getBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })),
+        }
         target.experimentalUnitService = {
           mergeSetEntriesToUnits: jest.fn(() => Promise.reject(new Error('test'))),
         }
+        const treatmentBlocks = [
+          { treatment_id: 23, block_id: 3 },
+          { treatment_id: 24, block_id: 3 },
+          { treatment_id: 25, block_id: 3 },
+          { treatment_id: 20, block_id: 3 },
+        ]
+        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch(() => {
-          expect(db.locationAssociation.findBySetId).toBeCalledWith(5, testTx)
-          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, undefined, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
+          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+          expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         })
       })
@@ -155,15 +174,24 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when on bad format', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5 }
-        db.locationAssociation = { findBySetId: jest.fn() }
+        target.locationAssocWithBlockService = {
+          getBySetId: jest.fn(),
+        }
         target.experimentalUnitService = {
           mergeSetEntriesToUnits: jest.fn(() => Promise.resolve()),
         }
+        const treatmentBlocks = [
+          { treatment_id: 23, block_id: 3 },
+          { treatment_id: 24, block_id: 3 },
+          { treatment_id: 25, block_id: 3 },
+          { treatment_id: 20, block_id: 3 },
+        ]
+        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
-          expect(db.locationAssociation.findBySetId).not.toBeCalled()
+          expect(target.locationAssocWithBlockService.getBySetId).not.toBeCalled()
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).not.toBeCalled()
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
           expect(err.status).toBe(400)
@@ -175,15 +203,24 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when no groups found', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5, entryChanges: [] }
-        db.locationAssociation = { findBySetId: jest.fn(() => Promise.resolve()) }
+        target.locationAssocWithBlockService = {
+          getBySetId: jest.fn(() => Promise.resolve()),
+        }
         target.experimentalUnitService = {
           mergeSetEntriesToUnits: jest.fn(() => Promise.resolve()),
         }
+        const treatmentBlocks = [
+          { treatment_id: 23, block_id: 3 },
+          { treatment_id: 24, block_id: 3 },
+          { treatment_id: 25, block_id: 3 },
+          { treatment_id: 20, block_id: 3 },
+        ]
+        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
-          expect(db.locationAssociation.findBySetId).toBeCalled()
+          expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).not.toBeCalled()
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
           expect(err.status).toBe(404)

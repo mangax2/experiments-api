@@ -11,14 +11,11 @@ class locationAssociationRepo {
   @setErrorCode('5P0000')
   repository = () => this.rep
 
-  @setErrorCode('5P1000')
-  findByLocation = (experimentId, location, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE experiment_id = $1 AND location = $2', [experimentId, location])
-
   @setErrorCode('5P2000')
   findBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
 
   @setErrorCode('5P3000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM location_association WHERE experiment_id = $1', experimentId)
+  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT la.* FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
 
   @setErrorCode('5P7000')
   batchFindExperimentBySetId = (setIds, tx = this.rep) => {
@@ -26,10 +23,11 @@ class locationAssociationRepo {
 
     if (setIds.includes('null')) {
       promises.push(tx.any('WITH experiment_location_blocks AS\n' +
-      '(SELECT DISTINCT e.id, u.location, u.block FROM experiment e, unit u, treatment t WHERE u.treatment_id = t.id AND t.experiment_id = e.id AND e.is_template = false AND t.in_all_blocks IS FALSE),\n' +
+      '(SELECT DISTINCT e.id, u.location, b.id as block_id FROM experiment e, unit u, treatment_block tb, block b ' +
+        'WHERE u.treatment_block_id = tb.id AND tb.block_id = b.id AND b.experiment_id = e.id AND e.is_template = false),\n' +
         'experiment_ids_missing_setIds AS(\n' +
         'SELECT DISTINCT elb.id FROM experiment_location_blocks elb\n' +
-        'LEFT JOIN location_association la ON elb.id = la.experiment_id AND elb.location = la.location AND elb.block IS NOT DISTINCT FROM la.block WHERE la.experiment_id IS NULL)\n' +
+        'LEFT JOIN location_association la ON la.block_id = elb.block_id AND elb.location = la.location WHERE la.set_id IS NULL)\n' +
         'SELECT e.* from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
     } else {
       promises.push(Promise.resolve())
@@ -37,7 +35,7 @@ class locationAssociationRepo {
 
     const validSetIds = _.without(setIds, 'null')
     if (validSetIds.length > 0) {
-      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e, location_association la WHERE e.id = la.experiment_id and la.set_id IN ($1:csv)', [validSetIds]))
+      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e, location_association la, block b WHERE e.id = b.experiment_id and b.id = la.block_id and la.set_id IN ($1:csv)', [validSetIds]))
     } else {
       promises.push(Promise.resolve())
     }
@@ -64,15 +62,14 @@ class locationAssociationRepo {
   @setErrorCode('5P4000')
   batchCreate = (associations, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['experiment_id', 'location', 'set_id', 'block'],
+      ['location', 'set_id', 'block_id'],
       {table: 'location_association'},
     )
 
     const values = associations.map(association => ({
-      experiment_id: association.experimentId,
       location: association.location,
       set_id: association.setId,
-      block: association.block,
+      block_id: association.block_id,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet)}`
@@ -81,26 +78,22 @@ class locationAssociationRepo {
   }
 
   @setErrorCode('5P6000')
-  batchRemoveByExperimentIdAndLocationAndBlock = (experimentIdsAndLocationsAndBlocks, tx = this.rep) => {
-    const promises = _.map(experimentIdsAndLocationsAndBlocks, association => {
-      if (_.isNil(association.block)) {
-        return tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2 AND block IS NULL', [association.experimentId, association.location])
-      }
-
-      return tx.none('DELETE FROM location_association WHERE experiment_id = $1 AND location = $2 AND block = $3', [association.experimentId, association.location, association.block])
-    })
+  batchRemoveByLocationAndBlock = (locationsAndBlocks, tx = this.rep) => {
+    const promises = _.map(locationsAndBlocks, association =>
+      tx.none('DELETE FROM location_association WHERE location = $1 AND block_id = $2', [association.location, association.block_id])
+    )
 
     return tx.batch(promises)
   }
 
   @setErrorCode('5P8000')
   removeBySetId = (setId, tx = this.rep) =>
-    tx.oneOrNone('DELETE FROM location_association WHERE set_id = $1 RETURNING experiment_id', setId)
+    tx.oneOrNone('DELETE FROM location_association la USING block b WHERE la.block_id = b.id AND la.set_id = $1 RETURNING b.experiment_id', setId)
 
   @setErrorCode('5P9000')
   findNumberOfLocationsAssociatedWithSets = (experimentId, tx = this.rep) =>
     tx.oneOrNone(
-      'SELECT max(location) FROM location_association WHERE experiment_id = $1',
+      'SELECT max(location) FROM location_association la, block b WHERE la.block_id = b.id and b.experiment_id = $1',
       experimentId,
     )
 }

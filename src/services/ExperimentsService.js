@@ -17,6 +17,7 @@ import TagService from './TagService'
 import FactorService from './FactorService'
 import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -32,6 +33,7 @@ class ExperimentsService {
     this.duplicationService = new DuplicationService()
     this.factorService = new FactorService()
     this.analysisModelService = new AnalysisModelService()
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('151000')
@@ -58,12 +60,11 @@ class ExperimentsService {
           promises.push(this.ownerService.batchCreateOwners(experimentsOwners, context, tx))
           const analysisModelInfo = _.compact(_.map(experiments, (exp) => {
             if (exp.analysisModelType) {
-              const obj = {
+              return {
                 experimentId: exp.id,
                 analysisModelType: exp.analysisModelType,
                 analysisModelSubType: exp.analysisModelSubType,
               }
-              return obj
             }
             return null
           }))
@@ -154,16 +155,24 @@ class ExperimentsService {
     })
   }
 
-  @setErrorCode('158000')
-  @Transactional('getExperimentById')
-  getExperimentById(id, isTemplate, context, tx) {
-    return db.experiments.find(id, isTemplate, tx).then((data) => {
+  @setErrorCode('15U000')
+  @Transactional('findExperimentWithTemplateCheck')
+  findExperimentWithTemplateCheck = (id, isTemplate, context, tx) =>
+    db.experiments.find(id, isTemplate, tx).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
         logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
-      } else {
+      }
+      return data
+    })
+
+  @setErrorCode('158000')
+  @Transactional('getExperimentById')
+  getExperimentById = (id, isTemplate, context, tx) =>
+    this.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
+      .then((data) => {
         const promises = []
 
         promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
@@ -184,9 +193,7 @@ class ExperimentsService {
           }
           return data
         })
-      }
-    })
-  }
+      })
 
   @notifyChanges('update', 0, 3)
   @setErrorCode('159000')
@@ -269,9 +276,8 @@ class ExperimentsService {
         .then((strategies) => {
           const randStrategy = _.find(strategies.body, strategy =>
             strategy.strategyCode === strategyCode)
-          const updateDesignPromise = isCreate ? Promise.resolve()
-            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx)
-          return updateDesignPromise
+          return (isCreate ? Promise.resolve()
+            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx))
         })
     })
   }
@@ -282,7 +288,7 @@ class ExperimentsService {
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate, tx).then((permissions) => {
       if (permissions.includes('write')) {
-        return db.locationAssociation.findByExperimentId(id).then((associations) => {
+        return this.locationAssocWithBlockService.getByExperimentId(id, tx).then((associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))

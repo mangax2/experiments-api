@@ -92,7 +92,7 @@ type ExperimentalUnit {
   location: Int
   rep: Int
   setEntryId: Int
-  block: Int
+  block: String
   "deactivationReason is the Answer key corresponding to Question code ADEACTR"
   deactivationReason: String
 }
@@ -189,7 +189,7 @@ type Treatment {
   treatmentNumber: Int
   notes: String
   inAllBlocks: Boolean,
-  block: Int,
+  block: String,
   auditInfo: AuditInfo
   combinationElements: [CombinationElement]
   controlTypes: [String]

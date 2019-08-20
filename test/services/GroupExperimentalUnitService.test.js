@@ -43,426 +43,166 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('createExperimentalUnits', () => {
     test('does nothing if no units are passed in', () => {
-      db.treatment.getDistinctExperimentIds = mockResolve()
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve()
+      db.unit.batchCreate = mockResolve()
 
       return target.createExperimentalUnits(1, [], testContext, testTx).then((data) => {
-        expect(db.treatment.getDistinctExperimentIds).not.toBeCalled()
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).not.toBeCalled()
+        expect(db.unit.batchCreate).not.toBeCalled()
         expect(data).toEqual(undefined)
       })
     })
 
     test('batch creates experimental units', () => {
-      db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }])
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
+      db.unit.batchCreate = mockResolve([1])
 
       return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then((data) => {
-        expect(db.treatment.getDistinctExperimentIds).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
+        expect(db.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
         expect(data).toEqual([1])
       })
     })
 
     test('rejects when batchCreate fails', () => {
       const error = { message: 'error' }
-      db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }])
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockReject(error)
+      db.unit.batchCreate = mockReject(error)
 
       return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, (err) => {
-        expect(db.treatment.getDistinctExperimentIds).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
+        expect(db.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
         expect(err).toEqual(error)
-      })
-    })
-
-    test('rejects when getDistinctExperimentIds fails', () => {
-      const error = { message: 'error' }
-      db.treatment.getDistinctExperimentIds = mockReject(error)
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
-
-      return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, (err) => {
-        expect(db.treatment.getDistinctExperimentIds).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('throws an error when there are multiple experiment ids returned', () => {
-      db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 1 }, { experiment_id: 2 }])
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
-      AppError.badRequest = mock()
-
-      return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, () => {
-        expect(db.treatment.getDistinctExperimentIds).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).not.toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatments not associated with same experiment', undefined, '1FA001')
-      })
-    })
-
-    test('throws an error when there are returned distinct experiment id does not match passed in', () => {
-      db.treatment.getDistinctExperimentIds = mockResolve([{ experiment_id: 2 }])
-      target.experimentalUnitService.batchCreateExperimentalUnits = mockResolve([1])
-      AppError.badRequest = mock()
-
-      return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, () => {
-        expect(db.treatment.getDistinctExperimentIds).toHaveBeenCalledWith([1], testTx)
-        expect(target.experimentalUnitService.batchCreateExperimentalUnits).not.toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Treatments not associated with same experiment', undefined, '1FA001')
       })
     })
   })
 
   describe('resetSet', () => {
-    test('calls all the correct services', () => {
-      const header = ['header']
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          setsAPIUrl: 'testUrl',
-        },
-      }
-      target.verifySetAndGetDetails = mockResolve({
-        experimentId: 3,
-        location: 2,
-        numberOfReps: 5,
-      })
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
-        location: 2, rep: 1, treatment_id: 1, id: 101,
+    cfServices.experimentsExternalAPIUrls = {
+      value: {
+        setsAPIUrl: 'testUrl',
+      },
+    }
+    const header = ['header']
+    const generatedUnits = [
+      {
+        location: 2, rep: 1, treatmentBlockId: 1,
       },
       {
-        location: 2, rep: 1, treatment_id: 2, id: 102,
+        location: 2, rep: 1, treatmentBlockId: 2,
       },
       {
-        location: 2, rep: 2, treatment_id: 1, id: 103,
+        location: 2, rep: 2, treatmentBlockId: 1,
       },
       {
-        location: 2, rep: 2, treatment_id: 2, id: 104,
+        location: 2, rep: 2, treatmentBlockId: 2,
       },
       {
-        location: 2, rep: 3, treatment_id: 1, id: 105,
+        location: 2, rep: 3, treatmentBlockId: 1,
       },
       {
-        location: 2, rep: 3, treatment_id: 2, id: 106,
+        location: 2, rep: 3, treatmentBlockId: 2,
+      },
+    ]
+    const unitsFromDB = [
+      {
+        location: 2, rep: 1, treatment_block_id: 1, id: 101,
       },
       {
-        location: 2, rep: 4, treatment_id: 1, id: 107,
+        location: 2, rep: 1, treatment_block_id: 2, id: 102,
       },
       {
-        location: 2, rep: 4, treatment_id: 2, id: 108,
+        location: 2, rep: 2, treatment_block_id: 1, id: 103,
       },
       {
-        location: 2, rep: 5, treatment_id: 1, id: 109,
+        location: 2, rep: 2, treatment_block_id: 2, id: 104,
       },
       {
-        location: 2, rep: 5, treatment_id: 2, id: 110,
-      }])
+        location: 2, rep: 3, treatment_block_id: 1, id: 105,
+      },
+      {
+        location: 2, rep: 3, treatment_block_id: 2, id: 106,
+      },
+    ]
+    const unitsWithSetEntries = [
+      {
+        id: 101, location: 2, rep: 1, treatmentBlockId: 1, setEntryId: 1001,
+      },
+      {
+        id: 102, location: 2, rep: 1, treatmentBlockId: 2, setEntryId: 1002,
+      },
+      {
+        id: 103, location: 2, rep: 2, treatmentBlockId: 1, setEntryId: 1003,
+      },
+      {
+        id: 104, location: 2, rep: 2, treatmentBlockId: 2, setEntryId: 1004,
+      },
+      {
+        id: 105, location: 2, rep: 3, treatmentBlockId: 1, setEntryId: 1005,
+      },
+      {
+        id: 106, location: 2, rep: 3, treatmentBlockId: 2, setEntryId: 1006,
+      },
+    ]
+    const setEntriesResponse = { body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }] } }
+    const setId = 5
+    const setDetails = {
+      experimentId: 3,
+      location: 2,
+      numberOfReps: 3,
+      blockId: 33,
+    }
+
+    beforeEach(() => {
+      target.verifySetAndGetDetails = mockResolve(setDetails)
+      db.treatmentBlock.findByBlockId = mockResolve([{ id: 1 }, { id: 2 }])
+      db.unit.batchFindAllByLocationAndTreatmentBlocks = mockResolve(unitsFromDB)
       target.saveUnitsBySetId = mockResolve()
       PingUtil.getMonsantoHeader = mockResolve(header)
+      HttpUtil.delete = mockResolve()
+      HttpUtil.patch = mockResolve(setEntriesResponse)
+      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
       HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
-      HttpUtil.delete = mockResolve()
-      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
-      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
+      AppError.internalServerError = mock()
+    })
 
-      return target.resetSet(5, {}, testTx).then(() => {
-        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
+    test('calls all the correct services', () =>
+      target.resetSet(setId, {}, testTx).then(() => {
+        expect(target.verifySetAndGetDetails).toBeCalledWith(setId, {}, testTx)
+        expect(db.treatmentBlock.findByBlockId).toBeCalledWith(setDetails.blockId, testTx)
+        expect(target.saveUnitsBySetId).toBeCalledWith(setId, setDetails.experimentId, generatedUnits, {}, testTx)
         expect(PingUtil.getMonsantoHeader).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
-        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-          id: 101, location: 2, rep: 1, treatmentId: 1, setEntryId: 1001,
-        },
-        {
-          id: 102, location: 2, rep: 1, treatmentId: 2, setEntryId: 1002,
-        },
-        {
-          id: 103, location: 2, rep: 2, treatmentId: 1, setEntryId: 1003,
-        },
-        {
-          id: 104, location: 2, rep: 2, treatmentId: 2, setEntryId: 1004,
-        },
-        {
-          id: 105, location: 2, rep: 3, treatmentId: 1, setEntryId: 1005,
-        },
-        {
-          id: 106, location: 2, rep: 3, treatmentId: 2, setEntryId: 1006,
-        },
-        {
-          id: 107, location: 2, rep: 4, treatmentId: 1, setEntryId: 1007,
-        },
-        {
-          id: 108, location: 2, rep: 4, treatmentId: 2, setEntryId: 1008,
-        },
-        {
-          id: 109, location: 2, rep: 5, treatmentId: 1, setEntryId: 1009,
-        },
-        {
-          id: 110, location: 2, rep: 5, treatmentId: 2, setEntryId: 1000,
-        }], {}, testTx)
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
+        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith(unitsWithSetEntries, {}, testTx)
+      }))
+
+    test('calls patch sets twice when there are existing entries that need to be deleted', () => {
+      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{}, {}, {}, {}] } })
+
+      return target.resetSet(setId, {}, testTx).then(() => {
+        expect(HttpUtil.patch).toHaveBeenCalledTimes(2)
+        expect(HttpUtil.patch).toHaveBeenNthCalledWith(1, 'testUrl/sets/5', header, { entries: [{ deleted: true }, { deleted: true }, { deleted: true }, { deleted: true }] })
+        expect(HttpUtil.patch).toHaveBeenNthCalledWith(2, 'testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
       })
     })
 
-    test('calls only the sets services it needs to', () => {
-      const header = ['header']
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          setsAPIUrl: 'testUrl',
-        },
-      }
-      target.verifySetAndGetDetails = mockResolve({
-        experimentId: 3,
-        location: 1,
-        numberOfReps: 5,
-      })
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
-        location: 1, rep: 1, treatment_id: 1, id: 101,
-      },
-      {
-        location: 1, rep: 1, treatment_id: 2, id: 102,
-      },
-      {
-        location: 1, rep: 2, treatment_id: 1, id: 103,
-      },
-      {
-        location: 1, rep: 2, treatment_id: 2, id: 104,
-      },
-      {
-        location: 1, rep: 3, treatment_id: 1, id: 105,
-      },
-      {
-        location: 1, rep: 3, treatment_id: 2, id: 106,
-      },
-      {
-        location: 1, rep: 4, treatment_id: 1, id: 107,
-      },
-      {
-        location: 1, rep: 4, treatment_id: 2, id: 108,
-      },
-      {
-        location: 1, rep: 5, treatment_id: 1, id: 109,
-      },
-      {
-        location: 1, rep: 5, treatment_id: 2, id: 110,
-      }])
-      target.saveUnitsBySetId = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve(header)
+    test('calls patch sets once when there are NO existing entries that need to be deleted', () => {
       HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
-      HttpUtil.delete = mockResolve()
-      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
-      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
 
-      return target.resetSet(5, {}, testTx).then(() => {
-        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
+      return target.resetSet(setId, {}, testTx).then(() => {
         expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
-        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
-        },
-        {
-          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
-        },
-        {
-          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
-        },
-        {
-          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
-        },
-        {
-          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
-        },
-        {
-          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
-        },
-        {
-          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
-        },
-        {
-          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
-        },
-        {
-          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
-        },
-        {
-          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
-        }], {}, testTx)
-      })
-    })
-
-    test('calls only the sets services it needs to with blocking', () => {
-      const header = ['header']
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          setsAPIUrl: 'testUrl',
-        },
-      }
-      target.verifySetAndGetDetails = mockResolve({
-        experimentId: 3,
-        location: 1,
-        numberOfReps: 2,
-        block: 2,
-      })
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 2 }, { id: 3, in_all_blocks: true }])
-      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([
-        {
-          location: 1, rep: 1, treatment_id: 2, id: 102, block: 2,
-        },
-        {
-          location: 1, rep: 1, treatment_id: 3, id: 104, block: 2,
-        },
-        {
-          location: 1, rep: 2, treatment_id: 2, id: 106, block: 2,
-        },
-        {
-          location: 1, rep: 2, treatment_id: 3, id: 108, block: 2,
-        },
-      ])
-      target.saveUnitsBySetId = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve(header)
-      HttpUtil.getWithRetry = mockResolve({ body: { entries: [] } })
-      HttpUtil.delete = mockResolve()
-      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }] } })
-      target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
-
-      return target.resetSet(5, {}, testTx).then(() => {
-        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}], layout: [] })
-        expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
-        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([
-          {
-            location: 1, rep: 1, treatmentId: 2, setEntryId: 1001, id: 102, block: 2,
-          },
-          {
-            location: 1, rep: 1, treatmentId: 3, setEntryId: 1002, id: 104, block: 2,
-          },
-          {
-            location: 1, rep: 2, treatmentId: 2, setEntryId: 1003, id: 106, block: 2,
-          },
-          {
-            location: 1, rep: 2, treatmentId: 3, setEntryId: 1004, id: 108, block: 2,
-          },
-        ], {}, testTx)
+        expect(HttpUtil.patch).toHaveBeenCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
       })
     })
 
     test('sends the correct error and code back when sets error occurs', (done) => {
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          setsAPIUrl: 'testUrl',
-        },
-      }
-      target.verifySetAndGetDetails = mockResolve({
-        experimentId: 3,
-        location: 1,
-        numberOfReps: 5,
-      })
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      target.saveUnitsBySetId = mockResolve()
       PingUtil.getMonsantoHeader = mockReject({ response: { error: {} } })
-      AppError.internalServerError = mock()
 
-      return target.resetSet(5, {}, testTx).catch(() => {
+      return target.resetSet(setId, {}, testTx).catch(() => {
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1Fd001')
         done()
       })
     })
 
     test('does not send sets error when error occurs while saving setEntryIds', (done) => {
-      const header = ['header']
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          setsAPIUrl: 'testUrl',
-        },
-      }
-      target.verifySetAndGetDetails = mockResolve({
-        experimentId: 3,
-        location: 1,
-        numberOfReps: 5,
-      })
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
-      db.unit.batchFindAllByExperimentIdLocationAndBlock = mockResolve([{
-        location: 1, rep: 1, treatment_id: 1, id: 101, setEntryId: 1001,
-      },
-      {
-        location: 1, rep: 1, treatment_id: 2, id: 102, setEntryId: 1002,
-      },
-      {
-        location: 1, rep: 2, treatment_id: 1, id: 103, setEntryId: 1003,
-      },
-      {
-        location: 1, rep: 2, treatment_id: 2, id: 104, setEntryId: 1004,
-      },
-      {
-        location: 1, rep: 3, treatment_id: 1, id: 105, setEntryId: 1005,
-      },
-      {
-        location: 1, rep: 3, treatment_id: 2, id: 106, setEntryId: 1006,
-      },
-      {
-        location: 1, rep: 4, treatment_id: 1, id: 107, setEntryId: 1007,
-      },
-      {
-        location: 1, rep: 4, treatment_id: 2, id: 108, setEntryId: 1008,
-      },
-      {
-        location: 1, rep: 5, treatment_id: 1, id: 109, setEntryId: 1009,
-      },
-      {
-        location: 1, rep: 5, treatment_id: 2, id: 110, setEntryId: 1000,
-      }])
-      target.saveUnitsBySetId = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve(header)
-      HttpUtil.getWithRetry = mockResolve({ body: { entries: [{ entryId: 1 }, { entryId: 2 }, { entryId: 3 }, { entryId: 4 }] } })
-      HttpUtil.delete = mockResolve()
-      HttpUtil.patch = mockResolve({ body: { entries: [{ entryId: 1001 }, { entryId: 1002 }, { entryId: 1003 }, { entryId: 1004 }, { entryId: 1005 }, { entryId: 1006 }, { entryId: 1007 }, { entryId: 1008 }, { entryId: 1009 }, { entryId: 1000 }] } })
       target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockReject()
-      AppError.internalServerError = mock()
 
       return target.resetSet(5, {}, testTx).catch(() => {
-        expect(target.verifySetAndGetDetails).toBeCalledWith(5, {}, testTx)
-        expect(db.treatment.findAllByExperimentId).toBeCalledWith(3, testTx)
-        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
-        expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}], layout: [] })
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{ entryId: 1, deleted: true }, { entryId: 2, deleted: true }, { entryId: 3, deleted: true }, { entryId: 4, deleted: true }] })
-        expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith([{
-          location: 1, rep: 1, treatmentId: 1, setEntryId: 1001, id: 101,
-        },
-        {
-          location: 1, rep: 1, treatmentId: 2, setEntryId: 1002, id: 102,
-        },
-        {
-          location: 1, rep: 2, treatmentId: 1, setEntryId: 1003, id: 103,
-        },
-        {
-          location: 1, rep: 2, treatmentId: 2, setEntryId: 1004, id: 104,
-        },
-        {
-          location: 1, rep: 3, treatmentId: 1, setEntryId: 1005, id: 105,
-        },
-        {
-          location: 1, rep: 3, treatmentId: 2, setEntryId: 1006, id: 106,
-        },
-        {
-          location: 1, rep: 4, treatmentId: 1, setEntryId: 1007, id: 107,
-        },
-        {
-          location: 1, rep: 4, treatmentId: 2, setEntryId: 1008, id: 108,
-        },
-        {
-          location: 1, rep: 5, treatmentId: 1, setEntryId: 1009, id: 109,
-        },
-        {
-          location: 1, rep: 5, treatmentId: 2, setEntryId: 1000, id: 110,
-        }], {}, testTx)
-
         expect(AppError.internalServerError).not.toBeCalled()
         done()
       })
@@ -471,12 +211,14 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', () => {
-      db.locationAssociation.findBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({
+        location: 1, experiment_id: 5, set_id: 3, block_id: 44,
+      })
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       db.refDesignSpecification.all = mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }])
 
       return target.verifySetAndGetDetails(3, {}, testTx).then((result) => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
 
@@ -484,17 +226,18 @@ describe('GroupExperimentalUnitService', () => {
           experimentId: 5,
           location: 1,
           numberOfReps: 2,
+          blockId: 44,
         })
       })
     })
 
     test('throws correct error when set is not found', (done) => {
-      db.locationAssociation.findBySetId = mockResolve()
+      target.locationAssocWithBlockService.getBySetId = mockResolve()
       db.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       AppError.notFound = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).not.toBeCalled()
         expect(AppError.notFound).toBeCalledWith('No set found for id 3', undefined, '1FK001')
 
@@ -503,13 +246,15 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when number of reps not found', (done) => {
-      db.locationAssociation.findBySetId = mockResolve({ location: 1, experiment_id: 5, set_id: 3 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({
+        location: 1, experiment_id: 5, set_id: 3, block_id: 44,
+      })
       db.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
       db.refDesignSpecification = { all: mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }]) }
       AppError.badRequest = mock()
 
       return target.verifySetAndGetDetails(3, {}, testTx).catch(() => {
-        expect(db.locationAssociation.findBySetId).toBeCalledWith(3, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3, testTx)
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
         expect(db.refDesignSpecification.all).toBeCalledWith()
         expect(AppError.badRequest).toBeCalledWith('The specified set (id 3) does not have a minimum number of reps and cannot be reset.', undefined, '1FK002')
@@ -522,14 +267,14 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupsAndUnits', () => {
     test('properly sends and retrieves data to lambda', () => {
       target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }])
+      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
@@ -570,14 +315,14 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
-        expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
@@ -588,28 +333,28 @@ describe('GroupExperimentalUnitService', () => {
 
     test('properly handles lambda errors', () => {
       target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve('units')
+      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.unit.findAllByExperimentId = mockResolve('units')
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockReject()
       AppError.internalServerError = mock({ message: 'error result' })
       target.lambdaPerformanceService.savePerformanceStats = mockResolve()
 
       return target.getGroupsAndUnits(5, testTx).catch(() => {
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
-        expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
@@ -619,14 +364,14 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and lambda are called multiple times', () => {
       target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
+      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: null }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
-      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }], inputSize: 3003, responseTime: 1 }) })
       AppError.internalServerError = mock()
@@ -667,14 +412,14 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
-        expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -688,15 +433,15 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and blocks', () => {
       target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
+      target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, inAllBlocks: true }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
       db.refDesignSpecification.all = mockResolve('refDesignSpecs')
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, in_all_blocks: true }])
       db.combinationElement.findAllByExperimentId = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 },
         { treatment_id: 8, factor_level_id: 4 }, { treatment_id: 8, factor_level_id: 6 }])
-      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
-      db.locationAssociation.findByExperimentId = mockResolve('setIds')
       db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
       AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
       AppError.internalServerError = mock()
@@ -751,14 +496,14 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
+        expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(db.refDesignSpecification.all).toBeCalled()
-        expect(db.treatment.findAllByExperimentId).toBeCalled()
         expect(db.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(db.unit.findAllByExperimentId).toBeCalled()
-        expect(db.locationAssociation.findByExperimentId).toBeCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
         expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -812,7 +557,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupAndUnitsBySetId', () => {
     test('getting a group and units with a valid set id', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,
@@ -836,7 +581,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an invalid set id', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({})
       return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
         expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
@@ -846,7 +591,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an empty return of the db query', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockResolve(null)
+      target.locationAssocWithBlockService.getBySetId = mockResolve(null)
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,
@@ -863,7 +608,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with a failed db query', () => {
       target = new GroupExperimentalUnitService()
-      db.locationAssociation.findBySetId = mockReject('error')
+      target.locationAssocWithBlockService.getBySetId = mockReject('error')
       target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
         id: 1,
         setId: 4781,
@@ -1100,128 +845,130 @@ describe('GroupExperimentalUnitService', () => {
   })
 
   describe('saveDesignSpecsAndUnits', () => {
-    test('saves design specifications and units', () => {
-      target.designSpecificationDetailService = {
-        saveDesignSpecifications: mockResolve(),
-      }
+    const experimentId = 1
+    const treatmentBlocks = [
+      { name: '1', treatment_id: 11, id: 111 },
+      { name: '2', treatment_id: 22, id: 222 },
+    ]
+    const designSpecifications = { locations: '1', reps: '2' }
+
+    beforeEach(() => {
+      db.locationAssociation.findNumberOfLocationsAssociatedWithSets = mockResolve({ max: 2 })
+      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve(treatmentBlocks)
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock([])
+      target.designSpecificationDetailService.saveDesignSpecifications = mockResolve()
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
+      AppError.badRequest = mock()
+    })
 
+    test('saves design specifications and empty units', () => {
       const designSpecsAndUnits = {
-        designSpecifications: [],
+        designSpecifications,
         units: [],
       }
-      db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
-      }
 
-      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
-        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith([], 1, false, testContext, testTx)
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
+        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalledWith(experimentId, testTx)
+        expect(target.treatmentBlockService.getTreatmentBlocksByExperimentId).toHaveBeenCalledWith(experimentId, testTx)
+        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(experimentId, [], false, testContext, testTx)
+        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith(designSpecifications, 1, false, testContext, testTx)
         expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
       })
     })
 
-    test('throws and error when locations are less than set associated with locations', () => {
-      target.designSpecificationDetailService = {
-        saveDesignSpecifications: mockResolve(),
-      }
-      target.saveUnitsByExperimentId = mockResolve()
-      AppUtil.createCompositePostResponse = mock()
-
+    test('saves a list of units', () => {
+      const unitsForDB = [{
+        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: 222, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: 111, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
       const designSpecsAndUnits = {
-        designSpecifications: [],
-        units: [{ location: 1 }, { location: 2 }],
+        designSpecifications,
+        units: [{
+          rep: 1, treatmentId: 22, block: 2, location: 1,
+        }, {
+          rep: 1, treatmentId: 11, block: 1, location: 2,
+        }],
       }
-      db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
-      }
-      AppError.badRequest = mock()
 
-      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalled()
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
+        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(experimentId, unitsForDB, false, testContext, testTx)
+      })
+    })
+
+    test('converts undefined block to null', () => {
+      const expectedUnits = [{
+        rep: 1, treatmentId: 22, block: null, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: null, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock()
+      const designSpecsAndUnits = {
+        designSpecifications,
+        units: [{
+          rep: 1, treatmentId: 22, block: undefined, location: 1,
+        }, {
+          rep: 1, treatmentId: 11, block: undefined, location: 2,
+        }],
+      }
+
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
+        expect(target.unitWithBlockService.addTreatmentBlocksToUnits).toHaveBeenCalledWith(expectedUnits, treatmentBlocks)
+      })
+    })
+
+    test('throws an error when treatment block combination is not valid for experiment', () => {
+      const unitsForDB = [{
+        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: undefined, location: 1,
+      }, {
+        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: undefined, location: 2,
+      }]
+      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
+      const designSpecsAndUnits = {
+        designSpecifications,
+        units: [{
+          rep: 1, treatmentId: 44, block: 2, location: 1,
+        }, {
+          rep: 1, treatmentId: 11, block: 4, location: 2,
+        }],
+      }
+
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('2 units have invalid treatment block values.', undefined, '1FV003')
+      })
+    })
+
+    test('throws an error when locations are less than set associated with locations', () => {
+      const designSpecsAndUnits = {
+        designSpecifications,
+        units: [{
+          rep: 1, treatmentId: 44, block: 2, location: 1,
+        }],
+      }
+
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Cannot remove locations from an experiment that are linked to sets', undefined, '1FV002')
       })
     })
 
     test('rejects when design specification call fails', () => {
       const error = { message: 'error' }
-      target.designSpecificationDetailService = {
-        saveDesignSpecifications: mockReject(error),
-      }
-      target.saveUnitsByExperimentId = mockResolve()
-      AppUtil.createCompositePostResponse = mock()
-
+      target.designSpecificationDetailService.saveDesignSpecifications = mockReject(error)
       const designSpecsAndUnits = {
-        designSpecifications: [],
+        designSpecifications,
         units: [],
       }
 
-      db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
-      }
-
-      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(1, [], false, testContext, testTx)
-        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith([], 1, false, testContext, testTx)
+      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {
         expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
 
     test('throws a bad request when passed in object is null', () => {
-      AppError.badRequest = mock('')
-
-      const designSpecsAndUnits = null
-      expect(() => target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, testTx)).toThrow()
-    })
-
-    test('rejects when a unit has a block value that does not match its treatment', () => {
-      target.designSpecificationDetailService = {
-        saveDesignSpecifications: mockResolve(),
-      }
-      target.saveUnitsByExperimentId = mockResolve()
-      AppUtil.createCompositePostResponse = mock()
-
-      const designSpecsAndUnits = {
-        designSpecifications: [],
-        units: [{ location: 1, treatmentId: 1, block: 1 }, { location: 2, treatmentId: 1, block: 2 }],
-      }
-      db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 2 }),
-      }
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }])
-      AppError.badRequest = mock()
-
-      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalled()
-      })
-    })
-
-    test('rejects when a unit has a block value that is outside those on the treatments', () => {
-      target.designSpecificationDetailService = {
-        saveDesignSpecifications: mockResolve(),
-      }
-      target.saveUnitsByExperimentId = mockResolve()
-      AppUtil.createCompositePostResponse = mock()
-
-      const designSpecsAndUnits = {
-        designSpecifications: [],
-        units: [{ location: 1, treatmentId: 1, block: 1 }, { location: 2, treatmentId: 3, block: 2 }, { location: 2, treatmentId: 3 }],
-      }
-      db.locationAssociation = {
-        findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 2 }),
-      }
-      db.treatment.findAllByExperimentId = mockResolve([{ id: 1, block: 1 }, { id: 2, block: 3 }, { id: 3, in_all_blocks: true }])
-      AppError.badRequest = mock()
-
-      return target.saveDesignSpecsAndUnits(1, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(AppError.badRequest).toHaveBeenCalled()
-      })
+      expect(() => target.saveDesignSpecsAndUnits(experimentId, null, testContext, testTx)).toThrow()
     })
   })
 
@@ -1294,52 +1041,52 @@ describe('GroupExperimentalUnitService', () => {
     test('existing units from DB contains more units', () => {
       target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
-        [{ treatment_id: 1, rep: 1, location: 3 },
-          { treatment_id: 2, rep: 1, location: 3 },
-          { treatment_id: 1, rep: 2, location: 3 },
-          { treatment_id: 2, rep: 2, location: 3 },
+        [{ treatment_block_id: 1, rep: 1, location: 3 },
+          { treatment_block_id: 2, rep: 1, location: 3 },
+          { treatment_block_id: 1, rep: 2, location: 3 },
+          { treatment_block_id: 2, rep: 2, location: 3 },
         ],
-        [{ treatmentId: 1, rep: 2, location: 3 }],
+        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
       )
 
-      expect(result.deletes).toEqual([{ treatmentId: 1, rep: 1, location: 3 },
-        { treatmentId: 2, rep: 1, location: 3 },
-        { treatmentId: 2, rep: 2, location: 3 }])
+      expect(result.deletes).toEqual([{ treatmentBlockId: 1, rep: 1, location: 3 },
+        { treatmentBlockId: 2, rep: 1, location: 3 },
+        { treatmentBlockId: 2, rep: 2, location: 3 }])
       expect(result.adds).toEqual([])
     })
 
     test('existing units from DB contains less units', () => {
       target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
-        [{ treatment_id: 1, rep: 1, location: 3 }],
-        [{ treatmentId: 1, rep: 1, location: 3 },
-          { treatmentId: 2, rep: 1, location: 3 },
-          { treatmentId: 1, rep: 2, location: 3 },
-          { treatmentId: 2, rep: 2, location: 3 }],
+        [{ treatment_block_id: 1, rep: 1, location: 3 }],
+        [{ treatmentBlockId: 1, rep: 1, location: 3 },
+          { treatmentBlockId: 2, rep: 1, location: 3 },
+          { treatmentBlockId: 1, rep: 2, location: 3 },
+          { treatmentBlockId: 2, rep: 2, location: 3 }],
       )
 
-      expect(result.adds).toEqual([{ treatmentId: 2, rep: 1, location: 3 },
-        { treatmentId: 1, rep: 2, location: 3 },
-        { treatmentId: 2, rep: 2, location: 3 }])
+      expect(result.adds).toEqual([{ treatmentBlockId: 2, rep: 1, location: 3 },
+        { treatmentBlockId: 1, rep: 2, location: 3 },
+        { treatmentBlockId: 2, rep: 2, location: 3 }])
       expect(result.deletes).toEqual([])
     })
 
     test('existing units from DB contains duplicate treatment in rep', () => {
       target = new GroupExperimentalUnitService()
       const result = target.compareWithExistingUnits(
-        [{ treatment_id: 1, rep: 1, location: 3 },
-          { treatment_id: 2, rep: 1, location: 3 },
-          { treatment_id: 1, rep: 2, location: 3 },
-          { treatmentId: 1, rep: 2, location: 3 },
-          { treatment_id: 2, rep: 2, location: 3 },
+        [{ treatment_block_id: 1, rep: 1, location: 3 },
+          { treatment_block_id: 2, rep: 1, location: 3 },
+          { treatment_block_id: 1, rep: 2, location: 3 },
+          { treatmentBlockId: 1, rep: 2, location: 3 },
+          { treatment_block_id: 2, rep: 2, location: 3 },
         ],
-        [{ treatmentId: 1, rep: 2, location: 3 }],
+        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
       )
 
-      expect(result.deletes).toEqual([{ treatmentId: 1, rep: 1, location: 3 },
-        { treatmentId: 2, rep: 1, location: 3 },
-        { treatmentId: 1, rep: 2, location: 3 },
-        { treatmentId: 2, rep: 2, location: 3 }])
+      expect(result.deletes).toEqual([{ treatmentBlockId: 1, rep: 1, location: 3 },
+        { treatmentBlockId: 2, rep: 1, location: 3 },
+        { treatmentBlockId: 1, rep: 2, location: 3 },
+        { treatmentBlockId: 2, rep: 2, location: 3 }])
       expect(result.adds).toEqual([])
     })
   })

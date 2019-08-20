@@ -16,6 +16,10 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS group_value_ids; " +
   "DROP TABLE IF EXISTS unit_ids; " +
   "DROP TABLE IF EXISTS analysis_model_ids; " +
+  "DROP TABLE IF EXISTS new_blocks; " +
+  "DROP TABLE IF EXISTS mapped_block_ids; " +
+  "DROP TABLE IF EXISTS new_treatment_blocks; " +
+  "DROP TABLE IF EXISTS mapped_treatment_block_ids; " +
   "WITH temp_experiment_parent AS (" +
     "INSERT INTO experiment " +
     "SELECT (e1).* FROM (" +
@@ -242,6 +246,12 @@ const duplicateDesignSpecificationScript =
   "FROM temp_design_spec_detail_ids;"
 
 const duplicateUnitScript =
+  "SELECT tb.id AS old_id, n.id AS new_id " +
+  "INTO TEMP mapped_treatment_block_ids " +
+  "FROM treatment_block tb " +
+  "INNER JOIN mapped_block_ids mbi ON mbi.old_id = tb.block_id " +
+  "INNER JOIN mapped_treatment_ids mti ON mti.old_id = tb.treatment_id " +
+  "INNER JOIN new_treatment_blocks n ON mti.new_id = n.treatment_id and mbi.new_id = n.block_id;" +
   "WITH temp_unit_ids AS (" +
     "INSERT INTO unit " +
     "SELECT (c).* FROM (" +
@@ -252,16 +262,61 @@ const duplicateUnitScript =
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
         "#= hstore('group_id', null::text) " +
-        "#= hstore('treatment_id', mti.new_id::text) " +
+        "#= hstore('treatment_block_id', mtbi.new_id::text) " +
         "#= hstore('set_entry_id', null) " +
         "#= hstore('deactivation_reason', null) " +
       "AS c FROM unit u " +
-        "INNER JOIN mapped_treatment_ids mti ON u.treatment_id = mti.old_id) sub " +
+        "INNER JOIN mapped_treatment_block_ids mtbi ON u.treatment_block_id = mtbi.old_id) sub " +
     "RETURNING id" +
   ")" +
   "SELECT * " +
   "INTO TEMP unit_ids " +
   "FROM temp_unit_ids;"
+
+const duplicateBlockScript =
+  "WITH temp_blocks AS (" +
+  "INSERT INTO block " +
+  "SELECT (c).* FROM (" +
+  "SELECT b " +
+  "#= hstore('id', nextval(pg_get_serial_sequence('block', 'id'))::text) " +
+  "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
+  "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
+  "#= hstore('created_user_id', $2) " +
+  "#= hstore('modified_user_id', $2) " +
+  "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
+  "AS c FROM block b " +
+  "WHERE experiment_id = $1 ) sub " +
+  "RETURNING id, name" +
+  ")" +
+  "SELECT * " +
+  "INTO TEMP new_blocks " +
+  "FROM temp_blocks;"
+
+const duplicateTreatmentBlockScript =
+  "SELECT b.id AS old_id, n.id AS new_id " +
+  "INTO TEMP mapped_block_ids " +
+  "FROM block b " +
+    "INNER JOIN new_blocks n ON b.name = n.name " +
+  "WHERE b.experiment_id = $1;" +
+  "WITH temp_new_treatment_blocks AS (" +
+  "INSERT INTO treatment_block " +
+  "SELECT (c).* FROM (" +
+  "SELECT tb " +
+  "#= hstore('id', nextval(pg_get_serial_sequence('treatment_block', 'id'))::text) " +
+  "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
+  "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
+  "#= hstore('created_user_id', $2) " +
+  "#= hstore('modified_user_id', $2) " +
+  "#= hstore('treatment_id', mti.new_id::text) " +
+  "#= hstore('block_id', mbi.new_id::text) " +
+  "AS c FROM treatment_block tb " +
+  "INNER JOIN mapped_treatment_ids mti ON tb.treatment_id = mti.old_id " +
+  "INNER JOIN mapped_block_ids mbi ON tb.block_id = mbi.old_id) sub " +
+  "RETURNING id, treatment_id, block_id" +
+  ")" +
+  "SELECT * " +
+  "INTO TEMP new_treatment_blocks " +
+  "FROM temp_new_treatment_blocks;"
 
 const duplicateAnalysisModelScript =
   "WITH temp_analysis_model_ids AS (" +
@@ -301,6 +356,8 @@ class duplicationRepo {
         duplicateCombinationElementScript +
         duplicateUnitSpecificationScript +
         duplicateDesignSpecificationScript +
+        duplicateBlockScript +
+        duplicateTreatmentBlockScript +
         duplicateUnitScript +
         duplicateAnalysisModelScript +
       " SELECT * FROM experiment_parent;",

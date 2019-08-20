@@ -12,46 +12,41 @@ class unitRepo {
   repository = () => this.rep
 
   @setErrorCode('5J4000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.* FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id=$1', experimentId)
-
-  @setErrorCode('5JE000')
-  batchfindAllByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT u.*, t.experiment_id FROM unit u, treatment t WHERE u.treatment_id=t.id and t.experiment_id IN ($1:csv)', experimentIds)
-    .then(data => {
-      const unitByExperimentId = _.groupBy(data, 'experiment_id')
-      return _.map(experimentIds, experimentId => {
-        return unitByExperimentId[experimentId] || []
-      })
-    })
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.experiment_id=$1', experimentId)
 
   @setErrorCode('5J5000')
-  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE treatment_id IN ($1:csv)', [treatmentIds])
+  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id\n' +
+    'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.treatment_id, u.rep, u.set_entry_id, u.location, u.block FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id\n' +
-    'INNER JOIN location_association la ON la.experiment_id = t.experiment_id AND la.location = u.location AND la.block IS NOT DISTINCT FROM u.block AND la.set_id = $1;', setId)
+  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
+    'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
+    'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
+    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)
 
   @setErrorCode('5JE000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.* from location_association la\n' +
-    'INNER JOIN unit u ON la.location = u.location AND la.block IS NOT DISTINCT FROM u.block\n' +
-    'INNER JOIN treatment t ON t.id = u.treatment_id AND t.experiment_id = la.experiment_id\n' +
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, b.name AS block FROM location_association la\n' +
+    'INNER JOIN treatment_block tb ON tb.block_id = la.block_id\n' +
+    'INNER JOIN unit u ON u.treatment_block_id = tb.id\n' +
+    'INNER JOIN block b ON tb.block_id = b.id\n' +
     'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
-    return _.compact(_.flatMap(setIds, setId => 
+    return _.compact(_.flatMap(setIds, setId =>
       _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id']))))
   })
 
   @setErrorCode('5J8000')
-  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, u.treatment_id, u.rep, u.set_entry_id, u.id FROM unit u INNER JOIN treatment t ON u.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
+  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, tb.treatment_id, u.rep, u.set_entry_id, u.id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
 
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['treatment_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location', 'block'],
+      ['treatment_block_id', 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location'],
       { table: 'unit' },
     )
 
     const values = units.map(u => ({
-      treatment_id: u.treatmentId,
+      treatment_block_id: u.treatmentBlockId,
       rep: u.rep,
       set_entry_id: u.setEntryId,
       created_user_id: context.userId,
@@ -59,7 +54,6 @@ class unitRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
-      block: u.block,
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
@@ -70,22 +64,21 @@ class unitRepo {
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'treatment_id', 'rep', {
+      ['?id', 'treatment_block_id', 'rep', {
         name: 'set_entry_id',
         cast: 'int',
-      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }, { name: 'block', cast: 'int' }],
+      }, 'modified_user_id', 'modified_date', { name: 'location', cast: 'int' }],
       { table: 'unit' },
     )
 
     const data = units.map(u => ({
       id: u.id,
-      treatment_id: u.treatmentId,
+      treatment_block_id: u.treatmentId,
       rep: u.rep,
       set_entry_id: u.setEntryId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       location: u.location,
-      block: u.block,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
 
@@ -129,14 +122,13 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL\n' +
-      'FROM treatment t, location_association la\n' +
-      'WHERE u.treatment_id = t.id AND t.experiment_id = la.experiment_id AND u.location = la.location AND u.block IS NOT DISTINCT FROM la.block AND la.set_id = $1', setId)
+    return tx.none('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
+      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1', setId)
   }
 
   @setErrorCode('5JI000')
-  batchFindAllByExperimentIdLocationAndBlock = (experimentId, location, block, tx = this.rep) => {
-    return tx.any('SELECT u.* FROM unit u INNER JOIN treatment t on u.treatment_id = t.id WHERE t.experiment_id=$1 AND u.location=$2 AND u.block IS NOT DISTINCT FROM $3', [experimentId, location, block])
+  batchFindAllByLocationAndTreatmentBlocks = (location, treatmentBlockIds, tx = this.rep) => {
+    return tx.any('SELECT u.* FROM unit u WHERE u.location=$1 AND u.treatment_block_id IN ($2:csv)', [location, treatmentBlockIds])
   }
 
   @setErrorCode('5JK000')

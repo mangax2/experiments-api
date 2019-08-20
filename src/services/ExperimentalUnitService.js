@@ -9,7 +9,7 @@ import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
-import SetEntryRemovalService from './prometheus/SetEntryRemovalService'
+import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -21,14 +21,7 @@ class ExperimentalUnitService {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
-  }
-
-  @setErrorCode('171000')
-  @Transactional('createExperimentalUnitsTx')
-  batchCreateExperimentalUnits(experimentalUnits, context, tx) {
-    return this.validator.validate(experimentalUnits, 'POST', tx)
-      .then(() => db.unit.batchCreate(experimentalUnits, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
   }
 
   @setErrorCode('172000')
@@ -50,13 +43,6 @@ class ExperimentalUnitService {
     if (ids.length !== _.uniq(ids).length) {
       throw AppError.badRequest(`Duplicate ${idKey}(s) in request payload`, undefined, getFullErrorCode('173001'))
     }
-  }
-
-  @setErrorCode('177000')
-  @Transactional('getExperimentalUnitsByExperimentId')
-  getExperimentalUnitsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.unit.findAllByExperimentId(id, tx))
   }
 
   @setErrorCode('178000')
@@ -101,51 +87,10 @@ class ExperimentalUnitService {
     return setEntryUnitMap
   }
 
-  @setErrorCode('17C000')
-  @Transactional('getTreatmentDetailsBySetId')
-  getTreatmentDetailsBySetId = (setId, tx) => {
-    if (setId) {
-      return db.unit.batchFindAllBySetId(setId, tx).then((units) => {
-        const treatmentIds = _.uniq(_.map(units, 'treatment_id'))
-
-        if (treatmentIds && treatmentIds.length > 0) {
-          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
-            .then(this.mapTreatmentLevelsToOutputFormat)
-        }
-
-        throw AppError.notFound(`No treatments found for set id: ${setId}.`, undefined, getFullErrorCode('17C001'))
-      })
-    }
-
-    throw AppError.badRequest('A setId is required', undefined, getFullErrorCode('17C002'))
-  }
-
-  @setErrorCode('17D000')
-  mapTreatmentLevelsToOutputFormat = (response) => {
-    const groupedValues = _.groupBy(response, 'treatment_id')
-
-    return _.map(groupedValues, (treatmentDetails, treatmentId) => (
-      {
-        treatmentId: Number(treatmentId),
-        factorLevels: _.map(treatmentDetails, detail => ({
-          items: detail.value.items,
-          factorName: detail.name,
-        })),
-      }))
-  }
-
-  @setErrorCode('17E000')
-  @Transactional('batchUpdateExperimentalUnits')
-  batchUpdateExperimentalUnits(experimentalUnits, context, tx) {
-    return this.validator.validate(experimentalUnits, 'PUT', tx)
-      .then(() => db.unit.batchUpdate(experimentalUnits, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
-  }
-
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')
   updateUnitsForSet = (setId, experimentalUnits, context, tx) =>
-    db.locationAssociation.findBySetId(setId, tx).then((setInfo) => {
+    this.locationAssocWithBlockService.getBySetId(setId, tx).then((setInfo) => {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }
@@ -180,66 +125,45 @@ class ExperimentalUnitService {
           delete unit.factorLevelKey
         })
         const treatmentIdsUsed = _.uniq(_.map(units, 'treatmentId'))
-        return db.treatment.batchFind(treatmentIdsUsed, tx).then((treatments) => {
-          const treatmentWithMismatchedBlock = _.find(treatments,
-            treatment => treatment.block !== setInfo.block && !treatment.in_all_blocks)
-          if (treatmentWithMismatchedBlock) {
-            throw AppError.badRequest('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, getFullErrorCode('17F003'))
-          }
-          return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
-            setInfo.block, context, tx)
-        })
+        return db.treatmentBlock.batchFindByBlockIds(setInfo.block_id, tx)
+          .then((treatmentBlocks) => {
+            const treatmentWithMismatchedBlock = treatmentIdsUsed.filter(treatmentId =>
+              !treatmentBlocks.find(treatmentBlock => treatmentBlock.treatment_id === treatmentId))
+            if (treatmentWithMismatchedBlock.length > 0) {
+              throw AppError.badRequest('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, getFullErrorCode('17F003'))
+            }
+            return this.mergeSetEntriesToUnits(setInfo.experiment_id, units, setInfo.location,
+              treatmentBlocks, context, tx)
+          })
       })
     })
 
   @notifyChanges('update', 0)
   @setErrorCode('17G000')
   @Transactional('mergeSetEntriesToUnits')
-  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, block, context, tx) =>
-    db.unit.batchFindAllByExperimentIdLocationAndBlock(experimentId, location, block, tx)
+  mergeSetEntriesToUnits = (experimentId, unitsToSave, location, treatmentBlocks, context, tx) =>
+    db.unit.batchFindAllByLocationAndTreatmentBlocks(location, _.map(treatmentBlocks, 'id'), tx)
       .then((unitsFromDB) => {
+        unitsToSave.forEach((unit) => {
+          const matchingTreatmentBlock = treatmentBlocks.find(
+            treatmentBlock => treatmentBlock.treatment_id === unit.treatmentId)
+          unit.treatmentBlockId = _.get(matchingTreatmentBlock, 'id')
+          delete unit.treatmentId
+        })
         const {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
-        } = this.getDbActions(unitsToSave, unitsFromDB, location, block)
-
-        this.detectWarnableUnitUpdateConditions(unitsToBeCreated, unitsToBeUpdated, unitsFromDB,
-          context, experimentId, location, block)
+        } = this.getDbActions(unitsToSave, unitsFromDB, location)
 
         return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
       })
 
-  detectWarnableUnitUpdateConditions =
-    (unitsToBeCreated, unitsToBeUpdated, databaseUnits, context, experimentId, location, block) => {
-      const unitsHavingSetEntryIdsRemoved = _.filter(_.map(
-        _.filter(unitsToBeUpdated, x => !x.setEntryId),
-        unit => ({
-          id: unit.id,
-          setEntryId: _.find(databaseUnits, dbUnit => dbUnit.id === unit.id).setEntryId,
-        })), z => !!z.setEntryId)
-
-      if (unitsHavingSetEntryIdsRemoved.length > 0) {
-        logger.warn(`[[${context.requestId}]] Set Entry IDs are being overwritten by this change! ExperimentId: ${experimentId}, Location: ${location}, Block: ${block}, Overwritten data: ${JSON.stringify(unitsHavingSetEntryIdsRemoved)}`)
-        SetEntryRemovalService.addWarning()
-      }
-
-      if (context.isRepPacking) {
-        const numberOfUnitsCreatingWithoutSetEntryId =
-          _.filter(unitsToBeCreated, unit => !unit.setEntryId).length
-        if (numberOfUnitsCreatingWithoutSetEntryId > 0) {
-          logger.warn(`Rep packing is creating ${numberOfUnitsCreatingWithoutSetEntryId} unit(s) without set entries! ExperimentId: ${experimentId}, Location: ${location}, Block: ${block}`)
-          SetEntryRemovalService.addWarning()
-        }
-      }
-    }
-
   @setErrorCode('17H000')
-  getDbActions = (unitsFromMessage, unitsFromDB, location, block) => {
+  getDbActions = (unitsFromMessage, unitsFromDB, location) => {
     const unitsFromDbCamelizeLower = inflector.transform(unitsFromDB, 'camelizeLower')
     _.forEach(unitsFromMessage, (unitM) => {
       unitM.location = location
-      unitM.block = block
     })
-    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentId', 'setEntryId', 'location', 'block'))
+    const unitsFromDbSlim = _.map(unitsFromDbCamelizeLower, unit => _.pick(unit, 'rep', 'treatmentBlockId', 'setEntryId', 'location'))
     const unitsToBeCreated = _.differenceBy(unitsFromMessage, unitsFromDbSlim, 'setEntryId')
     const unitsToBeDeleted = _.map(_.differenceBy(unitsFromDbCamelizeLower, unitsFromMessage, 'setEntryId'), 'id')
     const unitsThatAlreadyExist = _.difference(unitsFromMessage, unitsToBeCreated)

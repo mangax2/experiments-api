@@ -13,14 +13,17 @@ import FactorDependentCompositeService from '../services/FactorDependentComposit
 import FactorService from '../services/FactorService'
 import ListsService from '../services/ListsService'
 import LocationAssociationService from '../services/LocationAssociationService'
+import LocationAssociationWithBlockService from '../services/LocationAssociationWithBlockService'
 import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
 import RefDataSourceTypeService from '../services/RefDataSourceTypeService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
+import TreatmentBlockService from '../services/TreatmentBlockService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
+import UnitWithBlockService from '../services/UnitWithBlockService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 
@@ -101,7 +104,7 @@ router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentDetai
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, false, req.context)
+router.get('/experiments/:id/experimental-units', (req, res, next) => new UnitWithBlockService().getUnitsFromExperimentByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 router.patch('/experiments/:id/experimental-units', (req, res, next) => {
@@ -148,7 +151,7 @@ router.get('/experiments/:id/unit-specification-details', (req, res, next) => ne
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/location-association', (req, res, next) => new LocationAssociationService().getLocationAssociationByExperimentId(req.params.id)
+router.get('/experiments/:id/location-association', (req, res, next) => new LocationAssociationWithBlockService().getByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 
@@ -175,7 +178,7 @@ router.put('/sets/:setId/set-entries', (req, res, next) => new ExperimentalUnitS
   .then(() => res.sendStatus(200))
   .catch(err => next(err)))
 
-router.get('/sets/:setId/treatment-details', (req, res, next) => new ExperimentalUnitService().getTreatmentDetailsBySetId(req.params.setId)
+router.get('/sets/:setId/treatment-details', (req, res, next) => new TreatmentBlockService().getTreatmentDetailsBySetId(req.params.setId)
   .then(value => res.json(value))
   .catch(err => next(err)))
 
@@ -236,7 +239,7 @@ router.put('/templates/:id/treatments', (req, res, next) => new TreatmentDetails
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getExperimentalUnitsByExperimentId(req.params.id, true, req.context)
+router.get('/templates/:id/experimental-units', (req, res, next) => new UnitWithBlockService().getUnitsFromTemplateByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 

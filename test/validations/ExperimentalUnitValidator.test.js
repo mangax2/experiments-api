@@ -24,7 +24,6 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
-        { paramName: 'block', type: 'numeric' },
       ]
 
       expect(ExperimentalUnitValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -74,7 +73,6 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
-        { paramName: 'block', type: 'numeric' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -93,7 +91,6 @@ describe('ExperimentalUnitValidator', () => {
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         { paramName: 'setEntryId', type: 'numeric' },
         { paramName: 'location', type: 'numeric' },
-        { paramName: 'block', type: 'numeric' },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

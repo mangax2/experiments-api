@@ -11,6 +11,8 @@ describe('LocationAssociationService', () => {
   beforeEach(() => {
     expect.hasAssertions()
     target = new LocationAssociationService()
+
+    db.block.findByExperimentId = mockResolve([{ id: 1, name: null }, { id: 2, name: '1' }, { id: 3, name: '2' }])
   })
 
   describe('associateSetsToLocations', () => {
@@ -58,21 +60,10 @@ describe('LocationAssociationService', () => {
       })
     })
 
-    test('rejects when a block is passed in but there are no blocks defined', () => {
-      const groups = [{ id: '1.1.2' }, { id: '1.9' }]
+    test('rejects when an invalid block is passed in for blocking', () => {
+      const groups = [{ id: '1.1.4' }, { id: '1.9.1' }]
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
-
-      return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid block value passed for association', null, '1Y1005')
-      })
-    })
-
-    test('rejects when an invalid block is passed in for blocking', () => {
-      const groups = [{ id: '1.1.2' }, { id: '1.9.1' }]
-      AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1, block: 4 }, { location: 1 }])
       target.experimentService.verifyExperimentExists = mockResolve({})
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(null, () => {
@@ -87,22 +78,20 @@ describe('LocationAssociationService', () => {
       target.experimentService.verifyExperimentExists = mockResolve({})
       db.locationAssociation = {
         batchCreate: mockResolve(),
-        batchRemoveByExperimentIdAndLocationAndBlock: mockResolve(),
+        batchRemoveByLocationAndBlock: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {
         expect(db.locationAssociation.batchCreate).toHaveBeenCalledWith([
           {
-            experimentId: 1,
             location: 1,
             setId: 123,
-            block: null,
+            block_id: 1,
           },
           {
-            experimentId: 1,
             location: 2,
             setId: 456,
-            block: null,
+            block_id: 1,
           },
         ], testContext, testTx)
       })
@@ -111,37 +100,26 @@ describe('LocationAssociationService', () => {
     test('calls to persist location, set, experiment, block associations', () => {
       const groups = [{ id: '1.1.1', setId: 123 }, { id: '1.2.2', setId: 456 }]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1, block: 1 }, { location: 2, block: 2 }])
+      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
       target.experimentService.verifyExperimentExists = mockResolve({})
       db.locationAssociation = {
         batchCreate: mockResolve(),
-        batchRemoveByExperimentIdAndLocationAndBlock: mockResolve(),
+        batchRemoveByLocationAndBlock: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {
         expect(db.locationAssociation.batchCreate).toHaveBeenCalledWith([
           {
-            experimentId: 1,
             location: 1,
             setId: 123,
-            block: 1,
+            block_id: 2,
           },
           {
-            experimentId: 1,
             location: 2,
             setId: 456,
-            block: 2,
+            block_id: 3,
           },
         ], testContext, testTx)
-      })
-    })
-  })
-
-  describe('getLocationAssociationByExperimentId', () => {
-    test('locationAssociation repo should be called', () => {
-      db.locationAssociation.findByExperimentId = mockResolve({})
-      return target.getLocationAssociationByExperimentId(3, testTx).then(() => {
-        expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(3, testTx)
       })
     })
   })

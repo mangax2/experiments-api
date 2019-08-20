@@ -2,17 +2,20 @@ import { ConsumerGroup } from 'kafka-node'
 import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
+import db from '../../db/DbManager'
 import VaultUtil from '../utility/VaultUtil'
 import cfServices from '../utility/ServiceConfig'
-import db from '../../db/DbManager'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
 import SetEntryRemovalService from '../prometheus/SetEntryRemovalService'
+import LocationAssociationWithBlockService from '../LocationAssociationWithBlockService'
 
 const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
   experimentalUnitService = new ExperimentalUnitService()
+
+  locationAssocWithBlockService = new LocationAssociationWithBlockService()
 
   listen() {
     const params = {
@@ -71,17 +74,20 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
-      return db.locationAssociation.findBySetId(setId, tx).then((assoc) => {
+      return this.locationAssocWithBlockService.getBySetId(setId, tx).then((assoc) => {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }
-        const { location, block } = assoc
+        const { location } = assoc
+        const blockId = assoc.block_id
         const experimentId = assoc.experiment_id
-        return this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
-          location, block, { userId: 'REP_PACKING', isRepPacking: true }, tx)
-          .then(() => {
-            ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
-          })
+        return db.treatmentBlock.batchFindByBlockIds(blockId, tx)
+          .then(treatmentBlocks =>
+            this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
+              location, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, tx)
+              .then(() => {
+                ManageRepsAndUnitsListener.sendResponseMessage(set.setId, true)
+              }))
       }).catch((err) => {
         ManageRepsAndUnitsListener.sendResponseMessage(set.setId, false)
         return Promise.reject(err)

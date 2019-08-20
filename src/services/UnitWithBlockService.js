@@ -21,7 +21,7 @@ class UnitWithBlockService {
   getUnitsFromTemplateByExperimentId(id, context, tx) {
     return this.experimentService.findExperimentWithTemplateCheck(id, true, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
-      .then(pruneUnits)
+      .then(mapUnitsToResponseFormat)
   }
 
   @setErrorCode('202000')
@@ -29,7 +29,7 @@ class UnitWithBlockService {
   getUnitsFromExperimentByExperimentId(id, context, tx) {
     return this.experimentService.findExperimentWithTemplateCheck(id, false, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
-      .then(pruneUnits)
+      .then(mapUnitsToResponseFormat)
   }
 
   @setErrorCode('203000')
@@ -69,7 +69,7 @@ class UnitWithBlockService {
   }
 }
 
-const pruneUnits = units => units.map((u) => {
+const mapUnitsToResponseFormat = units => units.map((u) => {
   const unit = inflector.transform(u, 'camelizeLower')
   return {
     block: unit.block,

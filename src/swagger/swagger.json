@@ -3374,7 +3374,7 @@
           "description": "location number of experimental unit."
         },
         "block": {
-          "type": "integer",
+          "type": "string",
           "description": "the block that the experimental unit belongs to."
         }
       }
@@ -3438,7 +3438,7 @@
           "description": "the set entry id for the experimental unit"
         },
         "block": {
-          "type": "integer",
+          "type": "string",
           "description": "the block that the experimental unit belongs to."
         },
         "createdDate": {

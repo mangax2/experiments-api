@@ -154,18 +154,6 @@ class ExperimentsService {
     })
   }
 
-  @setErrorCode('15U000')
-  @Transactional('rejectIfExperimentDoesNotExist')
-  rejectIfExperimentDoesNotExist = (id, isTemplate, context, tx) =>
-    db.experiments.find(id, isTemplate, tx).then((data) => {
-      if (!data) {
-        const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
-          : 'Experiment Not Found for requested experimentId'
-        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-        throw AppError.notFound(errorMessage, undefined, getFullErrorCode('15U001'))
-      }
-    })
-
   @setErrorCode('158000')
   @Transactional('getExperimentById')
   getExperimentById(id, isTemplate, context, tx) {

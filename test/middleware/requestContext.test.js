@@ -7,7 +7,7 @@ describe('requestContextMiddlewareFunction', () => {
     expect.hasAssertions()
   })
 
-  const validHeaders = { oauth_resourceownerinfo: 'username=kmccl' }
+  const validHeaders = { oauth_resourceownerinfo: 'username=fakeuser' }
   const invalidRequest1 = { method: 'POST', headers: undefined }
   const invalidRequest2 = { method: 'POST' }
   const invalidRequest3 = { method: 'POST', headers: { oauth_resourceownerinfo: 'test=test' } }
@@ -26,7 +26,7 @@ describe('requestContextMiddlewareFunction', () => {
 
   test('returns the given request id if one is provided', () => {
     const nextFunc = mock()
-    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=kmccl', 'X-Request-Id': '25' } }
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=fakeuser', 'X-Request-Id': '25' } }
     const res = { set: mock() }
 
     requestContextMiddlewareFunction(req, res, nextFunc)
@@ -132,6 +132,30 @@ describe('requestContextMiddlewareFunction', () => {
       })
   })
 
+  test('retrieves the username from the username header when it ispopulated and the oauth_resourceownerinfo does not have that information', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'test=test', username: 'fakeuser' } }
+    const res = { set: mock() }
+
+    return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      .then(() => {
+        expect(nextFunc).toHaveBeenCalled()
+        expect(req.context.userId).toEqual('FAKEUSER')
+      })
+  })
+
+  test('retrieves the username from the oauth_resourceownerinfo when both it and the username header have that information', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=fakeuser2', username: 'fakeuser' } }
+    const res = { set: mock() }
+
+    return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      .then(() => {
+        expect(nextFunc).toHaveBeenCalled()
+        expect(req.context.userId).toEqual('FAKEUSER2')
+      })
+  })
+
   test('calls to get client id when graphql call', () => {
     const nextFunc = mock()
     const req = { method: 'POST', headers: validHeaders, url: '/experiments-api-graphql/graphql' }
@@ -140,7 +164,7 @@ describe('requestContextMiddlewareFunction', () => {
     return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
       .then(() => {
         expect(nextFunc).toHaveBeenCalled()
-        expect(req.context.userId).toEqual('KMCCL')
+        expect(req.context.userId).toEqual('FAKEUSER')
         expect(req.context.clientId).toEqual('PD-EXPERIMENTS-API-DEV-SVC')
       })
   })

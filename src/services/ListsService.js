@@ -32,11 +32,11 @@ class ListsService {
           throw AppError.badRequest(`Not all provided list ids are valid. Invalid List Ids: ${invalidListIds}`, null, '1W2002')
         }
 
-        return this.preferencesService.getPreferences('experiments-ui', 'factors', headers.authorization, context)
+        return this.preferencesService.getPreferences('material-lists-integration', 'experiments-ui', headers.authorization, context)
           .then((data) => {
             const preferences = data.body
             preferences.listIds = _.uniq(_.compact(([].concat(preferences.listIds, listIds))))
-            return this.preferencesService.setPreferences('experiments-ui', 'factors', preferences, headers.authorization, context)
+            return this.preferencesService.setPreferences('material-lists-integration', 'experiments-ui', preferences, headers.authorization, context)
               .then(() => ({ success: true, url: `https://${cfService['velocity-home'].value}/experiments`, method: 'newtab' }))
           })
       }, (err) => { throw AppError.internalServerError('Error Retrieving Lists', JSON.parse(err.response.text), '1W2003') })

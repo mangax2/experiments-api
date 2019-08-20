@@ -10,7 +10,7 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 // Error Codes 1YXXXX
 class LocationAssociationService {
   constructor() {
-    this.experimentService = new ExperimentsService()
+    this.experimentService = ExperimentsService
     this.experimentalUnitService = new ExperimentalUnitService()
   }
 
@@ -18,8 +18,10 @@ class LocationAssociationService {
   @Transactional('associateSetsToLocations')
   associateSetsToLocations = (experimentId, rawNewAssociations, context, tx) =>
     tx.batch([
-      this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
+      this.experimentalUnitService
+        .getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
       db.block.findByExperimentId(experimentId, tx),
+      this.experimentService.verifyExperimentExists(experimentId, false, context, tx),
     ]).then(([units, blocks]) => {
       const locations = _.uniq(_.map(units, 'location'))
 

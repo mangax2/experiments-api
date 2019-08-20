@@ -547,6 +547,7 @@ class ExperimentsService {
   handleReviewStatus = (experimentId, isTemplate, body, context, tx) => {
     const acceptableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED']
     if (_.isNil(body.status)) {
+      logger.error('Error in handleReviewStatus - Status is not found in request body:', JSON.stringify(body))
       return Promise.reject(AppError.badRequest(`Status must be provided in body. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P001')))
     }
 

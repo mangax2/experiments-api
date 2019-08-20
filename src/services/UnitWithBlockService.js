@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
@@ -20,6 +21,7 @@ class UnitWithBlockService {
   getUnitsFromTemplateByExperimentId(id, context, tx) {
     return this.experimentService.findExperimentWithTemplateCheck(id, true, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
+      .then(pruneUnits)
   }
 
   @setErrorCode('202000')
@@ -27,6 +29,7 @@ class UnitWithBlockService {
   getUnitsFromExperimentByExperimentId(id, context, tx) {
     return this.experimentService.findExperimentWithTemplateCheck(id, false, context, tx)
       .then(() => this.getExperimentalUnitsByExperimentId(id, tx))
+      .then(pruneUnits)
   }
 
   @setErrorCode('203000')
@@ -65,5 +68,23 @@ class UnitWithBlockService {
     return treatmentBlock ? treatmentBlock.id : null
   }
 }
+
+const pruneUnits = units => units.map((u) => {
+  const unit = inflector.transform(u, 'camelizeLower')
+  return {
+    block: unit.block,
+    createdDate: unit.createdDate,
+    createdUserId: unit.createdUserId,
+    deactivationReason: unit.deactivationReason,
+    groupId: unit.groupId,
+    id: unit.id,
+    location: unit.location,
+    modifiedDate: unit.modifiedDate,
+    modifiedUserId: unit.modifiedUserId,
+    rep: unit.rep,
+    setEntryId: unit.setEntryId,
+    treatmentId: unit.treatmentId,
+  }
+})
 
 module.exports = UnitWithBlockService

@@ -5,6 +5,21 @@ import { mock, mockReject, mockResolve } from '../jestUtil'
 describe('UnitWithBlockService', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
+  const trimmedUnit = {
+    block: '1',
+    createdDate: '2019-08-19T16:10:03.353Z',
+    createdUserId: 'user',
+    deactivationReason: 'damage',
+    groupId: 1234,
+    id: 9295665,
+    location: 1,
+    modifiedDate: '2019-08-19T18:17:35.289Z',
+    modifiedUserId: 'migration',
+    rep: 2,
+    setEntryId: 124,
+    treatmentId: 180490,
+  }
+
   describe('getUnitsFromTemplateByExperimentId', () => {
     test('The call fails getExperimentById check', () => {
       const target = new UnitWithBlockService()
@@ -24,6 +39,17 @@ describe('UnitWithBlockService', () => {
         expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
+      })
+    })
+
+    test('Prunes units to what the API expects to return', () => {
+      const target = new UnitWithBlockService()
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
+      target.getExperimentalUnitsByExperimentId = mockResolve([{ ...trimmedUnit, treatmentBlockId: 1 }])
+      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([trimmedUnit])
       })
     })
   })
@@ -47,6 +73,41 @@ describe('UnitWithBlockService', () => {
         expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
         expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual([])
+      })
+    })
+
+    test('Prunes units to what the API expects to return', () => {
+      const target = new UnitWithBlockService()
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
+      target.getExperimentalUnitsByExperimentId = mockResolve([{ ...trimmedUnit, treatmentBlockId: 1 }])
+      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([trimmedUnit])
+      })
+    })
+
+    test('converts units from snake_case to camelCase', () => {
+      const target = new UnitWithBlockService()
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
+      target.getExperimentalUnitsByExperimentId = mockResolve([{
+        block: '1',
+        created_date: '2019-08-19T16:10:03.353Z',
+        created_user_id: 'user',
+        deactivation_reason: 'damage',
+        group_id: 1234,
+        id: 9295665,
+        location: 1,
+        modified_date: '2019-08-19T18:17:35.289Z',
+        modified_user_id: 'migration',
+        rep: 2,
+        set_entry_id: 124,
+        treatment_id: 180490,
+      }])
+      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([trimmedUnit])
       })
     })
   })

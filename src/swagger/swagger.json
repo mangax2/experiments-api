@@ -3264,6 +3264,18 @@
           "items": {
             "$ref": "#/definitions/CompositeTreatmentsCombinationElementGET"
           }
+        },
+        "inAllBlocks": {
+          "type": "boolean",
+          "description": "boolean to specify if the treatment is in all blocks."
+        },
+        "block": {
+          "type": "string",
+          "description": "the block that the treatment belongs to."
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "the ID for the block that the treatment belongs to."
         }
       }
     },
@@ -3440,6 +3452,10 @@
         "block": {
           "type": "string",
           "description": "the block that the experimental unit belongs to."
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "the ID for the block that the experimental unit belongs to."
         },
         "createdDate": {
           "type": "string",
@@ -3756,6 +3772,14 @@
         "set_id": {
           "type": "integer",
           "description": "The Set Id that is associated to the location in the Experiment"
+        },
+        "block": {
+          "type": "string",
+          "description": "the block the set is associated to"
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "the ID for the block that the set is associated to"
         }
       }
     },

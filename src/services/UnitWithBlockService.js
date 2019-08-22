@@ -53,8 +53,11 @@ class UnitWithBlockService {
   @setErrorCode('205000')
   addBlockInfoToUnit = (units, treatmentBlocks) => _.map(units, (unit) => {
     const block = _.find(treatmentBlocks, tb => tb.id === unit.treatment_block_id)
-    unit.block = _.isNil(block) ? '' : block.name
-    return unit
+    return {
+      ...unit,
+      block: block.name,
+      blockId: block.block_id,
+    }
   })
 
   addTreatmentBlocksToUnits = (units, treatmentBlocks) => _.map(units, (unit) => {
@@ -73,6 +76,7 @@ const mapUnitsToResponseFormat = units => units.map((u) => {
   const unit = inflector.transform(u, 'camelizeLower')
   return {
     block: unit.block,
+    blockId: unit.blockId,
     createdDate: unit.createdDate,
     createdUserId: unit.createdUserId,
     deactivationReason: unit.deactivationReason,

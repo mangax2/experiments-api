@@ -7,6 +7,7 @@ describe('UnitWithBlockService', () => {
 
   const trimmedUnit = {
     block: '1',
+    blockId: 1,
     createdDate: '2019-08-19T16:10:03.353Z',
     createdUserId: 'user',
     deactivationReason: 'damage',
@@ -92,6 +93,7 @@ describe('UnitWithBlockService', () => {
       target.experimentService.findExperimentWithTemplateCheck = mockResolve()
       target.getExperimentalUnitsByExperimentId = mockResolve([{
         block: '1',
+        block_id: 1,
         created_date: '2019-08-19T16:10:03.353Z',
         created_user_id: 'user',
         deactivation_reason: 'damage',
@@ -157,33 +159,10 @@ describe('UnitWithBlockService', () => {
       const target = new UnitWithBlockService()
       expect(target.addBlockInfoToUnit(units, treatmentBlocks))
         .toEqual([{
-          treatment_block_id: 1, rep: 1, loc: 1, block: 'block1',
+          treatment_block_id: 1, rep: 1, loc: 1, blockId: 11, block: 'block1',
         },
         {
-          treatment_block_id: 2, rep: 1, loc: 1, block: 'block2',
-        }])
-    })
-
-    test('there is no matching treatment block with a unit', () => {
-      const treatmentBlocks = [
-        {
-          id: 1, block_id: 11, treatment_id: 111, name: 'block1',
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
-        },
-      ]
-      const units = [
-        { treatment_block_id: 1, rep: 1, loc: 1 },
-        { treatment_block_id: 3, rep: 1, loc: 1 },
-      ]
-      const target = new UnitWithBlockService()
-      expect(target.addBlockInfoToUnit(units, treatmentBlocks))
-        .toEqual([{
-          treatment_block_id: 1, rep: 1, loc: 1, block: 'block1',
-        },
-        {
-          treatment_block_id: 3, rep: 1, loc: 1, block: '',
+          treatment_block_id: 2, rep: 1, loc: 1, blockId: 12, block: 'block2',
         }])
     })
   })

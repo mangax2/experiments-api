@@ -70,7 +70,7 @@ describe('TreatmentWithBlockService', () => {
           id: 1, block_id: 11, treatment_id: 111, name: 'block1',
         },
         {
-          id: 2, block_id: 11, treatment_id: 112, name: 'block2',
+          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
         },
       ]
 
@@ -84,10 +84,10 @@ describe('TreatmentWithBlockService', () => {
 
       expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
         {
-          id: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+          id: 111, treatmentNumber: 1, blockId: 11, block: 'block1', inAllBlocks: false,
         },
         {
-          id: 112, treatmentNumber: 2, block: 'block2', inAllBlocks: false,
+          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false,
         },
       ])
     })
@@ -98,10 +98,10 @@ describe('TreatmentWithBlockService', () => {
           id: 1, block_id: 11, treatment_id: 111, name: 'block1',
         },
         {
-          id: 2, block_id: 11, treatment_id: 111, name: 'block2',
+          id: 2, block_id: 12, treatment_id: 111, name: 'block2',
         },
         {
-          id: 2, block_id: 11, treatment_id: 112, name: 'block2',
+          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
         },
       ]
 
@@ -115,10 +115,10 @@ describe('TreatmentWithBlockService', () => {
 
       expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
         {
-          id: 111, treatmentNumber: 1, block: null, inAllBlocks: true,
+          id: 111, treatmentNumber: 1, blockId: null, block: null, inAllBlocks: true,
         },
         {
-          id: 112, treatmentNumber: 2, block: 'block2', inAllBlocks: false,
+          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false,
         },
       ])
     })
@@ -137,7 +137,7 @@ describe('TreatmentWithBlockService', () => {
       const target = new TreatmentWithBlockService()
       expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
         {
-          id: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
+          id: 111, treatmentNumber: 1, block: 'block1', blockId: 11, inAllBlocks: false,
         },
       )
     })
@@ -157,7 +157,7 @@ describe('TreatmentWithBlockService', () => {
       const target = new TreatmentWithBlockService()
       expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
         {
-          id: 111, treatmentNumber: 1, block: null, inAllBlocks: true,
+          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: true,
         },
       )
     })

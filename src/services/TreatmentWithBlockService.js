@@ -50,12 +50,12 @@ class TreatmentWithBlockService {
   })
 
   @setErrorCode('1Z5000')
-  associateBlockInfoToTreatment = (treatment, treatmentBlocks) => {
-    const treatmentWithBlock = Object.assign({}, treatment)
-    treatmentWithBlock.inAllBlocks = treatmentBlocks.length > 1
-    treatmentWithBlock.block = treatmentBlocks.length === 1 ? treatmentBlocks[0].name : null
-    return treatmentWithBlock
-  }
+  associateBlockInfoToTreatment = (treatment, treatmentBlocks) => ({
+    ...treatment,
+    inAllBlocks: treatmentBlocks.length > 1,
+    block: treatmentBlocks.length === 1 ? treatmentBlocks[0].name : null,
+    blockId: treatmentBlocks.length === 1 ? treatmentBlocks[0].block_id : null,
+  })
 
   @setErrorCode('1Z6000')
   @Transactional('createTreatments')

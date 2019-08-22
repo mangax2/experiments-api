@@ -136,24 +136,6 @@ describe('TreatmentBlockService', () => {
   })
 
   describe('getTreatmentBlocksWithBlockInfo', () => {
-    test('get the treatment blocks with null block when the matching block is not found', () => {
-      const blocks = [
-        { id: 11, name: 'block1' },
-        { id: 12, name: 'block2' },
-      ]
-      const treatmentBlocks = [
-        { id: 1, block_id: 13, treatment_id: 111 },
-      ]
-
-      const target = new TreatmentBlockService()
-      const result = target.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)
-      expect(result).toEqual([
-        {
-          id: 1, block_id: 13, treatment_id: 111, name: null,
-        },
-      ])
-    })
-
     test('get the treatment blocks with block info added', () => {
       const blocks = [
         { id: 11, name: 'block1' },

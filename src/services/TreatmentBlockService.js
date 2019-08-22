@@ -56,7 +56,7 @@ class TreatmentBlockService {
   @setErrorCode('1V3000')
   getTreatmentBlocksWithBlockInfo = (treatmentBlocks, blocks) => _.map(treatmentBlocks, (tb) => {
     const block = _.find(blocks, b => b.id === tb.block_id)
-    return { ...tb, name: _.isNil(block) ? null : block.name }
+    return { ...tb, name: block.name }
   })
 
   @setErrorCode('1V4000')

@@ -10,6 +10,8 @@ import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import KafkaProducer from './kafka/KafkaProducer'
+import cfServices from './utility/ServiceConfig'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -219,7 +221,11 @@ class ExperimentalUnitService {
         const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
           const correspondingUnit = _.find(requestBody,
             requestObject => requestObject.setEntryId === unit.set_entry_id)
-          return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
+          return {
+            id: unit.id,
+            deactivationReason: correspondingUnit.deactivationReason,
+            setEntryId: correspondingUnit.setEntryId,
+          }
         })
 
         const byIdWithNewReason = _.map(idSubset, unit => (
@@ -227,8 +233,28 @@ class ExperimentalUnitService {
         )
         const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
         db.unit.batchUpdateDeactivationReasons(results, context, tx)
+        this.sendDeactivationNotifications(results)
         return results
       })
+  }
+
+  @setErrorCode('17K000')
+  sendDeactivationNotifications = (deactivations) => {
+    if (cfServices.experimentsKafka.value.enableKafka === 'true') {
+      _.forEach(deactivations, (deactivation) => {
+        try {
+          const message = {
+            experimentalUnitId: deactivation.id,
+            deactivationReason: deactivation.deactivationReason,
+            setEntryId: deactivation.setEntryId,
+          }
+          KafkaProducer.publish(cfServices.experimentsKafka.value.topics.unitDeactivation,
+            message, cfServices.experimentsKafka.value.schema.unitDeactivation)
+        } catch (err) {
+          console.warn(`An error was caught when publishing a deactivation reason for unit id ${deactivation.id}`, err)
+        }
+      })
+    }
   }
 }
 

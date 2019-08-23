@@ -3,6 +3,8 @@ import ExperimentalUnitService from '../../src/services/ExperimentalUnitService'
 import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
+import KafkaProducer from '../../src/services/kafka/KafkaProducer'
+import cfServices from '../../src/services/utility/ServiceConfig'
 
 describe('ExperimentalUnitService', () => {
   let target
@@ -501,6 +503,7 @@ describe('ExperimentalUnitService', () => {
 
       db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
       db.unit.batchUpdateDeactivationReasons = mockResolve()
+      target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
@@ -514,9 +517,9 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
 
-
       db.unit.batchFindAllBySetEntryIds = mockResolve()
       db.unit.batchUpdateDeactivationReasons = mockResolve()
+      target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
@@ -532,11 +535,81 @@ describe('ExperimentalUnitService', () => {
       db.unit.batchFindAllBySetEntryIds = mockResolve()
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       AppError.badRequest = mock('')
+      target.sendDeactivationNotifications = mock()
 
       expect(() => target.deactivateExperimentalUnits(payload, context, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledTimes(1)
       expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
       expect(db.unit.batchUpdateDeactivationReasons).not.toHaveBeenCalled()
+    })
+
+    test('calls the sendDeactivationNotifications function', () => {
+      const payload = [
+        { setEntryId: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+
+      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      target.sendDeactivationNotifications = mock()
+
+      return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
+        expect(target.sendDeactivationNotifications).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('sendDeactivationNotifications', () => {
+    target = new ExperimentalUnitService()
+
+    test('does nothing if kafka is disabled', () => {
+      KafkaProducer.publish = mock()
+      cfServices.experimentsKafka.value.enableKafka = 'false'
+
+      target.sendDeactivationNotifications()
+
+      expect(KafkaProducer.publish).not.toHaveBeenCalled()
+    })
+
+    test('sends a notification for each deactivation if kafka is enabled', () => {
+      KafkaProducer.publish = mock()
+      cfServices.experimentsKafka.value.enableKafka = 'true'
+
+      target.sendDeactivationNotifications([{}, {}])
+
+      expect(KafkaProducer.publish).toHaveBeenCalledTimes(2)
+    })
+
+    test('formats the deactivations before sending', () => {
+      KafkaProducer.publish = mock()
+      cfServices.experimentsKafka.value.enableKafka = 'true'
+      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
+      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
+
+      target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])
+
+      expect(KafkaProducer.publish).toHaveBeenCalledWith('deactivationTopic', { experimentalUnitId: 5, deactivationReason: 'test reason', setEntryId: 7 }, 1234)
+    })
+
+    test('still sends a message if the deactivationReason is null', () => {
+      KafkaProducer.publish = mock()
+      cfServices.experimentsKafka.value.enableKafka = 'true'
+      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
+      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
+
+      target.sendDeactivationNotifications([{ id: 5, deactivationReason: null, setEntryId: 7 }])
+
+      expect(KafkaProducer.publish).toHaveBeenCalledWith('deactivationTopic', { experimentalUnitId: 5, deactivationReason: null, setEntryId: 7 }, 1234)
+    })
+
+    test('does not throw if the KafkaProducer publish throws', () => {
+      KafkaProducer.publish = () => { throw new Error() }
+      cfServices.experimentsKafka.value.enableKafka = 'true'
+      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
+      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
+
+      expect(() => target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])).not.toThrow()
     })
   })
 })

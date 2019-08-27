@@ -10,7 +10,7 @@ import UnitWithBlockService from '../services/UnitWithBlockService'
 function experimentBatchLoaderCallback(args, tx) {
   const ids = _.map(args, arg => arg.id)
   return db.experiments.batchFind(ids, tx).then(data => _.map(data, (individualData) => {
-    if (!individualData || !individualData.is_template) {
+    if (!_.get(individualData, 'is_template')) {
       return individualData
     }
     if (_.find(args, { id: individualData.id, allowTemplate: true })) {
@@ -184,4 +184,4 @@ function createLoaders(tx) {
   }
 }
 
-module.exports = { createLoaders }
+module.exports = { createLoaders, experimentBatchLoaderCallback }

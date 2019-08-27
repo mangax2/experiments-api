@@ -8,13 +8,12 @@ export default {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
     getExperimentsByIds: (entity, args, context) => {
-      const uniqIds = uniq(args.ids)
       const maxInputLength = cfServices.experimentApiConfigurables.maxExperimentsToRetrieve
-      if (uniqIds.length > maxInputLength) {
-        throw new Error(`Unique request input ids exceeded the maximum length of ${maxInputLength}`)
+      if (args.ids.length > maxInputLength) {
+        throw new Error(`Request input ids exceeded the maximum length of ${maxInputLength}`)
       }
       return Promise.all(
-        uniqIds.map(id =>
+        uniq(args.ids).map(id =>
           context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
         ))
         .then(experiments => compact(experiments))

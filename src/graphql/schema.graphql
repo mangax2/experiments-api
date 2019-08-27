@@ -75,6 +75,7 @@ type Experiment {
   unitSpecificationDetails: [UnitSpecificationDetail]
   units: [ExperimentalUnit]
   analysisModel: AnalysisModel
+  isTemplate: Boolean
 }
 
 type ExperimentalSet {

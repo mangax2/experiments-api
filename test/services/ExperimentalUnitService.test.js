@@ -500,29 +500,60 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+      const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
       db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
+        expect(db.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
 
-    test('it does not query db unnecessarily if no units of a specific id type are given', () => {
+    test('it does not query db by set entry id if no units containing a set entry id are given', () => {
       const payload = [
         { id: 1, deactivationReason: 'foo' },
         { id: 2, deactivationReason: 'bar' },
       ]
+      const unitMockReturnValue = [
+        { id: 1, deactivationReason: null, set_entry_id: 5 },
+        { id: 2, deactivationReason: null, set_entry_id: 7 },
+      ]
 
       db.unit.batchFindAllBySetEntryIds = mockResolve()
+      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
+        expect(db.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
+        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    test('it does not query db by id if no units not containing a set entry id are given', () => {
+      const payload = [
+        { setEntryId: 1, deactivationReason: 'foo' },
+        { setEntryId: 2, deactivationReason: 'bar' },
+      ]
+      const setEntryIdMockReturnValue = [
+        { set_entry_id: 1, deactivationReason: null },
+        { set_entry_id: 2, deactivationReason: null },
+      ]
+
+      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      db.unit.batchFindAllByIds = mockResolve()
+      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      target.sendDeactivationNotifications = mock()
+
+      return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
+        expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
+        expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
         expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
@@ -533,6 +564,7 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       db.unit.batchFindAllBySetEntryIds = mockResolve()
+      db.unit.batchFindAllByIds = mockResolve()
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       AppError.badRequest = mock('')
       target.sendDeactivationNotifications = mock()
@@ -540,6 +572,7 @@ describe('ExperimentalUnitService', () => {
       expect(() => target.deactivateExperimentalUnits(payload, context, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledTimes(1)
       expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
+      expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
       expect(db.unit.batchUpdateDeactivationReasons).not.toHaveBeenCalled()
     })
 
@@ -549,8 +582,10 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+      const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
       db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       db.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 

@@ -210,28 +210,28 @@ class ExperimentalUnitService {
       throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
     }
     const [setEntryIdSubset, idSubset] = _.partition(requestBody, 'setEntryId')
-    const setEntryIds = _.map(setEntryIdSubset, value => value.setEntryId)
+    const setEntryIds = _.map(setEntryIdSubset, 'setEntryId')
+    const ids = _.map(idSubset, 'id')
 
     const unitsFromSetEntryIds = setEntryIds.length > 0
       ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
       : []
+    const unitsFromIds = ids.length > 0
+      ? db.unit.batchFindAllByIds(ids)
+      : []
 
-    return Promise.resolve(unitsFromSetEntryIds)
-      .then((setEntriesFromDb) => {
-        const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
-          const correspondingUnit = _.find(requestBody,
-            requestObject => requestObject.setEntryId === unit.set_entry_id)
+    return Promise.all([unitsFromSetEntryIds, unitsFromIds])
+      .then(([setEntriesFromDb, unitsByIdFromDb]) => {
+        const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
+        const results = _.map(unitsFromDb, (unit) => {
+          const correspondingUnit = _.find(requestBody, requestObject =>
+            requestObject.id === unit.id || requestObject.setEntryId === unit.set_entry_id)
           return {
             id: unit.id,
             deactivationReason: correspondingUnit.deactivationReason,
-            setEntryId: correspondingUnit.setEntryId,
+            setEntryId: unit.set_entry_id,
           }
         })
-
-        const byIdWithNewReason = _.map(idSubset, unit => (
-          { id: unit.id, deactivationReason: unit.deactivationReason }),
-        )
-        const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
         db.unit.batchUpdateDeactivationReasons(results, context, tx)
         this.sendDeactivationNotifications(results)
         return results
@@ -248,8 +248,11 @@ class ExperimentalUnitService {
             deactivationReason: deactivation.deactivationReason,
             setEntryId: deactivation.setEntryId,
           }
-          KafkaProducer.publish(cfServices.experimentsKafka.value.topics.unitDeactivation,
-            message, cfServices.experimentsKafka.value.schema.unitDeactivation)
+          KafkaProducer.publish({
+            topic: cfServices.experimentsKafka.value.topics.unitDeactivation,
+            message,
+            schemaId: cfServices.experimentsKafka.value.schema.unitDeactivation,
+          })
         } catch (err) {
           console.warn(`An error was caught when publishing a deactivation reason for unit id ${deactivation.id}`, err)
         }

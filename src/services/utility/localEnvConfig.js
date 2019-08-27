@@ -39,7 +39,7 @@ const cfServices = {
       },
       schema: {
         product360Outgoing: 1726,
-        unitDeactivation: 2188,
+        unitDeactivation: 3149,
       }
     }
   },

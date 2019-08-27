@@ -296,7 +296,7 @@ const duplicateTreatmentBlockScript =
   "SELECT b.id AS old_id, n.id AS new_id " +
   "INTO TEMP mapped_block_ids " +
   "FROM block b " +
-    "INNER JOIN new_blocks n ON b.name = n.name " +
+    "INNER JOIN new_blocks n ON (b.name = n.name) OR (b.name is NULL AND n.name is NULL) " +
   "WHERE b.experiment_id = $1;" +
   "WITH temp_new_treatment_blocks AS (" +
   "INSERT INTO treatment_block " +

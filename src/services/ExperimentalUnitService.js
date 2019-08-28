@@ -213,14 +213,14 @@ class ExperimentalUnitService {
     const setEntryIds = _.map(setEntryIdSubset, 'setEntryId')
     const ids = _.map(idSubset, 'id')
 
-    const unitsFromSetEntryIds = setEntryIds.length > 0
+    const unitsFromSetEntryIdsPromise = setEntryIds.length > 0
       ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
       : []
-    const unitsFromIds = ids.length > 0
+    const unitsFromIdsPromise = ids.length > 0
       ? db.unit.batchFindAllByIds(ids)
       : []
 
-    return Promise.all([unitsFromSetEntryIds, unitsFromIds])
+    return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
       .then(([setEntriesFromDb, unitsByIdFromDb]) => {
         const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
         const results = _.map(unitsFromDb, (unit) => {
@@ -232,9 +232,10 @@ class ExperimentalUnitService {
             setEntryId: unit.set_entry_id,
           }
         })
-        db.unit.batchUpdateDeactivationReasons(results, context, tx)
-        this.sendDeactivationNotifications(results)
-        return results
+        return db.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
+          this.sendDeactivationNotifications(results)
+          return results
+        })
       })
   }
 

@@ -10,6 +10,8 @@ import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import KafkaProducer from './kafka/KafkaProducer'
+import cfServices from './utility/ServiceConfig'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -208,27 +210,55 @@ class ExperimentalUnitService {
       throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
     }
     const [setEntryIdSubset, idSubset] = _.partition(requestBody, 'setEntryId')
-    const setEntryIds = _.map(setEntryIdSubset, value => value.setEntryId)
+    const setEntryIds = _.map(setEntryIdSubset, 'setEntryId')
+    const ids = _.map(idSubset, 'id')
 
-    const unitsFromSetEntryIds = setEntryIds.length > 0
+    const unitsFromSetEntryIdsPromise = setEntryIds.length > 0
       ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
       : []
+    const unitsFromIdsPromise = ids.length > 0
+      ? db.unit.batchFindAllByIds(ids)
+      : []
 
-    return Promise.resolve(unitsFromSetEntryIds)
-      .then((setEntriesFromDb) => {
-        const bySetEntryIdWithNewReason = _.map(setEntriesFromDb, (unit) => {
-          const correspondingUnit = _.find(requestBody,
-            requestObject => requestObject.setEntryId === unit.set_entry_id)
-          return { id: unit.id, deactivationReason: correspondingUnit.deactivationReason }
+    return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
+      .then(([setEntriesFromDb, unitsByIdFromDb]) => {
+        const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
+        const results = _.map(unitsFromDb, (unit) => {
+          const correspondingUnit = _.find(requestBody, requestObject =>
+            requestObject.id === unit.id || requestObject.setEntryId === unit.set_entry_id)
+          return {
+            id: unit.id,
+            deactivationReason: correspondingUnit.deactivationReason,
+            setEntryId: unit.set_entry_id,
+          }
         })
-
-        const byIdWithNewReason = _.map(idSubset, unit => (
-          { id: unit.id, deactivationReason: unit.deactivationReason }),
-        )
-        const results = [...bySetEntryIdWithNewReason, ...byIdWithNewReason]
-        db.unit.batchUpdateDeactivationReasons(results, context, tx)
-        return results
+        return db.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
+          this.sendDeactivationNotifications(results)
+          return results
+        })
       })
+  }
+
+  @setErrorCode('17K000')
+  sendDeactivationNotifications = (deactivations) => {
+    if (cfServices.experimentsKafka.value.enableKafka === 'true') {
+      _.forEach(deactivations, (deactivation) => {
+        try {
+          const message = {
+            experimentalUnitId: deactivation.id,
+            deactivationReason: deactivation.deactivationReason,
+            setEntryId: deactivation.setEntryId,
+          }
+          KafkaProducer.publish({
+            topic: cfServices.experimentsKafka.value.topics.unitDeactivation,
+            message,
+            schemaId: cfServices.experimentsKafka.value.schema.unitDeactivation,
+          })
+        } catch (err) {
+          console.warn(`An error was caught when publishing a deactivation reason for unit id ${deactivation.id}`, err)
+        }
+      })
+    }
   }
 }
 

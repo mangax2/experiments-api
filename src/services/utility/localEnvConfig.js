@@ -56,7 +56,10 @@ const cfServices = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     lambdaName: "cosmos-group-generation-lambda-dev"
-  }
+  },
+  experimentApiConfigurables: {
+    maxExperimentsToRetrieve: 10,
+  },
 }
 
 module.exports = cfServices

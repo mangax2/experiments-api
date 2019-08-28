@@ -75,6 +75,7 @@ type Experiment {
   unitSpecificationDetails: [UnitSpecificationDetail]
   units: [ExperimentalUnit]
   analysisModel: AnalysisModel
+  isTemplate: Boolean
 }
 
 type ExperimentalSet {
@@ -165,6 +166,7 @@ type Owner {
 
 type Query {
   getExperimentById(id: Int!, allowTemplate: Boolean): Experiment
+  getExperimentsByIds(ids: [Int!]!, allowTemplate: Boolean): [Experiment]
   getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!): [Experiment]
   getExperimentBySetId(setId: Int): [ExperimentInfo]

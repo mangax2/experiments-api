@@ -1,9 +1,23 @@
-import { has, property } from 'lodash'
+import {
+  has, property, compact, uniq,
+} from 'lodash'
+import cfServices from '../services/utility/ServiceConfig'
 
 export default {
   Query: {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
+    getExperimentsByIds: (entity, args, context) => {
+      const maxInputLength = cfServices.experimentApiConfigurables.maxExperimentsToRetrieve
+      if (args.ids.length > maxInputLength) {
+        throw new Error(`Request input ids exceeded the maximum length of ${maxInputLength}`)
+      }
+      return Promise.all(
+        uniq(args.ids).map(id =>
+          context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
+        ))
+        .then(experiments => compact(experiments))
+    },
     getExperimentsByCriteria: (entity, args, context) =>
       context.loaders.experimentsByCriteria.load(
         { criteria: args.criteria, value: args.value, isTemplate: false }),
@@ -61,6 +75,7 @@ export default {
   Experiment: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),
     randomizationStrategyCode: property('randomization_strategy_code'),
+    isTemplate: property('is_template'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
     responseVariables: (entity, args, context) =>

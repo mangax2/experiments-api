@@ -1,0 +1,1 @@
+CREATE INDEX unit_treatment_block_id_location ON unit (treatment_block_id, location);

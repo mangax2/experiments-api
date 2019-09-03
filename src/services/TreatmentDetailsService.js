@@ -55,6 +55,7 @@ class TreatmentDetailsService {
 
       return _.map(fullTreatmentDetails[0], treatment => ({
         id: treatment.id,
+        experiment_id: treatment.experiment_id,
         treatment_number: treatment.treatment_number,
         is_control: (treatment.control_types || []).length > 0,
         block: treatment.block,
@@ -62,6 +63,10 @@ class TreatmentDetailsService {
         inAllBlocks: treatment.inAllBlocks,
         notes: treatment.notes,
         control_types: treatment.control_types || [],
+        created_date: treatment.created_date,
+        created_user_id: treatment.created_user_id,
+        modified_date: treatment.modified_date,
+        modified_user_id: treatment.modified_user_id,
         combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
     })

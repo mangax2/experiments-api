@@ -26,7 +26,15 @@ describe('TreatmentDetailsService', () => {
 
   describe('getAllTreatmentDetails', () => {
     test('returns treatments with combination elements', () => {
-      const treatments = [{ id: 1, treatment_number: 1 }]
+      const treatments = [{
+        id: 1,
+        experiment_id: 1,
+        treatment_number: 1,
+        created_date: 'date string 1',
+        created_user_id: 'tester1',
+        modified_date: 'date string 2',
+        modified_user_id: 'tester2',
+      }]
       const combinationElements = [{ treatment_id: 1, id: 1, factor_level_id: 1 }, { treatment_id: 1, id: 2, factor_level_id: 2 }]
       const factorLevels = [{ id: 1, factor_id: 1, value: { items: [] } }, { id: 2, factor_id: 2 }]
       const factors = [{ id: 1, name: 'test' }, { id: 2, name: 'test2' }]
@@ -34,6 +42,11 @@ describe('TreatmentDetailsService', () => {
       const expectedData = [
         {
           id: 1,
+          experiment_id: 1,
+          created_date: 'date string 1',
+          created_user_id: 'tester1',
+          modified_date: 'date string 2',
+          modified_user_id: 'tester2',
           is_control: false,
           notes: undefined,
           treatment_number: 1,

@@ -12,8 +12,6 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS combination_element_ids; " +
   "DROP TABLE IF EXISTS unit_spec_detail_ids; " +
   "DROP TABLE IF EXISTS design_spec_detail_ids; " +
-  "DROP TABLE IF EXISTS mapped_group_ids; " +
-  "DROP TABLE IF EXISTS group_value_ids; " +
   "DROP TABLE IF EXISTS unit_ids; " +
   "DROP TABLE IF EXISTS analysis_model_ids; " +
   "DROP TABLE IF EXISTS new_blocks; " +
@@ -261,7 +259,6 @@ const duplicateUnitScript =
         "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
-        "#= hstore('group_id', null::text) " +
         "#= hstore('treatment_block_id', mtbi.new_id::text) " +
         "#= hstore('set_entry_id', null) " +
         "#= hstore('deactivation_reason', null) " +

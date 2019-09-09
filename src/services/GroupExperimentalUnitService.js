@@ -190,7 +190,7 @@ class GroupExperimentalUnitService {
       const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
       const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
       const trimmedCombinations = _.map(combinationElements, comb => _.omit(comb, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'id']))
-      const trimmedUnits = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'group_id']))
+      const trimmedUnits = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
 
       const variableLevelsMap = _.groupBy(trimmedVariableLevels, 'factor_id')
       const combinationElementsMap = _.groupBy(trimmedCombinations, 'treatment_id')

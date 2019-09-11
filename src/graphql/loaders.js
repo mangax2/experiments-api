@@ -117,7 +117,7 @@ function createLoaders(tx) {
     db.factorLevelAssociation.batchFindAssociatedLevels, factorLevelByIdLoader)
 
   const combinationElementsByTreatmentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.combinationElement.batchFindAllByTreatmentIds, factorLevelByIdLoader)
+    db.combinationElement.batchFindAllByTreatmentIds, combinationElementByIdLoader)
 
   const factorByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.factor.batchFindByExperimentId, factorByIdLoader)

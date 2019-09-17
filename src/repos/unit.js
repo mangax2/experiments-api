@@ -82,7 +82,7 @@ class unitRepo {
 
     const data = units.map(u => ({
       id: u.id,
-      treatment_block_id: u.treatmentId,
+      treatment_block_id: u.treatmentBlockId,
       rep: u.rep,
       set_entry_id: u.setEntryId,
       modified_user_id: context.userId,

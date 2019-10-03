@@ -7,7 +7,7 @@ const cfServices = {
     user: process.env.EXPERIMENTS_DB_LOCAL_USER,
     password: process.env.EXPERIMENTS_DB_LOCAL_PASSWORD,
     application_name:'experiments-api-local',
-    database: 'draft',
+    database: 'nonprod',
     type: 'conn',
     min: 10,
     max: 10,

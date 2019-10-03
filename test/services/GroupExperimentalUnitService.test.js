@@ -532,6 +532,105 @@ describe('GroupExperimentalUnitService', () => {
     })
   })
 
+  describe('getGroupsAndUnitsForSet', () => {
+    test('properly sends and retrieves data to lambda', () => {
+      target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsBySetIds = mockResolve([{ location: 1, block: null }])
+      target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experiment_id: 5 })
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.combinationElement.batchFindAllByTreatmentIds = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
+      db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
+      AWSUtil.callLambda = mockResolve({ Payload: JSON.stringify({ locationGroups: [{ test: 'message' }] }) })
+      AppError.internalServerError = mock()
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
+
+      const expectedLambdaPayload = {
+        experimentId: 5,
+        variables: [
+          {
+            id: 1,
+            name: 'var1',
+            levels: [
+              { id: 3, factorId: 1, items: {} },
+              { id: 5, factorId: 1, items: [{}, {}] },
+            ],
+          },
+        ],
+        designSpecs: 'designSpecs',
+        refDesignSpecs: 'refDesignSpecs',
+        treatments: [
+          {
+            id: 7,
+            block: null,
+            combinationElements: [
+              {
+                treatmentId: 7,
+                factorLevelId: 3,
+              },
+              {
+                treatmentId: 7,
+                factorLevelId: 5,
+              },
+            ],
+          },
+        ],
+        units: [{ location: 1, block: null }],
+        setLocAssociations: [{ location: 1, block: null, experimentId: 5 }],
+      }
+
+      return target.getGroupsAndUnitsForSet(5, testTx).then((data) => {
+        expect(target.treatmentWithBlockService.getTreatmentsByBySetIds).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsBySetIds).toBeCalled()
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.combinationElement.batchFindAllByTreatmentIds).toBeCalled()
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
+        expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
+        expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
+        expect(AppError.internalServerError).not.toBeCalled()
+        expect(data).toContainEqual({ test: 'message' })
+        expect(target.lambdaPerformanceService.savePerformanceStats).toBeCalled()
+      })
+    })
+
+    test('properly handles lambda errors', () => {
+      target = new GroupExperimentalUnitService()
+      target.unitWithBlockService.getExperimentalUnitsBySetIds = mockResolve('units')
+      target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
+      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experimentId: 5 })
+      db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
+      db.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
+      db.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
+      db.refDesignSpecification.all = mockResolve('refDesignSpecs')
+      db.combinationElement.batchFindAllByTreatmentIds = mockResolve([{ treatment_id: 7, factor_level_id: 3 }, { treatment_id: 7, factor_level_id: 5 }])
+      db.experiments.findExperimentOrTemplate = mockResolve({ randomizationStrategyCode: 'rcb' })
+      AWSUtil.callLambda = mockReject()
+      AppError.internalServerError = mock({ message: 'error result' })
+      target.lambdaPerformanceService.savePerformanceStats = mockResolve()
+
+      return target.getGroupsAndUnitsForSet(5, testTx).catch(() => {
+        expect(target.treatmentWithBlockService.getTreatmentsByBySetIds).toBeCalled()
+        expect(target.unitWithBlockService.getExperimentalUnitsBySetIds).toBeCalled()
+        expect(db.factor.findByExperimentId).toBeCalled()
+        expect(db.factorLevel.findByExperimentId).toBeCalled()
+        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(db.combinationElement.batchFindAllByTreatmentIds).toBeCalled()
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
+        expect(db.experiments.findExperimentOrTemplate).toHaveBeenCalled()
+        expect(AWSUtil.callLambda).toBeCalled()
+        expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FC001')
+        expect(target.lambdaPerformanceService.savePerformanceStats).not.toBeCalled()
+      })
+    })
+  })
+
   describe('getGroupsAndUnitsByExperimentIds', () => {
     test('multiple experiments, getting groups succeeded', () => {
       target = new GroupExperimentalUnitService()
@@ -548,6 +647,28 @@ describe('GroupExperimentalUnitService', () => {
       target.getGroupsAndUnits = mockReject('An error occurred')
       return target.getGroupsAndUnitsByExperimentIds([111, 112], testTx).then((data) => {
         expect(target.getGroupsAndUnits).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([[], []])
+      })
+    })
+  })
+
+  describe('getGroupsAndUnitsBySetIds', () => {
+    test('multiple sets, getting groups succeeded', () => {
+      target = new GroupExperimentalUnitService()
+      target.getGroupsAndUnitsForSet = mockResolve([{ id: 1 }, { id: 2 }])
+      return target.getGroupsAndUnitsBySetIds([111, 112], testTx).then((data) => {
+        expect(target.getGroupsAndUnitsForSet).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([[{ id: 1 }, { id: 2 }], [{ id: 1 }, { id: 2 }]])
+      })
+    })
+
+    test('multiple sets, getting groups failed', () => {
+      target = new GroupExperimentalUnitService()
+      target.getGroupsAndUnitsForSet = mockReject('An error occurred')
+      return target.getGroupsAndUnitsBySetIds([111, 112], testTx).then((data) => {
+        expect(target.getGroupsAndUnitsForSet).toHaveBeenCalled()
         expect(data.length).toEqual(2)
         expect(data).toEqual([[], []])
       })
@@ -625,130 +746,53 @@ describe('GroupExperimentalUnitService', () => {
   })
 
   describe('getGroupAndUnitsBySetIdAndExperimentId', () => {
-    test('get a group and units from a set id and experiment id', () => {
+    test('formats the set object correctly', () => {
       target = new GroupExperimentalUnitService()
-      target.getGroupsAndUnits = mockResolve([
-        {
+      const mockPromise = Promise.resolve()
+      target.unitWithBlockService = {
+        getExperimentalUnitsBySetIds: () => mockPromise,
+      }
+
+      const result = target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, 5, 'TestBlockName', testTx)
+
+      expect(result).toEqual({
+        groupId: '112.5.TestBlockName',
+        experimentId: 112,
+        refGroupTypeId: 1,
+        setId: 4781,
+        groupValues: [{
           id: 1,
-          setId: 4781,
-          parentId: null,
-          childGroups: [
-            {
-              id: 2,
-              parentId: 1,
-              childGroups: [
-                {
-                  id: 4,
-                  parentId: 2,
-                  units: [{ id: 3 }],
-                },
-                {
-                  id: 5,
-                  parentId: 2,
-                  childGroups: [
-                    {
-                      id: 6,
-                      parentId: 5,
-                      units: [{ id: 6 }],
-                    },
-                  ],
-                  units: [{ id: 4 }, { id: 5 }],
-                },
-              ],
-              units: [{ id: 1 }, { id: 2 }],
-            },
-            {
-              id: 3,
-              parentId: 1,
-            },
-          ],
-        },
-      ])
-      return target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, testTx).then((group) => {
-        expect(group).toEqual({
-          id: 1,
-          setId: 4781,
-          parentId: null,
-          setEntries: [
-            { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
-          ],
-          childGroups: [
-            {
-              id: 2,
-              parentId: 1,
-              childGroups: [
-                {
-                  id: 4,
-                  parentId: 2,
-                  units: [{ id: 3 }],
-                },
-                {
-                  id: 5,
-                  parentId: 2,
-                  childGroups: [
-                    {
-                      id: 6,
-                      parentId: 5,
-                      units: [{ id: 6 }],
-                    },
-                  ],
-                  units: [{ id: 4 }, { id: 5 }],
-                },
-              ],
-              units: [{ id: 1 }, { id: 2 }],
-            },
-            {
-              id: 3,
-              parentId: 1,
-            },
-          ],
-        })
+          name: 'locationNumber',
+          value: 5,
+          treatmentVariableLevelId: null,
+          groupId: '112.5.TestBlockName',
+        }],
+        setEntries: mockPromise,
       })
     })
 
-    test('get a group and units from an invalid set id and experiment id', () => {
+    test('replaces null block names with an empty string', () => {
       target = new GroupExperimentalUnitService()
-      target.getGroupsAndUnits = mockResolve([
-        {
-          id: 1,
-          setId: 4781,
-          parentId: null,
-        },
-        {
-          id: 2,
-          parentId: 1,
-          units: [{ id: 1 }, { id: 2 }],
-        },
-        {
-          id: 3,
-          parentId: 1,
-        },
-        {
-          id: 4,
-          parentId: 2,
-          units: [{ id: 3 }],
-        },
-        {
-          id: 5,
-          parentId: 2,
-          units: [{ id: 4 }, { id: 5 }],
-        },
-        {
-          id: 6,
-          parentId: 5,
-          units: [{ id: 6 }],
-        },
-      ])
-      return target.getGroupAndUnitsBySetIdAndExperimentId(4782, 112, testTx).then((group) => {
-        expect(group).toEqual({})
-      })
-    })
+      const mockPromise = Promise.resolve()
+      target.unitWithBlockService = {
+        getExperimentalUnitsBySetIds: () => mockPromise,
+      }
 
-    test('get a group and units from a failed AWS lambda called', () => {
-      target = new GroupExperimentalUnitService()
-      target.getGroupsAndUnits = mockReject('error')
-      return target.getGroupAndUnitsBySetIdAndExperimentId(4782, 112, testTx).then((group) => {
-        expect(group).toEqual({})
+      const result = target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, 5, null, testTx)
+
+      expect(result).toEqual({
+        groupId: '112.5.',
+        experimentId: 112,
+        refGroupTypeId: 1,
+        setId: 4781,
+        groupValues: [{
+          id: 1,
+          name: 'locationNumber',
+          value: 5,
+          treatmentVariableLevelId: null,
+          groupId: '112.5.',
+        }],
+        setEntries: mockPromise,
       })
     })
   })

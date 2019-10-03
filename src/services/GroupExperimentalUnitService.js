@@ -26,6 +26,40 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 
 const logger = log4js.getLogger('GroupExperimentalUnitService')
 
+const trimGroupGenerationData =
+  (variables, variableLevels, treatments, combinationElements, units) => {
+    const trimmingResults = {}
+
+    const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+    const trimmedCombinations = _.map(combinationElements, comb => _.omit(comb, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'id']))
+    trimmingResults.variables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+    trimmingResults.treatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
+    trimmingResults.units = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+
+    const variableLevelsMap = _.groupBy(trimmedVariableLevels, 'factor_id')
+    const combinationElementsMap = _.groupBy(trimmedCombinations, 'treatment_id')
+
+    _.forEach(trimmingResults.variables, (variable) => {
+      variable.levels = variableLevelsMap[variable.id]
+      _.forEach(variable.levels, (level) => {
+        level.factorName = variable.name
+      })
+    })
+
+    _.forEach(trimmingResults.treatments, (treatment) => {
+      treatment.combinationElements = combinationElementsMap[treatment.id]
+    })
+
+    _.forEach(trimmedVariableLevels, (level) => {
+      const levelItems = _.get(level, 'value.items') || []
+      level.items = levelItems.length === 1 ? levelItems[0] : levelItems
+      delete level.value
+      delete level.factorName
+    })
+
+    return trimmingResults
+  }
+
 // Error Codes 1FXXXX
 class GroupExperimentalUnitService {
   constructor() {
@@ -186,40 +220,16 @@ class GroupExperimentalUnitService {
         setLocAssociations,
       ],
     ) => {
-      const trimmedVariables = _.map(variables, variable => _.omit(variable, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
-      const trimmedVariableLevels = _.map(variableLevels, variableLevel => _.omit(variableLevel, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
-      const trimmedTreatments = _.map(treatments, treatment => _.omit(treatment, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'notes', 'treatment_number']))
-      const trimmedCombinations = _.map(combinationElements, comb => _.omit(comb, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'id']))
-      const trimmedUnits = _.map(units, unit => _.omit(unit, ['created_user_id', 'created_date', 'modified_user_id', 'modified_date']))
+      const trimmed = trimGroupGenerationData(variables, variableLevels, treatments,
+        combinationElements, units)
 
-      const variableLevelsMap = _.groupBy(trimmedVariableLevels, 'factor_id')
-      const combinationElementsMap = _.groupBy(trimmedCombinations, 'treatment_id')
-
-      _.forEach(trimmedVariables, (variable) => {
-        variable.levels = variableLevelsMap[variable.id]
-        _.forEach(variable.levels, (level) => {
-          level.factorName = variable.name
-        })
-      })
-
-      _.forEach(trimmedTreatments, (treatment) => {
-        treatment.combinationElements = combinationElementsMap[treatment.id]
-      })
-
-      _.forEach(trimmedVariableLevels, (level) => {
-        const levelItems = _.get(level, 'value.items') || []
-        level.items = levelItems.length === 1 ? levelItems[0] : levelItems
-        delete level.value
-        delete level.factorName
-      })
-
-      const groupPromises = _.flatMap(_.groupBy(trimmedUnits, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
-        const treatmentsByBlock = _.filter(trimmedTreatments,
+      const groupPromises = _.flatMap(_.groupBy(trimmed.units, 'location'), locUnit => _.map(_.groupBy(locUnit, 'block'), (u) => {
+        const treatmentsByBlock = _.filter(trimmed.treatments,
           t => t.block === u[0].block || t.inAllBlocks)
         const body = JSON.stringify(inflector.transform({
           experimentId,
           randomizationStrategyCode: experiment.randomization_strategy_code,
-          variables: trimmedVariables,
+          variables: trimmed.variables,
           designSpecs,
           refDesignSpecs,
           treatments: treatmentsByBlock,
@@ -245,9 +255,75 @@ class GroupExperimentalUnitService {
         })
     })
 
+  @setErrorCode('1FC000')
+  @Transactional('getGroupsAndUnitsForSet')
+  getGroupsAndUnitsForSet = (setId, tx) =>
+    tx.batch([
+      this.treatmentWithBlockService.getTreatmentsByBySetIds([setId], tx),
+      this.unitWithBlockService.getExperimentalUnitsBySetIds([setId], tx),
+      this.locationAssocWithBlockService.getBySetId(setId, tx),
+    ]).then(([
+      treatments,
+      units,
+      setLocAssociation,
+    ]) => tx.batch([
+      db.factor.findByExperimentId(setLocAssociation.experiment_id, tx),
+      db.factorLevel.findByExperimentId(setLocAssociation.experiment_id, tx),
+      db.designSpecificationDetail.findAllByExperimentId(setLocAssociation.experiment_id, tx),
+      db.refDesignSpecification.all(tx),
+      db.combinationElement.batchFindAllByTreatmentIds(_.map(treatments, 'id'), tx),
+      db.experiments.findExperimentOrTemplate(setLocAssociation.experiment_id, tx),
+    ]).then((
+      [
+        variables,
+        variableLevels,
+        designSpecs,
+        refDesignSpecs,
+        combinationElements,
+        experiment,
+      ],
+    ) => {
+      const trimmed = trimGroupGenerationData(variables, variableLevels, treatments,
+        combinationElements, units)
+
+      const body = JSON.stringify(inflector.transform({
+        experimentId: setLocAssociation.experiment_id,
+        randomizationStrategyCode: experiment.randomization_strategy_code,
+        variables: trimmed.variables,
+        designSpecs,
+        refDesignSpecs,
+        treatments: trimmed.treatments,
+        units: trimmed.units,
+        setLocAssociations: [setLocAssociation],
+      }, 'camelizeLower'))
+
+      // return AWSUtil.callLambdaLocal(body)
+      // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
+      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+        .then((data) => {
+          const response = JSON.parse(data.Payload)
+          this.lambdaPerformanceService.savePerformanceStats(response.inputSize,
+            data.Payload.length, response.responseTime)
+          return [response.locationGroups[0]]
+        })
+        .catch((err) => {
+          console.error(err)
+          return Promise.reject(AppError.internalServerError('An error occurred while generating groups.', undefined, getFullErrorCode('1FC001')))
+        })
+    }))
+
   @setErrorCode('1FP000')
   getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => tx.batch(_.map(experimentIds,
     experimentId => this.getGroupsAndUnits(experimentId, tx)
+      .catch((err) => {
+        console.error(err)
+        return []
+      }),
+  ))
+
+  @setErrorCode('1FD000')
+  getGroupsAndUnitsBySetIds = (setIds, tx) => tx.batch(_.map(setIds,
+    setId => this.getGroupsAndUnitsForSet(setId, tx)
       .catch((err) => {
         console.error(err)
         return []
@@ -260,20 +336,25 @@ class GroupExperimentalUnitService {
     .then((setAssocation) => {
       if (!setAssocation) return {}
       return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,
-        setAssocation.experiment_id, tx)
+        setAssocation.experiment_id, setAssocation.location, setAssocation.block, tx)
     })
     .catch(() => ({}))
 
   @setErrorCode('1FR000')
-  getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, tx) =>
-    this.getGroupsAndUnits(experimentId, tx)
-      .then((groups) => {
-        const group = _.find(groups, g => g.setId === setId)
-        if (_.isNil(group)) return {}
-        group.setEntries = this.getUnitsFromGroupsBySetId(groups, setId)
-        return group
-      })
-      .catch(() => ({}))
+  getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, location, block, tx) => ({
+    groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
+    experimentId,
+    refGroupTypeId: 1,
+    setId,
+    groupValues: [{
+      id: 1,
+      name: 'locationNumber',
+      value: location,
+      treatmentVariableLevelId: null,
+      groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
+    }],
+    setEntries: this.unitWithBlockService.getExperimentalUnitsBySetIds([setId], tx),
+  })
 
   @setErrorCode('1FS000')
   getUnitsFromGroupsBySetId = (groups, setId) => {
@@ -367,7 +448,7 @@ class GroupExperimentalUnitService {
     db.unit.batchFindAllBySetId(setId, tx)
       .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
 
-  @setErrorCode('1Fa000')
+  @setErrorCode('1Fb000')
   compareWithExistingUnits = (existingUnits, newUnits) => {
     const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
       const matchingUnit = _.find(newUnits,

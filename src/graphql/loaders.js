@@ -59,6 +59,11 @@ function createLoaders(tx) {
       tx.batch(_.map(args, arg =>
         new GroupExperimentalUnitService().getGroupsAndUnits(arg, tx))))
 
+  const groupJsonBySetIdLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg =>
+        new GroupExperimentalUnitService().getGroupsAndUnitsForSet(arg, tx))))
+
   const groupBySetIdLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg =>
@@ -131,6 +136,9 @@ function createLoaders(tx) {
   const groupByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     new GroupExperimentalUnitService().getGroupsAndUnitsByExperimentIds, groupByIdLoader)
 
+  const groupJsonsBySetIdLoader = createLoaderToPrimeCacheOfChildren(
+    new GroupExperimentalUnitService().getGroupsAndUnitsBySetIds, groupJsonBySetIdLoader)
+
   const nestedFactorLevelByAssociatedFactorLevelIds = createLoaderToPrimeCacheOfChildren(
     db.factorLevelAssociation.batchFindNestedLevels, factorLevelByIdLoader)
 
@@ -161,6 +169,7 @@ function createLoaders(tx) {
     factorLevelAssociation: factorLevelAssociationByIdLoader,
     group: groupByIdLoader,
     groupsByExperimentIds: groupByExperimentIdLoader,
+    groupsBySetIds: groupJsonsBySetIdLoader,
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
     owner: ownerByIdLoader,
     ownersByExperimentIds: ownerByExperimentIdLoader,

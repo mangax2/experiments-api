@@ -84,6 +84,7 @@ type ExperimentalSet {
   refGroupTypeId: Int
   setId: Int
   groupValues: [GroupValue]
+  groupsJSON: JSON
   setEntries: [ExperimentalUnit]
 }
 

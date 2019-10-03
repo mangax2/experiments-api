@@ -169,7 +169,7 @@ function createLoaders(tx) {
     factorLevelAssociation: factorLevelAssociationByIdLoader,
     group: groupByIdLoader,
     groupsByExperimentIds: groupByExperimentIdLoader,
-    groupsBySetIds: groupJsonsBySetIdLoader,
+    groupsJsonsBySetIds: groupJsonsBySetIdLoader,
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
     owner: ownerByIdLoader,
     ownersByExperimentIds: ownerByExperimentIdLoader,

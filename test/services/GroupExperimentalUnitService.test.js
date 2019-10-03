@@ -770,6 +770,31 @@ describe('GroupExperimentalUnitService', () => {
         setEntries: mockPromise,
       })
     })
+
+    test('replaces null block names with an empty string', () => {
+      target = new GroupExperimentalUnitService()
+      const mockPromise = Promise.resolve()
+      target.unitWithBlockService = {
+        getExperimentalUnitsBySetIds: () => mockPromise,
+      }
+
+      const result = target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, 5, null, testTx)
+
+      expect(result).toEqual({
+        groupId: '112.5.',
+        experimentId: 112,
+        refGroupTypeId: 1,
+        setId: 4781,
+        groupValues: [{
+          id: 1,
+          name: 'locationNumber',
+          value: 5,
+          treatmentVariableLevelId: null,
+          groupId: '112.5.',
+        }],
+        setEntries: mockPromise,
+      })
+    })
   })
 
   describe('getUnitsFromGroupsBySetId', () => {

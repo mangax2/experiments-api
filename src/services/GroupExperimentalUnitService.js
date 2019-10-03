@@ -342,7 +342,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FR000')
   getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, location, block, tx) => ({
-    groupId: `${experimentId}.${location}.${block}`,
+    groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
     experimentId,
     refGroupTypeId: 1,
     setId,
@@ -351,7 +351,7 @@ class GroupExperimentalUnitService {
       name: 'locationNumber',
       value: location,
       treatmentVariableLevelId: null,
-      groupId: `${experimentId}.${location}.${block}`,
+      groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
     }],
     setEntries: this.unitWithBlockService.getExperimentalUnitsBySetIds([setId], tx),
   })

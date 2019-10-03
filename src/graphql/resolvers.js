@@ -102,7 +102,7 @@ export default {
   ExperimentalSet: {
     groupId: property('id'),
     groupsJSON: (entity, args, context) =>
-      context.loaders.groupsBySetIds.load(entity.setId),
+      context.loaders.groupsJsonsBySetIds.load(entity.setId),
   },
   ExperimentalUnit: {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),

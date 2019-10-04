@@ -3642,6 +3642,10 @@
           "type": "string",
           "description": "name of the experiment."
         },
+        "numberOfBlocks": {
+          "type": "integer",
+          "description": "the number of experiment blocks associated with the experiment."
+        },
         "numberOfVariables": {
           "type": "integer",
           "description": "the number of variables associated with the experiment."

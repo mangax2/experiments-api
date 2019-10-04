@@ -331,21 +331,36 @@ class GroupExperimentalUnitService {
   ))
 
   @setErrorCode('1FQ000')
-  @Transactional('getGroupAndUnitsBySetId')
-  getGroupAndUnitsBySetId = (setId, tx) => this.locationAssocWithBlockService.getBySetId(setId, tx)
-    .then((setAssocation) => {
-      if (!setAssocation) return {}
-      return this.getGroupAndUnitsBySetIdAndExperimentId(setAssocation.set_id,
-        setAssocation.experiment_id, setAssocation.location, setAssocation.block, tx)
+  @Transactional('getSetInformationBySetId')
+  getSetInformationBySetId = (setId, tx) => this.locationAssocWithBlockService.getBySetId(setId, tx)
+    .then((setAssociation) => {
+      if (!setAssociation) return {}
+      const inflectedSetAssociation = inflector.transform(setAssociation, 'camelizeLower')
+      return this.formatSetResponse(inflectedSetAssociation)
     })
     .catch(() => ({}))
 
+  @setErrorCode('1FE000')
+  @Transactional('getSetInformationBySetIds')
+  getSetInformationBySetIds = (setIds, tx) => tx.batch(_.map(setIds,
+    setId => this.getSetInformationBySetId(setId, tx)
+      .catch((err) => {
+        console.error(err)
+        return []
+      }),
+  ))
+
   @setErrorCode('1FR000')
-  getGroupAndUnitsBySetIdAndExperimentId = (setId, experimentId, location, block, tx) => ({
+  formatSetResponse = ({
+    setId, experimentId, location, block, blockId,
+  }) => ({
     groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
     experimentId,
     refGroupTypeId: 1,
     setId,
+    block,
+    blockId,
+    location,
     groupValues: [{
       id: 1,
       name: 'locationNumber',
@@ -353,7 +368,6 @@ class GroupExperimentalUnitService {
       treatmentVariableLevelId: null,
       groupId: `${experimentId}.${location}.${_.isNil(block) ? '' : block}`,
     }],
-    setEntries: this.unitWithBlockService.getExperimentalUnitsBySetIds([setId], tx),
   })
 
   @setErrorCode('1FS000')

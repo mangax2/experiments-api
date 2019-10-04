@@ -67,7 +67,12 @@ function createLoaders(tx) {
   const groupBySetIdLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupAndUnitsBySetId(arg, tx))))
+        new GroupExperimentalUnitService().getSetInformationBySetId(arg, tx))))
+
+  const setsBySetIdsLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg =>
+        new GroupExperimentalUnitService().getSetInformationBySetIds(arg, tx))))
 
   const designSpecDetailByExperimentIdLoader =
     new DataLoader(args =>
@@ -180,6 +185,7 @@ function createLoaders(tx) {
     refUnitSpec: refUnitSpecByIdLoader,
     refUnitType: refUnitTypeByIdLoader,
     setBySetIds: groupBySetIdLoader,
+    setsBySetIds: setsBySetIdsLoader,
     template: templateByIdLoader,
     templates: createDataLoader(templatesBatchLoaderCallback),
     treatmentByExperimentIds: treatmentByExperimentIdLoader,

@@ -63,8 +63,8 @@ const experimentSummaryQuery = `WITH treatment_numbers AS (
 )
 SELECT e.id,
   e.name,
-  (COALESCE(b.number_of_blocks, 0::bigint)::integer AS number_of_blocks,
-  COALESCE(dv.number_of_dependent_variables, 0::bigint) + COALESCE(f.number_of_factors, 0::bigint))::integer AS number_of_variables,
+  COALESCE(b.number_of_blocks, 0::bigint)::integer AS number_of_blocks,
+  (COALESCE(dv.number_of_dependent_variables, 0::bigint) + COALESCE(f.number_of_factors, 0::bigint))::integer AS number_of_variables,
   COALESCE(t.number_of_treatments, 0::bigint)::integer AS number_of_treatments,
   COALESCE(eu.number_of_experimental_units, 0::bigint)::integer AS number_of_experimental_units,
   COALESCE(us.number_of_unit_specs, 0::bigint)::integer AS number_of_unit_specs,

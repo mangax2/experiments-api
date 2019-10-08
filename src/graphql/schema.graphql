@@ -86,6 +86,17 @@ type ExperimentalSet {
   groupValues: [GroupValue]
   groupsJSON: JSON
   setEntries: [ExperimentalUnit]
+  block: String
+  blockId: Int
+  location: Int
+}
+
+type ExperimentalSetInfo {
+  experimentId: Int
+  setId: Int
+  location: Int
+  block: String
+  blockId: Int
 }
 
 type ExperimentalUnit {
@@ -182,6 +193,7 @@ type Query {
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
   getSetBySetId(setId: Int!): ExperimentalSet
+  getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
 }

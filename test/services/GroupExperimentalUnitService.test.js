@@ -675,11 +675,11 @@ describe('GroupExperimentalUnitService', () => {
     })
   })
 
-  describe('getGroupAndUnitsBySetId', () => {
+  describe('getSetInformationBySetId', () => {
     test('getting a group and units with a valid set id', () => {
       target = new GroupExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
-      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+      target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,
         parentId: null,
@@ -687,8 +687,8 @@ describe('GroupExperimentalUnitService', () => {
           { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
         ],
       })
-      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
-        expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
+      return target.getSetInformationBySetId(4871, testTx).then((group) => {
+        expect(target.formatSetResponse).toHaveBeenCalled()
         expect(group).toEqual({
           id: 1,
           setId: 4781,
@@ -703,9 +703,9 @@ describe('GroupExperimentalUnitService', () => {
     test('getting a group and units with an invalid set id', () => {
       target = new GroupExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
-      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({})
-      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
-        expect(target.getGroupAndUnitsBySetIdAndExperimentId).toHaveBeenCalled()
+      target.formatSetResponse = mockResolve({})
+      return target.getSetInformationBySetId(4871, testTx).then((group) => {
+        expect(target.formatSetResponse).toHaveBeenCalled()
         expect(group).toEqual({})
       })
     })
@@ -713,7 +713,7 @@ describe('GroupExperimentalUnitService', () => {
     test('getting a group and units with an empty return of the db query', () => {
       target = new GroupExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve(null)
-      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+      target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,
         parentId: null,
@@ -721,8 +721,8 @@ describe('GroupExperimentalUnitService', () => {
           { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
         ],
       })
-      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
-        expect(target.getGroupAndUnitsBySetIdAndExperimentId).not.toHaveBeenCalled()
+      return target.getSetInformationBySetId(4871, testTx).then((group) => {
+        expect(target.formatSetResponse).not.toHaveBeenCalled()
         expect(group).toEqual({})
       })
     })
@@ -730,7 +730,7 @@ describe('GroupExperimentalUnitService', () => {
     test('getting a group and units with a failed db query', () => {
       target = new GroupExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockReject('error')
-      target.getGroupAndUnitsBySetIdAndExperimentId = mockResolve({
+      target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,
         parentId: null,
@@ -738,28 +738,54 @@ describe('GroupExperimentalUnitService', () => {
           { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 },
         ],
       })
-      return target.getGroupAndUnitsBySetId(4871, testTx).then((group) => {
-        expect(target.getGroupAndUnitsBySetIdAndExperimentId).not.toHaveBeenCalled()
+      return target.getSetInformationBySetId(4871, testTx).then((group) => {
+        expect(target.formatSetResponse).not.toHaveBeenCalled()
         expect(group).toEqual({})
       })
     })
   })
 
-  describe('getGroupAndUnitsBySetIdAndExperimentId', () => {
+  describe('getSetInformationBySetIds', () => {
+    test('multiple sets, getting info succeeded', () => {
+      target = new GroupExperimentalUnitService()
+      target.getSetInformationBySetId = mockResolve({ groupId: 'groupId', experimentId: 2, setId: 3 })
+      return target.getSetInformationBySetIds([111, 112], testTx).then((data) => {
+        expect(target.getSetInformationBySetId).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([
+          { groupId: 'groupId', experimentId: 2, setId: 3 },
+          { groupId: 'groupId', experimentId: 2, setId: 3 },
+        ])
+      })
+    })
+
+    test('multiple sets, getting info failed', () => {
+      target = new GroupExperimentalUnitService()
+      target.getSetInformationBySetId = mockReject('An error occurred')
+      return target.getSetInformationBySetIds([111, 112], testTx).then((data) => {
+        expect(target.getSetInformationBySetId).toHaveBeenCalled()
+        expect(data.length).toEqual(2)
+        expect(data).toEqual([[], []])
+      })
+    })
+  })
+
+  describe('formatSetResponse', () => {
     test('formats the set object correctly', () => {
       target = new GroupExperimentalUnitService()
-      const mockPromise = Promise.resolve()
-      target.unitWithBlockService = {
-        getExperimentalUnitsBySetIds: () => mockPromise,
-      }
 
-      const result = target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, 5, 'TestBlockName', testTx)
+      const result = target.formatSetResponse({
+        setId: 4781, experimentId: 112, location: 5, block: 'TestBlockName', blockId: 7,
+      })
 
       expect(result).toEqual({
         groupId: '112.5.TestBlockName',
         experimentId: 112,
         refGroupTypeId: 1,
         setId: 4781,
+        block: 'TestBlockName',
+        blockId: 7,
+        location: 5,
         groupValues: [{
           id: 1,
           name: 'locationNumber',
@@ -767,24 +793,23 @@ describe('GroupExperimentalUnitService', () => {
           treatmentVariableLevelId: null,
           groupId: '112.5.TestBlockName',
         }],
-        setEntries: mockPromise,
       })
     })
 
     test('replaces null block names with an empty string', () => {
       target = new GroupExperimentalUnitService()
-      const mockPromise = Promise.resolve()
-      target.unitWithBlockService = {
-        getExperimentalUnitsBySetIds: () => mockPromise,
-      }
 
-      const result = target.getGroupAndUnitsBySetIdAndExperimentId(4781, 112, 5, null, testTx)
+      const result = target.formatSetResponse({
+        setId: 4781, experimentId: 112, location: 5, blockId: 7,
+      })
 
       expect(result).toEqual({
         groupId: '112.5.',
         experimentId: 112,
         refGroupTypeId: 1,
         setId: 4781,
+        blockId: 7,
+        location: 5,
         groupValues: [{
           id: 1,
           name: 'locationNumber',
@@ -792,7 +817,6 @@ describe('GroupExperimentalUnitService', () => {
           treatmentVariableLevelId: null,
           groupId: '112.5.',
         }],
-        setEntries: mockPromise,
       })
     })
   })

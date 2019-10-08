@@ -53,6 +53,8 @@ export default {
       context.loaders.unitByExperimentIds.load(args.experimentId),
     getSetBySetId: (entity, args, context) =>
       context.loaders.setBySetIds.load(args.setId),
+    getSetsBySetId: (entity, args, context) =>
+      context.loaders.setsBySetIds.load(args.setIds),
     getSetEntriesBySetId: (entity, args, context) =>
       context.loaders.unitsBySetId.load(args.setId),
     getTreatmentsBySetId: (entity, args, context) =>
@@ -100,9 +102,10 @@ export default {
       context.loaders.analysisModelByExperimentIds.load(entity.id),
   },
   ExperimentalSet: {
-    groupId: property('id'),
     groupsJSON: (entity, args, context) =>
       context.loaders.groupsJsonsBySetIds.load(entity.setId),
+    setEntries: (entity, args, context) =>
+      context.loaders.unitsBySetId.load([entity.setId]),
   },
   ExperimentalUnit: {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),

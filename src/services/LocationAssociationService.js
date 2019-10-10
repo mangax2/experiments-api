@@ -48,7 +48,7 @@ const destructureInput = (rawInput) => {
   return {
     experimentId: Number(splitGroupId[0]),
     location: Number(splitGroupId[1]),
-    block: splitGroupId[2],
+    block: splitGroupId.slice(2).join('.'),
     setId: rawInput.setId,
   }
 }

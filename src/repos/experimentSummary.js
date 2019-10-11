@@ -60,6 +60,24 @@ const experimentSummaryQuery = `WITH treatment_numbers AS (
   WHERE e_1.id = $1
    ORDER BY c_1.id DESC
   LIMIT 1
+), rep_numbers AS (
+  SELECT dsd.experiment_id, dsd.value
+  FROM design_spec_detail dsd
+    INNER JOIN ref_design_spec rep_ref ON rep_ref.name='Reps'
+      AND rep_ref.id = dsd.ref_design_spec_id
+  WHERE dsd.experiment_id = $1
+), min_rep_numbers AS (
+  SELECT dsd.experiment_id, dsd.value
+  FROM design_spec_detail dsd
+    INNER JOIN ref_design_spec rep_ref ON rep_ref.name='Min Reps'
+      AND rep_ref.id = dsd.ref_design_spec_id
+  WHERE dsd.experiment_id = $1
+), loc_numbers AS (
+  SELECT dsd.experiment_id, dsd.value
+  FROM design_spec_detail dsd
+    INNER JOIN ref_design_spec rep_ref ON rep_ref.name='Locations'
+      AND rep_ref.id = dsd.ref_design_spec_id
+  WHERE dsd.experiment_id = $1
 )
 SELECT e.id,
   e.name,
@@ -71,6 +89,8 @@ SELECT e.id,
   utn.name_of_unit_type,
   COALESCE(dv.number_of_dependent_variables, 0::bigint)::integer AS number_of_dependent_variables,
   COALESCE(f.number_of_factors, 0::bigint)::integer AS number_of_independent_variables,
+  COALESCE(min_rep.value::int, rep.value::int, 0::bigint)::integer AS number_of_reps,
+  COALESCE(loc.value::int, 0::bigint)::integer AS number_of_locations,
   e.status,
   es.status_comment
 FROM experiment e
@@ -82,6 +102,9 @@ FROM experiment e
   LEFT JOIN unit_spec_numbers us ON us.experiment_id = e.id
   LEFT JOIN unit_type_name utn ON utn.experiment_id = e.id
   LEFT JOIN experiment_status es ON es.experiment_id = e.id
+  LEFT JOIN rep_numbers rep ON rep.experiment_id = e.id
+  LEFT JOIN min_rep_numbers min_rep ON min_rep.experiment_id = e.id
+  LEFT JOIN loc_numbers loc on loc.experiment_id = e.id
 WHERE e.id = $1;`
 
 // Error Codes 56XXXX

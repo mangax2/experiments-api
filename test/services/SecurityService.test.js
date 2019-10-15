@@ -49,7 +49,7 @@ describe('SecurityService', () => {
       return target.getGroupsByUserId('kprat1').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user permissions', '1O2001')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user permissions', undefined, '1O2001')
         HttpUtil.post.mockReset()
         HttpUtil.post.mockClear()
       })
@@ -78,6 +78,63 @@ describe('SecurityService', () => {
         expect(response.length).toBe(2)
         HttpUtil.post.mockReset()
         HttpUtil.post.mockClear()
+      })
+    })
+  })
+
+  describe('getEntitlementsByUserId', () => {
+    test('returns empty Array profile api returns empty groups', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [] } } } })
+      return target.getEntitlementsByUserId('testUser').then((data) => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(data.length).toBe(0)
+      })
+    })
+
+    test('throws an error  when getGroupsByUserId is null or undefined', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { data: { getUserById: null } } })
+      AppError.badRequest = mock()
+      return target.getEntitlementsByUserId('testUser').then((data) => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(data).toEqual([])
+      })
+    })
+
+    test('rejects when PAPI returns nothing', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({})
+      AppError.badRequest = mock()
+
+      return target.getEntitlementsByUserId('testUser').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user entitlements', undefined, '1O5001')
+      })
+    })
+
+    test('rejects when PAPI returns errors', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { errors: [{}] } })
+      AppError.badRequest = mock()
+
+      return target.getEntitlementsByUserId('testUser').then(() => {}, () => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '1O5002')
+      })
+    })
+
+    test('returns entitlements when data is retrieved', () => {
+      PingUtil.getMonsantoHeader = mockResolve({})
+      HttpUtil.post = mockResolve({ body: { data: { getEntitlementsForUser: [{ code: 'access' }, { code: 'create' }] } } })
+      return target.getEntitlementsByUserId('testUser').then((response) => {
+        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(HttpUtil.post).toBeCalled()
+        expect(response).toEqual(['access', 'create'])
       })
     })
   })
@@ -251,6 +308,38 @@ describe('SecurityService', () => {
       expect(() => target.permissionsCheck(1, {}, true, testTx)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing', undefined, '1O1003')
       expect(db.experiments.find).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('canUserCreateExperiments', () => {
+    test('returns true if the request came from an API', () => {
+      const context = { userId: 'testUser', isApiRequest: true }
+      target.getEntitlementsByUserId = mockResolve([])
+
+      return target.canUserCreateExperiments(context).then((result) => {
+        expect(target.getEntitlementsByUserId).not.toHaveBeenCalled()
+        expect(result).toBe(true)
+      })
+    })
+
+    test('returns true if the request is not from an API but the user has the "create" entitlement', () => {
+      const context = { userId: 'testUser', isApiRequest: false }
+      target.getEntitlementsByUserId = mockResolve(['create', 'access'])
+
+      return target.canUserCreateExperiments(context).then((result) => {
+        expect(target.getEntitlementsByUserId).toHaveBeenCalled()
+        expect(result).toBe(true)
+      })
+    })
+
+    test('returns false if the request is not from an API and the user does not have the "create" entitlement', () => {
+      const context = { userId: 'testUser', isApiRequest: false }
+      target.getEntitlementsByUserId = mockResolve(['access'])
+
+      return target.canUserCreateExperiments(context).then((result) => {
+        expect(target.getEntitlementsByUserId).toHaveBeenCalled()
+        expect(result).toBe(false)
+      })
     })
   })
 })

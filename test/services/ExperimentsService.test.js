@@ -21,6 +21,9 @@ describe('ExperimentsService', () => {
   beforeEach(() => {
     expect.hasAssertions()
     target = new ExperimentsService()
+    target.securityService = {
+      canUserCreateExperiments: mockResolve(true),
+    }
     PingUtil.getMonsantoHeader.mockClear()
   })
 
@@ -1356,6 +1359,16 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('fails with a forbidden if the user is not allowed to create experiments', () => {
+      target.securityService.canUserCreateExperiments = mockResolve(false)
+      AppError.forbidden = mock()
+
+      return target.manageExperiments({}, {}, testContext, testTx).catch(() => {
+        expect(target.securityService.canUserCreateExperiments).toHaveBeenCalledWith(testContext)
+        expect(AppError.forbidden).toHaveBeenCalledWith('The user is not allowed to create experiments.', undefined, '15F003')
+      })
+    })
+
     test('CopyExperiments', () => {
       target.generateEntities = mockResolve()
       return target.copyEntities([1, 2], 1, testContext, false, testTx).then(() => {
@@ -1440,6 +1453,16 @@ describe('ExperimentsService', () => {
       target.copyEntities = mockResolve()
       return target.manageTemplates(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.copyEntities).toHaveBeenCalledWith([1], 1, testContext, true, testTx)
+      })
+    })
+
+    test('fails with a forbidden if the user is not allowed to create templates', () => {
+      target.securityService.canUserCreateExperiments = mockResolve(false)
+      AppError.forbidden = mock()
+
+      return target.manageTemplates({}, {}, testContext, testTx).catch(() => {
+        expect(target.securityService.canUserCreateExperiments).toHaveBeenCalledWith(testContext)
+        expect(AppError.forbidden).toHaveBeenCalledWith('The user is not allowed to create templates.', undefined, '15G002')
       })
     })
 

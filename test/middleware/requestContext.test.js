@@ -144,6 +144,18 @@ describe('requestContextMiddlewareFunction', () => {
       })
   })
 
+  test('marks the request as from an API if the oauth_resourceownerinfo does not have username information', () => {
+    const nextFunc = mock()
+    const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'test=test', username: 'fakeuser' } }
+    const res = { set: mock() }
+
+    return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      .then(() => {
+        expect(nextFunc).toHaveBeenCalled()
+        expect(req.context.isApiRequest).toEqual(true)
+      })
+  })
+
   test('retrieves the username from the oauth_resourceownerinfo when both it and the username header have that information', () => {
     const nextFunc = mock()
     const req = { method: 'POST', headers: { oauth_resourceownerinfo: 'username=fakeuser2', username: 'fakeuser' } }

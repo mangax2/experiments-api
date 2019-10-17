@@ -3652,7 +3652,7 @@
         },
         "numberOfLocations": {
           "type": "integer",
-          "descriptipon": "the number of locations associated with the experiment"
+          "description": "the number of locations associated with the experiment"
         },
         "numberOfVariables": {
           "type": "integer",

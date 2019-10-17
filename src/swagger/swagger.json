@@ -3642,6 +3642,18 @@
           "type": "string",
           "description": "name of the experiment."
         },
+        "numberOfBlocks": {
+          "type": "integer",
+          "description": "the number of experiment blocks associated with the experiment."
+        },
+        "numberOfReps": {
+          "type": "integer",
+          "description": "the number of replications per location associated with the experiment"
+        },
+        "numberOfLocations": {
+          "type": "integer",
+          "descriptipon": "the number of locations associated with the experiment"
+        },
         "numberOfVariables": {
           "type": "integer",
           "description": "the number of variables associated with the experiment."

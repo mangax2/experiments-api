@@ -382,82 +382,94 @@ class ExperimentsService {
   @setErrorCode('15F000')
   @Transactional('manageExperiments')
   manageExperiments(requestBody, queryString, context, tx) {
-    const { source } = queryString
-    let experimentPromise
-    switch (source) {
-      case undefined:
-        experimentPromise = this.batchCreateExperiments(requestBody, context, false, tx)
-        break
-      case 'template': {
-        const numberOfCopies = requestBody.numberOfCopies || 1
-        experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
-          context, false, tx).then((data) => {
-          if (data && _.isArray(data)) {
-            const tagsPromise = []
-            _.forEach(_.range(numberOfCopies), (t) => {
-              const experimentId = data[t].id
-              const newTag = {
-                category: 'FROM TEMPLATE',
-                value: String(requestBody.id),
-                experimentId,
+    return this.securityService.canUserCreateExperiments(context)
+      .then((canCreateExperiments) => {
+        if (!canCreateExperiments) {
+          return Promise.reject(AppError.forbidden('The user is not allowed to create experiments.', undefined, getFullErrorCode('15F003')))
+        }
+        const { source } = queryString
+        let experimentPromise
+        switch (source) {
+          case undefined:
+            experimentPromise = this.batchCreateExperiments(requestBody, context, false, tx)
+            break
+          case 'template': {
+            const numberOfCopies = requestBody.numberOfCopies || 1
+            experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
+              context, false, tx).then((data) => {
+              if (data && _.isArray(data)) {
+                const tagsPromise = []
+                _.forEach(_.range(numberOfCopies), (t) => {
+                  const experimentId = data[t].id
+                  const newTag = {
+                    category: 'FROM TEMPLATE',
+                    value: String(requestBody.id),
+                    experimentId,
+                  }
+                  tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                    .then((result) => {
+                      const tags = _.map(result.tags, (tag) => {
+                        tag.experimentId = experimentId
+                        return tag
+                      })
+                      tags.push(newTag)
+                      return this.tagService.saveTags(tags, experimentId, context, false)
+                    }))
+                })
+                return Promise.all(tagsPromise).then(() =>
+                  AppUtil.createPostResponse(data),
+                )
               }
-              tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
-                .then((result) => {
-                  const tags = _.map(result.tags, (tag) => {
-                    tag.experimentId = experimentId
-                    return tag
-                  })
-                  tags.push(newTag)
-                  return this.tagService.saveTags(tags, experimentId, context, false)
-                }))
+              return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed', undefined, getFullErrorCode('15F001')))
             })
-            return Promise.all(tagsPromise).then(() =>
-              AppUtil.createPostResponse(data),
-            )
+            break
           }
-          return Promise.reject(AppError.internalServerError('Create Experiment From Template Failed', undefined, getFullErrorCode('15F001')))
-        })
-        break
-      }
-      case 'experiment': {
-        experimentPromise = this.copyEntities(requestBody.ids,
-          requestBody.numberOfCopies,
-          context, false, tx)
-        break
-      }
-      default:
-        experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15F002')))
-        break
-    }
-    return experimentPromise
+          case 'experiment': {
+            experimentPromise = this.copyEntities(requestBody.ids,
+              requestBody.numberOfCopies,
+              context, false, tx)
+            break
+          }
+          default:
+            experimentPromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15F002')))
+            break
+        }
+        return experimentPromise
+      })
   }
 
   @setErrorCode('15G000')
   @Transactional('manageTemplates')
   manageTemplates(requestBody, queryString, context, tx) {
-    const { source } = queryString
-    let templatePromise
-    switch (source) {
-      case undefined:
-        templatePromise = this.batchCreateTemplates(requestBody, context, tx)
-        break
-      case 'template': {
-        templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
-          context, true, tx)
-        break
-      }
-      case 'experiment': {
-        const numberOfCopies = requestBody.numberOfCopies || 1
-        templatePromise = this.createEntity(requestBody.id,
-          numberOfCopies,
-          context, true, tx)
-        break
-      }
-      default:
-        templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15G001')))
-        break
-    }
-    return templatePromise
+    return this.securityService.canUserCreateExperiments(context)
+      .then((canCreateExperiments) => {
+        if (!canCreateExperiments) {
+          return Promise.reject(AppError.forbidden('The user is not allowed to create templates.', undefined, getFullErrorCode('15G002')))
+        }
+        const { source } = queryString
+        let templatePromise
+        switch (source) {
+          case undefined:
+            templatePromise = this.batchCreateTemplates(requestBody, context, tx)
+            break
+          case 'template': {
+            templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
+              context, true, tx)
+            break
+          }
+          case 'experiment': {
+            const numberOfCopies = requestBody.numberOfCopies || 1
+            templatePromise = this.createEntity(requestBody.id,
+              numberOfCopies,
+              context, true, tx)
+            break
+          }
+          default:
+            templatePromise = Promise.reject(AppError.badRequest('Invalid Source Type', undefined, getFullErrorCode('15G001')))
+            break
+        }
+        return templatePromise
+      })
   }
 
   @setErrorCode('15H000')

@@ -23,15 +23,21 @@ const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
   return undefined
 }
 
-function getUserIdFromHeaders(headers) {
+function getContextFromHeaders(headers) {
+  const context = {
+    requestId: (headers ? headers['X-Request-Id'] : null) || uuid(),
+  }
+
   if (headers && headers.oauth_resourceownerinfo) {
-    const username = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo) || headers.username
-    return (username && username.length > 0
+    const userNameFromOauth = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo)
+    const username = userNameFromOauth || headers.username
+    context.isApiRequest = !userNameFromOauth
+    context.userId = (username && username.length > 0
       ? username.toUpperCase()
       : undefined)
   }
 
-  return undefined
+  return context
 }
 
 /* istanbul ignore next */
@@ -57,11 +63,7 @@ function getClientIdFromToken(headers) {
 }
 
 function requestContextMiddlewareFunction(req, res, next) {
-  const userId = getUserIdFromHeaders(req.headers)
-  req.context = {
-    userId,
-    requestId: (req.headers ? req.headers['X-Request-Id'] : null) || uuid(),
-  }
+  req.context = getContextFromHeaders(req.headers)
   res.set('X-Request-Id', req.context.requestId)
   res.set('Access-Control-Expose-Headers', 'X-Request-Id')
 
@@ -69,7 +71,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     // Need to set a user if undefined for audit
     // Need to retrieve client id for audit
 
-    if (userId === undefined) {
+    if (req.context.userId === undefined) {
       req.context.userId = 'SERVICE-USER'
     }
 
@@ -81,7 +83,7 @@ function requestContextMiddlewareFunction(req, res, next) {
       next()
     })
   } else {
-    if (userId === undefined && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
+    if (req.context.userId === undefined && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
       throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
     }
 

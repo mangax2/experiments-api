@@ -54,7 +54,7 @@ class SecurityService {
           const graphqlResult = _.get(result, 'body')
 
           if (_.isNil(graphqlResult)) {
-            throw AppError.badRequest('Unable to verify user permissions', getFullErrorCode('1O2001'))
+            throw AppError.badRequest('Unable to verify user permissions', undefined, getFullErrorCode('1O2001'))
           }
 
           if (graphqlResult.errors && graphqlResult.errors.length > 0) {
@@ -89,6 +89,38 @@ class SecurityService {
       }
       return userPermissions
     })
+  }
+
+  @setErrorCode('1O5000')
+  getEntitlementsByUserId = userId => PingUtil.getMonsantoHeader()
+    .then((header) => {
+      const graphqlQuery = `{ getEntitlementsForUser(userId:${JSON.stringify(userId)}, appIds:"EXPERIMENTS-UI"){code}}`
+      return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+        .then((result) => {
+          const graphqlResult = _.get(result, 'body')
+
+          if (_.isNil(graphqlResult)) {
+            throw AppError.badRequest('Unable to verify user entitlements', undefined, getFullErrorCode('1O5001'))
+          }
+
+          if (graphqlResult.errors && graphqlResult.errors.length > 0) {
+            throw AppError.badRequest('Profile API encountered an error', graphqlResult.errors, getFullErrorCode('1O5002'))
+          }
+          if (_.isNil(graphqlResult.data.getEntitlementsForUser)) {
+            logger.error('Unable to verify permissions. User not found')
+            return []
+          }
+          return _.map(graphqlResult.data.getEntitlementsForUser, 'code')
+        })
+    })
+
+  @setErrorCode('1O6000')
+  canUserCreateExperiments = (context) => {
+    if (context.isApiRequest) {
+      return Promise.resolve(true)
+    }
+    return this.getEntitlementsByUserId(context.userId)
+      .then(entitlements => _.includes(entitlements, 'create'))
   }
 }
 

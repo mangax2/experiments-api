@@ -246,7 +246,7 @@ class ExperimentalUnitService {
         try {
           const message = {
             experimentalUnitId: deactivation.id,
-            deactivationReason: deactivation.deactivationReason,
+            deactivationReason: deactivation.deactivationReason || '',
             setEntryId: deactivation.setEntryId,
           }
           KafkaProducer.publish({

@@ -635,7 +635,7 @@ describe('ExperimentalUnitService', () => {
 
       target.sendDeactivationNotifications([{ id: 5, deactivationReason: null, setEntryId: 7 }])
 
-      expect(KafkaProducer.publish).toHaveBeenCalledWith({ topic: 'deactivationTopic', message: { experimentalUnitId: 5, deactivationReason: null, setEntryId: 7 }, schemaId: 1234 })
+      expect(KafkaProducer.publish).toHaveBeenCalledWith({ topic: 'deactivationTopic', message: { experimentalUnitId: 5, deactivationReason: '', setEntryId: 7 }, schemaId: 1234 })
     })
 
     test('does not throw if the KafkaProducer publish throws', () => {

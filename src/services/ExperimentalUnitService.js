@@ -246,7 +246,10 @@ class ExperimentalUnitService {
         try {
           const message = {
             experimentalUnitId: deactivation.id,
-            deactivationReason: deactivation.deactivationReason,
+            // Kafka doesn't accept null values, but can provide null values if you set the default
+            // to null in the AVRO schema and provide an empty string in the JSON message. Yes,
+            // this is stupid and confusing but it works.
+            deactivationReason: deactivation.deactivationReason || '',
             setEntryId: deactivation.setEntryId,
           }
           KafkaProducer.publish({

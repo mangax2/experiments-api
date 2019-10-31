@@ -69,7 +69,7 @@ const experimentSummaryQuery = `WITH treatment_numbers AS (
 ), min_rep_numbers AS (
   SELECT dsd.experiment_id, dsd.value
   FROM design_spec_detail dsd
-    INNER JOIN ref_design_spec rep_ref ON rep_ref.name='Min Reps'
+    INNER JOIN ref_design_spec rep_ref ON rep_ref.name='Min Rep'
       AND rep_ref.id = dsd.ref_design_spec_id
   WHERE dsd.experiment_id = $1
 ), loc_numbers AS (

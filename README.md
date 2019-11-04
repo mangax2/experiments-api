@@ -1,2 +1,2 @@
 # experiments-api
-This is service project for Velocity Experiments Workflow
+This is the API project for Velocity Experiments Workflow.

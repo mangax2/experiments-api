@@ -1,7 +1,7 @@
 import { mock } from '../../jestUtil'
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
-import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
+import AvroUtil from '../../../src/services/utility/AvroUtil'
 
 jest.mock('kafka-node')
 
@@ -62,11 +62,35 @@ describe('KafkaProducer', () => {
       }
       KafkaProducer.producerPromise = Promise.resolve(producer)
       KafkaProducer.init = jest.fn()
+      const encodedMessage = 'encodedMessage'
+      AvroUtil.serializeKafkaAvroMsg = mock(encodedMessage)
 
       const message = 'test'
       return KafkaProducer.publish({ topic: 'topic', message, schemaId: 1 }).then(() => {
         expect(KafkaProducer.init).not.toBeCalled()
-        expect(producer.send.mock.calls[0][0]).toEqual([{ topic: 'topic', messages: serializeKafkaAvroMsg(message, 1) }])
+        expect(producer.send.mock.calls[0][0]).toEqual([{ topic: 'topic', messages: encodedMessage }])
+        expect(AvroUtil.serializeKafkaAvroMsg).toHaveBeenCalledWith(message, 1, undefined)
+      })
+    })
+
+    test('sends an avro message with a schema', () => {
+      const producer = {
+        send: mock((message, cb) => cb(null)),
+      }
+      KafkaProducer.producerPromise = Promise.resolve(producer)
+      KafkaProducer.init = jest.fn()
+      const encodedMessage = 'encodedMessage'
+      AvroUtil.serializeKafkaAvroMsg = mock(encodedMessage)
+
+      const message = { field: 'test' }
+      const schema = { type: 'record', fields: [{ name: 'field', type: 'string' }] }
+
+      return KafkaProducer.publish({
+        topic: 'topic', message, schemaId: 1, schema,
+      }).then(() => {
+        expect(KafkaProducer.init).not.toBeCalled()
+        expect(producer.send.mock.calls[0][0]).toEqual([{ topic: 'topic', messages: encodedMessage }])
+        expect(AvroUtil.serializeKafkaAvroMsg).toHaveBeenCalledWith(message, 1, schema)
       })
     })
 
@@ -76,11 +100,13 @@ describe('KafkaProducer', () => {
       }
       KafkaProducer.producerPromise = Promise.resolve(producer)
       KafkaProducer.init = jest.fn()
+      const encodedMessage = 'encodedMessage'
+      AvroUtil.serializeKafkaAvroMsg = mock(encodedMessage)
 
       const message = 'test'
       return KafkaProducer.publish({ topic: 'topic', message, schemaId: 1 }).then(null, (err) => {
         expect(KafkaProducer.init).not.toBeCalled()
-        expect(producer.send.mock.calls[0][0]).toEqual([{ topic: 'topic', messages: serializeKafkaAvroMsg(message, 1) }])
+        expect(producer.send.mock.calls[0][0]).toEqual([{ topic: 'topic', messages: encodedMessage }])
         expect(err.message).toEqual('error')
       })
     })

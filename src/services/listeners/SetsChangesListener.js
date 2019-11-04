@@ -53,7 +53,9 @@ class SetsChangesListener {
         { name: 'time', type: 'string' },
       ],
     })
-
+    // TODO: Pull this out into the AvroUtil so that it can be properly mocked the next
+    // time we consume an AVRO topic. As it is, our unit tests for this currently rely on
+    // the AvroUtil class to even test this function.
     const data = type.fromBuffer(message.slice(5))
     const eventCategory = data.event_category
 

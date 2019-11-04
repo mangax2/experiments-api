@@ -17,6 +17,28 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 
 const logger = log4js.getLogger('ExperimentalUnitService')
 
+const experimentalUnitDeactivationSchema = {
+  type: 'record',
+  fields: [
+    {
+      name: 'experimentalUnitId',
+      type: 'int',
+    },
+    {
+      name: 'deactivationReason',
+      type: [
+        'null',
+        'string',
+      ],
+      default: null,
+    },
+    {
+      name: 'setEntryId',
+      type: 'int',
+    },
+  ],
+}
+
 // Error Codes 17XXXX
 class ExperimentalUnitService {
   constructor() {
@@ -249,13 +271,14 @@ class ExperimentalUnitService {
             // Kafka doesn't accept null values, but can provide null values if you set the default
             // to null in the AVRO schema and provide an empty string in the JSON message. Yes,
             // this is stupid and confusing but it works.
-            deactivationReason: deactivation.deactivationReason || '',
+            deactivationReason: deactivation.deactivationReason,
             setEntryId: deactivation.setEntryId,
           }
           KafkaProducer.publish({
             topic: cfServices.experimentsKafka.value.topics.unitDeactivation,
             message,
             schemaId: cfServices.experimentsKafka.value.schema.unitDeactivation,
+            schema: experimentalUnitDeactivationSchema,
           })
         } catch (err) {
           console.warn(`An error was caught when publishing a deactivation reason for unit id ${deactivation.id}`, err)

@@ -7,7 +7,7 @@ describe('AvroUtil', () => {
   })
 
   describe('serializeKafkaAvroMsg', () => {
-    test('encodes data correctly in the format of 0, schemaId, and message', () => {
+    test('encodes data with the first byte as 0, then schemaId, and finally the message', () => {
       const message = {
         resource_id: 1137,
         event_category: 'update',
@@ -25,28 +25,23 @@ describe('AvroUtil', () => {
 
     test('passes the schema into the encoder and encodes with it', () => {
       const message = {
-        experimentalUnitId: 5,
-        deactivationReason: null,
-        setEntryId: 7,
+        id: 5,
+        someNullableString: null,
       }
       const schema = {
         type: 'record',
         fields: [
           {
-            name: 'experimentalUnitId',
+            name: 'id',
             type: 'int',
           },
           {
-            name: 'deactivationReason',
+            name: 'someNullableString',
             type: [
               'null',
               'string',
             ],
             default: null,
-          },
-          {
-            name: 'setEntryId',
-            type: 'int',
           },
         ],
       }

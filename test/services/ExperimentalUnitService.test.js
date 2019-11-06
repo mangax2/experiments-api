@@ -624,18 +624,32 @@ describe('ExperimentalUnitService', () => {
 
       target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])
 
-      expect(KafkaProducer.publish).toHaveBeenCalledWith({ topic: 'deactivationTopic', message: { experimentalUnitId: 5, deactivationReason: 'test reason', setEntryId: 7 }, schemaId: 1234 })
-    })
-
-    test('still sends a message if the deactivationReason is null', () => {
-      KafkaProducer.publish = mock()
-      cfServices.experimentsKafka.value.enableKafka = 'true'
-      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
-      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
-
-      target.sendDeactivationNotifications([{ id: 5, deactivationReason: null, setEntryId: 7 }])
-
-      expect(KafkaProducer.publish).toHaveBeenCalledWith({ topic: 'deactivationTopic', message: { experimentalUnitId: 5, deactivationReason: '', setEntryId: 7 }, schemaId: 1234 })
+      expect(KafkaProducer.publish).toHaveBeenCalledWith({
+        topic: 'deactivationTopic',
+        message: { experimentalUnitId: 5, deactivationReason: 'test reason', setEntryId: 7 },
+        schemaId: 1234,
+        schema: {
+          type: 'record',
+          fields: [
+            {
+              name: 'experimentalUnitId',
+              type: 'int',
+            },
+            {
+              name: 'deactivationReason',
+              type: [
+                'null',
+                'string',
+              ],
+              default: null,
+            },
+            {
+              name: 'setEntryId',
+              type: 'int',
+            },
+          ],
+        },
+      })
     })
 
     test('does not throw if the KafkaProducer publish throws', () => {

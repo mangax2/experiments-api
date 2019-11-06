@@ -2,7 +2,7 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import cfServices from '../../../src/services/utility/ServiceConfig'
 import db from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
-import { serializeKafkaAvroMsg } from '../../../src/services/utility/AvroUtil'
+import AvroUtil from '../../../src/services/utility/AvroUtil'
 import { sendKafkaNotification } from '../../../src/decorators/notifyChanges'
 
 jest.mock('kafka-node')
@@ -57,7 +57,7 @@ describe('SetsChangesListener', () => {
           time: '123',
         }
 
-        const serializedMessage = serializeKafkaAvroMsg(message, 777)
+        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve([])
@@ -75,7 +75,7 @@ describe('SetsChangesListener', () => {
           time: '123',
         }
 
-        const serializedMessage = serializeKafkaAvroMsg(message, 777)
+        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve([{ experiment_id: 1 }])
@@ -94,7 +94,7 @@ describe('SetsChangesListener', () => {
           time: '123',
         }
 
-        const serializedMessage = serializeKafkaAvroMsg(message, 777)
+        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve(null)
@@ -114,7 +114,7 @@ describe('SetsChangesListener', () => {
           time: '123',
         }
 
-        const serializedMessage = serializeKafkaAvroMsg(message, 777)
+        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockReject(new Error('error'))
@@ -134,7 +134,7 @@ describe('SetsChangesListener', () => {
           time: '123',
         }
 
-        const serializedMessage = serializeKafkaAvroMsg(message, 777)
+        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mock()

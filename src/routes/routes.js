@@ -279,8 +279,12 @@ router.get('/getDoc/:fileName', (req, res, next) => {
 })
 
 router.post('/kafka-publish', (req, res, next) => {
-  const { topic, message, schemaId } = req.body
-  pt.timeout(KafkaProducer.publish({ topic, message, schemaId }), 8000)
+  const {
+    topic, message, schemaId, schema,
+  } = req.body
+  pt.timeout(KafkaProducer.publish({
+    topic, message, schemaId, schema,
+  }), 8000)
     .then(result => res.json(result))
     .catch(err => next(err))
 })

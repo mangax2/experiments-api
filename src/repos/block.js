@@ -16,7 +16,10 @@ class blockRepo {
 
 
   @setErrorCode('5S2000')
-  batchFindByBlockIds = (ids, tx = this.rep) => tx.any('SELECT * FROM block WHERE id IN ($1:csv)', [ids])
+  batchFindByBlockIds = (ids, tx = this.rep) => tx.any('SELECT * FROM block WHERE id IN ($1:csv)', [ids]).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(ids, id => keyedData[id])
+  })
 
   @setErrorCode('5S5000')
   findByBlockId = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM block WHERE id = $1', id)

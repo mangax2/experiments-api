@@ -90,6 +90,10 @@ function createLoaders(tx) {
       tx.batch(_.map(args, arg =>
         new UnitWithBlockService().getExperimentalUnitsByExperimentId(arg, tx))))
 
+  const blocksByBlockIdsLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg => db.block.batchFindByBlockIds(arg, tx))))
+
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
   const dependentVariableByIdLoader = createDataLoader(db.dependentVariable.batchFind)
@@ -109,6 +113,7 @@ function createLoaders(tx) {
   const templateByIdLoader = createDataLoader(templateBatchLoaderCallback)
   const unitSpecDetailByIdLoader = createDataLoader(db.unitSpecificationDetail.batchFind)
   const analysisModelByIdLoader = createDataLoader(db.analysisModel.batchFindByExperimentIds)
+  const unitsByBlockIdsLoader = createDataLoader(db.unit.batchFindByBlockIds)
 
   // Loaders that load by parent ID.  These prime the caches of loaders that load by entity ID.
   function createLoaderToPrimeCacheOfChildren(dbCallback, loaderPrimeTarget) {
@@ -157,6 +162,7 @@ function createLoaders(tx) {
 
   return {
     associatedFactorLevel: associatedFactorLevelsByNestedFactorLevelIds,
+    blocksByBlockIds: blocksByBlockIdsLoader,
     combinationElement: combinationElementByIdLoader,
     combinationElementByTreatmentIds: combinationElementsByTreatmentIdLoader,
     dependentVariable: dependentVariableByIdLoader,
@@ -191,6 +197,7 @@ function createLoaders(tx) {
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
     treatmentBySetIds: treatmentBySetIdLoader,
     unitByExperimentIds: unitsByExperimentIdLoader,
+    unitsByBlockIds: unitsByBlockIdsLoader,
     unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,

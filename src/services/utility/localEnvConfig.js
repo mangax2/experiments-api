@@ -59,6 +59,7 @@ const cfServices = {
   },
   experimentApiConfigurables: {
     maxExperimentsToRetrieve: 10,
+    maxBlocksToRetrieve: 100,
   },
 }
 

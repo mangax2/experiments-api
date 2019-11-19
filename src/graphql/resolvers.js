@@ -3,15 +3,18 @@ import {
 } from 'lodash'
 import cfServices from '../services/utility/ServiceConfig'
 
+const checkIdArrayLength = (ids, maxLength) => {
+  if (ids.length > maxLength) {
+    throw new Error(`Request input ids exceeded the maximum length of ${maxLength}`)
+  }
+}
+
 export default {
   Query: {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
     getExperimentsByIds: (entity, args, context) => {
-      const maxInputLength = cfServices.experimentApiConfigurables.maxExperimentsToRetrieve
-      if (args.ids.length > maxInputLength) {
-        throw new Error(`Request input ids exceeded the maximum length of ${maxInputLength}`)
-      }
+      checkIdArrayLength(args.ids, cfServices.experimentApiConfigurables.maxExperimentsToRetrieve)
       return Promise.all(
         uniq(args.ids).map(id =>
           context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
@@ -59,6 +62,17 @@ export default {
       context.loaders.unitsBySetId.load(args.setId),
     getTreatmentsBySetId: (entity, args, context) =>
       context.loaders.treatmentBySetIds.load(args.setId),
+    getBlocksByBlockIds: (entity, args, context) => {
+      checkIdArrayLength(args.blockId, cfServices.experimentApiConfigurables.maxBlocksToRetrieve)
+      return context.loaders.blocksByBlockIds.load(args.blockId)
+    },
+  },
+  Block: {
+    experimentId: property('experiment_id'),
+    auditInfo: (entity, args, context) =>
+      context.getAuditInfo(entity),
+    units: (entity, args, context) =>
+      context.loaders.unitsByBlockIds.load(entity.id),
   },
   CombinationElement: {
     treatmentVariableLevelId: property('factor_level_id'),
@@ -111,6 +125,7 @@ export default {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),
     setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
     deactivationReason: entity => (has(entity, 'deactivation_reason') ? entity.deactivation_reason : entity.deactivationReason),
+    blockId: entity => (has(entity, 'block_id') ? entity.block_id : entity.blockId),
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),

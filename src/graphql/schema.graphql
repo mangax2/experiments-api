@@ -14,6 +14,14 @@ type AuditInfo {
   modifiedDate: String
 }
 
+type Block {
+  id: Int
+  name: String
+  experimentId: Int
+  auditInfo: AuditInfo
+  units: [ExperimentalUnit]
+}
+
 type ClusterComposite {
   text: String
   value: ID
@@ -196,6 +204,7 @@ type Query {
   getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
+  getBlocksByBlockIds(blockId: [Int!]!): [Block]
 }
 
 type Treatment {

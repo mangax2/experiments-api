@@ -5,9 +5,9 @@ Ticket: [EXP-384](https://monsanto.aha.io/features/EXP-384)
 
 ### To run:
 ```sh
-$ pip3 install numpy, pandas, requests, sgqlc, docopt, pytest, pytest_cases
+$ pip3 install numpy, pandas, requests, sgqlc, docopt
 $ cd support-scripts/reassign_entries_to_treatments
-$ python3 reassign_entries_to_treatments.py
+$ python3 reassign_entries_to_treatments.py -h
 ```
 
 ### To test:

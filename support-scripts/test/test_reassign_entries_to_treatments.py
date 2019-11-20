@@ -78,9 +78,9 @@ def test_getUnitsToTreatments(req):
   print(req)
   req.side_effect = [units_data, treatments_data]
   
-  actual = getUnitsToTreatments(experimentId=1, **{"env": "np", "experimentsToken": "zzzz"})
-  req.assert_called_once_with(getUnitsByExperimentIdQuery, {"experimentId": 1})
-  req.assert_called_once_with(getTreatmentsByExperimentIdQuery, {"experimentId": 1})
+  actual = getUnitsToTreatments(experiment=1, **{"env": "np", "experimentsToken": "zzzz"})
+  req.assert_called_once_with(getUnitsByExperimentIdQuery, {"experiment": 1})
+  req.assert_called_once_with(getTreatmentsByExperimentIdQuery, {"experiment": 1})
   assert isinstance(actual, pd.DataFrame)
   assert sorted(list(actual.columns)) == sorted(["catalogId", "treatmentId", "setEntryId", "variableLabel", "combinationId", "treatmentVariableLevelId", "experimentalUnitId"])
   assert actual.catalogId.dtype == np.int64

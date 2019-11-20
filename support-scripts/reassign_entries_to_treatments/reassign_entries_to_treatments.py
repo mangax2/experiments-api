@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Usage:
-  reassign_entries_to_treatments.py (-u | --update) --env=ENV --experiment=ID -e=TOKEN -s=TOKEN -v=TOKEN
+  reassign_entries_to_treatments.py [-u | --update] --env=ENV --experiment=ID -e=TOKEN -s=TOKEN -v=TOKEN
   reassign_entries_to_treatments.py (-h | --help)
   reassign_entries_to_treatments.py --version
 
@@ -29,11 +29,18 @@ from getpass import getuser
 from itertools import accumulate
 import json
 import numpy as np
+import os
 import pandas as pd
 import requests
 import sgqlc as gql
-from sgqlc.endpoint.http import HTTPEndpoint as gqlEndpoint
+from sgqlc.endpoint.http import HTTPEndpoint
 
+
+def getRegressionDataPath():
+  pathlist = __file__.split(os.path.sep)[:-1]
+  pathlist[-1] = 'test/data'
+  regressionDataPath = os.path.join(*pathlist)
+  return regressionDataPath
 
 def getHeaders(token):
   return {
@@ -60,8 +67,6 @@ def getVelmatURL(env):
 treatmentsEndpoint = "/experiments/{id}/treatments"
 experimentalUnitsEndpoint = "/experiments/{id}/experimental-units"
 setEntriesEndpoint = "/set-entries"
-lotQuery = "/{index}?type=INTERNAL_SEED&q=materialId\:{materialId}"
-
 
 # ## Get the materials assigned to each set entry
 # 
@@ -72,7 +77,7 @@ def getSetsByExperiment(experiment=None, env='np', setsToken='', store=False, *a
   response = requests.get(getSetURL(env) + "/sets", params=params, headers=headers)
   response.raise_for_status()
   if store:
-    with open('setsByExperimentResponse.json', 'w') as fid:
+    with open(os.path.join(getRegressionDataPath(), 'setsByExperimentResponse.json'), 'w') as fid:
       fid.write(json.dumps(response.json(), sort_keys=True, indent=2))
   retval = pd.io.json.json_normalize(response.json(), 
                                      ["entries", "materials"],
@@ -91,29 +96,6 @@ def getSetsByExperiment(experiment=None, env='np', setsToken='', store=False, *a
 def getSeedsOnly(df):
   return df[df.materialType == 'internal_seed']
   
-'''
-def mapEntries(item):
-  for entry in item["entries"]:
-    newEntry = {}
-    newEntry["sourceId"] = item["source"]["sourceId"]
-    newEntry["setEntryId"] = entry["entryId"]
-    seed = [m for m in entry["materials"] if m["materialType"] == "internal_seed"]
-    assert len(seed) <= 1, 'Entry can not have more than one seed material associated to it: {0}'.format(entry))
-    if len(seed) > 0:
-      pass  # print(entry)
-    else:
-      newEntry["materialId"] = seed[0]["materialId"]
-      newEntry["materialType"] = seed[0]["productType"]
-    except IndexError:
-      pass
-  return newEntry
-
-def extractEntries(response):
-  return [mapEntries(x) for x in response.json()]
-
-def test_extractEntries(response):
-    assert sum([len(i["entries"]) for i in response.json()]) == len(extractEntries(response))
-'''
 # ## Get the catalog information from Velmat
 # 
 # Now that we have the seed material information in hand, we need to get the relationship between how Experiments stores the material (the catalog ID) and how Sets stores the material (an inventory or lot ID).
@@ -137,7 +119,7 @@ def generateListQuery(materials):
     retval.append(entry)
   return json.dumps(retval, sort_keys=True, indent=2)
 
-def getSetMaterialData(materials, env='', velmatToken='', store=False):
+def getSetMaterialData(materials, env='', velmatToken='', store=False, **kwargs):
   """ 
   Return a list of dictionaries with keys 'catalogId', 'lotId', and 'inventoryId'.
   The lot OR the inventory key can == None.
@@ -149,7 +131,7 @@ def getSetMaterialData(materials, env='', velmatToken='', store=False):
   response = requests.post(url, data=query, headers=headers)
   response.raise_for_status()
   if store:
-    with open('velmatSearchResponse.json', 'w') as fid:
+    with open(os.path.join(getRegressionDataPath(), 'velmatSearchResponse.json'), 'w') as fid:
       fid.write(json.dumps(response.json(), sort_keys=True, indent=2))
   retval = []
   for catalog in response.json():
@@ -204,38 +186,38 @@ query GetTreatmentsByExperimentId($experimentId: Int!) {
   }
 }
 """
-def getUnitsByExperimentId(experimentId, store=False, **kwargs):
+def getUnitsByExperimentId(experiment, env, experimentsToken, store, **kwargs):
   filename = ''
   if store:
     filename = 'getUnitsByExperimentResponse'
-  return getFromGraphQL(getUnitsByExperimentIdQuery, experimentId, filename, kwargs["env"], kwargs["experimentsToken"])['getUnitsByExperimentId']
+  return getFromGraphQL(getUnitsByExperimentIdQuery, filename, experiment, env, experimentsToken, store)['getUnitsByExperimentId']
 
-def getTreatmentsByExperimentId(experimentId, store=False, **kwargs):
+def getTreatmentsByExperimentId(experiment, env, experimentsToken, store, **kwargs):
   filename = ''
   if store:
     filename = 'getTreatmentsByExperimentResponse'
-  return getFromGraphQL(getTreatmentsByExperimentIdQuery, experimentId, filename, kwargs["env"], kwargs["experimentsToken"])['getTreatmentsByExperimentId']
+  return getFromGraphQL(getTreatmentsByExperimentIdQuery, filename, experiment, env, experimentsToken, store)['getTreatmentsByExperimentId']
 
-def getFromGraphQL(query, experimentId, filename, env='', experimentsToken='', **kwargs):
-  url = "https://api01-np.agro.services/experiments-api-graphql/v1/graphql" 
-  headers = getHeaders(experimentsToken)
-  variables = {"experimentId": experimentId}
-
-  endpoint = gqlEndpoint(url, headers)
+def getFromGraphQL(query, filename, experiment, env, token, store=False):
+  url = "https://api01{suffix}.agro.services/experiments-api-graphql/v1/graphql".format(suffix=getSuffix(env))
+  headers = getHeaders(token)
+  endpoint = HTTPEndpoint(url, headers)
+  variables = {"experimentId": experiment}
   data = endpoint(query, variables)
-  print(data.keys(), query)
-  if filename != '':
-    with open('{0}.json'.format(filename), 'w') as fid:
+  if "errors" in data.keys() and len(data["errors"]) > 0:
+    raise RuntimeError(data["errors"])
+  if store and filename != '':
+    with open('{0}/{1}.json'.format(getRegressionDataPath(), filename), 'w') as fid:
       json.dump(data, fid, indent=2)
   return data['data']
 
-def getUnitsToTreatments(experimentId, store=False, **kwargs):
-  units = getUnitsByExperimentId(experimentId, store, **kwargs)  # TODO: pass down kwargs
+def getUnitsToTreatments(experiment, env, experimentsToken, store=False, **kwargs):
+  units = getUnitsByExperimentId(experiment, env, experimentsToken, store)
   unitsFrame = pd.DataFrame(units)
   for column in ['blockId', 'treatmentId', 'setEntryId', "id"]:
     unitsFrame[column] = unitsFrame[column].astype('int64')
   unitsFrame = unitsFrame.rename(columns={"setEntryId": "entryId", "id": "experimentalUnitId"})
-  treatments = getTreatmentsByExperimentId(id)
+  treatments = getTreatmentsByExperimentId(experiment, env, experimentsToken, store)
   parsedTreatments = []
   for treatment in treatments:
     for element in treatment["combinationElements"]:
@@ -277,7 +259,11 @@ def correctUnitEntryAssociations(df, verbose):
   return algorithm(df, expIndices, setIndices, verbose)
   
 def algorithm(df, expIndices, setIndices, verbose):
+  old = df.copy()
   i = -1
+  if len(expIndices) == df.shape[0]:
+    # No fixes needed
+    return None
   for e in expIndices:
     i += 1
     s = setIndices[i]
@@ -305,18 +291,23 @@ def algorithm(df, expIndices, setIndices, verbose):
         _, __, currentIndices = np.intersect1d(df.catalogId_e.values, df.catalogId_s.values, return_indices=True)
         print('Exp:', expIndices, '\nCur:', currentIndices)
       continue
-  return df
+  return df.loc[df.catalogId_s != old.catalogId_s].copy()
 
-def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=True, **kwargs):
+def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, **kwargs):
   """
     args = (eunit_1, entryId_1), (eunit_2, entryId_2)
   """
   headers = getHeaders(experimentsToken)
-  body = [{"id": eunit, "setEntryId": entry} for eunit, entry in args]
+  body = sorted([{"id":eunit, "setEntryId":entry} for eunit, entry in args], key=lambda d: d["setEntryId"])
   if testing:
+    for pair in body:
+      print(pair)
+    # print(json.dumps(body))
+    print("Found {0} experimental units to fix...".format(len(args)))
     request = requests.Request("PATCH", getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
     return request.prepare()
   else:
+    print("Fixing {0} experimental units...".format(len(args)))
     response = requests.patch(getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
     response.raise_for_status()
     print("Patch response: {0}".format(response.status_code))
@@ -329,30 +320,25 @@ def renameTokens(arguments):
   arguments["experimentsToken"] = arguments.pop("e")
   arguments["setsToken"] = arguments.pop("s")
   arguments["velmatToken"] = arguments.pop("v")
-  arguments["store"] = arguments["update"]
+  arguments["store"] = arguments.pop("update")
   return arguments
 
 if __name__ == "__main__":
-  print(__doc__)
   arguments = {cleanKey(x): y for x, y in docopt(__doc__, version="0.1").items()}
   arguments.pop('help')
   arguments.pop('version')
   arguments = renameTokens(arguments)
-  print(arguments)
   setResponse = getSetsByExperiment(**arguments)
   setSeeds = getSeedsOnly(setResponse)
   setMaterials = getMaterialsFromSet(setSeeds)
   mappedMaterials = getSetMaterialData(setMaterials, **arguments)
   entriesToCatalog = setSeeds.merge(mappedMaterials, on=["materialId"], how="inner", copy=True)
-  assert entriesToCatalog[entriesToCatalog.materialId == 2323687].lotId.values == mappedMaterials[mappedMaterials.materialId== 2323687].lotId.values
-  assert entriesToCatalog[entriesToCatalog.materialId == 2323687].entryId.values == setSeeds[setSeeds.materialId== 2323687].entryId.values
-  # 
   txToUnits = getUnitsToTreatments(**arguments)
-  #
-  assert txToUnits[txToUnits.treatmentId == 351475].shape[0] == 20  # experimental blocks (2) * locations (10) * reps/location (1)
-  #
   final = txToUnits.merge(entriesToCatalog, on='entryId', how="inner", suffixes=('_e', '_s'), copy=True)
   correct = correctUnitEntryAssociations(final, False)
-  arg = correct[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x))  
-  prep = patchExperimentalUnits(*args, **arguments, testing=True)
-  print("Done\n\nPatch response:\n", prep)
+  if correct is None:
+    args = correct[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x)).values
+    prep = patchExperimentalUnits(*args, **arguments, testing=True)
+  else:
+    print("No corrections needed")
+  exit()

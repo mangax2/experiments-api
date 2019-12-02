@@ -1,15 +1,18 @@
+import json
 import numpy as np
 import os.path as op
 import pandas as pd
 import pytest
-from pytest_cases import pytest_fixture_plus, fixture_union, cases_data
 from unittest.mock import Mock, MagicMock, patch
-import json
 import requests
 from requests import Response
-import sgqlc  # from sgqlc.endpoint.http import HTTPEndpoint
+import sgqlc
+from sgqlc.endpoint.http import HTTPEndpoint
 
 from reassign_entries_to_treatments.reassign_entries_to_treatments import *
+from reassign_entries_to_treatments.services.experiments import *
+from reassign_entries_to_treatments.services.utils import *
+
 
 @patch('requests.get', autospec=True)
 @patch('requests.Response', autospec=True )
@@ -20,8 +23,9 @@ def test_getSetsByExperiment(res, req):
   res.raise_for_status.return_value = None
   req.return_value = res
   kwargs = {"experiment": 1, "env": 'nonprod'}
-  actual = getSetsByExperiment(setsToken='xxxx', **kwargs)
+  response = getSetsByExperiment(setsToken='xxxx', **kwargs)
   req.assert_called_once_with('https://api01-np.agro.services/sets-api/v2/sets', headers=getHeaders("xxxx"), params={"sourceId": 1, "entries": "true", "limit": 500} )
+  actual = getSetsDataFrame(response)
   assert isinstance(actual, pd.DataFrame)
   assert actual.materialId.dtype == np.int64
   assert actual.shape[0] == 364  # NOT len(data) b/c materials is nested inside the sets
@@ -69,22 +73,31 @@ def test_getSetMaterialData(res, req):
   assert actual.shape[0] == len(data)
   assert sorted(["lotId", "materialId", "catalogId"]) == sorted(actual.columns)
 
-@patch('sgqlc.endpoint.http.HTTPEndpoint', autospec=True)
-def test_getUnitsToTreatments(req):
-  with open(op.abspath('./test/data/getUnitsByExperimentResponse.json'), 'r') as fid:
+@patch.object(HTTPEndpoint, '__call__', autospec=True)
+def test_getUnitsToTreatments(endpoint):
+  with open(op.abspath('test/data/getUnitsByExperimentResponse.json'), 'r') as fid:
     units_data = json.load(fid)
-  with open(op.abspath('./test/data/getTreatmentsByExperimentResponse.json'), 'r') as fid:
+  with open(op.abspath('test/data/getTreatmentsByExperimentResponse.json'), 'r') as fid:
     treatments_data = json.load(fid)
-  print(req)
-  req.side_effect = [units_data, treatments_data]
-  
-  actual = getUnitsToTreatments(experiment=1, **{"env": "np", "experimentsToken": "zzzz"})
-  req.assert_called_once_with(getUnitsByExperimentIdQuery, {"experiment": 1})
-  req.assert_called_once_with(getTreatmentsByExperimentIdQuery, {"experiment": 1})
+  endpoint.side_effect = [units_data, treatments_data]
+  getUnitsToTreatments(experiment=1, env="np", experimentsToken="zzzz")
+  mock_calls = endpoint.mock_calls
+  assert mock_calls[0][1][1:] == (getUnitsByExperimentIdQuery, dict(experimentId=1))
+  assert mock_calls[1][1][1:] == (getTreatmentsByExperimentIdQuery, dict(experimentId=1))
+
+def test_parseExperimentResponse():
+  with open(op.abspath('test/data/getUnitsByExperimentResponse.json'), 'r') as fid:
+    units_data = json.load(fid)["data"]['getUnitsByExperimentId']
+  with open(op.abspath('test/data/getTreatmentsByExperimentResponse.json'), 'r') as fid:
+    treatments_data = json.load(fid)["data"]['getTreatmentsByExperimentId']
+  actual = parseExperimentResponses(units_data, treatments_data)
   assert isinstance(actual, pd.DataFrame)
-  assert sorted(list(actual.columns)) == sorted(["catalogId", "treatmentId", "setEntryId", "variableLabel", "combinationId", "treatmentVariableLevelId", "experimentalUnitId"])
+  assert sorted(list(actual.columns)) == sorted(["block", "blockId", "catalogId", "treatmentId", "entryId", "variableLabel", "combinationId", "treatmentVariableLevelId", "experimentalUnitId"])
   assert actual.catalogId.dtype == np.int64
   assert actual.shape[0] == len(units_data)
+
+
+
 """
 # ---------------------------------------
 entryIdColumnIndex = final.columns.get_loc("entryId")

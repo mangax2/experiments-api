@@ -184,7 +184,7 @@ if __name__ == "__main__":
     print(final)
   if correct is None:
     args = correct[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x)).values
-    prep = patchExperimentalUnits(*args, **arguments, testing=True)  # TODO: set testing --> !update
+    prep = patchExperimentalUnits(*args, **arguments, testing=!arguments["update"])
   else:
     print("No corrections needed")
   exit()

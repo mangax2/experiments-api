@@ -114,16 +114,17 @@ def algorithm(df, expRowNumbers, setRowNumbers, verbose):
       continue
   return df
 
-def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, **kwargs):
+def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, verbose=False, **kwargs):
   """
     args = (eunit_1, entryId_1), (eunit_2, entryId_2)
   """
   headers = getHeaders(experimentsToken)
   body = sorted([{"id": eunit, "setEntryId": entry} for eunit, entry in args], key=lambda d: d["setEntryId"])
   if testing:
-    for pair in body:
-      print(pair)
-    print("Found {0} experimental units to fix...".format(len(args)))
+    if verbose:
+      for pair in body:
+        print(pair)
+      print("Found {0} experimental units to fix...".format(len(args)))
     request = requests.Request("PATCH", getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
     return request.prepare()
   else:

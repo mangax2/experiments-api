@@ -1,0 +1,3122 @@
+{
+  "data": {
+    "getTreatmentsByExperimentId": [
+      {
+        "id": 351475,
+        "isControl": "true",
+        "inAllBlocks": true,
+        "blockId": null,
+        "combinationElements": [
+          {
+            "id": 525375,
+            "treatmentVariableLevelId": 317458,
+            "treatmentId": 351475,
+            "treatmentVariableLevel": {
+              "id": 317458,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 33964,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": [
+          "42864ffd-6b49-4c90-a32c-0e91a70961c2",
+          "b4a09539-27c7-4856-9077-adbfcbbeffa1",
+          "5c90e8b2-6d1f-4414-910b-b9f26f3ca3e7"
+        ]
+      },
+      {
+        "id": 351476,
+        "isControl": "true",
+        "inAllBlocks": true,
+        "blockId": null,
+        "combinationElements": [
+          {
+            "id": 525376,
+            "treatmentVariableLevelId": 317459,
+            "treatmentId": 351476,
+            "treatmentVariableLevel": {
+              "id": 317459,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 33804,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": [
+          "42864ffd-6b49-4c90-a32c-0e91a70961c2",
+          "b4a09539-27c7-4856-9077-adbfcbbeffa1",
+          "5c90e8b2-6d1f-4414-910b-b9f26f3ca3e7"
+        ]
+      },
+      {
+        "id": 351477,
+        "isControl": "true",
+        "inAllBlocks": true,
+        "blockId": null,
+        "combinationElements": [
+          {
+            "id": 525377,
+            "treatmentVariableLevelId": 317460,
+            "treatmentId": 351477,
+            "treatmentVariableLevel": {
+              "id": 317460,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 33786,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": [
+          "42864ffd-6b49-4c90-a32c-0e91a70961c2",
+          "b4a09539-27c7-4856-9077-adbfcbbeffa1",
+          "5c90e8b2-6d1f-4414-910b-b9f26f3ca3e7"
+        ]
+      },
+      {
+        "id": 351478,
+        "isControl": "true",
+        "inAllBlocks": true,
+        "blockId": null,
+        "combinationElements": [
+          {
+            "id": 525378,
+            "treatmentVariableLevelId": 317461,
+            "treatmentId": 351478,
+            "treatmentVariableLevel": {
+              "id": 317461,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 34005,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": [
+          "42864ffd-6b49-4c90-a32c-0e91a70961c2",
+          "b4a09539-27c7-4856-9077-adbfcbbeffa1",
+          "5c90e8b2-6d1f-4414-910b-b9f26f3ca3e7"
+        ]
+      },
+      {
+        "id": 351479,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525379,
+            "treatmentVariableLevelId": 317462,
+            "treatmentId": 351479,
+            "treatmentVariableLevel": {
+              "id": 317462,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60708,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351480,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525380,
+            "treatmentVariableLevelId": 317463,
+            "treatmentId": 351480,
+            "treatmentVariableLevel": {
+              "id": 317463,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60715,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351481,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525381,
+            "treatmentVariableLevelId": 317464,
+            "treatmentId": 351481,
+            "treatmentVariableLevel": {
+              "id": 317464,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60754,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351482,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525382,
+            "treatmentVariableLevelId": 317465,
+            "treatmentId": 351482,
+            "treatmentVariableLevel": {
+              "id": 317465,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60709,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351483,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525383,
+            "treatmentVariableLevelId": 317466,
+            "treatmentId": 351483,
+            "treatmentVariableLevel": {
+              "id": 317466,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60713,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351484,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525384,
+            "treatmentVariableLevelId": 317467,
+            "treatmentId": 351484,
+            "treatmentVariableLevel": {
+              "id": 317467,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60717,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351485,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525385,
+            "treatmentVariableLevelId": 317468,
+            "treatmentId": 351485,
+            "treatmentVariableLevel": {
+              "id": 317468,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60751,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351486,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525386,
+            "treatmentVariableLevelId": 317469,
+            "treatmentId": 351486,
+            "treatmentVariableLevel": {
+              "id": 317469,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60772,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351487,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525387,
+            "treatmentVariableLevelId": 317470,
+            "treatmentId": 351487,
+            "treatmentVariableLevel": {
+              "id": 317470,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60737,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351488,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525388,
+            "treatmentVariableLevelId": 317471,
+            "treatmentId": 351488,
+            "treatmentVariableLevel": {
+              "id": 317471,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60719,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351489,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525389,
+            "treatmentVariableLevelId": 317472,
+            "treatmentId": 351489,
+            "treatmentVariableLevel": {
+              "id": 317472,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60793,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351490,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525390,
+            "treatmentVariableLevelId": 317473,
+            "treatmentId": 351490,
+            "treatmentVariableLevel": {
+              "id": 317473,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60783,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351491,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525391,
+            "treatmentVariableLevelId": 317474,
+            "treatmentId": 351491,
+            "treatmentVariableLevel": {
+              "id": 317474,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60729,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351492,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525392,
+            "treatmentVariableLevelId": 317475,
+            "treatmentId": 351492,
+            "treatmentVariableLevel": {
+              "id": 317475,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60742,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351493,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525393,
+            "treatmentVariableLevelId": 317476,
+            "treatmentId": 351493,
+            "treatmentVariableLevel": {
+              "id": 317476,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60743,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351494,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525394,
+            "treatmentVariableLevelId": 317477,
+            "treatmentId": 351494,
+            "treatmentVariableLevel": {
+              "id": 317477,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60752,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351495,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525395,
+            "treatmentVariableLevelId": 317478,
+            "treatmentId": 351495,
+            "treatmentVariableLevel": {
+              "id": 317478,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60721,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351496,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525396,
+            "treatmentVariableLevelId": 317479,
+            "treatmentId": 351496,
+            "treatmentVariableLevel": {
+              "id": 317479,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60726,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351497,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525397,
+            "treatmentVariableLevelId": 317480,
+            "treatmentId": 351497,
+            "treatmentVariableLevel": {
+              "id": 317480,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60739,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351498,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525398,
+            "treatmentVariableLevelId": 317481,
+            "treatmentId": 351498,
+            "treatmentVariableLevel": {
+              "id": 317481,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60776,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351499,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525399,
+            "treatmentVariableLevelId": 317482,
+            "treatmentId": 351499,
+            "treatmentVariableLevel": {
+              "id": 317482,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60716,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351500,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525400,
+            "treatmentVariableLevelId": 317483,
+            "treatmentId": 351500,
+            "treatmentVariableLevel": {
+              "id": 317483,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60720,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351501,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525401,
+            "treatmentVariableLevelId": 317484,
+            "treatmentId": 351501,
+            "treatmentVariableLevel": {
+              "id": 317484,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60735,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351502,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525402,
+            "treatmentVariableLevelId": 317485,
+            "treatmentId": 351502,
+            "treatmentVariableLevel": {
+              "id": 317485,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60744,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351503,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525403,
+            "treatmentVariableLevelId": 317486,
+            "treatmentId": 351503,
+            "treatmentVariableLevel": {
+              "id": 317486,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60723,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351504,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525404,
+            "treatmentVariableLevelId": 317487,
+            "treatmentId": 351504,
+            "treatmentVariableLevel": {
+              "id": 317487,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60728,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351505,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525405,
+            "treatmentVariableLevelId": 317488,
+            "treatmentId": 351505,
+            "treatmentVariableLevel": {
+              "id": 317488,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60771,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351506,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525406,
+            "treatmentVariableLevelId": 317489,
+            "treatmentId": 351506,
+            "treatmentVariableLevel": {
+              "id": 317489,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60745,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351507,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525407,
+            "treatmentVariableLevelId": 317490,
+            "treatmentId": 351507,
+            "treatmentVariableLevel": {
+              "id": 317490,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60712,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351508,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525408,
+            "treatmentVariableLevelId": 317491,
+            "treatmentId": 351508,
+            "treatmentVariableLevel": {
+              "id": 317491,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60727,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351509,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525409,
+            "treatmentVariableLevelId": 317492,
+            "treatmentId": 351509,
+            "treatmentVariableLevel": {
+              "id": 317492,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60757,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351510,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525410,
+            "treatmentVariableLevelId": 317493,
+            "treatmentId": 351510,
+            "treatmentVariableLevel": {
+              "id": 317493,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60784,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351511,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525411,
+            "treatmentVariableLevelId": 317494,
+            "treatmentId": 351511,
+            "treatmentVariableLevel": {
+              "id": 317494,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60714,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351512,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525412,
+            "treatmentVariableLevelId": 317495,
+            "treatmentId": 351512,
+            "treatmentVariableLevel": {
+              "id": 317495,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60722,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351513,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525413,
+            "treatmentVariableLevelId": 317496,
+            "treatmentId": 351513,
+            "treatmentVariableLevel": {
+              "id": 317496,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60766,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351514,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525414,
+            "treatmentVariableLevelId": 317497,
+            "treatmentId": 351514,
+            "treatmentVariableLevel": {
+              "id": 317497,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60785,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351515,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525415,
+            "treatmentVariableLevelId": 317498,
+            "treatmentId": 351515,
+            "treatmentVariableLevel": {
+              "id": 317498,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60707,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351516,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525416,
+            "treatmentVariableLevelId": 317499,
+            "treatmentId": 351516,
+            "treatmentVariableLevel": {
+              "id": 317499,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60718,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351517,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525417,
+            "treatmentVariableLevelId": 317500,
+            "treatmentId": 351517,
+            "treatmentVariableLevel": {
+              "id": 317500,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60724,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351518,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525418,
+            "treatmentVariableLevelId": 317501,
+            "treatmentId": 351518,
+            "treatmentVariableLevel": {
+              "id": 317501,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60740,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351519,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525419,
+            "treatmentVariableLevelId": 317502,
+            "treatmentId": 351519,
+            "treatmentVariableLevel": {
+              "id": 317502,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60792,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351520,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525420,
+            "treatmentVariableLevelId": 317503,
+            "treatmentId": 351520,
+            "treatmentVariableLevel": {
+              "id": 317503,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60710,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351521,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525421,
+            "treatmentVariableLevelId": 317504,
+            "treatmentId": 351521,
+            "treatmentVariableLevel": {
+              "id": 317504,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60732,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351522,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525422,
+            "treatmentVariableLevelId": 317505,
+            "treatmentId": 351522,
+            "treatmentVariableLevel": {
+              "id": 317505,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60731,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351523,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525423,
+            "treatmentVariableLevelId": 317506,
+            "treatmentId": 351523,
+            "treatmentVariableLevel": {
+              "id": 317506,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60770,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351524,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525424,
+            "treatmentVariableLevelId": 317507,
+            "treatmentId": 351524,
+            "treatmentVariableLevel": {
+              "id": 317507,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60748,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351525,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525425,
+            "treatmentVariableLevelId": 317508,
+            "treatmentId": 351525,
+            "treatmentVariableLevel": {
+              "id": 317508,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60711,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351526,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5913,
+        "combinationElements": [
+          {
+            "id": 525426,
+            "treatmentVariableLevelId": 317509,
+            "treatmentId": 351526,
+            "treatmentVariableLevel": {
+              "id": 317509,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60725,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351527,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525427,
+            "treatmentVariableLevelId": 317510,
+            "treatmentId": 351527,
+            "treatmentVariableLevel": {
+              "id": 317510,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60733,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351528,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525428,
+            "treatmentVariableLevelId": 317511,
+            "treatmentId": 351528,
+            "treatmentVariableLevel": {
+              "id": 317511,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60730,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351529,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525429,
+            "treatmentVariableLevelId": 317512,
+            "treatmentId": 351529,
+            "treatmentVariableLevel": {
+              "id": 317512,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60763,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351530,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525430,
+            "treatmentVariableLevelId": 317513,
+            "treatmentId": 351530,
+            "treatmentVariableLevel": {
+              "id": 317513,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60775,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351531,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525431,
+            "treatmentVariableLevelId": 317514,
+            "treatmentId": 351531,
+            "treatmentVariableLevel": {
+              "id": 317514,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60738,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351532,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525432,
+            "treatmentVariableLevelId": 317515,
+            "treatmentId": 351532,
+            "treatmentVariableLevel": {
+              "id": 317515,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60777,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351533,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525433,
+            "treatmentVariableLevelId": 317516,
+            "treatmentId": 351533,
+            "treatmentVariableLevel": {
+              "id": 317516,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60773,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351534,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525434,
+            "treatmentVariableLevelId": 317517,
+            "treatmentId": 351534,
+            "treatmentVariableLevel": {
+              "id": 317517,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60758,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351535,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525435,
+            "treatmentVariableLevelId": 317518,
+            "treatmentId": 351535,
+            "treatmentVariableLevel": {
+              "id": 317518,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60759,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351536,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525436,
+            "treatmentVariableLevelId": 317519,
+            "treatmentId": 351536,
+            "treatmentVariableLevel": {
+              "id": 317519,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60753,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351537,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525437,
+            "treatmentVariableLevelId": 317520,
+            "treatmentId": 351537,
+            "treatmentVariableLevel": {
+              "id": 317520,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60761,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351538,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525438,
+            "treatmentVariableLevelId": 317521,
+            "treatmentId": 351538,
+            "treatmentVariableLevel": {
+              "id": 317521,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60767,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351539,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525439,
+            "treatmentVariableLevelId": 317522,
+            "treatmentId": 351539,
+            "treatmentVariableLevel": {
+              "id": 317522,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60736,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351540,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525440,
+            "treatmentVariableLevelId": 317523,
+            "treatmentId": 351540,
+            "treatmentVariableLevel": {
+              "id": 317523,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60788,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351541,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525441,
+            "treatmentVariableLevelId": 317524,
+            "treatmentId": 351541,
+            "treatmentVariableLevel": {
+              "id": 317524,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60791,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351542,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525442,
+            "treatmentVariableLevelId": 317525,
+            "treatmentId": 351542,
+            "treatmentVariableLevel": {
+              "id": 317525,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60780,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351543,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525443,
+            "treatmentVariableLevelId": 317526,
+            "treatmentId": 351543,
+            "treatmentVariableLevel": {
+              "id": 317526,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60741,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351544,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525444,
+            "treatmentVariableLevelId": 317527,
+            "treatmentId": 351544,
+            "treatmentVariableLevel": {
+              "id": 317527,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60747,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351545,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525445,
+            "treatmentVariableLevelId": 317528,
+            "treatmentId": 351545,
+            "treatmentVariableLevel": {
+              "id": 317528,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60782,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351546,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525446,
+            "treatmentVariableLevelId": 317529,
+            "treatmentId": 351546,
+            "treatmentVariableLevel": {
+              "id": 317529,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60774,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351547,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525447,
+            "treatmentVariableLevelId": 317530,
+            "treatmentId": 351547,
+            "treatmentVariableLevel": {
+              "id": 317530,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60789,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351548,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525448,
+            "treatmentVariableLevelId": 317531,
+            "treatmentId": 351548,
+            "treatmentVariableLevel": {
+              "id": 317531,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60734,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351549,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525449,
+            "treatmentVariableLevelId": 317532,
+            "treatmentId": 351549,
+            "treatmentVariableLevel": {
+              "id": 317532,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60750,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351550,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525450,
+            "treatmentVariableLevelId": 317533,
+            "treatmentId": 351550,
+            "treatmentVariableLevel": {
+              "id": 317533,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60778,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351551,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525451,
+            "treatmentVariableLevelId": 317534,
+            "treatmentId": 351551,
+            "treatmentVariableLevel": {
+              "id": 317534,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60779,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351552,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525452,
+            "treatmentVariableLevelId": 317535,
+            "treatmentId": 351552,
+            "treatmentVariableLevel": {
+              "id": 317535,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60787,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351553,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525453,
+            "treatmentVariableLevelId": 317536,
+            "treatmentId": 351553,
+            "treatmentVariableLevel": {
+              "id": 317536,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60762,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351554,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525454,
+            "treatmentVariableLevelId": 317537,
+            "treatmentId": 351554,
+            "treatmentVariableLevel": {
+              "id": 317537,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60768,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351555,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525455,
+            "treatmentVariableLevelId": 317538,
+            "treatmentId": 351555,
+            "treatmentVariableLevel": {
+              "id": 317538,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60790,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351556,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525456,
+            "treatmentVariableLevelId": 317539,
+            "treatmentId": 351556,
+            "treatmentVariableLevel": {
+              "id": 317539,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60794,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351557,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525457,
+            "treatmentVariableLevelId": 317540,
+            "treatmentId": 351557,
+            "treatmentVariableLevel": {
+              "id": 317540,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60786,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351558,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525458,
+            "treatmentVariableLevelId": 317541,
+            "treatmentId": 351558,
+            "treatmentVariableLevel": {
+              "id": 317541,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60749,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351559,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525459,
+            "treatmentVariableLevelId": 317542,
+            "treatmentId": 351559,
+            "treatmentVariableLevel": {
+              "id": 317542,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60746,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351560,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525460,
+            "treatmentVariableLevelId": 317543,
+            "treatmentId": 351560,
+            "treatmentVariableLevel": {
+              "id": 317543,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60765,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351561,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525461,
+            "treatmentVariableLevelId": 317544,
+            "treatmentId": 351561,
+            "treatmentVariableLevel": {
+              "id": 317544,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60760,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351562,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525462,
+            "treatmentVariableLevelId": 317545,
+            "treatmentId": 351562,
+            "treatmentVariableLevel": {
+              "id": 317545,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60764,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351563,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525463,
+            "treatmentVariableLevelId": 317546,
+            "treatmentId": 351563,
+            "treatmentVariableLevel": {
+              "id": 317546,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60756,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351564,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525464,
+            "treatmentVariableLevelId": 317547,
+            "treatmentId": 351564,
+            "treatmentVariableLevel": {
+              "id": 317547,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60755,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351565,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525465,
+            "treatmentVariableLevelId": 317548,
+            "treatmentId": 351565,
+            "treatmentVariableLevel": {
+              "id": 317548,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60769,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351566,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525466,
+            "treatmentVariableLevelId": 317549,
+            "treatmentId": 351566,
+            "treatmentVariableLevel": {
+              "id": 317549,
+              "valueJSON": {
+                "items": [
+                  {
+                    "label": "Seed",
+                    "value": 60781,
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": false
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351567,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525467,
+            "treatmentVariableLevelId": 317550,
+            "treatmentId": 351567,
+            "treatmentVariableLevel": {
+              "id": 317550,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 93",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351568,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525468,
+            "treatmentVariableLevelId": 317551,
+            "treatmentId": 351568,
+            "treatmentVariableLevel": {
+              "id": 317551,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 94",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351569,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525469,
+            "treatmentVariableLevelId": 317552,
+            "treatmentId": 351569,
+            "treatmentVariableLevel": {
+              "id": 317552,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 95",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351570,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525470,
+            "treatmentVariableLevelId": 317553,
+            "treatmentId": 351570,
+            "treatmentVariableLevel": {
+              "id": 317553,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 96",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351571,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525471,
+            "treatmentVariableLevelId": 317554,
+            "treatmentId": 351571,
+            "treatmentVariableLevel": {
+              "id": 317554,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 97",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351572,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525472,
+            "treatmentVariableLevelId": 317555,
+            "treatmentId": 351572,
+            "treatmentVariableLevel": {
+              "id": 317555,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 98",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351573,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525473,
+            "treatmentVariableLevelId": 317556,
+            "treatmentId": 351573,
+            "treatmentVariableLevel": {
+              "id": 317556,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 99",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      },
+      {
+        "id": 351574,
+        "isControl": "false",
+        "inAllBlocks": false,
+        "blockId": 5914,
+        "combinationElements": [
+          {
+            "id": 525474,
+            "treatmentVariableLevelId": 317557,
+            "treatmentId": 351574,
+            "treatmentVariableLevel": {
+              "id": 317557,
+              "valueJSON": {
+                "items": [
+                  {
+                    "text": "Seed 100",
+                    "label": "Seed",
+                    "objectType": "Catalog",
+                    "catalogType": "INTERNAL_SEED",
+                    "isPlaceholder": true
+                  }
+                ],
+                "objectType": "Cluster"
+              },
+              "nestedLevels": [],
+              "associatedLevels": []
+            }
+          }
+        ],
+        "controlTypes": []
+      }
+    ]
+  }
+}

@@ -166,7 +166,7 @@ class ExperimentsService {
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
       }
       return data
-    }).catch(err => console.error(err))
+    })
 
   @setErrorCode('158000')
   @Transactional('getExperimentById')

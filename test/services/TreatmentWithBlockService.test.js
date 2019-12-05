@@ -8,24 +8,24 @@ describe('TreatmentWithBlockService', () => {
   describe('getTreatmentsByExperimentIdWithTemplateCheck', () => {
     test('failed on template check', () => {
       const target = new TreatmentWithBlockService()
-      target.experimentService.findExperimentWithTemplateCheck = mockReject()
+      target.experimentsService.findExperimentWithTemplateCheck = mockReject()
       target.getTreatmentsByExperimentId = mockResolve([])
 
       return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {}, testTx)
         .catch(() => {
-          expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
           expect(target.getTreatmentsByExperimentId).not.toHaveBeenCalled()
         })
     })
 
     test('passed with template check', () => {
       const target = new TreatmentWithBlockService()
-      target.experimentService.findExperimentWithTemplateCheck = mockResolve([])
+      target.experimentsService.findExperimentWithTemplateCheck = mockResolve([])
       target.getTreatmentsByExperimentId = mockResolve([])
 
       return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {}, testTx)
         .then(() => {
-          expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
           expect(target.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, testTx)
         })
     })

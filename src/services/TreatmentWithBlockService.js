@@ -11,7 +11,7 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 // Error Codes 1ZXXXX
 class TreatmentWithBlockService {
   constructor() {
-    this.experimentService = new ExperimentsService()
+    this.experimentsService = new ExperimentsService()
     this.treatmentService = new TreatmentService()
     this.treatmentBlockService = new TreatmentBlockService()
     this.blockService = new BlockService()
@@ -20,7 +20,7 @@ class TreatmentWithBlockService {
   @setErrorCode('1Z1000')
   @Transactional('getTreatmentsByExperimentIdWithTemplateCheck')
   getTreatmentsByExperimentIdWithTemplateCheck(id, isTemplate, context, tx) {
-    return this.experimentService.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
+    return this.experimentsService.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
       .then(() => this.getTreatmentsByExperimentId(id, tx))
   }
 

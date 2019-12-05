@@ -120,7 +120,7 @@ def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testin
   """
   headers = getHeaders(experimentsToken)
   body = sorted([{"id": eunit, "setEntryId": entry} for eunit, entry in args], key=lambda d: d["setEntryId"])
-  if testing:
+  if testing or kwargs["update"]:
     if verbose:
       for pair in body:
         print(pair)
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     print(final)
   if correct is None:
     args = correct[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x)).values
-    prep = patchExperimentalUnits(*args, **arguments, testing=!arguments["update"])
+    prep = patchExperimentalUnits(*args, **arguments)
   else:
     print("No corrections needed")
   exit()

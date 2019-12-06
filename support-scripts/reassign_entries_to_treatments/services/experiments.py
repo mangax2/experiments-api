@@ -99,13 +99,12 @@ def parseTreatments(treatments):
 
 def parseExperimentResponses(units, treatments):
   unitsFrame = pd.DataFrame(units)
-  for column in ["blockId", "treatmentId", "setEntryId", "id"]:
-    unitsFrame[column] = unitsFrame[column].astype('int64')
+  unitsFrame = unitsFrame.dropna().astype(dict(id='int64', blockId='int64', treatmentId='int64', setEntryId='int64', block='object'))  # if Set entries aren't associated yet, they will be 'NaN' (which we don't care about)
   unitsFrame = unitsFrame.rename(columns={"setEntryId": "entryId", "id": "experimentalUnitId"})
   parsedTreatments = parseTreatments(treatments)
   txFrame = pd.DataFrame(parsedTreatments)
   txToUnits = txFrame.merge(unitsFrame, on=["treatmentId"], how="inner", copy=True, validate="one_to_many")
-  txToUnits["catalogId"] = txToUnits["catalogId"].astype('int64')
+  txToUnits = txToUnits.astype({'catalogId': 'int64'})
   return txToUnits
 
 def getUnitsToTreatments(experiment, env, experimentsToken, store=False, **kwargs):
@@ -113,21 +112,27 @@ def getUnitsToTreatments(experiment, env, experimentsToken, store=False, **kwarg
   treatments = getTreatmentsByExperimentId(experiment, env, experimentsToken, store)
   return parseExperimentResponses(units, treatments)
 
-def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, **kwargs):
+def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, update=False, **kwargs):
   """
   args = (eunit_1, entryId_1), (eunit_2, entryId_2)
   """
   headers = utils.getHeaders(experimentsToken)
   body = sorted([{"id":eunit, "setEntryId":entry} for eunit, entry in args], key=lambda d: d["setEntryId"])
-  if testing:
-    for pair in body:
-      print(pair)
+  if testing or update:
     print("Found {0} experimental units to fix...".format(len(args)))
     request = requests.Request("PATCH", getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
     return request.prepare()
-  else:
-    print("Fixing {0} experimental units...".format(len(args)))
-    response = requests.patch(getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
-    response.raise_for_status()
-    print("Patch response: {0}".format(response.status_code))
+
+  print("Patching {0} experimental units...".format(len(args)))
+
+  # abort = input("Would you like to abort and examine? Y/n ")
+  # if abort.lower() == "y":
+  #   print()
+  #   print("-"*100)
+  #   print(json.dumps(body, sort_keys=True, indent=2))
+  #   print("-"*100)
+  #   return None
+
+  response = requests.patch(getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
+  response.raise_for_status()
   return response

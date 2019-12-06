@@ -10,6 +10,7 @@ import { notifyChanges } from '../decorators/notifyChanges'
 import TreatmentValidator from '../validations/TreatmentValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import BlockService from './BlockService'
+import ExperimentsService from './ExperimentsService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -20,7 +21,7 @@ class TreatmentDetailsService {
     this.treatmentWithBlockService = new TreatmentWithBlockService()
     this.treatmentService = new TreatmentService()
     this.combinationElementService = new CombinationElementService()
-    this.factorService = new FactorService()
+    this.experimentsService = new ExperimentsService()
     this.securityService = new SecurityService()
     this.validator = new TreatmentValidator()
   }
@@ -28,16 +29,17 @@ class TreatmentDetailsService {
   @setErrorCode('1Q1000')
   @Transactional('getAllTreatmentDetails')
   getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
-    return tx.batch([
-      this.treatmentWithBlockService.getTreatmentsByExperimentIdWithTemplateCheck(experimentId,
-        isTemplate, context, tx),
+    return this.experimentsService.findExperimentWithTemplateCheck(
+      experimentId, isTemplate, context, tx,
+    ).then(() => tx.batch([
+      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
       this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-      this.factorService.getFactorsByExperimentId(experimentId, isTemplate, context, tx),
-    ]).then((fullTreatmentDetails) => {
-      const groupedFactors = _.groupBy(fullTreatmentDetails[3], 'id')
+      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
+    ]).then(([treatments, combinationElements, factorLevels, factors]) => {
+      const groupedFactors = _.groupBy(factors, 'id')
 
-      const groupedFactorLevels = _.groupBy(_.map(fullTreatmentDetails[2], level => ({
+      const groupedFactorLevels = _.groupBy(_.map(factorLevels, level => ({
         id: level.id,
         items: level.value ? level.value.items : [],
         factor_id: level.factor_id,
@@ -45,7 +47,7 @@ class TreatmentDetailsService {
       })), 'id')
 
       const groupedCombinationElements = _.groupBy(
-        _.map(fullTreatmentDetails[1], combinationElement => ({
+        _.map(combinationElements, combinationElement => ({
           id: combinationElement.id,
           treatment_id: combinationElement.treatment_id,
           factor_id: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
@@ -53,7 +55,7 @@ class TreatmentDetailsService {
           factor_level: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
         })), 'treatment_id')
 
-      return _.map(fullTreatmentDetails[0], treatment => ({
+      return _.map(treatments, treatment => ({
         id: treatment.id,
         experiment_id: treatment.experiment_id,
         treatment_number: treatment.treatment_number,
@@ -69,7 +71,7 @@ class TreatmentDetailsService {
         modified_user_id: treatment.modified_user_id,
         combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
       }))
-    })
+    }))
   }
 
   stringifyBlock = treatments => _.map(treatments, (t) => {

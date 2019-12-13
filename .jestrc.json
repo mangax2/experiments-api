@@ -4,5 +4,5 @@
     "js",
     "json"
   ],
-  "setupTestFrameworkScriptFile": "./test/jestSetup.js"
+  "setupFilesAfterEnv": ["./test/jestSetup.js"]
 }

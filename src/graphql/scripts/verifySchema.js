@@ -3,7 +3,7 @@
 verifySchema()
 
 function verifySchema() {
-  require('babel-register')
+  require('@babel/register')
   const importSchema = require('graphql-import').importSchema
   const buildSchema = require('graphql').buildSchema
 

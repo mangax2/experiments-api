@@ -20,7 +20,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
   .then(() => {
     if (config.node_env !== 'production') {
       // eslint-disable-next-line
-      require('babel-register')
+      require('@babel/register')
     }
 
     const serviceConfig = require('./services/utility/ServiceConfig')

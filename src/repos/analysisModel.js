@@ -30,7 +30,6 @@ class analysisModelRepo {
 
   @setErrorCode('5N2000')
   batchCreate = (analysisModelInfo, context, tx = this.rep) =>{
-    console.log('analysisModelInfo',analysisModelInfo,context.userId)
     return tx.batch(
     analysisModelInfo.map(
       analysisModel => {

@@ -26,5 +26,5 @@
     "!**/src/swagger/**",
     "!**/node_modules/**"
   ],
-  "setupTestFrameworkScriptFile": "./test/jestSetup.js"
+  "setupFilesAfterEnv": ["./test/jestSetup.js"]
 }

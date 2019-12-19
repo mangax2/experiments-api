@@ -47,7 +47,7 @@ def getSetMaterialData(materials, env='', velmatToken='', store=False, **kwargs)
   Return a list of dictionaries with keys 'catalogId', 'lotId', and 'inventoryId'.
   The lot OR the inventory key can == None.
   """
-  url = "https://velmat-search-api.velocity-np.ag/v2/load"
+  url = "https://velmat-search-api.velocity{0}.ag/v2/load".format(utils.getSuffix(env))
   headers = {'Authorization': "Bearer {0}".format(velmatToken),
             'Content-Type': 'application/json'}
   query = generateListQuery(materials)

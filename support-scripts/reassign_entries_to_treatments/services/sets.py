@@ -27,6 +27,26 @@ def getSetsByExperiment(experiment=None, env='np', setsToken='', store=False, *a
       fid.write(json.dumps(response.json(), sort_keys=True, indent=2))
   return response.json()
 
+def formatSetsResponse(jsonInput):
+  setsDF = getSetsDataFrame(jsonInput)
+  setSeeds = getSeedsOnly(setsDF)
+  return getMaterialsFromSet(setSeeds), setSeeds
+
+def getMaterialsFromSet(df):
+  materials = []
+  for index, material in df.iterrows():
+    materials.append((
+      material.productType, 
+      "INTERNAL_SEED", 
+      int(material.materialId), 
+      int(material.entryId), 
+      int(material.setId)
+    ))
+  return materials
+
+def getSeedsOnly(df):
+  return df[df.materialType == 'internal_seed']
+
 def getSetsDataFrame(output):
   retval = pd.io.json.json_normalize(output, 
                                      ["entries", "materials"],

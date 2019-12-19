@@ -27,112 +27,58 @@ Unfortunately, determining the new assignments means we need some information fr
 With this information in hand, we can identify which entry CAN go to which experimental unit and which are irreparably foobar...
 """
 from docopt import docopt
-from getpass import getuser
-from itertools import accumulate
-import json
 import numpy as np
-import os
-import pandas as pd
-import requests
-import sgqlc as gql
-from sgqlc.endpoint.http import HTTPEndpoint
 
 from services.experiments import getUnitsToTreatments, patchExperimentalUnits
-from services.sets import getSetsByExperiment, getSetsDataFrame
+from services.sets import getSetsByExperiment, formatSetsResponse
 from services.velmat import getSetMaterialData
 
 
-def getSeedsOnly(df):
-  return df[df.materialType == 'internal_seed']
-  
-def getMaterialsFromSet(df):
-  materials = []
-  for index, material in df.iterrows():
-    materials.append((
-      material.productType, 
-      "INTERNAL_SEED", 
-      int(material.materialId), 
-      int(material.entryId), 
-      int(material.setId)
-    ))
-  return materials
+totalCount = 0
 
 def switchRows(df, i1, i2):
+  global totalCount
+  print(".", end="")
   r1 = df.iloc[i1, -9:]
   r2 = df.iloc[i2, -9:]
   df.iloc[i1, -9:] = r2
   df.iloc[i2, -9:] = r1
+  totalCount += 1
   return df
 
-def correctUnitEntryAssociations(df, verbose):
-  for setId in df["setId"]:
-    setDf = df.loc[lambda df: df.setId == setId, :].copy()
+def correctUnitEntryAssociations(df):
+  # Note: we MUST examine the relationships BY SET or we could accidentally move an entry
+  # association to a different block in Experiments!  <-- This is VERY BAD!
+  df = df.copy()
+  for setId in df["setId"].unique():
+    print(' | ', end='')
+    setDf = df.loc[(df.setId == setId), :].copy()
     _, expRowNumbers, setRowNumbers = np.intersect1d(
       setDf.catalogId_e.values,
       setDf.catalogId_s.values,
       return_indices=True
     )
-    if verbose:  # setId == 37867:
-      # verbose = True
-      print()
-      print("New set:", setId)
-      print(expRowNumbers)
-      print(setRowNumbers)
-      print(")"*100)
-    df.loc[lambda df: df.setId == setId, :] = algorithm(setDf, expRowNumbers, setRowNumbers, verbose)
+    output = algorithm(setDf, expRowNumbers, setRowNumbers)
+    df.loc[(df.setId == setId), :] = output
+  print()
   return df
   
-def algorithm(df, expRowNumbers, setRowNumbers, verbose):
-  old = df.copy()
+def algorithm(df, expRowNumbers, setRowNumbers):
+  df = df.copy()
   i = -1
   if np.all(expRowNumbers == setRowNumbers):
     return df
   for expRowNumber in expRowNumbers:
     i += 1
     setRowNumber = setRowNumbers[i]
-    if verbose: 
-      print('-'*100, '\n', expRowNumber, setRowNumber, ':\n')
     if expRowNumber != setRowNumber:
       df = switchRows(df, expRowNumber, setRowNumber)
-      if verbose:
-        print(expRowNumber, '<-->', setRowNumber, end="\n")
-        print('Exp:', expRowNumbers, '\nSet:', setRowNumbers, '\n^^^^^^OLD VS NEWvvvvvvv')
-        print(df.iloc[expRowNumber, -9:], df.iloc[expRowNumber, -9:])
-        print("......")
-      if verbose: 
-        print(expRowNumber, '<-->', setRowNumber, end="\n")
-      if expRowNumber in setRowNumbers:  # part of a chain
+      if expRowNumber in setRowNumbers:
         setRowNumbers[np.where(setRowNumbers == expRowNumber)] = setRowNumber
       setRowNumbers[i] = expRowNumber
-      if verbose:
-        print('Exp:', expRowNumbers, '\nSet:', setRowNumbers)
     else:
-      if verbose:
-        print("Do nothing!")
-        _, __, currentIndices = np.intersect1d(df.catalogId_e.values, df.catalogId_s.values, return_indices=True)
-        print('Exp:', expRowNumbers, '\nCur:', currentIndices)
       continue
   return df
-
-def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, verbose=False, **kwargs):
-  """
-    args = (eunit_1, entryId_1), (eunit_2, entryId_2)
-  """
-  headers = getHeaders(experimentsToken)
-  body = sorted([{"id": eunit, "setEntryId": entry} for eunit, entry in args], key=lambda d: d["setEntryId"])
-  if testing:
-    if verbose:
-      for pair in body:
-        print(pair)
-      print("Found {0} experimental units to fix...".format(len(args)))
-    request = requests.Request("PATCH", getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
-    return request.prepare()
-  else:
-    print("Fixing {0} experimental units...".format(len(args)))
-    response = requests.patch(getExperimentURL(env) + experimentalUnitsEndpoint.format(id=id), headers=headers, data=json.dumps(body))
-    response.raise_for_status()
-    print("Patch response: {0}".format(response.status_code))
-  return response
 
 def cleanKey(key):
   return key.strip('-').lower()
@@ -154,17 +100,20 @@ if __name__ == "__main__":
   # Let's query the Sets service and get the mapping of `setEntryId` -> `seedMaterial`
   #   (with `materialType` and `materialId`).
   setResponseJSON = getSetsByExperiment(**arguments)
-  setsDF = getSetsDataFrame(setResponseJSON)
-  setSeeds = getSeedsOnly(setsDF)
+  print("Retrieved sets...")
+  setMaterials, setSeeds = formatSetsResponse(setResponseJSON)
   # Get the catalog information from Velmat
   # 
   # Now that we have the seed material information in hand, we need to get the relationship
   #   between how Experiments stores the material (the catalog ID) and how Sets stores the
-  #   material (an inventory or lot ID).
-  setMaterials = getMaterialsFromSet(setSeeds)
+  #   material (an inventory or lot ID).  
   mappedMaterials = getSetMaterialData(setMaterials, **arguments)
+  mappedMaterials = mappedMaterials.drop_duplicates(keep='first')
+  print("Retrieved materials...")
   entriesToCatalog = setSeeds.merge(mappedMaterials, on=["materialId"], how="inner", copy=True)
+  # Get the experimental units and treatments
   txToUnits = getUnitsToTreatments(**arguments)
+  print("Retrieved units and treatments...")
   # The home stretch
   # 
   # Now we have two competing DataFrames: `entriesToCatalog` and `txToUnits` which represent
@@ -173,18 +122,13 @@ if __name__ == "__main__":
   # between `experimentalUnitId` and `entryId` is wrong in some places, so we must remember
   # to find where the `catalogId` fields are mismatched.
   #
-  # Note: we MUST examine the relationships BY SET or we could accidentally move an entry
-  # association to a different block in Experiments!  <-- This is VERY BAD!
-  final = txToUnits.merge(entriesToCatalog, on='entryId', how="inner", suffixes=('_e', '_s'), copy=True)
-  correct = None
-  try:
-    correct = correctUnitEntryAssociations(final, False)
-    correct = correct.loc[correct.catalogId_s != final.catalogId_s].copy()
-  except:
-    print(final)
-  if correct is None:
-    args = correct[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x)).values
-    prep = patchExperimentalUnits(*args, **arguments, testing=!arguments["update"])
+  merged = txToUnits.merge(entriesToCatalog, on='entryId', how="inner", suffixes=('_e', '_s'), copy=True)
+  correct = correctUnitEntryAssociations(merged)
+  if np.all(correct == merged):
+     print("No corrections needed")
   else:
-    print("No corrections needed")
-  exit()
+    toFix = correct[(correct["catalogId_s"] != merged["catalogId_s"])].copy()
+    args = toFix[["experimentalUnitId", "entryId"]].T.apply(lambda x: tuple(x)).values
+    patchExperimentalUnits(*args, **arguments)
+  print("DONE")
+  exit(0)

@@ -46,7 +46,7 @@ def test_getSetMaterialData(res, req):
     res.raise_for_status.return_value = None
     req.return_value = res
     actual = velmat.getSetMaterialData(materials, env='np', velmatToken="yyyy")
-    assert actual == [retval]
+    assert actual == res.json.return_value
     expected_headers = getHeaders("yyyy")
     expected_headers.pop('oauth_resourceownerinfo')
     req.assert_called_once_with("https://velmat-search-api.velocity-np.ag/v2/load",
@@ -61,4 +61,4 @@ def test_parseVelmatResponse():
     with open(op.abspath('./test/data/velmatSearchResponse.json'), 'r') as fid:
         data = json.load(fid)
     actual = velmat.parseVelmatResponse(setMaterials, data)
-    assert actual.shape[0] == setMaterials.shape[0]
+    assert actual.shape[0] == setMaterials.shape[0] - 1

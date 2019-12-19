@@ -36,7 +36,7 @@ def test_combineActiveAndArchivedMaterials(res, req, setup_data):
     actual = combineActiveAndArchivedMaterials(setMaterials, 'np', 'xxxx')
     assert isinstance(actual, pd.DataFrame)
     assert actual.inventory.dtype == np.int64
-    assert actual.shape[0] == 2, actual
+    assert actual.shape[0] == 3, "Archived and active inventory data is not merged"
     assert sorted(['catalog', 'entryId', 'index', 'inventory', 'lot', 'setId', 'setName', 'type']
 ) == sorted(actual.columns)
-    assert np.all(actual.inventory.values == [archiveId, activeId])
+    assert set(actual.inventory.values) == set([archiveId, activeId])

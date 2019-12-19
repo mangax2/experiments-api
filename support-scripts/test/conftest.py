@@ -1,11 +1,13 @@
 import json
 import os.path as op
+import pandas as pd
 import pytest
 
 from reassign_entries_to_treatments.reassign_entries_to_treatments import correctUnitEntryAssociations, mapMaterialsToEntries
 from reassign_entries_to_treatments.services.experiments import parseExperimentResponses, patchExperimentalUnits
 from reassign_entries_to_treatments.services.sets import formatSetsResponse
-from reassign_entries_to_treatments.services.velmat import parseVelmatResponse, responseShim, splitMaterials  # TODO: remove
+from reassign_entries_to_treatments.services.velmat import parseVelmatResponse
+from reassign_entries_to_treatments.services.inventory import parseInventoryResponse
 
 
 @pytest.fixture(scope="module")
@@ -17,9 +19,18 @@ def setup_data():
     assert setMaterials.shape[0] >= 52 * 7
     with open(op.abspath('test/data/velmatSearchResponse.json'), 'r') as fid:
       velmatResponseJSON = json.load(fid)
-    mappedMaterials = parseVelmatResponse(setMaterials, velmatResponseJSON)
-    assert mappedMaterials.shape[0] == 52 * 7, "Error creating materials"
-    entriesToCatalog = mapMaterialsToEntries(mappedMaterials, setSeeds)
+    activeDf = parseVelmatResponse(setMaterials, velmatResponseJSON)
+    assert activeDf.shape[0] == 52 * 7 - 1, "Error creating materials"
+
+    with open(op.abspath('test/data/archivedMaterialDataResponse.json'), 'r') as fid:
+        archive = json.load(fid)
+    archiveDf = parseInventoryResponse(setMaterials, archive)
+    assert archiveDf.shape[0] == 1
+    columns = ["type", "index", "inventory", "lot", "catalog", "setId", "entryId", "setName"]
+    materialsDf = pd.concat([archiveDf[columns], activeDf[columns]])
+    materialsDf = materialsDf.drop_duplicates().infer_objects()
+
+    entriesToCatalog = mapMaterialsToEntries(materialsDf, setSeeds)
     assert entriesToCatalog.shape[0] > 52, "Error mapping entries to material catalog"
 
     with open(op.abspath('test/data/getUnitsByExperimentResponse.json'), 'r') as fid:

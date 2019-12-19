@@ -64,17 +64,13 @@ def splitMaterials(materialsDf, index, dataDf):
 
 def parseVelmatResponse(materialsDf, data):
     dataDf = responseShim(data)
-    # inventories = materialsDf[materialsDf["index"] == "inventory"]
     mergedInventories = splitMaterials(materialsDf, "inventory", dataDf)
     mergedLots = splitMaterials(materialsDf, "lot", dataDf)
     mergedLots = mergedLots[mergedLots.inventory < 0]
     mergedCatalogs = splitMaterials(materialsDf, "catalog", dataDf)
     mergedCatalogs = mergedCatalogs[mergedCatalogs.lot < 0]
-    
     output = pd.concat([mergedInventories, mergedLots, mergedCatalogs], sort=False)
-    assert output.shape[0] <= materialsDf.shape[0]
     return output
-    # return dataDf
 
   
 def getSetMaterialData(materialsDf, env='', velmatToken='', store=False, **kwargs):

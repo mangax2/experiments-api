@@ -14,7 +14,7 @@ from reassign_entries_to_treatments.services.utils import *
 
 
 materials = pd.DataFrame([
-    {"index": "inventory", "type": "INTERNAL_SEED", "catalog": None, "lot": None, "inventory": 438104, "entryId": 11, "setId": 2},
+    {"index": "inventory", "type": "INTERNAL_SEED", "catalog": None, "lot": None, "inventory": 2323699, "entryId": 11, "setId": 2},
     {"index": "lot",       "type": "INTERNAL_REED", "catalog": None, "lot": 3456, "inventory": None, "entryId": 22, "setId": 3},
     {"index": "catalog",   "type": "INTERNAL_FEED", "catalog": 6789, "lot": None, "inventory": None, "entryId": 33, "setId": 1},
     {"index": "inventory", "type": "INTERNAL_SEED", "catalog": 1111, "lot": 2222, "inventory": 5432, "entryId": 12, "setId": 4}
@@ -42,8 +42,8 @@ def test_filterInventories():
 @patch("requests.Response", autospec=True )
 def test_getArchivedInventoriesByLots(res, req):
     archivedIds = [ int(materials["inventory"][0]) ]
-    assert archivedIds == [ 438104 ], "Test setup failed: {0}".format(archivedIds)
-    archived = [ item for item in data if item['barcode'] == 438104 ][0]
+    assert archivedIds == [ 2323699 ], "Test setup failed: {0}".format(archivedIds)
+    archived = data[0]
     expected = [ archived ]
     res.json.return_value = expected
     res.raise_for_status.return_value = None
@@ -54,5 +54,3 @@ def test_getArchivedInventoriesByLots(res, req):
                                 params=dict(includeArchived=True),
                                 json=archivedIds)
     assert response == expected
-    # assert response[0]["catalog"] == res.json.return_value[0]["materialId"], "Returns the archived catalogID in result"
-    # assert [(i["catalog"], i["lot"]) for i in response[1:3]] == [(None, 3456), (6789, None)], "Doesn't modify catalog and lot data"

@@ -11,12 +11,13 @@ from . import utils
 def getExperimentURL(env):
   return "{url}/experiments-api/v3".format(url=utils.getBaseURL(env))
 
+
 def getGraphQLURL(env):
   return "{url}/experiments-api-graphql/v1/graphql".format(url=utils.getBaseURL(env))
 
+
 treatmentsEndpoint = "/experiments/{id}/treatments"
 experimentalUnitsEndpoint = "/experiments/{id}/experimental-units"
-
 getUnitsByExperimentIdQuery = """
 query GetUnitsByExperimentId($experimentId: Int!) {
   getUnitsByExperimentId(experimentId:$experimentId) {
@@ -28,7 +29,6 @@ query GetUnitsByExperimentId($experimentId: Int!) {
   }
 }
 """
-
 getTreatmentsByExperimentIdQuery = """
 query GetTreatmentsByExperimentId($experimentId: Int!) {
   getTreatmentsByExperimentId(experimentId:$experimentId){
@@ -52,6 +52,7 @@ query GetTreatmentsByExperimentId($experimentId: Int!) {
 }
 """
 
+
 def getUnitsByExperimentId(experiment, env, experimentsToken, store, **kwargs):
   filename = ''
   if store:
@@ -59,12 +60,14 @@ def getUnitsByExperimentId(experiment, env, experimentsToken, store, **kwargs):
   response = getFromGraphQL(getUnitsByExperimentIdQuery, filename, experiment, env, experimentsToken, store)
   return response['getUnitsByExperimentId']
 
+
 def getTreatmentsByExperimentId(experiment, env, experimentsToken, store, **kwargs):
   filename = ''
   if store:
     filename = 'getTreatmentsByExperimentResponse'
   response = getFromGraphQL(getTreatmentsByExperimentIdQuery, filename, experiment, env, experimentsToken, store)
   return response['getTreatmentsByExperimentId']
+
 
 def getFromGraphQL(query, filename, experiment, env, token, store=False):
   headers = utils.getHeaders(token)
@@ -78,6 +81,7 @@ def getFromGraphQL(query, filename, experiment, env, token, store=False):
       json.dump(data, fid, indent=2)
   return data['data']
 
+
 def parseTreatments(treatments):
   retval = []
   for treatment in treatments:
@@ -89,13 +93,14 @@ def parseTreatments(treatments):
           else:
             catalogId = item['value']
           retval.append({
-            "catalogId": catalogId,
+            "catalog": catalogId,
             "variableLabel": item["label"],
             "treatmentId": treatment["id"],
             "combinationId": element["id"],
             "treatmentVariableLevelId": element["treatmentVariableLevelId"]
           })
   return retval
+
 
 def parseExperimentResponses(units, treatments):
   unitsFrame = pd.DataFrame(units)
@@ -104,13 +109,15 @@ def parseExperimentResponses(units, treatments):
   parsedTreatments = parseTreatments(treatments)
   txFrame = pd.DataFrame(parsedTreatments)
   txToUnits = txFrame.merge(unitsFrame, on=["treatmentId"], how="inner", copy=True, validate="one_to_many")
-  txToUnits = txToUnits.astype({'catalogId': 'int64'})
+  txToUnits = txToUnits.astype({'catalog': 'int64'})
   return txToUnits
+
 
 def getUnitsToTreatments(experiment, env, experimentsToken, store=False, **kwargs):
   units = getUnitsByExperimentId(experiment, env, experimentsToken, store)
   treatments = getTreatmentsByExperimentId(experiment, env, experimentsToken, store)
   return parseExperimentResponses(units, treatments)
+
 
 def patchExperimentalUnits(*args, id=None, env=None, experimentsToken='', testing=False, update=False, **kwargs):
   """

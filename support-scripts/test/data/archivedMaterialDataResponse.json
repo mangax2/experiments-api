@@ -1,0 +1,59 @@
+[
+  {
+    "additionalAttributes": {
+      "conversionGroupUuid": "71f5e330-ffee-11e9-8ad5-2181ce481649",
+      "treatmentNames": "",
+      "treatments": ""
+    },
+    "alias": null,
+    "archived": true,
+    "barcode": 2323699,
+    "barcodeStr": "2323699",
+
+    "container": null,
+    "createdBy": "tmala",
+    "createdDate": "2019-08-27T12:05:13Z",
+    "entryId": null,
+    "legacyBarcode": "I00879555369867606010000",
+    "locationUUID": "59470882-8419-46a7-94ef-e28c21e8b4aa",
+    "lot": {
+      "activeIngredients": [],
+      "additionalAttributes": {
+        "conversionGroupUuid": "d1c43c20-c8c2-11e9-a36e-a7bcad66e3e9",
+        "includesConversionGroupUuids": "d1c43c20-c8c2-11e9-a36e-a7bcad66e3e9"
+      },
+      "archived": false,
+      "createdBy": "tmala",
+      "createdDate": "2019-08-27T12:04:58Z",
+      "dateReceived": null,
+      "epaEstablishmentNumbers": [],
+      "germplasmId": "1PY9kiaSzOJaZyAjOt766afggrN",
+      "gpsLat": null,
+      "gpsLong": null,
+      "id": 74452,
+      "materialId": 60743,
+      "materialType": "INTERNAL_SEED",
+      "populationName": null,
+      "resistanceCharacteristics": null,
+      "seedSource": null,
+      "sourceCountry": null,
+      "sourceCounty": null,
+      "sourceLocation": null,
+      "sourceState": null,
+      "uuid": "96117af5-c306-4a0a-8993-7724b9301fd2",
+      "vendor": null,
+      "vendorLotNumber": null
+    },
+    "lotSequenceNumber": 1,
+    "materialId": 60743,
+    "owner": "GLOBAL-BREEDING-MATERIAL-MANAGEMENT",
+    "packaging": null,
+    "packagingPlanId": null,
+    "quantity": 0.0,
+    "steward": "RSA-SEED-PRODUCT-PIPELINE-DELIVERY",
+    "treatments": [],
+    "type": "INTERNAL_SEED",
+    "uom": "seed",
+    "uuid": "e10cee11-231f-4012-af02-ba5ccb053785"
+  }
+]

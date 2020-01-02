@@ -28,11 +28,10 @@ With this information in hand, we can identify which entry CAN go to which exper
 """
 from docopt import docopt
 import numpy as np
-import pandas as pd
 
 from services.experiments import getUnitsToTreatments, patchExperimentalUnits
 from services.sets import getSetsByExperiment, formatSetsResponse
-from services import inventory, velmat
+from services.velmat import getSetMaterialData
 
 
 totalCount = 0
@@ -47,7 +46,6 @@ def switchRows(df, i1, i2):
   totalCount += 1
   return df
 
-
 def correctUnitEntryAssociations(df):
   # Note: we MUST examine the relationships BY SET or we could accidentally move an entry
   # association to a different block in Experiments!  <-- This is VERY BAD!
@@ -56,16 +54,15 @@ def correctUnitEntryAssociations(df):
     print(' | ', end='')
     setDf = df.loc[(df.setId == setId), :].copy()
     _, expRowNumbers, setRowNumbers = np.intersect1d(
-      setDf.catalog_e.values,
-      setDf.catalog_s.values,
+      setDf.catalogId_e.values,
+      setDf.catalogId_s.values,
       return_indices=True
     )
     output = algorithm(setDf, expRowNumbers, setRowNumbers)
     df.loc[(df.setId == setId), :] = output
   print()
   return df
-
-
+  
 def algorithm(df, expRowNumbers, setRowNumbers):
   df = df.copy()
   i = -1
@@ -83,32 +80,8 @@ def algorithm(df, expRowNumbers, setRowNumbers):
       continue
   return df
 
-
-def combineActiveAndArchivedMaterials(materialsDf, env, token, **kwargs):
-  output = velmat.getSetMaterialData(materialsDf, env, token)
-  activeDf = velmat.parseVelmatResponse(materialsDf, output)
-  archive = inventory.getArchivedInventoriesByLots(materialsDf, env, token)
-  archiveDf = inventory.parseInventoryResponse(materialsDf, archive)
-  columns = ["type", "index", "inventory", "lot", "catalog", "setId", "entryId", "setName"]
-  finalDf = pd.concat([archiveDf[columns], activeDf[columns]])
-  finalDf = finalDf.drop_duplicates().infer_objects()
-  return finalDf
-
-
-def mapMaterialsToEntries(mappedMaterials, setSeeds):
-  mappedMaterials = mappedMaterials.drop_duplicates(keep='first')
-  retval = setSeeds.merge(mappedMaterials,
-                          on=["entryId", "setId", "type", "index"],
-                          suffixes=('_set', ''),
-                          how="inner",
-                          copy=True)
-  retval = retval.drop(columns=["inventory_set", "lot_set", "catalog_set", "setName_set"])
-  return retval
-  
-
 def cleanKey(key):
   return key.strip('-').lower()
-
 
 def renameTokens(arguments):
   arguments["experimentsToken"] = arguments.pop("e")
@@ -116,7 +89,6 @@ def renameTokens(arguments):
   arguments["velmatToken"] = arguments.pop("v")
   arguments["store"] = arguments.pop("update")
   return arguments
-
 
 if __name__ == "__main__":
   arguments = {cleanKey(x): y for x, y in docopt(__doc__, version="0.1").items()}
@@ -135,9 +107,10 @@ if __name__ == "__main__":
   # Now that we have the seed material information in hand, we need to get the relationship
   #   between how Experiments stores the material (the catalog ID) and how Sets stores the
   #   material (an inventory or lot ID).  
-  mappedMaterials = combineActiveAndArchivedMaterials(setMaterials, **arguments)
+  mappedMaterials = getSetMaterialData(setMaterials, **arguments)
+  mappedMaterials = mappedMaterials.drop_duplicates(keep='first')
   print("Retrieved materials...")
-  entriesToCatalog = mapMaterialsToEntries(mappedMaterials, setSeeds)
+  entriesToCatalog = setSeeds.merge(mappedMaterials, on=["materialId"], how="inner", copy=True)
   # Get the experimental units and treatments
   txToUnits = getUnitsToTreatments(**arguments)
   print("Retrieved units and treatments...")

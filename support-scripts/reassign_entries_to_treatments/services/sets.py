@@ -30,34 +30,41 @@ def getSetsByExperiment(experiment=None, env='np', setsToken='', store=False, *a
 def formatSetsResponse(jsonInput):
   setsDF = getSetsDataFrame(jsonInput)
   setSeeds = getSeedsOnly(setsDF)
-  return getMaterialsFromSet(setSeeds), setSeeds
+  return setsDF, setSeeds
 
-def getMaterialsFromSet(df):
-  materials = []
-  for index, material in df.iterrows():
-    materials.append((
-      material.productType, 
-      "INTERNAL_SEED", 
-      int(material.materialId), 
-      int(material.entryId), 
-      int(material.setId)
-    ))
-  return materials
+def parseMaterialRow(material):
+  material[material["index"]] = int(material["materialId"])  # set catalog, lot, or inventory ID
+  material["type"] = material["type"].upper()
+  return material
 
 def getSeedsOnly(df):
-  return df[df.materialType == 'internal_seed']
+  return df[df["type"] == 'INTERNAL_SEED']
 
 def getSetsDataFrame(output):
-  retval = pd.io.json.json_normalize(output, 
-                                     ["entries", "materials"],
-                                     [
-                                       ["entries", "setId"],
-                                       ["entries", "entryId"],
-                                       "name",
-                                     ],
-                                     errors='ignore', max_level=10)
+  retval = pd.io.json.json_normalize(
+    output, 
+    ["entries", "materials"],
+    [
+      ["entries", "setId"],
+      ["entries", "entryId"],
+      "name",
+    ],
+    errors='ignore', max_level=10)
   retval = retval[['materialId', 'materialType', 'productType', 'materialName', 'entries.setId', 'entries.entryId', 'name']]
-  retval = retval.rename(columns={"entries.setId": "setId", "entries.entryId": "entryId", "name": "setName"})
-  for column in ['materialId', 'setId', 'entryId']:
+  column_mapping = {
+    "entries.setId":   "setId",
+    "entries.entryId": "entryId",
+    "name":            "setName",
+    "materialType":    "type",
+    "productType":     "index"
+  }
+  retval = retval.rename(columns=column_mapping)
+  retval.insert(3, 'catalog', None)
+  retval.insert(3, 'lot', None)
+  retval.insert(3, 'inventory', None)
+  retval = retval.apply(parseMaterialRow, axis=1)
+  retval = retval.drop(columns=["materialId"])
+  retval = retval.fillna(-1)
+  for column in ['setId', 'entryId', "inventory", "lot", "catalog"]:
     retval[column] = retval[column].astype('int64')
   return retval

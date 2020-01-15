@@ -284,7 +284,7 @@ class GroupExperimentalUnitService {
       ],
     ) => {
       const trimmed = trimGroupGenerationData(variables, variableLevels, treatments,
-        combinationElements, units)
+        _.flatMap(combinationElements), units)
 
       const body = JSON.stringify(inflector.transform({
         experimentId: setLocAssociation.experiment_id,

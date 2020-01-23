@@ -32,7 +32,8 @@ class AWSUtil {
     return invokeLambda(lambda, params)
   }
 
-  callLambdaLocal = /* istanbul ignore next */ (payload) => {
+  /* istanbul ignore next */
+  callLambdaLocal = (payload) => {
     const agent = require('superagent')
     return agent.post('http://localhost:4000/group-generation-lambda/local-test', payload).set('Content-Type', 'application/json')
   }

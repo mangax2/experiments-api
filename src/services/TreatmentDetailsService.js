@@ -62,6 +62,7 @@ class TreatmentDetailsService {
         is_control: (treatment.control_types || []).length > 0,
         block: treatment.block,
         blockId: treatment.blockId,
+        blocks: treatment.blocks,
         inAllBlocks: treatment.inAllBlocks,
         notes: treatment.notes,
         control_types: treatment.control_types || [],

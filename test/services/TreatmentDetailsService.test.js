@@ -35,6 +35,10 @@ describe('TreatmentDetailsService', () => {
         created_user_id: 'tester1',
         modified_date: 'date string 2',
         modified_user_id: 'tester2',
+        blocks: [{ name: 'block-001', numPerRep: 1 }],
+        block: 'block-001',
+        blockId: 1,
+        inAllBlocks: false,
       }]
       const combinationElements = [{ treatment_id: 1, id: 1, factor_level_id: 1 }, { treatment_id: 1, id: 2, factor_level_id: 2 }]
       const factorLevels = [{ id: 1, factor_id: 1, value: { items: [] } }, { id: 2, factor_id: 2 }]
@@ -48,6 +52,10 @@ describe('TreatmentDetailsService', () => {
           created_user_id: 'tester1',
           modified_date: 'date string 2',
           modified_user_id: 'tester2',
+          block: 'block-001',
+          blockId: 1,
+          inAllBlocks: false,
+          blocks: [{ name: 'block-001', numPerRep: 1 }],
           is_control: false,
           notes: undefined,
           treatment_number: 1,

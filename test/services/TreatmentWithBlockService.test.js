@@ -161,6 +161,19 @@ describe('TreatmentWithBlockService', () => {
         },
       )
     })
+
+    test('returns an empty array for blocks if no treatmentBlocks are found', () => {
+      const treatmentBlocks = []
+      const treatments = { id: 111, treatmentNumber: 1 }
+
+      const target = new TreatmentWithBlockService()
+
+      expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
+        {
+          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: false, blocks: [],
+        },
+      )
+    })
   })
 
   describe('createTreatments', () => {

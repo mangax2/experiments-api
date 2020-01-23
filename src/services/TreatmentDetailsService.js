@@ -14,6 +14,20 @@ import ExperimentsService from './ExperimentsService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
+const formatTreatmentsWithNewBlocksStructure = (treatments) => {
+  if (!_.some(treatments, 'blocks')) {
+    const allBlocksInRequest = _.uniq(_.map(_.filter(treatments, t => !t.inAllBlocks), 'block'))
+
+    _.forEach(treatments, (t) => {
+      if (t.inAllBlocks) {
+        t.blocks = _.map(allBlocksInRequest, blockName => ({ name: blockName, numPerRep: 1 }))
+      } else {
+        t.blocks = [{ name: t.block, numPerRep: 1 }]
+      }
+    })
+  }
+}
+
 // Error Codes 1QXXXX
 class TreatmentDetailsService {
   constructor() {
@@ -93,7 +107,8 @@ class TreatmentDetailsService {
     ]).then(() => this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
       .then((result) => {
         const treatments = this.stringifyBlock(inputTreatments)
-        const blockNames = _.map(_.filter(treatments, t => !t.inAllBlocks), 'block')
+        formatTreatmentsWithNewBlocksStructure(treatments)
+        const blockNames = _.uniq(_.flatMap(treatments, t => _.map(t.blocks, 'name')))
         return this.blockService.createOnlyNewBlocksByExperimentId(experimentId,
           blockNames, context, tx)
           .then(() => {

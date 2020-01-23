@@ -1,4 +1,5 @@
 import log4js from 'log4js'
+import '@babel/polyfill'
 
 log4js.getLogger = jest.fn(() => ({
   debug: jest.fn(),

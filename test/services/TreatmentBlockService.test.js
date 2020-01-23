@@ -182,551 +182,294 @@ describe('TreatmentBlockService', () => {
   })
 
   describe('createTreatmentBlocks', () => {
-    test('empty treatment, return with []', () => {
+    const treatments = [{ id: 3, blocks: [{ name: 'blah', numPerRep: 1 }] }]
+    const blocks = [{ id: 5, name: 'blah' }]
+    const treatmentBlocks = [{
+      name: 'blah', treatmentId: 3, blockId: 5, numPerRep: 1,
+    }]
+
+
+    test('returns an empty array when given no treatments', async () => {
       const target = new TreatmentBlockService()
-      return target.createTreatmentBlocks(1, [], {}, testTx).then((data) => {
-        expect(data).toEqual([])
-      })
+
+      const result = await target.createTreatmentBlocks([], blocks, {}, testTx)
+
+      expect(result).toEqual([])
     })
 
-    test('treatment blocks are created from treatments', () => {
-      const blocks = [
-        { id: 11, name: 'block1' },
-        { id: 12, name: 'block2' },
-      ]
-
-      const oneBlockTM = [{
-        treatmentId: 111, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-      }]
-      const allBlockTM = [{
-        treatmentId: 112, treatmentNumber: 2, block: null, inAllBlocks: true,
-      }]
-      const treatments = oneBlockTM.concat(allBlockTM)
-      const oneBlockTB = [{ blockId: 11, treatmentId: 111, name: 'block1' }]
-      const allBlockTB = [
-        {
-          blockId: 11, treatmentId: 112, name: 'block1',
-        },
-        {
-          blockId: 12, treatmentId: 112, name: 'block2',
-        },
-      ]
-
-      db.treatmentBlock.batchCreate = mockResolve([])
+    test('returns an empty array when given no blocks', async () => {
       const target = new TreatmentBlockService()
-      target.assembleNewTreatmentBlocks = mock(oneBlockTB)
-      target.assembleNewInAllTreatmentBlocks = mock(allBlockTB)
-      return target.createTreatmentBlocks(treatments, blocks, {}, testTx).then(() => {
-        expect(target.assembleNewTreatmentBlocks).toHaveBeenCalledWith(oneBlockTM, blocks)
-        expect(target.assembleNewInAllTreatmentBlocks).toHaveBeenCalledWith(allBlockTM, blocks)
-        expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith(oneBlockTB.concat(allBlockTB), {}, testTx)
-      })
+
+      const result = await target.createTreatmentBlocks(treatments, [], {}, testTx)
+
+      expect(result).toEqual([])
+    })
+
+    test('uses the blocks and treatments to generate treatmentBlocks', async () => {
+      const target = new TreatmentBlockService()
+      target.createTreatmentBlockModels = mock(treatmentBlocks)
+      db.treatmentBlock.batchCreate = mockResolve()
+
+      await target.createTreatmentBlocks(treatments, blocks, {}, testTx)
+
+      expect(target.createTreatmentBlockModels).toHaveBeenCalledWith(treatments, blocks)
+    })
+
+    test('returns the treatment blocks that are generated', async () => {
+      const target = new TreatmentBlockService()
+      target.createTreatmentBlockModels = mock(treatmentBlocks)
+      db.treatmentBlock.batchCreate = mockResolve(treatmentBlocks)
+
+      const result = await target.createTreatmentBlocks(treatments, blocks, {}, testTx)
+
+      expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith(treatmentBlocks, {}, testTx)
+      expect(result).toBe(treatmentBlocks)
     })
   })
 
   describe('handleTreatmentBlocksForExistingTreatments', () => {
-    test('remove treatment blocks that is not applicable any more, mainly when inAllBlocks in a treatment turns false', () => {
-      const tbsInDB = [
-        {
-          id: 1, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 13, treatment_id: 112,
-        },
-      ]
-      db.block.findByExperimentId = mockResolve([])
-      db.treatmentBlock.batchFindByTreatmentIds = mockResolve(tbsInDB)
-      db.treatmentBlock.batchRemove = mockResolve([{ id: 1 }, { id: 2 }])
-      db.treatmentBlock.batchCreate = mockResolve([])
+    const treatments = [{ id: 3 }, { id: 7 }]
+    const creates = [{}, {}]
+    const updates = [{}]
+    const deletes = [{ id: 1 }]
+    const createMockedDb = () => ({
+      block: { findByExperimentId: mockResolve() },
+      treatmentBlock: {
+        batchFindByTreatmentIds: mockResolve(),
+        batchCreate: mockResolve(),
+        batchRemove: mockResolve(),
+        batchUpdate: mockResolve(),
+      },
+    })
 
-      const target = new TreatmentBlockService()
-      target.findTBByTreatmentId = mock({})
-      target.getTBsToRemoveForExistingTreatments = mock([1, 2])
-      target.getNewTBsForExistingTreatments = mock([])
-      target.batchUpdateOneBlockTreatmentBlocks = mockResolve([])
-      target.createTreatmentBlocks = mockResolve([])
+    test('gets the existing blocks and treatmentBlocks from the database', async () => {
+      const mockedDb = createMockedDb()
+      const target = new TreatmentBlockService({}, {}, mockedDb)
+      target.createTreatmentBlockModels = mock()
+      target.splitTreatmentBlocksToActions = mock({})
 
-      return target.handleTreatmentBlocksForExistingTreatments(1, [], {}, testTx).then(() => {
-        expect(db.treatmentBlock.batchRemove).toHaveBeenCalledWith([1, 2])
-        expect(target.batchUpdateOneBlockTreatmentBlocks).toHaveBeenCalledWith([],
-          [{ id: 3, block_id: 13, treatment_id: 112 }], [], {}, testTx)
-        expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith([], {}, testTx)
-        expect(target.createTreatmentBlocks).toHaveBeenCalledWith([], [], {}, testTx)
+      await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+
+      expect(mockedDb.block.findByExperimentId).toHaveBeenCalledWith(5, testTx)
+      expect(mockedDb.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([3, 7], testTx)
+    })
+
+    test('calls the treatment block repo to add, update, and delete', async () => {
+      const mockedDb = createMockedDb()
+      const target = new TreatmentBlockService({}, {}, mockedDb)
+      target.createTreatmentBlockModels = mock()
+      target.splitTreatmentBlocksToActions = mock({
+        creates,
+        updates,
+        deletes,
       })
+
+      await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+
+      expect(mockedDb.treatmentBlock.batchCreate).toHaveBeenCalledWith(creates, {}, testTx)
+      expect(mockedDb.treatmentBlock.batchRemove).toHaveBeenCalledWith([1], testTx)
+      expect(mockedDb.treatmentBlock.batchUpdate).toHaveBeenCalledWith(updates, {}, testTx)
     })
 
-    test('add treatment blocks, mainly when inAllBlocks in a treatment turns true', () => {
-      const tbsInDB = [
-        {
-          id: 1, block_id: 11, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          treatmentId: 112, treatmentNumber: 1, block: null, inAllBlocks: true,
-        },
-      ]
-      db.block.findByExperimentId = mockResolve([])
-      db.treatmentBlock.batchFindByTreatmentIds = mockResolve(tbsInDB)
-      db.treatmentBlock.batchRemove = mockResolve([])
-      db.treatmentBlock.batchCreate = mockResolve([])
-
-      const target = new TreatmentBlockService()
-      target.findTBByTreatmentId = mock(null)
-      target.getTBsToRemoveForExistingTreatments = mock([])
-      target.getNewTBsForExistingTreatments = mock([])
-      target.batchUpdateOneBlockTreatmentBlocks = mockResolve([])
-      target.createTreatmentBlocks = mockResolve([])
-
-      return target.handleTreatmentBlocksForExistingTreatments(1, treatments, {}, testTx).then(() => {
-        expect(db.treatmentBlock.batchRemove).toHaveBeenCalledWith([])
-        expect(target.batchUpdateOneBlockTreatmentBlocks).toHaveBeenCalledWith([], tbsInDB, [], {}, testTx)
-        expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith([], {}, testTx)
-        expect(target.createTreatmentBlocks).toHaveBeenCalledWith(treatments, [], {}, testTx)
+    test('does not call the treatment block repo to add, update, and delete if retrieving treatmentBlocks fails', async () => {
+      const mockedDb = createMockedDb()
+      mockedDb.treatmentBlock.batchFindByTreatmentIds = mockReject()
+      const target = new TreatmentBlockService({}, {}, mockedDb)
+      target.createTreatmentBlockModels = mock()
+      target.splitTreatmentBlocksToActions = mock({
+        creates,
+        updates,
+        deletes,
       })
-    })
 
-    test('update an existing treatment block when the treatment block info has changed', () => {
-      const tbsInDB = [
-        {
-          id: 1, block_id: 11, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          treatmentId: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-      db.block.findByExperimentId = mockResolve([])
-      db.treatmentBlock.batchFindByTreatmentIds = mockResolve(tbsInDB)
-      db.treatmentBlock.batchRemove = mockResolve([])
-      db.treatmentBlock.batchCreate = mockResolve([])
-
-      const target = new TreatmentBlockService()
-      target.findTBByTreatmentId = mock({})
-      target.getTBsToRemoveForExistingTreatments = mock([])
-      target.getNewTBsForExistingTreatments = mock([])
-      target.batchUpdateOneBlockTreatmentBlocks = mockResolve([])
-      target.createTreatmentBlocks = mockResolve([])
-
-      return target.handleTreatmentBlocksForExistingTreatments(1, treatments, {}, testTx).then(() => {
-        expect(db.treatmentBlock.batchRemove).toHaveBeenCalledWith([])
-        expect(target.batchUpdateOneBlockTreatmentBlocks).toHaveBeenCalledWith(treatments, tbsInDB, [], {}, testTx)
-        expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith([], {}, testTx)
-        expect(target.createTreatmentBlocks).toHaveBeenCalledWith([], [], {}, testTx)
-      })
+      try {
+        await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+      } catch {
+        // no-op
+      } finally {
+        expect(mockedDb.treatmentBlock.batchCreate).not.toHaveBeenCalled()
+        expect(mockedDb.treatmentBlock.batchRemove).not.toHaveBeenCalled()
+        expect(mockedDb.treatmentBlock.batchUpdate).not.toHaveBeenCalled()
+      }
     })
   })
 
-  describe('getTBsToRemoveForExistingTreatments', () => {
-    test('one block and inAllBlocks treatments are counted for treatment block removal', () => {
-      const oneBlockTB = [{ id: 1, blockId: 11, treatmentId: 111 }]
-      const allBlockTB = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-      ]
-
+  describe('createTreatmentBlockModels', () => {
+    test('flattens the blocks from all treatments and matches block names to ids', () => {
       const target = new TreatmentBlockService()
-      target.getTBsToRemoveForOneBlockTreatments = mock(oneBlockTB)
-      target.getTBsToRemoveForAllBlockTreatments = mock(allBlockTB)
-      expect(target.getTBsToRemoveForExistingTreatments()).toEqual([1, 2, 3])
-    })
-  })
-
-  describe('getTBsToRemoveForOneBlockTreatments', () => {
-    test('returns [] when all treatments are inAllBlocks', () => {
-      const existingTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
       const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: null, inAllBlocks: true,
-        },
-      ]
-
-      const target = new TreatmentBlockService()
-      expect(target.getTBsToRemoveForOneBlockTreatments(treatments, existingTBs)).toEqual([])
-    })
-
-    test('when a treatment inAllBlocks has changed to false, keep one treatment block', () => {
-      const existingTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-
-      const target = new TreatmentBlockService()
-      expect(target.getTBsToRemoveForOneBlockTreatments(treatments, existingTBs))
-        .toEqual([{
-          id: 3, block_id: 12, treatment_id: 112,
-        }])
-    })
-
-    test('when a treatment inAllBlocks has not changed, return []', () => {
-      const existingTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-
-      const target = new TreatmentBlockService()
-      expect(target.getTBsToRemoveForOneBlockTreatments(treatments, existingTBs)).toEqual([])
-    })
-  })
-
-  describe('getTBsToRemoveForAllBlockTreatments', () => {
-    test('when a treatment is inAllBlocks and there more existing treatment blocks, return the ones to remove', () => {
-      const newAllBlockTBs = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-      ]
-
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-        {
-          id: 4, block_id: 13, treatment_id: 112,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.getExistingAndNewAllBlockTBs = mock({ newAllBlockTBs, existingAllBlockTBs })
-      expect(target.getTBsToRemoveForAllBlockTreatments()).toEqual([{
-        id: 4, block_id: 13, treatment_id: 112,
-      }])
-    })
-
-    test('when a treatment is inAllBlocks and there less existing treatment blocks, retrun []', () => {
-      const newAllBlockTBs = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-        {
-          id: 4, blockId: 13, treatmentId: 112,
-        },
-      ]
-
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.getExistingAndNewAllBlockTBs = mock({ newAllBlockTBs, existingAllBlockTBs })
-      expect(target.getTBsToRemoveForAllBlockTreatments()).toEqual([])
-    })
-  })
-
-  describe('getNewTBsForExistingTreatments', () => {
-    test('when a treatment is inAllBlocks and there more existing treatment blocks, return []', () => {
-      const newAllBlockTBs = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-      ]
-
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-        {
-          id: 4, block_id: 13, treatment_id: 112,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.getExistingAndNewAllBlockTBs = mock({ newAllBlockTBs, existingAllBlockTBs })
-      expect(target.getNewTBsForExistingTreatments()).toEqual([])
-    })
-
-    test('when a treatment is inAllBlocks and there less existing treatment blocks, retrun the new ones', () => {
-      const newAllBlockTBs = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-        {
-          id: 4, blockId: 13, treatmentId: 112,
-        },
-      ]
-
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.getExistingAndNewAllBlockTBs = mock({ newAllBlockTBs, existingAllBlockTBs })
-      expect(target.getNewTBsForExistingTreatments()).toEqual([{
-        id: 4, blockId: 13, treatmentId: 112,
-      }])
-    })
-  })
-
-  describe('getExistingAndNewAllBlockTBs', () => {
-    test('when there is no inAllBlocks treatments, return {[], []}', () => {
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.assembleNewInAllTreatmentBlocks = mock([])
-      expect(target.getExistingAndNewAllBlockTBs(treatments, existingAllBlockTBs, []))
-        .toEqual({ newAllBlockTBs: [], existingAllBlockTBs: [] })
-    })
-
-    test('get the new and existing treatment blocks for the inAllBlocks treatment', () => {
-      const newAllBlockTBs = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-        {
-          id: 3, blockId: 12, treatmentId: 112,
-        },
-        {
-          id: 4, blockId: 13, treatmentId: 112,
-        },
-      ]
-
-      const existingAllBlockTBs = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-        {
-          id: 3, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: null, inAllBlocks: true,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      target.assembleNewInAllTreatmentBlocks = mock(newAllBlockTBs)
-      expect(target.getExistingAndNewAllBlockTBs(treatments, existingAllBlockTBs, []))
-        .toEqual({ newAllBlockTBs, existingAllBlockTBs })
-    })
-  })
-
-  describe('batchUpdateOneBlockTreatmentBlocks', () => {
-    test('when all existing treatments are inAllBlocks, no treatment block is updated', () => {
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: false, inAllBlocks: true,
-        },
-      ]
-      db.treatmentBlock.batchUpdate = mockResolve([])
-      const target = new TreatmentBlockService()
-      target.assembleTBsForExistingTreatments = mock([])
-      return target.batchUpdateOneBlockTreatmentBlocks(treatments, [], [], {}, testTx).then(() => {
-        expect(target.assembleTBsForExistingTreatments).toHaveBeenCalledWith([], [], [])
-        expect(db.treatmentBlock.batchUpdate).toHaveBeenCalledWith([], {}, testTx)
-      })
-    })
-
-    test('get one block treatments and update treatment blocks', () => {
-      const treatmentBlocks = [
-        {
-          id: 2, blockId: 11, treatmentId: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-      db.treatmentBlock.batchUpdate = mockResolve([])
-      const target = new TreatmentBlockService()
-      target.assembleTBsForExistingTreatments = mock(treatmentBlocks)
-      return target.batchUpdateOneBlockTreatmentBlocks(treatments, [], [], {}, testTx).then(() => {
-        expect(target.assembleTBsForExistingTreatments).toHaveBeenCalledWith(treatments, [], [])
-        expect(db.treatmentBlock.batchUpdate).toHaveBeenCalledWith(treatmentBlocks, {}, testTx)
-      })
-    })
-  })
-
-  describe('assembleTBsForExistingTreatments', () => {
-    test('found an existing treatment block for a treatment, return []', () => {
-      const treatmentBlocks = [
-        {
-          id: 2, block_id: 11, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
+        { id: 3, blocks: [{ name: 'second', numPerRep: 1 }, { name: 'first', numPerRep: 2 }] },
+        { id: 5, blocks: [{ name: 'second', numPerRep: 1 }] },
       ]
       const blocks = [
-        {
-          id: 11, name: 'block1',
-        },
+        { name: 'first', id: 11 },
+        { name: 'second', id: 25 },
       ]
-      const target = new TreatmentBlockService()
-      expect(target.assembleTBsForExistingTreatments(treatments, treatmentBlocks, blocks)).toEqual([])
-    })
 
-    test('assemble treatment block for a treatment', () => {
-      const treatmentBlocks = [
-        {
-          id: 2, block_id: 12, treatment_id: 112,
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
-      const blocks = [
-        {
-          id: 11, name: 'block1',
-        },
-      ]
-      const target = new TreatmentBlockService()
-      expect(target.assembleTBsForExistingTreatments(treatments, treatmentBlocks, blocks))
-        .toEqual([{ id: 2, treatmentId: 112, blockId: 11 }])
+      const result = target.createTreatmentBlockModels(treatments, blocks)
+
+      expect(result).toEqual([
+        { blockId: 25, treatmentId: 3, numPerRep: 1 },
+        { blockId: 11, treatmentId: 3, numPerRep: 2 },
+        { blockId: 25, treatmentId: 5, numPerRep: 1 },
+      ])
     })
   })
 
-  describe('assembleNewTreatmentBlocks', () => {
-    test('empty treatment blocks when there is no block info', () => {
-      const blocks = [
-        {
-          id: 11, name: 'block1',
-        },
-        {
-          id: 12, name: 'block2',
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block3', inAllBlocks: false,
-        },
-      ]
+  describe('splitTreatmentBlocksToActions', () => {
+    test('makes all request treatment blocks creates when nothing comes from database', () => {
       const target = new TreatmentBlockService()
-      expect(target.assembleNewTreatmentBlocks(treatments, blocks))
-        .toEqual([])
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 3, treatmentId: 7, numPerRep: 1 },
+      ]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, [])
+
+      expect(result.creates).toEqual(requestTbs)
+      expect(result.updates).toEqual([])
+      expect(result.deletes).toEqual([])
     })
 
-    test('assemble a treatment block for a treatment', () => {
-      const blocks = [
-        {
-          id: 11, name: 'block1',
-        },
-        {
-          id: 12, name: 'block2',
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: 'block1', inAllBlocks: false,
-        },
-      ]
+    test('makes all database treatment blocks deletes when nothing comes from request', () => {
       const target = new TreatmentBlockService()
-      expect(target.assembleNewTreatmentBlocks(treatments, blocks))
-        .toEqual([{ treatmentId: 112, blockId: 11 }])
-    })
-  })
+      const databaseTbs = [{
+        id: 9, block_id: 3, treatment_id: 5, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
 
-  describe('assembleNewInAllTreatmentBlocks', () => {
-    test('each treatment has a treatment block for all bloks', () => {
-      const blocks = [
-        {
-          id: 11, name: 'block1',
-        },
-        {
-          id: 12, name: 'block2',
-        },
-      ]
-      const treatments = [
-        {
-          id: 112, treatmentNumber: 1, block: null, inAllBlocks: true,
-        },
-      ]
-      const target = new TreatmentBlockService()
-      expect(target.assembleNewInAllTreatmentBlocks(treatments, blocks))
-        .toEqual([{ treatmentId: 112, blockId: 11 }, { treatmentId: 112, blockId: 12 }])
-    })
-  })
+      const result = target.splitTreatmentBlocksToActions([], databaseTbs)
 
-  describe('treatmentBlocksEqual', () => {
-    test('two treatment blocks are equal when treatment ids and block ids are the same', () => {
-      const treatmentBlock = { treatmentId: 112, blockId: 11 }
-      const treatmentBlockInDB = { treatment_id: 112, block_id: 11 }
-      const target = new TreatmentBlockService()
-      expect(target.treatmentBlocksEqual(treatmentBlock, treatmentBlockInDB)).toBeTruthy()
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([])
+      expect(result.deletes).toEqual(databaseTbs)
     })
-    test('two treatment blocks are not equal when block ids are different', () => {
-      const treatmentBlock = { treatmentId: 112, blockId: 11 }
-      const treatmentBlockInDB = { treatment_id: 112, block_id: 12 }
-      const target = new TreatmentBlockService()
-      expect(target.treatmentBlocksEqual(treatmentBlock, treatmentBlockInDB)).toBeFalsy()
-    })
-  })
 
-  describe('findTBByTreatmentId', () => {
-    test('find the treatment blocks by the treatment id', () => {
-      const treatmentBlocks = [{ treatment_id: 112, block_id: 12 }, { treatment_id: 113, block_id: 12 }]
+    test('has no changes when request and database match', () => {
       const target = new TreatmentBlockService()
-      expect(target.findTBByTreatmentId(treatmentBlocks, 112))
-        .toEqual({ treatment_id: 112, block_id: 12 })
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 3, treatmentId: 7, numPerRep: 1 },
+      ]
+      const databaseTbs = [{
+        id: 9, block_id: 3, treatment_id: 5, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([])
+      expect(result.deletes).toEqual([])
+    })
+
+    test('finds updates when the treatment block is an exact match, but the numPerRep has changed', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 3, treatmentId: 7, numPerRep: 2 },
+      ]
+      const databaseTbs = [{
+        id: 9, block_id: 3, treatment_id: 5, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([requestTbs[1]])
+      expect(result.deletes).toEqual([])
+    })
+
+    test('can combine adds and updates', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 3, treatmentId: 7, numPerRep: 2 },
+      ]
+      const databaseTbs = [{
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([requestTbs[0]])
+      expect(result.updates).toEqual([requestTbs[1]])
+      expect(result.deletes).toEqual([])
+    })
+
+    test('can combine adds and deletes', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+      ]
+      const databaseTbs = [{
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([requestTbs[0]])
+      expect(result.updates).toEqual([])
+      expect(result.deletes).toEqual([databaseTbs[0]])
+    })
+
+    test('can combine updates and deletes', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 7, numPerRep: 2 },
+      ]
+      const databaseTbs = [{
+        id: 9, block_id: 3, treatment_id: 5, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([requestTbs[0]])
+      expect(result.deletes).toEqual([databaseTbs[0]])
+    })
+
+    test('does an update if a block is being "swapped" for a treatment block', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 7, numPerRep: 1 },
+      ]
+      const databaseTbs = [{
+        id: 11, block_id: 4, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([requestTbs[0]])
+      expect(result.deletes).toEqual([])
+    })
+
+    test('does not use an id twice when "swapping"', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 4, treatmentId: 5, numPerRep: 1 },
+      ]
+      const databaseTbs = [{
+        id: 9, block_id: 5, treatment_id: 5, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 6, treatment_id: 5, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([])
+      expect(result.updates).toEqual([requestTbs[0], requestTbs[1]])
+      expect(result.deletes).toEqual([])
+      expect(requestTbs[0].id).toBe(9)
+      expect(requestTbs[1].id).toBe(11)
     })
   })
 

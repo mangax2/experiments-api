@@ -38,12 +38,13 @@ class treatmentBlockRepo {
     }
 
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['treatment_id', 'block_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
+      ['treatment_id', 'block_id', 'num_per_rep', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
       { table: 'treatment_block' },
     )
     const values = treatmentBlocks.map(tb => ({
       treatment_id: tb.treatmentId,
       block_id: tb.blockId,
+      num_per_rep: tb.numPerRep,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
@@ -61,13 +62,14 @@ class treatmentBlockRepo {
     }
 
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'treatment_id', 'block_id', 'modified_user_id', 'modified_date'],
+      ['?id', 'treatment_id', 'num_per_rep', 'block_id', 'modified_user_id', 'modified_date'],
       { table: 'treatment_block' },
     )
     const data = treatmentBlocks.map(tb => ({
       id: tb.id,
       treatment_id: tb.treatmentId,
       block_id: tb.blockId,
+      num_per_rep: tb.numPerRep,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))

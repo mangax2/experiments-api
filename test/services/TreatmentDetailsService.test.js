@@ -219,7 +219,11 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, [{}], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
-        expect(target.createTreatments).toHaveBeenCalledWith(1, [{ block: null, experimentId: 1 }], testContext, testTx)
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [{
+          block: null,
+          experimentId: 1,
+          blocks: [{ name: null, numPerRep: 1 }],
+        }], testContext, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.deleteTreatments).not.toHaveBeenCalled()
       })
@@ -328,14 +332,27 @@ describe('TreatmentDetailsService', () => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [
           {
-            ...treatments[1], block: null, experimentId: 1, sortedFactorLevelIds: '100,104',
+            ...treatments[1],
+            block: null,
+            experimentId: 1,
+            sortedFactorLevelIds: '100,104',
+            blocks: [{ name: null, numPerRep: 1 }],
           },
           {
-            ...treatments[2], block: null, experimentId: 1, sortedFactorLevelIds: '102',
+            ...treatments[2],
+            block: null,
+            experimentId: 1,
+            sortedFactorLevelIds: '102',
+            blocks: [{ name: null, numPerRep: 1 }],
           }], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith(1,
           [{
-            ...treatments[0], block: null, experimentId: 1, id: 2, sortedFactorLevelIds: '100,102',
+            ...treatments[0],
+            block: null,
+            experimentId: 1,
+            id: 2,
+            sortedFactorLevelIds: '100,102',
+            blocks: [{ name: null, numPerRep: 1 }],
           }],
           testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([1, 3], testContext, testTx)
@@ -403,12 +420,71 @@ describe('TreatmentDetailsService', () => {
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[1], block: null, experimentId: 1, sortedFactorLevelIds: '100,101',
+          ...treatments[1],
+          block: null,
+          experimentId: 1,
+          sortedFactorLevelIds: '100,101',
+          blocks: [{ name: null, numPerRep: 1 }],
         }], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[0], block: null, id: 1, experimentId: 1, sortedFactorLevelIds: '100,101',
+          ...treatments[0],
+          block: null,
+          experimentId: 1,
+          sortedFactorLevelIds: '100,101',
+          id: 1,
+          blocks: [{ name: null, numPerRep: 1 }],
         }], testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([], testContext, testTx)
+      })
+    })
+
+    test('transforms block and inAllBlock structures to the new blocks structure', () => {
+      const dbTreatments = []
+      target.securityService = {
+        permissionsCheck: mockResolve(),
+      }
+      target.getAllTreatmentDetails = mockResolve(dbTreatments)
+      target.createTreatments = mockResolve()
+      target.updateTreatments = mockResolve()
+      target.deleteTreatments = mockResolve()
+      AppUtil.createNoContentResponse = mock()
+      target.blockService.createOnlyNewBlocksByExperimentId = mockResolve()
+      target.blockService.removeBlocksByExperimentId = mockResolve()
+
+      const treatments = [
+        {
+          treatmentNumber: 1,
+          combinationElements: [{ factorLevelId: 100 }, { factorLevelId: 101 }],
+          block: 'test1',
+        },
+        {
+          treatmentNumber: 2,
+          combinationElements: [{ factorLevelId: 100 }, { factorLevelId: 101 }],
+          block: 'test2',
+        },
+        {
+          treatmentNumber: 3,
+          combinationElements: [{ factorLevelId: 100 }, { factorLevelId: 101 }],
+          block: null,
+          inAllBlocks: true,
+        },
+      ]
+
+      return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
+        expect(target.createTreatments).toHaveBeenCalledWith(1, [{
+          ...treatments[0],
+          experimentId: 1,
+          blocks: [{ name: 'test1', numPerRep: 1 }],
+        }, {
+          ...treatments[1],
+          experimentId: 1,
+          blocks: [{ name: 'test2', numPerRep: 1 }],
+        }, {
+          ...treatments[2],
+          block: null,
+          experimentId: 1,
+          blocks: [{ name: 'test1', numPerRep: 1 }, { name: 'test2', numPerRep: 1 }],
+        }], testContext, testTx)
       })
     })
 
@@ -463,6 +539,7 @@ describe('TreatmentDetailsService', () => {
               factorLevelId: 101,
             },
           ],
+          blocks: [{ name: null, numPerRep: 1 }],
         },
       ]
 
@@ -470,7 +547,12 @@ describe('TreatmentDetailsService', () => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[0], block: null, id: 1, experimentId: 1, sortedFactorLevelIds: '100,101',
+          ...treatments[0],
+          block: null,
+          id: 1,
+          experimentId: 1,
+          sortedFactorLevelIds: '100,101',
+          blocks: [{ name: null, numPerRep: 1 }],
         }], testContext, testTx)
         expect(target.deleteTreatments).toHaveBeenCalledWith([2], testContext, testTx)
       })

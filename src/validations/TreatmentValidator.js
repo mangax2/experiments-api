@@ -242,19 +242,45 @@ class TreatmentValidator extends SchemaValidator {
 
   @setErrorCode('3F4000')
   validateBlockValue = (treatmentDTOs) => {
-    if (this.conflictBlocksExists(treatmentDTOs)) {
-      return Promise.reject(AppError.badRequest('Treatment request object contains conflicting blocking information',
-        undefined, getFullErrorCode('3F4001')))
+    const hasOldSchema = _.some(treatmentDTOs, t => t.block || t.inAllBlocks)
+    const hasNewSchema = _.some(treatmentDTOs, t => t.blocks)
+
+    if (hasOldSchema && hasNewSchema) {
+      return Promise.reject(AppError.badRequest('Do not mix usage of "block" and "blocks" in treatments submitted in the same request', undefined, getFullErrorCode('3F4004')))
     }
 
-    if (this.blockForNotAllTreatments(treatmentDTOs)) {
-      return Promise.reject(AppError.badRequest('Only some of the treatments in the treatment request object contains the block information',
-        undefined, getFullErrorCode('3F4002')))
+    if (hasOldSchema) {
+      if (this.conflictBlocksExists(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('Treatment request object contains conflicting blocking information',
+          undefined, getFullErrorCode('3F4001')))
+      }
+
+      if (this.blockForNotAllTreatments(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('Only some of the treatments in the treatment request object contains the block information',
+          undefined, getFullErrorCode('3F4002')))
+      }
+
+      if (this.allTreatmentsInAllBlocks(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('All treatments apply to all blocks is not allowed',
+          undefined, getFullErrorCode('3F4003')))
+      }
     }
 
-    if (this.allTreatmentsInAllBlocks(treatmentDTOs)) {
-      return Promise.reject(AppError.badRequest('All treatments apply to all blocks is not allowed',
-        undefined, getFullErrorCode('3F4003')))
+    if (hasNewSchema) {
+      if (!this.allTreatmentsHaveBlocks(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('All treatments must have at least one block in the blocks array',
+          undefined, getFullErrorCode('3F4005')))
+      }
+
+      if (!this.allBlocksHaveNumPerRep(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('All block objects must have a numPerRep value which is an integer',
+          undefined, getFullErrorCode('3F4006')))
+      }
+
+      if (this.anyTreatmentRepeatsBlockName(treatmentDTOs)) {
+        return Promise.reject(AppError.badRequest('Treatments cannot be added to the same block twice',
+          undefined, getFullErrorCode('3F4007')))
+      }
     }
 
     return Promise.resolve()
@@ -267,7 +293,6 @@ class TreatmentValidator extends SchemaValidator {
   @setErrorCode('3F6000')
   blockForNotAllTreatments = treatmentDTOs =>
     this.noBlockTreamentExists(treatmentDTOs) && this.blockedTreatmentExists(treatmentDTOs)
-
 
   @setErrorCode('3F7000')
   noBlockTreamentExists = treatmentDTOs =>
@@ -283,6 +308,18 @@ class TreatmentValidator extends SchemaValidator {
   allTreatmentsInAllBlocks = treatmentDTOs =>
     treatmentDTOs.length > 0 &&
     _.find(treatmentDTOs, t => _.isNil(t.inAllBlocks) || t.inAllBlocks === false) === undefined
+
+  @setErrorCode('3FA000')
+  allTreatmentsHaveBlocks = treatmentDTOs =>
+    _.every(treatmentDTOs, 'blocks') && _.every(treatmentDTOs, t => t.blocks.length > 0)
+
+  @setErrorCode('3FB000')
+  allBlocksHaveNumPerRep = treatmentDTOs =>
+    _.every(_.flatMap(treatmentDTOs, 'blocks'), b => b.numPerRep && parseInt(b.numPerRep.toString(), 10))
+
+  @setErrorCode('3FC000')
+  anyTreatmentRepeatsBlockName = treatmentDTOs =>
+    _.find(treatmentDTOs, t => t.blocks.length !== _.uniq(_.map(t.blocks, 'name')).length)
 }
 
 module.exports = TreatmentValidator

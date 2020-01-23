@@ -900,5 +900,93 @@ describe('TreatmentValidator', () => {
       AppError.badRequest = mock(testError)
       return expect(target.validateBlockValue(treatments)).rejects.toEqual({ errorCode: '3F4000', message: 'error' })
     })
+
+    test('fails on mix of block and blocks', async () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], inAllBlocks: true,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], inAllBlocks: true,
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+
+      try {
+        await target.validateBlockValue(treatments)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Do not mix usage of "block" and "blocks" in treatments submitted in the same request', undefined, '3F4004')
+      }
+    })
+
+    test('fails when treatment has no block in block array', async () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], blocks: [],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+
+      try {
+        await target.validateBlockValue(treatments)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('All treatments must have at least one block in the blocks array', undefined, '3F4005')
+      }
+    })
+
+    test('fails when treatment has block with no numPerRep', async () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], blocks: [{ name: 'test' }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+
+      try {
+        await target.validateBlockValue(treatments)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('All block objects must have a numPerRep value which is an integer', undefined, '3F4006')
+      }
+    })
+
+    test('fails when treatment has two blocks with same name', async () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], blocks: [{ name: 'test', numPerRep: 1 }, { name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+
+      try {
+        await target.validateBlockValue(treatments)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Treatments cannot be added to the same block twice', undefined, '3F4007')
+      }
+    })
   })
 })

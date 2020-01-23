@@ -28,50 +28,50 @@ class TreatmentDetailsService {
 
   @setErrorCode('1Q1000')
   @Transactional('getAllTreatmentDetails')
-  getAllTreatmentDetails(experimentId, isTemplate, context, tx) {
-    return this.experimentsService.findExperimentWithTemplateCheck(
+  getAllTreatmentDetails = async (experimentId, isTemplate, context, tx) => {
+    await this.experimentsService.findExperimentWithTemplateCheck(
       experimentId, isTemplate, context, tx,
-    ).then(() => tx.batch([
+    )
+    const [treatments, combinationElements, factorLevels, factors] = await tx.batch([
       this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
       this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
       FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
-    ]).then(([treatments, combinationElements, factorLevels, factors]) => {
-      const groupedFactors = _.groupBy(factors, 'id')
+    ])
+    const groupedFactors = _.groupBy(factors, 'id')
 
-      const groupedFactorLevels = _.groupBy(_.map(factorLevels, level => ({
-        id: level.id,
-        items: level.value ? level.value.items : [],
-        factor_id: level.factor_id,
-        factor_name: groupedFactors[level.factor_id][0].name,
-      })), 'id')
+    const groupedFactorLevels = _.groupBy(_.map(factorLevels, level => ({
+      id: level.id,
+      items: level.value ? level.value.items : [],
+      factor_id: level.factor_id,
+      factor_name: groupedFactors[level.factor_id][0].name,
+    })), 'id')
 
-      const groupedCombinationElements = _.groupBy(
-        _.map(combinationElements, combinationElement => ({
-          id: combinationElement.id,
-          treatment_id: combinationElement.treatment_id,
-          factor_id: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
-          factor_name: groupedFactorLevels[combinationElement.factor_level_id][0].factor_name,
-          factor_level: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
-        })), 'treatment_id')
+    const groupedCombinationElements = _.groupBy(
+      _.map(combinationElements, combinationElement => ({
+        id: combinationElement.id,
+        treatment_id: combinationElement.treatment_id,
+        factor_id: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
+        factor_name: groupedFactorLevels[combinationElement.factor_level_id][0].factor_name,
+        factor_level: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
+      })), 'treatment_id')
 
-      return _.map(treatments, treatment => ({
-        id: treatment.id,
-        experiment_id: treatment.experiment_id,
-        treatment_number: treatment.treatment_number,
-        is_control: (treatment.control_types || []).length > 0,
-        block: treatment.block,
-        blockId: treatment.blockId,
-        blocks: treatment.blocks,
-        inAllBlocks: treatment.inAllBlocks,
-        notes: treatment.notes,
-        control_types: treatment.control_types || [],
-        created_date: treatment.created_date,
-        created_user_id: treatment.created_user_id,
-        modified_date: treatment.modified_date,
-        modified_user_id: treatment.modified_user_id,
-        combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
-      }))
+    return _.map(treatments, treatment => ({
+      id: treatment.id,
+      experiment_id: treatment.experiment_id,
+      treatment_number: treatment.treatment_number,
+      is_control: (treatment.control_types || []).length > 0,
+      block: treatment.block,
+      blockId: treatment.blockId,
+      blocks: treatment.blocks,
+      inAllBlocks: treatment.inAllBlocks,
+      notes: treatment.notes,
+      control_types: treatment.control_types || [],
+      created_date: treatment.created_date,
+      created_user_id: treatment.created_user_id,
+      modified_date: treatment.modified_date,
+      modified_user_id: treatment.modified_user_id,
+      combination_elements: _.map(groupedCombinationElements[treatment.id], ce => _.omit(ce, ['treatment_id'])),
     }))
   }
 

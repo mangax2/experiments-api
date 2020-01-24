@@ -11,10 +11,6 @@ import {
 describe('CapacityRequestService', () => {
   kafkaProducerMocker()
 
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('associateExperimentToCapacityRequest', () => {
     const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
     const capacityRequest = { id: 5, experiment_id: 7 }

@@ -7,7 +7,6 @@ describe('DesignSpecificationDetailValidator', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new DesignSpecificationDetailValidator()
   })
 

@@ -9,7 +9,6 @@ describe('AnalysisModelService', () => {
   const testContext = {}
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new AnalysisModelService()
   })
 

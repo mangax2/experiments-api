@@ -19,7 +19,6 @@ describe('ExperimentsService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new ExperimentsService()
     target.securityService = {
       canUserCreateExperiments: mockResolve(true),

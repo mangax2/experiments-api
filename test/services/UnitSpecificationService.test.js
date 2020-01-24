@@ -6,7 +6,6 @@ describe('UnitSpecificationService', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new UnitSpecificationService()
   })
 

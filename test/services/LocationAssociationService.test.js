@@ -9,7 +9,6 @@ describe('LocationAssociationService', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new LocationAssociationService()
 
     db.block.findByExperimentId = mockResolve([{ id: 1, name: null }, { id: 2, name: '1' }, { id: 3, name: '2' }, { id: 4, name: 'Test 2.5' }])

@@ -4,10 +4,6 @@ import { mock } from '../../jestUtil'
 SetEntryRemovalService.setInterval = () => {}
 
 describe('SetEntryRemovalService', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('addWarning', () => {
     test('adds 1 to the warning count', () => {
       SetEntryRemovalService.numberOfWarnings = 5

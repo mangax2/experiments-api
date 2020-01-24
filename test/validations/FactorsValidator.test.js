@@ -7,7 +7,6 @@ describe('FactorsValidator', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new FactorsValidator()
   })
 

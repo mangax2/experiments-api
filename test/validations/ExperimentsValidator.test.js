@@ -7,7 +7,6 @@ describe('ExperimentsValidator', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new ExperimentsValidator()
   })
 

@@ -18,7 +18,6 @@ describe('resolvers', () => {
         },
       },
     }
-    expect.hasAssertions()
   })
 
   describe('Query', () => {

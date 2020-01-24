@@ -11,7 +11,6 @@ describe('CombinationElementService', () => {
   db.combinationElement.respository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new CombinationElementService()
   })
 

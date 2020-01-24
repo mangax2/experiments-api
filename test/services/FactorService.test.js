@@ -10,7 +10,6 @@ describe('FactorService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new FactorService()
   })
 

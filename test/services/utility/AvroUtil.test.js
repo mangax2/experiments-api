@@ -2,10 +2,6 @@ import avro from 'avsc'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
 
 describe('AvroUtil', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('serializeKafkaAvroMsg', () => {
     test('encodes data with the first byte as 0, then schemaId, and finally the message', () => {
       const message = {

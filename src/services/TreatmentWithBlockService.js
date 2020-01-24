@@ -52,9 +52,13 @@ class TreatmentWithBlockService {
   @setErrorCode('1Z5000')
   associateBlockInfoToTreatment = (treatment, treatmentBlocks) => ({
     ...treatment,
+    /* TODO: when we support multiple blocks in the UI,
+    inAllBlocks may need to be evaluated differently */
     inAllBlocks: treatmentBlocks.length > 1,
     block: treatmentBlocks.length === 1 ? treatmentBlocks[0].name : null,
     blockId: treatmentBlocks.length === 1 ? treatmentBlocks[0].block_id : null,
+    blocks: treatmentBlocks.length >= 1 ? treatmentBlocks.map(
+      tb => ({ name: tb.name, numPerRep: tb.num_per_rep })) : [],
   })
 
   @setErrorCode('1Z6000')

@@ -3276,6 +3276,22 @@
         "blockId": {
           "type": "integer",
           "description": "the ID for the block that the treatment belongs to."
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "the block that the treatment belongs to."
+              },
+              "numPerRep": {
+                "type": "integer",
+                "description": "the number of times the treatment occurs per rep."
+              }
+            }
+          }
         }
       }
     },

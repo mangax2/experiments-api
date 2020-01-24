@@ -33,7 +33,6 @@ describe('FactorDependentCompositeService', () => {
   let mapDependentVariableDTO2DbEntityOriginal
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new FactorDependentCompositeService()
 
     verifyExperimentExistsOriginal = ExperimentsService.verifyExperimentExists

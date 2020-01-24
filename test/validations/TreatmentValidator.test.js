@@ -8,7 +8,6 @@ describe('TreatmentValidator', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new TreatmentValidator()
   })
 

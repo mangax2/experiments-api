@@ -18,7 +18,6 @@ describe('GroupExperimentalUnitService', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new GroupExperimentalUnitService()
     target.unitValidator = { validate: () => Promise.resolve() }
   })

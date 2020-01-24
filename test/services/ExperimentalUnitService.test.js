@@ -12,7 +12,6 @@ describe('ExperimentalUnitService', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new ExperimentalUnitService()
   })
 

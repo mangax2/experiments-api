@@ -6,7 +6,6 @@ describe('RefDataSourceTypeService', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new RefDataSourceTypeService()
   })
 

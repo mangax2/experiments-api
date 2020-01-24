@@ -14,7 +14,6 @@ describe('LocationAssociationWithBlockService', () => {
   const block2 = { id: 456, experiment_id: experimentId, name: 'block456' }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new LocationAssociationWithBlockService()
   })
 

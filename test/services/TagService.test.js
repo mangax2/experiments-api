@@ -12,7 +12,6 @@ describe('TagService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new TagService()
   })
 

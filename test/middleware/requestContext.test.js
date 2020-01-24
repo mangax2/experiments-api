@@ -3,10 +3,6 @@ import AppError from '../../src/services/utility/AppError'
 import requestContextMiddlewareFunction from '../../src/middleware/requestContext'
 
 describe('requestContextMiddlewareFunction', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   const validHeaders = { oauth_resourceownerinfo: 'username=fakeuser' }
   const invalidRequest1 = { method: 'POST', headers: undefined }
   const invalidRequest2 = { method: 'POST' }

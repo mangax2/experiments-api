@@ -9,6 +9,7 @@ log4js.getLogger = jest.fn(() => ({
 }))
 
 jest.setTimeout(1000)
+beforeEach(() => { expect.hasAssertions() })
 
 console.info = jest.fn()
 console.error = jest.fn()

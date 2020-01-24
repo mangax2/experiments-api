@@ -11,7 +11,6 @@ describe('SecurityService', () => {
   const testContext = { userId: 'AK' }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new SecurityService()
   })
 

@@ -4,10 +4,6 @@ import VaultUtil from '../../../src/services/utility/VaultUtil'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 
 describe('VaultUtil', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   beforeAll(() => {
     console.error = mock()
   })

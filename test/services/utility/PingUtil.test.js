@@ -3,10 +3,6 @@ import { mock } from '../../jestUtil'
 import PingUtil from '../../../src/services/utility/PingUtil'
 
 describe('PingUtil', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('getMonsantoHeader', () => {
     test('calls oauth and returns headers', () => {
       oauthPing.httpGetToken = mock(() => () => Promise.resolve('token'))

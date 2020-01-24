@@ -7,7 +7,6 @@ describe('BaseValidator', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new BaseValidator()
     target.fileCode = ''
   })

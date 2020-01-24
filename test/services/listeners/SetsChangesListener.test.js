@@ -12,7 +12,6 @@ const SetsChangesListener = require('../../../src/services/listeners/SetsChanges
 
 describe('SetsChangesListener', () => {
   beforeEach(() => {
-    expect.hasAssertions()
     sendKafkaNotification.mockClear()
   })
 

@@ -9,7 +9,6 @@ describe('loaders', () => {
 
   beforeEach(() => {
     db.experiments = { all: mock() }
-    expect.hasAssertions()
   })
 
   describe('experimentBatchLoaderCallback', () => {

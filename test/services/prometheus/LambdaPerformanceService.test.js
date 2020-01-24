@@ -5,10 +5,6 @@ import { mock, mockResolve, mockReject } from '../../jestUtil'
 LambdaPerformanceService.setInterval = () => {}
 
 describe('LambdaPerformanceService', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('savePerformanceStats', () => {
     test('correctly calls the database', () => {
       const target = new LambdaPerformanceService()

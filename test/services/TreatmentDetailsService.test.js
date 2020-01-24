@@ -15,7 +15,6 @@ describe('TreatmentDetailsService', () => {
   let getFactorLevelsByExperimentIdNoExistenceCheckOriginal
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new TreatmentDetailsService()
 
     getFactorLevelsByExperimentIdNoExistenceCheckOriginal = FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck

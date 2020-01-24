@@ -9,7 +9,6 @@ describe('FactorLevelAssociationService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new FactorLevelAssociationService()
   })
 

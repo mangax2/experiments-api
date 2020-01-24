@@ -12,7 +12,6 @@ describe('OwnerValidator', () => {
   const testContext = { userId: 'KMCCL' }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new OwnerValidator()
   })
 

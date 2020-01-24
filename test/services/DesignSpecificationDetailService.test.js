@@ -16,7 +16,6 @@ describe('DesignSpecificationDetailService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new DesignSpecificationDetailService()
   })
   describe('batchCreateDesignSpecificationDetails', () => {

@@ -5,10 +5,6 @@ import AppError from '../../src/services/utility/AppError'
 import db from '../../src/db/DbManager'
 
 describe('DuplicationService', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   const testContext = {}
   const testTx = { tx: {} }
   db.duplication.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })

@@ -8,7 +8,6 @@ describe('ExperimentSummaryService', () => {
   const testTx = { tx: {} }
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new ExperimentSummaryService()
   })
 

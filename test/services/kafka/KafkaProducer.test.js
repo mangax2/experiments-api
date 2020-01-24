@@ -9,10 +9,6 @@ const { KafkaClient } = require('kafka-node')
 const KafkaProducer = require('../../../src/services/kafka/KafkaProducer').default
 
 describe('KafkaProducer', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('init', () => {
     test('calls to create a new producer', () => {
       VaultUtil.kafkaClientCert = 'cert'

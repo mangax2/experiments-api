@@ -2,10 +2,6 @@ import { mock } from '../../jestUtil'
 import AppUtil from '../../../src/services/utility/AppUtil'
 
 describe('AppUtil', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('createResponseElements', () => {
     test('returns an object with a status, message, and id', () => {
       expect(AppUtil.createResponseElements(1, 200, 'testMessage')).toEqual({

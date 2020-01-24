@@ -7,7 +7,6 @@ describe('UnitSpecificationDetailValidator', () => {
   let target
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new UnitSpecificationDetailValidator()
   })
 

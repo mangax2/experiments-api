@@ -13,7 +13,6 @@ describe('UnitSpecificationDetailService', () => {
   kafkaProducerMocker()
 
   beforeEach(() => {
-    expect.hasAssertions()
     target = new UnitSpecificationDetailService()
   })
 

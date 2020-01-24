@@ -10,10 +10,6 @@ const ManageRepsAndUnitsListener = require('../../../src/services/listeners/Mana
 const KafkaProducer = require('../../../src/services/kafka/KafkaProducer').default
 
 describe('ManageRepsAndUnitsListener', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('using mocked kafka-node', () => {
     describe('sendResponseMessage', () => {
       test('sends a success if isSuccess', () => {

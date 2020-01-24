@@ -3,10 +3,6 @@ import { mock } from '../../jestUtil'
 import AWSUtil from '../../../src/services/utility/AWSUtil'
 
 describe('AWSUtil', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   describe('createLambda', () => {
     test('creates an AWS.Lambda object', () => {
       expect(AWSUtil.createLambda()).toBeInstanceOf(AWS.Lambda)

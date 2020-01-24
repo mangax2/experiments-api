@@ -37,10 +37,6 @@ class testClass {
 }
 
 describe('notifyChanges', () => {
-  beforeEach(() => {
-    expect.hasAssertions()
-  })
-
   afterAll(() => {
     cfServices.experimentsKafka.value.enableKafka = 'false'
   })

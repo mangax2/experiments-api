@@ -38,7 +38,7 @@ describe('TreatmentWithBlockService', () => {
       target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([])
       target.getTreatmentsWithBlockInfo = mockResolve([])
 
-      target.getTreatmentsByExperimentId(1, testTx).then((data) => {
+      return target.getTreatmentsByExperimentId(1, testTx).then((data) => {
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.treatmentBlockService.getTreatmentBlocksByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(target.getTreatmentsWithBlockInfo).toHaveBeenCalledWith([], [])
@@ -54,7 +54,7 @@ describe('TreatmentWithBlockService', () => {
       target.treatmentBlockService.getTreatmentBlocksByTreatmentIds = mockResolve([])
       target.getTreatmentsWithBlockInfo = mockResolve([])
 
-      target.getTreatmentsByBySetIds(1, testTx).then((data) => {
+      return target.getTreatmentsByBySetIds(1, testTx).then((data) => {
         expect(db.treatment.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
         expect(target.treatmentBlockService.getTreatmentBlocksByTreatmentIds).toHaveBeenCalledWith([], testTx)
         expect(target.getTreatmentsWithBlockInfo).toHaveBeenCalledWith([], [])

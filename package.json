@@ -26,6 +26,7 @@
     "url": "git@github.platforms.engineering:Cosmos/experiments-api.git"
   },
   "dependencies": {
+    "@babel/runtime": "7.8.3",
     "@monsantoit/cloud-foundry": "3.0.0",
     "@monsantoit/error-decorator": "1.0.1",
     "@monsantoit/oauth-ping": "4.4.0",
@@ -59,7 +60,6 @@
     "validator": "10.4.0"
   },
   "devDependencies": {
-    "@babel/runtime": "7.8.3",
     "@babel/cli": "7.7.5",
     "@babel/core": "7.7.5",
     "@babel/plugin-proposal-class-properties": "7.7.4",

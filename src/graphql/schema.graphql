@@ -219,6 +219,13 @@ type Treatment {
   auditInfo: AuditInfo
   combinationElements: [CombinationElement]
   controlTypes: [String]
+  blocks: [TreatmentBlock]
+}
+
+type TreatmentBlock {
+  blockId: Int
+  name: String
+  numPerRep: Int
 }
 
 type UnitSpecification {

@@ -84,10 +84,10 @@ describe('TreatmentWithBlockService', () => {
 
       expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
         {
-          id: 111, treatmentNumber: 1, blockId: 11, block: 'block1', inAllBlocks: false, blocks: [{ name: 'block1', numPerRep: 1 }],
+          id: 111, treatmentNumber: 1, blockId: 11, block: 'block1', inAllBlocks: false, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }],
         },
         {
-          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', numPerRep: 1 }],
+          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', blockId: 12, numPerRep: 1 }],
         },
       ])
     })
@@ -115,10 +115,10 @@ describe('TreatmentWithBlockService', () => {
 
       expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
         {
-          id: 111, treatmentNumber: 1, blockId: null, block: null, inAllBlocks: true, blocks: [{ name: 'block1', numPerRep: 1 }, { name: 'block2', numPerRep: 1 }],
+          id: 111, treatmentNumber: 1, blockId: null, block: null, inAllBlocks: true, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }, { name: 'block2', blockId: 12, numPerRep: 1 }],
         },
         {
-          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', numPerRep: 1 }],
+          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', blockId: 12, numPerRep: 1 }],
         },
       ])
     })
@@ -137,7 +137,7 @@ describe('TreatmentWithBlockService', () => {
       const target = new TreatmentWithBlockService()
       expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
         {
-          id: 111, treatmentNumber: 1, block: 'block1', blockId: 11, inAllBlocks: false, blocks: [{ name: 'block1', numPerRep: 1 }],
+          id: 111, treatmentNumber: 1, block: 'block1', blockId: 11, inAllBlocks: false, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }],
         },
       )
     })
@@ -157,7 +157,7 @@ describe('TreatmentWithBlockService', () => {
       const target = new TreatmentWithBlockService()
       expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
         {
-          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: true, blocks: [{ name: 'block1', numPerRep: 1 }, { name: 'block2', numPerRep: 1 }],
+          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: true, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }, { name: 'block2', blockId: 12, numPerRep: 1 }],
         },
       )
     })

@@ -77,7 +77,7 @@ class TreatmentWithBlockService {
   @Transactional('updateTreatments')
   updateTreatments(experimentId, treatments, context, tx) {
     return this.treatmentService.batchUpdateTreatments(treatments, context, tx)
-      .then(() => this.treatmentBlockService.handleTreatmentBlocksForExistingTreatments(
+      .then(() => this.treatmentBlockService.persistTreatmentBlocksForExistingTreatments(
         experimentId, treatments, context, tx))
   }
 }

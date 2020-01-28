@@ -22,8 +22,8 @@ class SetEntryRemovalService {
     return updateFunc()
   }
 
-  setInterval = /* istanbul ignore next */ (intervalFunc) => {
-    /* istanbul ignore next */
+  /* istanbul ignore next */
+  setInterval = (intervalFunc) => {
     setInterval(intervalFunc, 600000)
   }
 }

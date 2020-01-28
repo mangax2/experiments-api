@@ -197,11 +197,11 @@ describe('TreatmentWithBlockService', () => {
     test('update treatments and handle add/remove/update treatment blocks for these treatments', () => {
       const target = new TreatmentWithBlockService()
       target.treatmentService.batchUpdateTreatments = mockResolve([])
-      target.treatmentBlockService.handleTreatmentBlocksForExistingTreatments = mockResolve([])
+      target.treatmentBlockService.persistTreatmentBlocksForExistingTreatments = mockResolve([])
 
       return target.updateTreatments(1, [], {}, testTx).then(() => {
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([], {}, testTx)
-        expect(target.treatmentBlockService.handleTreatmentBlocksForExistingTreatments).toHaveBeenCalledWith(1, [], {}, testTx)
+        expect(target.treatmentBlockService.persistTreatmentBlocksForExistingTreatments).toHaveBeenCalledWith(1, [], {}, testTx)
       })
     })
   })

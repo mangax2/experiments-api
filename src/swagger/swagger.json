@@ -4119,6 +4119,29 @@
                 }
               }
             }
+          },
+          "block": {
+            "type": "string"
+          },
+          "inAllBlocks": {
+            "type": "boolean"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "blockId": {
+                  "type": "number"
+                },
+                "numPerRep": {
+                  "type": "number"
+                }
+              }
+            }
           }
         }
       }

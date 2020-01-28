@@ -103,8 +103,8 @@ class TreatmentBlockService {
   }
 
   @setErrorCode('1V6000')
-  @Transactional('handleTreatmentBlocksForExistingTreatments')
-  handleTreatmentBlocksForExistingTreatments = (experimentId, treatments, context, tx) =>
+  @Transactional('persistTreatmentBlocksForExistingTreatments')
+  persistTreatmentBlocksForExistingTreatments = (experimentId, treatments, context, tx) =>
     tx.batch([this.db.block.findByExperimentId(experimentId, tx),
       this.db.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id'), tx)])
       .then(([blocks, tbsInDB]) => {

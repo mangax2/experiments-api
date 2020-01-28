@@ -227,7 +227,7 @@ describe('TreatmentBlockService', () => {
     })
   })
 
-  describe('handleTreatmentBlocksForExistingTreatments', () => {
+  describe('persistTreatmentBlocksForExistingTreatments', () => {
     const treatments = [{ id: 3 }, { id: 7 }]
     const creates = [{}, {}]
     const updates = [{}]
@@ -248,7 +248,7 @@ describe('TreatmentBlockService', () => {
       target.createTreatmentBlockModels = mock()
       target.splitTreatmentBlocksToActions = mock({})
 
-      await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
 
       expect(mockedDb.block.findByExperimentId).toHaveBeenCalledWith(5, testTx)
       expect(mockedDb.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([3, 7], testTx)
@@ -264,7 +264,7 @@ describe('TreatmentBlockService', () => {
         deletes,
       })
 
-      await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
 
       expect(mockedDb.treatmentBlock.batchCreate).toHaveBeenCalledWith(creates, {}, testTx)
       expect(mockedDb.treatmentBlock.batchRemove).toHaveBeenCalledWith([1], testTx)
@@ -283,7 +283,7 @@ describe('TreatmentBlockService', () => {
       })
 
       try {
-        await target.handleTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+        await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
       } catch {
         // no-op
       } finally {
@@ -432,6 +432,25 @@ describe('TreatmentBlockService', () => {
 
       expect(result.creates).toEqual([])
       expect(result.updates).toEqual([requestTbs[0]])
+      expect(result.deletes).toEqual([databaseTbs[0]])
+    })
+
+    test('can combine adds, updates, and deletes', () => {
+      const target = new TreatmentBlockService()
+      const requestTbs = [
+        { blockId: 3, treatmentId: 5, numPerRep: 1 },
+        { blockId: 3, treatmentId: 7, numPerRep: 2 },
+      ]
+      const databaseTbs = [{
+        id: 9, block_id: 3, treatment_id: 3, num_per_rep: 1,
+      }, {
+        id: 11, block_id: 3, treatment_id: 7, num_per_rep: 1,
+      }]
+
+      const result = target.splitTreatmentBlocksToActions(requestTbs, databaseTbs)
+
+      expect(result.creates).toEqual([requestTbs[0]])
+      expect(result.updates).toEqual([requestTbs[1]])
       expect(result.deletes).toEqual([databaseTbs[0]])
     })
 

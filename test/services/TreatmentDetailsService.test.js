@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import {
   kafkaProducerMocker, mock, mockReject, mockResolve,
 } from '../jestUtil'
@@ -220,7 +221,6 @@ describe('TreatmentDetailsService', () => {
       return target.handleAllTreatments(1, [{}], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [{
-          block: null,
           experimentId: 1,
           blocks: [{ name: null, numPerRep: 1 }],
         }], testContext, testTx)
@@ -332,23 +332,20 @@ describe('TreatmentDetailsService', () => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [
           {
-            ...treatments[1],
-            block: null,
+            ..._.omit(treatments[1], ['block', 'inAllBlocks']),
             experimentId: 1,
             sortedFactorLevelIds: '100,104',
             blocks: [{ name: null, numPerRep: 1 }],
           },
           {
-            ...treatments[2],
-            block: null,
+            ..._.omit(treatments[2], ['block', 'inAllBlocks']),
             experimentId: 1,
             sortedFactorLevelIds: '102',
             blocks: [{ name: null, numPerRep: 1 }],
           }], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith(1,
           [{
-            ...treatments[0],
-            block: null,
+            ..._.omit(treatments[0], ['block', 'inAllBlocks']),
             experimentId: 1,
             id: 2,
             sortedFactorLevelIds: '100,102',
@@ -420,15 +417,13 @@ describe('TreatmentDetailsService', () => {
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[1],
-          block: null,
+          ..._.omit(treatments[1], ['block', 'inAllBlocks']),
           experimentId: 1,
           sortedFactorLevelIds: '100,101',
           blocks: [{ name: null, numPerRep: 1 }],
         }], testContext, testTx)
         expect(target.updateTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[0],
-          block: null,
+          ..._.omit(treatments[0], ['block', 'inAllBlocks']),
           experimentId: 1,
           sortedFactorLevelIds: '100,101',
           id: 1,
@@ -472,16 +467,15 @@ describe('TreatmentDetailsService', () => {
 
       return target.handleAllTreatments(1, treatments, testContext, false, testTx).then(() => {
         expect(target.createTreatments).toHaveBeenCalledWith(1, [{
-          ...treatments[0],
+          ..._.omit(treatments[0], ['block', 'inAllBlocks']),
           experimentId: 1,
           blocks: [{ name: 'test1', numPerRep: 1 }],
         }, {
-          ...treatments[1],
+          ..._.omit(treatments[1], ['block', 'inAllBlocks']),
           experimentId: 1,
           blocks: [{ name: 'test2', numPerRep: 1 }],
         }, {
-          ...treatments[2],
-          block: null,
+          ..._.omit(treatments[2], ['block', 'inAllBlocks']),
           experimentId: 1,
           blocks: [{ name: 'test1', numPerRep: 1 }, { name: 'test2', numPerRep: 1 }],
         }], testContext, testTx)

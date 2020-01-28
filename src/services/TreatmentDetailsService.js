@@ -24,6 +24,8 @@ const formatTreatmentsWithNewBlocksStructure = (treatments) => {
       } else {
         t.blocks = [{ name: t.block, numPerRep: 1 }]
       }
+      delete t.block
+      delete t.inAllBlocks
     })
   }
 }

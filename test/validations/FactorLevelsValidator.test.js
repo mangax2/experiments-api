@@ -81,7 +81,7 @@ describe('FactorLevelsValidator', () => {
 
   describe('getBusinessKeyPropertyNames', () => {
     test('returns business keys', () => {
-      expect(target.getBusinessKeyPropertyNames()).toEqual(['factorId', 'value'])
+      expect(target.getBusinessKeyPropertyNames()).toEqual(['factorId', 'value', 'associatedFactorLevelRefIds'])
     })
   })
 
@@ -138,6 +138,15 @@ describe('FactorLevelsValidator', () => {
 
     test('adds a message when there are business key errors', () => {
       const targetObject = [{ test: 'a', factorId: 1 }, { test: 'a', factorId: 1 }]
+      target.getBusinessKeyPropertyNames = mock(['factorId', 'test'])
+
+      return target.postValidate(targetObject).then(() => {
+        expect(target.messages.length).toEqual(1)
+      })
+    })
+
+    test('does not add a message when the values are the same but the ref ids are different', () => {
+      const targetObject = [{ test: 'a', factorId: 1, associatedFactorLevelRefIds: [1] }, { test: 'a', factorId: 1, associatedFactorLevelRefIds: [2] }]
       target.getBusinessKeyPropertyNames = mock(['factorId', 'test'])
 
       return target.postValidate(targetObject).then(() => {

@@ -242,8 +242,9 @@ class TreatmentValidator extends SchemaValidator {
 
   @setErrorCode('3F4000')
   validateBlockValue = (treatmentDTOs) => {
-    const hasOldSchema = _.some(treatmentDTOs, t => t.block || t.inAllBlocks)
-    const hasNewSchema = _.some(treatmentDTOs, t => t.blocks)
+    const allKeysFromTreatments = _.uniq(_.flatMap(treatmentDTOs, _.keys))
+    const hasOldSchema = _.intersection(allKeysFromTreatments, ['block', 'inAllBlocks']).length > 0
+    const hasNewSchema = _.intersection(allKeysFromTreatments, ['blocks']).length > 0
 
     if (hasOldSchema && hasNewSchema) {
       return Promise.reject(AppError.badRequest('Do not mix usage of "block" and "blocks" in treatments submitted in the same request', undefined, getFullErrorCode('3F4004')))

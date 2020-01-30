@@ -922,6 +922,28 @@ describe('TreatmentValidator', () => {
       }
     })
 
+    test('fails on mix of block (falsey values) and blocks', async () => {
+      const treatments = [
+        {
+          isControl: false, notes: null, treatmentNumber: 1, combinationElements: [{ factorLevelId: 82186 }], inAllBlocks: false,
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 2, combinationElements: [{ factorLevelId: 82187 }], blocks: [{ name: 'test', numPerRep: 1 }],
+        },
+        {
+          isControl: false, notes: null, treatmentNumber: 3, combinationElements: [{ factorLevelId: 82188 }], block: null,
+        },
+      ]
+      const testError = { message: 'error' }
+      AppError.badRequest = mock(testError)
+
+      try {
+        await target.validateBlockValue(treatments)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Do not mix usage of "block" and "blocks" in treatments submitted in the same request', undefined, '3F4004')
+      }
+    })
+
     test('fails when treatment has no block in block array', async () => {
       const treatments = [
         {

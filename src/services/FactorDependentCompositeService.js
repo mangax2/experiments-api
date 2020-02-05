@@ -107,11 +107,15 @@ const deleteFactorLevelAssociations = addErrorHandling('1AE000',
   })
 
 const mapFactorLevelDTOsToFactorLevelEntities = addErrorHandling('1AF000',
-  allLevelDTOsWithParentFactorId => _.map(allLevelDTOsWithParentFactorId, level => ({
-    id: level.id,
-    value: { items: level.items, objectType: level.objectType },
-    factorId: level.factorId,
-  })))
+  (allLevelDTOsWithParentFactorId, factorLevelAssociations) =>
+    _.map(allLevelDTOsWithParentFactorId, level => ({
+      id: level.id,
+      value: { items: level.items, objectType: level.objectType },
+      factorId: level.factorId,
+      associatedFactorLevelRefIds: _.map(_.filter(factorLevelAssociations,
+        // eslint-disable-next-line no-underscore-dangle
+        fla => fla.nestedLevelRefId === level._refId), 'associatedLevelRefId'),
+    })))
 
 const mapFactorDTOsToFactorEntities = addErrorHandling('1AG000',
   (experimentId, factorDTOs, refFactorTypeId) =>
@@ -369,26 +373,28 @@ class FactorDependentCompositeService {
         tx)
 
   @setErrorCode('1Ab000')
-  updateLevels = (levelDTOsForUpdate, context, tx) => applyAsyncBatchToNonEmptyArray(
-    this.factorLevelService.batchUpdateFactorLevels,
-    mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate),
-    context,
-    tx)
+  updateLevels = (levelDTOsForUpdate, allFactorLevelAssociationDTOs, context, tx) =>
+    applyAsyncBatchToNonEmptyArray(
+      this.factorLevelService.batchUpdateFactorLevels,
+      mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate, allFactorLevelAssociationDTOs),
+      context,
+      tx)
 
   @setErrorCode('1Ac000')
   updateFactorsAndLevels = ({
-    experimentId, allIndependentDTOs: allFactorDTOs,
+    experimentId, allIndependentDTOs: allFactorDTOs, allFactorLevelAssociationDTOs,
     allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx,
   }) => tx.batch([
     this.updateFactors(
       experimentId, allFactorDTOs, allFactorTypes, context, tx),
-    this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, context, tx),
+    this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, allFactorLevelAssociationDTOs,
+      context, tx),
   ])
 
   @setErrorCode('1Ad000')
   createFactorsAndDependentLevels = (
     {
-      experimentId, factorDTOsForCreate, allFactorTypes, context, tx,
+      experimentId, factorDTOsForCreate, allFactorLevelAssociationDTOs, allFactorTypes, context, tx,
     }) => {
     const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
       experimentId,
@@ -403,17 +409,18 @@ class FactorDependentCompositeService {
         const levelDTOsWithFactorIdForCreate =
           _.flatMap(factorDTOsForCreate, (factorDTO, index) =>
             _.map(factorDTO.levels, level => ({ factorId: responses[index].id, ...level })))
-        return this.createFactorLevels(levelDTOsWithFactorIdForCreate, context, tx)
+        return this.createFactorLevels(levelDTOsWithFactorIdForCreate,
+          allFactorLevelAssociationDTOs, context, tx)
       })
   }
 
   @setErrorCode('1Ae000')
   createFactorLevels =
-    (allFactorLevelDTOs, context, tx) =>
+    (allFactorLevelDTOs, allFactorLevelAssociationDTOs, context, tx) =>
       applyAsyncBatchToNonEmptyArray(
         this.factorLevelService.batchCreateFactorLevels,
         mapFactorLevelDTOsToFactorLevelEntities(
-          determineDTOsForCreate(allFactorLevelDTOs)),
+          determineDTOsForCreate(allFactorLevelDTOs), allFactorLevelAssociationDTOs),
         context,
         tx)
 
@@ -464,6 +471,7 @@ class FactorDependentCompositeService {
     this.createFactorsAndDependentLevels(params),
     this.createFactorLevels(
       params.factorIndependentLevelDTOsForCreate,
+      params.allFactorLevelAssociationDTOs,
       params.context,
       params.tx)])
 

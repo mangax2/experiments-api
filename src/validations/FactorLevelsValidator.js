@@ -43,7 +43,7 @@ class FactorLevelsValidator extends SchemaValidator {
     }
   }
 
-  getBusinessKeyPropertyNames = () => ['factorId', 'value']
+  getBusinessKeyPropertyNames = () => ['factorId', 'value', 'associatedFactorLevelRefIds']
 
   getDuplicateBusinessKeyError = () => ({ message: 'Duplicate factor level value in request payload with same factor id', errorCode: getFullErrorCode('384001') })
 
@@ -63,7 +63,7 @@ class FactorLevelsValidator extends SchemaValidator {
       const businessKeyArray = _.map(targetObject, obj => _.pick(obj, businessKeyPropertyNames))
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.factorId))
       _.forEach(groupByObject, (innerArray) => {
-        const value = _.map(innerArray, e => e[businessKeyPropertyNames[1]])
+        const value = _.map(innerArray, e => _.pick(e, businessKeyPropertyNames.slice(1)))
         if (_.uniqWith(value, _.isEqual).length !== value.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false

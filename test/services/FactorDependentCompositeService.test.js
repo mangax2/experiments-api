@@ -936,6 +936,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             factorId: 1,
@@ -947,6 +948,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             factorId: 2,
@@ -962,6 +964,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             factorId: 2,
@@ -977,6 +980,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
         ], testContext, testTx)
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
@@ -1100,6 +1104,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             factorId: 1,
@@ -1111,6 +1116,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             factorId: 2,
@@ -1122,6 +1128,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [1],
           },
           {
             factorId: 2,
@@ -1133,6 +1140,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [2],
           },
         ], testContext, testTx)
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
@@ -1297,6 +1305,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -1309,6 +1318,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 21,
@@ -1325,6 +1335,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 22,
@@ -1341,6 +1352,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
@@ -1508,6 +1520,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -1520,6 +1533,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 21,
@@ -1532,6 +1546,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [1],
           },
           {
             id: 22,
@@ -1544,6 +1559,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [2],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
@@ -1657,6 +1673,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -1669,6 +1686,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).toHaveBeenCalledWith([2], {}, testTx)
@@ -1761,6 +1779,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
@@ -1998,6 +2017,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -2010,6 +2030,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 21,
@@ -2022,6 +2043,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [1],
           },
           {
             id: 22,
@@ -2034,6 +2056,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [2],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
@@ -2202,6 +2225,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -2214,6 +2238,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 21,
@@ -2226,6 +2251,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [1],
           },
           {
             id: 22,
@@ -2238,6 +2264,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()
@@ -2396,6 +2423,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 12,
@@ -2408,6 +2436,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 21,
@@ -2420,6 +2449,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [],
           },
           {
             id: 22,
@@ -2432,6 +2462,7 @@ describe('FactorDependentCompositeService', () => {
                 },
               ],
             },
+            associatedFactorLevelRefIds: [2],
           },
         ], testContext, testTx)
         expect(target.factorService.batchDeleteFactors).not.toHaveBeenCalled()

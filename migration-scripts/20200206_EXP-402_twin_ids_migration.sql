@@ -1,4 +1,4 @@
-create temp table twins(original_id: text, new_id: text);
+create temp table twins(original_id text, new_id text);
 -- weird off-batch from 12_18 slack post
 insert into twins(original_id, new_id) values('BBORD', 'BBORD9');
 insert into twins(original_id, new_id) values('BEORR', 'BEORR9');

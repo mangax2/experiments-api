@@ -62,7 +62,7 @@ class TreatmentBlockService {
     (_.isEmpty(treatmentIds) ? Promise.resolve([]) :
       db.treatmentBlock.batchFindByTreatmentIds(treatmentIds, tx)
         .then(treatmentBlocks =>
-          db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          db.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
             .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
         ))
 
@@ -72,7 +72,7 @@ class TreatmentBlockService {
     (_.isEmpty(ids) ? Promise.resolve([]) :
       db.treatmentBlock.batchFindByIds(ids, tx)
         .then(treatmentBlocks =>
-          db.block.batchFindByBlockIds(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          db.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
             .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
         )
     )

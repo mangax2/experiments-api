@@ -90,14 +90,14 @@ describe('TreatmentBlockService', () => {
         { id: 2, block_id: 11, treatment_id: 112 },
       ]
 
-      db.block.batchFindByBlockIds = mockResolve(blocks)
+      db.block.batchFind = mockResolve(blocks)
       db.treatmentBlock.batchFindByTreatmentIds = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksWithBlockInfo = mock()
 
       return target.getTreatmentBlocksByTreatmentIds([111, 112], testTx).then(() => {
-        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([11], testTx)
+        expect(db.block.batchFind).toHaveBeenCalledWith([11], testTx)
         expect(db.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([111, 112], testTx)
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
       })
@@ -121,14 +121,14 @@ describe('TreatmentBlockService', () => {
         { id: 2, block_id: 11, treatment_id: 112 },
       ]
 
-      db.block.batchFindByBlockIds = mockResolve(blocks)
+      db.block.batchFind = mockResolve(blocks)
       db.treatmentBlock.batchFindByIds = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksWithBlockInfo = mock()
 
       return target.getTreatmentBlocksByIds([1, 2], testTx).then(() => {
-        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([11], testTx)
+        expect(db.block.batchFind).toHaveBeenCalledWith([11], testTx)
         expect(db.treatmentBlock.batchFindByIds).toHaveBeenCalledWith([1, 2], testTx)
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
       })

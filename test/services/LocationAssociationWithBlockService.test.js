@@ -29,11 +29,11 @@ describe('LocationAssociationWithBlockService', () => {
 
     test('returns a list of one locationAssociation with block info', () => {
       db.locationAssociation.findByExperimentId = mockResolve([locationAssociation])
-      db.block.batchFindByBlockIds = mockResolve([block1])
+      db.block.batchFind = mockResolve([block1])
 
       return target.getByExperimentId(experimentId, testTx).then((data) => {
         expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(experimentId, testTx)
-        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([block1.id], testTx)
+        expect(db.block.batchFind).toHaveBeenCalledWith([block1.id], testTx)
         expect(data).toEqual([{
           location: locationAssociation.location,
           set_id: locationAssociation.set_id,
@@ -46,11 +46,11 @@ describe('LocationAssociationWithBlockService', () => {
 
     test('returns multiple locationAssociations with different block info', () => {
       db.locationAssociation.findByExperimentId = mockResolve([locationAssociation, locationAssociationWithDifferentBlock])
-      db.block.batchFindByBlockIds = mockResolve([block1, block2])
+      db.block.batchFind = mockResolve([block1, block2])
 
       return target.getByExperimentId(experimentId, testTx).then((data) => {
         expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(experimentId, testTx)
-        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([block1.id, block2.id], testTx)
+        expect(db.block.batchFind).toHaveBeenCalledWith([block1.id, block2.id], testTx)
         expect(data).toEqual([{
           location: locationAssociation.location,
           set_id: locationAssociation.set_id,
@@ -69,11 +69,11 @@ describe('LocationAssociationWithBlockService', () => {
 
     test('returns multiple locationAssociations with the same block info', () => {
       db.locationAssociation.findByExperimentId = mockResolve([locationAssociation, locationAssociationWithSameBlock])
-      db.block.batchFindByBlockIds = mockResolve([block1])
+      db.block.batchFind = mockResolve([block1])
 
       return target.getByExperimentId(experimentId, testTx).then((data) => {
         expect(db.locationAssociation.findByExperimentId).toHaveBeenCalledWith(experimentId, testTx)
-        expect(db.block.batchFindByBlockIds).toHaveBeenCalledWith([block1.id], testTx)
+        expect(db.block.batchFind).toHaveBeenCalledWith([block1.id], testTx)
         expect(data).toEqual([{
           location: locationAssociation.location,
           set_id: locationAssociation.set_id,

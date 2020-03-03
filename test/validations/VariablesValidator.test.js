@@ -3,9 +3,6 @@ import VariablesValidator from '../../src/validations/VariablesValidator'
 import AppError from '../../src/services/utility/AppError'
 
 describe('VariablesValidator', () => {
-  const TEST_FAILED =
-    Promise.reject(new Error('Promise expected to be rejected, but was resolved instead.'))
-
   let target
 
   beforeEach(() => {
@@ -16,12 +13,9 @@ describe('VariablesValidator', () => {
     test('indicates bad request if the element is an array', () => {
       AppError.badRequest = mock()
 
-      return target.preValidate([]).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('Variables request object cannot be an array', undefined, '3H2001')
-        },
-      )
+      return target.preValidate([]).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Variables request object cannot be an array', undefined, '3H2001')
+      })
     })
 
     test('indicates bad request if not all nested variables have an associated variable', () => {
@@ -56,12 +50,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 3,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.', undefined, '3H2006')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('An association must exist for all levels of a nested variable.', undefined, '3H2006')
+      })
     })
 
     test('indicates bad request if multiple levels within a factor have the same _refId', () => {
@@ -93,12 +84,9 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 4', undefined, '3H2002')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 4', undefined, '3H2002')
+      })
     })
 
     test('indicates bad request if multiple levels across factors have the same _refId', () => {
@@ -127,12 +115,9 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2', undefined, '3H2002')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2', undefined, '3H2002')
+      })
     })
 
     test('indicates bad request if there are multiple non-unique _refIds specified for levels', () => {
@@ -173,12 +158,9 @@ describe('VariablesValidator', () => {
             ],
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2, 3, 5', undefined, '3H2002')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are not unique: 2, 3, 5', undefined, '3H2002')
+      })
     })
 
     test('indicates bad request if an independent association references a _refId that does not exist', () => {
@@ -213,12 +195,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 2,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 99', undefined, '3H2003')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 99', undefined, '3H2003')
+      })
     })
 
     test('indicates bad request if multiple independent associations reference a _refId that does not exist', () => {
@@ -265,12 +244,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 99,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 42, 99', undefined, '3H2003')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following _refIds are referenced within an treatmentVariableAssociation, but the _refId is not valid: 42, 99', undefined, '3H2003')
+      })
     })
 
     test('indicates bad request if a duplicate relationship exists within the independent associations', () => {
@@ -313,12 +289,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 3,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}', undefined, '3H2004')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}', undefined, '3H2004')
+      })
     })
 
     test('indicates bad request if multiple duplicate relationships exists within the independent associations', () => {
@@ -369,12 +342,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 4,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}', undefined, '3H2004')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('The following treatment variable associations are not unique: {associatedLevelRefId: 1, nestedLevelRefId: 3}, {associatedLevelRefId: 2, nestedLevelRefId: 4}', undefined, '3H2004')
+      })
     })
 
     test('indicates a bad request when nesting occurs within a factor', () => {
@@ -409,12 +379,9 @@ describe('VariablesValidator', () => {
             nestedLevelRefId: 2,
           },
         ],
-      }).then(
-        () => TEST_FAILED,
-        () => {
-          expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single treatment variable is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}', undefined, '3H2005')
-        },
-      )
+      }).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Nesting levels within a single treatment variable is not allowed.  The following associations violate this: {associatedLevelRefId: 1, nestedLevelRefId: 2}', undefined, '3H2005')
+      })
     })
 
     test('resolves when request is valid', () => {

@@ -53,6 +53,26 @@ class blockRepo {
     }
     return tx.any('DELETE FROM block WHERE id IN ($1:csv) RETURNING id', [ids])
   }
+
+  @setErrorCode('5S5000')
+  batchUpdate = (blocks, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
+      [
+        '?id',
+        'name',
+        'modified_user_id',
+        'modified_date:raw',
+      ],
+      {table: 'block'})
+    const values = blocks.map(block => ({
+      name: block.name,
+      id: block.id,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+    const query = `${this.pgp.helpers.update(values, columnSet)} WHERE v.id = t.id`
+    return tx.query(query)
+  }
 }
 
 module.exports = (rep, pgp) => new blockRepo(rep, pgp)

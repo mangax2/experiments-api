@@ -21,6 +21,8 @@ class BlockValidator extends SchemaValidator {
 
   getEntityName = () => 'Block'
 
+  getBusinessKeyPropertyNames = () => ['name']
+
   @setErrorCode('3I1000')
   getSchema = (operationName) => {
     switch (operationName) {

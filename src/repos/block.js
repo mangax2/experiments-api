@@ -14,9 +14,8 @@ class blockRepo {
   @setErrorCode('5S1000')
   findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM block WHERE experiment_id = $1', experimentId)
 
-
   @setErrorCode('5S2000')
-  batchFindByBlockIds = (ids, tx = this.rep) => tx.any('SELECT * FROM block WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids, tx = this.rep) => tx.any(`SELECT * FROM block WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
@@ -53,6 +52,26 @@ class blockRepo {
       return Promise.resolve([])
     }
     return tx.any('DELETE FROM block WHERE id IN ($1:csv) RETURNING id', [ids])
+  }
+
+  @setErrorCode('5S5000')
+  batchUpdate = (blocks, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
+      [
+        '?id',
+        'name',
+        'modified_user_id',
+        'modified_date:raw',
+      ],
+      {table: 'block'})
+    const values = blocks.map(block => ({
+      name: block.name,
+      id: block.id,
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
+    }))
+    const query = `${this.pgp.helpers.update(values, columnSet)} WHERE v.id = t.id`
+    return tx.query(query)
   }
 }
 

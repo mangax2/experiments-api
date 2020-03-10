@@ -2,6 +2,7 @@ import express from 'express'
 import log4js from 'log4js'
 import pt from 'promise-timeout'
 import _ from 'lodash'
+import BlockService from '../services/BlockService'
 import CapacityRequestService from '../services/CapacityRequestService'
 import DependentVariableService from '../services/DependentVariableService'
 import DocumentationService from '../services/DocumentationService'
@@ -162,6 +163,10 @@ router.post('/experiments/:id/unit-specification-details', (req, res, next) => n
   .then(value => res.json(value))
   .catch(err => next(err)))
 
+router.patch('/experiments/:id/blocks', (req, res, next) => new BlockService().renameBlocks(req.params.id, false, req.body, req.context)
+  .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
 router.post('/preferences/treatment-variables/lists', (req, res, next) => new ListsService(new PreferencesService()).setUserLists(req.body.userId, req.body.listIds, req.headers, req.context)
   .then(data => res.status(200).json(data))
   .catch(err => next(err)))
@@ -267,6 +272,10 @@ router.post('/templates/:id/unit-specification-details', (req, res, next) => new
   .catch(err => next(err)))
 
 router.patch('/templates/:id/review', (req, res, next) => new ExperimentsService().handleReviewStatus(req.params.id, true, req.body, req.context)
+  .then(() => res.sendStatus(204))
+  .catch(err => next(err)))
+
+router.patch('/templates/:id/blocks', (req, res, next) => new BlockService().renameBlocks(req.params.id, true, req.body, req.context)
   .then(() => res.sendStatus(204))
   .catch(err => next(err)))
 

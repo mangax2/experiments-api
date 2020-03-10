@@ -92,7 +92,7 @@ function createLoaders(tx) {
 
   const blocksByBlockIdsLoader =
     new DataLoader(args =>
-      tx.batch(_.map(args, arg => db.block.batchFindByBlockIds(arg, tx))))
+      tx.batch(_.map(args, arg => db.block.batchFind(arg, tx))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)

@@ -19,7 +19,7 @@ class LocationAssociationWithBlockService {
         if (locationAssociations.length === 0) {
           return []
         }
-        return db.block.batchFindByBlockIds(_.uniq(_.map(locationAssociations, 'block_id')), tx)
+        return db.block.batchFind(_.uniq(_.map(locationAssociations, 'block_id')), tx)
           .then(blocks =>
             _.map(locationAssociations, (la) => {
               const block = _.find(blocks, { id: la.block_id })

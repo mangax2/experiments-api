@@ -68,8 +68,17 @@ describe('BlockValidator', () => {
       const target = new BlockValidator()
       AppError.badRequest = mock()
 
-      return target.preValidate([{ name: 'block' }, { name: 'block' }]).catch(() => {
+      return target.preValidate([{ id: 1, name: 'block' }, { id: 2, name: 'block' }]).catch(() => {
         expect(AppError.badRequest).toHaveBeenCalledWith('Block names must be unique', undefined, '3I2002')
+      })
+    })
+
+    test('rejects when two blocks have same id', () => {
+      const target = new BlockValidator()
+      AppError.badRequest = mock()
+
+      return target.preValidate([{ id: 1, name: 'block 1' }, { id: 1, name: 'block A' }]).catch(() => {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Block ids must be unique', undefined, '3I2003')
       })
     })
   })

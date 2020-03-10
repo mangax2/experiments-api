@@ -46,6 +46,13 @@ class BlockValidator extends SchemaValidator {
       return Promise.reject(
         AppError.badRequest('Block names must be unique', undefined, getFullErrorCode('3I2002')))
     }
+
+    const blockIds = _.map(blockObj, 'id')
+
+    if (_.uniq(blockIds).length !== blockIds.length) {
+      return Promise.reject(
+        AppError.badRequest('Block ids must be unique', undefined, getFullErrorCode('3I2003')))
+    }
     return Promise.resolve()
   }
 }

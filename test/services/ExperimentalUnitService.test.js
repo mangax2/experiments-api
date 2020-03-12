@@ -701,7 +701,7 @@ describe('ExperimentalUnitService', () => {
       QuestionsUtil.getAnswerKeys = mockResolve(['fizz', 'bang', 'foo', 'bar'])
       const payload = [
         { setEntryId: 1, deactivationReason: 'foo' },
-        { id: 2, deactivationReason: 'bang' },
+        { id: 2, deactivationReason: null },
       ]
       AppError.badRequest = mock(testError)
 

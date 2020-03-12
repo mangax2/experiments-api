@@ -5,6 +5,7 @@ import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
+import QuestionsUtil from './utility/QuestionsUtil'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
@@ -226,40 +227,37 @@ class ExperimentalUnitService {
 
   @setErrorCode('17J000')
   @Transactional('deactivateExperimentalUnitsTx')
-  deactivateExperimentalUnits = (requestBody, context, tx) => {
-    const eachHasDeactivationReason = _.every(requestBody, requestObject => _.has(requestObject, 'deactivationReason'))
-    if (!eachHasDeactivationReason) {
-      throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.')
-    }
-    const [setEntryIdSubset, idSubset] = _.partition(requestBody, 'setEntryId')
-    const setEntryIds = _.map(setEntryIdSubset, 'setEntryId')
-    const ids = _.map(idSubset, 'id')
+  deactivateExperimentalUnits = (requestBody, context, tx) =>
+    this.validateDeactivations(requestBody).then(() => {
+      const [setEntryIdSubset, idSubset] = _.partition(requestBody, 'setEntryId')
+      const setEntryIds = _.map(setEntryIdSubset, 'setEntryId')
+      const ids = _.map(idSubset, 'id')
 
-    const unitsFromSetEntryIdsPromise = setEntryIds.length > 0
-      ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
-      : []
-    const unitsFromIdsPromise = ids.length > 0
-      ? db.unit.batchFindAllByIds(ids)
-      : []
+      const unitsFromSetEntryIdsPromise = setEntryIds.length > 0
+        ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
+        : []
+      const unitsFromIdsPromise = ids.length > 0
+        ? db.unit.batchFindAllByIds(ids)
+        : []
 
-    return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
-      .then(([setEntriesFromDb, unitsByIdFromDb]) => {
-        const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
-        const results = _.map(unitsFromDb, (unit) => {
-          const correspondingUnit = _.find(requestBody, requestObject =>
-            requestObject.id === unit.id || requestObject.setEntryId === unit.set_entry_id)
-          return {
-            id: unit.id,
-            deactivationReason: correspondingUnit.deactivationReason,
-            setEntryId: unit.set_entry_id,
-          }
+      return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
+        .then(([setEntriesFromDb, unitsByIdFromDb]) => {
+          const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
+          const results = _.map(unitsFromDb, (unit) => {
+            const correspondingUnit = _.find(requestBody, requestObject =>
+              requestObject.id === unit.id || requestObject.setEntryId === unit.set_entry_id)
+            return {
+              id: unit.id,
+              deactivationReason: correspondingUnit.deactivationReason,
+              setEntryId: unit.set_entry_id,
+            }
+          })
+          return db.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
+            this.sendDeactivationNotifications(results)
+            return results
+          })
         })
-        return db.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
-          this.sendDeactivationNotifications(results)
-          return results
-        })
-      })
-  }
+    })
 
   @setErrorCode('17K000')
   sendDeactivationNotifications = (deactivations) => {
@@ -283,6 +281,22 @@ class ExperimentalUnitService {
       })
     }
   }
+
+  @setErrorCode('17L000')
+  validateDeactivations = requestBody =>
+    QuestionsUtil.getAnswerKeys('ADEACTR', 'TEXT').then((deactivationKeys) => {
+      const eachHasDeactivationReason = _.every(requestBody, requestObject => _.has(requestObject, 'deactivationReason'))
+      if (!eachHasDeactivationReason) {
+        throw AppError.badRequest('Please provide a deactivation reason for each experimental unit to be deactivated.', undefined, getFullErrorCode('17L001'))
+      }
+
+      const deactivationsFromRequest = _.uniq(_.compact(_.map(requestBody, 'deactivationReason')))
+      const invalidDeactivationKeys = _.difference(deactivationsFromRequest, deactivationKeys)
+
+      if (invalidDeactivationKeys.length > 0) {
+        throw AppError.badRequest(`Invalid deactivation reasons provided: ${JSON.stringify(invalidDeactivationKeys)}`, undefined, getFullErrorCode('17L002'))
+      }
+    })
 }
 
 module.exports = ExperimentalUnitService

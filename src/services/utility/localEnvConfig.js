@@ -17,13 +17,14 @@ const cfServices = {
   experimentsExternalAPIUrls: {
     value: {
       capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
+      experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',
+      materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
       preferencesAPIUrl: 'https://preferences.velocity-np.ag/v2',
       profileAPIUrl: 'https://profile.velocity-np.ag/v3',
-      experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',
+      questionsV3APIUrl: 'https://api01-np.agro.services/questions-api/v3',
+      randomizeTreatmentsAPIUrl: 'https://velocity-np.ag/randomize-treatments-api',
       setsAPIUrl: 'https://api01-np.agro.services/sets-api/v2',
-      materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
       velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5',
-      randomizeTreatmentsAPIUrl: 'https://velocity-np.ag/randomize-treatments-api'
     },
   },
   experimentsKafka:{

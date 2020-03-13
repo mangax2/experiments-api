@@ -3,6 +3,7 @@ import ExperimentalUnitService from '../../src/services/ExperimentalUnitService'
 import db from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
+import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 import cfServices from '../../src/services/utility/ServiceConfig'
 
@@ -493,6 +494,11 @@ describe('ExperimentalUnitService', () => {
   describe('deactivateExperimentalUnits', () => {
     const context = { userId: 'FooBar Baz' }
 
+    beforeEach(() => {
+      target = new ExperimentalUnitService()
+      target.validateDeactivations = () => Promise.resolve()
+    })
+
     test('it returns deactivated units given valid input', () => {
       const payload = [
         { setEntryId: 1, deactivationReason: 'foo' },
@@ -555,24 +561,6 @@ describe('ExperimentalUnitService', () => {
         expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
         expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
-    })
-
-    test('it throws if not every unit in payload has a deactivationReason', () => {
-      const payload = [
-        { setEntryId: 1 },
-        { id: 2, deactivationReason: 'bar' },
-      ]
-      db.unit.batchFindAllBySetEntryIds = mockResolve()
-      db.unit.batchFindAllByIds = mockResolve()
-      db.unit.batchUpdateDeactivationReasons = mockResolve()
-      AppError.badRequest = mock('')
-      target.sendDeactivationNotifications = mock()
-
-      expect(() => target.deactivateExperimentalUnits(payload, context, testTx)).toThrow()
-      expect(AppError.badRequest).toHaveBeenCalledTimes(1)
-      expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
-      expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
-      expect(db.unit.batchUpdateDeactivationReasons).not.toHaveBeenCalled()
     })
 
     test('calls the sendDeactivationNotifications function', () => {
@@ -658,6 +646,70 @@ describe('ExperimentalUnitService', () => {
       cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
 
       expect(() => target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])).not.toThrow()
+    })
+  })
+
+  describe('validatedDeactivations', () => {
+    const testError = { message: 'error' }
+
+    test('throws if not every unit in payload has a deactivationReason', () => {
+      QuestionsUtil.getAnswerKeys = mockResolve([])
+      const payload = [
+        { setEntryId: 1 },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+      AppError.badRequest = mock(testError)
+
+      return target.validateDeactivations(payload).catch((error) => {
+        expect(error).toBe(testError)
+        expect(QuestionsUtil.getAnswerKeys).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Please provide a deactivation reason for each experimental unit to be deactivated.', undefined, '17L001')
+      })
+    })
+
+    test('throws if a deactivationReason is not in the questions system', () => {
+      QuestionsUtil.getAnswerKeys = mockResolve(['fizz', 'bang', 'foo', 'bar'])
+      const payload = [
+        { setEntryId: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: 'biz' },
+      ]
+      AppError.badRequest = mock(testError)
+
+      return target.validateDeactivations(payload).catch((error) => {
+        expect(error).toBe(testError)
+        expect(QuestionsUtil.getAnswerKeys).toHaveBeenCalled()
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid deactivation reasons provided: ["biz"]', undefined, '17L002')
+      })
+    })
+
+    test('does not handle errors thrown by QuestionsUtil', () => {
+      QuestionsUtil.getAnswerKeys = mockReject(testError)
+      const payload = [
+        { setEntryId: 1 },
+        { id: 2, deactivationReason: 'bar' },
+      ]
+      AppError.badRequest = mock(testError)
+
+      return target.validateDeactivations(payload).catch((error) => {
+        expect(error).toBe(testError)
+        expect(QuestionsUtil.getAnswerKeys).toHaveBeenCalled()
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
+    })
+
+    test('returns undefined if all validations pass', () => {
+      QuestionsUtil.getAnswerKeys = mockResolve(['fizz', 'bang', 'foo', 'bar'])
+      const payload = [
+        { setEntryId: 1, deactivationReason: 'foo' },
+        { id: 2, deactivationReason: null },
+      ]
+      AppError.badRequest = mock(testError)
+
+      return target.validateDeactivations(payload).then((result) => {
+        expect(result).toBe(undefined)
+        expect(QuestionsUtil.getAnswerKeys).toHaveBeenCalled()
+        expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
     })
   })
 })

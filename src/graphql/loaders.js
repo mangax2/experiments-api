@@ -157,8 +157,6 @@ function createLoaders(tx) {
 
   const unitSpecDetailByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
     db.unitSpecificationDetail.batchFindAllByExperimentId, unitSpecDetailByIdLoader)
-  const analysisModelByExperimentIdLoader = createLoaderToPrimeCacheOfChildren(
-    db.analysisModel.batchFindByExperimentIds, analysisModelByIdLoader)
 
   return {
     associatedFactorLevel: associatedFactorLevelsByNestedFactorLevelIds,
@@ -202,7 +200,6 @@ function createLoaders(tx) {
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,
     analysisModel: analysisModelByIdLoader,
-    analysisModelByExperimentIds: analysisModelByExperimentIdLoader,
   }
 }
 

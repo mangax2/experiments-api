@@ -113,7 +113,7 @@ export default {
     units: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(entity.id),
     analysisModel: (entity, args, context) =>
-      context.loaders.analysisModelByExperimentIds.load(entity.id),
+      context.loaders.analysisModel.load(entity.id),
   },
   ExperimentalSet: {
     groupsJSON: (entity, args, context) =>
@@ -135,7 +135,7 @@ export default {
     owners: (entity, args, context) =>
       context.loaders.ownersByExperimentIds.load(entity.id),
     analysisModel: (entity, args, context) =>
-      context.loaders.analysisModelByExperimentIds.load(entity.id),
+      context.loaders.analysisModel.load(entity.id),
   },
   TreatmentVariable: {
     experimentId: property('experiment_id'),

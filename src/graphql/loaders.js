@@ -37,6 +37,9 @@ const transactionalBatchResolverWrapper =
 
 function createLoaders(tx) {
   const transactionalWrapper = transactionalBatchResolverWrapper(tx)
+
+  // This function is to be used for one-to-one relationships
+  // (e.g. Each Experiment has one and only one Analysis Model)
   const createDataLoader = batchLoaderCallback =>
     new DataLoader(transactionalWrapper(batchLoaderCallback))
 
@@ -93,6 +96,11 @@ function createLoaders(tx) {
   const blocksByBlockIdsLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg => db.block.batchFind(arg, tx))))
+
+  const locationAssociationByExperimentIdsLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg => db.locationAssociation.findByExperimentId(arg, tx))))
+
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
@@ -200,6 +208,7 @@ function createLoaders(tx) {
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,
     analysisModel: analysisModelByIdLoader,
+    locationAssociationByExperimentId: locationAssociationByExperimentIdsLoader,
   }
 }
 

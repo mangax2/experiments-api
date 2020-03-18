@@ -67,6 +67,11 @@ export default {
       return context.loaders.blocksByBlockIds.load(args.blockId)
     },
   },
+  AssociatedSet: {
+    blockId: property('block_id'),
+    blockName: property('block_name'),
+    setId: property('set_id'),
+  },
   Block: {
     experimentId: property('experiment_id'),
     auditInfo: (entity, args, context) =>
@@ -114,6 +119,8 @@ export default {
       context.loaders.unitByExperimentIds.load(entity.id),
     analysisModel: (entity, args, context) =>
       context.loaders.analysisModel.load(entity.id),
+    associatedSets: (entity, args, context) =>
+      context.loaders.locationAssociationByExperimentId.load(entity.id),
   },
   ExperimentalSet: {
     groupsJSON: (entity, args, context) =>

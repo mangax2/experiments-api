@@ -15,7 +15,7 @@ class locationAssociationRepo {
   findBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
 
   @setErrorCode('5P3000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT la.* FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
+  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT la.*, b.name as block_name FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
 
   @setErrorCode('5P7000')
   batchFindExperimentBySetId = (setIds, tx = this.rep) => {

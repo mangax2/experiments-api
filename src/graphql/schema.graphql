@@ -7,6 +7,13 @@ enum DateFormat {
     YYYYMM
 }
 
+type AssociatedSet {
+  location: Int
+  blockId: Int
+  blockName: String
+  setId: Int
+}
+
 type AuditInfo {
   createdUserId: String
   modifiedUserId: String
@@ -84,6 +91,7 @@ type Experiment {
   units: [ExperimentalUnit]
   analysisModel: AnalysisModel
   isTemplate: Boolean
+  associatedSets: [AssociatedSet]
 }
 
 type ExperimentalSet {

@@ -52,7 +52,7 @@ class VaultUtil {
           this.cloudFrontPrivateKey = vaultObj.body.data.privateKey
           this.cloudFrontUrl = vaultObj.body.data.url
         })
-        const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
+        const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/kafka2`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.kafkaPrivateKey = Buffer.from(vaultObj.body.data.privateKey, 'base64').toString()
           this.kafkaPassword = vaultObj.body.data.password
           this.kafkaClientCert = Buffer.from(vaultObj.body.data.clientCert, 'base64').toString()

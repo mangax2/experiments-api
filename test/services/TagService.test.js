@@ -217,10 +217,7 @@ describe('TagService', () => {
       HttpUtil.delete = mockResolve([])
       target.getEntityName = mock('experiment')
       return target.deleteTagsForExperimentId(1, context, false).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}, {
-          headerName: 'oauth_resourceownerinfo',
-          headerValue: 'username=KMCCL',
-        }])
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
       })
     })
 
@@ -229,10 +226,7 @@ describe('TagService', () => {
       HttpUtil.delete = mockReject({ status: 404 })
       target.getEntityName = mock('experiment')
       return target.deleteTagsForExperimentId(1, context, false).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}, {
-          headerName: 'oauth_resourceownerinfo',
-          headerValue: 'username=KMCCL',
-        }])
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
       })
     })
 

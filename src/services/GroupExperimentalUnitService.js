@@ -119,10 +119,7 @@ class GroupExperimentalUnitService {
   @setErrorCode('1Fd000')
   getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
     PingUtil.getMonsantoHeader().then((header) => {
-      header.push({
-        headerName: 'oauth_resourceownerinfo',
-        headerValue: `username=${context.userId},user_id=${context.userId}`,
-      })
+      header.push({ headerName: 'calling-user', headerValue: context.userId })
       return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
         .then((originalSet) => {
           const originals = []

@@ -46,7 +46,7 @@ class unitSpecificationDetailRepo {
   @setErrorCode('5L5000')
   batchUpdate = (unitSpecificationDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['id', 'value', 'uom_code', 'uom_id', 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
+      ['id', 'value', 'uom_code', { name: 'uom_id', cast: 'int' }, 'ref_unit_spec_id', 'experiment_id', 'modified_user_id', 'modified_date'],
       { table: 'unit_spec_detail' },
     )
 

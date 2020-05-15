@@ -4,6 +4,7 @@ import db from '../db/DbManager'
 import DesignSpecificationDetailService from '../services/DesignSpecificationDetailService'
 import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
+import TagService from '../services/TagService'
 import TreatmentWithBlockService from '../services/TreatmentWithBlockService'
 import UnitWithBlockService from '../services/UnitWithBlockService'
 
@@ -101,6 +102,10 @@ function createLoaders(tx) {
     new DataLoader(args =>
       tx.batch(_.map(args, arg => db.locationAssociation.findByExperimentId(arg, tx))))
 
+  const tagsByExperimentIdLoader =
+    new DataLoader(args =>
+      tx.batch(_.map(args, arg =>
+        new TagService().getTagsByExperimentId(arg, false, tx))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(db.combinationElement.batchFind)
@@ -198,6 +203,7 @@ function createLoaders(tx) {
     refUnitType: refUnitTypeByIdLoader,
     setBySetIds: groupBySetIdLoader,
     setsBySetIds: setsBySetIdsLoader,
+    tagsByExperimentId: tagsByExperimentIdLoader,
     template: templateByIdLoader,
     templates: createDataLoader(templatesBatchLoaderCallback),
     treatmentByExperimentIds: treatmentByExperimentIdLoader,

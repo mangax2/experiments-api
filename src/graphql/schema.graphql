@@ -92,6 +92,7 @@ type Experiment {
   analysisModel: AnalysisModel
   isTemplate: Boolean
   associatedSets: [AssociatedSet]
+  tags: [Tag]
 }
 
 type ExperimentalSet {
@@ -137,6 +138,11 @@ type ExperimentInfo {
   auditInfo: AuditInfo
   owners: Owner
   analysisModel: AnalysisModel
+}
+
+type Tag {
+  category: String
+  value: String
 }
 
 type TreatmentVariable {

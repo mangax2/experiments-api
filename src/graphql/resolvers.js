@@ -121,6 +121,8 @@ export default {
       context.loaders.analysisModel.load(entity.id),
     associatedSets: (entity, args, context) =>
       context.loaders.locationAssociationByExperimentId.load(entity.id),
+    tags: (entity, args, context) =>
+      context.loaders.tagsByExperimentId.load(entity.id),
   },
   ExperimentalSet: {
     groupsJSON: (entity, args, context) =>

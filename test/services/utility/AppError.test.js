@@ -82,11 +82,28 @@ describe('AppError', () => {
     })
   })
 
-  describe('internalServer Error', () => {
+  describe('internalServerError', () => {
     test('returns a 500 error status Code', () => {
-      const error = AppError.create(500)
+      const error = AppError.internalServerError()
       expect(error.status).toEqual(500)
       expect(error.errorMessage).toEqual('An internal server error occurred')
+    })
+  })
+
+  describe('internalServerErrorWithMessage', () => {
+    test('returns a 500 error status Code', () => {
+      const error = AppError.internalServerErrorWithMessage()
+      expect(error.status).toEqual(500)
+    })
+    test('sets the message with the passed in message', () => {
+      const error = AppError.internalServerErrorWithMessage('an error occurred on the server')
+      expect(error.status).toEqual(500)
+      expect(error.errorMessage).toEqual('an error occurred on the server')
+    })
+    test('sets the message to Http status if none provided', () => {
+      const error = AppError.internalServerErrorWithMessage()
+      expect(error.status).toEqual(500)
+      expect(error.errorMessage).toEqual('Internal Server Error')
     })
   })
 })

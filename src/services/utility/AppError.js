@@ -55,3 +55,9 @@ exports.notFound = function (message, data, errorCode) {
 exports.internalServerError = function (message, data, errorCode) {
   return create(500, message, data, errorCode, exports.internalServerError)
 }
+
+exports.internalServerErrorWithMessage = function (message, data, errorCode) {
+  const error = create(500, message, data, errorCode, exports.internalServerError)
+  error.errorMessage = message || internals.STATUS_CODES[500]
+  return error
+}

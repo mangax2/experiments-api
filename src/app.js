@@ -117,6 +117,10 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
     // improperly formatted, but eslint says it is not being used.
     // eslint-disable-next-line
     app.use((err, req, res, next) => {
+      // if the err is a superagent response, strip the request so we don't show a bearer token
+      if (_.get(err, 'response.request')) {
+        err.response.request = { toJSON: () => null }
+      }
       if (err) {
         if (_.isArray(err)) {
           logError(err, req.context)

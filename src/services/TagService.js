@@ -4,6 +4,7 @@ import TagValidator from '../validations/TagValidator'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
 import cfServices from './utility/ServiceConfig'
+import AppError from './utility/AppError'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -22,11 +23,14 @@ class TagService {
         const headers = header.slice()
         const experimentIds = _.uniq(_.map(tags, 'experimentId'))
         const tagsRequest = this.createTagRequest(tags, experimentIds, isTemplate)
-        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(`[[${context.requestId}]] An error occurred while creating the tags.`, err)
-          err.errorCode = getFullErrorCode('1P1001')
-          return Promise.reject(err)
-        })
+        return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags`, headers, tagsRequest)
+          .then(() => Promise.resolve())
+          .catch((err) => {
+            const errorMessage = `[[${context.requestId}]] An error occurred while creating the tags.`
+            const data = _.get(err, 'response.body')
+            logger.error(errorMessage, data)
+            return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P1001')))
+          })
       }))
   }
 
@@ -45,11 +49,14 @@ class TagService {
       .then(() => PingUtil.getMonsantoHeader().then((header) => {
         const headers = header.slice()
         const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
-        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${experimentId}`, headers, tagsRequest).then(() => Promise.resolve()).catch((err) => {
-          logger.error(`[[${context.requestId}]] An error occurred while saving the tags.`, err)
-          err.errorCode = getFullErrorCode('1P3001')
-          return Promise.reject(err)
-        })
+        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${experimentId}`, headers, tagsRequest)
+          .then(() => Promise.resolve())
+          .catch((err) => {
+            const errorMessage = `[[${context.requestId}]] An error occurred while saving the tags.`
+            const data = _.get(err, 'response.body')
+            logger.error(errorMessage, data)
+            return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P3001')))
+          })
       }))
   }
 
@@ -63,9 +70,10 @@ class TagService {
             if (err.status === 404) {
               return Promise.resolve([])
             }
-            logger.error(`[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`, err)
-            err.errorCode = getFullErrorCode('1P4001')
-            return Promise.reject(err)
+            const errorMessage = `[[${context.requestId}]] An error occurred while getting the tags for ${this.getEntityName(isTemplate)} id: ${id}`
+            const data = _.get(err, 'response.body')
+            logger.error(errorMessage, data)
+            return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P4001')))
           }),
       )
 
@@ -84,22 +92,32 @@ class TagService {
     })
 
   @setErrorCode('1P6000')
-  getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate, context) => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header).then(result => result.body).catch((err) => {
-    logger.error(`[[${context.requestId}]] An error occured while gettings tags by filters.`, err)
-    err.errorCode = getFullErrorCode('1P6001')
-    return Promise.reject(err)
-  }),
-  )
+  getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate, context) =>
+    PingUtil.getMonsantoHeader()
+      .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header))
+      .then(result => result.body)
+      .catch((err) => {
+        const errorMessage = `[[${context.requestId}]] An error occurred while getting tags by filters.`
+        const data = _.get(err, 'response.body')
+        logger.error(errorMessage, data)
+        return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P6001')))
+      })
+
 
   @setErrorCode('1P7000')
-  getAllTagsForEntity = entityName => PingUtil.getMonsantoHeader().then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${entityName}`, header).then(result => result.body).catch((err) => {
-    if (err.status === 404) {
-      return Promise.resolve([])
-    }
-    err.errorCode = getFullErrorCode('1P7001')
-    return Promise.reject(err)
-  }),
-  )
+  getAllTagsForEntity = entityName => PingUtil.getMonsantoHeader()
+    .then(header => HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${entityName}`, header))
+    .then(result => result.body)
+    .catch((err) => {
+      if (err.status === 404) {
+        return Promise.resolve([])
+      }
+      const errorMessage = 'An error occurred while retrieving tags.'
+      const data = _.get(err, 'response.body')
+      logger.error(errorMessage, data)
+      return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P7001')))
+    })
+
 
   @setErrorCode('1P8000')
   getEntityName = (isTemplate) => {
@@ -111,17 +129,21 @@ class TagService {
 
   @setErrorCode('1P9000')
   deleteTagsForExperimentId = (id, context, isTemplate) =>
-    PingUtil.getMonsantoHeader().then((header) => {
-      const headers = header.slice()
-      return HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, headers).then(() => Promise.resolve()).catch((err) => {
+    PingUtil.getMonsantoHeader()
+      .then((header) => {
+        const headers = header.slice()
+        return HttpUtil.delete(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, headers)
+      })
+      .then(() => Promise.resolve())
+      .catch((err) => {
         if (err.status === 404) {
           return Promise.resolve()
         }
-        err.errorCode = getFullErrorCode('1P9001')
-        return Promise.reject(err)
+        const errorMessage = `[[${context.requestId}]] An error occurred while deleting tags.`
+        const data = _.get(err, 'response.body')
+        logger.error(errorMessage, data)
+        return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P9001')))
       })
-    },
-    )
 }
 
 module.exports = TagService

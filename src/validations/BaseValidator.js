@@ -1,12 +1,9 @@
 import * as _ from 'lodash'
-import log4js from 'log4js'
 import validator from 'validator'
 import AppError from '../services/utility/AppError'
 import ReferentialIntegrityService from '../services/ReferentialIntegrityService'
 
 const { getFullErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('BaseValidator')
 
 /* istanbul ignore next */
 function promiseAllOrTransactionBatch(promises, optionalTransaction) {
@@ -63,12 +60,12 @@ class BaseValidator {
   postValidate = () => Promise.resolve()
 
   validateEntity = (targetObject) => {
-    logger.error(`validateEntity validation method not implemented to validate ${targetObject}`)
+    console.error(`validateEntity validation method not implemented to validate ${targetObject}`)
     return Promise.reject(AppError.internalServerError('Server error, please contact support', undefined, getFullErrorCode('300001')))
   }
 
   validateBatchForRI = () => {
-    logger.error('validateBatchForRI validation method not implemented to validate')
+    console.error('validateBatchForRI validation method not implemented to validate')
     return Promise.reject(AppError.internalServerError('Server error, please contact support', undefined, getFullErrorCode('300002')))
   }
 

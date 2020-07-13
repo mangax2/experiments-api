@@ -1,7 +1,7 @@
 import {
   has, property, compact, uniq,
 } from 'lodash'
-import cfServices from '../services/utility/ServiceConfig'
+import settings from '../config/settings'
 
 const checkIdArrayLength = (ids, maxLength) => {
   if (ids.length > maxLength) {
@@ -14,7 +14,7 @@ export default {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
     getExperimentsByIds: (entity, args, context) => {
-      checkIdArrayLength(args.ids, cfServices.experimentApiConfigurables.maxExperimentsToRetrieve)
+      checkIdArrayLength(args.ids, settings.maxExperimentsToRetrieve)
       return Promise.all(
         uniq(args.ids).map(id =>
           context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
@@ -63,7 +63,7 @@ export default {
     getTreatmentsBySetId: (entity, args, context) =>
       context.loaders.treatmentBySetIds.load(args.setId),
     getBlocksByBlockIds: (entity, args, context) => {
-      checkIdArrayLength(args.blockId, cfServices.experimentApiConfigurables.maxBlocksToRetrieve)
+      checkIdArrayLength(args.blockId, settings.maxBlocksToRetrieve)
       return context.loaders.blocksByBlockIds.load(args.blockId)
     },
   },

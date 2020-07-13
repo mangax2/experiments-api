@@ -1,13 +1,10 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfServices from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('PreferencesService')
 
 // Error Codes 1XXXXX
 class PreferencesService {
@@ -44,9 +41,9 @@ class PreferencesService {
       // replace the auth header with a user authheader
         const authHeader = _.find(headers, header => header.headerName === 'authorization')
         authHeader.headerValue = authorizationHeader
-        return HttpUtil.get(`${cfServices.experimentsExternalAPIUrls.value.preferencesAPIUrl}/user/${namespace}/${subNamespace}`, headers)
+        return HttpUtil.get(`${apiUrls.preferencesAPIUrl}/user/${namespace}/${subNamespace}`, headers)
           .catch((err) => {
-            logger.error(`[[${context.requestId}]] Error received from Preferences API.`, err)
+            console.error(`[[${context.requestId}]] Error received from Preferences API.`, err)
             throw this.handlePreferencesAPIError(err, getFullErrorCode('1X2001'))
           })
       })
@@ -58,9 +55,9 @@ class PreferencesService {
       // replace the auth header with a user authheader
         const authHeader = _.find(headers, header => header.headerName === 'authorization')
         authHeader.headerValue = authorizationHeader
-        return HttpUtil.put(`${cfServices.experimentsExternalAPIUrls.value.preferencesAPIUrl}/user/${namespace}/${subNamespace}`, headers, preferences)
+        return HttpUtil.put(`${apiUrls.preferencesAPIUrl}/user/${namespace}/${subNamespace}`, headers, preferences)
           .catch((err) => {
-            logger.error(`[[${context.requestId}]] Error received from Preference API.`, err)
+            console.error(`[[${context.requestId}]] Error received from Preference API.`, err)
             throw this.handlePreferencesAPIError(err, getFullErrorCode('1X3001'))
           })
       })

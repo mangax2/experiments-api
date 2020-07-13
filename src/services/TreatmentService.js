@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
@@ -9,8 +8,6 @@ import TreatmentBlockService from './TreatmentBlockService'
 import TreatmentValidator from '../validations/TreatmentValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('TreatmentService')
 
 // Error Codes 1RXXXX
 class TreatmentService {
@@ -33,7 +30,7 @@ class TreatmentService {
   batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.requestId}]] Treatment not found for all requested ids.`)
+        console.error(`[[${context.requestId}]] Treatment not found for all requested ids.`)
         throw AppError.notFound('Treatment not found for all requested ids.', undefined, getFullErrorCode('1R4001'))
       } else {
         return data
@@ -58,7 +55,7 @@ class TreatmentService {
       return db.treatment.batchRemove(ids, tx)
         .then((data) => {
           if (_.filter(data, element => element !== null).length !== ids.length) {
-            logger.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
+            console.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
             throw AppError.notFound('Not all treatments requested for delete were found', undefined, getFullErrorCode('1R6001'))
           } else {
             return data

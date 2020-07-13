@@ -4,7 +4,7 @@ import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import PingUtil from '../services/utility/PingUtil'
-import cfServices from '../services/utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 import config from '../../config'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -12,7 +12,7 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 
 function getPAPIResult(graphqlQuery, errorCode) {
   return PingUtil.getMonsantoHeader().then(header =>
-    HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+    HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
       .then((result) => {
         const errors = _.get(result, 'body.errors')
         if (errors && errors.length > 0) {

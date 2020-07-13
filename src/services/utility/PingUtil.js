@@ -1,18 +1,16 @@
-import log4js from 'log4js'
 import AppError from './AppError'
 import HttpUtil from './HttpUtil'
+import VaultUtil from './VaultUtil'
+import apiUrls from '../../config/apiUrls'
 
 const oauthPing = require('@monsantoit/oauth-ping')
-const cfServices = require('./ServiceConfig')
-
-const logger = log4js.getLogger('PingUtil')
 
 class PingUtil {
   static getMonsantoHeader() {
     const params = {
-      clientId: cfServices.pingDataSource.clientId,
-      clientSecret: cfServices.pingDataSource.clientSecret,
-      url: cfServices.pingDataSource.url,
+      clientId: VaultUtil.clientId,
+      clientSecret: VaultUtil.clientSecret,
+      url: `${apiUrls.pingUrl}/token.oauth2`,
     }
     const startTime = new Date().getTime()
     return oauthPing.httpGetToken(params)().then((token) => {
@@ -22,7 +20,7 @@ class PingUtil {
         { headerName: 'Content-Type', headerValue: 'application/json' },
       ]
     }).catch((error) => {
-      logger.error('Authentication service returned error', error)
+      console.error('Authentication service returned error', error)
       return Promise.reject(AppError.create(500, 'Internal Server Error', 'Authentication service returned an error'))
     })
   }

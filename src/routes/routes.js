@@ -1,5 +1,4 @@
 import express from 'express'
-import log4js from 'log4js'
 import pt from 'promise-timeout'
 import _ from 'lodash'
 import BlockService from '../services/BlockService'
@@ -28,12 +27,10 @@ import UnitWithBlockService from '../services/UnitWithBlockService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 
-
-const logger = log4js.getLogger('Router')
 const router = express.Router()
 
 router.get('/ping', (req, res) => {
-  logger.debug(`the user for /ping url is ${req.userProfile.id}`)
+  console.info(`the user for /ping url is ${req.userProfile.id}`)
   return res.json({ message: 'Received Ping request: Experiments API !!!' })
 })
 
@@ -109,14 +106,14 @@ router.get('/experiments/:id/experimental-units', (req, res, next) => new UnitWi
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 router.patch('/experiments/:id/experimental-units', (req, res, next) => {
-  logger.info(`[[${req.context.requestId}]] Attempting to associate units to entries for experiment "${req.params.id}". Values: ${JSON.stringify(req.body)}`)
+  console.info(`[[${req.context.requestId}]] Attempting to associate units to entries for experiment "${req.params.id}". Values: ${JSON.stringify(req.body)}`)
   return new ExperimentalUnitService().batchPartialUpdateExperimentalUnits(req.body, req.context)
     .then((value) => {
-      logger.info(`[[${req.context.requestId}]] Association succeeded.`)
+      console.info(`[[${req.context.requestId}]] Association succeeded.`)
       return res.json(value)
     })
     .catch((err) => {
-      logger.warn(`[[${req.context.requestId}]] Association FAILED.`, err)
+      console.warn(`[[${req.context.requestId}]] Association FAILED.`, err)
       return next(err)
     })
 })

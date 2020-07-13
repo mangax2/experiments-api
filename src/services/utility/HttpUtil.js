@@ -1,8 +1,5 @@
 const agent = require('superagent')
 const _ = require('lodash')
-const log4js = require('log4js')
-
-const logger = log4js.getLogger('HttpUtilService')
 
 class HttpUtil {
   static get(url, headers, threshold = 10000) {
@@ -95,16 +92,15 @@ class HttpUtil {
     return 'Unable to retrieve error message.'
   }
 
-  // Ignoring code coverage. Mocking out log4js at start, else we'd get a lot of logs in our test
   /* istanbul ignore next */
   static logExternalTime(startTime, threshold, url, operation) {
     const endTime = new Date().getTime()
     const totalTime = endTime - startTime
 
     if (totalTime >= threshold) {
-      logger.warn(`${operation} call on ${url} took ${totalTime / 1000} seconds to complete`)
+      console.warn(`${operation} call on ${url} took ${totalTime / 1000} seconds to complete`)
     } else {
-      logger.debug(`${operation} call on ${url} took ${totalTime / 1000} seconds to complete`)
+      console.info(`${operation} call on ${url} took ${totalTime / 1000} seconds to complete`)
     }
   }
 }

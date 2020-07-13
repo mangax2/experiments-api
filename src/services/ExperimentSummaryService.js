@@ -1,12 +1,9 @@
-import log4js from 'log4js'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('ExperimentSummaryService')
 
 // Error Codes 19XXXX
 class ExperimentSummaryService {
@@ -21,7 +18,7 @@ class ExperimentSummaryService {
       .then(() => db.experimentSummary.find(id, tx)
         .then((data) => {
           if (!data) {
-            logger.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
+            console.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)
             throw AppError.notFound('Experiment Summary Not Found for requested experimentId', undefined, getFullErrorCode('191001'))
           } else {
             data.numberOfTreatmentVariables = data.number_of_independent_variables

@@ -1,5 +1,4 @@
 import * as _ from 'lodash'
-import log4js from 'log4js'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -8,8 +7,6 @@ import FactorLevelsValidator from '../validations/FactorLevelsValidator'
 import FactorService from './FactorService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('FactorLevelService')
 
 // Error Codes 1CXXXX
 class FactorLevelService {
@@ -44,7 +41,7 @@ class FactorLevelService {
   batchDeleteFactorLevels = (ids, context, tx) => db.factorLevel.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.requestId}]] Not all factor levels requested for delete were found`)
+        console.error(`[[${context.requestId}]] Not all factor levels requested for delete were found`)
         throw AppError.notFound('Not all factor levels requested for delete were found', undefined, getFullErrorCode('1C7001'))
       } else {
         return data

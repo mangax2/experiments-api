@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import KafkaProducer from '../services/kafka/KafkaProducer'
-import cfServices from '../services/utility/ServiceConfig'
+import kafkaConfig from '../config/kafkaConfig'
 
 function sendKafkaNotification(event, id) {
   const message =
@@ -12,9 +12,9 @@ function sendKafkaNotification(event, id) {
 
   return KafkaProducer.publish(
     {
-      topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+      topic: kafkaConfig.topics.product360OutgoingTopic,
       message,
-      schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+      schemaId: kafkaConfig.schema.product360Outgoing,
     })
 }
 
@@ -44,7 +44,7 @@ function notifyChanges(event, argIdx, sendArgIdx) {
       return result
     })
 
-    if (cfServices.experimentsKafka.value.enableKafka === 'true') {
+    if (kafkaConfig.enableKafka === 'true') {
       if (descriptor.value) {
         // This section handles traditional javascript functions [function (arg) { //logic }]
         const wrappedFunction = descriptor.value

@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
@@ -19,12 +18,11 @@ import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfServices from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
+import awsConfig from '../config/awsConfig'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('GroupExperimentalUnitService')
 
 const trimGroupGenerationData =
   (variables, variableLevels, treatments, combinationElements, units) => {
@@ -120,7 +118,7 @@ class GroupExperimentalUnitService {
   getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
     PingUtil.getMonsantoHeader().then((header) => {
       header.push({ headerName: 'calling-user', headerValue: context.userId })
-      return HttpUtil.getWithRetry(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}?entries=true`, header)
+      return HttpUtil.getWithRetry(`${apiUrls.setsAPIUrl}/sets/${setId}?entries=true`, header)
         .then((originalSet) => {
           const originals = []
           _.forEach(originalSet.body.entries, (entry) => {
@@ -128,7 +126,7 @@ class GroupExperimentalUnitService {
           })
 
           const originalsDeletePromise = originals.length > 0
-            ? HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
+            ? HttpUtil.patch(`${apiUrls.setsAPIUrl}/sets/${setId}`, header, { entries: originals })
             : Promise.resolve()
 
           const entries = []
@@ -136,13 +134,13 @@ class GroupExperimentalUnitService {
             entries.push({})
           }
           return originalsDeletePromise
-            .then(() => HttpUtil.patch(`${cfServices.experimentsExternalAPIUrls.value.setsAPIUrl}/sets/${setId}`, header, {
+            .then(() => HttpUtil.patch(`${apiUrls.setsAPIUrl}/sets/${setId}`, header, {
               entries,
               layout: [],
             }))
         })
     }).catch((err) => {
-      logger.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err.response.error)
+      console.error(`[[${context.requestId}]] An error occurred while communicating with the sets service`, err.response.error)
       throw AppError.internalServerError('An error occurred while communicating with the sets service.', undefined, getFullErrorCode('1Fd001'))
     })
 
@@ -150,7 +148,7 @@ class GroupExperimentalUnitService {
   verifySetAndGetDetails = (setId, context, tx) =>
     this.locationAssocWithBlockService.getBySetId(setId, tx).then((locAssociation) => {
       if (!locAssociation) {
-        logger.error(`[[${context.requestId}]] No set found for id ${setId}.`)
+        console.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
       }
       const experimentId = locAssociation.experiment_id
@@ -166,7 +164,7 @@ class GroupExperimentalUnitService {
               || _.find(designSpecs, sd => sd.ref_design_spec_id === repsRefDesignSpec.id)
 
           if (!repDesignSpecDetail) {
-            logger.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
+            console.error(`[[${context.requestId}]] The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`)
             throw AppError.badRequest(`The specified set (id ${setId}) does not have a minimum number of reps and cannot be reset.`,
               undefined, getFullErrorCode('1FK002'))
           }
@@ -236,7 +234,7 @@ class GroupExperimentalUnitService {
 
         // return AWSUtil.callLambdaLocal(body)
         // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-        return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+        return AWSUtil.callLambda(awsConfig.lambdaName, body)
       }))
 
       return Promise.all(groupPromises)
@@ -296,7 +294,7 @@ class GroupExperimentalUnitService {
 
       // return AWSUtil.callLambdaLocal(body)
       // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-      return AWSUtil.callLambda(cfServices.aws.lambdaName, body)
+      return AWSUtil.callLambda(awsConfig.lambdaName, body)
         .then((data) => {
           const response = JSON.parse(data.Payload)
           this.lambdaPerformanceService.savePerformanceStats(response.inputSize,

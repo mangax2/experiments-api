@@ -1,21 +1,18 @@
 import { ConsumerGroup } from 'kafka-node'
-import log4js from 'log4js'
 import avro from 'avsc'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import VaultUtil from '../utility/VaultUtil'
-import cfServices from '../utility/ServiceConfig'
+import kafkaConfig from '../../config/kafkaConfig'
 import db from '../../db/DbManager'
 import { sendKafkaNotification } from '../../decorators/notifyChanges'
-
-const logger = log4js.getLogger('SetsChangesListener')
 
 class SetsChangesListener {
   listen() {
     const params = {
       client_id: VaultUtil.clientId,
       groupId: VaultUtil.clientId,
-      kafkaHost: cfServices.experimentsKafka.value.host,
+      kafkaHost: kafkaConfig.host,
       ssl: true,
       sslOptions: {
         cert: VaultUtil.kafkaClientCert,
@@ -26,7 +23,7 @@ class SetsChangesListener {
       encoding: 'buffer',
     }
 
-    const topics = [cfServices.experimentsKafka.value.topics.setsChangesTopic]
+    const topics = [kafkaConfig.topics.setsChangesTopic]
     this.consumer = SetsChangesListener.createConsumer(params, topics)
 
     // cannot test this event
@@ -44,7 +41,7 @@ class SetsChangesListener {
   dataHandler = messageSet => Promise.all(_.map(messageSet, (m) => {
     const message = m.value
 
-    logger.info(m.topic, m.partition, m.offset)
+    console.info(m.topic, m.partition, m.offset)
     const type = avro.Type.forSchema({
       type: 'record',
       fields: [
@@ -63,11 +60,11 @@ class SetsChangesListener {
       const setId = data.resource_id
       return this.clearSet(setId).then((setClearResults) => {
         if (!_.isNil(setClearResults)) {
-          logger.info(`Successfully cleared SetId: ${setId} and related set entry ids`)
+          console.info(`Successfully cleared SetId: ${setId} and related set entry ids`)
           sendKafkaNotification('update', setClearResults.experiment_id)
         }
       }).catch((err) => {
-        logger.error(`Failed to clear setId: ${setId}`, err)
+        console.error(`Failed to clear setId: ${setId}`, err)
         return Promise.reject(err)
       })
     }

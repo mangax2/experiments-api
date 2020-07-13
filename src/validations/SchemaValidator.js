@@ -1,9 +1,6 @@
-import log4js from 'log4js'
 import * as _ from 'lodash'
 import BaseValidator from './BaseValidator'
 import AppError from '../services/utility/AppError'
-
-const logger = log4js.getLogger('SchemaValidator')
 
 class SchemaValidator extends BaseValidator {
   schemaCheck(targetObject, schema, optionalTransaction) {
@@ -116,17 +113,17 @@ class SchemaValidator extends BaseValidator {
   }
 
   getSchema = () => {
-    logger.error('getSchema not implemented')
+    console.error('getSchema not implemented')
     throw new Error('getSchema not implemented')
   }
 
   getBusinessKeyPropertyNames = () => {
-    logger.error('getBusinessKeyPropertyNames not implemented')
+    console.error('getBusinessKeyPropertyNames not implemented')
     throw new Error('getBusinessKeyPropertyNames not implemented')
   }
 
   getDuplicateBusinessKeyError = () => {
-    logger.error('getDuplicateBusinessKeyError not implemented')
+    console.error('getDuplicateBusinessKeyError not implemented')
     throw new Error('getDuplicateBusinessKeyError not implemented')
   }
 }

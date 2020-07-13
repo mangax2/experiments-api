@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfService from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -20,8 +19,6 @@ import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('ExperimentsService')
 
 // Error Codes 15XXXX
 class ExperimentsService {
@@ -149,7 +146,7 @@ class ExperimentsService {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+        console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('157001'))
       }
     })
@@ -162,7 +159,7 @@ class ExperimentsService {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
-        logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+        console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
         throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
       }
       return data
@@ -208,7 +205,7 @@ class ExperimentsService {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
                 : 'Experiment Not Found to Update for id'
-              logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+              console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
               throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
             } else {
               const comment = {}
@@ -270,8 +267,7 @@ class ExperimentsService {
   @setErrorCode('15T000')
   updateExperimentsRandomizationStrategyId(experimentId, strategyCode, isCreate, context, tx) {
     return PingUtil.getMonsantoHeader().then((headers) => {
-      const { randomizeTreatmentsAPIUrl } =
-        cfService.experimentsExternalAPIUrls.value
+      const { randomizeTreatmentsAPIUrl } = apiUrls
       return HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)
         .then((strategies) => {
           const randStrategy = _.find(strategies.body, strategy =>
@@ -296,17 +292,17 @@ class ExperimentsService {
           return db.experiments.remove(id, isTemplate)
             .then((data) => {
               if (!data) {
-                logger.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
+                console.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
                 throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
               } else {
-                const url = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/experiments/${id}`
+                const url = `${apiUrls.capacityRequestAPIUrl}/requests/experiments/${id}`
 
                 const promises = []
                 const requestPromise = PingUtil.getMonsantoHeader()
                   .then(headers => HttpUtil.get(url, headers)
                     .then((response) => {
                       if (response && response.body) {
-                        const putUrl = `${cfService.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${response.body.id}?type=${response.body.request_type}`
+                        const putUrl = `${apiUrls.capacityRequestAPIUrl}/requests/${response.body.id}?type=${response.body.request_type}`
                         const modifiedData = {
                           request:
                             {
@@ -559,7 +555,7 @@ class ExperimentsService {
   handleReviewStatus = (experimentId, isTemplate, body, context, tx) => {
     const acceptableStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED']
     if (_.isNil(body.status)) {
-      logger.error('Error in handleReviewStatus - Status is not found in request body:', JSON.stringify(body))
+      console.error('Error in handleReviewStatus - Status is not found in request body:', JSON.stringify(body))
       return Promise.reject(AppError.badRequest(`Status must be provided in body. Acceptable options are: ${acceptableStatuses.join(',')}`, null, getFullErrorCode('15P001')))
     }
 
@@ -609,7 +605,7 @@ class ExperimentsService {
             actions: [
               {
                 title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
-                url: `https://${cfService['velocity-home'].value}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
+                url: `https://${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
               },
             ],
             tags: [
@@ -620,7 +616,7 @@ class ExperimentsService {
           }
 
           return PingUtil.getMonsantoHeader().then(headers =>
-            HttpUtil.post(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
+            HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
               .then((taskResult) => {
                 const taskId = taskResult.body.id
                 return db.experiments.updateExperimentStatus(experimentId, 'SUBMITTED', taskId, context, tx)
@@ -655,9 +651,9 @@ class ExperimentsService {
         }
 
         return PingUtil.getMonsantoHeader().then(headers =>
-          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
+          HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
             .catch((err) => {
-              logger.error(`Unable to complete task. Reason: ${err.response.text}`)
+              console.error(`Unable to complete task. Reason: ${err.response.text}`)
               if (err.status !== 404 && err.response.text !== 'task has already been completed') {
                 return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15R003')))
               }
@@ -679,9 +675,9 @@ class ExperimentsService {
         }
 
         return PingUtil.getMonsantoHeader().then(headers =>
-          HttpUtil.put(`${cfService.experimentsExternalAPIUrls.value.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
+          HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
             .catch((err) => {
-              logger.error(`Unable to complete task. Reason: ${err.response.text}`)
+              console.error(`Unable to complete task. Reason: ${err.response.text}`)
 
               if (err.status !== 404 && err.response.text !== 'task has already been completed') {
                 return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15S001')))

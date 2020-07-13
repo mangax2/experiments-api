@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
@@ -12,11 +11,9 @@ import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import KafkaProducer from './kafka/KafkaProducer'
-import cfServices from './utility/ServiceConfig'
+import kafkaConfig from '../config/kafkaConfig'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('ExperimentalUnitService')
 
 const experimentalUnitDeactivationSchema = {
   type: 'record',
@@ -143,7 +140,7 @@ class ExperimentalUnitService {
         const unitsWithoutTreatmentId = _.filter(units, unit => !unit.treatmentId)
         if (unitsWithoutTreatmentId.length > 0) {
           const stringifiedCombinations = JSON.stringify(_.map(unitsWithoutTreatmentId, 'factorLevelKey'))
-          logger.error(`[[${context.requestId}]] Attempted to save the following invalid factor level combinations to Set Id ${setId}: ${stringifiedCombinations}`)
+          console.error(`[[${context.requestId}]] Attempted to save the following invalid factor level combinations to Set Id ${setId}: ${stringifiedCombinations}`)
           throw AppError.badRequest(`One or more entries had an invalid combination of factor level ids. The invalid combinations are: ${stringifiedCombinations}`, undefined, getFullErrorCode('17F002'))
         }
         _.forEach(units, (unit) => {
@@ -261,7 +258,7 @@ class ExperimentalUnitService {
 
   @setErrorCode('17K000')
   sendDeactivationNotifications = (deactivations) => {
-    if (cfServices.experimentsKafka.value.enableKafka === 'true') {
+    if (kafkaConfig.enableKafka === 'true') {
       _.forEach(deactivations, (deactivation) => {
         try {
           const message = {
@@ -270,9 +267,9 @@ class ExperimentalUnitService {
             setEntryId: deactivation.setEntryId,
           }
           KafkaProducer.publish({
-            topic: cfServices.experimentsKafka.value.topics.unitDeactivation,
+            topic: kafkaConfig.topics.unitDeactivation,
             message,
-            schemaId: cfServices.experimentsKafka.value.schema.unitDeactivation,
+            schemaId: kafkaConfig.schema.unitDeactivation,
             schema: experimentalUnitDeactivationSchema,
           })
         } catch (err) {

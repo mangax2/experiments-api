@@ -1,11 +1,8 @@
 import graphqlHTTP from 'express-graphql'
 import { GraphQLError } from 'graphql'
-import log4js from 'log4js'
 import db from '../db/DbManager'
 import loaders from './loaders'
 import config from '../../config'
-
-require('../../log4js-conf')()
 
 function LimitQueryDepth(maxDepth) {
   return (context) => {
@@ -63,8 +60,7 @@ function formatDate(args, date) {
 
 function graphqlMiddlewareFunction(schema) {
   return function (request, response) {
-    const logger = log4js.getLogger('experiments-api-graphql')
-    logger.info(JSON.stringify(request.body))
+    console.info(JSON.stringify(request.body))
 
     return db.tx('GraphQLTransaction', (tx) => {
       const handler = graphqlHTTP({
@@ -83,7 +79,7 @@ function graphqlMiddlewareFunction(schema) {
         validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
         graphiql: config.env === 'local',
       })
-      LogQuery(request.body, request.context, logger)
+      LogQuery(request.body, request.context, console)
       return handler(request, response)
     })
   }

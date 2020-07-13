@@ -1,17 +1,15 @@
 import { ConsumerGroup } from 'kafka-node'
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../../db/DbManager'
 import VaultUtil from '../utility/VaultUtil'
-import cfServices from '../utility/ServiceConfig'
+import kafkaConfig from '../../config/kafkaConfig'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
 import SetEntryRemovalService from '../prometheus/SetEntryRemovalService'
 import LocationAssociationWithBlockService from '../LocationAssociationWithBlockService'
 
-const logger = log4js.getLogger('ManageRepsAndUnitsListener')
 class ManageRepsAndUnitsListener {
   experimentalUnitService = new ExperimentalUnitService()
 
@@ -21,7 +19,7 @@ class ManageRepsAndUnitsListener {
     const params = {
       client_id: VaultUtil.clientId,
       groupId: VaultUtil.clientId,
-      kafkaHost: cfServices.experimentsKafka.value.host,
+      kafkaHost: kafkaConfig.host,
       ssl: true,
       sslOptions: {
         cert: VaultUtil.kafkaClientCert,
@@ -31,7 +29,7 @@ class ManageRepsAndUnitsListener {
       },
     }
 
-    const topics = [cfServices.experimentsKafka.value.topics.repPackingTopic]
+    const topics = [kafkaConfig.topics.repPackingTopic]
     this.consumer = ManageRepsAndUnitsListener.createConsumer(params, topics)
 
     // cannot test this event
@@ -48,7 +46,7 @@ class ManageRepsAndUnitsListener {
 
   dataHandler = (messageSet, topic, partition) => Promise.all(_.map(messageSet, (m) => {
     const message = m.value.toString('utf8')
-    logger.info(topic, partition, m.offset, message)
+    console.info(topic, partition, m.offset, message)
     const set = JSON.parse(message)
     set.entryChanges = _.map(_.filter(set.entryChanges, entry => entry.avail !== 0),
       entryChange => ({
@@ -58,14 +56,14 @@ class ManageRepsAndUnitsListener {
       }))
 
     if (_.filter(set.entryChanges, entry => !entry.setEntryId).length > 0) {
-      logger.warn('An error occurred while parsing the kafka message. At least one SetEntryId was not found.')
+      console.warn('An error occurred while parsing the kafka message. At least one SetEntryId was not found.')
       SetEntryRemovalService.addWarning()
     }
 
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
-      logger.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
+      console.info(`Successfully updated set "${set.setId}" with rep packing changes.`)
     }).catch((err) => {
-      logger.error(`Failed to update set "${set.setId}" with rep packing changes `, message, err)
+      console.error(`Failed to update set "${set.setId}" with rep packing changes `, message, err)
     })
   }))
 
@@ -100,7 +98,7 @@ class ManageRepsAndUnitsListener {
 
   static sendResponseMessage = (setId, isSuccess) => {
     KafkaProducer.publish({
-      topic: cfServices.experimentsKafka.value.topics.repPackingResultTopic,
+      topic: kafkaConfig.topics.repPackingResultTopic,
       message: {
         setId,
         result: isSuccess ? 'SUCCESS' : 'FAILURE',

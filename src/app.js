@@ -1,6 +1,11 @@
-const swaggerTools = require('swagger-tools')
-require('../log4js-conf')()
 const config = require('../config')
+
+if (config.node_env !== 'production') {
+  // eslint-disable-next-line
+  require('@babel/register')
+}
+
+const vaultConfig = require('./config/vaultConfig')
 const swaggerDoc = require('./swagger/swagger.json')
 const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')
 const vaultUtil = require('./services/utility/VaultUtil')
@@ -16,21 +21,16 @@ process.on('unhandledRejection', (reason, p) => {
 })
 
 vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSecretId,
-  config.vaultConfig)
+  vaultConfig)
   .then(() => {
-    if (config.node_env !== 'production') {
-      // eslint-disable-next-line
-      require('@babel/register')
-    }
-
-    const serviceConfig = require('./services/utility/ServiceConfig')
+    const awsConfig = require('./config/awsConfig')
+    const kafkaConfig = require('./config/kafkaConfig')
+    const swaggerTools = require('swagger-tools')
     const express = require('express')
     const _ = require('lodash')
     const inflector = require('json-inflector')
     const bodyParser = require('body-parser')
-    const log4js = require('log4js')
     const promMetrics = require('@monsantoit/prom-metrics')
-    const logger = log4js.getLogger('app')
     const appBaseUrl = '/experiments-api'
     const graphqlBaseUrl = '/experiments-api-graphql'
     const { setErrorPrefix, setPromiseLibrary } = require('@monsantoit/error-decorator')()
@@ -45,7 +45,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
 
     setPromiseLibrary(require('bluebird'))
     setErrorPrefix('EXP')
-    require('./services/utility/AWSUtil').configure(serviceConfig.aws.accessKeyId, serviceConfig.aws.secretAccessKey)
+    require('./services/utility/AWSUtil').configure(awsConfig.accessKeyId, awsConfig.secretAccessKey)
 
     const requestContext = require('./middleware/requestContext')
 
@@ -146,7 +146,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
         return res.status(500).json(err)
       }
 
-      logger.error(err, req.context)
+      console.error(err, req.context)
       return res.status(500).json(err)
     })
 
@@ -155,37 +155,37 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
     const server = app.listen(port, () => {
       const address = server.address()
       const url = `http://${address.host || 'localhost'}:${port}`
-      return logger.info(`Listening at ${url}`)
+      return console.info(`Listening at ${url}`)
     })
 
     const logError = (err, context) => {
       if (err.stack) {
-        logger.error(`[[${context.requestId}]] ${err.errorCode}: ${err.stack}`)
+        console.error(`[[${context.requestId}]] ${err.errorCode}: ${err.stack}`)
       } else {
-        logger.error(`[[${context.requestId}]] ${err.errorCode}: ${err}`)
+        console.error(`[[${context.requestId}]] ${err.errorCode}: ${err}`)
       }
     }
 
     const repPackingMessageConsume = () => {
-      if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
+      if (kafkaConfig.enableKafka === 'true') {
         try {
           require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
         } catch (error) {
-          logger.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
+          console.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
         }
       } else {
-        logger.info('Experiments Kafka has been disabled for this session.')
+        console.info('Experiments Kafka has been disabled for this session.')
       }
     }
     const setsChangesMessageConsume = () => {
-      if (serviceConfig.experimentsKafka.value.enableKafka === 'true') {
+      if (kafkaConfig.enableKafka === 'true') {
         try {
           require('./services/listeners/SetsChangesListener').setsChangesListener.listen()
         } catch (error) {
-          logger.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
+          console.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
         }
       } else {
-        logger.info('Sets Changes Kafka has been disabled for this session.')
+        console.info('Sets Changes Kafka has been disabled for this session.')
       }
     }
     repPackingMessageConsume()

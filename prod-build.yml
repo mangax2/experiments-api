@@ -1,0 +1,40 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
+version: 0.2
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: "745421575498"
+    NP_AWS_ACCOUNT_ID: "286985534438"
+    AWS_REPO_NAME: "experiments-api"
+    AWS_CLUSTER_NAME: "fargate"
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_SERVICE_NAME: "experiments-api-prod"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+  pre_build:
+    commands:
+      - echo Logging in to NP Amazon ECR...
+      - $(aws ecr get-login --registry-ids $NP_AWS_ACCOUNT_ID --no-include-email --region $AWS_DEFAULT_REGION)
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Pulling NP Docker image...
+      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - export NP_DOCKER_URL=$NP_AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - docker pull $NP_DOCKER_URL:$VERSION
+      - echo Logging in to Prod Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - echo Tagging the Docker image...
+      - docker tag $NP_DOCKER_URL:$VERSION $DOCKER_URL:latest
+      - echo Pushing the Docker image to Prod...
+      - docker push $DOCKER_URL:latest
+  post_build:
+    commands:
+      - echo Restarting Service
+      - aws ecs update-service --cluster $AWS_CLUSTER_NAME --service $AWS_SERVICE_NAME --force-new-deployment
+      - echo Build completed on `date`

@@ -1,0 +1,52 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
+version: 0.2
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: "286985534438"
+    AWS_REPO_NAME: "experiments-api"
+    AWS_CLUSTER_NAME: "fargate"
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_SERVICE_NAME: "experiments-api-np"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+  pre_build:
+    commands:
+      - npm config set //npm.platforms.engineering/:_authToken $npm_access_token
+      - npm config set @monsantoit:registry https://npm.platforms.engineering
+      - echo Running npm install
+      - npm install
+      - echo Running tests
+      - npm run testCoverage
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Grabbing package.json version
+      - PACKAGE_VERSION=$(node -e "console.log(require('./package.json').version)")
+      - echo Version is $PACKAGE_VERSION
+      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - echo Packaging Node application
+      - npm run build-server
+      - echo Removing dev packages
+      - npm prune --production
+      - echo Building the Docker image...
+      - docker build --build-arg NPM_ACCESS_TOKEN=$npm_access_token -t $AWS_REPO_NAME:latest .
+      - echo Tagging the Docker image...
+      - docker tag $AWS_REPO_NAME:latest $DOCKER_URL:$PACKAGE_VERSION
+      - docker tag $AWS_REPO_NAME:latest $DOCKER_URL:latest
+      - echo Pushing the Docker image...
+      # Push version so we can promote it or rollback to it later, if neccessary
+      - docker push $DOCKER_URL:$PACKAGE_VERSION
+      # Push 'latest' so build can recognize the new hotness
+      - docker push $DOCKER_URL:latest
+
+  post_build:
+    commands:
+      - echo Restarting Service
+      - aws ecs update-service --cluster $AWS_CLUSTER_NAME --service $AWS_SERVICE_NAME --force-new-deployment
+      - echo Build completed on `date`

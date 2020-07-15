@@ -16,6 +16,8 @@ class VaultUtil {
     if (env === 'local') {
       this.clientId = process.env.EXPERIMENTS_API_CLIENT_ID
       this.clientSecret = process.env.EXPERIMENTS_API_CLIENT_SECRET
+      this.dbAppUser = process.env.EXPERIMENTS_DB_LOCAL_USER
+      this.dbAppPassword = process.env.EXPERIMENTS_DB_LOCAL_PASSWORD
       this.awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
       this.awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
       this.awsLambdaName = 'group-generation-lambda-dev'

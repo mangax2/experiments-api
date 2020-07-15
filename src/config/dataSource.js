@@ -3,8 +3,6 @@ const localDataSource = {
   alias: 'experimentsDataSource',
   host: 'localhost',
   port: '9000',
-  user: process.env.EXPERIMENTS_DB_LOCAL_USER,
-  password: process.env.EXPERIMENTS_DB_LOCAL_PASSWORD,
   application_name: 'experiments-api-local',
   database: 'draft',
   type: 'conn',

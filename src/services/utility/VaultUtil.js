@@ -20,6 +20,7 @@ class VaultUtil {
       this.dbAppPassword = process.env.EXPERIMENTS_DB_LOCAL_PASSWORD
       this.awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
       this.awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+      this.kafkaPassword = process.env.KAFKA_PASSWORD
       this.awsLambdaName = 'group-generation-lambda-dev'
       this.awsDocumentationBucketName = 'cosmos-experiments-286985534438'
       const fs = require('bluebird').promisifyAll(require('fs'))
@@ -29,7 +30,6 @@ class VaultUtil {
         .then((data) => { this.kafkaClientCert = data })
       const kafkaCaPromise = fs.readFileAsync('./src/kafka_ca.cert', 'utf8')
         .then((data) => { this.kafkaCA = data })
-      this.kafkaPassword = vaultConfig.kafkaPassword
 
       return Promise.all([privateKeyPromise, clientCertPromise, kafkaCaPromise])
     }

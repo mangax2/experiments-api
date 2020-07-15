@@ -19,6 +19,10 @@ class VaultUtil {
     if (env === 'local') {
       this.clientId = process.env.EXPERIMENTS_API_CLIENT_ID
       this.clientSecret = process.env.EXPERIMENTS_API_CLIENT_SECRET
+      this.awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
+      this.awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+      this.awsLambdaName = 'group-generation-lambda-dev'
+      this.awsDocumentationBucketName = 'cosmos-experiments-286985534438'
       const fs = require('bluebird').promisifyAll(require('fs'))
       const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
         .then((data) => { this.kafkaPrivateKey = data })

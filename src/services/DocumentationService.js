@@ -7,7 +7,7 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 class DocumentationService {
   @setErrorCode('142000')
   static getDoc(fileName) {
-    return AWSUtil.getFileFromS3(VaultUtil.awsDocumentationBucketName, `documentation/${fileName}`)
+    return AWSUtil.getFileFromS3(VaultUtil.awsDocumentationBucketName, `documentation/experiments/${fileName}`)
       .then(result => result.Body.toString())
   }
 }

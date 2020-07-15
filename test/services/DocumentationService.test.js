@@ -10,7 +10,7 @@ describe('DocumentationService', () => {
       VaultUtil.awsDocumentationBucketName = 'bucketName'
 
       return DocumentationService.getDoc('doc.md').then((result) => {
-        expect(AWSUtil.getFileFromS3).toHaveBeenCalledWith('bucketName', 'documentation/doc.md')
+        expect(AWSUtil.getFileFromS3).toHaveBeenCalledWith('bucketName', 'documentation/experiments/doc.md')
         expect(result).toEqual('sample file contents')
       })
     })

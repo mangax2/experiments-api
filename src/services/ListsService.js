@@ -37,7 +37,7 @@ class ListsService {
             const preferences = data.body
             preferences.listIds = _.uniq(_.compact(([].concat(preferences.listIds, listIds))))
             return this.preferencesService.setPreferences('material-lists-integration', 'experiments-ui', preferences, headers.authorization, context)
-              .then(() => ({ success: true, url: `https://${apiUrls.velocityUrl}/experiments`, method: 'newtab' }))
+              .then(() => ({ success: true, url: `${apiUrls.velocityUrl}/experiments`, method: 'newtab' }))
           })
       }, (err) => { throw AppError.internalServerError('Error Retrieving Lists', JSON.parse(err.response.text), '1W2003') })
     }

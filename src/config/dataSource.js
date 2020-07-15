@@ -9,10 +9,9 @@ const localDataSource = {
   min: 10,
   max: 10,
   idleTimeoutMillis: 30000,
-  ssl: { ca },
 }
 const dataSource = process.env.DATA_SOURCE
   ? JSON.parse(process.env.DATA_SOURCE)
   : localDataSource
-
+dataSource.ssl = { ca }
 export default dataSource

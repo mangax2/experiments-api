@@ -6,9 +6,6 @@ class VaultUtil {
     this.dbAppPassword = ''
     this.clientId = ''
     this.clientSecret = ''
-    this.cloudFrontKeyPair = ''
-    this.cloudFrontPrivateKey = ''
-    this.cloudFrontUrl = ''
     this.kafkaPrivateKey = ''
     this.kafkaPassword = ''
     this.kafkaClientCert = ''
@@ -53,11 +50,6 @@ class VaultUtil {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })
-        const cloudFrontPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/cloudFront`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
-          this.cloudFrontKeyPair = vaultObj.body.data.keyPair
-          this.cloudFrontPrivateKey = vaultObj.body.data.privateKey
-          this.cloudFrontUrl = vaultObj.body.data.url
-        })
         const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.kafkaPrivateKey = Buffer.from(vaultObj.body.data.privateKey, 'base64').toString()
           this.kafkaPassword = vaultObj.body.data.password
@@ -70,7 +62,7 @@ class VaultUtil {
           this.awsLambdaName = vaultObj.body.data.lambdaNameV2
           this.awsDocumentationBucketName = vaultObj.body.data.documentationBucketName
         })
-        return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise, awsPromise])
+        return Promise.all([dbPromise, clientPromise, kafkaPromise, awsPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

@@ -64,6 +64,7 @@ class VaultUtil {
           this.awsAccessKeyId = vaultObj.body.data.accessKeyId
           this.awsSecretAccessKey = vaultObj.body.data.secretAccessKey
           this.awsLambdaName = vaultObj.body.data.lambdaNameV2
+          this.awsDocumentationBucketName = vaultObj.body.data.documentationBucketName
         })
         return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise, awsPromise])
       }).catch((err) => {

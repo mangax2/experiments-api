@@ -278,9 +278,9 @@ router.patch('/templates/:id/blocks', (req, res, next) => new BlockService().ren
 
 
 router.get('/getDoc/:fileName', (req, res, next) => {
-  DocumentationService.getDoc(req.params.fileName).then((data) => {
+  DocumentationService.getDoc(req.params.fileName).then((documentationFile) => {
     res.set('Content-Type', 'text/markdown')
-    res.send(data.text)
+    res.send(documentationFile)
   }).catch(err => next(err))
 })
 

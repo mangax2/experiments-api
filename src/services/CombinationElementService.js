@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
@@ -8,8 +7,6 @@ import CombinationElementValidator from '../validations/CombinationElementValida
 import TreatmentService from './TreatmentService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('CombinationElementService')
 
 // Error Codes 11XXXX
 class CombinationElementService {
@@ -56,7 +53,7 @@ class CombinationElementService {
   batchDeleteCombinationElements = (ids, context, tx) => db.combinationElement.batchRemove(ids, tx)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
-        logger.error(`[[${context.requestId}]] Not all combination elements requested for delete were found`)
+        console.error(`[[${context.requestId}]] Not all combination elements requested for delete were found`)
         throw AppError.notFound('Not all combination elements requested for delete were found', undefined, getFullErrorCode('118001'))
       } else {
         return data

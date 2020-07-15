@@ -17,6 +17,8 @@ class VaultUtil {
 
   static configureDbCredentials(env, vaultRoleId, vaultSecretId, vaultConfig) {
     if (env === 'local') {
+      this.clientId = process.env.EXPERIMENTS_API_CLIENT_ID
+      this.clientSecret = process.env.EXPERIMENTS_API_CLIENT_SECRET
       const fs = require('bluebird').promisifyAll(require('fs'))
       const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
         .then((data) => { this.kafkaPrivateKey = data })

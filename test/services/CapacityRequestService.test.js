@@ -1,6 +1,6 @@
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import AppError from '../../src/services/utility/AppError'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import apiUrls from '../../src/config/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
 import db from '../../src/db/DbManager'
@@ -17,11 +17,7 @@ describe('CapacityRequestService', () => {
     let originalFunction
 
     beforeAll(() => {
-      cfServices.experimentsExternalAPIUrls = {
-        value: {
-          capacityRequestAPIUrl: 'test',
-        },
-      }
+      apiUrls.capacityRequestAPIUrl = 'test'
       originalFunction = CapacityRequestService.handleCapacityRequestError
     })
 

@@ -1,15 +1,13 @@
 import { mock } from '../jestUtil'
 import resolvers from '../../src/graphql/resolvers'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import settings from '../../src/config/settings'
 
 describe('resolvers', () => {
   let loadMock
   let context
 
   beforeEach(() => {
-    cfServices.experimentApiConfigurables = {
-      maxExperimentsToRetrieve: 10,
-    }
+    settings.maxExperimentsToRetrieve = 10
     loadMock = mock()
     context = {
       loaders: {

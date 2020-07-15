@@ -1,5 +1,5 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
-import cfServices from '../../../src/services/utility/ServiceConfig'
+import kafkaConfig from '../../../src/config/kafkaConfig'
 import SetEntryRemovalService from '../../../src/services/prometheus/SetEntryRemovalService'
 import db from '../../../src/db/DbManager'
 import { mockResolve } from '../../jestUtil'
@@ -14,13 +14,8 @@ describe('ManageRepsAndUnitsListener', () => {
     describe('sendResponseMessage', () => {
       test('sends a success if isSuccess', () => {
         KafkaProducer.publish = jest.fn()
-        cfServices.experimentsKafka = {
-          value: {
-            topics:
-              { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
-            schema: { product360Outgoing: 1 },
-          },
-        }
+        kafkaConfig.topics = { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' }
+        kafkaConfig.schema = { product360Outgoing: 1 }
 
         ManageRepsAndUnitsListener.sendResponseMessage(555, true)
 
@@ -32,13 +27,8 @@ describe('ManageRepsAndUnitsListener', () => {
 
       test('sends a failure if not isSuccess', () => {
         KafkaProducer.publish = jest.fn()
-        cfServices.experimentsKafka = {
-          value: {
-            topics:
-              { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
-            schema: { product360Outgoing: 1 },
-          },
-        }
+        kafkaConfig.topics = { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' }
+        kafkaConfig.schema = { product360Outgoing: 1 }
 
         ManageRepsAndUnitsListener.sendResponseMessage(777, false)
 
@@ -56,7 +46,8 @@ describe('ManageRepsAndUnitsListener', () => {
         VaultUtil.kafkaPrivateKey = 'key'
         VaultUtil.kafkaPassword = 'password'
         VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
-        cfServices.experimentsKafka = { value: { host: 'host', topics: { repPackingTopic: 'topic' } } }
+        kafkaConfig.host = 'host'
+        kafkaConfig.topics = { repPackingTopic: 'topic' }
         const consumer = { on: jest.fn() }
         ManageRepsAndUnitsListener.createConsumer = jest.fn(() => consumer)
 
@@ -110,13 +101,8 @@ describe('ManageRepsAndUnitsListener', () => {
     describe('adjustExperimentWithRepPackChanges', () => {
       test('publishes a success when successful', () => {
         const target = new ManageRepsAndUnitsListener()
-        cfServices.experimentsKafka = {
-          value: {
-            topics:
-              { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' },
-            schema: { product360Outgoing: 1 },
-          },
-        }
+        kafkaConfig.topics = { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' }
+        kafkaConfig.schema = { product360Outgoing: 1 }
         const message = { setId: 5, entryChanges: [] }
         target.locationAssocWithBlockService = {
           getBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })),

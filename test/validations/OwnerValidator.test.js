@@ -1,7 +1,7 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import OwnerValidator from '../../src/validations/OwnerValidator'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import apiUrls from '../../src/config/apiUrls'
 
 import PingUtil from '../../src/services/utility/PingUtil'
 import AppError from '../../src/services/utility/AppError'
@@ -244,7 +244,7 @@ describe('OwnerValidator', () => {
 
       return target.validateGroupIds(['group1']).then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getGroupsById(ids:["group1"]){ id } }' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getGroupsById(ids:["group1"]){ id } }' })
       })
     })
 
@@ -290,7 +290,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck(['group1'], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
         expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '3D7002')
       })
     })
@@ -313,7 +313,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck(['group2'], ['user1'], 'user2').then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
       })
     })
 
@@ -323,7 +323,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck([], [], 'user').then(() => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user"){ id, groups{ id } }}' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user"){ id, groups{ id } }}' })
       })
     })
 
@@ -334,7 +334,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck(['group1'], ['user1'], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
         expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner', undefined, '3D7001')
       })
     })
@@ -346,7 +346,7 @@ describe('OwnerValidator', () => {
 
       return target.userOwnershipCheck([], [], 'user2').then(() => {}, () => {
         expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
-        expect(HttpUtil.post).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
+        expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.profileAPIUrl}/graphql`, {}, { query: '{ getUserById(id:"user2"){ id, groups{ id } }}' })
 
         expect(AppError.badRequest).toHaveBeenCalledWith('You cannot remove yourself as an owner', undefined, '3D7001')
       })

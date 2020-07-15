@@ -5,7 +5,7 @@ import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import kafkaConfig from '../../src/config/kafkaConfig'
 
 describe('ExperimentalUnitService', () => {
   let target
@@ -587,7 +587,7 @@ describe('ExperimentalUnitService', () => {
 
     test('does nothing if kafka is disabled', () => {
       KafkaProducer.publish = mock()
-      cfServices.experimentsKafka.value.enableKafka = 'false'
+      kafkaConfig.enableKafka = 'false'
 
       target.sendDeactivationNotifications()
 
@@ -596,7 +596,7 @@ describe('ExperimentalUnitService', () => {
 
     test('sends a notification for each deactivation if kafka is enabled', () => {
       KafkaProducer.publish = mock()
-      cfServices.experimentsKafka.value.enableKafka = 'true'
+      kafkaConfig.enableKafka = 'true'
 
       target.sendDeactivationNotifications([{}, {}])
 
@@ -605,9 +605,9 @@ describe('ExperimentalUnitService', () => {
 
     test('formats the deactivations before sending', () => {
       KafkaProducer.publish = mock()
-      cfServices.experimentsKafka.value.enableKafka = 'true'
-      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
-      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
+      kafkaConfig.enableKafka = 'true'
+      kafkaConfig.topics.unitDeactivation = 'deactivationTopic'
+      kafkaConfig.schema.unitDeactivation = 1234
 
       target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])
 
@@ -641,9 +641,9 @@ describe('ExperimentalUnitService', () => {
 
     test('does not throw if the KafkaProducer publish throws', () => {
       KafkaProducer.publish = () => { throw new Error() }
-      cfServices.experimentsKafka.value.enableKafka = 'true'
-      cfServices.experimentsKafka.value.topics.unitDeactivation = 'deactivationTopic'
-      cfServices.experimentsKafka.value.schema.unitDeactivation = 1234
+      kafkaConfig.enableKafka = 'true'
+      kafkaConfig.topics.unitDeactivation = 'deactivationTopic'
+      kafkaConfig.schema.unitDeactivation = 1234
 
       expect(() => target.sendDeactivationNotifications([{ id: 5, deactivationReason: 'test reason', setEntryId: 7 }])).not.toThrow()
     })

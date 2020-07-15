@@ -2,11 +2,11 @@ import QuestionsUtil from '../../../src/services/utility/QuestionsUtil'
 import AppError from '../../../src/services/utility/AppError'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 import PingUtil from '../../../src/services/utility/PingUtil'
-import cfServices from '../../../src/services/utility/ServiceConfig'
+import apiUrls from '../../../src/config/apiUrls'
 import { mock, mockReject, mockResolve } from '../../jestUtil'
 
 const testHeaders = [{ name: 'authorization', value: 'bearer token' }]
-cfServices.experimentsExternalAPIUrls.value.questionsV3APIUrl = 'baseUrl'
+apiUrls.questionsV3APIUrl = 'baseUrl'
 
 describe('QuestionsUtil', () => {
   describe('getAnswerKeys', () => {

@@ -1,17 +1,14 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import AppError from './utility/AppError'
 import AppUtil from './utility/AppUtil'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfServices from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 import db from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('CapacityRequestService')
 
 // Error Codes 10XXXX
 class CapacityRequestService {
@@ -23,7 +20,7 @@ class CapacityRequestService {
 
   @setErrorCode('101000')
   static associateExperimentToCapacityRequest(experiment, context) {
-    const capacityRequestUri = `${cfServices.experimentsExternalAPIUrls.value.capacityRequestAPIUrl}/requests/${experiment.request.id}?type=${experiment.request.type}`
+    const capacityRequestUri = `${apiUrls.capacityRequestAPIUrl}/requests/${experiment.request.id}?type=${experiment.request.type}`
     return PingUtil.getMonsantoHeader()
       .then(headers => HttpUtil.get(capacityRequestUri, headers)
         .then((response) => {
@@ -37,7 +34,7 @@ class CapacityRequestService {
           return HttpUtil.put(capacityRequestUri, headers, putBody)
         }))
       .catch((err) => {
-        logger.error(`[[${context.requestId}]] Error received from Capacity Request API.`, err)
+        console.error(`[[${context.requestId}]] Error received from Capacity Request API.`, err)
         throw CapacityRequestService.handleCapacityRequestError(err, getFullErrorCode('101001'))
       })
   }

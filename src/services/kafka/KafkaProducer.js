@@ -2,13 +2,13 @@ import _ from 'lodash'
 import { KafkaClient, Producer } from 'kafka-node'
 import AvroUtil from '../utility/AvroUtil'
 import VaultUtil from '../utility/VaultUtil'
-import cfServices from '../utility/ServiceConfig'
+import kafkaConfig from '../../config/kafkaConfig'
 
 class KafkaProducer {
   static init = () => {
     const params = {
       client_id: VaultUtil.clientId,
-      kafkaHost: cfServices.experimentsKafka.value.host,
+      kafkaHost: kafkaConfig.host,
       sslOptions: {
         cert: VaultUtil.kafkaClientCert,
         key: VaultUtil.kafkaPrivateKey,

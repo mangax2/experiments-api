@@ -1,5 +1,5 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
-import cfServices from '../../../src/services/utility/ServiceConfig'
+import kafkaConfig from '../../../src/config/kafkaConfig'
 import db from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
@@ -23,7 +23,8 @@ describe('SetsChangesListener', () => {
         VaultUtil.kafkaPrivateKey = 'key'
         VaultUtil.kafkaPassword = 'password'
         VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
-        cfServices.experimentsKafka = { value: { host: 'host', topics: { setsChangesTopic: 'topic' } } }
+        kafkaConfig.host = 'host'
+        kafkaConfig.topics = { setsChangesTopic: 'topic' }
         const consumer = { on: jest.fn() }
         SetsChangesListener.createConsumer = jest.fn(() => consumer)
         target.dataHandler = mock()
@@ -47,7 +48,8 @@ describe('SetsChangesListener', () => {
     })
 
     describe('dataHandler', () => {
-      cfServices.experimentsKafka = { value: { topics: { product360OutgoingTopic: 'outgoingTopic' }, schema: { product360Outgoing: 'outgoing' } } }
+      kafkaConfig.topics = { product360OutgoingTopic: 'outgoingTopic' }
+      kafkaConfig.schema = { product360Outgoing: 'outgoing' }
 
       test('converts data from avro to json and calls clearSet', () => {
         const message = {
@@ -79,7 +81,8 @@ describe('SetsChangesListener', () => {
         const target = new SetsChangesListener()
         target.clearSet = mockResolve([{ experiment_id: 1 }])
         target.consumer = {}
-        cfServices.experimentsKafka = { value: { topics: { product360OutgoingTopic: 'topic1' }, schema: { product360Outgoing: 123 } } }
+        kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
+        kafkaConfig.schema = { product360Outgoing: 123 }
 
         return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
@@ -98,7 +101,8 @@ describe('SetsChangesListener', () => {
         const target = new SetsChangesListener()
         target.clearSet = mockResolve(null)
         target.consumer = {}
-        cfServices.experimentsKafka = { value: { topics: { product360OutgoingTopic: 'topic1' }, schema: { product360Outgoing: 123 } } }
+        kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
+        kafkaConfig.schema = { product360Outgoing: 123 }
 
         return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
@@ -118,7 +122,8 @@ describe('SetsChangesListener', () => {
         const target = new SetsChangesListener()
         target.clearSet = mockReject(new Error('error'))
         target.consumer = {}
-        cfServices.experimentsKafka = { value: { topics: { product360OutgoingTopic: 'topic1' }, schema: { product360Outgoing: 123 } } }
+        kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
+        kafkaConfig.schema = { product360Outgoing: 123 }
 
         return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(null, (err) => {
           expect(target.clearSet).toHaveBeenCalledWith(123)

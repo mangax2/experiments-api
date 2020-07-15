@@ -1,17 +1,14 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import config from '../../config'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfServices from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
 import db from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('SecurityService')
 
 // Error Codes 1OXXXX
 class SecurityService {
@@ -28,12 +25,12 @@ class SecurityService {
           if (!data) {
             const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
               : 'Experiment Not Found for requested experimentId'
-            logger.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+            console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
             throw AppError.notFound(errorMessage, undefined, getFullErrorCode('1O1001'))
           } else {
             return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
               if (result.length === 0) {
-                logger.error(`Access denied for ${context.userId} on id ${id}`)
+                console.error(`Access denied for ${context.userId} on id ${id}`)
                 throw AppError.unauthorized('Access denied', undefined, getFullErrorCode('1O1002'))
               }
               return result
@@ -49,7 +46,7 @@ class SecurityService {
   getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
     .then((header) => {
       const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
-      return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+      return HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
         .then((result) => {
           const graphqlResult = _.get(result, 'body')
 
@@ -61,7 +58,7 @@ class SecurityService {
             throw AppError.badRequest('Profile API encountered an error', graphqlResult.errors, getFullErrorCode('1O2002'))
           }
           if (_.isNil(graphqlResult.data.getUserById)) {
-            logger.error('Unable to verify permissions. User not found')
+            console.error('Unable to verify permissions. User not found')
             return []
           }
           return _.map(graphqlResult.data.getUserById.groups, 'id')
@@ -95,7 +92,7 @@ class SecurityService {
   getEntitlementsByUserId = userId => PingUtil.getMonsantoHeader()
     .then((header) => {
       const graphqlQuery = `{ getEntitlementsForUser(userId:${JSON.stringify(userId)}, appIds:"EXPERIMENTS-UI"){code}}`
-      return HttpUtil.post(`${cfServices.experimentsExternalAPIUrls.value.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
+      return HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
         .then((result) => {
           const graphqlResult = _.get(result, 'body')
 
@@ -107,7 +104,7 @@ class SecurityService {
             throw AppError.badRequest('Profile API encountered an error', graphqlResult.errors, getFullErrorCode('1O5002'))
           }
           if (_.isNil(graphqlResult.data.getEntitlementsForUser)) {
-            logger.error('Unable to verify permissions. User not found')
+            console.error('Unable to verify permissions. User not found')
             return []
           }
           return _.map(graphqlResult.data.getEntitlementsForUser, 'code')

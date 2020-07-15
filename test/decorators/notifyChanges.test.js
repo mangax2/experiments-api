@@ -1,8 +1,8 @@
 import { mock } from '../jestUtil'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import kafkaConfig from '../../src/config/kafkaConfig'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 
-cfServices.experimentsKafka.value.enableKafka = 'true'
+kafkaConfig.enableKafka = 'true'
 
 const { notifyChanges } = require('../../src/decorators/notifyChanges')
 
@@ -38,7 +38,7 @@ class testClass {
 
 describe('notifyChanges', () => {
   afterAll(() => {
-    cfServices.experimentsKafka.value.enableKafka = 'false'
+    kafkaConfig.enableKafka = 'false'
   })
 
   describe('notifyChanges', () => {
@@ -47,13 +47,13 @@ describe('notifyChanges', () => {
       return testClass.createFunc(3).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 3,
             event_category: 'create',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })
@@ -70,13 +70,13 @@ describe('notifyChanges', () => {
       return testClass.createFunc(1, 'experiment').then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 1,
             event_category: 'create',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })
@@ -86,13 +86,13 @@ describe('notifyChanges', () => {
       return testClass.create().then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 3,
             event_category: 'create',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })
@@ -102,13 +102,13 @@ describe('notifyChanges', () => {
       return testClass.updateFunc(2).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 2,
             event_category: 'update',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })
@@ -118,13 +118,13 @@ describe('notifyChanges', () => {
       return testClass.update(2).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 2,
             event_category: 'update',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })
@@ -141,13 +141,13 @@ describe('notifyChanges', () => {
       return testClass.updateFunc(2, false).then(() => {
         expect(KafkaProducer.publish).toHaveBeenCalledTimes(1)
         expect(KafkaProducer.publish).toHaveBeenCalledWith({
-          topic: cfServices.experimentsKafka.value.topics.product360OutgoingTopic,
+          topic: kafkaConfig.topics.product360OutgoingTopic,
           message: {
             resource_id: 2,
             event_category: 'update',
             time: expect.any(String),
           },
-          schemaId: cfServices.experimentsKafka.value.schema.product360Outgoing,
+          schemaId: kafkaConfig.schema.product360Outgoing,
         })
       })
     })

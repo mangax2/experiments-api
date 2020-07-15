@@ -2,7 +2,7 @@ import * as _ from 'lodash'
 import AppError from './utility/AppError'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
-import cfService from './utility/ServiceConfig'
+import apiUrls from '../config/apiUrls'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -17,7 +17,7 @@ class ListsService {
     PingUtil.getMonsantoHeader()
       .then((headers) => {
         headers.push({ headerName: 'user-id', headerValue: userId.toLowerCase() })
-        return HttpUtil.get(`${cfService.experimentsExternalAPIUrls.value.materialListsAPIUrl}/lists?${_.map(listIds, id => `id=${id}`).join('&')}`, headers)
+        return HttpUtil.get(`${apiUrls.materialListsAPIUrl}/lists?${_.map(listIds, id => `id=${id}`).join('&')}`, headers)
       })
 
   @setErrorCode('1W2000')
@@ -37,7 +37,7 @@ class ListsService {
             const preferences = data.body
             preferences.listIds = _.uniq(_.compact(([].concat(preferences.listIds, listIds))))
             return this.preferencesService.setPreferences('material-lists-integration', 'experiments-ui', preferences, headers.authorization, context)
-              .then(() => ({ success: true, url: `https://${cfService['velocity-home'].value}/experiments`, method: 'newtab' }))
+              .then(() => ({ success: true, url: `https://${apiUrls.velocityUrl}/experiments`, method: 'newtab' }))
           })
       }, (err) => { throw AppError.internalServerError('Error Retrieving Lists', JSON.parse(err.response.text), '1W2003') })
     }

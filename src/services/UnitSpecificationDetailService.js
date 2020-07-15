@@ -1,4 +1,3 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
@@ -11,8 +10,6 @@ import UnitSpecificationDetailValidator from '../validations/UnitSpecificationDe
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
-const logger = log4js.getLogger('UnitSpecificationDetailService')
 
 const backfillMapper = {
   ft: 1,
@@ -91,7 +88,7 @@ class UnitSpecificationDetailService {
     return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
         if (_.compact(data).length !== idsToDelete.length) {
-          logger.error(`[[${context.requestId}]] Not all unit specification detail ids requested for delete were found`)
+          console.error(`[[${context.requestId}]] Not all unit specification detail ids requested for delete were found`)
           throw AppError.notFound(
             'Not all unit specification detail ids requested for delete were found', undefined, getFullErrorCode('1S6001'))
         } else {

@@ -1,7 +1,7 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import TagService from '../../src/services/TagService'
 import AppUtil from '../../src/services/utility/AppUtil'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import apiUrls from '../../src/config/apiUrls'
 
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
@@ -120,7 +120,7 @@ describe('TagService', () => {
       HttpUtil.get = mockResolve({ body: { tags: [] } })
 
       return target.getTagsByExperimentId(1, false, testTx).then((data) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(data).toEqual([])
       })
     })
@@ -129,7 +129,7 @@ describe('TagService', () => {
       HttpUtil.get = mockReject({ status: 404 })
 
       return target.getTagsByExperimentId(1, false, testTx).then((data) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(data).toEqual([])
       })
     })
@@ -142,7 +142,7 @@ describe('TagService', () => {
       AppError.internalServerErrorWithMessage = mock(appErrorResponse)
 
       return target.getTagsByExperimentId(1, false, context).then(() => {}, (err) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, {})
         expect(err).toEqual(appErrorResponse)
         expect(AppError.internalServerErrorWithMessage).toHaveBeenCalledWith(
           '[[requestId]] An error occurred while getting the tags for experiment id: 1',
@@ -159,7 +159,7 @@ describe('TagService', () => {
       HttpUtil.get = mockResolve({ body: { entityId: 1, tags: [] } })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
         expect(data).toEqual({ entityId: 1, tags: [] })
       })
     })
@@ -168,7 +168,7 @@ describe('TagService', () => {
       HttpUtil.get = mockReject({ status: 404 })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
         expect(data).toEqual([])
       })
     })
@@ -181,7 +181,7 @@ describe('TagService', () => {
       AppError.internalServerErrorWithMessage = mock(appErrorResponse)
 
       return target.getAllTagsForEntity('experiment').then(() => {}, (err) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment`, {})
         expect(err).toEqual(appErrorResponse)
         expect(AppError.internalServerErrorWithMessage).toHaveBeenCalledWith(
           'An error occurred while retrieving tags.',
@@ -224,7 +224,7 @@ describe('TagService', () => {
       HttpUtil.get = mockResolve({ body: [{ entityId: 1, tags: [] }] })
 
       return target.getEntityTagsByTagFilters(['tag1'], ['val1']).then((data) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
         expect(data).toEqual([{ entityId: 1, tags: [] }])
       })
     })
@@ -237,7 +237,7 @@ describe('TagService', () => {
       AppError.internalServerErrorWithMessage = mock(appErrorResponse)
 
       return target.getEntityTagsByTagFilters(['tag1'], ['val1'], false, context).then(() => {}, (err) => {
-        expect(HttpUtil.get).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
+        expect(HttpUtil.get).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment?tags.category=tag1&tags.value=val1`, {})
         expect(err).toEqual(appErrorResponse)
         expect(AppError.internalServerErrorWithMessage).toHaveBeenCalledWith(
           '[[requestId]] An error occurred while getting tags by filters.',
@@ -255,7 +255,7 @@ describe('TagService', () => {
       target.getEntityName = mock('experiment')
 
       return target.deleteTagsForExperimentId(1, context, false).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
       })
     })
 
@@ -264,7 +264,7 @@ describe('TagService', () => {
       HttpUtil.delete = mockReject({ status: 404 })
       target.getEntityName = mock('experiment')
       return target.deleteTagsForExperimentId(1, context, false).then(() => {
-        expect(HttpUtil.delete).toHaveBeenCalledWith(`${cfServices.experimentsExternalAPIUrls.value.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
+        expect(HttpUtil.delete).toHaveBeenCalledWith(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/experiment/1`, [{}])
       })
     })
 

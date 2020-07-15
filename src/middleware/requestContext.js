@@ -1,11 +1,9 @@
-import log4js from 'log4js'
 import _ from 'lodash'
 import uuid from 'uuid/v4'
 import AppError from '../services/utility/AppError'
-import cfServices from '../services/utility/ServiceConfig'
+import VaultUtil from '../services/utility/VaultUtil'
 import HttpUtil from '../services/utility/HttpUtil'
-
-const logger = log4js.getLogger('experiments-api-request-context')
+import apiUrls from '../config/apiUrls'
 
 const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
   const tokens = oauthresourceownerinfo.split(',')
@@ -44,8 +42,8 @@ function getContextFromHeaders(headers) {
 function getClientIdFromToken(headers) {
   if (headers && headers.authorization) {
     const token = headers.authorization.substring(7)
-    const url = cfServices.pingDataSource.introspectionUrl
-    const { clientId, clientSecret } = cfServices.pingDataSource
+    const url = `${apiUrls}/introspect.oauth2`
+    const { clientId, clientSecret } = VaultUtil
 
     const postHeaders = [{ headerName: 'Content-Type', headerValue: 'application/x-www-form-urlencoded' }]
     const formData = { token, client_id: clientId, client_secret: clientSecret }
@@ -79,7 +77,7 @@ function requestContextMiddlewareFunction(req, res, next) {
       req.context.clientId = clientId
       next()
     }).catch(/* istanbul ignore next */(err) => {
-      logger.warn(`[[${req.context.requestId}]] Error received when trying to retrieve client id.`, err)
+      console.warn(`[[${req.context.requestId}]] Error received when trying to retrieve client id.`, err)
       next()
     })
   } else {

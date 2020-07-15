@@ -1,6 +1,5 @@
 import promise from 'bluebird'
 import pgPromise from 'pg-promise'
-import log4js from 'log4js'
 import { setDbInstance } from '@monsantoit/pg-transactional'
 import config from '../../config'
 import CombinationElement from '../repos/combinationElement'
@@ -29,8 +28,7 @@ import GraphQLAudit from '../repos/graphqlAudit'
 import AnalysisModel from '../repos/analysisModel'
 import Block from '../repos/block'
 import TreatmentBlock from '../repos/treatmentBlock'
-
-const logger = log4js.getLogger('DbManager')
+import dataSource from '../config/dataSource'
 
 // pg-promise initialization options:
 const options = {
@@ -77,19 +75,11 @@ let dbConfig = {}
 
 // Setup database config if not running unit tests
 if (config.node_env !== 'UNITTEST') {
-  // eslint-disable-next-line global-require
-  const cfServices = require('../services/utility/ServiceConfig')
-  dbConfig = cfServices.experimentsDataSource
-  logger.debug('loaded db connection config')
+  dbConfig = dataSource
+  console.info('loaded db connection config')
 }
-// const config = cfServices.experimentsDataSource
-// logger.debug('loaded db connection config')
 
 const pgp = pgPromise(options)
-
-// const monitor = require('pg-monitor')
-// monitor.attach(options)
-// monitor.setTheme('matrix')
 
 // Create the database instance with extensions:
 const db = pgp(dbConfig)

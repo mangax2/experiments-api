@@ -8,7 +8,7 @@ import db from '../../src/db/DbManager'
 import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
-import cfServices from '../../src/services/utility/ServiceConfig'
+import apiUrls from '../../src/config/apiUrls'
 
 describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
@@ -71,11 +71,7 @@ describe('GroupExperimentalUnitService', () => {
   })
 
   describe('resetSet', () => {
-    cfServices.experimentsExternalAPIUrls = {
-      value: {
-        setsAPIUrl: 'testUrl',
-      },
-    }
+    apiUrls.setsAPIUrl = 'testUrl'
     const header = ['header']
     const generatedUnits = [
       {

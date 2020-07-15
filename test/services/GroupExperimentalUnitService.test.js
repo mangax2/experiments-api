@@ -8,6 +8,7 @@ import db from '../../src/db/DbManager'
 import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PingUtil from '../../src/services/utility/PingUtil'
+import VaultUtil from '../../src/services/utility/VaultUtil'
 import apiUrls from '../../src/config/apiUrls'
 
 describe('GroupExperimentalUnitService', () => {
@@ -16,6 +17,7 @@ describe('GroupExperimentalUnitService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
+  VaultUtil.awsLambdaName = 'cosmos-group-generation-lambda-dev'
 
   beforeEach(() => {
     target = new GroupExperimentalUnitService()

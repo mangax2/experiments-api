@@ -23,7 +23,6 @@ process.on('unhandledRejection', (reason, p) => {
 vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSecretId,
   vaultConfig)
   .then(() => {
-    const awsConfig = require('./config/awsConfig')
     const kafkaConfig = require('./config/kafkaConfig')
     const swaggerTools = require('swagger-tools')
     const express = require('express')
@@ -45,7 +44,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
 
     setPromiseLibrary(require('bluebird'))
     setErrorPrefix('EXP')
-    require('./services/utility/AWSUtil').configure(awsConfig.accessKeyId, awsConfig.secretAccessKey)
+    require('./services/utility/AWSUtil').configure(vaultUtil.awsAccessKeyId, vaultUtil.awsSecretAccessKey)
 
     const requestContext = require('./middleware/requestContext')
 

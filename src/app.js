@@ -1,3 +1,4 @@
+require('../sqlMigration')
 const config = require('../config')
 
 if (config.node_env !== 'production') {

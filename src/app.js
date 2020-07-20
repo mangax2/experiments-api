@@ -24,7 +24,7 @@ process.on('unhandledRejection', (reason, p) => {
 vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSecretId,
   vaultConfig)
   .then(() => {
-    const kafkaConfig = require('./config/kafkaConfig')
+    const kafkaConfig = require('./config/kafkaConfig').default
     const swaggerTools = require('swagger-tools')
     const express = require('express')
     const _ = require('lodash')

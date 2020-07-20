@@ -66,7 +66,7 @@ class VaultUtil {
         })
         return Promise.all([dbPromise, clientPromise, kafkaPromise, awsPromise])
       }).catch((err) => {
-        console.error(err)
+        console.error('error while retrieving vault secrets: ', err)
         return Promise.reject(err)
       })
   }

@@ -6,7 +6,7 @@ if (config.node_env !== 'production') {
   require('@babel/register')
 }
 
-const vaultConfig = require('./config/vaultConfig')
+const vaultConfig = require('./config/vaultConfig').default
 const swaggerDoc = require('./swagger/swagger.json')
 const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')
 const vaultUtil = require('./services/utility/VaultUtil')

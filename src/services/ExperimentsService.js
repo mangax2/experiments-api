@@ -605,7 +605,7 @@ class ExperimentsService {
             actions: [
               {
                 title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
-                url: `https://${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
+                url: `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
               },
             ],
             tags: [

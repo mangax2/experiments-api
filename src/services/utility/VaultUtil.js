@@ -6,9 +6,6 @@ class VaultUtil {
     this.dbAppPassword = ''
     this.clientId = ''
     this.clientSecret = ''
-    this.cloudFrontKeyPair = ''
-    this.cloudFrontPrivateKey = ''
-    this.cloudFrontUrl = ''
     this.kafkaPrivateKey = ''
     this.kafkaPassword = ''
     this.kafkaClientCert = ''
@@ -19,6 +16,13 @@ class VaultUtil {
     if (env === 'local') {
       this.clientId = process.env.EXPERIMENTS_API_CLIENT_ID
       this.clientSecret = process.env.EXPERIMENTS_API_CLIENT_SECRET
+      this.dbAppUser = process.env.EXPERIMENTS_DB_LOCAL_USER
+      this.dbAppPassword = process.env.EXPERIMENTS_DB_LOCAL_PASSWORD
+      this.awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
+      this.awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+      this.kafkaPassword = process.env.KAFKA_PASSWORD
+      this.awsLambdaName = 'group-generation-lambda-dev'
+      this.awsDocumentationBucketName = 'cosmos-experiments-286985534438'
       const fs = require('bluebird').promisifyAll(require('fs'))
       const privateKeyPromise = fs.readFileAsync('./src/experiments-api-cosmos.pem', 'utf8')
         .then((data) => { this.kafkaPrivateKey = data })
@@ -26,7 +30,6 @@ class VaultUtil {
         .then((data) => { this.kafkaClientCert = data })
       const kafkaCaPromise = fs.readFileAsync('./src/kafka_ca.cert', 'utf8')
         .then((data) => { this.kafkaCA = data })
-      this.kafkaPassword = vaultConfig.kafkaPassword
 
       return Promise.all([privateKeyPromise, clientCertPromise, kafkaCaPromise])
     }
@@ -49,11 +52,6 @@ class VaultUtil {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
         })
-        const cloudFrontPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/cloudFront`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
-          this.cloudFrontKeyPair = vaultObj.body.data.keyPair
-          this.cloudFrontPrivateKey = vaultObj.body.data.privateKey
-          this.cloudFrontUrl = vaultObj.body.data.url
-        })
         const kafkaPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/kafka`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.kafkaPrivateKey = Buffer.from(vaultObj.body.data.privateKey, 'base64').toString()
           this.kafkaPassword = vaultObj.body.data.password
@@ -64,8 +62,9 @@ class VaultUtil {
           this.awsAccessKeyId = vaultObj.body.data.accessKeyId
           this.awsSecretAccessKey = vaultObj.body.data.secretAccessKey
           this.awsLambdaName = vaultObj.body.data.lambdaNameV2
+          this.awsDocumentationBucketName = vaultObj.body.data.documentationBucketName
         })
-        return Promise.all([dbPromise, clientPromise, cloudFrontPromise, kafkaPromise, awsPromise])
+        return Promise.all([dbPromise, clientPromise, kafkaPromise, awsPromise])
       }).catch((err) => {
         console.error(err)
         return Promise.reject(err)

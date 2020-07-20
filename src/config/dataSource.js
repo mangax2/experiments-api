@@ -3,18 +3,15 @@ const localDataSource = {
   alias: 'experimentsDataSource',
   host: 'localhost',
   port: '9000',
-  user: process.env.EXPERIMENTS_DB_LOCAL_USER,
-  password: process.env.EXPERIMENTS_DB_LOCAL_PASSWORD,
   application_name: 'experiments-api-local',
   database: 'draft',
   type: 'conn',
   min: 10,
   max: 10,
   idleTimeoutMillis: 30000,
-  ssl: { ca },
 }
 const dataSource = process.env.DATA_SOURCE
   ? JSON.parse(process.env.DATA_SOURCE)
   : localDataSource
-
+dataSource.ssl = { ca }
 export default dataSource

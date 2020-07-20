@@ -1,45 +1,17 @@
-import cf from 'aws-cloudfront-sign'
-import { mock, mockResolve } from '../jestUtil'
+import { mockResolve } from '../jestUtil'
 import DocumentationService from '../../src/services/DocumentationService'
-import config from '../../config'
+import AWSUtil from '../../src/services/utility/AWSUtil'
 import VaultUtil from '../../src/services/utility/VaultUtil'
-import HttpUtil from '../../src/services/utility/HttpUtil'
 
 describe('DocumentationService', () => {
-  describe('getCloudFrontCookies', () => {
-    test('calls getSignedCookie' +
-      ' undefined', () => {
-      config.env = 'local'
-      VaultUtil.cloudFrontKeyPair = ''
-      VaultUtil.cloudFrontSecret = ''
-      cf.getSignedCookies = mock({})
-
-      const result = DocumentationService.getCloudfrontCookies()
-
-      expect(result).toEqual({})
-      expect(cf.getSignedCookies).toHaveBeenCalled()
-    })
-
-    test('calls getSignedCookie for prod', () => {
-      config.env = 'prod'
-      VaultUtil.cloudFrontKeyPair = ''
-      VaultUtil.cloudFrontPrivateKey = ''
-      cf.getSignedCookies = mock({})
-
-      const result = DocumentationService.getCloudfrontCookies()
-      expect(result).toEqual({})
-      expect(cf.getSignedCookies).toHaveBeenCalled()
-    })
-  })
-
   describe('getDoc', () => {
-    test('calls getCloudfrontCookies and HttpUtil get', () => {
-      DocumentationService.getCloudfrontCookies = mock({ header: 'value', header2: 'value2' })
-      HttpUtil.get = mockResolve()
-      const headers = [{ headerName: 'Accept', headerValue: 'text/markdown' }, { headerName: 'Cookie', headerValue: 'header=value; header2=value2' }]
+    test('calls getFileFromS3 and returns the body', () => {
+      AWSUtil.getFileFromS3 = mockResolve({ Body: 'sample file contents' })
+      VaultUtil.awsDocumentationBucketName = 'bucketName'
 
-      return DocumentationService.getDoc('doc.md').then(() => {
-        expect(HttpUtil.get).toHaveBeenCalledWith('http://dcb6g58iy3guq.cloudfront.net/experiments/doc.md', headers)
+      return DocumentationService.getDoc('doc.md').then((result) => {
+        expect(AWSUtil.getFileFromS3).toHaveBeenCalledWith('bucketName', 'documentation/experiments/doc.md')
+        expect(result).toEqual('sample file contents')
       })
     })
   })

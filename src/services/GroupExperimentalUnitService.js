@@ -18,8 +18,8 @@ import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
 import HttpUtil from './utility/HttpUtil'
 import PingUtil from './utility/PingUtil'
+import VaultUtil from './utility/VaultUtil'
 import apiUrls from '../config/apiUrls'
-import awsConfig from '../config/awsConfig'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -234,7 +234,7 @@ class GroupExperimentalUnitService {
 
         // return AWSUtil.callLambdaLocal(body)
         // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-        return AWSUtil.callLambda(awsConfig.lambdaName, body)
+        return AWSUtil.callLambda(VaultUtil.awsLambdaName, body)
       }))
 
       return Promise.all(groupPromises)
@@ -294,7 +294,7 @@ class GroupExperimentalUnitService {
 
       // return AWSUtil.callLambdaLocal(body)
       // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-      return AWSUtil.callLambda(awsConfig.lambdaName, body)
+      return AWSUtil.callLambda(VaultUtil.awsLambdaName, body)
         .then((data) => {
           const response = JSON.parse(data.Payload)
           this.lambdaPerformanceService.savePerformanceStats(response.inputSize,

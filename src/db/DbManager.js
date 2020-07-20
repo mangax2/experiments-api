@@ -29,6 +29,7 @@ import AnalysisModel from '../repos/analysisModel'
 import Block from '../repos/block'
 import TreatmentBlock from '../repos/treatmentBlock'
 import dataSource from '../config/dataSource'
+import VaultUtil from '../services/utility/VaultUtil'
 
 // pg-promise initialization options:
 const options = {
@@ -76,6 +77,8 @@ let dbConfig = {}
 // Setup database config if not running unit tests
 if (config.node_env !== 'UNITTEST') {
   dbConfig = dataSource
+  dbConfig.user = VaultUtil.dbAppUser
+  dbConfig.password = VaultUtil.dbAppPassword
   console.info('loaded db connection config')
 }
 

@@ -61,13 +61,14 @@ if (process.env.ENV === 'np' || process.env.ENV === 'prod') {
                 queriesToRun.push(tx.query(sqlContents).then())
               })
               return tx.batch(queriesToRun)
-            })).then(() => { process.exit(0) })
+            }))
         })
     })
+    .then(() => { console.info('SQL migrations completed successfully.') })
     .catch((error) => {
+      console.error('SQL migrations had an error')
       console.error(error)
-      process.exit(-1)
     })
 } else {
-  process.exit(0)
+  console.info('Environment is not np or prod; Not running SQL Migrations')
 }

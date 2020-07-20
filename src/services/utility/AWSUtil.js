@@ -12,6 +12,16 @@ const invokeLambda = (lambda, params) => new Promise((resolve, reject) => {
   })
 })
 
+const getS3Object = (s3, params) => new Promise((resolve, reject) => {
+  s3.getObject(params, (error, data) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(data)
+    }
+  })
+})
+
 class AWSUtil {
   configure = (accessKeyId, secretAccessKey) => {
     AWS.config.update({
@@ -32,6 +42,16 @@ class AWSUtil {
     return invokeLambda(lambda, params)
   }
 
+  getFileFromS3 = (bucket, file) => {
+    const s3 = this.createS3()
+    const params = {
+      Bucket: bucket,
+      Key: file,
+    }
+
+    return getS3Object(s3, params)
+  }
+
   /* istanbul ignore next */
   callLambdaLocal = (payload) => {
     const agent = require('superagent')
@@ -39,6 +59,8 @@ class AWSUtil {
   }
 
   createLambda = () => new AWS.Lambda()
+
+  createS3 = () => new AWS.S3()
 }
 
 module.exports = new AWSUtil()

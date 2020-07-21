@@ -22,19 +22,17 @@ const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
   return undefined
 }
 
-function getContextFromHeaders(headers) {
+function getContextFromHeaders(headers = {}) {
   const context = {
     requestId: (headers ? headers['X-Request-Id'] : null) || uuid(),
   }
 
-  if (headers && (headers.oauth_resourceownerinfo || headers['x-bayer-cwid'] || headers.username)) {
-    const userNameFromOauth = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo)
-    const username = userNameFromOauth || headers['x-bayer-cwid'] || headers.username
-    context.isApiRequest = !userNameFromOauth
-    context.userId = (username && username.length > 0
-      ? username.toUpperCase()
-      : undefined)
-  }
+  const userNameFromOauth = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo)
+  const username = userNameFromOauth || headers['x-bayer-cwid'] || headers.username
+  context.isApiRequest = !userNameFromOauth
+  context.userId = (username && username.length > 0)
+    ? username.toUpperCase()
+    : undefined
 
   return context
 }

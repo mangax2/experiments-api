@@ -6,6 +6,7 @@ import HttpUtil from '../services/utility/HttpUtil'
 import apiUrls from '../config/apiUrls'
 
 const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
+  if (_.isUndefined(oauthresourceownerinfo)) { return undefined }
   const tokens = oauthresourceownerinfo.split(',')
   const userIdToken = _.find(tokens, token => token.startsWith('username'))
 
@@ -21,19 +22,17 @@ const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
   return undefined
 }
 
-function getContextFromHeaders(headers) {
+function getContextFromHeaders(headers = {}) {
   const context = {
     requestId: (headers ? headers['X-Request-Id'] : null) || uuid(),
   }
 
-  if (headers && headers.oauth_resourceownerinfo) {
-    const userNameFromOauth = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo)
-    const username = userNameFromOauth || headers.username
-    context.isApiRequest = !userNameFromOauth
-    context.userId = (username && username.length > 0
-      ? username.toUpperCase()
-      : undefined)
-  }
+  const userNameFromOauth = getUserIdFromOauthHeader(headers.oauth_resourceownerinfo)
+  const username = userNameFromOauth || headers['x-bayer-cwid'] || headers.username
+  context.isApiRequest = !userNameFromOauth
+  context.userId = (username && username.length > 0)
+    ? username.toUpperCase()
+    : undefined
 
   return context
 }
@@ -82,7 +81,7 @@ function requestContextMiddlewareFunction(req, res, next) {
     })
   } else {
     if (req.context.userId === undefined && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
-      throw AppError.badRequest('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing')
+      throw AppError.badRequest('username value is invalid/missing in header')
     }
 
     next()

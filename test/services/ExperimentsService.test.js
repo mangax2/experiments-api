@@ -1441,7 +1441,7 @@ describe('ExperimentsService', () => {
       expect(AppError.badRequest).not.toHaveBeenCalled()
     })
 
-    test('does nothing when name is a string less than 100 characters', () => {
+    test('does nothing when name is a string less than or equal to 100 characters', () => {
       AppError.badRequest = mock()
 
       target.validateExperimentName('test name')
@@ -1449,10 +1449,10 @@ describe('ExperimentsService', () => {
       expect(AppError.badRequest).not.toHaveBeenCalled()
     })
 
-    test('throws an exception if the ', () => {
+    test('throws an exception if the name is a string over 100 characters', () => {
       AppError.badRequest = mock()
 
-      expect(() => target.validateExperimentName('01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890')).toThrow()
+      expect(() => target.validateExperimentName(Array(101).fill('a').join())).toThrow()
 
       expect(AppError.badRequest).toHaveBeenCalledWith('Experiment or template names cannot be longer than 100 characters', undefined, '15V001')
     })

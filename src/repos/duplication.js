@@ -27,7 +27,7 @@ const duplicateExperimentInfoScript =
         "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
-        "#= hstore('name', CAST(('COPY OF ' || e.name) AS varchar(100))) " +
+        "#= hstore('name', COALESCE($4, CAST(('COPY OF ' || e.name) AS varchar(100)))) " +
         "#= hstore('is_template', $3) " +
       "AS e1 FROM experiment e " +
     "WHERE id = $1) sub " +
@@ -342,7 +342,8 @@ class duplicationRepo {
   repository = () => this.rep
 
   @setErrorCode('531000')
-  duplicateExperiment=  function(experimentId,isTemplate ,context, tx = this.rep){ return tx.oneOrNone(
+  duplicateExperiment= function(experimentId, name, isTemplate, context, tx = this.rep) {
+    return tx.oneOrNone(
       duplicateExperimentInfoScript +
         duplicateOwnersScript +
         duplicateFactorScript +
@@ -357,9 +358,9 @@ class duplicationRepo {
         duplicateTreatmentBlockScript +
         duplicateUnitScript +
         duplicateAnalysisModelScript +
-      " SELECT * FROM experiment_parent;",
-    [experimentId, context.userId,isTemplate.toString()],
-  )
+        " SELECT * FROM experiment_parent;",
+      [experimentId, context.userId, isTemplate.toString(), name],
+    )
   }
 }
 

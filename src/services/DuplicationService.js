@@ -21,7 +21,7 @@ class DuplicationService {
       const isTemplate = body.isTemplate || false
       const updateFlag = source === 'conversion' ? !isTemplate : isTemplate
       const getTagsPromise = this.getAllTagsToDuplicate(body.ids, updateFlag, context)
-      const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies,
+      const sqlPromise = this.duplicateExperimentData(body.ids, body.numberOfCopies, body.name,
         isTemplate, context, tx)
 
       return Promise.all([getTagsPromise, sqlPromise])
@@ -41,14 +41,14 @@ class DuplicationService {
   }
 
   @setErrorCode('163000')
-  @Transactional('DuplicateExperiments')
-  duplicateExperimentData = (ids, numberOfCopies, isTemplate, context, tx) => {
+  @Transactional('DuplicateExperimentData')
+  duplicateExperimentData = (ids, numberOfCopies, name, isTemplate, context, tx) => {
     let sqlPromise = Promise.resolve()
     const conversionMap = []
     _.forEach(ids, (id) => {
       for (let i = 0; i < numberOfCopies; i += 1) {
         sqlPromise = sqlPromise.then(() =>
-          db.duplication.duplicateExperiment(id, isTemplate, context, tx))
+          db.duplication.duplicateExperiment(id, name, isTemplate, context, tx))
           .then((newIdObject) => { conversionMap.push({ oldId: id, newId: newIdObject.id }) })
       }
     })

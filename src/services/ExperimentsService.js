@@ -392,7 +392,7 @@ class ExperimentsService {
           case 'template': {
             const numberOfCopies = requestBody.numberOfCopies || 1
             experimentPromise = this.createEntity(requestBody.id, numberOfCopies,
-              context, false, tx).then((data) => {
+              requestBody.name, context, false, tx).then((data) => {
               if (data && _.isArray(data)) {
                 const tagsPromise = []
                 _.forEach(_.range(numberOfCopies), (t) => {
@@ -422,7 +422,7 @@ class ExperimentsService {
           }
           case 'experiment': {
             experimentPromise = this.copyEntities(requestBody.ids,
-              requestBody.numberOfCopies,
+              requestBody.numberOfCopies, requestBody.name,
               context, false, tx)
             break
           }
@@ -450,13 +450,13 @@ class ExperimentsService {
             break
           case 'template': {
             templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
-              context, true, tx)
+              requestBody.name, context, true, tx)
             break
           }
           case 'experiment': {
             const numberOfCopies = requestBody.numberOfCopies || 1
             templatePromise = this.createEntity(requestBody.id,
-              numberOfCopies,
+              numberOfCopies, requestBody.name,
               context, true, tx)
             break
           }
@@ -468,10 +468,18 @@ class ExperimentsService {
       })
   }
 
+  @setErrorCode('15V000')
+  validateExperimentName = (name) => {
+    if (name && name.length > 100) {
+      throw AppError.badRequest('Experiment or template names cannot be longer than 100 characters', undefined, '15V001')
+    }
+  }
+
   @setErrorCode('15H000')
-  createEntity(id, numberOfCopies, context, isTemplate, tx) {
+  createEntity(id, numberOfCopies, name, context, isTemplate, tx) {
+    this.validateExperimentName(name)
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateEntities([id], numberOfCopies,
+      return this.generateEntities([id], numberOfCopies, name,
         context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
@@ -479,14 +487,15 @@ class ExperimentsService {
   }
 
   @setErrorCode('15I000')
-  copyEntities(ids, numberOfCopies, context, isTemplate, tx) {
+  copyEntities(ids, numberOfCopies, name, context, isTemplate, tx) {
+    this.validateExperimentName(name)
     if (!_.isArray(ids)) {
       return Promise.reject(AppError.badRequest('ids must be an array', undefined, getFullErrorCode('15I001')))
     }
 
-    const idsCheck = _.partition(ids, id => _.isNumber(id))
-    if (_.isNumber(numberOfCopies) && ids.length > 0 && idsCheck[1].length === 0) {
-      return this.generateEntities(ids, numberOfCopies,
+    const [, invalidIds] = _.partition(ids, id => _.isNumber(id))
+    if (_.isNumber(numberOfCopies) && ids.length > 0 && invalidIds.length === 0) {
+      return this.generateEntities(ids, numberOfCopies, name,
         context, isTemplate, 'copy', tx)
     }
     return Promise.reject(AppError.badRequest('Invalid ids or number of Copies', undefined, getFullErrorCode('15I002')))
@@ -502,8 +511,10 @@ class ExperimentsService {
   }
 
   @setErrorCode('15K000')
-  generateEntities(ids, numberOfCopies, context, isTemplate, source, tx) {
-    const duplicationObj = { ids, numberOfCopies, isTemplate }
+  generateEntities(ids, numberOfCopies, name, context, isTemplate, source, tx) {
+    const duplicationObj = {
+      ids, numberOfCopies, isTemplate, name,
+    }
     return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }
 

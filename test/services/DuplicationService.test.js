@@ -16,9 +16,9 @@ describe('DuplicationService', () => {
       target.duplicateExperimentData = jest.fn(() => Promise.resolve({ ids: null }))
       target.duplicateTagsForExperiments = jest.fn(() => Promise.resolve())
 
-      return target.duplicateExperiments({ ids: [1], numberOfCopies: 2 }, testContext, 'copy', testTx).then(() => {
+      return target.duplicateExperiments({ ids: [1], numberOfCopies: 2, name: 'newName' }, testContext, 'copy', testTx).then(() => {
         expect(target.getAllTagsToDuplicate).toBeCalledWith([1], false, testContext)
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, false, testContext, testTx)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, 'newName', false, testContext, testTx)
         expect(target.duplicateTagsForExperiments).toBeCalledWith({ tags: null }, { ids: null }, testContext, false)
       })
     })
@@ -31,7 +31,7 @@ describe('DuplicationService', () => {
 
       return target.duplicateExperiments({ ids: [1], numberOfCopies: 2, isTemplate: true }, testContext, 'conversion', testTx).then(() => {
         expect(target.getAllTagsToDuplicate).toBeCalledWith([1], false, testContext)
-        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, true, testContext, testTx)
+        expect(target.duplicateExperimentData).toBeCalledWith([1], 2, undefined, true, testContext, testTx)
         expect(target.duplicateTagsForExperiments).toBeCalledWith({ tags: null }, { ids: null }, testContext, true)
       })
     })
@@ -74,7 +74,7 @@ describe('DuplicationService', () => {
       const target = new DuplicationService()
       db.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
 
-      return target.duplicateExperimentData([3, 5], 3, false, testContext, testTx)
+      return target.duplicateExperimentData([3, 5], 3, null, false, testContext, testTx)
         .then((result) => {
           expect(result.length).toBe(6)
           expect(db.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)

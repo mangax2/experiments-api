@@ -25,6 +25,7 @@ describe('FactorsValidator', () => {
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
+        { paramName: 'isBlockingFactorOnly', type: 'boolean' },
       ]
 
       expect(FactorsValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -58,6 +59,7 @@ describe('FactorsValidator', () => {
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
+        { paramName: 'isBlockingFactorOnly', type: 'boolean' },
       ]
 
       expect(target.getSchema('POST')).toEqual(schema)
@@ -77,6 +79,7 @@ describe('FactorsValidator', () => {
         { paramName: 'refFactorTypeId', type: 'refData', entity: {} },
         { paramName: 'experimentId', type: 'numeric', required: true },
         { paramName: 'experimentId', type: 'refData', entity: {} },
+        { paramName: 'isBlockingFactorOnly', type: 'boolean' },
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
       ]

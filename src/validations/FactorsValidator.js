@@ -22,6 +22,7 @@ class FactorsValidator extends SchemaValidator {
       { paramName: 'refFactorTypeId', type: 'refData', entity: db.factorType },
       { paramName: 'experimentId', type: 'numeric', required: true },
       { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'isBlockingFactorOnly', type: 'boolean' },
     ]
   }
 

@@ -34,7 +34,8 @@ class factorRepo {
         'created_date:raw',
         'modified_user_id',
         'modified_date:raw',
-        'tier:raw'
+        'tier:raw',
+        'is_blocking_factor_only',
       ],
       {table: 'factor'})
     const values = factors.map(factor => ({
@@ -45,7 +46,8 @@ class factorRepo {
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`,
+      is_blocking_factor_only: factor.isBlockingFactorOnly || false,
     }))
     const query = `${this.pgp.helpers.insert(values, columnSet)} RETURNING id`
     return tx.any(query)
@@ -61,7 +63,8 @@ class factorRepo {
         'experiment_id',
         'modified_user_id',
         'modified_date:raw',
-        'tier:raw'
+        'tier:raw',
+        'is_blocking_factor_only',
       ],
       {table: 'factor'})
     const data = factors.map(factor => ({
@@ -71,7 +74,8 @@ class factorRepo {
       experiment_id: factor.experimentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
-      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`
+      tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`,
+      is_blocking_factor_only: factor.isBlockingFactorOnly || false,
     }))
     const query = `${this.pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
     return tx.any(query)

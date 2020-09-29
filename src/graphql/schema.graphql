@@ -152,6 +152,7 @@ type TreatmentVariable {
   tier: Int
   auditInfo: AuditInfo
   treatmentVariableLevels: [TreatmentVariableLevel]
+  isBlockingFactorOnly: Boolean
 }
 
 type TreatmentVariableLevel {

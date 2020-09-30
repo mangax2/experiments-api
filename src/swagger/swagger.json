@@ -4313,7 +4313,7 @@
         },
         "isBlockingFactorOnly": {
           "type": "boolean",
-          "description": "indicates whether the treatment variable should be analyze or if it only exists to enable blocking"
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },
@@ -4370,7 +4370,7 @@
         },
         "isBlockingFactorOnly": {
           "type": "boolean",
-          "description": "indicates whether the treatment variable should be analyze or if it only exists to enable blocking"
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },
@@ -4415,7 +4415,7 @@
         },
         "isBlockingFactorOnly": {
           "type": "boolean",
-          "description": "indicates whether the treatment variable should be analyze or if it only exists to enable blocking"
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },

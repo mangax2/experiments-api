@@ -4310,6 +4310,10 @@
         "tier": {
           "type": "integer",
           "description": "the tier of the split that the variable is part of"
+        },
+        "isBlockingFactorOnly": {
+          "type": "boolean",
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },
@@ -4363,6 +4367,10 @@
         "tier": {
           "type": "integer",
           "description": "the tier of the split that the variable is part of"
+        },
+        "isBlockingFactorOnly": {
+          "type": "boolean",
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },
@@ -4404,6 +4412,10 @@
         "tier": {
           "type": "integer",
           "description": "tier is used categorize treatment variables in to main/sub/sub-sub etc  plots (valid Range : 1 to 10)"
+        },
+        "isBlockingFactorOnly": {
+          "type": "boolean",
+          "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
         }
       }
     },

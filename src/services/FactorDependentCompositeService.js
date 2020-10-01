@@ -125,6 +125,7 @@ const mapFactorDTOsToFactorEntities = addErrorHandling('1AG000',
       refFactorTypeId,
       experimentId,
       tier: factorDTO.tier,
+      isBlockingFactorOnly: factorDTO.isBlockingFactorOnly,
     })))
 
 const appendParentIdToChildren = addErrorHandling('1AH000',
@@ -235,6 +236,7 @@ class FactorDependentCompositeService {
         type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
         levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factorLevels),
         tier: factor.tier,
+        isBlockingFactorOnly: factor.is_blocking_factor_only,
       }
     })
   }

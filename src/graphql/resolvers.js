@@ -152,6 +152,7 @@ export default {
       context.getAuditInfo(entity),
     treatmentVariableLevels: (entity, args, context) =>
       context.loaders.factorLevelByFactorIds.load(entity.id),
+    isBlockingFactorOnly: property('is_blocking_factor_only'),
   },
   TreatmentVariableLevel: {
     valueJSON: property('value'),

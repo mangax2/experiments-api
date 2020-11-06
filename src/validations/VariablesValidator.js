@@ -94,7 +94,7 @@ class VariablesValidator extends BaseValidator {
   @setErrorCode('3H3000')
   validateEntity = (variables) => {
     const independentVariables = variables.treatmentVariables
-    if (!_.isUndefined(independentVariables) && !_.isNull(independentVariables)) {
+    if (!_.isNil(independentVariables) && independentVariables.length > 0) {
       const factorsWithoutLevels =
         _.filter(independentVariables,
           variable => (_.isNull(variable)
@@ -102,6 +102,9 @@ class VariablesValidator extends BaseValidator {
             || _.size(variable.levels) === 0))
       if (_.size(factorsWithoutLevels) > 0) {
         this.messages.push({ message: 'Treatment variables must contain at least one level.', errorCode: getFullErrorCode('3H3001') })
+      }
+      if (_.every(independentVariables, variable => variable.isBlockingFactorOnly)) {
+        this.messages.push({ message: 'At least one treatment variable must not be a blocking factor.', errorCode: getFullErrorCode('3H3002') })
       }
     }
     return Promise.resolve()

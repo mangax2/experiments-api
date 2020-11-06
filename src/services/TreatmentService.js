@@ -62,6 +62,11 @@ class TreatmentService {
           }
         })
     })
+
+  @setErrorCode('1R7000')
+  @Transactional('batchGetTreatmentsByExperimentId')
+  batchGetTreatmentsByExperimentId = (id, tx) => db.treatment.batchFindAllByExperimentId([id], tx)
+    .then(data => _.flatten(data))
 }
 
 module.exports = TreatmentService

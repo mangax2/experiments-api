@@ -119,6 +119,7 @@ type ExperimentalSetInfo {
 type ExperimentalUnit {
   id: Int
   treatmentId: Int
+  treatmentNumber: Int
   location: Int
   rep: Int
   setEntryId: Int

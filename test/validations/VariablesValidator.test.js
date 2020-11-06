@@ -472,5 +472,20 @@ describe('VariablesValidator', () => {
         expect(target.messages[0]).toEqual({ message: 'Treatment variables must contain at least one level.', errorCode: '3H3001' })
       })
     })
+
+    test('rejects when all factors are blocking factors', () => {
+      AppError.badRequest = mock()
+      const variables = {
+        treatmentVariables: [
+          { isBlockingFactorOnly: true, levels: [{}] },
+          { isBlockingFactorOnly: true, levels: [{}] },
+        ],
+      }
+
+      return target.validateEntity(variables).then(() => {
+        expect(target.hasErrors()).toEqual(true)
+        expect(target.messages[0]).toEqual({ message: 'At least one treatment variable must not be a blocking factor.', errorCode: '3H3002' })
+      })
+    })
   })
 })

@@ -197,7 +197,7 @@ describe('UnitWithBlockService', () => {
     })
   })
 
-  describe('addTreatmentNumbersToUnits', () => {
+  describe('addTreatmentInfoToUnits', () => {
     test('adds the appropriate treatment numbers to units', () => {
       const treatments = [
         { id: 987, treatment_number: 1 },
@@ -205,9 +205,9 @@ describe('UnitWithBlockService', () => {
       ]
       const units = [{ otherProp: 'blah', treatment_id: 986 }, { otherProp: 'blah', treatment_id: 987 }]
       const target = new UnitWithBlockService()
-      const result = target.addTreatmentNumbersToUnits(units, treatments)
+      const result = target.addTreatmentInfoToUnits(units, treatments)
 
-      expect(result).toEqual([{ otherProp: 'blah', treatment_id: 986, treatment_number: 2 }, { otherProp: 'blah', treatment_id: 987, treatment_number: 1 }])
+      expect(result).toEqual([{ otherProp: 'blah', treatment_id: 986, treatment: { id: 986, treatment_number: 2 } }, { otherProp: 'blah', treatment_id: 987, treatment: { id: 987, treatment_number: 1 } }])
     })
   })
 
@@ -247,17 +247,17 @@ describe('UnitWithBlockService', () => {
     })
   })
 
-  describe('findTreatmentNumber', () => {
+  describe('findTreatment', () => {
     test('returns the matching treatment if present', () => {
       const treatments = [
-        { id: 987, treatment_number: 1 },
-        { id: 986, treatment_number: 2 },
+        { id: 987, treatment_number: 1, combination_elements: { id: 432, treatment_id: 987 } },
+        { id: 986, treatment_number: 2, combination_elements: { id: 431, treatment_id: 986 } },
       ]
       const unit = { treatment_id: 986 }
       const target = new UnitWithBlockService()
-      const result = target.findTreatmentNumber(unit, treatments)
+      const result = target.findTreatment(unit, treatments)
 
-      expect(result).toEqual(2)
+      expect(result).toEqual({ id: 986, treatment_number: 2, combination_elements: { id: 431, treatment_id: 986 } })
     })
 
     test('returns null if no matching treatment is found', () => {
@@ -267,7 +267,7 @@ describe('UnitWithBlockService', () => {
       ]
       const unit = { treatment_id: 985 }
       const target = new UnitWithBlockService()
-      const result = target.findTreatmentNumber(unit, treatments)
+      const result = target.findTreatment(unit, treatments)
 
       expect(result).toEqual(null)
     })

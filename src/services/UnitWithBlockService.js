@@ -42,7 +42,7 @@ class UnitWithBlockService {
       this.treatmentService.batchGetTreatmentsByExperimentId(id, tx),
     ])
       .then(([units, treatmentBlocks, treatments]) =>
-        this.addTreatmentNumbersToUnits(
+        this.addTreatmentInfoToUnits(
           this.addBlockInfoToUnit(units, treatmentBlocks), treatments))
   }
 
@@ -71,8 +71,8 @@ class UnitWithBlockService {
     return ({ ...unit, treatmentBlockId })
   })
 
-  addTreatmentNumbersToUnits = (units, treatments) => _.map(units, unit =>
-    ({ ...unit, treatment_number: this.findTreatmentNumber(unit, treatments) }))
+  addTreatmentInfoToUnits = (units, treatments) => _.map(units, unit =>
+    ({ ...unit, treatment: this.findTreatment(unit, treatments) }))
 
   findTreatmentBlockId = (unit, treatmentBlocks) => {
     const treatmentBlock = _.find(treatmentBlocks,
@@ -80,10 +80,10 @@ class UnitWithBlockService {
     return treatmentBlock ? treatmentBlock.id : null
   }
 
-  findTreatmentNumber = (unit, treatments) => {
+  findTreatment = (unit, treatments) => {
     const treatment = _.find(treatments,
       t => ((t.id) === (unit.treatment_id)))
-    return treatment ? treatment.treatment_number : null
+    return treatment || null
   }
 }
 

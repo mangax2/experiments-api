@@ -3,7 +3,6 @@ import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
 import db from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
-import TreatmentService from './TreatmentService'
 import TreatmentBlockService from './TreatmentBlockService'
 import ExperimentalUnitService from './ExperimentalUnitService'
 
@@ -14,7 +13,6 @@ class UnitWithBlockService {
   constructor() {
     this.experimentService = new ExperimentsService()
     this.experimentalUnitService = new ExperimentalUnitService()
-    this.treatmentService = new TreatmentService()
     this.treatmentBlockService = new TreatmentBlockService()
   }
 
@@ -38,12 +36,10 @@ class UnitWithBlockService {
   @Transactional('getExperimentalUnitsByExperimentId')
   getExperimentalUnitsByExperimentId(id, tx) {
     return tx.batch([db.unit.findAllByExperimentId(id, tx),
-      this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx),
-      this.treatmentService.batchGetTreatmentsByExperimentId(id, tx),
-    ])
-      .then(([units, treatmentBlocks, treatments]) =>
-        this.addTreatmentInfoToUnits(
-          this.addBlockInfoToUnit(units, treatmentBlocks), treatments))
+      this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx)])
+      .then(([units, treatmentBlocks]) =>
+        this.addBlockInfoToUnit(units, treatmentBlocks),
+      )
   }
 
   @setErrorCode('204000')
@@ -71,19 +67,10 @@ class UnitWithBlockService {
     return ({ ...unit, treatmentBlockId })
   })
 
-  addTreatmentInfoToUnits = (units, treatments) => _.map(units, unit =>
-    ({ ...unit, treatment: this.findTreatment(unit, treatments) }))
-
   findTreatmentBlockId = (unit, treatmentBlocks) => {
     const treatmentBlock = _.find(treatmentBlocks,
       tb => tb.treatment_id === unit.treatmentId && tb.name === unit.block)
     return treatmentBlock ? treatmentBlock.id : null
-  }
-
-  findTreatment = (unit, treatments) => {
-    const treatment = _.find(treatments,
-      t => ((t.id) === (unit.treatment_id)))
-    return treatment || null
   }
 }
 

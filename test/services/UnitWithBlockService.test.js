@@ -119,7 +119,6 @@ describe('UnitWithBlockService', () => {
       db.unit.findAllByExperimentId = mockResolve([])
       const target = new UnitWithBlockService()
       target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([])
-      target.treatmentService.batchGetTreatmentsByExperimentId = mockResolve([])
       target.addBlockInfoToUnit = mock([])
       return target.getExperimentalUnitsByExperimentId(1, testTx).then(() => {
         expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
@@ -197,20 +196,6 @@ describe('UnitWithBlockService', () => {
     })
   })
 
-  describe('addTreatmentInfoToUnits', () => {
-    test('adds the appropriate treatment numbers to units', () => {
-      const treatments = [
-        { id: 987, treatment_number: 1 },
-        { id: 986, treatment_number: 2 },
-      ]
-      const units = [{ otherProp: 'blah', treatment_id: 986 }, { otherProp: 'blah', treatment_id: 987 }]
-      const target = new UnitWithBlockService()
-      const result = target.addTreatmentInfoToUnits(units, treatments)
-
-      expect(result).toEqual([{ otherProp: 'blah', treatment_id: 986, treatment: { id: 986, treatment_number: 2 } }, { otherProp: 'blah', treatment_id: 987, treatment: { id: 987, treatment_number: 1 } }])
-    })
-  })
-
   describe('findTreatmentBlockId', () => {
     test('found the matching treatment block', () => {
       const treatmentBlocks = [
@@ -244,32 +229,6 @@ describe('UnitWithBlockService', () => {
 
       const target = new UnitWithBlockService()
       expect(target.findTreatmentBlockId(unit, treatmentBlocks)).toEqual(null)
-    })
-  })
-
-  describe('findTreatment', () => {
-    test('returns the matching treatment if present', () => {
-      const treatments = [
-        { id: 987, treatment_number: 1, combination_elements: { id: 432, treatment_id: 987 } },
-        { id: 986, treatment_number: 2, combination_elements: { id: 431, treatment_id: 986 } },
-      ]
-      const unit = { treatment_id: 986 }
-      const target = new UnitWithBlockService()
-      const result = target.findTreatment(unit, treatments)
-
-      expect(result).toEqual({ id: 986, treatment_number: 2, combination_elements: { id: 431, treatment_id: 986 } })
-    })
-
-    test('returns null if no matching treatment is found', () => {
-      const treatments = [
-        { id: 987, treatment_number: 1 },
-        { id: 986, treatment_number: 2 },
-      ]
-      const unit = { treatment_id: 985 }
-      const target = new UnitWithBlockService()
-      const result = target.findTreatment(unit, treatments)
-
-      expect(result).toEqual(null)
     })
   })
 })

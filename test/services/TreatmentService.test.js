@@ -162,16 +162,4 @@ describe('TreatmentService', () => {
       })
     })
   })
-
-  describe('batchGetTreatmentsByExperimentId', () => {
-    test('gets treatments for provided experiment id(s)', () => {
-      const mockDbData = [[1, 2]]
-      const mockDbBatchFindAllByExperimentId = mockResolve(mockDbData)
-      db.treatment.batchFindAllByExperimentId = mockDbBatchFindAllByExperimentId
-      return target.batchGetTreatmentsByExperimentId(1, testTx).then((data) => {
-        expect(data).toEqual([1, 2])
-        expect(mockDbBatchFindAllByExperimentId).toHaveBeenCalledWith([1], testTx)
-      })
-    })
-  })
 })

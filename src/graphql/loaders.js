@@ -124,6 +124,7 @@ function createLoaders(tx) {
   const refUnitSpecByIdLoader = createDataLoader(db.unitSpecification.batchFind)
   const refUnitTypeByIdLoader = createDataLoader(db.unitType.batchFind)
   const templateByIdLoader = createDataLoader(templateBatchLoaderCallback)
+  const treatmentByTreatmentIdLoader = createDataLoader(db.treatment.batchFind)
   const unitSpecDetailByIdLoader = createDataLoader(db.unitSpecificationDetail.batchFind)
   const analysisModelByIdLoader = createDataLoader(db.analysisModel.batchFindByExperimentIds)
   const unitsByBlockIdsLoader = createDataLoader(db.unit.batchFindByBlockIds)
@@ -207,6 +208,7 @@ function createLoaders(tx) {
     template: templateByIdLoader,
     templates: createDataLoader(templatesBatchLoaderCallback),
     treatmentByExperimentIds: treatmentByExperimentIdLoader,
+    treatmentByTreatmentId: treatmentByTreatmentIdLoader,
     treatmentBySetIds: treatmentBySetIdLoader,
     unitByExperimentIds: unitsByExperimentIdLoader,
     unitsByBlockIds: unitsByBlockIdsLoader,

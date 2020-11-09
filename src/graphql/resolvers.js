@@ -132,7 +132,8 @@ export default {
   },
   ExperimentalUnit: {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),
-    treatment: property('treatment'),
+    treatment: (entity, args, context) =>
+      context.loaders.treatmentByTreatmentId.load(entity.treatment_id),
     setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
     deactivationReason: entity => (has(entity, 'deactivation_reason') ? entity.deactivation_reason : entity.deactivationReason),
     blockId: entity => (has(entity, 'block_id') ? entity.block_id : entity.blockId),

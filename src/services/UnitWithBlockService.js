@@ -37,9 +37,7 @@ class UnitWithBlockService {
   getExperimentalUnitsByExperimentId(id, tx) {
     return tx.batch([db.unit.findAllByExperimentId(id, tx),
       this.treatmentBlockService.getTreatmentBlocksByExperimentId(id, tx)])
-      .then(([units, treatmentBlocks]) =>
-        this.addBlockInfoToUnit(units, treatmentBlocks),
-      )
+      .then(([units, treatmentBlocks]) => this.addBlockInfoToUnit(units, treatmentBlocks))
   }
 
   @setErrorCode('204000')
@@ -90,7 +88,6 @@ const mapUnitsToResponseFormat = units => units.map((u) => {
     rep: unit.rep,
     setEntryId: unit.setEntryId,
     treatmentId: unit.treatmentId,
-    treatmentNumber: unit.treatmentNumber,
   }
 })
 

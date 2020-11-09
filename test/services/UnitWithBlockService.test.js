@@ -18,7 +18,6 @@ describe('UnitWithBlockService', () => {
     rep: 2,
     setEntryId: 124,
     treatmentId: 180490,
-    treatmentNumber: 306,
   }
 
   describe('getUnitsFromTemplateByExperimentId', () => {
@@ -104,7 +103,6 @@ describe('UnitWithBlockService', () => {
         rep: 2,
         set_entry_id: 124,
         treatment_id: 180490,
-        treatment_number: 306,
       }])
       return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
         expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)

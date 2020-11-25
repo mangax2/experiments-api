@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import config from '../../config'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
@@ -43,7 +43,7 @@ class SecurityService {
   }
 
   @setErrorCode('1O2000')
-  getGroupsByUserId = userId => PingUtil.getMonsantoHeader()
+  getGroupsByUserId = userId => OAuthUtil.getAuthorizationHeaders()
     .then((header) => {
       const graphqlQuery = `{ getUserById(id:${JSON.stringify(userId)}){ id, groups{ id } }}`
       return HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
@@ -89,7 +89,7 @@ class SecurityService {
   }
 
   @setErrorCode('1O5000')
-  getEntitlementsByUserId = userId => PingUtil.getMonsantoHeader()
+  getEntitlementsByUserId = userId => OAuthUtil.getAuthorizationHeaders()
     .then((header) => {
       const graphqlQuery = `{ getEntitlementsForUser(userId:${JSON.stringify(userId)}, appIds:"EXPERIMENTS-UI"){code}}`
       return HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })

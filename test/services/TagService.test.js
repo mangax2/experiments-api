@@ -4,7 +4,7 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import apiUrls from '../../src/config/apiUrls'
 
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import AppError from '../../src/services/utility/AppError'
 
 describe('TagService', () => {
@@ -20,7 +20,7 @@ describe('TagService', () => {
   describe('batchCreateTags', () => {
     test('creates tags', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.post = mockResolve({ body: [{ id: 1 }] })
       AppUtil.createPostResponse = mock()
       target.getEntityName = mock('experiment')
@@ -34,7 +34,7 @@ describe('TagService', () => {
       const body = { message: 'error' }
       const error = { response: { body } }
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.post = mockReject(error)
       target.getEntityName = mock('experiment')
       AppError.internalServerErrorWithMessage = mock(appErrorResponse)
@@ -53,7 +53,7 @@ describe('TagService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.post = mockReject(error)
       return target.batchCreateTags([], context, testTx).then(() => {}, (err) => {
         expect(target.validator.validate).toHaveBeenCalledWith([])
@@ -66,7 +66,7 @@ describe('TagService', () => {
   describe('saveTags', () => {
     test('creates tags', () => {
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.put = mockResolve({ body: { id: 1 } })
       AppUtil.createPostResponse = mock()
       const tags = [{ category: 'tagCategory', value: 'tagValue' }]
@@ -82,7 +82,7 @@ describe('TagService', () => {
       const body = { message: 'error' }
       const error = { response: { body } }
       target.validator.validate = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.put = mockReject(error)
       const tags = [{ category: 'tagCategory', value: 'tagValue' }]
       target.getEntityName = mock('experiment')
@@ -103,7 +103,7 @@ describe('TagService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.put = mockReject(error)
 
       return target.saveTags([], 1, false).then(() => {}, (err) => {
@@ -116,7 +116,7 @@ describe('TagService', () => {
 
   describe('getTagsByExperimentId', () => {
     test('gets tags for an experiment', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.get = mockResolve({ body: { tags: [] } })
 
       return target.getTagsByExperimentId(1, false, testTx).then((data) => {
@@ -125,7 +125,7 @@ describe('TagService', () => {
       })
     })
     test('returns empty array when 404 status is returned by tagging api', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.get = mockReject({ status: 404 })
 
       return target.getTagsByExperimentId(1, false, testTx).then((data) => {
@@ -135,7 +135,7 @@ describe('TagService', () => {
     })
 
     test('rejects when get tags fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       const body = { message: 'error' }
       const error = { response: { body } }
       HttpUtil.get = mockReject(error)
@@ -155,7 +155,7 @@ describe('TagService', () => {
 
   describe('getAllTagsForEntity', () => {
     test('gets tags for all experiments', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.get = mockResolve({ body: { entityId: 1, tags: [] } })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
@@ -164,7 +164,7 @@ describe('TagService', () => {
       })
     })
     test('returns empty array when error status code is 404', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.get = mockReject({ status: 404 })
 
       return target.getAllTagsForEntity('experiment').then((data) => {
@@ -174,7 +174,7 @@ describe('TagService', () => {
     })
 
     test('rejects when get tags fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       const body = { message: 'error' }
       const error = { response: { body } }
       HttpUtil.get = mockReject(error)
@@ -220,7 +220,7 @@ describe('TagService', () => {
 
   describe('getEntityTagsByTagFilters', () => {
     test('gets tag entities matching filter criteria', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.get = mockResolve({ body: [{ entityId: 1, tags: [] }] })
 
       return target.getEntityTagsByTagFilters(['tag1'], ['val1']).then((data) => {
@@ -230,7 +230,7 @@ describe('TagService', () => {
     })
 
     test('rejects when get tags fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       const body = { message: 'error' }
       const error = { response: { body } }
       HttpUtil.get = mockReject(error)
@@ -250,7 +250,7 @@ describe('TagService', () => {
 
   describe('deleteTagsForExperimentId', () => {
     test('deletes tags for an experimentId', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.delete = mockResolve([])
       target.getEntityName = mock('experiment')
 
@@ -260,7 +260,7 @@ describe('TagService', () => {
     })
 
     test('Resolves promise when tagging api returns 404 status', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       HttpUtil.delete = mockReject({ status: 404 })
       target.getEntityName = mock('experiment')
       return target.deleteTagsForExperimentId(1, context, false).then(() => {
@@ -269,7 +269,7 @@ describe('TagService', () => {
     })
 
     test('rejects when removeByExperimentId fails', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{}])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{}])
       target.getEntityName = mock('experiment')
       const body = { message: 'error' }
       const error = { response: { body } }

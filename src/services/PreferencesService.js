@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 
@@ -36,7 +36,7 @@ class PreferencesService {
 
   @setErrorCode('1X2000')
   getPreferences = (namespace, subNamespace, authorizationHeader, context) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then((headers) => {
       // replace the auth header with a user authheader
         const authHeader = _.find(headers, header => header.headerName === 'authorization')
@@ -50,7 +50,7 @@ class PreferencesService {
 
   @setErrorCode('1X3000')
   setPreferences = (namespace, subNamespace, preferences, authorizationHeader, context) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then((headers) => {
       // replace the auth header with a user authheader
         const authHeader = _.find(headers, header => header.headerName === 'authorization')

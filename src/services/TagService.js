@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import TagValidator from '../validations/TagValidator'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 
@@ -16,7 +16,7 @@ class TagService {
   @setErrorCode('1P1000')
   batchCreateTags(tags, context, isTemplate) {
     return this.validator.validate(tags)
-      .then(() => PingUtil.getMonsantoHeader().then((header) => {
+      .then(() => OAuthUtil.getAuthorizationHeaders().then((header) => {
         const headers = header.slice()
         const experimentIds = _.uniq(_.map(tags, 'experimentId'))
         const tagsRequest = this.createTagRequest(tags, experimentIds, isTemplate)
@@ -43,7 +43,7 @@ class TagService {
   @setErrorCode('1P3000')
   saveTags(tags, experimentId, context, isTemplate) {
     return this.validator.validate(tags)
-      .then(() => PingUtil.getMonsantoHeader().then((header) => {
+      .then(() => OAuthUtil.getAuthorizationHeaders().then((header) => {
         const headers = header.slice()
         const tagsRequest = _.map(tags, t => ({ category: t.category, value: t.value }))
         return HttpUtil.put(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${experimentId}`, headers, tagsRequest)
@@ -59,7 +59,7 @@ class TagService {
 
   @setErrorCode('1P4000')
   getTagsByExperimentId = (id, isTemplate, context) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then(header =>
         HttpUtil.get(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, header)
           .then(result => result.body.tags)
@@ -90,7 +90,7 @@ class TagService {
 
   @setErrorCode('1P6000')
   getEntityTagsByTagFilters = (tagCategories, tagValues, isTemplate, context) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then(header => HttpUtil.get(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}?tags.category=${tagCategories}&tags.value=${tagValues}`, header))
       .then(result => result.body)
       .catch((err) => {
@@ -102,7 +102,7 @@ class TagService {
 
 
   @setErrorCode('1P7000')
-  getAllTagsForEntity = entityName => PingUtil.getMonsantoHeader()
+  getAllTagsForEntity = entityName => OAuthUtil.getAuthorizationHeaders()
     .then(header => HttpUtil.get(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${entityName}`, header))
     .then(result => result.body)
     .catch((err) => {
@@ -126,7 +126,7 @@ class TagService {
 
   @setErrorCode('1P9000')
   deleteTagsForExperimentId = (id, context, isTemplate) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then((header) => {
         const headers = header.slice()
         return HttpUtil.delete(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${this.getEntityName(isTemplate)}/${id}`, headers)

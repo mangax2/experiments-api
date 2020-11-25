@@ -6,10 +6,10 @@ import db from '../../src/db/DbManager'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 
-jest.mock('../../src/services/utility/PingUtil')
+jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')
 
 describe('ExperimentsService', () => {
@@ -23,7 +23,7 @@ describe('ExperimentsService', () => {
     target.securityService = {
       canUserCreateExperiments: mockResolve(true),
     }
-    PingUtil.getMonsantoHeader.mockClear()
+    OAuthUtil.getAuthorizationHeaders.mockClear()
   })
 
   describe('batchCreateExperiments', () => {
@@ -1025,7 +1025,7 @@ describe('ExperimentsService', () => {
 
   describe('updateExperimentsRandomizationStrategyId', () => {
     test('saves the matching randomizationStrategyId', () => {
-      PingUtil.getMonsantoHeader = mockResolve()
+      OAuthUtil.getAuthorizationHeaders = mockResolve()
       HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
       target.factorService = { updateFactorsForDesign: mockResolve() }
       return target.updateExperimentsRandomizationStrategyId(5, 'crd', false, testContext, testTx)
@@ -1035,7 +1035,7 @@ describe('ExperimentsService', () => {
     })
 
     test('does not call factorService on creates', () => {
-      PingUtil.getMonsantoHeader = mockResolve()
+      OAuthUtil.getAuthorizationHeaders = mockResolve()
       HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
       target.factorService = { updateFactorsForDesign: mockResolve() }
 
@@ -1060,7 +1060,7 @@ describe('ExperimentsService', () => {
           num_external_sites: 1,
         },
       }
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.resolve(headers))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: response.body }))
       HttpUtil.put = jest.fn(() => Promise.resolve({}))
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -1079,7 +1079,7 @@ describe('ExperimentsService', () => {
       const error = new Error()
       error.status = 500
       error.response = { }
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(error))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.reject(error))
       AppError.badRequest = mock({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
       return target.deleteExperiment(1, testContext, false, testTx).catch(() => {
@@ -1096,7 +1096,7 @@ describe('ExperimentsService', () => {
       const error = new Error()
       error.status = 404
       error.response = { text: '' }
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(error))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.reject(error))
       AppError.badRequest = mock({})
       target.tagService.deleteTagsForExperimentId = mockResolve()
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {
@@ -1114,7 +1114,7 @@ describe('ExperimentsService', () => {
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = undefined
       target.tagService.deleteTagsForExperimentId = mockResolve()
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.resolve(headers))
       HttpUtil.get = jest.fn(() => Promise.resolve(response))
       HttpUtil.put = jest.fn(() => Promise.resolve({}))
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
@@ -1766,7 +1766,7 @@ describe('ExperimentsService', () => {
     test('creates a task and updates experiment status when everything is valid', () => {
       target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'EXP NAME' })
       target.securityService.permissionsCheck = mockResolve()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
       db.experiments.updateExperimentStatus = mockResolve()
 
@@ -1793,7 +1793,7 @@ describe('ExperimentsService', () => {
       }
 
       return target.submitForReview(1, false, date.toISOString(), testContext, testTx).then(() => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
         expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
       })
@@ -1802,7 +1802,7 @@ describe('ExperimentsService', () => {
     test('creates a task and updates experiment status when everything is valid for a template', () => {
       target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
       target.securityService.permissionsCheck = mockResolve()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
       db.experiments.updateExperimentStatus = mockResolve()
 
@@ -1829,7 +1829,7 @@ describe('ExperimentsService', () => {
       }
 
       return target.submitForReview(1, true, date.toISOString(), testContext, testTx).then(() => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
         expect(db.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
       })
@@ -1838,7 +1838,7 @@ describe('ExperimentsService', () => {
     test('fails to create a task', () => {
       target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
       target.securityService.permissionsCheck = mockResolve()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('error')))
       db.experiments.updateExperimentStatus = mockResolve()
       AppError.internalServerError = mock()
@@ -1866,7 +1866,7 @@ describe('ExperimentsService', () => {
       }
 
       return target.submitForReview(1, true, date.toISOString(), testContext, testTx).then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
         expect(db.experiments.updateExperimentStatus).not.toHaveBeenCalled()
         expect(AppError.internalServerError).toHaveBeenCalledWith('Error encountered contacting the velocity messaging api', 'error', '15Q005')
@@ -1909,7 +1909,7 @@ describe('ExperimentsService', () => {
       target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
       target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
       AppError.badRequest = mock()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       const error = new Error('text')
       error.status = 400
       error.response = {
@@ -1931,14 +1931,14 @@ describe('ExperimentsService', () => {
       return target.submitReview(1, true, '', null, testContext, testTx).then(() => {
         expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
         expect(db.comment.batchCreate).toHaveBeenCalled()
-        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).not.toHaveBeenCalled()
       })
     })
 
     test('successfully completes the task and updates experiment status and comment', () => {
       target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
       target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       const error = new Error('text')
       error.status = 400
       error.response = {
@@ -1957,7 +1957,7 @@ describe('ExperimentsService', () => {
     test('updates status of experiment and adds comment when task complete call fails but is ignored', () => {
       target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
       target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       const error = new Error('text')
       error.status = 404
       error.response = {
@@ -1982,7 +1982,7 @@ describe('ExperimentsService', () => {
 
       return target.cancelReview(1, false, testContext, testTx).then(() => {
         expect(db.experiments.updateExperimentStatus).toHaveBeenCalled()
-        expect(PingUtil.getMonsantoHeader).not.toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).not.toHaveBeenCalled()
       })
     })
 
@@ -1991,7 +1991,7 @@ describe('ExperimentsService', () => {
       target.securityService.permissionsCheck = mockResolve()
       AppError.badRequest = mock()
       db.experiments.updateExperimentStatus = mock()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       const error = new Error('text')
       error.status = 400
       error.response = {
@@ -2009,7 +2009,7 @@ describe('ExperimentsService', () => {
       target.getExperimentById = mockResolve({ task_id: 123 })
       target.securityService.permissionsCheck = mockResolve()
       db.experiments.updateExperimentStatus = mock()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.put.mockReturnValueOnce(Promise.resolve())
 
       return target.cancelReview(1, false, testContext, testTx).then(() => {
@@ -2021,7 +2021,7 @@ describe('ExperimentsService', () => {
       target.getExperimentById = mockResolve({ task_id: 123 })
       target.securityService.permissionsCheck = mockResolve()
       db.experiments.updateExperimentStatus = mock()
-      PingUtil.getMonsantoHeader.mockReturnValueOnce(Promise.resolve([]))
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       const error = new Error('text')
       error.status = 404
       error.response = {

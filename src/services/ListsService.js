@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import AppError from './utility/AppError'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
@@ -14,7 +14,7 @@ class ListsService {
 
   @setErrorCode('1W1000')
   getLists = (userId, listIds) =>
-    PingUtil.getMonsantoHeader()
+    OAuthUtil.getAuthorizationHeaders()
       .then((headers) => {
         headers.push({ headerName: 'user-id', headerValue: userId.toLowerCase() })
         return HttpUtil.get(`${apiUrls.materialListsAPIUrl}/lists?${_.map(listIds, id => `id=${id}`).join('&')}`, headers)

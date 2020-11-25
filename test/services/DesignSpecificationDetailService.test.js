@@ -7,7 +7,7 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
 
 jest.mock('../../src/services/utility/HttpUtil')
-jest.mock('../../src/services/utility/PingUtil')
+jest.mock('../../src/services/utility/OAuthUtil')
 
 describe('DesignSpecificationDetailService', () => {
   let target

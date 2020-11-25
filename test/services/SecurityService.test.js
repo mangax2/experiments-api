@@ -2,7 +2,7 @@ import { mock, mockReject, mockResolve } from '../jestUtil'
 import SecurityService from '../../src/services/SecurityService'
 import AppError from '../../src/services/utility/AppError'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import db from '../../src/db/DbManager'
 
 describe('SecurityService', () => {
@@ -16,10 +16,10 @@ describe('SecurityService', () => {
 
   describe('getGroupsByUserId', () => {
     test('returns empty Array profile api returns empty groups', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [] } } } })
       return target.getGroupsByUserId('kprat1').then((data) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(data.length).toBe(0)
         HttpUtil.post.mockReset()
@@ -28,11 +28,11 @@ describe('SecurityService', () => {
     })
 
     test('throws an error  when getGroupsByUserId is null or undefined', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: null } } })
       AppError.badRequest = mock()
       return target.getGroupsByUserId('kchit').then((data) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(data).toEqual([])
         HttpUtil.post.mockReset()
@@ -41,12 +41,12 @@ describe('SecurityService', () => {
     })
 
     test('rejects when PAPI returns nothing', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({})
       AppError.badRequest = mock()
 
       return target.getGroupsByUserId('kprat1').then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user permissions', undefined, '1O2001')
         HttpUtil.post.mockReset()
@@ -55,12 +55,12 @@ describe('SecurityService', () => {
     })
 
     test('rejects when PAPI returns errors', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { errors: [{}] } })
       AppError.badRequest = mock()
 
       return target.getGroupsByUserId('kprat1').then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '1O2002')
         HttpUtil.post.mockReset()
@@ -68,11 +68,11 @@ describe('SecurityService', () => {
       })
     })
 
-    test('Calls The PingUtil and returns groupIds', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+    test('Calls The OAuthUtil and returns groupIds', () => {
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [{ id: 'group1' }, { id: 'group2' }] } } } })
       return target.getGroupsByUserId('kprat1').then((response) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(response.length).toBe(2)
         HttpUtil.post.mockReset()
@@ -83,55 +83,55 @@ describe('SecurityService', () => {
 
   describe('getEntitlementsByUserId', () => {
     test('returns empty Array profile api returns empty groups', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: { groups: [] } } } })
       return target.getEntitlementsByUserId('testUser').then((data) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(data.length).toBe(0)
       })
     })
 
     test('throws an error  when getGroupsByUserId is null or undefined', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getUserById: null } } })
       AppError.badRequest = mock()
       return target.getEntitlementsByUserId('testUser').then((data) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(data).toEqual([])
       })
     })
 
     test('rejects when PAPI returns nothing', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({})
       AppError.badRequest = mock()
 
       return target.getEntitlementsByUserId('testUser').then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Unable to verify user entitlements', undefined, '1O5001')
       })
     })
 
     test('rejects when PAPI returns errors', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { errors: [{}] } })
       AppError.badRequest = mock()
 
       return target.getEntitlementsByUserId('testUser').then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Profile API encountered an error', [{}], '1O5002')
       })
     })
 
     test('returns entitlements when data is retrieved', () => {
-      PingUtil.getMonsantoHeader = mockResolve({})
+      OAuthUtil.getAuthorizationHeaders = mockResolve({})
       HttpUtil.post = mockResolve({ body: { data: { getEntitlementsForUser: [{ code: 'access' }, { code: 'create' }] } } })
       return target.getEntitlementsByUserId('testUser').then((response) => {
-        expect(PingUtil.getMonsantoHeader).toBeCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
         expect(HttpUtil.post).toBeCalled()
         expect(response).toEqual(['access', 'create'])
       })

@@ -1,5 +1,5 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import PreferencesService from '../../src/services/PreferencesService'
 import AppError from '../../src/services/utility/AppError'
@@ -45,24 +45,24 @@ describe('PreferencesService', () => {
 
   describe('getPreferences', () => {
     test('successfully gets preferences', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
       HttpUtil.get = mockResolve()
       const target = new PreferencesService()
 
       return target.getPreferences('ns', 'sns', 'userAuth', {}).then(() => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalledWith('https://preferences.velocity-np.ag/v2/user/ns/sns', [{ headerName: 'authorization', headerValue: 'userAuth' }])
       })
     })
 
     test('throws an error when it fails to retrieve preferences', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
       HttpUtil.get = mockReject()
       const target = new PreferencesService()
       target.handlePreferencesAPIError = mock()
 
       return target.getPreferences('ns', 'sns', 'userAuth', { requestId: 1 }).then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalledWith('https://preferences.velocity-np.ag/v2/user/ns/sns', [{ headerName: 'authorization', headerValue: 'userAuth' }])
         expect(target.handlePreferencesAPIError).toHaveBeenCalledWith(undefined, '1X2001')
       })
@@ -71,24 +71,24 @@ describe('PreferencesService', () => {
 
   describe('setPreferences', () => {
     test('successfully sets preferences', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
       HttpUtil.put = mockResolve()
       const target = new PreferencesService()
 
       return target.setPreferences('ns', 'sns', {}, 'userAuth', {}).then(() => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.put).toHaveBeenCalledWith('https://preferences.velocity-np.ag/v2/user/ns/sns', [{ headerName: 'authorization', headerValue: 'userAuth' }], {})
       })
     })
 
     test('throws an error when it fails to set preferences', () => {
-      PingUtil.getMonsantoHeader = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([{ headerName: 'authorization', headerValue: 'testAuth' }])
       HttpUtil.put = mockReject()
       const target = new PreferencesService()
       target.handlePreferencesAPIError = mock()
 
       return target.setPreferences('ns', 'sns', {}, 'userAuth', { requestId: 1 }).then(() => {}, () => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.put).toHaveBeenCalledWith('https://preferences.velocity-np.ag/v2/user/ns/sns', [{ headerName: 'authorization', headerValue: 'userAuth' }], {})
         expect(target.handlePreferencesAPIError).toHaveBeenCalledWith(undefined, '1X3001')
       })

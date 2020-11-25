@@ -3,7 +3,7 @@ import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import db from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
-import PingUtil from '../services/utility/PingUtil'
+import OAuthUtil from '../services/utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import config from '../../config'
 
@@ -11,7 +11,7 @@ const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator'
 
 
 function getPAPIResult(graphqlQuery, errorCode) {
-  return PingUtil.getMonsantoHeader().then(header =>
+  return OAuthUtil.getAuthorizationHeaders().then(header =>
     HttpUtil.post(`${apiUrls.profileAPIUrl}/graphql`, header, { query: graphqlQuery })
       .then((result) => {
         const errors = _.get(result, 'body.errors')

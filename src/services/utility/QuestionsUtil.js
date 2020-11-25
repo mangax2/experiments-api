@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import AppError from './AppError'
 import HttpUtil from './HttpUtil'
-import PingUtil from './PingUtil'
+import OAuthUtil from './OAuthUtil'
 import apiUrls from '../../config/apiUrls'
 
 class QuestionsUtil {
   static getAnswerKeys = (questionCode, uomCode) =>
-    PingUtil.getMonsantoHeader().then(headers =>
+    OAuthUtil.getAuthorizationHeaders().then(headers =>
       HttpUtil.getWithRetry(`${apiUrls.questionsV3APIUrl}/validation/question/${questionCode}/uom/${uomCode}`, headers)
         .then(response => _.map(_.get(response.body, 'rule.values'), 'key'))
         .catch((error) => {

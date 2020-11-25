@@ -17,7 +17,7 @@ import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import VaultUtil from './utility/VaultUtil'
 import apiUrls from '../config/apiUrls'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
@@ -116,7 +116,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1Fd000')
   getSetEntriesFromSet = (setId, numberOfReps, treatmentLength, context) =>
-    PingUtil.getMonsantoHeader().then((header) => {
+    OAuthUtil.getAuthorizationHeaders().then((header) => {
       header.push({ headerName: 'calling-user', headerValue: context.userId })
       return HttpUtil.getWithRetry(`${apiUrls.setsAPIUrl}/sets/${setId}?entries=true`, header)
         .then((originalSet) => {

@@ -7,7 +7,7 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import db from '../../src/db/DbManager'
 import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import VaultUtil from '../../src/services/utility/VaultUtil'
 import apiUrls from '../../src/config/apiUrls'
 
@@ -149,7 +149,7 @@ describe('GroupExperimentalUnitService', () => {
       db.treatmentBlock.findByBlockId = mockResolve([{ id: 1 }, { id: 2 }])
       db.unit.batchFindAllByLocationAndTreatmentBlocks = mockResolve(unitsFromDB)
       target.saveUnitsBySetId = mockResolve()
-      PingUtil.getMonsantoHeader = mockResolve(header)
+      OAuthUtil.getAuthorizationHeaders = mockResolve(header)
       HttpUtil.delete = mockResolve()
       HttpUtil.patch = mockResolve(setEntriesResponse)
       target.experimentalUnitService.batchPartialUpdateExperimentalUnits = mockResolve()
@@ -162,7 +162,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(target.verifySetAndGetDetails).toBeCalledWith(setId, {}, testTx)
         expect(db.treatmentBlock.findByBlockId).toBeCalledWith(setDetails.blockId, testTx)
         expect(target.saveUnitsBySetId).toBeCalledWith(setId, setDetails.experimentId, generatedUnits, {}, testTx)
-        expect(PingUtil.getMonsantoHeader).toBeCalledWith()
+        expect(OAuthUtil.getAuthorizationHeaders).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith(unitsWithSetEntries, {}, testTx)
@@ -188,7 +188,7 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('sends the correct error and code back when sets error occurs', (done) => {
-      PingUtil.getMonsantoHeader = mockReject({ response: { error: {} } })
+      OAuthUtil.getAuthorizationHeaders = mockReject({ response: { error: {} } })
 
       return target.resetSet(setId, {}, testTx).catch(() => {
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while communicating with the sets service.', undefined, '1Fd001')

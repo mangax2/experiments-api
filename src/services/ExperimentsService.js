@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import HttpUtil from './utility/HttpUtil'
-import PingUtil from './utility/PingUtil'
+import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import db from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
@@ -266,7 +266,7 @@ class ExperimentsService {
 
   @setErrorCode('15T000')
   updateExperimentsRandomizationStrategyId(experimentId, strategyCode, isCreate, context, tx) {
-    return PingUtil.getMonsantoHeader().then((headers) => {
+    return OAuthUtil.getAuthorizationHeaders().then((headers) => {
       const { randomizeTreatmentsAPIUrl } = apiUrls
       return HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)
         .then((strategies) => {
@@ -298,7 +298,7 @@ class ExperimentsService {
                 const url = `${apiUrls.capacityRequestAPIUrl}/requests/experiments/${id}`
 
                 const promises = []
-                const requestPromise = PingUtil.getMonsantoHeader()
+                const requestPromise = OAuthUtil.getAuthorizationHeaders()
                   .then(headers => HttpUtil.get(url, headers)
                     .then((response) => {
                       if (response && response.body) {
@@ -626,7 +626,7 @@ class ExperimentsService {
             tagKey: `${experimentId}|${isoDateString.slice(0, isoDateString.indexOf('T'))}`,
           }
 
-          return PingUtil.getMonsantoHeader().then(headers =>
+          return OAuthUtil.getAuthorizationHeaders().then(headers =>
             HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
               .then((taskResult) => {
                 const taskId = taskResult.body.id
@@ -661,7 +661,7 @@ class ExperimentsService {
           return tx.batch([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
         }
 
-        return PingUtil.getMonsantoHeader().then(headers =>
+        return OAuthUtil.getAuthorizationHeaders().then(headers =>
           HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
             .catch((err) => {
               console.error(`Unable to complete task. Reason: ${err.response.text}`)
@@ -685,7 +685,7 @@ class ExperimentsService {
           return db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)
         }
 
-        return PingUtil.getMonsantoHeader().then(headers =>
+        return OAuthUtil.getAuthorizationHeaders().then(headers =>
           HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
             .catch((err) => {
               console.error(`Unable to complete task. Reason: ${err.response.text}`)

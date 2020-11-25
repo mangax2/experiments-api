@@ -1,18 +1,18 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import AppError from '../../src/services/utility/AppError'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import ListsService from '../../src/services/ListsService'
 
 describe('ListsService', () => {
   describe('getLists', () => {
     test('gets authorization headers and calls lists api', () => {
-      PingUtil.getMonsantoHeader = mockResolve([])
+      OAuthUtil.getAuthorizationHeaders = mockResolve([])
       HttpUtil.get = mockResolve([])
 
       const target = new ListsService()
       return target.getLists('KMCCL', [1, 2]).then(() => {
-        expect(PingUtil.getMonsantoHeader).toHaveBeenCalled()
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
         expect(HttpUtil.get).toHaveBeenCalledWith('https://api01-np.agro.services/material-lists-api/v1/lists?id=1&id=2', [{ headerName: 'user-id', headerValue: 'kmccl' }])
       })
     })

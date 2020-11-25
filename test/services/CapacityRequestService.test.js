@@ -2,7 +2,7 @@ import CapacityRequestService from '../../src/services/CapacityRequestService'
 import AppError from '../../src/services/utility/AppError'
 import apiUrls from '../../src/config/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import PingUtil from '../../src/services/utility/PingUtil'
+import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import db from '../../src/db/DbManager'
 import {
   kafkaProducerMocker, mock, mockReject, mockResolve,
@@ -22,7 +22,7 @@ describe('CapacityRequestService', () => {
     })
 
     test('resolves if nothing goes wrong', () => {
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.resolve(headers))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.resolve(headers))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: capacityRequest }))
       HttpUtil.put = jest.fn(() => Promise.resolve())
       CapacityRequestService.handleCapacityRequestError = jest.fn(() => 'err')
@@ -37,7 +37,7 @@ describe('CapacityRequestService', () => {
 
       return CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
         .then(() => {
-          expect(PingUtil.getMonsantoHeader).toBeCalled()
+          expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
           expect(HttpUtil.get).toBeCalledWith('test/requests/53?type=ce', headers)
           expect(capacityRequest.experiment_id).toBe(100)
           expect(HttpUtil.put).toBeCalledWith('test/requests/53?type=ce', headers, { currentUser: 'testUser', request: capacityRequest })
@@ -46,7 +46,7 @@ describe('CapacityRequestService', () => {
     })
 
     test('rejects if something goes wrong', (done) => {
-      PingUtil.getMonsantoHeader = jest.fn(() => Promise.reject(new Error('err')))
+      OAuthUtil.getAuthorizationHeaders = jest.fn(() => Promise.reject(new Error('err')))
       HttpUtil.get = jest.fn(() => Promise.resolve({ body: capacityRequest }))
       HttpUtil.put = jest.fn(() => Promise.resolve())
       CapacityRequestService.handleCapacityRequestError = jest.fn(() => 'err')
@@ -61,7 +61,7 @@ describe('CapacityRequestService', () => {
 
       CapacityRequestService.associateExperimentToCapacityRequest(experiment, context)
         .catch(() => {
-          expect(PingUtil.getMonsantoHeader).toBeCalled()
+          expect(OAuthUtil.getAuthorizationHeaders).toBeCalled()
           expect(HttpUtil.get).not.toBeCalled()
           expect(HttpUtil.put).not.toBeCalledWith()
           expect(CapacityRequestService.handleCapacityRequestError).toBeCalled()

@@ -8,6 +8,14 @@ import FactorService from './FactorService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
+const factorLevelValueConstants = {
+  CLUSTER: 'Cluster',
+  COMPOSITE: 'Composite',
+  EXACT: 'exact',
+  PLACEHOLDER: 'placeholder',
+  NO_TREATMENT: 'noTreatment',
+}
+
 // Error Codes 1CXXXX
 class FactorLevelService {
   constructor() {
@@ -47,6 +55,48 @@ class FactorLevelService {
         return data
       }
     })
+
+  @setErrorCode('1C8000')
+  processFactorLevelValues = (treatmentVariables) => {
+    const treatmentVariableLevels = _.flatMap(treatmentVariables, 'levels')
+    const allProperties = this.flattenTreatmentVariableLevelValues(treatmentVariableLevels)
+
+    // This is where we'd put treatment variable level value validation - IF WE HAD ANY
+    // this.validateFactorLevelValueProperties(allProperties)
+
+    this.populateValueType(allProperties)
+  }
+
+  @setErrorCode('1C9000')
+  flattenTreatmentVariableLevelValues = variableLevels =>
+    _.flatMap(variableLevels, level => this.flattenClusterOrComposite(level))
+
+  @setErrorCode('1CA000')
+  flattenClusterOrComposite = property =>
+    _.flatMap(property.items, (item) => {
+      if (item.objectType === factorLevelValueConstants.CLUSTER
+        || item.objectType === factorLevelValueConstants.COMPOSITE) {
+        return this.flattenClusterOrComposite(item)
+      }
+      return [item]
+    })
+
+  @setErrorCode('1CB000')
+  populateValueType = (valueProperties) => {
+    valueProperties.forEach((property) => {
+      if (property.valueType
+        || property.objectType === factorLevelValueConstants.CLUSTER
+        || property.objectType === factorLevelValueConstants.COMPOSITE) {
+        return
+      }
+
+      if (property.placeholder) {
+        property.valueType = factorLevelValueConstants.PLACEHOLDER
+      } else {
+        property.valueType = factorLevelValueConstants.EXACT
+      }
+    })
+  }
 }
 
 module.exports = FactorLevelService

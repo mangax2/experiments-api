@@ -157,4 +157,173 @@ describe('FactorLevelService', () => {
       })
     })
   })
+
+  describe('processFactorLevelValues', () => {
+    test('flattens the variables to the individual level value properties', () => {
+      target = new FactorLevelService()
+      target.flattenTreatmentVariableLevelValues = mock([])
+      const variables = [
+        { levels: [{ id: 3 }, { id: 4 }] },
+        { levels: [{ id: 5 }, { id: 6 }, { id: 7 }] },
+      ]
+
+      target.processFactorLevelValues(variables)
+
+      expect(target.flattenTreatmentVariableLevelValues).toHaveBeenCalledWith([...variables[0].levels, ...variables[1].levels])
+    })
+
+    test('passes the value from flattenTreatmentVariableLevelValues to populateValueType', () => {
+      target = new FactorLevelService()
+      const properties = [{ placeholder: true }, { placeholder: false }]
+      const variables = []
+      target.flattenTreatmentVariableLevelValues = mock(properties)
+      target.populateValueType = mock()
+
+      target.processFactorLevelValues(variables)
+
+      expect(target.populateValueType).toHaveBeenCalledWith(properties)
+    })
+  })
+
+  describe('flattenTreatmentVariableLevelValues', () => {
+    test('calls flattenClusterOrComposite for every treatmentVariableLevel', () => {
+      target = new FactorLevelService()
+      target.flattenClusterOrComposite = mock([{}, {}])
+      const treatmentVariableLevels = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ]
+
+      const result = target.flattenTreatmentVariableLevelValues(treatmentVariableLevels)
+
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledTimes(3)
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledWith(treatmentVariableLevels[0])
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledWith(treatmentVariableLevels[1])
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledWith(treatmentVariableLevels[2])
+      expect(result.length).toBe(6)
+    })
+  })
+
+  describe('flattenClusterOrComposite', () => {
+    test('calls itself with the child item if it is a Cluster and returns that value', () => {
+      target = new FactorLevelService()
+      const originalFunction = target.flattenClusterOrComposite
+      const returnedValue = [{}, {}]
+      target.flattenClusterOrComposite = mock(returnedValue)
+      const childProperty = { objectType: 'Cluster' }
+      const property = { items: [childProperty] }
+
+      const result = originalFunction(property)
+
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledWith(childProperty)
+      expect(result).toEqual(returnedValue)
+    })
+
+    test('calls itself with the child item if it is a Composite and returns that value', () => {
+      target = new FactorLevelService()
+      const originalFunction = target.flattenClusterOrComposite
+      const returnedValue = [{}, {}]
+      target.flattenClusterOrComposite = mock(returnedValue)
+      const childProperty = { objectType: 'Composite' }
+      const property = { items: [childProperty] }
+
+      const result = originalFunction(property)
+
+      expect(target.flattenClusterOrComposite).toHaveBeenCalledWith(childProperty)
+      expect(result).toEqual(returnedValue)
+    })
+
+    test('does not call itself with the child item if it is not a Cluster or a Composite and instead returns itself in an array', () => {
+      target = new FactorLevelService()
+      const originalFunction = target.flattenClusterOrComposite
+      target.flattenClusterOrComposite = mock()
+      const childProperty = { objectType: 'Catalog' }
+      const property = { items: [childProperty] }
+
+      const result = originalFunction(property)
+
+      expect(target.flattenClusterOrComposite).not.toHaveBeenCalled()
+      expect(result).toEqual([childProperty])
+    })
+
+    test('returns the result of multiple items in a single array', () => {
+      target = new FactorLevelService()
+      const originalFunction = target.flattenClusterOrComposite
+      target.flattenClusterOrComposite = mock([{}, {}])
+      const property = {
+        items: [
+          { objectType: 'Cluster' },
+          { objectType: 'Composite' },
+          { objectType: 'Catalog' },
+        ],
+      }
+
+      const result = originalFunction(property)
+
+      expect(result.length).toBe(5)
+    })
+  })
+
+  describe('populateValueType', () => {
+    test('sets valueType to "exact" if placeholder is false', () => {
+      target = new FactorLevelService()
+      const property = { placeholder: false }
+
+      target.populateValueType([property])
+
+      expect(property.valueType).toBe('exact')
+    })
+
+    test('sets valueType to "placeholder" if placeholder is true', () => {
+      target = new FactorLevelService()
+      const property = { placeholder: true }
+
+      target.populateValueType([property])
+
+      expect(property.valueType).toBe('placeholder')
+    })
+
+    test('does nothing if valueType is already populated', () => {
+      target = new FactorLevelService()
+      const property = { placeholder: true, valueType: 'illegal value' }
+
+      target.populateValueType([property])
+
+      expect(property.valueType).toBe('illegal value')
+    })
+
+    test('does nothing if objectType is "Cluster"', () => {
+      target = new FactorLevelService()
+      const property = { placeholder: true, objectType: 'Cluster' }
+
+      target.populateValueType([property])
+
+      expect(property.valueType).toBe(undefined)
+    })
+
+    test('does nothing if objectType is "Composite"', () => {
+      target = new FactorLevelService()
+      const property = { placeholder: true, objectType: 'Composite' }
+
+      target.populateValueType([property])
+
+      expect(property.valueType).toBe(undefined)
+    })
+
+    test('sets multiple properties at once', () => {
+      target = new FactorLevelService()
+      const properties = [
+        { placeholder: false },
+        { placeholder: false },
+        { placeholder: true },
+      ]
+
+      target.populateValueType(properties)
+
+      expect(properties[0].valueType).toBe('exact')
+      expect(properties[1].valueType).toBe('exact')
+      expect(properties[2].valueType).toBe('placeholder')
+    })
+  })
 })

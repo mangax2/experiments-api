@@ -487,6 +487,8 @@ class FactorDependentCompositeService {
       context,
       tx,
     }
+    this.factorLevelService.processFactorLevelValues(allIndependentDTOs)
+
     return this.getCurrentDbEntities(requestData).then(
       (dbEntities) => {
         const inputsAndDbEntities = {

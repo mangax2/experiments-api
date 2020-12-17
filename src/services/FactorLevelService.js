@@ -15,6 +15,10 @@ const factorLevelValueConstants = {
   PLACEHOLDER: 'placeholder',
   NO_TREATMENT: 'noTreatment',
 }
+const clusterAndCompositeTypes = [
+  factorLevelValueConstants.CLUSTER,
+  factorLevelValueConstants.COMPOSITE,
+]
 
 // Error Codes 1CXXXX
 class FactorLevelService {
@@ -61,8 +65,7 @@ class FactorLevelService {
     const treatmentVariableLevels = _.flatMap(treatmentVariables, 'levels')
     const allProperties = this.flattenTreatmentVariableLevelValues(treatmentVariableLevels)
 
-    // This is where we'd put treatment variable level value validation - IF WE HAD ANY
-    // this.validateFactorLevelValueProperties(allProperties)
+    this.validateFactorLevelValueProperties(allProperties)
 
     this.populateValueType(allProperties)
   }
@@ -96,6 +99,20 @@ class FactorLevelService {
         property.valueType = factorLevelValueConstants.EXACT
       }
     })
+  }
+
+  @setErrorCode('1CC000')
+  validateFactorLevelValueProperties = (valueProperties) => {
+    const [clusterCatalogProps, valueProps] = _.partition(valueProperties,
+      vp => clusterAndCompositeTypes.includes(vp.objectType))
+
+    if (_.some(clusterCatalogProps, ccp => !_.isArray(ccp.items))) {
+      throw AppError.badRequest('All Cluster and Composite properties must have an array named "items".', undefined, '1CC001')
+    }
+
+    if (_.some(valueProps, vp => _.isNil(vp.placeholder) && _.isNil(vp.valueType))) {
+      throw AppError.badRequest('All value properties must either specify "placeholder", "valueType", or both of these.', undefined, '1CC002')
+    }
   }
 }
 

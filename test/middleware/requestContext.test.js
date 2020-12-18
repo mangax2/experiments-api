@@ -1,7 +1,5 @@
-import { mock } from '../jestUtil'
 import AppError from '../../src/services/utility/AppError'
 import requestContextMiddlewareFunction from '../../src/middleware/requestContext'
-
 
 describe('requestContextMiddlewareFunction', () => {
   const createHeader = (value, provider) => {
@@ -11,10 +9,13 @@ describe('requestContextMiddlewareFunction', () => {
       }
       case 'azure': {
         if (value.startsWith('username=')) {
-          value = value.split('=')[1]
-          if (value === ' ' || value === '') { value = undefined } // 'username= '
-          return { 'x-bayer-cwid': value }
-        } else { return {} }  // 'test=test'
+          let username = value.split('=')[1]
+          if (username === ' ' || username === '') {
+            username = undefined
+          } // 'username= '
+          return { 'x-bayer-cwid': username }
+        }
+        return {} // 'test=test'
       }
       default: {
         throw Error('Invalid option for provider')
@@ -23,7 +24,6 @@ describe('requestContextMiddlewareFunction', () => {
   }
 
   describe.each(['ping', 'azure'])('with %s token', (provider) => {
-
     const validHeaders = createHeader('username=fakeuser', provider)
     const invalidRequest1 = { method: 'POST', headers: undefined }
     const invalidRequest2 = { method: 'POST' }
@@ -48,8 +48,13 @@ describe('requestContextMiddlewareFunction', () => {
     })
 
     test('returns the given request id if one is provided', () => {
-      const req = { method: 'POST', headers: { ...createHeader('username=fakeuser', provider),
-                                               'X-Request-Id': '25' } }
+      const req = {
+        method: 'POST',
+        headers: {
+          ...createHeader('username=fakeuser', provider),
+          'X-Request-Id': '25',
+        },
+      }
 
       requestContextMiddlewareFunction(req, res, nextFunc)
       expect(res.set).toHaveBeenCalledWith('X-Request-Id', '25')
@@ -136,45 +141,121 @@ describe('requestContextMiddlewareFunction', () => {
     })
 
     test('retrieves the username from the header when it is populated and the oauth_resourceownerinfo does not have that information', async () => {
-      const req = { method: 'POST', headers: { ...createHeader('test=test', provider),
-                                               username: 'fakeuser' } }
+      const req = {
+        method: 'POST',
+        headers: {
+          ...createHeader('test=test', provider),
+          username: 'fakeuser',
+        },
+      }
 
       await requestContextMiddlewareFunction(req, res, nextFunc)
       expect(nextFunc).toHaveBeenCalled()
       expect(req.context.userId).toEqual('FAKEUSER')
     })
 
+    test('pulls the client id from the AzureAD token when possible', async () => {
+      const encodedToken = Buffer.from(JSON.stringify({ appid: 'test app id' })).toString('base64')
+      const req = {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer .${encodedToken}.`.padEnd(100, '0'),
+          username: 'fakeuser',
+        },
+        url: '/experiments-api-graphql/graphql',
+      }
+
+      await requestContextMiddlewareFunction(req, res, nextFunc)
+      expect(nextFunc).toHaveBeenCalled()
+      expect(req.context.clientId).toEqual('test app id')
+    })
+
+    test('sets the client id to UNKNOWN AzureAD Client when it cannot read the AzureAD token', async () => {
+      const req = {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer .aaaaaaaa.'.padEnd(100, '0'),
+          username: 'fakeuser',
+        },
+        url: '/experiments-api-graphql/graphql',
+      }
+
+      await requestContextMiddlewareFunction(req, res, nextFunc)
+      expect(nextFunc).toHaveBeenCalled()
+      expect(req.context.clientId).toEqual('UNKNOWN AzureAD Client')
+    })
+
+    test('sets the client id to UNKNOWN AzureAD Client when AzureAD token does not have client info', async () => {
+      const req = {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer ..'.padEnd(100, '0'),
+          username: 'fakeuser',
+        },
+        url: '/experiments-api-graphql/graphql',
+      }
+
+      await requestContextMiddlewareFunction(req, res, nextFunc)
+      expect(nextFunc).toHaveBeenCalled()
+      expect(req.context.clientId).toEqual('UNKNOWN AzureAD Client')
+    })
+
+    test('sets the client id to UNKNOWN Ping Client when Ping token', async () => {
+      const req = {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer PingTokenOf28CharactersOrSo',
+          username: 'fakeuser',
+        },
+        url: '/experiments-api-graphql/graphql',
+      }
+
+      await requestContextMiddlewareFunction(req, res, nextFunc)
+      expect(nextFunc).toHaveBeenCalled()
+      expect(req.context.clientId).toEqual('UNKNOWN Ping Client')
+    })
+
     test('marks the request as from an API if the oauth_resourceownerinfo does not have username information', () => {
-      const req = { method: 'POST', headers: { ...createHeader('test=test', provider),
-                                               username: 'fakeuser' } }
+      const req = {
+        method: 'POST',
+        headers: {
+          ...createHeader('test=test', provider),
+          username: 'fakeuser',
+        },
+      }
 
       return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
-          .then(() => {
-            expect(nextFunc).toHaveBeenCalled()
-            expect(req.context.isApiRequest).toEqual(true)
-          })
+        .then(() => {
+          expect(nextFunc).toHaveBeenCalled()
+          expect(req.context.isApiRequest).toEqual(true)
+        })
     })
 
     test('retrieves the username from the oauth_resourceownerinfo when both it and the username header have that information', () => {
-      const req = { method: 'POST', headers: { ...createHeader('username=fakeuser2', provider),
-                                               username: 'fakeuser' } }
+      const req = {
+        method: 'POST',
+        headers: {
+          ...createHeader('username=fakeuser2', provider),
+          username: 'fakeuser',
+        },
+      }
 
       return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
-          .then(() => {
-            expect(nextFunc).toHaveBeenCalled()
-            expect(req.context.userId).toEqual('FAKEUSER2')
-          })
+        .then(() => {
+          expect(nextFunc).toHaveBeenCalled()
+          expect(req.context.userId).toEqual('FAKEUSER2')
+        })
     })
 
     test('calls to get client id when graphql call', () => {
       const req = { method: 'POST', headers: validHeaders, url: '/experiments-api-graphql/graphql' }
 
       return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
-          .then(() => {
-            expect(nextFunc).toHaveBeenCalled()
-            expect(req.context.userId).toEqual('FAKEUSER')
-            expect(req.context.clientId).toEqual('PD-EXPERIMENTS-API-DEV-SVC')
-          })
+        .then(() => {
+          expect(nextFunc).toHaveBeenCalled()
+          expect(req.context.userId).toEqual('FAKEUSER')
+          expect(req.context.clientId).toEqual('PD-EXPERIMENTS-API-DEV-SVC')
+        })
     })
   })
 })

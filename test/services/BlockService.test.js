@@ -44,7 +44,10 @@ describe('BlockService', () => {
       ]
       db.block.findByExperimentId = mockResolve(blocks)
       db.block.batchRemove = mockResolve([])
+      db.locationAssociation.findByExperimentId = mockResolve([])
+
       const target = new BlockService()
+
       return target.removeBlocksByExperimentId(1, ['block2', 'block2'], testTx)
         .then(() => {
           expect(db.block.batchRemove).toHaveBeenCalledWith([11], testTx)
@@ -58,11 +61,67 @@ describe('BlockService', () => {
       ]
       db.block.findByExperimentId = mockResolve(blocks)
       db.block.batchRemove = mockResolve([])
+      db.locationAssociation.findByExperimentId = mockResolve([])
+
       const target = new BlockService()
       return target.removeBlocksByExperimentId(1, ['block1', 'block2'], testTx)
         .then(() => {
           expect(db.block.batchRemove).toHaveBeenCalledWith([], testTx)
         })
+    })
+
+    test('throws if block to be removed has location association', () => {
+      const blocks = [
+        { id: 11, name: 'block1' },
+        { id: 12, name: 'block2' },
+      ]
+      const testErr = { message: 'Ya dun goofed', status: 400 }
+      db.block.findByExperimentId = mockResolve(blocks)
+      db.block.batchRemove = mockResolve([])
+      db.locationAssociation.findByExperimentId = mockResolve([{ block_id: 11, id: 1 }])
+      AppError.badRequest = mock(testErr)
+
+      const target = new BlockService()
+
+      return target.removeBlocksByExperimentId(1, ['block2', 'block2'], testTx)
+        .catch((err) => {
+          expect(err).toBe(testErr)
+          expect(AppError.badRequest).toHaveBeenCalledWith('Cannot remove blocks that already have sets associated to them', [{ id: 11, name: 'block1' }], '212001')
+          expect(db.block.batchRemove).not.toHaveBeenCalled()
+        })
+    })
+  })
+
+  describe('getBlocksToRemoveWithLocationAssociation', () => {
+    test('returns empty array when blocks to be removed do not have location associations', () => {
+      const blocksToRemove = [
+        { id: 11, name: 'block1' },
+        { id: 12, name: 'block2' },
+      ]
+
+      const locationAssociationsInDB = [
+        { id: 123, block_id: 5432 },
+        { id: 124, block_id: 5433 },
+      ]
+
+      const results = BlockService.getBlocksToRemoveWithLocationAssociation(blocksToRemove, locationAssociationsInDB)
+
+      expect(results).toEqual([])
+    })
+    test('returns array of non-removable blocks when blocks to be removed have location associations', () => {
+      const blocksToRemove = [
+        { id: 11, name: 'block1' },
+        { id: 12, name: 'block2' },
+      ]
+
+      const locationAssociationsInDB = [
+        { id: 123, block_id: 11 },
+        { id: 124, block_id: 123 },
+      ]
+
+      const results = BlockService.getBlocksToRemoveWithLocationAssociation(blocksToRemove, locationAssociationsInDB)
+
+      expect(results).toEqual([{ id: 11, name: 'block1' }])
     })
   })
 

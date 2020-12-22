@@ -1,9 +1,6 @@
 import _ from 'lodash'
 import uuid from 'uuid/v4'
 import AppError from '../services/utility/AppError'
-import VaultUtil from '../services/utility/VaultUtil'
-import HttpUtil from '../services/utility/HttpUtil'
-import apiUrls from '../config/apiUrls'
 
 const getUserIdFromOauthHeader = (oauthresourceownerinfo) => {
   if (_.isUndefined(oauthresourceownerinfo)) { return undefined }
@@ -37,26 +34,34 @@ function getContextFromHeaders(headers = {}) {
   return context
 }
 
-/* istanbul ignore next */
 function getClientIdFromToken(headers) {
+  let clientId
   if (headers && headers.authorization) {
     const token = headers.authorization.substring(7)
-    const url = `${apiUrls}/introspect.oauth2`
-    const { clientId, clientSecret } = VaultUtil
 
-    const postHeaders = [{ headerName: 'Content-Type', headerValue: 'application/x-www-form-urlencoded' }]
-    const formData = { token, client_id: clientId, client_secret: clientSecret }
-
-    return HttpUtil.postform(url, formData, postHeaders).then((data) => {
-      if (data && data.body && data.body.client_id) {
-        return data.body.client_id.toUpperCase()
-      }
-
-      return Promise.reject(new Error('Unable to resolve client id'))
-    }).catch(err => Promise.reject(err))
+    if (token && token.length > 50) {
+      clientId = getClientIdFromAzureADToken(token) || 'UNKNOWN AzureAD Client'
+    } else {
+      clientId = 'UNKNOWN Ping Client'
+    }
   }
 
-  return Promise.resolve('PD-EXPERIMENTS-API-DEV-SVC')
+  return clientId || 'PD-EXPERIMENTS-API-DEV-SVC'
+}
+
+function getClientIdFromAzureADToken(token) {
+  try {
+    const encodedClientInfo = token.split('.')[1]
+
+    if (encodedClientInfo) {
+      const clientInfoBuffer = Buffer.from(encodedClientInfo, 'base64')
+      const clientInfo = JSON.parse(clientInfoBuffer.toString('utf8'))
+      return clientInfo['https://bayer.com/app_displayname'] || clientInfo.appid
+    }
+  } catch {
+    console.warn('An error occurred while retrieving client id from AzureAD token')
+  }
+  return undefined
 }
 
 function requestContextMiddlewareFunction(req, res, next) {
@@ -72,20 +77,12 @@ function requestContextMiddlewareFunction(req, res, next) {
       req.context.userId = 'SERVICE-USER'
     }
 
-    getClientIdFromToken(req.headers).then((clientId) => {
-      req.context.clientId = clientId
-      next()
-    }).catch(/* istanbul ignore next */(err) => {
-      console.warn(`[[${req.context.requestId}]] Error received when trying to retrieve client id.`, err)
-      next()
-    })
-  } else {
-    if (req.context.userId === undefined && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
-      throw AppError.badRequest('username value is invalid/missing in header')
-    }
-
-    next()
+    req.context.clientId = getClientIdFromToken(req.headers)
+  } else if (req.context.userId === undefined
+    && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
+    throw AppError.badRequest('username value is invalid/missing in header')
   }
+  next()
 }
 
 module.exports = requestContextMiddlewareFunction

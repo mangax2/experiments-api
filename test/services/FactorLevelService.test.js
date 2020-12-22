@@ -174,7 +174,7 @@ describe('FactorLevelService', () => {
 
     test('passes the value from flattenTreatmentVariableLevelValues to validateFactorLevelValueProperties and populateValueType', () => {
       target = new FactorLevelService()
-      const properties = [{ placeholder: true }, { placeholder: false }]
+      const properties = [{ isPlaceholder: true }, { isPlaceholder: false }]
       const variables = []
       target.flattenTreatmentVariableLevelValues = mock(properties)
       target.validateFactorLevelValueProperties = mock()
@@ -188,7 +188,7 @@ describe('FactorLevelService', () => {
 
     test('does not call populateValueType if validateFactorLevelValueProperties throws an error', () => {
       target = new FactorLevelService()
-      const properties = [{ placeholder: true }, { placeholder: false }]
+      const properties = [{ isPlaceholder: true }, { isPlaceholder: false }]
       const variables = []
       target.flattenTreatmentVariableLevelValues = mock(properties)
       target.validateFactorLevelValueProperties = () => { throw new Error() }
@@ -281,18 +281,18 @@ describe('FactorLevelService', () => {
   })
 
   describe('populateValueType', () => {
-    test('sets valueType to "exact" if placeholder is false', () => {
+    test('sets valueType to "exact" if isPlaceholder is false', () => {
       target = new FactorLevelService()
-      const property = { placeholder: false }
+      const property = { isPlaceholder: false }
 
       target.populateValueType([property])
 
       expect(property.valueType).toBe('exact')
     })
 
-    test('sets valueType to "placeholder" if placeholder is true', () => {
+    test('sets valueType to "placeholder" if isPlaceholder is true', () => {
       target = new FactorLevelService()
-      const property = { placeholder: true }
+      const property = { isPlaceholder: true }
 
       target.populateValueType([property])
 
@@ -301,7 +301,7 @@ describe('FactorLevelService', () => {
 
     test('does nothing if valueType is already populated', () => {
       target = new FactorLevelService()
-      const property = { placeholder: true, valueType: 'illegal value' }
+      const property = { isPlaceholder: true, valueType: 'illegal value' }
 
       target.populateValueType([property])
 
@@ -310,7 +310,7 @@ describe('FactorLevelService', () => {
 
     test('does nothing if objectType is "Cluster"', () => {
       target = new FactorLevelService()
-      const property = { placeholder: true, objectType: 'Cluster' }
+      const property = { isPlaceholder: true, objectType: 'Cluster' }
 
       target.populateValueType([property])
 
@@ -319,7 +319,7 @@ describe('FactorLevelService', () => {
 
     test('does nothing if objectType is "Composite"', () => {
       target = new FactorLevelService()
-      const property = { placeholder: true, objectType: 'Composite' }
+      const property = { isPlaceholder: true, objectType: 'Composite' }
 
       target.populateValueType([property])
 
@@ -329,9 +329,9 @@ describe('FactorLevelService', () => {
     test('sets multiple properties at once', () => {
       target = new FactorLevelService()
       const properties = [
-        { placeholder: false },
-        { placeholder: false },
-        { placeholder: true },
+        { isPlaceholder: false },
+        { isPlaceholder: false },
+        { isPlaceholder: true },
       ]
 
       target.populateValueType(properties)
@@ -346,7 +346,7 @@ describe('FactorLevelService', () => {
     test('does nothing if the value properties are valid', () => {
       const properties = [
         { objectType: 'Cluster', items: [] },
-        { objectType: 'Catalog', placeholder: true },
+        { objectType: 'Catalog', isPlaceholder: true },
       ]
       AppError.badRequest = mock(new Error())
 
@@ -357,7 +357,7 @@ describe('FactorLevelService', () => {
     test('throws an error if a cluster or composite does not have items', () => {
       const properties = [
         { objectType: 'Cluster' },
-        { objectType: 'Catalog', placeholder: true },
+        { objectType: 'Catalog', isPlaceholder: true },
       ]
       AppError.badRequest = mock(new Error())
 
@@ -365,7 +365,7 @@ describe('FactorLevelService', () => {
       expect(AppError.badRequest).toHaveBeenCalledWith('All Cluster and Composite properties must have an array named "items".', undefined, '1CC001')
     })
 
-    test('throws an error if a value property does not have placeholder or valueType', () => {
+    test('throws an error if a value property does not have isPlaceholder or valueType', () => {
       const properties = [
         { objectType: 'Cluster', items: [] },
         { objectType: 'Catalog' },
@@ -373,7 +373,7 @@ describe('FactorLevelService', () => {
       AppError.badRequest = mock(new Error())
 
       expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
-      expect(AppError.badRequest).toHaveBeenCalledWith('All value properties must either specify "placeholder", "valueType", or both of these.', undefined, '1CC002')
+      expect(AppError.badRequest).toHaveBeenCalledWith('All value properties must either specify "isPlaceholder", "valueType", or both of these.', undefined, '1CC002')
     })
   })
 })

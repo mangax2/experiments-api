@@ -93,7 +93,7 @@ class FactorLevelService {
         return
       }
 
-      if (property.placeholder) {
+      if (property.isPlaceholder) {
         property.valueType = factorLevelValueConstants.PLACEHOLDER
       } else {
         property.valueType = factorLevelValueConstants.EXACT
@@ -110,8 +110,8 @@ class FactorLevelService {
       throw AppError.badRequest('All Cluster and Composite properties must have an array named "items".', undefined, '1CC001')
     }
 
-    if (_.some(valueProps, vp => _.isNil(vp.placeholder) && _.isNil(vp.valueType))) {
-      throw AppError.badRequest('All value properties must either specify "placeholder", "valueType", or both of these.', undefined, '1CC002')
+    if (_.some(valueProps, vp => _.isNil(vp.isPlaceholder) && _.isNil(vp.valueType))) {
+      throw AppError.badRequest('All value properties must either specify "isPlaceholder", "valueType", or both of these.', undefined, '1CC002')
     }
   }
 }

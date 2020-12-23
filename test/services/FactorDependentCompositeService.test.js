@@ -856,6 +856,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -864,6 +865,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -878,10 +880,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
+                    isPlaceholder: true,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -890,10 +894,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON456',
+                    isPlaceholder: true,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -933,6 +939,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -945,6 +953,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -957,10 +967,14 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -973,10 +987,14 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1020,6 +1038,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1029,6 +1048,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1044,6 +1064,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1053,6 +1074,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1101,6 +1123,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1113,6 +1137,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1125,6 +1151,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1137,6 +1165,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1215,6 +1245,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1225,6 +1256,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1241,10 +1273,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON123',
+                    isPlaceholder: true,
                   },
                   {
                     label: 'Rate',
                     text: '1.23',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1254,10 +1288,12 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Chem',
                     text: 'MON456',
+                    isPlaceholder: true,
                   },
                   {
                     label: 'Rate',
                     text: '4.56',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1302,6 +1338,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1315,6 +1353,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1328,10 +1368,14 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON123',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
                 {
                   label: 'Rate',
                   text: '1.23',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1345,10 +1389,14 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Chem',
                   text: 'MON456',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
                 {
                   label: 'Rate',
                   text: '4.56',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1427,6 +1475,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1437,6 +1486,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1454,6 +1504,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1464,6 +1515,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1517,6 +1569,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1530,6 +1584,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1543,6 +1599,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1556,6 +1614,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1623,6 +1683,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1633,6 +1694,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1670,6 +1732,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1683,6 +1747,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1739,6 +1805,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1776,6 +1843,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -1924,6 +1993,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1934,6 +2004,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1951,6 +2022,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -1961,6 +2033,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2014,6 +2087,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2027,6 +2102,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2040,6 +2117,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2053,6 +2132,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2136,6 +2217,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2146,6 +2228,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2163,6 +2246,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2173,6 +2257,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2222,6 +2307,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2235,6 +2322,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2248,6 +2337,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2261,6 +2352,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2334,6 +2427,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F11',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2344,6 +2438,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor1',
                     text: 'F12',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2361,6 +2456,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F21',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2371,6 +2467,7 @@ describe('FactorDependentCompositeService', () => {
                   {
                     label: 'Factor2',
                     text: 'F22',
+                    isPlaceholder: true,
                   },
                 ],
               },
@@ -2420,6 +2517,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F11',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2433,6 +2532,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor1',
                   text: 'F12',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2446,6 +2547,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F21',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2459,6 +2562,8 @@ describe('FactorDependentCompositeService', () => {
                 {
                   label: 'Factor2',
                   text: 'F22',
+                  isPlaceholder: true,
+                  valueType: 'placeholder',
                 },
               ],
             },
@@ -2476,6 +2581,19 @@ describe('FactorDependentCompositeService', () => {
             nestedLevelId: 22,
           },
         ], testContext, testTx)
+      })
+    })
+  })
+
+  describe('persistIndependentAndAssociations', () => {
+    test('calls processFactorLevelValues on the factorLevelService before getting db entities', () => {
+      const localTarget = new FactorDependentCompositeService()
+      localTarget.factorLevelService = { processFactorLevelValues: mock() }
+      localTarget.getCurrentDbEntities = () => Promise.reject()
+      const independentDtos = [{ name: 'test variable' }]
+
+      return localTarget.persistIndependentAndAssociations(5, independentDtos).catch(() => {
+        expect(localTarget.factorLevelService.processFactorLevelValues).toHaveBeenCalledWith(independentDtos)
       })
     })
   })

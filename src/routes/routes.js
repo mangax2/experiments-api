@@ -30,7 +30,7 @@ import { sendKafkaNotification } from '../decorators/notifyChanges'
 const router = express.Router()
 
 router.get('/ping', (req, res) => {
-  console.info(`the user for /ping url is ${req.userProfile.id}`)
+  console.info(`the user for /ping url is ${req.context.userId}`)
   return res.json({ message: 'Received Ping request: Experiments API !!!' })
 })
 

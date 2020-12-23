@@ -29,13 +29,27 @@ class BlockService {
   @setErrorCode('212000')
   @Transactional('removeBlocksByExperimentId')
   removeBlocksByExperimentId = (experimentId, blockNamesToKeep, tx) =>
-    db.block.findByExperimentId(experimentId, tx)
-      .then((blocksInDB) => {
-        const inputBlockNames = _.uniqWith(blockNamesToKeep, _.isEqual)
-        const blocksToRemove = _.filter(blocksInDB, b => !_.includes(inputBlockNames, b.name))
+    Promise.all([
+      db.block.findByExperimentId(experimentId, tx),
+      db.locationAssociation.findByExperimentId(experimentId, tx),
+    ]).then(([blocksInDB, locationAssociationsInDB]) => {
+      const inputBlockNames = _.uniqWith(blockNamesToKeep, _.isEqual)
+      const blocksToRemove = _.filter(blocksInDB, b => !_.includes(inputBlockNames, b.name))
 
-        return db.block.batchRemove(_.map(blocksToRemove, 'id'), tx)
-      })
+      const blocksToRemoveWithLocationAssociation =
+        BlockService.getBlocksToRemoveWithLocationAssociation(
+          blocksToRemove, locationAssociationsInDB)
+      if (!_.isEmpty(blocksToRemoveWithLocationAssociation)) {
+        throw AppError.badRequest('Cannot remove blocks that already have sets associated to them', blocksToRemoveWithLocationAssociation, getFullErrorCode('212001'))
+      }
+
+      return db.block.batchRemove(_.map(blocksToRemove, 'id'), tx)
+    })
+
+  static getBlocksToRemoveWithLocationAssociation = (blocksToRemove, locationAssociationsInDB) => {
+    const locationBlockIds = _.map(locationAssociationsInDB, 'block_id')
+    return _.filter(blocksToRemove, block => _.includes(locationBlockIds, block.id))
+  }
 
   @setErrorCode('213000')
   @Transactional('renameBlocks')

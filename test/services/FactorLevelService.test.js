@@ -399,10 +399,21 @@ describe('FactorLevelService', () => {
       expect(AppError.badRequest).toHaveBeenCalledWith('All value properties must either specify "isPlaceholder", "valueType", or both of these.', undefined, '1CC002')
     })
 
-    test('throws an error if a value property has conflicting values for isPlaceholder and valueType', () => {
+    test('throws an error if a value property has isPlaceholder: true and valueType is not placeholder', () => {
       const properties = [
         { objectType: 'Cluster', items: [] },
         { objectType: 'Catalog', valueType: 'exact', isPlaceholder: true },
+      ]
+      AppError.badRequest = mock(new Error())
+
+      expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
+      expect(AppError.badRequest).toHaveBeenCalledWith('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CB001')
+    })
+
+    test('throws an error if a value property has isPlaceholder: false and valueType is placeholder', () => {
+      const properties = [
+        { objectType: 'Cluster', items: [] },
+        { objectType: 'Catalog', valueType: 'placeholder', isPlaceholder: false },
       ]
       AppError.badRequest = mock(new Error())
 

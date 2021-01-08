@@ -117,7 +117,7 @@ class FactorLevelService {
 
     if (_.some(valueProps, vp => !_.isNil(vp.valueType) && !_.isNil(vp.isPlaceholder) &&
       this.areValueTypeAndPlaceholderMismatched(vp))) {
-      throw AppError.badRequest('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CB001')
+      throw AppError.badRequest('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CC003')
     }
   }
 

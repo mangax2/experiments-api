@@ -68,6 +68,7 @@ class FactorLevelService {
     this.validateFactorLevelValueProperties(allProperties)
 
     this.populateValueType(allProperties)
+    this.populateIsPlaceholderFromValueType(allProperties)
   }
 
   @setErrorCode('1C9000')
@@ -113,7 +114,28 @@ class FactorLevelService {
     if (_.some(valueProps, vp => _.isNil(vp.isPlaceholder) && _.isNil(vp.valueType))) {
       throw AppError.badRequest('All value properties must either specify "isPlaceholder", "valueType", or both of these.', undefined, '1CC002')
     }
+
+    if (_.some(valueProps, vp => !_.isNil(vp.valueType) && !_.isNil(vp.isPlaceholder) &&
+      this.areValueTypeAndPlaceholderMismatched(vp))) {
+      throw AppError.badRequest('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
+    }
   }
+
+  @setErrorCode('1CD000')
+  populateIsPlaceholderFromValueType = (valueProperties) => {
+    valueProperties.forEach((property) => {
+      if (_.isNil(property.isPlaceholder)) {
+        property.isPlaceholder = this.isValueTypePlaceholder(property)
+      }
+    })
+  }
+
+  @setErrorCode('1CE000')
+  isValueTypePlaceholder = property => property.valueType === factorLevelValueConstants.PLACEHOLDER
+
+  @setErrorCode('1CF000')
+  areValueTypeAndPlaceholderMismatched = vp =>
+    this.isValueTypePlaceholder(vp) !== vp.isPlaceholder
 }
 
 module.exports = FactorLevelService

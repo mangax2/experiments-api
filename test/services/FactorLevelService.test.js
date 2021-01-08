@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import FactorLevelService from '../../src/services/FactorLevelService'
 import AppUtil from '../../src/services/utility/AppUtil'
@@ -173,20 +172,18 @@ describe('FactorLevelService', () => {
       expect(target.flattenTreatmentVariableLevelValues).toHaveBeenCalledWith([...variables[0].levels, ...variables[1].levels])
     })
 
-    test('passes the value from flattenTreatmentVariableLevelValues to validateFactorLevelValueProperties, populateValueType, and populateIsPlaceholderFromValueType', () => {
+    test('passes the value from flattenTreatmentVariableLevelValues to validateFactorLevelValueProperties and populateValueType', () => {
       target = new FactorLevelService()
       const properties = [{ isPlaceholder: true }, { isPlaceholder: false }]
       const variables = []
       target.flattenTreatmentVariableLevelValues = mock(properties)
       target.validateFactorLevelValueProperties = mock()
       target.populateValueType = mock()
-      target.populateIsPlaceholderFromValueType = mock()
 
       target.processFactorLevelValues(variables)
 
       expect(target.validateFactorLevelValueProperties).toHaveBeenCalledWith(properties)
       expect(target.populateValueType).toHaveBeenCalledWith(properties)
-      expect(target.populateIsPlaceholderFromValueType).toHaveBeenCalledWith(properties)
     })
 
     test('does not call populateValueType if validateFactorLevelValueProperties throws an error', () => {
@@ -345,37 +342,6 @@ describe('FactorLevelService', () => {
     })
   })
 
-  describe('populateIsPlaceholderFromValueType', () => {
-    test('sets isPlaceholder to true when valueType is "placeholder" and isPlaceholder is not provided', () => {
-      target = new FactorLevelService()
-      const property = { valueType: 'placeholder' }
-
-      target.populateIsPlaceholderFromValueType([property])
-
-      expect(property.isPlaceholder).toBe(true)
-    })
-
-    test('sets isPlaceholder to false when valueType is anything other than placeholder and isPlaceholder is not provided', () => {
-      target = new FactorLevelService()
-      const properties = [{ valueType: 'exact' }, { valueType: 'noTreatment' }]
-
-      target.populateIsPlaceholderFromValueType(properties)
-
-      expect(_.find(properties, p => p.isPlaceholder === true)).toBe(undefined)
-    })
-
-    test('does not attempt to set isPlaceholder for value properties where isPlaceholder is already set', () => {
-      target = new FactorLevelService()
-      const mockComparator = mock()
-      const property = { valueType: 'exact', isPlaceholder: false }
-      target.isValueTypePlaceholder = mockComparator
-
-      target.populateIsPlaceholderFromValueType([property])
-
-      expect(mockComparator).not.toHaveBeenCalled()
-    })
-  })
-
   describe('validateFactorLevelValueProperties', () => {
     test('does nothing if the value properties are valid', () => {
       const properties = [
@@ -408,52 +374,6 @@ describe('FactorLevelService', () => {
 
       expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
       expect(AppError.badRequest).toHaveBeenCalledWith('All value properties must either specify "isPlaceholder", "valueType", or both of these.', undefined, '1CC002')
-    })
-
-    test('throws an error if a value property has isPlaceholder: true and valueType is not placeholder', () => {
-      const properties = [
-        { objectType: 'Cluster', items: [] },
-        { objectType: 'Catalog', valueType: 'exact', isPlaceholder: true },
-      ]
-      AppError.badRequest = mock(new Error())
-
-      expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
-      expect(AppError.badRequest).toHaveBeenCalledWith('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
-    })
-
-    test('throws an error if a value property has isPlaceholder: false and valueType is placeholder', () => {
-      const properties = [
-        { objectType: 'Cluster', items: [] },
-        { objectType: 'Catalog', valueType: 'placeholder', isPlaceholder: false },
-      ]
-      AppError.badRequest = mock(new Error())
-
-      expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
-      expect(AppError.badRequest).toHaveBeenCalledWith('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
-    })
-
-    test('does not call areValueTypeAndPlaceholderMismatched if valueType is not populated', () => {
-      target = new FactorLevelService()
-      const properties = [
-        { objectType: 'Cluster', items: [] },
-        { objectType: 'Catalog', valueType: null, isPlaceholder: false },
-      ]
-      target.areValueTypeAndPlaceholderMismatched = mock()
-
-      expect(() => target.validateFactorLevelValueProperties(properties)).not.toThrowError()
-      expect(target.areValueTypeAndPlaceholderMismatched).not.toHaveBeenCalled()
-    })
-
-    test('does not call areValueTypeAndPlaceholderMismatched if isPlaceholder is not populated', () => {
-      target = new FactorLevelService()
-      const properties = [
-        { objectType: 'Cluster', items: [] },
-        { objectType: 'Catalog', valueType: 'placeholder', isPlaceholder: null },
-      ]
-      target.areValueTypeAndPlaceholderMismatched = mock()
-
-      expect(() => target.validateFactorLevelValueProperties(properties)).not.toThrowError()
-      expect(target.areValueTypeAndPlaceholderMismatched).not.toHaveBeenCalled()
     })
   })
 })

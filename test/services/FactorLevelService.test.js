@@ -363,6 +363,17 @@ describe('FactorLevelService', () => {
 
       expect(_.find(properties, p => p.isPlaceholder === true)).toBe(undefined)
     })
+
+    test('does not attempt to set isPlaceholder for value properties where isPlaceholder is already set', () => {
+      target = new FactorLevelService()
+      const mockComparator = mock()
+      const property = { valueType: 'exact', isPlaceholder: false }
+      target.isValueTypePlaceholder = mockComparator
+
+      target.populateIsPlaceholderFromValueType([property])
+
+      expect(mockComparator).not.toHaveBeenCalled()
+    })
   })
 
   describe('validateFactorLevelValueProperties', () => {
@@ -419,6 +430,30 @@ describe('FactorLevelService', () => {
 
       expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
       expect(AppError.badRequest).toHaveBeenCalledWith('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CB001')
+    })
+
+    test('does not call areValueTypeAndPlaceholderMismatched if valueType is not populated', () => {
+      target = new FactorLevelService()
+      const properties = [
+        { objectType: 'Cluster', items: [] },
+        { objectType: 'Catalog', valueType: null, isPlaceholder: false },
+      ]
+      target.areValueTypeAndPlaceholderMismatched = mock()
+
+      expect(() => target.validateFactorLevelValueProperties(properties)).not.toThrowError()
+      expect(target.areValueTypeAndPlaceholderMismatched).not.toHaveBeenCalled()
+    })
+
+    test('does not call areValueTypeAndPlaceholderMismatched if isPlaceholder is not populated', () => {
+      target = new FactorLevelService()
+      const properties = [
+        { objectType: 'Cluster', items: [] },
+        { objectType: 'Catalog', valueType: 'placeholder', isPlaceholder: null },
+      ]
+      target.areValueTypeAndPlaceholderMismatched = mock()
+
+      expect(() => target.validateFactorLevelValueProperties(properties)).not.toThrowError()
+      expect(target.areValueTypeAndPlaceholderMismatched).not.toHaveBeenCalled()
     })
   })
 })

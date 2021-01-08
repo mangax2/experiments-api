@@ -418,7 +418,7 @@ describe('FactorLevelService', () => {
       AppError.badRequest = mock(new Error())
 
       expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CC003')
+      expect(AppError.badRequest).toHaveBeenCalledWith('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
     })
 
     test('throws an error if a value property has isPlaceholder: false and valueType is placeholder', () => {
@@ -429,7 +429,7 @@ describe('FactorLevelService', () => {
       AppError.badRequest = mock(new Error())
 
       expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
-      expect(AppError.badRequest).toHaveBeenCalledWith('Value properties cannot have a valueType of placeholder and an isPlaceholder value of false', undefined, '1CC003')
+      expect(AppError.badRequest).toHaveBeenCalledWith('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
     })
 
     test('does not call areValueTypeAndPlaceholderMismatched if valueType is not populated', () => {

@@ -106,24 +106,17 @@ const duplicateFactorLevelScript =
   " n.id AS new_id " +
   "INTO TEMP mapped_factor_ids " +
   "FROM " +
-  " factor f " +
-  " INNER JOIN new_factors n ON f.name = n.name " +
-  "WHERE " +
-  " f.experiment_id = $1; " +
-  "WITH temp_ordered_old_factor_level_ids AS ( " +
-  " SELECT " +
-  "   fl.id AS old_factor_level_id, " +
-  "   ROW_NUMBER() OVER (ORDER BY fl.id) AS row_num " +
-  " FROM " +
-  "   factor_level fl " +
-  "   INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
+    "factor f " +
+    "INNER JOIN new_factors n ON f.name = n.name " +
+  "WHERE f.experiment_id = $1" +
+  "; WITH temp_ordered_old_factor_level_ids AS ( " +
+    "SELECT fl.id AS old_factor_level_id, ROW_NUMBER() OVER (ORDER BY fl.id) AS row_num " +
+    "FROM factor_level fl " +
+      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
   "), temp_ordered_new_factor_level_ids AS ( " +
-  " SELECT " +
-  "   nextval(pg_get_serial_sequence('factor_level', 'id'))::TEXT AS new_factor_level_id, " +
-  "   ROW_NUMBER() OVER (ORDER BY old_factor_level_id) AS row_num " +
-  " FROM " +
-  "   temp_ordered_old_factor_level_ids " +
-  " ) " +
+    "SELECT nextval(pg_get_serial_sequence('factor_level', 'id'))::TEXT AS new_factor_level_id, ROW_NUMBER() OVER (ORDER BY old_factor_level_id) AS row_num " +
+    "FROM temp_ordered_old_factor_level_ids " +
+  ") " +
   "SELECT " +
   " old_factor_level_id, " +
   " new_factor_level_id INTO TEMP mapped_factor_level_ids " +
@@ -131,28 +124,23 @@ const duplicateFactorLevelScript =
   " temp_ordered_old_factor_level_ids ofl " +
   " INNER JOIN temp_ordered_new_factor_level_ids nfl ON ofl.row_num = nfl.row_num; " +
   "WITH temp_factor_levels AS ( " +
-  "   INSERT INTO factor_level SELECT " +
-  "    (c1).* " +
-  "   FROM " +
-  "     ( " +
-  "     SELECT " +
-  "       fl " +
-  "       #= hstore ('id', mfli.new_factor_level_id) " +
-  "       #= hstore ('created_date', CURRENT_TIMESTAMP::TEXT) " +
-  "       #= hstore ('modified_date', CURRENT_TIMESTAMP::TEXT) " +
-  "       #= hstore ('created_user_id', $2) " +
-  "       #= hstore ('modified_user_id', $2) " +
-  "       #= hstore ('factor_id', mfi.new_id::TEXT) AS c1 " +
-  "     FROM " +
-  "       factor_level fl " +
-  "       INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
-  "       INNER JOIN mapped_factor_level_ids mfli ON fl.id = mfli.old_factor_level_id " +
-  "     ) sub RETURNING id, factor_id, value " +
-  "   ) " +
-  "SELECT " +
-  " * INTO TEMP new_factor_levels " +
-  "FROM " +
-  " temp_factor_levels;"
+      "INSERT INTO factor_level " +
+      "SELECT (c1).* FROM (" +
+        "SELECT fl " +
+           "#= hstore ('id', mfli.new_factor_level_id) " +
+           "#= hstore ('created_date', CURRENT_TIMESTAMP::TEXT) " +
+           "#= hstore ('modified_date', CURRENT_TIMESTAMP::TEXT) " +
+           "#= hstore ('created_user_id', $2) " +
+           "#= hstore ('modified_user_id', $2) " +
+           "#= hstore ('factor_id', mfi.new_id::TEXT) AS c1 " +
+    "FROM factor_level fl " +
+      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
+      "INNER JOIN mapped_factor_level_ids mfli ON fl.id = mfli.old_factor_level_id ) sub " +
+  "RETURNING id, factor_id, value " +
+  ") " +
+  "SELECT * " +
+  "INTO TEMP new_factor_levels " +
+  "FROM temp_factor_levels;"
 
 const duplicateFactorLevelAssociationScript =
   "INSERT INTO factor_level_association " +

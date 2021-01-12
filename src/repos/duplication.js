@@ -193,7 +193,7 @@ const duplicateCombinationElementScript =
         "#= hstore('treatment_id', mti.new_id::text) AS c " +
       "FROM combination_element ce " +
         "INNER JOIN mapped_treatment_ids mti ON ce.treatment_id = mti.old_id " +
-        "INNER JOIN mapped_factor_level_ids mfli ON ce.factor_level_id = mfli.old_id ) " +
+        "INNER JOIN mapped_factor_level_ids mfli ON ce.factor_level_id = mfli.old_factor_level_id ) " +
         " sub " +
     "RETURNING id" +
   ")" +

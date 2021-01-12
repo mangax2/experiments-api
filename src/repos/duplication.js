@@ -101,12 +101,9 @@ const duplicateFactorScript =
   "FROM temp_new_factors;"
 
 const duplicateFactorLevelScript =
-  "SELECT " +
-  " f.id AS old_id, " +
-  " n.id AS new_id " +
+  "SELECT f.id AS old_id, n.id AS new_id " +
   "INTO TEMP mapped_factor_ids " +
-  "FROM " +
-    "factor f " +
+  "FROM factor f " +
     "INNER JOIN new_factors n ON f.name = n.name " +
   "WHERE f.experiment_id = $1" +
   "; WITH temp_ordered_old_factor_level_ids AS (" +
@@ -125,20 +122,20 @@ const duplicateFactorLevelScript =
   "FROM temp_ordered_old_factor_level_ids ofl " +
     "INNER JOIN temp_ordered_new_factor_level_ids nfl ON ofl.row_number = nfl.row_number;" +
   "WITH temp_factor_levels AS ( " +
-      "INSERT INTO factor_level " +
-      "SELECT (c1).* FROM (" +
-        "SELECT fl " +
-           "#= hstore ('id', mfli.new_factor_level_id) " +
-           "#= hstore ('created_date', CURRENT_TIMESTAMP::TEXT) " +
-           "#= hstore ('modified_date', CURRENT_TIMESTAMP::TEXT) " +
-           "#= hstore ('created_user_id', $2) " +
-           "#= hstore ('modified_user_id', $2) " +
-           "#= hstore ('factor_id', mfi.new_id::TEXT) AS c1 " +
-    "FROM factor_level fl " +
-      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
-      "INNER JOIN mapped_factor_level_ids mfli ON fl.id = mfli.old_factor_level_id ) sub " +
-  "RETURNING id, factor_id, value " +
-  ") " +
+    "INSERT INTO factor_level " +
+    "SELECT (c).* FROM  (" +
+      "SELECT fl " +
+        "#= hstore('id', mfli.new_factor_level_id) " +
+        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
+        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
+        "#= hstore('created_user_id', $2) " +
+        "#= hstore('modified_user_id', $2) " +
+        "#= hstore('factor_id', mfi.new_id::text) AS c " +
+      "FROM factor_level fl " +
+        "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
+        "INNER JOIN mapped_factor_level_ids mfli ON fl.id = mfli.old_factor_level_id ) sub " +
+    "RETURNING id, factor_id, value" +
+  ")" +
   "SELECT * " +
   "INTO TEMP new_factor_levels " +
   "FROM temp_factor_levels;"

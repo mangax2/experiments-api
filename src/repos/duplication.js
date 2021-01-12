@@ -189,7 +189,7 @@ const duplicateCombinationElementScript =
         "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
         "#= hstore('created_user_id', $2) " +
         "#= hstore('modified_user_id', $2) " +
-        "#= hstore('factor_level_id', mfli.new_id::text) " +
+        "#= hstore('factor_level_id', mfli.new_factor_level_id::text) " +
         "#= hstore('treatment_id', mti.new_id::text) AS c " +
       "FROM combination_element ce " +
         "INNER JOIN mapped_treatment_ids mti ON ce.treatment_id = mti.old_id " +

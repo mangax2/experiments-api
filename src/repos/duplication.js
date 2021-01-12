@@ -109,17 +109,21 @@ const duplicateFactorLevelScript =
     "factor f " +
     "INNER JOIN new_factors n ON f.name = n.name " +
   "WHERE f.experiment_id = $1" +
-  "; WITH temp_mapped_factor_level_ids AS ( " +
-    "SELECT fl.id AS old_factor_level_id, SELECT nextval(pg_get_serial_sequence('factor_level', 'id'))::TEXT AS new_factor_level_id " +
+  "; WITH temp_ordered_old_factor_level_ids AS (" +
+    "SELECT fl.id AS old_factor_level_id, ROW_NUMBER() OVER (ORDER BY fl.id) AS row_number " +
     "FROM factor_level fl " +
-      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
-    "ORDER BY old_factor_level_id" +
-  ") " +
-  "SELECT " +
-  " old_factor_level_id, " +
-  " new_factor_level_id INTO TEMP mapped_factor_level_ids " +
-  "FROM " +
-  " temp_mapped_factor_level_ids ofl; " +
+      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id" +
+  "), temp_new_factor_level_ids AS (" +
+    "SELECT nextval(pg_get_serial_sequence('factor_level', 'id'))::text as new_factor_level_id " +
+    "FROM temp_ordered_old_factor_level_ids" +
+  "), temp_ordered_new_factor_level_ids AS (" +
+    "SELECT new_factor_level_id, ROW_NUMBER() OVER (ORDER BY new_factor_level_id) AS row_number " +
+    "FROM temp_new_factor_level_ids" +
+  ")" + 
+  "SELECT old_factor_level_id, new_factor_level_id " +
+  "INTO TEMP mapped_factor_level_ids " +
+  "FROM temp_ordered_old_factor_level_ids ofl " +
+    "INNER JOIN temp_ordered_new_factor_level_ids nfl ON ofl.row_number = nfl.row_number;" +
   "WITH temp_factor_levels AS ( " +
       "INSERT INTO factor_level " +
       "SELECT (c1).* FROM (" +

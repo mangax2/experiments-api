@@ -381,6 +381,9 @@ describe('FactorLevelService', () => {
       const properties = [
         { objectType: 'Cluster', items: [] },
         { objectType: 'Catalog', isPlaceholder: true },
+        { objectType: 'Catalog', isPlaceholder: true, valueType: 'placeholder' },
+        { objectType: 'Catalog', isPlaceholder: false, valueType: 'exact' },
+        { objectType: 'Catalog', isPlaceholder: false, valueType: 'noTreatment' },
       ]
       AppError.badRequest = mock(new Error())
 
@@ -454,6 +457,17 @@ describe('FactorLevelService', () => {
 
       expect(() => target.validateFactorLevelValueProperties(properties)).not.toThrowError()
       expect(target.areValueTypeAndPlaceholderMismatched).not.toHaveBeenCalled()
+    })
+
+    test('throws an error if an invalid input is given for valueType', () => {
+      target = new FactorLevelService()
+      const properties = [
+        { objectType: 'Catalog', valueType: 'noValue' },
+        { objectType: 'Catalog', valueType: 'noTreatment' },
+      ]
+
+      expect(() => target.validateFactorLevelValueProperties(properties)).toThrowError()
+      expect(AppError.badRequest).toHaveBeenCalledWith('One or more value properties have an invalid "valueType". "valueType" must be one of: "exact", "placeholder", "noTreatment".', undefined, '1CC004')
     })
   })
 })

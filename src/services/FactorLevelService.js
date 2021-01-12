@@ -19,6 +19,11 @@ const clusterAndCompositeTypes = [
   factorLevelValueConstants.CLUSTER,
   factorLevelValueConstants.COMPOSITE,
 ]
+const validValueTypeInputs = [
+  factorLevelValueConstants.EXACT,
+  factorLevelValueConstants.PLACEHOLDER,
+  factorLevelValueConstants.NO_TREATMENT,
+]
 
 // Error Codes 1CXXXX
 class FactorLevelService {
@@ -118,6 +123,11 @@ class FactorLevelService {
     if (_.some(valueProps, vp => !_.isNil(vp.valueType) && !_.isNil(vp.isPlaceholder) &&
       this.areValueTypeAndPlaceholderMismatched(vp))) {
       throw AppError.badRequest('One or more value properties have mismatched "valueType" and "isPlaceholder" values', undefined, '1CC003')
+    }
+
+    if (_.some(valueProps, vp => !_.isNil(vp.valueType) &&
+      !validValueTypeInputs.includes(vp.valueType))) {
+      throw AppError.badRequest('One or more value properties have an invalid "valueType". "valueType" must be one of: "exact", "placeholder", "noTreatment".', undefined, '1CC004')
     }
   }
 

@@ -500,7 +500,7 @@ class ExperimentsService {
       return this.generateEntities(id, numberOfCopies, name,
         context, isTemplate, 'copy', tx)
     }
-    return Promise.reject(AppError.badRequest('Invalid ids or number of Copies', undefined, getFullErrorCode('15I002')))
+    return Promise.reject(AppError.badRequest('Invalid id or number of Copies', undefined, getFullErrorCode('15I002')))
   }
 
   @setErrorCode('15J000')

@@ -1488,7 +1488,7 @@ describe('ExperimentsService', () => {
       AppError.badRequest = mock()
       target.validateExperimentName = mock()
       return target.copyEntities('3', '2', undefined, testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies', undefined, '15I002')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid id or number of Copies', undefined, '15I002')
       })
     })
 
@@ -1522,7 +1522,7 @@ describe('ExperimentsService', () => {
       AppError.badRequest = mock()
       target.validateExperimentName = mock()
       return target.copyEntities('3', '2', undefined, testContext, true, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid ids or number of Copies', undefined, '15I002')
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid id or number of Copies', undefined, '15I002')
       })
     })
 

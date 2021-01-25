@@ -421,7 +421,7 @@ class ExperimentsService {
             break
           }
           case 'experiment': {
-            experimentPromise = this.copyEntities(requestBody.ids,
+            experimentPromise = this.copyEntities((requestBody.ids || requestBody.id),
               requestBody.numberOfCopies, requestBody.name,
               context, false, tx)
             break
@@ -449,7 +449,7 @@ class ExperimentsService {
             templatePromise = this.batchCreateTemplates(requestBody, context, tx)
             break
           case 'template': {
-            templatePromise = this.copyEntities(requestBody.ids, requestBody.numberOfCopies,
+            templatePromise = this.copyEntities((requestBody.ids || requestBody.id), requestBody.numberOfCopies,
               requestBody.name, context, true, tx)
             break
           }
@@ -479,7 +479,7 @@ class ExperimentsService {
   createEntity(id, numberOfCopies, name, context, isTemplate, tx) {
     this.validateExperimentName(name)
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateEntities([id], numberOfCopies, name,
+      return this.generateEntities(id, numberOfCopies, name,
         context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
@@ -489,13 +489,15 @@ class ExperimentsService {
   @setErrorCode('15I000')
   copyEntities(ids, numberOfCopies, name, context, isTemplate, tx) {
     this.validateExperimentName(name)
-    if (!_.isArray(ids)) {
-      return Promise.reject(AppError.badRequest('ids must be an array', undefined, getFullErrorCode('15I001')))
+
+    if (_.isArray(ids) && ids.length !== 1) {
+      return Promise.reject(AppError.badRequest('Only one experiment or template may be copied at a time', undefined, getFullErrorCode('15I001')))
     }
 
-    const [, invalidIds] = _.partition(ids, id => _.isNumber(id))
-    if (_.isNumber(numberOfCopies) && ids.length > 0 && invalidIds.length === 0) {
-      return this.generateEntities(ids, numberOfCopies, name,
+    const id = _.head(ids) || ids
+
+    if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
+      return this.generateEntities(id, numberOfCopies, name,
         context, isTemplate, 'copy', tx)
     }
     return Promise.reject(AppError.badRequest('Invalid ids or number of Copies', undefined, getFullErrorCode('15I002')))
@@ -511,9 +513,9 @@ class ExperimentsService {
   }
 
   @setErrorCode('15K000')
-  generateEntities(ids, numberOfCopies, name, context, isTemplate, source, tx) {
+  generateEntities(id, numberOfCopies, name, context, isTemplate, source, tx) {
     const duplicationObj = {
-      ids, numberOfCopies, isTemplate, name,
+      id, numberOfCopies, isTemplate, name,
     }
     return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }

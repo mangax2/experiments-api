@@ -479,7 +479,7 @@ class ExperimentsService {
   createEntity(id, numberOfCopies, name, context, isTemplate, tx) {
     this.validateExperimentName(name)
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateEntities(id, numberOfCopies, name,
+      return this.generateEntities([id], numberOfCopies, name,
         context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'
@@ -497,7 +497,7 @@ class ExperimentsService {
     const id = _.head(ids) || ids
 
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateEntities(id, numberOfCopies, name,
+      return this.generateEntities([id], numberOfCopies, name,
         context, isTemplate, 'copy', tx)
     }
     return Promise.reject(AppError.badRequest('Invalid id or number of Copies', undefined, getFullErrorCode('15I002')))
@@ -513,9 +513,9 @@ class ExperimentsService {
   }
 
   @setErrorCode('15K000')
-  generateEntities(id, numberOfCopies, name, context, isTemplate, source, tx) {
+  generateEntities(ids, numberOfCopies, name, context, isTemplate, source, tx) {
     const duplicationObj = {
-      id, numberOfCopies, isTemplate, name,
+      ids, numberOfCopies, isTemplate, name,
     }
     return this.duplicationService.duplicateExperiments(duplicationObj, context, source, tx)
   }

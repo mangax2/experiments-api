@@ -479,7 +479,7 @@ class ExperimentsService {
   createEntity(id, numberOfCopies, name, context, isTemplate, tx) {
     this.validateExperimentName(name)
     if (_.isNumber(id) && _.isNumber(numberOfCopies)) {
-      return this.generateEntities(id, numberOfCopies, name,
+      return this.generateEntities([id], numberOfCopies, name,
         context, isTemplate, 'conversion', tx)
     }
     const entityCreatedFrom = isTemplate ? 'Experiment' : 'Template'

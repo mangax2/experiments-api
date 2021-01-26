@@ -1541,7 +1541,7 @@ describe('ExperimentsService', () => {
       target.validateExperimentName = mock()
       return target.createEntity(1, 1, 'newName', testContext, false, testTx).then(() => {
         expect(target.validateExperimentName).toHaveBeenCalledWith('newName')
-        expect(target.generateEntities).toHaveBeenCalledWith(1, 1, 'newName', testContext, false, 'conversion', testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, 'newName', testContext, false, 'conversion', testTx)
       })
     })
 
@@ -1558,7 +1558,7 @@ describe('ExperimentsService', () => {
       target.validateExperimentName = mock()
       return target.createEntity(1, 1, undefined, testContext, true, testTx).then(() => {
         expect(target.validateExperimentName).toHaveBeenCalledWith(undefined)
-        expect(target.generateEntities).toHaveBeenCalledWith(1, 1, undefined, testContext, true, 'conversion', testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, undefined, testContext, true, 'conversion', testTx)
       })
     })
 

@@ -1480,7 +1480,7 @@ describe('ExperimentsService', () => {
       target.validateExperimentName = mock()
       return target.copyEntities([1], 1, 'newName', testContext, false, testTx).then(() => {
         expect(target.validateExperimentName).toHaveBeenCalledWith('newName')
-        expect(target.generateEntities).toHaveBeenCalledWith(1, 1, 'newName', testContext, false, 'copy', testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, 'newName', testContext, false, 'copy', testTx)
       })
     })
 
@@ -1505,7 +1505,7 @@ describe('ExperimentsService', () => {
       target.validateExperimentName = mock()
       return target.copyEntities(1, 1, 'newName', testContext, false, testTx).then(() => {
         expect(target.validateExperimentName).toHaveBeenCalledWith('newName')
-        expect(target.generateEntities).toHaveBeenCalledWith(1, 1, 'newName', testContext, false, 'copy', testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, 'newName', testContext, false, 'copy', testTx)
       })
     })
 
@@ -1514,7 +1514,7 @@ describe('ExperimentsService', () => {
       target.validateExperimentName = mock()
       return target.copyEntities([1], 1, undefined, testContext, true, testTx).then(() => {
         expect(target.validateExperimentName).toHaveBeenCalledWith(undefined)
-        expect(target.generateEntities).toHaveBeenCalledWith(1, 1, undefined, testContext, true, 'copy', testTx)
+        expect(target.generateEntities).toHaveBeenCalledWith([1], 1, undefined, testContext, true, 'copy', testTx)
       })
     })
 
@@ -1574,9 +1574,9 @@ describe('ExperimentsService', () => {
   describe('generateEntities', () => {
     test('generateExperiments', () => {
       target.duplicationService.duplicateExperiments = mockResolve()
-      return target.generateEntities(2, 1, 'newName', testContext, false, 'copy', testTx).then(() => {
+      return target.generateEntities([2], 1, 'newName', testContext, false, 'copy', testTx).then(() => {
         expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
-          id: 2,
+          ids: [2],
           isTemplate: false,
           numberOfCopies: 1,
           name: 'newName',
@@ -1586,9 +1586,9 @@ describe('ExperimentsService', () => {
 
     test('generateTemplates', () => {
       target.duplicationService.duplicateExperiments = mockResolve()
-      return target.generateEntities(2, 1, undefined, testContext, true, 'copy', testTx).then(() => {
+      return target.generateEntities([2], 1, undefined, testContext, true, 'copy', testTx).then(() => {
         expect(target.duplicationService.duplicateExperiments).toHaveBeenCalledWith({
-          id: 2,
+          ids: [2],
           isTemplate: true,
           numberOfCopies: 1,
         }, testContext, 'copy', testTx)

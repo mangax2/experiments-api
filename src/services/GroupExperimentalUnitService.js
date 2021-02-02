@@ -136,7 +136,7 @@ class GroupExperimentalUnitService {
           return originalsDeletePromise
             .then(() => HttpUtil.patch(`${apiUrls.setsAPIUrl}/sets/${setId}`, header, {
               entries,
-              layout: [],
+              layout: null,
             }))
         })
     }).catch((err) => {

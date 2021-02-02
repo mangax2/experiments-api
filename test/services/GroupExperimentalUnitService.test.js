@@ -164,7 +164,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(target.saveUnitsBySetId).toBeCalledWith(setId, setDetails.experimentId, generatedUnits, {}, testTx)
         expect(OAuthUtil.getAuthorizationHeaders).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
-        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: null })
         expect(target.experimentalUnitService.batchPartialUpdateExperimentalUnits).toBeCalledWith(unitsWithSetEntries, {}, testTx)
       }))
 
@@ -174,7 +174,7 @@ describe('GroupExperimentalUnitService', () => {
       return target.resetSet(setId, {}, testTx).then(() => {
         expect(HttpUtil.patch).toHaveBeenCalledTimes(2)
         expect(HttpUtil.patch).toHaveBeenNthCalledWith(1, 'testUrl/sets/5', header, { entries: [{ deleted: true }, { deleted: true }, { deleted: true }, { deleted: true }] })
-        expect(HttpUtil.patch).toHaveBeenNthCalledWith(2, 'testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toHaveBeenNthCalledWith(2, 'testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: null })
       })
     })
 
@@ -183,7 +183,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.resetSet(setId, {}, testTx).then(() => {
         expect(HttpUtil.patch).toHaveBeenCalledTimes(1)
-        expect(HttpUtil.patch).toHaveBeenCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: [] })
+        expect(HttpUtil.patch).toHaveBeenCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: null })
       })
     })
 

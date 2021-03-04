@@ -3501,6 +3501,10 @@
         "reps": {
           "type": "string",
           "description": "the maximum number of units/entries allowed in a rep"
+        },
+        "areAllBlocksAtAllLocations": {
+          "type": "boolean",
+          "description": "indicates if all experiment blocks are intended to be tested at all locations where the experiment will be run"
         }
       }
     },

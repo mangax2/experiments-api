@@ -15,7 +15,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
       {
-        paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true,
+        paramName: 'value', type: ['text', 'boolean'], lengthRange: { min: 0, max: 50 }, required: true,
       },
       { paramName: 'refDesignSpecId', type: 'numeric', required: true },
       { paramName: 'refDesignSpecId', type: 'refData', entity: db.refDesignSpecification },

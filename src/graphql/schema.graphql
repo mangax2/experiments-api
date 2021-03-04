@@ -70,6 +70,7 @@ type DesignSpecificationDetail {
   repRangeMin: String
   repRangeMax: String
   reps: String
+  areAllBlocksAtAllLocations: Boolean
 }
 
 type Experiment {

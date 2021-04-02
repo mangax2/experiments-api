@@ -524,12 +524,11 @@ class ExperimentsService {
   static
   mergeTagsWithExperiments(experiments, entityTags) {
     const experimentsAndTagsMap = _.groupBy(entityTags, 'entityId')
-    return _.map(experiments.slice(), (experiment) => {
-      const tags = experimentsAndTagsMap[experiment.id] ?
-        experimentsAndTagsMap[experiment.id][0].tags : []
-      experiment.tags = ExperimentsService.prepareTagResponse(tags)
-      return experiment
+    _.forEach(experiments, (experiment) => {
+      experiment.tags = experimentsAndTagsMap[experiment.id] ?
+        ExperimentsService.prepareTagResponse(experimentsAndTagsMap[experiment.id][0].tags) : []
     })
+    return experiments
   }
 
   @setErrorCode('15M000')

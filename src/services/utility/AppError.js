@@ -8,10 +8,10 @@ const internals = {
   },
 }
 
-function initialize(error, statusCode, message) {
+function override(error, statusCode, message) {
   error.status = statusCode
   error.code = internals.STATUS_CODES[statusCode] || 'Unknown'
-  if (statusCode === 500) {
+  if (!message && statusCode === 500) {
     error.errorMessage = 'An internal server error occurred'
   } else if (message) {
     error.errorMessage = message
@@ -28,7 +28,7 @@ function create(statusCode, message, data, errorCode, ctor) {
     error.data = data
   }
   error.errorCode = errorCode
-  initialize(error, statusCode, message)
+  override(error, statusCode, message)
   return error
 }
 

@@ -83,10 +83,16 @@ describe('AppError', () => {
   })
 
   describe('internalServerError', () => {
-    test('returns a 500 error status Code', () => {
+    test('returns a 500 error status Code and default message', () => {
       const error = AppError.internalServerError()
       expect(error.status).toEqual(500)
       expect(error.errorMessage).toEqual('An internal server error occurred')
+    })
+
+    test('returns a 500 error and passed message', () => {
+      const error = AppError.internalServerError('Error with underlying service')
+      expect(error.status).toEqual(500)
+      expect(error.errorMessage).toEqual('Error with underlying service')
     })
   })
 

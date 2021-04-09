@@ -264,7 +264,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupsAndUnits', () => {
     test('properly sends and retrieves data to lambda', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -313,7 +313,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -330,7 +330,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('properly handles lambda errors', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve('units')
+      db.unit.findAllByExperimentId = mockResolve('units')
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -345,7 +345,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).catch(() => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -361,7 +361,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and lambda are called multiple times', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -410,7 +410,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -430,7 +430,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('test multiple locations and blocks', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
+      db.unit.findAllByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, inAllBlocks: true }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -494,7 +494,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnits(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByExperimentId).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsByExperimentId).toBeCalled()
+        expect(db.unit.findAllByExperimentId).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -532,7 +532,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('getGroupsAndUnitsForSet', () => {
     test('properly sends and retrieves data to lambda', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsBySetIds = mockResolve([{ location: 1, block: null }])
+      target.experimentalUnitService.getExperimentalUnitsBySetIds = mockResolve([{ location: 1, block: null }])
       target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
       target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experiment_id: 5 })
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -581,7 +581,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnitsForSet(5, testTx).then((data) => {
         expect(target.treatmentWithBlockService.getTreatmentsByBySetIds).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsBySetIds).toBeCalled()
+        expect(target.experimentalUnitService.getExperimentalUnitsBySetIds).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -598,7 +598,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('properly handles lambda errors', () => {
       target = new GroupExperimentalUnitService()
-      target.unitWithBlockService.getExperimentalUnitsBySetIds = mockResolve('units')
+      target.experimentalUnitService.getExperimentalUnitsBySetIds = mockResolve('units')
       target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
       target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experimentId: 5 })
       db.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
@@ -613,7 +613,7 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.getGroupsAndUnitsForSet(5, testTx).catch(() => {
         expect(target.treatmentWithBlockService.getTreatmentsByBySetIds).toBeCalled()
-        expect(target.unitWithBlockService.getExperimentalUnitsBySetIds).toBeCalled()
+        expect(target.experimentalUnitService.getExperimentalUnitsBySetIds).toBeCalled()
         expect(db.factor.findByExperimentId).toBeCalled()
         expect(db.factorLevel.findByExperimentId).toBeCalled()
         expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
@@ -920,7 +920,7 @@ describe('GroupExperimentalUnitService', () => {
     beforeEach(() => {
       db.locationAssociation.findNumberOfLocationsAssociatedWithSets = mockResolve({ max: 2 })
       target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve(treatmentBlocks)
-      target.unitWithBlockService.addTreatmentBlocksToUnits = mock([])
+      target.addTreatmentBlocksToUnits = mock([])
       target.designSpecificationDetailService.saveDesignSpecifications = mockResolve()
       target.saveUnitsByExperimentId = mockResolve()
       AppUtil.createCompositePostResponse = mock()
@@ -948,7 +948,7 @@ describe('GroupExperimentalUnitService', () => {
       }, {
         rep: 1, treatmentId: 11, block: '1', treatmentBlockId: 111, location: 2,
       }]
-      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
+      target.addTreatmentBlocksToUnits = mock(unitsForDB)
       const designSpecsAndUnits = {
         designSpecifications,
         units: [{
@@ -969,7 +969,7 @@ describe('GroupExperimentalUnitService', () => {
       }, {
         rep: 1, treatmentId: 11, block: null, location: 2,
       }]
-      target.unitWithBlockService.addTreatmentBlocksToUnits = mock()
+      target.addTreatmentBlocksToUnits = mock()
       const designSpecsAndUnits = {
         designSpecifications,
         units: [{
@@ -980,7 +980,7 @@ describe('GroupExperimentalUnitService', () => {
       }
 
       return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
-        expect(target.unitWithBlockService.addTreatmentBlocksToUnits).toHaveBeenCalledWith(expectedUnits, treatmentBlocks)
+        expect(target.addTreatmentBlocksToUnits).toHaveBeenCalledWith(expectedUnits, treatmentBlocks)
       })
     })
 
@@ -990,7 +990,7 @@ describe('GroupExperimentalUnitService', () => {
       }, {
         rep: 1, treatmentId: 11, block: '1', treatmentBlockId: undefined, location: 2,
       }]
-      target.unitWithBlockService.addTreatmentBlocksToUnits = mock(unitsForDB)
+      target.addTreatmentBlocksToUnits = mock(unitsForDB)
       const designSpecsAndUnits = {
         designSpecifications,
         units: [{
@@ -1153,6 +1153,71 @@ describe('GroupExperimentalUnitService', () => {
         { treatmentBlockId: 1, rep: 2, location: 3 },
         { treatmentBlockId: 2, rep: 2, location: 3 }])
       expect(result.adds).toEqual([])
+    })
+  })
+
+  describe('addTreatmentBlocksToUnits', () => {
+    test('match units with treatment blocks', () => {
+      const treatmentBlocks = [
+        {
+          id: 1, block_id: 11, treatment_id: 111, name: 'block1',
+        },
+        {
+          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
+        },
+      ]
+      const units = [
+        {
+          rep: 1, loc: 1, treatmentId: 111, block: 'block1',
+        },
+        {
+          rep: 1, loc: 1, treatmentId: 112, block: 'block2',
+        },
+      ]
+      target = new GroupExperimentalUnitService()
+      expect(target.addTreatmentBlocksToUnits(units, treatmentBlocks))
+        .toEqual([{
+          treatmentBlockId: 1, treatmentId: 111, rep: 1, loc: 1, block: 'block1',
+        },
+        {
+          treatmentBlockId: 2, treatmentId: 112, rep: 1, loc: 1, block: 'block2',
+        }])
+    })
+  })
+
+  describe('findTreatmentBlockId', () => {
+    test('found the matching treatment block', () => {
+      const treatmentBlocks = [
+        {
+          id: 1, block_id: 11, treatment_id: 111, name: 'block1',
+        },
+        {
+          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
+        },
+      ]
+      const unit = {
+        rep: 1, loc: 1, treatmentId: 111, block: 'block1',
+      }
+
+      target = new GroupExperimentalUnitService()
+      expect(target.findTreatmentBlockId(unit, treatmentBlocks)).toEqual(1)
+    })
+
+    test('did not find the matching treatment block', () => {
+      const treatmentBlocks = [
+        {
+          id: 1, block_id: 11, treatment_id: 113, name: 'block1',
+        },
+        {
+          id: 2, block_id: 12, treatment_id: 112, name: 'block2',
+        },
+      ]
+      const unit = {
+        rep: 1, loc: 1, treatmentId: 111, block: 'block1',
+      }
+
+      target = new GroupExperimentalUnitService()
+      expect(target.findTreatmentBlockId(unit, treatmentBlocks)).toEqual(null)
     })
   })
 })

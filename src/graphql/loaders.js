@@ -6,7 +6,7 @@ import ExperimentsService from '../services/ExperimentsService'
 import GroupExperimentalUnitService from '../services/GroupExperimentalUnitService'
 import TagService from '../services/TagService'
 import TreatmentWithBlockService from '../services/TreatmentWithBlockService'
-import UnitWithBlockService from '../services/UnitWithBlockService'
+import ExperimentalUnitService from '../services/ExperimentalUnitService'
 
 function experimentBatchLoaderCallback(args, tx) {
   const ids = _.map(args, arg => arg.id)
@@ -56,7 +56,7 @@ function createLoaders(tx) {
   const unitsBySetIdLoader =
       new DataLoader(args =>
         tx.batch(_.map(args, arg =>
-          new UnitWithBlockService().getExperimentalUnitsBySetIds(arg, tx))))
+          new ExperimentalUnitService().getExperimentalUnitsBySetIds(arg, tx))))
 
   const groupByIdLoader =
     new DataLoader(args =>
@@ -92,7 +92,7 @@ function createLoaders(tx) {
   const unitsByExperimentIdLoader =
     new DataLoader(args =>
       tx.batch(_.map(args, arg =>
-        new UnitWithBlockService().getExperimentalUnitsByExperimentId(arg, tx))))
+        new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(arg, tx))))
 
   const blocksByBlockIdsLoader =
     new DataLoader(args =>

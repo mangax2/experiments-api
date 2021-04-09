@@ -12,7 +12,7 @@ class unitRepo {
   repository = () => this.rep
 
   @setErrorCode('5J4000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.experiment_id=$1', experimentId)
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
 
   @setErrorCode('5JD000')
   batchFind = (ids, tx = this.rep) => this.batchFindAllByIds(ids).then(data => {
@@ -31,7 +31,7 @@ class unitRepo {
     'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)
 
   @setErrorCode('5JE000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, b.name AS block FROM location_association la\n' +
+  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, tb.block_id, b.name AS block FROM location_association la\n' +
     'INNER JOIN treatment_block tb ON tb.block_id = la.block_id\n' +
     'INNER JOIN unit u ON u.treatment_block_id = tb.id and u.location = la.location\n' +
     'INNER JOIN block b ON tb.block_id = b.id\n' +

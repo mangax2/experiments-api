@@ -9,7 +9,6 @@ import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import TreatmentBlockService from './TreatmentBlockService'
-import UnitWithBlockService from './UnitWithBlockService'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 
 import db from '../db/DbManager'
@@ -68,7 +67,6 @@ class GroupExperimentalUnitService {
     this.factorService = new FactorService()
     this.lambdaPerformanceService = new LambdaPerformanceService()
     this.unitValidator = new ExperimentalUnitValidator()
-    this.unitWithBlockService = new UnitWithBlockService()
     this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
     this.treatmentBlockService = new TreatmentBlockService()
   }
@@ -200,7 +198,7 @@ class GroupExperimentalUnitService {
       db.combinationElement.findAllByExperimentId(experimentId, tx),
       db.experiments.findExperimentOrTemplate(experimentId, tx),
       this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
-      this.unitWithBlockService.getExperimentalUnitsByExperimentId(experimentId, tx),
+      db.unit.findAllByExperimentId(experimentId, tx),
       this.locationAssocWithBlockService.getByExperimentId(experimentId, tx),
     ]).then((
       [
@@ -255,7 +253,7 @@ class GroupExperimentalUnitService {
   getGroupsAndUnitsForSet = (setId, tx) =>
     tx.batch([
       this.treatmentWithBlockService.getTreatmentsByBySetIds([setId], tx),
-      this.unitWithBlockService.getExperimentalUnitsBySetIds([setId], tx),
+      this.experimentalUnitService.getExperimentalUnitsBySetIds([setId], tx),
       this.locationAssocWithBlockService.getBySetId(setId, tx),
     ]).then(([
       treatments,
@@ -403,7 +401,7 @@ class GroupExperimentalUnitService {
           })
 
           const unitsWithTBs =
-            this.unitWithBlockService.addTreatmentBlocksToUnits(units, treatmentBlocks)
+            this.addTreatmentBlocksToUnits(units, treatmentBlocks)
           this.validateUnitsTBs(unitsWithTBs)
 
           return tx.batch([
@@ -418,6 +416,17 @@ class GroupExperimentalUnitService {
     }
 
     throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
+  }
+
+  addTreatmentBlocksToUnits = (units, treatmentBlocks) => _.map(units, (unit) => {
+    const treatmentBlockId = this.findTreatmentBlockId(unit, treatmentBlocks)
+    return ({ ...unit, treatmentBlockId })
+  })
+
+  findTreatmentBlockId = (unit, treatmentBlocks) => {
+    const treatmentBlock = _.find(treatmentBlocks,
+      tb => tb.treatment_id === unit.treatmentId && tb.name === unit.block)
+    return treatmentBlock ? treatmentBlock.id : null
   }
 
   validateUnitsTBs = (unitWithTBs) => {

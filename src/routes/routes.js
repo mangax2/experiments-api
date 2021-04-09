@@ -23,7 +23,6 @@ import TreatmentBlockService from '../services/TreatmentBlockService'
 import UnitTypeService from '../services/UnitTypeService'
 import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
-import UnitWithBlockService from '../services/UnitWithBlockService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 
@@ -102,7 +101,7 @@ router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentDetai
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/experimental-units', (req, res, next) => new UnitWithBlockService().getUnitsFromExperimentByExperimentId(req.params.id, req.context)
+router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromExperimentByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 router.patch('/experiments/:id/experimental-units', (req, res, next) => {
@@ -241,7 +240,7 @@ router.put('/templates/:id/treatments', (req, res, next) => new TreatmentDetails
   .then(result => res.json(result))
   .catch(err => next(err)))
 
-router.get('/templates/:id/experimental-units', (req, res, next) => new UnitWithBlockService().getUnitsFromTemplateByExperimentId(req.params.id, req.context)
+router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromTemplateByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
   .catch(err => next(err)))
 

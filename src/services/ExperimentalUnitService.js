@@ -67,6 +67,20 @@ class ExperimentalUnitService {
     }
   }
 
+  @setErrorCode('174000')
+  @Transactional('getUnitsFromTemplateByExperimentId')
+  getUnitsFromTemplateByExperimentId(id, context, tx) {
+    return this.experimentService.findExperimentWithTemplateCheck(id, true, context, tx)
+      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id, tx))
+  }
+
+  @setErrorCode('175000')
+  @Transactional('getUnitsFromExperimentByExperimentId')
+  getUnitsFromExperimentByExperimentId(id, context, tx) {
+    return this.experimentService.findExperimentWithTemplateCheck(id, false, context, tx)
+      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id, tx))
+  }
+
   @setErrorCode('178000')
   @Transactional('getExperimentalUnitsByExperimentIdNoValidate')
   getExperimentalUnitsByExperimentIdNoValidate = (id, tx) =>
@@ -108,6 +122,11 @@ class ExperimentalUnitService {
     })
     return setEntryUnitMap
   }
+
+  @setErrorCode('17C000')
+  @Transactional('getExperimentalUnitsBySetIds')
+  getExperimentalUnitsBySetIds = (ids, tx) =>
+    db.unit.batchFindAllBySetIds(ids, tx)
 
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')

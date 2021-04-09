@@ -12,6 +12,21 @@ describe('ExperimentalUnitService', () => {
   const testContext = {}
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
+  const trimmedUnit = {
+    block: '1',
+    blockId: 1,
+    createdDate: '2019-08-19T16:10:03.353Z',
+    createdUserId: 'user',
+    deactivationReason: 'damage',
+    id: 9295665,
+    location: 1,
+    modifiedDate: '2019-08-19T18:17:35.289Z',
+    modifiedUserId: 'migration',
+    rep: 2,
+    setEntryId: 124,
+    treatmentId: 180490,
+  }
+
   beforeEach(() => {
     target = new ExperimentalUnitService()
   })
@@ -709,6 +724,64 @@ describe('ExperimentalUnitService', () => {
         expect(result).toBe(undefined)
         expect(QuestionsUtil.getAnswerKeys).toHaveBeenCalled()
         expect(AppError.badRequest).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('getUnitsFromTemplateByExperimentId', () => {
+    test('The call fails getExperimentById check', () => {
+      target.experimentService.findExperimentWithTemplateCheck = mockReject()
+      target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
+
+      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).catch(() => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).not.toHaveBeenCalled()
+      })
+    })
+
+    test('The call passes getExperimentById check', () => {
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
+      target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
+
+      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+  })
+
+  describe('getUnitsFromExperimentByExperimentId', () => {
+    test('The call fails getExperimentById check', () => {
+      target.experimentService.findExperimentWithTemplateCheck = mockReject()
+      target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
+
+      return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).catch(() => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).not.toHaveBeenCalled()
+      })
+    })
+
+    test('The call passes getExperimentById check', () => {
+      target.experimentService.findExperimentWithTemplateCheck = mockResolve()
+      target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
+
+      return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
+        expect(data).toEqual([])
+      })
+    })
+  })
+
+  describe('getExperimentalUnitsBySetIds', () => {
+    test('calls batchFindAllBySetIds on the unit repo', () => {
+      const expectedResult = [trimmedUnit]
+      db.unit.batchFindAllBySetIds = mockResolve(expectedResult)
+
+      return target.getExperimentalUnitsBySetIds(1, testTx).then((result) => {
+        expect(db.unit.batchFindAllBySetIds).toHaveBeenCalledWith(1, testTx)
+        expect(result).toEqual(expectedResult)
       })
     })
   })

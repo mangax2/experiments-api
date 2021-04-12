@@ -81,6 +81,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
 
     const cors = require('cors')
 
+    require('./graphql/GraphQLAuditManager').startInterval()
     app.use(`${graphqlBaseUrl}/graphql`, cors(), bodyParser.json({ limit: 1024 * 1024 * 40 }), require('./graphql/graphqlConfig')(schema))
 
     app.use(inflector())

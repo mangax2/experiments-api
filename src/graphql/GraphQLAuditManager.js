@@ -1,6 +1,6 @@
 import db from '../db/DbManager'
 
-const FIVE_SECONDS_IN_MS = 300000
+const FIVE_MINUTES_IN_MS = 300000
 
 class GraphQLAuditManager {
   queue = []
@@ -33,7 +33,7 @@ class GraphQLAuditManager {
   }
 
   startInterval = () => {
-    this.intervalHandle = setInterval(() => this.saveLogs, FIVE_SECONDS_IN_MS)
+    this.intervalHandle = setInterval(() => this.saveLogs, FIVE_MINUTES_IN_MS)
   }
 
   // TODO: Figure out a way to call this when the application is shutting down.

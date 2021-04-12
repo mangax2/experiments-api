@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql'
 import db from '../db/DbManager'
 import loaders from './loaders'
 import config from '../../config'
+import AuditManager from './GraphQLAuditManager'
 
 function LimitQueryDepth(maxDepth) {
   return (context) => {
@@ -46,21 +47,13 @@ function LimitNumQueries(maxQueries) {
   }
 }
 
-function LogQuery(request, context, logger) {
-  if (context.clientId) {
-    db.graphqlAudit.batchCreate([{ raw: request }], context).catch((err) => {
-      logger.warn(`Unable to persist GraphQL query to database. Reason: ${err.message}. Original query: ${JSON.stringify(request)}`)
-    })
-  }
-}
-
 function formatDate(args, date) {
   return args.format === 'YYYYMM' ? new Date(date).toISOString().slice(0, 7) : date
 }
 
 function graphqlMiddlewareFunction(schema) {
   return function (request, response) {
-    console.info(JSON.stringify(request.body))
+    AuditManager.logRequest(request.body, request.context.userId, request.context.clientId)
 
     return db.tx('GraphQLTransaction', (tx) => {
       const handler = graphqlHTTP({
@@ -79,7 +72,6 @@ function graphqlMiddlewareFunction(schema) {
         validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
         graphiql: config.env === 'local',
       })
-      LogQuery(request.body, request.context, console)
       return handler(request, response)
     })
   }

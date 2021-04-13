@@ -15,7 +15,7 @@ class graphqlAuditRepo {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
         'raw',
-        'request_time:raw',
+        'request_time',
         'client_id',
         'user_id',
       ],

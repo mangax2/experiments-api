@@ -33,7 +33,7 @@ class GraphQLAuditManager {
   }
 
   startInterval = () => {
-    this.intervalHandle = setInterval(() => this.saveLogs, FIVE_MINUTES_IN_MS)
+    this.intervalHandle = setInterval(() => this.saveLogs(), FIVE_MINUTES_IN_MS)
   }
 
   // TODO: Figure out a way to call this when the application is shutting down.

@@ -1,4 +1,8 @@
 
+if ('development' === process.env.NODE_ENV) {
+  require('dotenv').config()
+}
+
 const {
   ENV,
   PORT,

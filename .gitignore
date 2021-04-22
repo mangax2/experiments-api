@@ -38,3 +38,5 @@ benchmarks/graphs
 
 # pem files
 *.pem
+
+.env

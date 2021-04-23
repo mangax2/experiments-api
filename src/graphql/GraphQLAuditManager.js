@@ -8,7 +8,7 @@ class GraphQLAuditManager {
   intervalHandle = null
 
   logRequest = (query, userId, clientId) => {
-    console.info(`Experiments API GraphQL request: "${query}"`)
+    console.info(`Experiments API GraphQL request: "${JSON.stringify(query)}"`)
     this.queue.push({
       query,
       userId,

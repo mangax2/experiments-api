@@ -128,8 +128,12 @@ describe('FactorLevelsValidator', () => {
     })
 
     test('does not add a message if there are not any business key errors', () => {
-      const targetObject = [{ test: 'a', factorId: 1 }, { test: 'b', factorId: 1 }]
-      target.getBusinessKeyPropertyNames = mock(['factorId', 'test'])
+      const targetObject = [
+        { value: 'a', factorId: 1, associatedFactorLevelRefIds: [] },
+        { value: 'b', factorId: 1, associatedFactorLevelRefIds: [] },
+      ]
+      target.getBusinessKeyPropertyNames = mock(['factorId', 'value', 'associatedFactorLevelRefIds'])
+
 
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(0)

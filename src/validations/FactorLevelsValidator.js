@@ -5,6 +5,14 @@ import db from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
+const uniques = (arr) => {
+  const set = new Set()
+  return arr.filter(({ value, associatedFactorLevelRefIds }, key) => {
+    key = JSON.stringify(value) + JSON.stringify(associatedFactorLevelRefIds)
+    return !set.has(key) && set.add(key)
+  })
+}
+
 // Error Codes 38XXXX
 class FactorLevelsValidator extends SchemaValidator {
   constructor() {
@@ -64,7 +72,8 @@ class FactorLevelsValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.factorId))
       _.forEach(groupByObject, (innerArray) => {
         const value = _.map(innerArray, e => _.pick(e, businessKeyPropertyNames.slice(1)))
-        if (_.uniqWith(value, _.isEqual).length !== value.length) {
+        const uniqueValues = uniques(value)
+        if (uniqueValues.length !== value.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

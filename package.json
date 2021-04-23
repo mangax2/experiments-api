@@ -13,7 +13,6 @@
     "eslintTests": "eslint test --fix --ext .js; exit 0",
     "migrations": "node ./sqlMigration.js",
     "precommit": "npm run validateSchema && eslint src --ext .js",
-    "prepush": "jest --config .jestrc.json",
     "start": "NODE_ENV=production node --max-http-header-size 64000 ./build/app",
     "test": "jest --config .jestrc.json --detectOpenHandles",
     "testCoverage": "jest --config .jestCoveragerc.json --detectOpenHandles",

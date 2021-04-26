@@ -5,10 +5,10 @@ import db from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
-const uniques = (arr) => {
+const getUniqueBusinessKeys = (arr) => {
   const set = new Set()
-  return arr.filter(({ value, associatedFactorLevelRefIds }, key) => {
-    key = JSON.stringify(value) + JSON.stringify(associatedFactorLevelRefIds)
+  return arr.filter(({ value, associatedFactorLevelRefIds }) => {
+    const key = JSON.stringify(value) + JSON.stringify(associatedFactorLevelRefIds)
     return !set.has(key) && set.add(key)
   })
 }
@@ -72,8 +72,8 @@ class FactorLevelsValidator extends SchemaValidator {
       const groupByObject = _.values(_.groupBy(businessKeyArray, keyObj => keyObj.factorId))
       _.forEach(groupByObject, (innerArray) => {
         const value = _.map(innerArray, e => _.pick(e, businessKeyPropertyNames.slice(1)))
-        const uniqueValues = uniques(value)
-        if (uniqueValues.length !== value.length) {
+        const uniqueKeys = getUniqueBusinessKeys(value)
+        if (uniqueKeys.length !== value.length) {
           this.messages.push(this.getDuplicateBusinessKeyError())
           return false
         }

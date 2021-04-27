@@ -31,24 +31,30 @@ class factorLevelRepo {
   batchCreate = (factorLevels, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
-        'value:raw',
+        'id:raw',
+        'value',
         'factor_id',
         'created_user_id',
         'created_date:raw',
         'modified_user_id',
         'modified_date:raw'
       ],
-      {table: 'factor_level'})
+      {table: 'temp_insert_factor_level'})
     const values = factorLevels.map(factorLevel => ({
-      value: `CAST(${this.pgp.as.json(factorLevel.value)} AS jsonb)`,
+      id: 'nextval(pg_get_serial_sequence(\'factor_level\', \'id\'))::integer',
+      value: factorLevel.value,
       factor_id: factorLevel.factorId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP'
     }))
-    const query = `${this.pgp.helpers.insert(values, columnSet)} RETURNING id`
-    return tx.any(query)
+    // Split into two queries to drastically reduce the time it takes to audit the inserts for
+    // large number of rows. This is likely due to the size of the query being writtent to the audit.logged_actions table.
+    const query1 = `DROP TABLE IF EXISTS temp_insert_factor_level; CREATE TEMP TABLE temp_insert_factor_level AS TABLE factor_level WITH NO DATA; ${this.pgp.helpers.insert(values, columnSet)};`
+    const query2 = "INSERT INTO factor_level SELECT * FROM temp_insert_factor_level RETURNING id"
+    return tx.query(query1)
+      .then(() => tx.any(query2))
   }
 
   @setErrorCode('587000')

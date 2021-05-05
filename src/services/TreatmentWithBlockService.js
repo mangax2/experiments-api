@@ -75,10 +75,10 @@ class TreatmentWithBlockService {
 
   @setErrorCode('1Z7000')
   @Transactional('updateTreatments')
-  updateTreatments(experimentId, treatments, context, tx) {
-    return this.treatmentService.batchUpdateTreatments(treatments, context, tx)
-      .then(() => this.treatmentBlockService.persistTreatmentBlocksForExistingTreatments(
-        experimentId, treatments, context, tx))
+  updateTreatments = async (experimentId, treatments, context, tx) => {
+    await this.treatmentService.batchUpdateTreatments(treatments, context, tx)
+    return this.treatmentBlockService.persistTreatmentBlocksForExistingTreatments(
+      experimentId, treatments, context, tx)
   }
 }
 

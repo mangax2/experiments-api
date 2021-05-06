@@ -17,10 +17,11 @@ class CombinationElementService {
 
   @setErrorCode('111000')
   @Transactional('createCombinationElementTx')
-  batchCreateCombinationElements(combinationElements, context, tx) {
-    return this.validator.validate(combinationElements, 'POST', tx)
-      .then(() => db.combinationElement.batchCreate(combinationElements, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+  batchCreateCombinationElements = async (combinationElements, context, tx) => {
+    await this.validator.validate(combinationElements, 'POST', tx)
+
+    const data = await db.combinationElement.batchCreate(combinationElements, context, tx)
+    return AppUtil.createPostResponse(data)
   }
 
   @setErrorCode('113000')
@@ -42,10 +43,10 @@ class CombinationElementService {
 
   @setErrorCode('117000')
   @Transactional('batchUpdateCombinationElements')
-  batchUpdateCombinationElements(combinationElements, context, tx) {
-    return this.validator.validate(combinationElements, 'PUT', tx)
-      .then(() => db.combinationElement.batchUpdate(combinationElements, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
+  batchUpdateCombinationElements = async (combinationElements, context, tx) => {
+    await this.validator.validate(combinationElements, 'PUT', tx)
+    const data = await db.combinationElement.batchUpdate(combinationElements, context, tx)
+    return AppUtil.createPutResponse(data)
   }
 
   @setErrorCode('118000')

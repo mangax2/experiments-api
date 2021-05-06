@@ -20,13 +20,23 @@ class treatmentRepo {
   findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
 
   @setErrorCode('5I4000')
-  batchCreate = (treatments, context, tx = this.rep) => {
+  batchCreate = async (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['treatment_number', 'notes', 'experiment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date',
-      { name: 'control_types', cast: 'text[]' }],
-      { table: 'treatment' },
+      [
+        'id:raw',
+        'treatment_number',
+        'notes',
+        'experiment_id',
+        'created_user_id',
+        'created_date:raw',
+        'modified_user_id',
+        'modified_date:raw',
+        { name: 'control_types', cast: 'text[]' }
+      ],
+      { table: 'temp_insert_treatment' },
     )
     const values = treatments.map(t => ({
+      id: 'nextval(pg_get_serial_sequence(\'treatment\', \'id\'))::integer',
       treatment_number: t.treatmentNumber,
       notes: t.notes,
       experiment_id: t.experimentId,
@@ -36,17 +46,25 @@ class treatmentRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
-
-    return tx.any(query)
+    const query1 = `DROP TABLE IF EXISTS temp_insert_treatment; CREATE TEMP TABLE temp_insert_treatment AS TABLE treatment WITH NO DATA; ${this.pgp.helpers.insert(values, columnSet)};`
+    const query2 = "INSERT INTO treatment SELECT * FROM temp_insert_treatment RETURNING id"
+    await tx.any(query1)
+    return tx.any(query2)
   }
 
   @setErrorCode('5I5000')
-  batchUpdate = (treatments, context, tx = this.rep) => {
+  batchUpdate = async (treatments, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'treatment_number', 'notes', 'experiment_id', 'modified_user_id', 'modified_date',
-        { name: 'control_types', cast: 'text[]' }],
-      { table: 'treatment' },
+      [
+        '?id',
+        'treatment_number',
+        'notes',
+        'experiment_id',
+        'modified_user_id',
+        'modified_date:raw',
+        { name: 'control_types', cast: 'text[]' }
+      ],
+      { table: 'temp_update_treatment' },
     )
     const data = treatments.map(t => ({
       id: t.id,
@@ -57,9 +75,13 @@ class treatmentRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
-
-    return tx.any(query)
+    const query1 = `DROP TABLE IF EXISTS temp_update_treatment; CREATE TEMP TABLE temp_update_treatment AS TABLE treatment WITH NO DATA; ${this.pgp.helpers.insert(data, columnSet)};`
+    const query2 = `UPDATE treatment
+    SET treatment_number = tut.treatment_number, notes = tut.notes, experiment_id = tut.experiment_id, modified_user_id = tut.modified_user_id, modified_date = tut.modified_date, control_types = tut.control_types
+    FROM temp_update_treatment tut
+    WHERE treatment.id = tut.id`
+    await tx.any(query1)
+    return tx.any(query2)
   }
 
   @setErrorCode('5I6000')

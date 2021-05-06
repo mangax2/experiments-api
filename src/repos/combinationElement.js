@@ -38,12 +38,21 @@ class combinationElementRepo {
   }
 
   @setErrorCode('506000')
-  batchCreate = (combinationElements, context, tx = this.rep) => {
+  batchCreate = async (combinationElements, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['factor_level_id', 'treatment_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element' },
+      [
+        'id:raw',
+        'factor_level_id',
+        'treatment_id',
+        'created_user_id',
+        'created_date:raw',
+        'modified_user_id',
+        'modified_date:raw',
+      ],
+      { table: 'temp_insert_combination_element' },
     )
     const values = combinationElements.map(ce => ({
+      id: 'nextval(pg_get_serial_sequence(\'combination_element\', \'id\'))::integer',
       factor_level_id: ce.factorLevelId,
       treatment_id: ce.treatmentId,
       created_user_id: context.userId,
@@ -51,16 +60,23 @@ class combinationElementRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
-
-    return tx.any(query)
+    const query1 = `DROP TABLE IF EXISTS temp_insert_combination_element; CREATE TEMP TABLE temp_insert_combination_element AS TABLE combination_element WITH NO DATA; ${this.pgp.helpers.insert(values, columnSet)};`
+    const query2 = "INSERT INTO combination_element SELECT * FROM temp_insert_combination_element RETURNING id"
+    await tx.any(query1)
+    return tx.any(query2)
   }
 
   @setErrorCode('507000')
-  batchUpdate = (combinationElements, context, tx = this.rep) => {
+  batchUpdate = async (combinationElements, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['?id', 'factor_level_id', 'treatment_id', 'modified_user_id', 'modified_date'],
-      { table: 'combination_element' },
+      [
+        '?id',
+        'factor_level_id',
+        'treatment_id',
+        'modified_user_id',
+        'modified_date:raw',
+      ],
+      { table: 'temp_update_combination_element' },
     )
     const data = combinationElements.map(ce => ({
       id: ce.id,
@@ -69,9 +85,13 @@ class combinationElementRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
-
-    return tx.any(query)
+    const query1 = `DROP TABLE IF EXISTS temp_update_combination_element; CREATE TEMP TABLE temp_update_combination_element AS TABLE combination_element WITH NO DATA; ${this.pgp.helpers.insert(data, columnSet)};`
+    const query2 = `UPDATE combination_element
+    SET factor_level_id = tuce.factor_level_id, treatment_id = tuce.treatment_id, modified_user_id = tuce.modified_user_id, modified_date = tuce.modified_date
+    FROM temp_update_combination_element tuce
+    WHERE combination_element.id = tuce.id`
+    await tx.any(query1)
+    return tx.any(query2)
   }
 
   @setErrorCode('508000')

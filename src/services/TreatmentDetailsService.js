@@ -102,100 +102,102 @@ class TreatmentDetailsService {
   @notifyChanges('update', 0, 3)
   @setErrorCode('1QI000')
   @Transactional('handleAllTreatments')
-  handleAllTreatments(experimentIdStr, inputTreatments, context, isTemplate, tx) {
+  handleAllTreatments = async (experimentIdStr, inputTreatments, context, isTemplate, tx) => {
     const experimentId = _.toNumber(experimentIdStr)
-    return Promise.all([
+    await Promise.all([
       this.securityService.permissionsCheck(experimentId, context, isTemplate, tx),
       this.validator.validateBlockValue(inputTreatments),
-    ]).then(() => this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
-      .then((result) => {
-        const treatments = this.stringifyBlock(inputTreatments)
-        formatTreatmentsWithNewBlocksStructure(treatments)
-        const blockNames = _.uniq(_.flatMap(treatments, t => _.map(t.blocks, 'name')))
-        return this.blockService.createOnlyNewBlocksByExperimentId(experimentId,
-          blockNames, context, tx)
-          .then(() => {
-            const dbTreatments = _.sortBy(result, 'treatment_number')
-            const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
+    ])
 
-            if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
-              TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
-              return this.createTreatments(experimentId, sortedTreatments, context, tx)
-                .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                  blockNames, tx))
-                .then(() => AppUtil.createNoContentResponse())
-            }
+    const result = await this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
+    const treatments = this.stringifyBlock(inputTreatments)
 
-            if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
-              return this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
-                .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                  blockNames, tx))
-                .then(() => AppUtil.createNoContentResponse())
-            }
+    formatTreatmentsWithNewBlocksStructure(treatments)
 
-            if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
-              _.forEach(dbTreatments, (treatment) => {
-                treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
-                treatment.used = false
-              })
+    const blockNames = _.uniq(_.flatMap(treatments, t => _.map(t.blocks, 'name')))
 
-              _.forEach(sortedTreatments, (treatment) => {
-                treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
-              })
+    await this.blockService.createOnlyNewBlocksByExperimentId(experimentId, blockNames, context, tx)
 
-              const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
 
-              const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
-                dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
+    const dbTreatments = _.sortBy(result, 'treatment_number')
+    const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
 
-              const updates = []
+    if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
+      TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
+      await this.createTreatments(experimentId, sortedTreatments, context, tx)
+      await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
+      return AppUtil.createNoContentResponse()
+    }
 
-              _.forEach(updatesToCheck, (updateTreatment) => {
-                const dbTreatment = _.find(dbTreatments, treatment =>
-                  treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
-                  && treatment.used === false,
-                )
+    if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+      await this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
+      await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
+      return AppUtil.createNoContentResponse()
+    }
 
-                if (dbTreatment === undefined) {
-                  adds.push(updateTreatment)
-                } else {
-                  updateTreatment.id = dbTreatment.id
-                  dbTreatment.used = true
+    if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+      _.forEach(dbTreatments, (treatment) => {
+        treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
+        treatment.used = false
+      })
 
-                  _.forEach(updateTreatment.combinationElements, (ce) => {
-                    const dbCombination = _.find(dbTreatment.combination_elements,
-                      dbCE => dbCE.factor_level.id === ce.factorLevelId)
-                    ce.id = dbCombination.id
-                  })
+      _.forEach(sortedTreatments, (treatment) => {
+        treatment.sortedFactorLevelIds = _.join(_.map(treatment.combinationElements, 'factorLevelId').sort(), ',')
+      })
 
-                  updates.push(updateTreatment)
-                }
-              })
+      const dbTreatmentSortedFactorLevelIds = _.map(dbTreatments, 'sortedFactorLevelIds')
+      const [updatesToCheck, adds] = _.partition(sortedTreatments, t =>
+        dbTreatmentSortedFactorLevelIds.includes(t.sortedFactorLevelIds))
 
-              const deletes = []
+      const updates = this.getUpdates(updatesToCheck, adds, dbTreatments)
+      const deletes = this.getDeletes(dbTreatments)
 
-              _.forEach(dbTreatments, (treatment) => {
-                if (treatment.used === false) {
-                  deletes.push(treatment.id)
-                }
-              })
+      TreatmentDetailsService.populateExperimentId(updates, experimentId)
+      TreatmentDetailsService.populateExperimentId(adds, experimentId)
+      await this.deleteTreatments(deletes, context, tx)
+      await this.updateTreatments(experimentId, updates, context, tx)
+      await this.createTreatments(experimentId, adds, context, tx)
+      await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
+      await AppUtil.createNoContentResponse()
+    }
 
-              TreatmentDetailsService.populateExperimentId(updates, experimentId)
-              TreatmentDetailsService.populateExperimentId(adds, experimentId)
+    return AppUtil.createNoContentResponse()
+  }
 
-              return this.deleteTreatments(deletes, context, tx)
-                .then(() => this.updateTreatments(experimentId, updates, context, tx)
-                  .then(() => this.createTreatments(experimentId, adds, context, tx)
-                    .then(() => this.blockService.removeBlocksByExperimentId(experimentId,
-                      blockNames, tx))
-                    .then(() => AppUtil.createNoContentResponse()),
-                  ))
-            }
+  getUpdates = (updatesToCheck, adds, dbTreatments) => {
+    const updates = []
+    _.forEach(updatesToCheck, (updateTreatment) => {
+      const dbTreatment = _.find(dbTreatments, treatment =>
+        treatment.sortedFactorLevelIds === updateTreatment.sortedFactorLevelIds
+        && treatment.used === false,
+      )
 
-            return AppUtil.createNoContentResponse()
-          })
-      }),
-    )
+      if (dbTreatment === undefined) {
+        adds.push(updateTreatment)
+      } else {
+        updateTreatment.id = dbTreatment.id
+        dbTreatment.used = true
+
+        _.forEach(updateTreatment.combinationElements, (ce) => {
+          const dbCombination = _.find(dbTreatment.combination_elements,
+            dbCE => dbCE.factor_level.id === ce.factorLevelId)
+          ce.id = dbCombination.id
+        })
+
+        updates.push(updateTreatment)
+      }
+    })
+    return updates
+  }
+
+  getDeletes = (dbTreatments) => {
+    const deletes = []
+    _.forEach(dbTreatments, (treatment) => {
+      if (treatment.used === false) {
+        deletes.push(treatment.id)
+      }
+    })
+    return deletes
   }
 
   @setErrorCode('1Q3000')
@@ -258,14 +260,14 @@ class TreatmentDetailsService {
   removeUndefinedElements = elements => _.filter(elements, element => !_.isUndefined(element))
 
   @setErrorCode('1QA000')
-  updateTreatments(experimentId, treatmentUpdates, context, tx) {
+  updateTreatments = async (experimentId, treatmentUpdates, context, tx) => {
     if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
     }
-    return this.treatmentWithBlockService.updateTreatments(experimentId,
-      treatmentUpdates, context, tx)
-      .then(() => this.deleteCombinationElements(treatmentUpdates, context, tx)
-        .then(() => this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)))
+    await this.treatmentWithBlockService.updateTreatments(
+      experimentId, treatmentUpdates, context, tx)
+    await this.deleteCombinationElements(treatmentUpdates, context, tx)
+    return this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)
   }
 
   @setErrorCode('1QB000')
@@ -298,15 +300,19 @@ class TreatmentDetailsService {
   }
 
   @setErrorCode('1QD000')
-  createAndUpdateCombinationElements(treatmentUpdates, context, tx) {
-    return this.updateCombinationElements(
+  createAndUpdateCombinationElements = async (treatmentUpdates, context, tx) => {
+    const updates = await this.updateCombinationElements(
       this.assembleBatchUpdateCombinationElementsRequestFromUpdates(treatmentUpdates),
       context,
       tx,
-    ).then(() => this.createCombinationElements(
+    )
+
+    const creates = await this.createCombinationElements(
       this.assembleBatchCreateCombinationElementsRequestFromUpdates(treatmentUpdates),
       context,
-      tx))
+      tx)
+
+    return [creates, updates]
   }
 
   @setErrorCode('1QE000')

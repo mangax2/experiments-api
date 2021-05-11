@@ -1,3 +1,4 @@
+require('./tracer')
 require('../sqlMigration')
 const config = require('../config')
 
@@ -68,6 +69,27 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
 
     const compression = require('compression')
     app.use(compression())
+
+    if (config.node_env === 'production') {
+      const connectDatadog = require('connect-datadog')
+      app.use(connectDatadog({
+        protocol: true,
+        base_url: true,
+        method: true,
+        path: true,
+        response_code: true,
+        tags: ['service:experiments-api', `env:${config.env}`],
+      }))
+
+      const customMetricsMiddleware = require('@monsantoit/custom-datadog-metrics-express-middleware')
+      app.use(customMetricsMiddleware.default({
+        environment: config.env,
+        clientId: vaultUtil.clientId,
+        clientSecret: vaultUtil.clientSecret,
+        serviceName: 'experiments-api',
+        appName: 'Experiments API',
+      }))
+    }
 
     const { makeExecutableSchema } = require('graphql-tools')
     const { importSchema } = require('graphql-import')

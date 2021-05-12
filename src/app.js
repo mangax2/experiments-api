@@ -81,14 +81,16 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
         tags: ['service:experiments-api', `env:${config.env}`],
       }))
 
-      const customMetricsMiddleware = require('@monsantoit/custom-datadog-metrics-express-middleware')
-      app.use(customMetricsMiddleware.default({
-        environment: config.env,
-        clientId: vaultUtil.clientId,
-        clientSecret: vaultUtil.clientSecret,
-        serviceName: 'experiments-api',
-        appName: 'Experiments API',
-      }))
+      if (['np', 'prod'].includes(config.env)) {
+        const customMetricsMiddleware = require('@monsantoit/custom-datadog-metrics-express-middleware')
+        app.use(customMetricsMiddleware.default({
+          environment: config.env === 'prod' ? 'production' : 'non-prod',
+          clientId: vaultUtil.clientId,
+          clientSecret: vaultUtil.clientSecret,
+          serviceName: 'experiments-api',
+          appName: 'Experiments API',
+        }))
+      }
     }
 
     const { makeExecutableSchema } = require('graphql-tools')

@@ -1209,15 +1209,71 @@ describe('FactorDependentCompositeService', () => {
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([
         {
           id: 11,
+          value: {
+            items: [
+              {
+                label: 'Factor1',
+                text: 'F1.1',
+                isPlaceholder: true,
+                valueType: 'placeholder',
+              },
+            ],
+            objectType: 'Cluster',
+          },
         },
         {
           id: 12,
+          value: {
+            items: [
+              {
+                label: 'Factor1',
+                text: 'F1.2',
+                isPlaceholder: true,
+                valueType: 'placeholder',
+              },
+            ],
+            objectType: 'Cluster',
+          },
         },
         {
           id: 21,
+          value: {
+            items: [
+              {
+                label: 'Chem',
+                text: 'MON123',
+                isPlaceholder: true,
+                valueType: 'placeholder',
+              },
+              {
+                label: 'Rate',
+                text: '1.23',
+                isPlaceholder: true,
+                valueType: 'placeholder',
+              },
+            ],
+            objectType: 'Cluster',
+          },
         },
         {
           id: 22,
+          value: {
+            items: [
+              {
+                label: 'Chem',
+                text: 'MON456',
+                isPlaceholder: false,
+                valueType: 'placeholder',
+              },
+              {
+                label: 'Rate',
+                text: '4.56',
+                isPlaceholder: true,
+                valueType: 'placeholder',
+              },
+            ],
+            objectType: 'Cluster',
+          },
         },
       ])
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve([])
@@ -1248,6 +1304,7 @@ describe('FactorDependentCompositeService', () => {
                     isPlaceholder: true,
                   },
                 ],
+                objectType: 'Cluster',
               },
               {
                 id: 12,
@@ -1259,6 +1316,7 @@ describe('FactorDependentCompositeService', () => {
                     isPlaceholder: true,
                   },
                 ],
+                objectType: 'Cluster',
               },
             ],
             tier: null,
@@ -1281,6 +1339,7 @@ describe('FactorDependentCompositeService', () => {
                     isPlaceholder: true,
                   },
                 ],
+                objectType: 'Cluster',
               },
               {
                 id: 22,
@@ -1296,6 +1355,7 @@ describe('FactorDependentCompositeService', () => {
                     isPlaceholder: true,
                   },
                 ],
+                objectType: 'Cluster',
               },
             ],
             tier: null,
@@ -1342,6 +1402,7 @@ describe('FactorDependentCompositeService', () => {
                   valueType: 'placeholder',
                 },
               ],
+              objectType: 'Cluster',
             },
             associatedFactorLevelRefIds: [],
           },
@@ -1357,27 +1418,7 @@ describe('FactorDependentCompositeService', () => {
                   valueType: 'placeholder',
                 },
               ],
-            },
-            associatedFactorLevelRefIds: [],
-          },
-          {
-            id: 21,
-            factorId: 2,
-            value: {
-              items: [
-                {
-                  label: 'Chem',
-                  text: 'MON123',
-                  isPlaceholder: true,
-                  valueType: 'placeholder',
-                },
-                {
-                  label: 'Rate',
-                  text: '1.23',
-                  isPlaceholder: true,
-                  valueType: 'placeholder',
-                },
-              ],
+              objectType: 'Cluster',
             },
             associatedFactorLevelRefIds: [],
           },
@@ -1399,6 +1440,7 @@ describe('FactorDependentCompositeService', () => {
                   valueType: 'placeholder',
                 },
               ],
+              objectType: 'Cluster',
             },
             associatedFactorLevelRefIds: [],
           },

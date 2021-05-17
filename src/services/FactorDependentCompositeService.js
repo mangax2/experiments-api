@@ -375,22 +375,27 @@ class FactorDependentCompositeService {
         tx)
 
   @setErrorCode('1Ab000')
-  updateLevels = (levelDTOsForUpdate, allFactorLevelAssociationDTOs, context, tx) =>
-    applyAsyncBatchToNonEmptyArray(
+  updateLevels = (levelDTOsForUpdate, allFactorLevelAssociationDTOs, allDbLevels, context, tx) => {
+    const requestFactorLevels =
+      mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate, allFactorLevelAssociationDTOs)
+    const mappedDbFactorLevels = _.mapValues(_.groupBy(allDbLevels, 'id'), x => x[0])
+    return applyAsyncBatchToNonEmptyArray(
       this.factorLevelService.batchUpdateFactorLevels,
-      mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate, allFactorLevelAssociationDTOs),
+      _.filter(requestFactorLevels, factorLevel => mappedDbFactorLevels[factorLevel.id] &&
+        !_.isEqual(factorLevel.value, mappedDbFactorLevels[factorLevel.id].value)),
       context,
       tx)
+  }
 
   @setErrorCode('1Ac000')
   updateFactorsAndLevels = ({
     experimentId, allIndependentDTOs: allFactorDTOs, allFactorLevelAssociationDTOs,
-    allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, context, tx,
+    allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, allDbLevels, context, tx,
   }) => tx.batch([
     this.updateFactors(
       experimentId, allFactorDTOs, allFactorTypes, context, tx),
     this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, allFactorLevelAssociationDTOs,
-      context, tx),
+      allDbLevels, context, tx),
   ])
 
   @setErrorCode('1Ad000')

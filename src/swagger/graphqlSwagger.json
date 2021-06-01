@@ -11,6 +11,30 @@
   ],
   "basePath": "/experiments-api-graphql",
   "paths": {
+    "/ping": {
+      "get": {
+        "summary": "simple ping call",
+        "description": "This is a ping call to the service to check if it's up",
+        "operationId": "ping",
+        "tags": [
+          "Ping"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Ping Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/graphql": {
       "post": {
         "summary": "Sends query request to graphql endpoint",

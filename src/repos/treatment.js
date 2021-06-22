@@ -17,7 +17,25 @@ class treatmentRepo {
   })
 
   @setErrorCode('5I3000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any(`WITH treatment_block_info AS (
+  SELECT tb.treatment_id, json_build_object('name', b.name, 'blockId', b.id, 'numPerRep', tb.num_per_rep) AS block_info
+  FROM block b
+    INNER JOIN treatment_block tb ON b.id = tb.block_id
+  WHERE b.experiment_id = $1
+), grouped_treatment_block_info AS (
+  SELECT treatment_id, json_agg(block_info) AS blocks
+  FROM treatment_block_info
+  GROUP BY treatment_id
+)
+SELECT t.*,
+  json_array_length(gtbi.blocks) > 1 AS in_all_blocks,
+  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'name' ELSE NULL END AS block,
+  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'blockId' ELSE NULL END AS block_id,
+  gtbi.blocks
+FROM treatment t
+INNER JOIN grouped_treatment_block_info gtbi ON t.id = gtbi.treatment_id
+WHERE experiment_id = $1
+ORDER BY id ASC`, experimentId)
 
   @setErrorCode('5I4000')
   batchCreate = async (treatments, context, tx = this.rep) => {
@@ -125,9 +143,32 @@ class treatmentRepo {
   }
 
   batchFindAllBySetId = (setIds, tx = this.rep) => {
-    return tx.any('SELECT DISTINCT ON (t.id) la.set_id, t.*\n' +
-      'FROM public.location_association la, public.treatment_block tb, treatment t\n' +
-      'WHERE t.id = tb.treatment_id AND la.block_id = tb.block_id AND la.set_id IN ($1:csv)', [setIds])
+    return tx.any(`WITH experiment_ids AS (
+  SELECT experiment_id
+  FROM block b
+    INNER JOIN location_association la ON b.id = la.block_id
+  WHERE la.set_id in ($1:csv)	
+), treatment_block_info AS (
+  SELECT tb.treatment_id, json_build_object('name', b.name, 'blockId', b.id, 'numPerRep', tb.num_per_rep) AS block_info
+  FROM block b
+    INNER JOIN treatment_block tb ON b.id = tb.block_id
+  WHERE b.experiment_id IN (SELECT * FROM experiment_ids)
+), grouped_treatment_block_info AS (
+  SELECT treatment_id, json_agg(block_info) AS blocks
+  FROM treatment_block_info
+  GROUP BY treatment_id
+)
+SELECT t.*, la.set_id,
+  json_array_length(gtbi.blocks) > 1 AS in_all_blocks,
+  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'name' ELSE NULL END AS block,
+  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'blockId' ELSE NULL END AS block_id,
+  gtbi.blocks
+FROM treatment t
+  INNER JOIN treatment_block tb ON t.id = tb.treatment_id
+  INNER JOIN block b ON tb.block_id = b.id
+  INNER JOIN location_association la ON b.id = la.block_id
+  INNER JOIN grouped_treatment_block_info gtbi ON t.id = gtbi.treatment_id
+WHERE la.set_id in ($1:csv)`, [setIds])
       .then(data => {
         const dataBySetId = _.groupBy(data, 'set_id')
         return _.compact(_.flatMap(setIds, setId =>

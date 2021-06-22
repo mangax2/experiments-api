@@ -32,147 +32,26 @@ describe('TreatmentWithBlockService', () => {
   })
 
   describe('getTreatmentsByExperimentId', () => {
-    test('get treatments and treatment blocks', () => {
+    test('calls the repo and returns the result', () => {
       db.treatment.findAllByExperimentId = mockResolve([])
       const target = new TreatmentWithBlockService()
-      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([])
-      target.getTreatmentsWithBlockInfo = mockResolve([])
 
       return target.getTreatmentsByExperimentId(1, testTx).then((data) => {
         expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.treatmentBlockService.getTreatmentBlocksByExperimentId).toHaveBeenCalledWith(1, testTx)
-        expect(target.getTreatmentsWithBlockInfo).toHaveBeenCalledWith([], [])
         expect(data).toEqual([])
       })
     })
   })
 
   describe('getTreatmentsByBySetIds', () => {
-    test('get treatments and treatment blocks', () => {
+    test('calls the repo and returns the result', () => {
       db.treatment.batchFindAllBySetId = mockResolve([])
       const target = new TreatmentWithBlockService()
-      target.treatmentBlockService.getTreatmentBlocksByTreatmentIds = mockResolve([])
-      target.getTreatmentsWithBlockInfo = mockResolve([])
 
       return target.getTreatmentsByBySetIds(1, testTx).then((data) => {
         expect(db.treatment.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
-        expect(target.treatmentBlockService.getTreatmentBlocksByTreatmentIds).toHaveBeenCalledWith([], testTx)
-        expect(target.getTreatmentsWithBlockInfo).toHaveBeenCalledWith([], [])
         expect(data).toEqual([])
       })
-    })
-  })
-
-  describe('getTreatmentsWithBlockInfo', () => {
-    test('found treatment blocks and they are treatments in a single block', () => {
-      const treatmentBlocks = [
-        {
-          id: 1, block_id: 11, treatment_id: 111, name: 'block1', num_per_rep: 1,
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 112, name: 'block2', num_per_rep: 1,
-        },
-      ]
-
-      const treatments = [{
-        id: 111, treatmentNumber: 1,
-      },
-      {
-        id: 112, treatmentNumber: 2,
-      }]
-      const target = new TreatmentWithBlockService()
-
-      expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
-        {
-          id: 111, treatmentNumber: 1, blockId: 11, block: 'block1', inAllBlocks: false, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }],
-        },
-        {
-          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', blockId: 12, numPerRep: 1 }],
-        },
-      ])
-    })
-
-    test('found treatment blocks and they are treatments in all blocks', () => {
-      const treatmentBlocks = [
-        {
-          id: 1, block_id: 11, treatment_id: 111, name: 'block1', num_per_rep: 1,
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 111, name: 'block2', num_per_rep: 1,
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 112, name: 'block2', num_per_rep: 1,
-        },
-      ]
-
-      const treatments = [{
-        id: 111, treatmentNumber: 1,
-      },
-      {
-        id: 112, treatmentNumber: 2,
-      }]
-      const target = new TreatmentWithBlockService()
-
-      expect(target.getTreatmentsWithBlockInfo(treatments, treatmentBlocks)).toEqual([
-        {
-          id: 111, treatmentNumber: 1, blockId: null, block: null, inAllBlocks: true, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }, { name: 'block2', blockId: 12, numPerRep: 1 }],
-        },
-        {
-          id: 112, treatmentNumber: 2, blockId: 12, block: 'block2', inAllBlocks: false, blocks: [{ name: 'block2', blockId: 12, numPerRep: 1 }],
-        },
-      ])
-    })
-  })
-
-  describe('associateBlockInfoToTreatment', () => {
-    test('found the matching treatment block and it is a single block treatment', () => {
-      const treatmentBlocks = [
-        {
-          id: 1, block_id: 11, treatment_id: 111, name: 'block1', num_per_rep: 1,
-        },
-      ]
-
-      const treatments = { id: 111, treatmentNumber: 1 }
-
-      const target = new TreatmentWithBlockService()
-      expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
-        {
-          id: 111, treatmentNumber: 1, block: 'block1', blockId: 11, inAllBlocks: false, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }],
-        },
-      )
-    })
-
-    test('found the matching treatment block and it is an inAllBlocks treatment', () => {
-      const treatmentBlocks = [
-        {
-          id: 1, block_id: 11, treatment_id: 111, name: 'block1', num_per_rep: 1,
-        },
-        {
-          id: 2, block_id: 12, treatment_id: 111, name: 'block2', num_per_rep: 1,
-        },
-      ]
-
-      const treatments = { id: 111, treatmentNumber: 1 }
-
-      const target = new TreatmentWithBlockService()
-      expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
-        {
-          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: true, blocks: [{ name: 'block1', blockId: 11, numPerRep: 1 }, { name: 'block2', blockId: 12, numPerRep: 1 }],
-        },
-      )
-    })
-
-    test('returns an empty array for blocks if no treatmentBlocks are found', () => {
-      const treatmentBlocks = []
-      const treatments = { id: 111, treatmentNumber: 1 }
-
-      const target = new TreatmentWithBlockService()
-
-      expect(target.associateBlockInfoToTreatment(treatments, treatmentBlocks)).toEqual(
-        {
-          id: 111, treatmentNumber: 1, block: null, blockId: null, inAllBlocks: false, blocks: [],
-        },
-      )
     })
   })
 

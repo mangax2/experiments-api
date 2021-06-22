@@ -185,6 +185,8 @@ export default {
     isControl: entity => (entity.control_types || []).length > 0,
     controlTypes: property('control_types'),
     treatmentNumber: property('treatment_number'),
+    inAllBlocks: property('in_all_blocks'),
+    blockId: property('block_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
     combinationElements: (entity, args, context) =>

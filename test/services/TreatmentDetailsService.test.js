@@ -37,8 +37,8 @@ describe('TreatmentDetailsService', () => {
         modified_user_id: 'tester2',
         blocks: [{ name: 'block-001', numPerRep: 1 }],
         block: 'block-001',
-        blockId: 1,
-        inAllBlocks: false,
+        block_id: 1,
+        in_all_blocks: false,
       }]
       const combinationElements = [{ treatment_id: 1, id: 1, factor_level_id: 1 }, { treatment_id: 1, id: 2, factor_level_id: 2 }]
       const factorLevels = [{ id: 1, factor_id: 1, value: { items: [] } }, { id: 2, factor_id: 2 }]

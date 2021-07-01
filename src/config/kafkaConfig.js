@@ -1,6 +1,6 @@
 const localKafkaConfig = {
   enableKafka: 'false',
-  host: 'kafka.tst.datahub.internal:9093',
+  host: 'kfk.awsuse1.tst.edh.cnb:9093',
   topics: {
     repPackingTopic: 'rsr.field-experiments.test.incoming.json',
     repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json',

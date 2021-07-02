@@ -219,6 +219,7 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
 
     server.timeout = 300000
     server.keepAliveTimeout = 650000
+    server.headersTimeout = 660000
 
     module.exports = app
   }).catch((err) => {

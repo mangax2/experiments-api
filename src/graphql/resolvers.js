@@ -3,9 +3,15 @@ import {
 } from 'lodash'
 import settings from '../config/settings'
 
-const checkIdArrayLength = (ids, maxLength) => {
+const maxIdCountCheck = (ids, maxLength) => {
   if (ids.length > maxLength) {
     throw new Error(`Request input ids exceeded the maximum length of ${maxLength}`)
+  }
+}
+
+const emptyInputIdCheck = (ids) => {
+  if (Array.isArray(ids) && ids.length === 0) {
+    throw new Error('Should have at least one input id')
   }
 }
 
@@ -14,7 +20,7 @@ export default {
     getExperimentById: (entity, args, context) =>
       context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
     getExperimentsByIds: (entity, args, context) => {
-      checkIdArrayLength(args.ids, settings.maxExperimentsToRetrieve)
+      maxIdCountCheck(args.ids, settings.maxExperimentsToRetrieve)
       return Promise.all(
         uniq(args.ids).map(id =>
           context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
@@ -58,12 +64,17 @@ export default {
       context.loaders.setBySetIds.load(args.setId),
     getSetsBySetId: (entity, args, context) =>
       context.loaders.setsBySetIds.load(args.setIds),
-    getSetEntriesBySetId: (entity, args, context) =>
-      context.loaders.unitsBySetId.load(args.setId),
-    getTreatmentsBySetId: (entity, args, context) =>
-      context.loaders.treatmentBySetIds.load(args.setId),
+    getSetEntriesBySetId: (entity, args, context) => {
+      emptyInputIdCheck(args.setId)
+      return context.loaders.unitsBySetId.load(args.setId)
+    },
+    getTreatmentsBySetId: (entity, args, context) => {
+      emptyInputIdCheck(args.setId)
+      return context.loaders.treatmentBySetIds.load(args.setId)
+    },
     getBlocksByBlockIds: (entity, args, context) => {
-      checkIdArrayLength(args.blockId, settings.maxBlocksToRetrieve)
+      emptyInputIdCheck(args.blockId)
+      maxIdCountCheck(args.blockId, settings.maxBlocksToRetrieve)
       return context.loaders.blocksByBlockIds.load(args.blockId)
     },
   },

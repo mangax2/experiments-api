@@ -12,16 +12,16 @@ class blockRepo {
   repository = () => this.rep
 
   @setErrorCode('5S1000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM block WHERE experiment_id = $1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM block WHERE experiment_id = $1', experimentId)
 
   @setErrorCode('5S2000')
-  batchFind = (ids, tx = this.rep) => tx.any(`SELECT * FROM block WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
+  batchFind = (ids) => this.rep.any(`SELECT * FROM block WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('5S5000')
-  findByBlockId = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM block WHERE id = $1', id)
+  findByBlockId = (id) => this.rep.oneOrNone('SELECT * FROM block WHERE id = $1', id)
 
   @setErrorCode('5S3000')
   batchCreateByExperimentId = (experimentId, blockNames, context, tx = this.rep) => {

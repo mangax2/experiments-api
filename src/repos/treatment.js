@@ -11,13 +11,13 @@ class treatmentRepo {
   @setErrorCode('5I0000')
   repository = () => this.rep
   @setErrorCode('5I2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM treatment WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('5I3000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any(`WITH treatment_block_info AS (
+  findAllByExperimentId = (experimentId) => this.rep.any(`WITH treatment_block_info AS (
   SELECT tb.treatment_id, json_build_object('name', b.name, 'blockId', b.id, 'numPerRep', tb.num_per_rep) AS block_info
   FROM block b
     INNER JOIN treatment_block tb ON b.id = tb.block_id
@@ -103,7 +103,7 @@ ORDER BY id ASC`, experimentId)
   }
 
   @setErrorCode('5I6000')
-  getDistinctExperimentIds = (ids, tx = this.rep) => tx.any('SELECT DISTINCT(experiment_id) FROM treatment WHERE id IN ($1:csv)', [ids])
+  getDistinctExperimentIds = (ids) => this.rep.any('SELECT DISTINCT(experiment_id) FROM treatment WHERE id IN ($1:csv)', [ids])
 
   @setErrorCode('5I7000')
   batchRemove = (ids, tx = this.rep) => {
@@ -117,33 +117,33 @@ ORDER BY id ASC`, experimentId)
   removeByExperimentId = (experimentId, tx = this.rep) => tx.any('DELETE FROM treatment WHERE experiment_id = $1 RETURNING id', experimentId)
 
   @setErrorCode('5I9000')
-  findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2', keys)
+  findByBusinessKey = (keys) => this.rep.oneOrNone('SELECT * FROM treatment WHERE experiment_id=$1 and treatment_number=$2', keys)
 
   @setErrorCode('5IA000')
-  batchFindAllTreatmentLevelDetails = (treatmentIds, tx = this.rep) => tx.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds])
+  batchFindAllTreatmentLevelDetails = (treatmentIds) => this.rep.any('SELECT ce.treatment_id, fl.value, f.name FROM factor_level fl INNER JOIN combination_element ce ON fl.id = ce.factor_level_id INNER JOIN factor f ON fl.factor_id = f.id WHERE ce.treatment_id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5IB000')
-  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
+  batchFindByBusinessKey = (batchKeys) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],
       treatment_number: obj.keys[1],
       id: obj.updateId,
     }))
     const query = `WITH d(experiment_id, treatment_number, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'treatment_number', 'id'])}) select t.experiment_id, t.treatment_number from public.treatment t inner join d on t.experiment_id = CAST(d.experiment_id as integer) and t.treatment_number = d.treatment_number and (d.id is null or t.id != CAST(d.id as integer))`
-    return tx.any(query)
+    return this.rep.any(query)
   }
 
   @setErrorCode('5IC000')
-  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment WHERE experiment_id IN ($1:csv)', [experimentIds])
+  batchFindAllByExperimentId = (experimentIds) => {
+    return this.rep.any('SELECT * FROM treatment WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
       })
   }
 
-  batchFindAllBySetId = (setIds, tx = this.rep) => {
-    return tx.any(`WITH experiment_ids AS (
+  batchFindAllBySetId = (setIds) => {
+    return this.rep.any(`WITH experiment_ids AS (
   SELECT experiment_id
   FROM block b
     INNER JOIN location_association la ON b.id = la.block_id

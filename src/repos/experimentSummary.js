@@ -117,7 +117,7 @@ class experimentSummaryRepo {
   repository = () => this.rep
 
   @setErrorCode('561000')
-  find = (id, tx = this.rep) => tx.oneOrNone(experimentSummaryQuery, id)
+  find = (id) => this.rep.oneOrNone(experimentSummaryQuery, id)
 
   @setErrorCode('562000')
   all = () => this.rep.any('SELECT * FROM experiment_summary')

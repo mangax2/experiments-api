@@ -12,23 +12,23 @@ class treatmentBlockRepo {
   repository = () => this.rep
 
   @setErrorCode('5T2000')
-  batchFindByTreatmentIds = (treatmentIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment_block WHERE treatment_id IN ($1:csv)', [treatmentIds])
+  batchFindByTreatmentIds = (treatmentIds) => {
+    return this.rep.any('SELECT * FROM treatment_block WHERE treatment_id IN ($1:csv)', [treatmentIds])
   }
 
   @setErrorCode('5T3000')
-  batchFindByBlockIds = (blockIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment_block WHERE block_id IN ($1:csv)', [blockIds])
+  batchFindByBlockIds = (blockIds) => {
+    return this.rep.any('SELECT * FROM treatment_block WHERE block_id IN ($1:csv)', [blockIds])
   }
 
   @setErrorCode('5T8000')
-  batchFindByIds = (ids, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment_block WHERE id IN ($1:csv)', [ids])
+  batchFindByIds = (ids) => {
+    return this.rep.any('SELECT * FROM treatment_block WHERE id IN ($1:csv)', [ids])
   }
 
   @setErrorCode('5T7000')
-  findByBlockId = (blockId, tx = this.rep) => {
-    return tx.any('SELECT * FROM treatment_block WHERE block_id = $1', blockId)
+  findByBlockId = (blockId) => {
+    return this.rep.any('SELECT * FROM treatment_block WHERE block_id = $1', blockId)
   }
 
   @setErrorCode('5T4000')

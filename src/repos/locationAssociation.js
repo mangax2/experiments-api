@@ -12,17 +12,17 @@ class locationAssociationRepo {
   repository = () => this.rep
 
   @setErrorCode('5P2000')
-  findBySetId = (setId, tx = this.rep) => tx.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
+  findBySetId = (setId,) => this.rep.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
 
   @setErrorCode('5P3000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT la.*, b.name as block_name FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any('SELECT la.*, b.name as block_name FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
 
   @setErrorCode('5P7000')
-  batchFindExperimentBySetId = (setIds, tx = this.rep) => {
+  batchFindExperimentBySetId = (setIds) => {
     const promises = []
 
     if (setIds.includes('null')) {
-      promises.push(tx.any('WITH experiment_location_blocks AS\n' +
+      promises.push(this.rep.any('WITH experiment_location_blocks AS\n' +
       '(SELECT DISTINCT e.id, u.location, b.id as block_id FROM experiment e, unit u, treatment_block tb, block b ' +
         'WHERE u.treatment_block_id = tb.id AND tb.block_id = b.id AND b.experiment_id = e.id AND e.is_template = false),\n' +
         'experiment_ids_missing_setIds AS(\n' +
@@ -40,7 +40,7 @@ class locationAssociationRepo {
       promises.push(Promise.resolve())
     }
 
-    return tx.batch(promises).then(([experimentsNeedingSets, experimentsWithSets]) => {
+    return Promise.all(promises).then(([experimentsNeedingSets, experimentsWithSets]) => {
       const values = []
       _.forEach(setIds, (setId) => {
         if (setId === 'null') {
@@ -91,8 +91,8 @@ class locationAssociationRepo {
     tx.oneOrNone('DELETE FROM location_association la USING block b WHERE la.block_id = b.id AND la.set_id = $1 RETURNING b.experiment_id', setId)
 
   @setErrorCode('5P9000')
-  findNumberOfLocationsAssociatedWithSets = (experimentId, tx = this.rep) =>
-    tx.oneOrNone(
+  findNumberOfLocationsAssociatedWithSets = (experimentId) =>
+    this.rep.oneOrNone(
       'SELECT max(location) FROM location_association la, block b WHERE la.block_id = b.id and b.experiment_id = $1',
       experimentId,
     )

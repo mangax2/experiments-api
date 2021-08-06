@@ -11,13 +11,13 @@ class analysisModelRepo {
   repository = () => this.rep
 
   @setErrorCode('5N1000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT experiment_id,' +
+  findByExperimentId = (experimentId) => this.rep.oneOrNone('SELECT experiment_id,' +
     ' analysis_model_type, analysis_model_sub_type FROM' +
     ' analysis_model WHERE' +
     ' experiment_id = $1', experimentId)
 
   @setErrorCode('5N4000')
-  batchFindByExperimentIds = (ids, tx = this.rep) => tx.any('SELECT * FROM "analysis_model" WHERE' +
+  batchFindByExperimentIds = (ids) => this.rep.any('SELECT * FROM "analysis_model" WHERE' +
     ' experiment_id IN' +
     ' ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'experiment_id')

@@ -15,7 +15,7 @@ class factorTypeRepo {
   all = () => this.rep.any('SELECT * FROM ref_factor_type')
 
   @setErrorCode('5A2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM ref_factor_type WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
@@ -33,13 +33,13 @@ class factorTypeRepo {
   findByBusinessKey = keys => this.rep.oneOrNone('SELECT * FROM ref_factor_type where type = $1', keys)
 
   @setErrorCode('5A8000')
-  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
+  batchFindByBusinessKey = (batchKeys) => {
     const values = batchKeys.map(obj => ({
       type: obj.keys[0],
       id: obj.updateId,
     }))
     const query = `WITH d(type, id) AS (VALUES ${this.pgp.helpers.values(values, ['type', 'id'])}) select entity.type from public.ref_factor_type entity inner join d on entity.type = d.type and (d.id is null or entity.id != CAST(d.id as integer))`
-    return tx.any(query)
+    return this.rep.any(query)
   }
 }
 

@@ -12,26 +12,26 @@ class unitRepo {
   repository = () => this.rep
 
   @setErrorCode('5J4000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
+  findAllByExperimentId = (experimentId) => this.rep.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
 
   @setErrorCode('5JD000')
-  batchFind = (ids, tx = this.rep) => this.batchFindAllByIds(ids).then(data => {
+  batchFind = (ids) => this.batchFindAllByIds(ids).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('5J5000')
-  batchFindAllByTreatmentIds = (treatmentIds, tx = this.rep) => tx.any('SELECT * FROM unit INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id\n' +
+  batchFindAllByTreatmentIds = (treatmentIds) => this.rep.any('SELECT * FROM unit INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId, tx = this.rep) => tx.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
+  batchFindAllBySetId = (setIds) => this.rep.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
     'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
     'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)
 
   @setErrorCode('5JE000')
-  batchFindAllBySetIds = (setIds, tx = this.rep) => tx.any('SELECT la.set_id, u.*, tb.treatment_id, tb.block_id, b.name AS block FROM location_association la\n' +
+  batchFindAllBySetIds = (setIds) => this.rep.any('SELECT la.set_id, u.*, tb.treatment_id, tb.block_id, b.name AS block FROM location_association la\n' +
     'INNER JOIN treatment_block tb ON tb.block_id = la.block_id\n' +
     'INNER JOIN unit u ON u.treatment_block_id = tb.id and u.location = la.location\n' +
     'INNER JOIN block b ON tb.block_id = b.id\n' +
@@ -42,7 +42,7 @@ class unitRepo {
   })
 
   @setErrorCode('5JG000')
-  batchFindByBlockIds = (ids, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b on tb.block_id = b.id WHERE' +
+  batchFindByBlockIds = (ids) => this.rep.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b on tb.block_id = b.id WHERE' +
     ' b.id IN' +
     ' ($1:csv)', [ids])
     .then(data => {
@@ -51,10 +51,10 @@ class unitRepo {
     })
 
   @setErrorCode('5J8000')
-  batchFindAllBySetEntryIds = (setEntryIds, tx = this.rep) => tx.any('SELECT t.treatment_number, tb.treatment_id, u.rep, u.set_entry_id, u.id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
+  batchFindAllBySetEntryIds = (setEntryIds) => this.rep.any('SELECT t.treatment_number, tb.treatment_id, u.rep, u.set_entry_id, u.id FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN treatment t ON tb.treatment_id = t.id WHERE set_entry_id IN ($1:csv)', [setEntryIds])
 
   @setErrorCode('5JF000')
-  batchFindAllByIds = (experimentalUnitIds, tx = this.rep) => tx.any('SELECT * FROM unit WHERE id IN ($1:csv)', [experimentalUnitIds])
+  batchFindAllByIds = (experimentalUnitIds) => this.rep.any('SELECT * FROM unit WHERE id IN ($1:csv)', [experimentalUnitIds])
 
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
@@ -139,8 +139,8 @@ class unitRepo {
   }
 
   @setErrorCode('5JI000')
-  batchFindAllByLocationAndTreatmentBlocks = (location, treatmentBlockIds, tx = this.rep) => {
-    return tx.any('SELECT u.* FROM unit u WHERE u.location=$1 AND u.treatment_block_id IN ($2:csv)', [location, treatmentBlockIds])
+  batchFindAllByLocationAndTreatmentBlocks = (location, treatmentBlockIds) => {
+    return this.rep.any('SELECT u.* FROM unit u WHERE u.location=$1 AND u.treatment_block_id IN ($2:csv)', [location, treatmentBlockIds])
   }
 
   @setErrorCode('5JK000')

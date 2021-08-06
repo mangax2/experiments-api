@@ -11,19 +11,19 @@ class experimentsRepo {
   repository = () => this.rep
 
   @setErrorCode('551000')
-  find = (id, isTemplate, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1 AND is_template = $2', [id, isTemplate])
+  find = (id, isTemplate) => this.rep.oneOrNone('SELECT * FROM experiment WHERE id = $1 AND is_template = $2', [id, isTemplate])
  
   @setErrorCode('55E000')
-  findExperimentOrTemplate = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM experiment WHERE id = $1', [id]) 
+  findExperimentOrTemplate = (id) => this.rep.oneOrNone('SELECT * FROM experiment WHERE id = $1', [id]) 
 
   @setErrorCode('552000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM experiment WHERE id IN ($1:csv)' ,[ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('553000')
-  batchFindExperimentOrTemplate = (ids,isTemplate, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2', [ids, isTemplate]).then(data => {
+  batchFindExperimentOrTemplate = (ids,isTemplate) => this.rep.any('SELECT * FROM experiment WHERE id IN ($1:csv) AND is_template=$2', [ids, isTemplate]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
@@ -61,13 +61,13 @@ class experimentsRepo {
     [context.userId, id])
 
   @setErrorCode('559000')
-  batchFindExperimentsByName = (names, tx = this.rep) => tx.any('SELECT * FROM experiment WHERE name IN ($1:csv) AND is_template = FALSE', [names]).then(data => {
+  batchFindExperimentsByName = (names) => this.rep.any('SELECT * FROM experiment WHERE name IN ($1:csv) AND is_template = FALSE', [names]).then(data => {
     const groupedData = _.groupBy(data, 'name')
     return _.map(names, name => groupedData[name] || [])
   })
 
   @setErrorCode('55B000')
-  findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds, tx = this.rep) => tx.any(
+  findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds) => this.rep.any(
     'SELECT e.* FROM experiment e INNER JOIN owner o ON e.id=o.experiment_id WHERE e.is_template=$1 AND (o.user_ids && ARRAY[UPPER($2)]::VARCHAR[] OR o.group_ids && ARRAY[$3:csv]::VARCHAR[])',
     [isTemplate, userId, groupIds])
 

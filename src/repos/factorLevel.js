@@ -15,14 +15,14 @@ class factorLevelRepo {
   repository = () => this.rep
 
   @setErrorCode('582000')
-  batchFind = (ids, tx = this.rep) => tx.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
+  batchFind = (ids) => this.rep.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('583000')
-  findByExperimentId = (experimentId, tx = this.rep) =>
-    tx.any(`SELECT ${qualifiedColumns} FROM factor f inner join factor_level fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId)
+  findByExperimentId = (experimentId) =>
+  this.rep.any(`SELECT ${qualifiedColumns} FROM factor f inner join factor_level fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId)
 
   @setErrorCode('585000')
   all = () => this.rep.any('SELECT ${columns} FROM factor_level')
@@ -89,22 +89,22 @@ class factorLevelRepo {
   }
 
   @setErrorCode('589000')
-  findByBusinessKey = (keys, tx) => tx.oneOrNone(`SELECT ${columns} FROM factor_level WHERE factor_id = $1 and value = $2`, keys)
+  findByBusinessKey = (keys) => this.rep.oneOrNone(`SELECT ${columns} FROM factor_level WHERE factor_id = $1 and value = $2`, keys)
 
   @setErrorCode('58A000')
-  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
+  batchFindByBusinessKey = (batchKeys) => {
     const values = batchKeys.map(obj => ({
       factor_id: obj.keys[0],
       value: obj.keys[1],
       id: obj.updateId,
     }))
     const query = `WITH d(factor_id, value, id) AS (VALUES ${this.pgp.helpers.values(values, ['factor_id', 'value', 'id'])}) select entity.factor_id, entity.value from public.factor_level entity inner join d on entity.factor_id = CAST(d.factor_id as integer) and entity.value = CAST(d.value as jsonb) and (d.id is null or entity.id != CAST(d.id as integer))`
-    return tx.any(query)
+    return this.rep.any(query)
   }
 
   @setErrorCode('58B000')
-  batchFindByFactorId = (factorIds, tx = this.rep) => {
-    return tx.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
+  batchFindByFactorId = (factorIds) => {
+    return this.rep.any(`SELECT ${columns} FROM factor_level WHERE factor_id in ($1:csv)`, [factorIds])
       .then(data => {
         const dataByFactorId = _.groupBy(data, 'factor_id')
         return _.map(factorIds, factorId => dataByFactorId[factorId] || [])

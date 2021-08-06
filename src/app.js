@@ -31,18 +31,10 @@ vaultUtil.configureDbCredentials(config.env, config.vaultRoleId, config.vaultSec
     const _ = require('lodash')
     const inflector = require('json-inflector')
     const bodyParser = require('body-parser')
-    const promMetrics = require('@monsantoit/prom-metrics')
     const appBaseUrl = '/experiments-api'
     const graphqlBaseUrl = '/experiments-api-graphql'
     const { setErrorPrefix, setPromiseLibrary } = require('@monsantoit/error-decorator')()
-    const lambdaPerformanceService = require('./services/prometheus/LambdaPerformanceService')
-    const setEntryRemovalService = require('./services/prometheus/SetEntryRemovalService')
     const app = express()
-
-    const prometheusClient = promMetrics(app)
-    lambdaPerformanceService.setUpPrometheus(prometheusClient, 7)
-    lambdaPerformanceService.setUpPrometheus(prometheusClient, 30)
-    setEntryRemovalService.setUpPrometheus(prometheusClient)
 
     setPromiseLibrary(require('bluebird'))
     setErrorPrefix('EXP')

@@ -2,7 +2,7 @@ import { mock, mockReject, mockResolve } from '../jestUtil'
 import FactorService from '../../src/services/FactorService'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 
 describe('FactorService', () => {
   let target
@@ -16,12 +16,12 @@ describe('FactorService', () => {
   describe('batchCreateFactors', () => {
     test('validates, calls batchCreate, and returns postResponse', () => {
       target.validator.validate = mockResolve()
-      db.factor.batchCreate = mockResolve([{}])
+      dbWrite.factor.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateFactors([], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.factor.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(dbWrite.factor.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{}])
       })
     })
@@ -29,12 +29,12 @@ describe('FactorService', () => {
     test('rejects when batchCreate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factor.batchCreate = mockReject(error)
+      dbWrite.factor.batchCreate = mockReject(error)
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateFactors([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.factor.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(dbWrite.factor.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -43,12 +43,12 @@ describe('FactorService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      db.factor.batchCreate = mock()
+      dbWrite.factor.batchCreate = mock()
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateFactors([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(db.factor.batchCreate).not.toHaveBeenCalled()
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(dbWrite.factor.batchCreate).not.toHaveBeenCalled()
         expect(AppUtil.createPostResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -57,20 +57,20 @@ describe('FactorService', () => {
 
   describe('getAllFactors', () => {
     test('returns factors', () => {
-      db.factor.all = mockResolve([{}])
+      dbRead.factor.all = mockResolve([{}])
 
-      return target.getAllFactors(testTx).then((data) => {
-        expect(db.factor.all).toHaveBeenCalledWith(testTx)
+      return target.getAllFactors().then((data) => {
+        expect(dbRead.factor.all).toHaveBeenCalledWith()
         expect(data).toEqual([{}])
       })
     })
 
     test('rejects when get all call fails', () => {
       const error = { message: 'error' }
-      db.factor.all = mockReject(error)
+      dbRead.factor.all = mockReject(error)
 
-      return target.getAllFactors(testTx).then(() => {}, (err) => {
-        expect(db.factor.all).toHaveBeenCalledWith(testTx)
+      return target.getAllFactors().then(() => {}, (err) => {
+        expect(dbRead.factor.all).toHaveBeenCalledWith()
         expect(err).toEqual(error)
       })
     })
@@ -78,56 +78,56 @@ describe('FactorService', () => {
 
   describe('getFactorsByExperimentId', () => {
     test('gets an experiment, and finds factors by that id', () => {
-      db.experiments.find = mockResolve({})
-      db.factor.findByExperimentId = mockResolve([])
+      dbRead.experiments.find = mockResolve({})
+      dbRead.factor.findByExperimentId = mockResolve([])
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then((data) => {
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getFactorsByExperimentId(1, false, testContext).then((data) => {
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
+        expect(dbRead.factor.findByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      db.experiments.find = mockResolve({})
-      db.factor.findByExperimentId = mockReject(error)
+      dbRead.experiments.find = mockResolve({})
+      dbRead.factor.findByExperimentId = mockReject(error)
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, (err) => {
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getFactorsByExperimentId(1, false, testContext).then(() => {}, (err) => {
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
+        expect(dbRead.factor.findByExperimentId).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
 
     test('rejects when getExperimentById fails', () => {
       const error = { message: 'error' }
-      db.experiments.find = mockResolve()
-      db.factor.findByExperimentId = mockReject(error)
+      dbRead.experiments.find = mockResolve()
+      dbRead.factor.findByExperimentId = mockReject(error)
 
-      return target.getFactorsByExperimentId(1, false, testContext, testTx).then(() => {}, () => {
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
-        expect(db.factor.findByExperimentId).not.toHaveBeenCalled()
+      return target.getFactorsByExperimentId(1, false, testContext).then(() => {}, () => {
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
+        expect(dbRead.factor.findByExperimentId).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('getFactorsByExperimentIdNoExistenceCheck', () => {
     test('finds factors by that id', () => {
-      db.factor.findByExperimentId = mockResolve([])
+      dbRead.factor.findByExperimentId = mockResolve([])
 
-      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then((data) => {
-        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1).then((data) => {
+        expect(dbRead.factor.findByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      db.factor.findByExperimentId = mockReject(error)
+      dbRead.factor.findByExperimentId = mockReject(error)
 
-      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1, testTx).then(() => {}, (err) => {
-        expect(db.factor.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return FactorService.getFactorsByExperimentIdNoExistenceCheck(1).then(() => {}, (err) => {
+        expect(dbRead.factor.findByExperimentId).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
@@ -135,12 +135,12 @@ describe('FactorService', () => {
   describe('batchUpdateFactors', () => {
     test('validates, batchUpdates and returns put resposne', () => {
       target.validator.validate = mockResolve()
-      db.factor.batchUpdate = mockResolve([{}])
+      dbWrite.factor.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateFactors([{}], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.factor.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.factor.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith([{}])
       })
     })
@@ -148,11 +148,11 @@ describe('FactorService', () => {
     test('rejects when batchUpdate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.factor.batchUpdate = mockReject(error)
+      dbWrite.factor.batchUpdate = mockReject(error)
 
       return target.batchUpdateFactors([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.factor.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.factor.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -160,11 +160,11 @@ describe('FactorService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      db.factor.batchUpdate = mockReject(error)
+      dbWrite.factor.batchUpdate = mockReject(error)
 
       return target.batchUpdateFactors([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.factor.batchUpdate).not.toHaveBeenCalled()
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.factor.batchUpdate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
@@ -172,20 +172,20 @@ describe('FactorService', () => {
 
   describe('batchDeleteFactors', () => {
     test('calls factor batchRemove and returns data', () => {
-      db.factor.batchRemove = mockResolve([1, 2])
+      dbWrite.factor.batchRemove = mockResolve([1, 2])
 
       return target.batchDeleteFactors([1, 2], {}, testTx).then((data) => {
-        expect(db.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(dbWrite.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(data).toEqual([1, 2])
       })
     })
 
     test('throws an error when remove returns array whose length mismatches input', () => {
-      db.factor.batchRemove = mockResolve([null, 1])
+      dbWrite.factor.batchRemove = mockResolve([null, 1])
       AppError.notFound = mock()
 
       return target.batchDeleteFactors([1, 2], {}, testTx).then(() => {}, () => {
-        expect(db.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(dbWrite.factor.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all factors requested for delete were found', undefined, '1D7001')
       })
     })
@@ -193,18 +193,18 @@ describe('FactorService', () => {
 
   describe('updateFactorsForDesign', () => {
     test('calls removeTiersForExperiment when there is no split', () => {
-      db.factor.removeTiersForExperiment = mockResolve()
+      dbWrite.factor.removeTiersForExperiment = mockResolve()
 
       return target.updateFactorsForDesign(1, { rules: {} }, testTx).then(() => {
-        expect(db.factor.removeTiersForExperiment).toHaveBeenCalledWith(1, testTx)
+        expect(dbWrite.factor.removeTiersForExperiment).toHaveBeenCalledWith(1, testTx)
       })
     })
 
     test('does not call removeTiersForExperiment when there is splits', () => {
-      db.factor.removeTiersForExperiment = mockResolve()
+      dbWrite.factor.removeTiersForExperiment = mockResolve()
 
       return target.updateFactorsForDesign(1, { rules: { grouping: { min: 1, max: 10 } } }, testTx).then(() => {
-        expect(db.factor.removeTiersForExperiment).not.toHaveBeenCalled()
+        expect(dbWrite.factor.removeTiersForExperiment).not.toHaveBeenCalled()
       })
     })
   })

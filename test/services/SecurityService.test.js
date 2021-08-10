@@ -3,11 +3,10 @@ import SecurityService from '../../src/services/SecurityService'
 import AppError from '../../src/services/utility/AppError'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('SecurityService', () => {
   let target
-  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
   const testContext = { userId: 'AK' }
 
   beforeEach(() => {
@@ -146,7 +145,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -159,7 +158,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -172,7 +171,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['reviewer_1', 'reviewer_2'])
       const expectedResult = ['review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -187,7 +186,7 @@ describe('SecurityService', () => {
         ['group_1', 'group_2', 'group_3', 'reviewer_1', 'reviewer_3'])
       const expectedResult = ['write', 'review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -198,7 +197,7 @@ describe('SecurityService', () => {
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).catch((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
         expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
@@ -212,7 +211,7 @@ describe('SecurityService', () => {
         error: 'error',
       })
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }, testTx).catch((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).catch((data) => {
         expect(data).toEqual({ error: 'error', errorCode: '1O4000' })
       })
     })
@@ -225,7 +224,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -237,7 +236,7 @@ describe('SecurityService', () => {
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = []
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -246,7 +245,7 @@ describe('SecurityService', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve(null)
       const expectedResult = []
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
-      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }, testTx).then((data) => {
+      return target.getUserPermissionsForExperiment(1, { userId: 'JN' }).then((data) => {
         expect(data).toEqual(expectedResult)
       })
     })
@@ -255,20 +254,20 @@ describe('SecurityService', () => {
   describe('permissionsCheck', () => {
     test('calls getUserPermissionsForExperiment and returns resolved promise when user has access', () => {
       target.getUserPermissionsForExperiment = mockResolve(['write'])
-      db.experiments.find = mockResolve({})
-      return target.permissionsCheck(1, testContext, false, testTx).then(() => {
-        expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+      dbRead.experiments.find = mockResolve({})
+      return target.permissionsCheck(1, testContext, false).then(() => {
+        expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext)
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
       })
     })
     test('calls getUserPermissionsForExperiment and throws error when user does not have access', () => {
       const error = { message: 'error' }
       target.getUserPermissionsForExperiment = mockResolve([])
-      db.experiments.find = mockResolve({})
+      dbRead.experiments.find = mockResolve({})
       AppError.unauthorized = mock(error)
-      return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, (err) => {
-        expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext, testTx)
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+      return target.permissionsCheck(1, testContext, false).then(() => {}, (err) => {
+        expect(target.getUserPermissionsForExperiment).toHaveBeenCalledWith(1, testContext)
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
         expect(err).toBe(error)
       })
     })
@@ -277,12 +276,12 @@ describe('SecurityService', () => {
     test('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
       ' for an invalid experimentId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
-      db.experiments.find = mockResolve(undefined)
+      dbRead.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext, false, testTx).then(() => {}, () => {
+      return target.permissionsCheck(1, testContext, false).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
-        expect(db.experiments.find).toHaveBeenCalledWith(1, false, testTx)
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
         expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '1O1001')
       })
     })
@@ -290,23 +289,23 @@ describe('SecurityService', () => {
     test('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
       ' for an invalid TemplateId', () => {
       target.getUserPermissionsForExperiment = mockResolve([])
-      db.experiments.find = mockResolve(undefined)
+      dbRead.experiments.find = mockResolve(undefined)
       AppError.notFound = mock()
       AppError.unauthorized = mock('')
-      return target.permissionsCheck(1, testContext, true, testTx).then(() => {}, () => {
+      return target.permissionsCheck(1, testContext, true).then(() => {}, () => {
         expect(target.getUserPermissionsForExperiment).not.toHaveBeenCalled()
-        expect(db.experiments.find).toHaveBeenCalledWith(1, true, testTx)
+        expect(dbRead.experiments.find).toHaveBeenCalledWith(1, true)
         expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '1O1001')
       })
     })
 
     test('throws an error when userId is not set', () => {
       AppError.badRequest = mock('')
-      db.experiments.find = mock()
+      dbRead.experiments.find = mock()
 
-      expect(() => target.permissionsCheck(1, {}, true, testTx)).toThrow()
+      expect(() => target.permissionsCheck(1, {}, true)).toThrow()
       expect(AppError.badRequest).toHaveBeenCalledWith('oauth_resourceownerinfo header with username=<user_id> value is invalid/missing', undefined, '1O1003')
-      expect(db.experiments.find).not.toHaveBeenCalled()
+      expect(dbRead.experiments.find).not.toHaveBeenCalled()
     })
   })
 

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -15,14 +15,14 @@ class FactorLevelAssociationValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'associatedLevelId', type: 'numeric', required: true },
-      { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+      { paramName: 'associatedLevelId', type: 'refData', entity: dbRead.factorLevel },
       { paramName: 'nestedLevelId', type: 'numeric', required: true },
-      { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
+      { paramName: 'nestedLevelId', type: 'refData', entity: dbRead.factorLevel },
       {
         paramName: 'FactorLevelAssociation',
         type: 'businessKey',
         keys: ['associatedLevelId', 'nestedLevelId'],
-        entity: db.factorLevelAssociation,
+        entity: dbRead.factorLevelAssociation,
       },
     ]
   }

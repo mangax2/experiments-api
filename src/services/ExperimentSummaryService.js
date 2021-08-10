@@ -1,5 +1,4 @@
-import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 
@@ -12,10 +11,9 @@ class ExperimentSummaryService {
   }
 
   @setErrorCode('191000')
-  @Transactional('getExperimentSummaryById')
-  getExperimentSummaryById(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.experimentSummary.find(id, tx)
+  getExperimentSummaryById(id, isTemplate, context) {
+    return this.experimentService.getExperimentById(id, isTemplate, context)
+      .then(() => dbRead.experimentSummary.find(id)
         .then((data) => {
           if (!data) {
             console.error(`[[${context.requestId}]] Experiment Summary Not Found for requested experimentId = ${id}`)

@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import ExperimentsValidator from '../../src/validations/ExperimentsValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('ExperimentsValidator', () => {
   let target
@@ -12,7 +12,7 @@ describe('ExperimentsValidator', () => {
 
   describe('get POST_AND_PUT_SCHEMA_ELEMENTS', () => {
     test('gets schema', () => {
-      db.experimentDesign = {}
+      dbRead.experimentDesign = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
@@ -56,7 +56,7 @@ describe('ExperimentsValidator', () => {
 
   describe('getSchema', () => {
     test('returns POST+AND_PUT schema when POST is supplied', () => {
-      db.experimentDesign = {}
+      dbRead.experimentDesign = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,
@@ -77,7 +77,7 @@ describe('ExperimentsValidator', () => {
     })
 
     test('returns POST_AND_PUT schema when POST is supplied', () => {
-      db.experimentDesign = {}
+      dbRead.experimentDesign = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 100 }, required: true,

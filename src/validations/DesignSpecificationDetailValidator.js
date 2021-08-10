@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -18,14 +18,14 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
         paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true,
       },
       { paramName: 'refDesignSpecId', type: 'numeric', required: true },
-      { paramName: 'refDesignSpecId', type: 'refData', entity: db.refDesignSpecification },
+      { paramName: 'refDesignSpecId', type: 'refData', entity: dbRead.refDesignSpecification },
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
       {
         paramName: 'DesignSpecificationDetail',
         type: 'businessKey',
         keys: ['experimentId', 'refDesignSpecId'],
-        entity: db.designSpecificationDetail,
+        entity: dbRead.designSpecificationDetail,
       },
     ]
   }
@@ -33,7 +33,7 @@ class DesignSpecificationDetailValidator extends SchemaValidator {
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.designSpecificationDetail },
+      { paramName: 'id', type: 'refData', entity: dbRead.designSpecificationDetail },
     ]
   }
 

@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import FactorsValidator from '../../src/validations/FactorsValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('FactorsValidator', () => {
   let target
@@ -12,10 +12,10 @@ describe('FactorsValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('gets schema', () => {
-      db.experiments = {}
-      db.factor = {}
-      db.factorType = {}
-      db.refDataSource = {}
+      dbRead.experiments = {}
+      dbRead.factor = {}
+      dbRead.factorType = {}
+      dbRead.refDataSource = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
@@ -34,7 +34,7 @@ describe('FactorsValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('gets schema elements', () => {
-      db.factor = {}
+      dbRead.factor = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
@@ -46,10 +46,10 @@ describe('FactorsValidator', () => {
 
   describe('getSchema', () => {
     test('returns post schema', () => {
-      db.experiments = {}
-      db.factor = {}
-      db.factorType = {}
-      db.refDataSource = {}
+      dbRead.experiments = {}
+      dbRead.factor = {}
+      dbRead.factorType = {}
+      dbRead.refDataSource = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
@@ -66,10 +66,10 @@ describe('FactorsValidator', () => {
     })
 
     test('returns put schema', () => {
-      db.experiments = {}
-      db.factor = {}
-      db.factorType = {}
-      db.refDataSource = {}
+      dbRead.experiments = {}
+      dbRead.factor = {}
+      dbRead.factorType = {}
+      dbRead.refDataSource = {}
       const schema = [
         {
           paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,

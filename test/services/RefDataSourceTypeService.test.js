@@ -1,6 +1,6 @@
 import { mockReject, mockResolve } from '../jestUtil'
 import RefDataSourceTypeService from '../../src/services/RefDataSourceTypeService'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('RefDataSourceTypeService', () => {
   let target
@@ -11,20 +11,20 @@ describe('RefDataSourceTypeService', () => {
 
   describe('getRefDataSourceTypes', () => {
     test('gets ref data source types', () => {
-      db.refDataSourceType.all = mockResolve([{}])
+      dbRead.refDataSourceType.all = mockResolve([{}])
 
       return target.getRefDataSourceTypes().then((data) => {
-        expect(db.refDataSourceType.all).toHaveBeenCalled()
+        expect(dbRead.refDataSourceType.all).toHaveBeenCalled()
         expect(data).toEqual([{}])
       })
     })
 
     test('rejects when get all fails', () => {
       const error = { message: 'error' }
-      db.refDataSourceType.all = mockReject(error)
+      dbRead.refDataSourceType.all = mockReject(error)
 
       return target.getRefDataSourceTypes().then(() => {}, (err) => {
-        expect(db.refDataSourceType.all).toHaveBeenCalled()
+        expect(dbRead.refDataSourceType.all).toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
@@ -42,23 +42,23 @@ describe('RefDataSourceTypeService', () => {
         ref_data_sources: [],
       }]
 
-      db.refDataSourceType.all = mockResolve(dataSourceTypes)
+      dbRead.refDataSourceType.all = mockResolve(dataSourceTypes)
       target.refDataSourceService.getRefDataSources = mockResolve(dataSources)
 
       return target.getRefDataSourceTypesWithDataSources().then((data) => {
-        expect(db.refDataSourceType.all).toHaveBeenCalled()
+        expect(dbRead.refDataSourceType.all).toHaveBeenCalled()
         expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalled()
         expect(data).toEqual(expectedResult)
       })
     })
 
     test('rejects when getRefDataSources fails', () => {
-      db.refDataSourceType.all = mockResolve([])
+      dbRead.refDataSourceType.all = mockResolve([])
       const error = { message: 'error' }
       target.refDataSourceService.getRefDataSources = mockReject(error)
 
       return target.getRefDataSourceTypesWithDataSources().then(() => {}, (err) => {
-        expect(db.refDataSourceType.all).toHaveBeenCalled()
+        expect(dbRead.refDataSourceType.all).toHaveBeenCalled()
         expect(target.refDataSourceService.getRefDataSources).toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -66,11 +66,11 @@ describe('RefDataSourceTypeService', () => {
 
     test('rejects when get all ref data source types fails', () => {
       const error = { message: 'error' }
-      db.refDataSourceType.all = mockReject(error)
+      dbRead.refDataSourceType.all = mockReject(error)
       target.refDataSourceService.getRefDataSources = mockReject(error)
 
       return target.getRefDataSourceTypesWithDataSources().then(() => {}, (err) => {
-        expect(db.refDataSourceType.all).toHaveBeenCalled()
+        expect(dbRead.refDataSourceType.all).toHaveBeenCalled()
         expect(target.refDataSourceService.getRefDataSources).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })

@@ -1,6 +1,6 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import ExperimentalUnitService from '../../src/services/ExperimentalUnitService'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
@@ -33,10 +33,10 @@ describe('ExperimentalUnitService', () => {
 
   describe('getExperimentalUnitsByExperimentIdNoValidate', () => {
     test('calls findAllByExperimentId', () => {
-      db.unit.findAllByExperimentId = mockResolve()
+      dbRead.unit.findAllByExperimentId = mockResolve()
 
-      return target.getExperimentalUnitsByExperimentIdNoValidate(1, testTx).then(() => {
-        expect(db.unit.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsByExperimentIdNoValidate(1).then(() => {
+        expect(dbRead.unit.findAllByExperimentId).toHaveBeenCalledWith(1)
       })
     })
   })
@@ -56,7 +56,7 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('throws an error when no results found', (done) => {
-      db.unit.batchFindAllBySetId = mockResolve([])
+      dbRead.unit.batchFindAllBySetId = mockResolve([])
       AppError.notFound = mock('')
 
       return target.getExperimentalUnitInfoBySetId(5).catch(() => {
@@ -68,7 +68,7 @@ describe('ExperimentalUnitService', () => {
     test('returns the result from the map function when data found', () => {
       const mockResult = { 1: {} }
       const repoResult = [{ set_entry_id: 1 }]
-      db.unit.batchFindAllBySetId = mockResolve(repoResult)
+      dbRead.unit.batchFindAllBySetId = mockResolve(repoResult)
       target.mapUnitsToSetEntryFormat = mock(mockResult)
 
       return target.getExperimentalUnitInfoBySetId(5).then((result) => {
@@ -90,7 +90,7 @@ describe('ExperimentalUnitService', () => {
     })
 
     test('throws an error when setEntryIds are not defined', () => {
-      db.unit.batchFindAllBySetEntryIds = mock()
+      dbRead.unit.batchFindAllBySetEntryIds = mock()
       AppError.badRequest = mock('')
 
       expect(() => target.getExperimentalUnitInfoBySetEntryId()).toThrow()
@@ -99,7 +99,7 @@ describe('ExperimentalUnitService', () => {
     test('returns an empty map of Set Entry Ids', () => {
       const result = []
       const expectedMap = {}
-      db.unit.batchFindAllBySetEntryIds = mockResolve(result)
+      dbRead.unit.batchFindAllBySetEntryIds = mockResolve(result)
       target.mapUnitsToSetEntryFormat = mock(expectedMap)
 
       return target.getExperimentalUnitInfoBySetEntryId([1]).then((data) => {
@@ -146,12 +146,12 @@ describe('ExperimentalUnitService', () => {
   describe('batchPartialUpdateExperimentalUnits', () => {
     test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()
-      db.unit.batchPartialUpdate = mockResolve({})
+      dbWrite.unit.batchPartialUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
-        expect(db.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
+        expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
       })
     })
@@ -159,12 +159,12 @@ describe('ExperimentalUnitService', () => {
     test('rejects when batchUpdate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.unit.batchPartialUpdate = mockReject(error)
+      dbWrite.unit.batchPartialUpdate = mockReject(error)
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
-        expect(db.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
+        expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -173,12 +173,12 @@ describe('ExperimentalUnitService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      db.unit.batchPartialUpdate = mock()
+      dbWrite.unit.batchPartialUpdate = mock()
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH', testTx)
-        expect(db.unit.batchPartialUpdate).not.toHaveBeenCalled()
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
+        expect(dbWrite.unit.batchPartialUpdate).not.toHaveBeenCalled()
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
@@ -221,15 +221,15 @@ describe('ExperimentalUnitService', () => {
     test('returns an error if the set is not found', () => {
       target = new ExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve()
-      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve()
+      dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve()
       const testError = { message: 'error' }
       AppError.notFound = mock(testError)
 
       return target.updateUnitsForSet(5, [], {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).toBeCalledWith('No experiment found for Set Id 5', undefined, '17F001')
         expect(err).toBe(testError)
-        expect(db.combinationElement.findAllByExperimentIdIncludingControls).not.toBeCalled()
+        expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).not.toBeCalled()
       })
     })
 
@@ -241,9 +241,9 @@ describe('ExperimentalUnitService', () => {
       ]
       target = new ExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
-      db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
-      db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
-      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+      dbRead.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
+      dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
+      dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
         { factor_level_id: 12, treatment_id: 24 },
@@ -257,18 +257,18 @@ describe('ExperimentalUnitService', () => {
         { treatment_id: 25, block_id: 3 },
         { treatment_id: 20, block_id: 3 },
       ]
-      db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+      dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
       AppError.notFound = mock()
       AppError.badRequest = mock()
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).then(() => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).not.toBeCalled()
-        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
-        expect(db.experiments.find).toBeCalledWith(7, false, testTx)
-        expect(db.treatmentBlock.batchFindByBlockIds).toBeCalledWith(3, testTx)
+        expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
+        expect(dbRead.experiments.find).toBeCalledWith(7, false)
+        expect(dbRead.treatmentBlock.batchFindByBlockIds).toBeCalledWith(3)
         expect(target.mergeSetEntriesToUnits).toBeCalledWith(7, [
           { setEntryId: 15, treatmentId: 23 },
           { setEntryId: 17, treatmentId: 24 },
@@ -285,9 +285,9 @@ describe('ExperimentalUnitService', () => {
       ]
       target = new ExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 5 })
-      db.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
-      db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
-      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+      dbRead.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
+      dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
+      dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
         { factor_level_id: 12, treatment_id: 24 },
@@ -295,7 +295,7 @@ describe('ExperimentalUnitService', () => {
         { factor_level_id: 13, treatment_id: 25 },
         { treatment_id: 20 },
       ])
-      db.treatmentBlock.batchFindByBlockIds = mockResolve([
+      dbRead.treatmentBlock.batchFindByBlockIds = mockResolve([
         { treatment_id: 23, block_id: 5 },
         { treatment_id: 25, block_id: 5 },
         { treatment_id: 20, block_id: 5 },
@@ -306,12 +306,12 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, '17F003')
-        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
-        expect(db.experiments.find).toBeCalledWith(7, false, testTx)
-        expect(db.treatmentBlock.batchFindByBlockIds).toBeCalledWith(5, testTx)
+        expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
+        expect(dbRead.experiments.find).toBeCalledWith(7, false)
+        expect(dbRead.treatmentBlock.batchFindByBlockIds).toBeCalledWith(5)
         expect(target.mergeSetEntriesToUnits).not.toBeCalled()
         expect(err).toBe(testError)
       })
@@ -326,15 +326,15 @@ describe('ExperimentalUnitService', () => {
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
-      db.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
-      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+      dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
+      dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
         { factor_level_id: 12, treatment_id: 24 },
         { factor_level_id: 12, treatment_id: 25 },
         { factor_level_id: 13, treatment_id: 25 },
       ])
-      db.treatmentBlock.batchFindByBlockIds = mockResolve([
+      dbRead.treatmentBlock.batchFindByBlockIds = mockResolve([
         { treatment_id: 23, block_id: 3 },
         { treatment_id: 24, block_id: 3 },
         { treatment_id: 25, block_id: 3 },
@@ -344,11 +344,11 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
-        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
-        expect(db.experiments.find).toBeCalledWith(7, false, testTx)
-        expect(db.treatmentBlock.batchFindByBlockIds).not.toBeCalled()
+        expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
+        expect(dbRead.experiments.find).toBeCalledWith(7, false)
+        expect(dbRead.treatmentBlock.batchFindByBlockIds).not.toBeCalled()
         expect(target.mergeSetEntriesToUnits).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('One or more entries had an invalid combination of factor level ids. The invalid combinations are: [""]', undefined, '17F002')
         expect(err).toBe(testError)
@@ -364,8 +364,8 @@ describe('ExperimentalUnitService', () => {
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
       target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
-      db.experiments.find = mockResolve({ randomization_strategy_code: 'custom' })
-      db.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
+      dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom' })
+      dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
         { factor_level_id: 11, treatment_id: 23 },
         { factor_level_id: 12, treatment_id: 24 },
@@ -378,11 +378,11 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, '17F004')
-        expect(db.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7, testTx)
-        expect(db.experiments.find).toBeCalledWith(7, false, testTx)
+        expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
+        expect(dbRead.experiments.find).toBeCalledWith(7, false)
         expect(target.mergeSetEntriesToUnits).not.toBeCalled()
         expect(err).toBe(testError)
       })
@@ -399,11 +399,11 @@ describe('ExperimentalUnitService', () => {
       })
       target.saveToDb = mockResolve()
       target.detectWarnableUnitUpdateConditions = mock()
-      db.unit.batchFindAllByLocationAndTreatmentBlocks = mockResolve('unitsFromDb')
+      dbRead.unit.batchFindAllByLocationAndTreatmentBlocks = mockResolve('unitsFromDb')
       const unitsToBeSaved = [{}]
 
       return target.mergeSetEntriesToUnits(7, unitsToBeSaved, 5, [{ id: 3 }, { id: 4 }], {}, testTx).then(() => {
-        expect(db.unit.batchFindAllByLocationAndTreatmentBlocks).toBeCalledWith(5, [3, 4], testTx)
+        expect(dbRead.unit.batchFindAllByLocationAndTreatmentBlocks).toBeCalledWith(5, [3, 4])
         expect(target.getDbActions).toBeCalledWith(unitsToBeSaved, 'unitsFromDb', 5)
         expect(target.saveToDb).toBeCalledWith('unitsToBeCreated', 'unitsToBeUpdated', 'unitsToBeDeleted', {}, testTx)
       })
@@ -481,27 +481,27 @@ describe('ExperimentalUnitService', () => {
     test('calls everything correctly when values are present', () => {
       target = new ExperimentalUnitService()
       const context = { userId: 'REP_PACKING' }
-      db.unit.batchCreate = mockResolve()
-      db.unit.batchUpdate = mockResolve()
-      db.unit.batchRemove = mockResolve()
+      dbWrite.unit.batchCreate = mockResolve()
+      dbWrite.unit.batchUpdate = mockResolve()
+      dbWrite.unit.batchRemove = mockResolve()
 
       return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, testTx).then(() => {
-        expect(db.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
-        expect(db.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, testTx)
-        expect(db.unit.batchRemove).toBeCalledWith([6], testTx)
+        expect(dbWrite.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
+        expect(dbWrite.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, testTx)
+        expect(dbWrite.unit.batchRemove).toBeCalledWith([6], testTx)
       })
     })
 
     test('calls everything correctly when values are not present', () => {
       target = new ExperimentalUnitService()
-      db.unit.batchCreate = mockResolve()
-      db.unit.batchUpdate = mockResolve()
-      db.unit.batchRemove = mockResolve()
+      dbWrite.unit.batchCreate = mockResolve()
+      dbWrite.unit.batchUpdate = mockResolve()
+      dbWrite.unit.batchRemove = mockResolve()
 
       return target.saveToDb(9, [], [], [], testTx).then(() => {
-        expect(db.unit.batchCreate).not.toBeCalled()
-        expect(db.unit.batchUpdate).not.toBeCalled()
-        expect(db.unit.batchRemove).not.toBeCalled()
+        expect(dbWrite.unit.batchCreate).not.toBeCalled()
+        expect(dbWrite.unit.batchUpdate).not.toBeCalled()
+        expect(dbWrite.unit.batchRemove).not.toBeCalled()
       })
     })
   })
@@ -522,15 +522,15 @@ describe('ExperimentalUnitService', () => {
       const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
       const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
-      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
-      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
-      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
+      dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
-        expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
+        expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
+        expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -544,15 +544,15 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: null, set_entry_id: 7 },
       ]
 
-      db.unit.batchFindAllBySetEntryIds = mockResolve()
-      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
-      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      dbRead.unit.batchFindAllBySetEntryIds = mockResolve()
+      dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
+      dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
-        expect(db.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
-        expect(db.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(dbRead.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
+        expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
+        expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -566,15 +566,15 @@ describe('ExperimentalUnitService', () => {
         { set_entry_id: 2, deactivationReason: null },
       ]
 
-      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
-      db.unit.batchFindAllByIds = mockResolve()
-      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      dbRead.unit.batchFindAllByIds = mockResolve()
+      dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
-        expect(db.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
-        expect(db.unit.batchFindAllByIds).not.toHaveBeenCalled()
-        expect(db.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
+        expect(dbRead.unit.batchFindAllByIds).not.toHaveBeenCalled()
+        expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
       })
     })
 
@@ -586,9 +586,9 @@ describe('ExperimentalUnitService', () => {
       const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
       const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
-      db.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
-      db.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
-      db.unit.batchUpdateDeactivationReasons = mockResolve()
+      dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
+      dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
+      dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
@@ -733,8 +733,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.findExperimentWithTemplateCheck = mockReject()
       target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
-      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).catch(() => {
-        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
+      return target.getUnitsFromTemplateByExperimentId(1, {}).catch(() => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {})
         expect(target.getExperimentalUnitsByExperimentIdNoValidate).not.toHaveBeenCalled()
       })
     })
@@ -743,9 +743,9 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.findExperimentWithTemplateCheck = mockResolve()
       target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
-      return target.getUnitsFromTemplateByExperimentId(1, {}, testTx).then((data) => {
-        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {}, testTx)
-        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
+      return target.getUnitsFromTemplateByExperimentId(1, {}).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, true, {})
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })
@@ -756,8 +756,8 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.findExperimentWithTemplateCheck = mockReject()
       target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
-      return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).catch(() => {
-        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+      return target.getUnitsFromExperimentByExperimentId(1, {}).catch(() => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {})
         expect(target.getExperimentalUnitsByExperimentIdNoValidate).not.toHaveBeenCalled()
       })
     })
@@ -766,9 +766,9 @@ describe('ExperimentalUnitService', () => {
       target.experimentService.findExperimentWithTemplateCheck = mockResolve()
       target.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
 
-      return target.getUnitsFromExperimentByExperimentId(1, {}, testTx).then((data) => {
-        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
-        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1, testTx)
+      return target.getUnitsFromExperimentByExperimentId(1, {}).then((data) => {
+        expect(target.experimentService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {})
+        expect(target.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })
@@ -777,10 +777,10 @@ describe('ExperimentalUnitService', () => {
   describe('getExperimentalUnitsBySetIds', () => {
     test('calls batchFindAllBySetIds on the unit repo', () => {
       const expectedResult = [trimmedUnit]
-      db.unit.batchFindAllBySetIds = mockResolve(expectedResult)
+      dbRead.unit.batchFindAllBySetIds = mockResolve(expectedResult)
 
-      return target.getExperimentalUnitsBySetIds(1, testTx).then((result) => {
-        expect(db.unit.batchFindAllBySetIds).toHaveBeenCalledWith(1, testTx)
+      return target.getExperimentalUnitsBySetIds(1).then((result) => {
+        expect(dbRead.unit.batchFindAllBySetIds).toHaveBeenCalledWith(1)
         expect(result).toEqual(expectedResult)
       })
     })

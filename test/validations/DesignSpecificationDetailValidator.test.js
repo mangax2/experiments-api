@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import DesignSpecificationDetailValidator from '../../src/validations/DesignSpecificationDetailValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('DesignSpecificationDetailValidator', () => {
   let target
@@ -12,9 +12,9 @@ describe('DesignSpecificationDetailValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('gets the schema', () => {
-      db.designSpecificationDetail = {}
-      db.experiments = {}
-      db.refDesignSpecification = {}
+      dbRead.designSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.refDesignSpecification = {}
 
       const schema = [
         {
@@ -38,9 +38,9 @@ describe('DesignSpecificationDetailValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('gets the elements', () => {
-      db.designSpecificationDetail = {}
-      db.experiments = {}
-      db.refDesignSpecification = {}
+      dbRead.designSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.refDesignSpecification = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
@@ -58,9 +58,9 @@ describe('DesignSpecificationDetailValidator', () => {
 
   describe('getSchema', () => {
     test('gets post schema', () => {
-      db.designSpecificationDetail = {}
-      db.experiments = {}
-      db.refDesignSpecification = {}
+      dbRead.designSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.refDesignSpecification = {}
       const schema = [
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true,
@@ -81,9 +81,9 @@ describe('DesignSpecificationDetailValidator', () => {
     })
 
     test('gets put schema', () => {
-      db.designSpecificationDetail = {}
-      db.experiments = {}
-      db.refDesignSpecification = {}
+      dbRead.designSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.refDesignSpecification = {}
       const schema = [
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 50 }, required: true,

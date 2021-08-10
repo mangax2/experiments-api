@@ -1,7 +1,7 @@
 import { mock, mockResolve } from '../jestUtil'
 import TreatmentValidator from '../../src/validations/TreatmentValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('TreatmentValidator', () => {
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
@@ -13,8 +13,8 @@ describe('TreatmentValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('gets schema', () => {
-      db.experiments = {}
-      db.treatment = {}
+      dbRead.experiments = {}
+      dbRead.treatment = {}
 
       const schema = [
         { paramName: 'treatmentNumber', type: 'numeric', required: true },
@@ -32,7 +32,7 @@ describe('TreatmentValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('gets elements', () => {
-      db.treatment = {}
+      dbRead.treatment = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
@@ -51,8 +51,8 @@ describe('TreatmentValidator', () => {
   describe('getSchema', () => {
     describe('getSchema', () => {
       test('returns post schema', () => {
-        db.experiments = {}
-        db.treatment = {}
+        dbRead.experiments = {}
+        dbRead.treatment = {}
         const schema = [
           { paramName: 'treatmentNumber', type: 'numeric', required: true },
           {
@@ -67,8 +67,8 @@ describe('TreatmentValidator', () => {
       })
 
       test('returns put schema', () => {
-        db.experiments = {}
-        db.treatment = {}
+        dbRead.experiments = {}
+        dbRead.treatment = {}
         const schema = [
           { paramName: 'treatmentNumber', type: 'numeric', required: true },
           {
@@ -142,8 +142,8 @@ describe('TreatmentValidator', () => {
     })
 
     test('does not add a message if there are not any business key errors', () => {
-      db.factorLevel.findByExperimentId = mockResolve([])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([])
+      dbRead.factorLevel.findByExperimentId = mockResolve([])
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([])
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'b', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
@@ -153,8 +153,8 @@ describe('TreatmentValidator', () => {
     })
 
     test('adds a message when there are business key errors', () => {
-      db.factorLevel.findByExperimentId = mockResolve([])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([])
+      dbRead.factorLevel.findByExperimentId = mockResolve([])
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([])
       const targetObject = [{ test: 'a', experimentId: 1 }, { test: 'a', experimentId: 1 }]
       target.getBusinessKeyPropertyNames = mock(['experimentId', 'test'])
 
@@ -164,7 +164,7 @@ describe('TreatmentValidator', () => {
     })
 
     test('creates error message when a treatment has a combination that represents an invalid nesting', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -182,7 +182,7 @@ describe('TreatmentValidator', () => {
           factor_id: 2,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 22,
@@ -220,10 +220,10 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([
           { message: 'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }', errorCode: '3F8001' },
         ])
@@ -231,7 +231,7 @@ describe('TreatmentValidator', () => {
     })
 
     test('creates error messages when a multiple treatments have combinations that represents invalid nestings', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -249,7 +249,7 @@ describe('TreatmentValidator', () => {
           factor_id: 2,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 22,
@@ -287,10 +287,10 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([
           { message: 'Treatment number: 1 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 21 }', errorCode: '3F8001' },
           { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 12, Nested Level Id: 22 }', errorCode: '3F8001' },
@@ -299,7 +299,7 @@ describe('TreatmentValidator', () => {
     })
 
     test('does not create error messages when all treatment combinations are valid nestings', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -317,7 +317,7 @@ describe('TreatmentValidator', () => {
           factor_id: 2,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 21,
@@ -355,16 +355,16 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([])
       })
     })
 
     test('does not create error messages when all treatment combinations are valid and not all factors are in a relationship', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -390,7 +390,7 @@ describe('TreatmentValidator', () => {
           factor_id: 3,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 21,
@@ -464,16 +464,16 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([])
       })
     })
 
     test('Creates error messages when their are invalid treatment combinations in a multi-tiered nested relationship', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -499,7 +499,7 @@ describe('TreatmentValidator', () => {
           factor_id: 3,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 21,
@@ -581,10 +581,10 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([
           { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 22, Nested Level Id: 31 }', errorCode: '3F8001' },
           { message: 'Treatment number: 3 has the following invalid level id combinations: { Associated Level Id: 21, Nested Level Id: 32 }', errorCode: '3F8001' },
@@ -593,7 +593,7 @@ describe('TreatmentValidator', () => {
     })
 
     test('Creates no error messages for associated factor with multiple nestings when all combinations are valid.', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -619,7 +619,7 @@ describe('TreatmentValidator', () => {
           factor_id: 3,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 21,
@@ -671,16 +671,16 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([])
       })
     })
 
     test('Creates error messages for associated factor with multiple nestings when multiple combinations within a treatment are invalid.', () => {
-      db.factorLevel.findByExperimentId = mockResolve([
+      dbRead.factorLevel.findByExperimentId = mockResolve([
         {
           id: 11,
           factor_id: 1,
@@ -706,7 +706,7 @@ describe('TreatmentValidator', () => {
           factor_id: 3,
         },
       ])
-      db.factorLevelAssociation.findByExperimentId = mockResolve([
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve([
         {
           associated_level_id: 11,
           nested_level_id: 21,
@@ -788,10 +788,10 @@ describe('TreatmentValidator', () => {
       ]
 
       return target.postValidate(treatments, {}, testTx).then(() => {
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevel.findByExperimentId).toHaveBeenCalledWith(41, testTx)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
-        expect(db.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41, testTx)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevel.findByExperimentId).toHaveBeenCalledWith(41)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledTimes(1)
+        expect(dbRead.factorLevelAssociation.findByExperimentId).toHaveBeenCalledWith(41)
         expect(target.messages).toEqual([
           { message: 'Treatment number: 2 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 32 }', errorCode: '3F8001' },
           { message: 'Treatment number: 4 has the following invalid level id combinations: { Associated Level Id: 11, Nested Level Id: 22 }, { Associated Level Id: 11, Nested Level Id: 32 }', errorCode: '3F8001' },

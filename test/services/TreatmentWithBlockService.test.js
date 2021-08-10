@@ -1,5 +1,5 @@
 import TreatmentWithBlockService from '../../src/services/TreatmentWithBlockService'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 import { mockReject, mockResolve } from '../jestUtil'
 
 describe('TreatmentWithBlockService', () => {
@@ -11,9 +11,9 @@ describe('TreatmentWithBlockService', () => {
       target.experimentsService.findExperimentWithTemplateCheck = mockReject()
       target.getTreatmentsByExperimentId = mockResolve([])
 
-      return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {}, testTx)
+      return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {})
         .catch(() => {
-          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
+          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {})
           expect(target.getTreatmentsByExperimentId).not.toHaveBeenCalled()
         })
     })
@@ -23,21 +23,21 @@ describe('TreatmentWithBlockService', () => {
       target.experimentsService.findExperimentWithTemplateCheck = mockResolve([])
       target.getTreatmentsByExperimentId = mockResolve([])
 
-      return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {}, testTx)
+      return target.getTreatmentsByExperimentIdWithTemplateCheck(1, false, {})
         .then(() => {
-          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {}, testTx)
-          expect(target.getTreatmentsByExperimentId).toHaveBeenCalledWith(1, testTx)
+          expect(target.experimentsService.findExperimentWithTemplateCheck).toHaveBeenCalledWith(1, false, {})
+          expect(target.getTreatmentsByExperimentId).toHaveBeenCalledWith(1)
         })
     })
   })
 
   describe('getTreatmentsByExperimentId', () => {
     test('calls the repo and returns the result', () => {
-      db.treatment.findAllByExperimentId = mockResolve([])
+      dbRead.treatment.findAllByExperimentId = mockResolve([])
       const target = new TreatmentWithBlockService()
 
-      return target.getTreatmentsByExperimentId(1, testTx).then((data) => {
-        expect(db.treatment.findAllByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getTreatmentsByExperimentId(1).then((data) => {
+        expect(dbRead.treatment.findAllByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })
@@ -45,11 +45,11 @@ describe('TreatmentWithBlockService', () => {
 
   describe('getTreatmentsByBySetIds', () => {
     test('calls the repo and returns the result', () => {
-      db.treatment.batchFindAllBySetId = mockResolve([])
+      dbRead.treatment.batchFindAllBySetId = mockResolve([])
       const target = new TreatmentWithBlockService()
 
-      return target.getTreatmentsByBySetIds(1, testTx).then((data) => {
-        expect(db.treatment.batchFindAllBySetId).toHaveBeenCalledWith(1, testTx)
+      return target.getTreatmentsByBySetIds(1).then((data) => {
+        expect(dbRead.treatment.batchFindAllBySetId).toHaveBeenCalledWith(1)
         expect(data).toEqual([])
       })
     })

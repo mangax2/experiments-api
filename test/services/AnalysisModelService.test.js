@@ -1,7 +1,7 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AnalysisModelService from '../../src/services/AnalysisModelService'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 
 describe('AnalysisModelService', () => {
   let target
@@ -14,21 +14,21 @@ describe('AnalysisModelService', () => {
 
   describe('batchCreateAnalysisModel', () => {
     test('calls batchCreate and succeeds', () => {
-      db.analysisModel.batchCreate = mockResolve({})
+      dbWrite.analysisModel.batchCreate = mockResolve({})
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateAnalysisModel([], testContext, testTx).then(() => {
-        expect(db.analysisModel.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(dbWrite.analysisModel.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith({})
       })
     })
 
     test('rejects when batchCreate fails', () => {
       const error = { message: 'error' }
-      db.analysisModel.batchCreate = mockReject(error)
+      dbWrite.analysisModel.batchCreate = mockReject(error)
 
       return target.batchCreateAnalysisModel([], testContext, testTx).then(() => {}, (err) => {
-        expect(db.analysisModel.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(dbWrite.analysisModel.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -36,20 +36,20 @@ describe('AnalysisModelService', () => {
 
   describe('getAnalysisModelByExperimentId', () => {
     test('returns AnalysisModel for an experimentId', () => {
-      db.analysisModel.findByExperimentId = mockResolve(['test'])
+      dbRead.analysisModel.findByExperimentId = mockResolve(['test'])
 
-      return target.getAnalysisModelByExperimentId(1, testTx).then((data) => {
-        expect(db.analysisModel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAnalysisModelByExperimentId(1).then((data) => {
+        expect(dbRead.analysisModel.findByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual(['test'])
       })
     })
 
     test('rejects when findByExperimentId fails', () => {
       const error = { message: 'error' }
-      db.analysisModel.findByExperimentId = mockReject(error)
+      dbRead.analysisModel.findByExperimentId = mockReject(error)
 
-      return target.getAnalysisModelByExperimentId(1, testTx).then(() => {}, (err) => {
-        expect(db.analysisModel.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAnalysisModelByExperimentId(1).then(() => {}, (err) => {
+        expect(dbRead.analysisModel.findByExperimentId).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
@@ -57,9 +57,9 @@ describe('AnalysisModelService', () => {
 
   describe('deleteAnalysisModelByExperimentId', () => {
     test('deleted AnalysisModel for an experimentId', () => {
-      db.analysisModel.removeByExperimentId = mockResolve(1)
+      dbWrite.analysisModel.removeByExperimentId = mockResolve(1)
       return target.deleteAnalysisModelByExperimentId(1, testTx).then((data) => {
-        expect(db.analysisModel.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
+        expect(dbWrite.analysisModel.removeByExperimentId).toHaveBeenCalledWith(1, testTx)
         expect(data).toEqual(1)
       })
     })
@@ -67,21 +67,21 @@ describe('AnalysisModelService', () => {
 
   describe('batchUpdateAnalysisModel', () => {
     test('updates AnalysisModel for experiments', () => {
-      db.analysisModel.batchUpdate = mockResolve({})
+      dbWrite.analysisModel.batchUpdate = mockResolve({})
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateAnalysisModel([], testContext, testTx).then(() => {
-        expect(db.analysisModel.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(dbWrite.analysisModel.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
       })
     })
 
     test('rejects when batchUpdate fails', () => {
       const error = { message: 'error' }
-      db.analysisModel.batchUpdate = mockReject(error)
+      dbWrite.analysisModel.batchUpdate = mockReject(error)
 
       return target.batchUpdateAnalysisModel([], testContext, testTx).then(() => {}, (err) => {
-        expect(db.analysisModel.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
+        expect(dbWrite.analysisModel.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(err).toEqual(error)
       })
     })

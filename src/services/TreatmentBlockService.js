@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppError from './utility/AppError'
 import BlockService from './BlockService'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
@@ -31,48 +31,43 @@ class TreatmentBlockService {
   constructor(
     blockService = new BlockService(),
     locAssocService = new LocationAssociationWithBlockService(),
-    dbRepos = db,
   ) {
     this.blockService = blockService
     this.locationAssocWithBlockService = locAssocService
-    this.db = dbRepos
   }
 
   @setErrorCode('1V1000')
-  @Transactional('getTreatmentBlocksByExperimentId')
-  getTreatmentBlocksByExperimentId = (id, tx) => db.block.findByExperimentId(id, tx)
+  getTreatmentBlocksByExperimentId = id => dbRead.block.findByExperimentId(id)
     .then(blocks => (_.isEmpty(blocks) ? Promise.resolve([]) :
-      db.treatmentBlock.batchFindByBlockIds(_.map(blocks, 'id'), tx)
+      dbRead.treatmentBlock.batchFindByBlockIds(_.map(blocks, 'id'))
         .then(treatmentBlocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks))))
 
   @setErrorCode('1V2000')
-  @Transactional('getTreatmentBlocksBySetId')
-  getTreatmentBlocksBySetId = (setId, tx) =>
-    this.locationAssocWithBlockService.getBySetId(setId, tx)
+  getTreatmentBlocksBySetId = setId =>
+    this.locationAssocWithBlockService.getBySetId(setId)
       .then(locAssociation => (_.isNil(locAssociation) ? Promise.resolve([]) :
-        tx.batch([db.block.findByBlockId(locAssociation.block_id, tx),
-          db.treatmentBlock.findByBlockId(locAssociation.block_id, tx)])
-          .then(([block, treatmentBlocks]) =>
-            this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, [block]))
+        Promise.all([
+          dbRead.block.findByBlockId(locAssociation.block_id),
+          dbRead.treatmentBlock.findByBlockId(locAssociation.block_id),
+        ]).then(([block, treatmentBlocks]) =>
+          this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, [block]))
       ))
 
   @setErrorCode('1VK000')
-  @Transactional('getTreatmentBlocksByTreatmentIds')
-  getTreatmentBlocksByTreatmentIds = (treatmentIds, tx) =>
+  getTreatmentBlocksByTreatmentIds = treatmentIds =>
     (_.isEmpty(treatmentIds) ? Promise.resolve([]) :
-      db.treatmentBlock.batchFindByTreatmentIds(treatmentIds, tx)
+      dbRead.treatmentBlock.batchFindByTreatmentIds(treatmentIds)
         .then(treatmentBlocks =>
-          db.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          dbRead.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')))
             .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
         ))
 
   @setErrorCode('1VL000')
-  @Transactional('getTreatmentBlocksByIds')
-  getTreatmentBlocksByIds = (ids, tx) =>
+  getTreatmentBlocksByIds = ids =>
     (_.isEmpty(ids) ? Promise.resolve([]) :
-      db.treatmentBlock.batchFindByIds(ids, tx)
+      dbRead.treatmentBlock.batchFindByIds(ids)
         .then(treatmentBlocks =>
-          db.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')), tx)
+          dbRead.block.batchFind(_.uniq(_.map(treatmentBlocks, 'block_id')))
             .then(blocks => this.getTreatmentBlocksWithBlockInfo(treatmentBlocks, blocks)),
         )
     )
@@ -85,10 +80,10 @@ class TreatmentBlockService {
 
   @setErrorCode('1V4000')
   @Transactional('createTreatmentBlocksByExperimentId')
-  createTreatmentBlocksByExperimentId = (experimentId, treatments, context, tx) =>
-    db.block.findByExperimentId(experimentId, tx).then(blocks =>
-      this.createTreatmentBlocks(treatments, blocks, context, tx),
-    )
+  createTreatmentBlocksByExperimentId = async (experimentId, treatments, context, tx) => {
+    const blocks = await dbRead.block.findByExperimentId(experimentId)
+    return this.createTreatmentBlocks(treatments, blocks, context, tx)
+  }
 
   @setErrorCode('1V5000')
   @Transactional('createTreatmentBlocks')
@@ -99,23 +94,24 @@ class TreatmentBlockService {
 
     const treatmentBlocks = this.createTreatmentBlockModels(treatments, blocks)
 
-    return db.treatmentBlock.batchCreate(treatmentBlocks, context, tx)
+    return dbWrite.treatmentBlock.batchCreate(treatmentBlocks, context, tx)
   }
 
   @setErrorCode('1V6000')
   @Transactional('persistTreatmentBlocksForExistingTreatments')
   persistTreatmentBlocksForExistingTreatments = (experimentId, treatments, context, tx) =>
-    tx.batch([this.db.block.findByExperimentId(experimentId, tx),
-      this.db.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id'), tx)])
-      .then(([blocks, tbsInDB]) => {
-        const treatmentBlocksFromRequest = this.createTreatmentBlockModels(treatments, blocks)
-        const { creates, updates, deletes } =
-          this.splitTreatmentBlocksToActions(treatmentBlocksFromRequest, tbsInDB)
+    Promise.all([
+      dbRead.block.findByExperimentId(experimentId),
+      dbRead.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id')),
+    ]).then(([blocks, tbsInDB]) => {
+      const treatmentBlocksFromRequest = this.createTreatmentBlockModels(treatments, blocks)
+      const { creates, updates, deletes } =
+        this.splitTreatmentBlocksToActions(treatmentBlocksFromRequest, tbsInDB)
 
-        return this.db.treatmentBlock.batchRemove(_.map(deletes, 'id'), tx)
-          .then(() => this.db.treatmentBlock.batchUpdate(updates, context, tx))
-          .then(() => this.db.treatmentBlock.batchCreate(creates, context, tx))
-      })
+      return dbWrite.treatmentBlock.batchRemove(_.map(deletes, 'id'), tx)
+        .then(() => dbWrite.treatmentBlock.batchUpdate(updates, context, tx))
+        .then(() => dbWrite.treatmentBlock.batchCreate(creates, context, tx))
+    })
 
   @setErrorCode('1V7000')
   createTreatmentBlockModels = (treatments, blocks) => {
@@ -144,14 +140,13 @@ class TreatmentBlockService {
   }
 
   @setErrorCode('1VI000')
-  @Transactional('getTreatmentDetailsBySetId')
-  getTreatmentDetailsBySetId = (setId, tx) => {
+  getTreatmentDetailsBySetId = (setId) => {
     if (setId) {
-      return this.getTreatmentBlocksBySetId(setId, tx).then((treatmentBlocks) => {
+      return this.getTreatmentBlocksBySetId(setId).then((treatmentBlocks) => {
         const treatmentIds = _.uniq(_.map(treatmentBlocks, 'treatment_id'))
 
         if (treatmentIds && treatmentIds.length > 0) {
-          return db.treatment.batchFindAllTreatmentLevelDetails(treatmentIds, tx)
+          return dbRead.treatment.batchFindAllTreatmentLevelDetails(treatmentIds)
             .then(this.mapTreatmentLevelsToOutputFormat)
         }
 

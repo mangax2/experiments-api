@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -18,7 +18,7 @@ class FactorTypesValidator extends SchemaValidator {
       paramName: 'type', type: 'text', lengthRange: { min: 1, max: 50 }, required: true,
     },
     {
-      paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: db.factorType,
+      paramName: 'FactorType', type: 'businessKey', keys: ['type'], entity: dbRead.factorType,
     },
   ]
 

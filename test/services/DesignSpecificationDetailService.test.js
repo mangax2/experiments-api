@@ -4,7 +4,7 @@ import {
 import DesignSpecificationDetailService from '../../src/services/DesignSpecificationDetailService'
 import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 
 jest.mock('../../src/services/utility/HttpUtil')
 jest.mock('../../src/services/utility/OAuthUtil')
@@ -21,12 +21,12 @@ describe('DesignSpecificationDetailService', () => {
   describe('batchCreateDesignSpecificationDetails', () => {
     test('creates design specification details', () => {
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchCreate = mockResolve([{}])
+      dbWrite.designSpecificationDetail.batchCreate = mockResolve([{}])
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST')
+        expect(dbWrite.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith([{}])
       })
     })
@@ -34,11 +34,11 @@ describe('DesignSpecificationDetailService', () => {
     test('rejects when batchCreate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchCreate = mockReject(error)
+      dbWrite.designSpecificationDetail.batchCreate = mockReject(error)
 
       return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST')
+        expect(dbWrite.designSpecificationDetail.batchCreate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -46,20 +46,20 @@ describe('DesignSpecificationDetailService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      db.designSpecificationDetail.batchCreate = mockReject(error)
+      dbWrite.designSpecificationDetail.batchCreate = mockReject(error)
 
       return target.batchCreateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST', testTx)
-        expect(db.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'POST')
+        expect(dbWrite.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
 
     test('does not create design specification details when none are passed in', () => {
-      db.designSpecificationDetail.batchCreate = mockResolve([{}])
+      dbWrite.designSpecificationDetail.batchCreate = mockResolve([{}])
 
       return target.batchCreateDesignSpecificationDetails([], testContext, testTx).then(() => {
-        expect(db.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
+        expect(dbWrite.designSpecificationDetail.batchCreate).not.toHaveBeenCalled()
       })
     })
   })
@@ -67,12 +67,12 @@ describe('DesignSpecificationDetailService', () => {
   describe('batchUpdateDesignSpecificationDetails', () => {
     test('updates design specification details', () => {
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchUpdate = mockResolve([{}])
+      dbWrite.designSpecificationDetail.batchUpdate = mockResolve([{}])
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateDesignSpecificationDetails([{}], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.designSpecificationDetail.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.designSpecificationDetail.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith([{}])
       })
     })
@@ -80,11 +80,11 @@ describe('DesignSpecificationDetailService', () => {
     test('rejects when batchUpdate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()
-      db.designSpecificationDetail.batchUpdate = mockReject(error)
+      dbWrite.designSpecificationDetail.batchUpdate = mockReject(error)
 
       return target.batchUpdateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.designSpecificationDetail.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.designSpecificationDetail.batchUpdate).toHaveBeenCalledWith([{}], testContext, testTx)
         expect(err).toEqual(error)
       })
     })
@@ -92,47 +92,47 @@ describe('DesignSpecificationDetailService', () => {
     test('rejects when validate fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockReject(error)
-      db.designSpecificationDetail.batchUpdate = mockReject(error)
+      dbWrite.designSpecificationDetail.batchUpdate = mockReject(error)
 
       return target.batchUpdateDesignSpecificationDetails([{}], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT', testTx)
-        expect(db.designSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
+        expect(target.validator.validate).toHaveBeenCalledWith([{}], 'PUT')
+        expect(dbWrite.designSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
 
     test('does not update design specification details when none are passed in', () => {
-      db.designSpecificationDetail.batchUpdate = mockResolve([{}])
+      dbWrite.designSpecificationDetail.batchUpdate = mockResolve([{}])
 
       return target.batchUpdateDesignSpecificationDetails([], testContext, testTx).then(() => {
-        expect(db.designSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
+        expect(dbWrite.designSpecificationDetail.batchUpdate).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('deleteDesignSpecificationDetails', () => {
     test('deletes design specification details', () => {
-      db.designSpecificationDetail.batchRemove = mockResolve([1])
+      dbWrite.designSpecificationDetail.batchRemove = mockResolve([1])
       return target.deleteDesignSpecificationDetails([1], testContext, testTx).then((data) => {
-        expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1], testTx)
+        expect(dbWrite.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1], testTx)
         expect(data).toEqual([1])
       })
     })
 
     test('resolves when no ids are passed in for delete', () => {
-      db.designSpecificationDetail.batchRemove = mock()
+      dbWrite.designSpecificationDetail.batchRemove = mock()
 
       return target.deleteDesignSpecificationDetails([], testContext, testTx).then(() => {
-        expect(db.designSpecificationDetail.batchRemove).not.toHaveBeenCalled()
+        expect(dbWrite.designSpecificationDetail.batchRemove).not.toHaveBeenCalled()
       })
     })
 
     test('throws an error when not all design specification details are found for delete', () => {
-      db.designSpecificationDetail.batchRemove = mockResolve([1])
+      dbWrite.designSpecificationDetail.batchRemove = mockResolve([1])
       AppError.notFound = mock()
 
       return target.deleteDesignSpecificationDetails([1, 2], testContext, testTx).then(() => {}, () => {
-        expect(db.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
+        expect(dbWrite.designSpecificationDetail.batchRemove).toHaveBeenCalledWith([1, 2], testTx)
         expect(AppError.notFound).toHaveBeenCalledWith('Not all design specification detail ids requested for delete were found', undefined, '137001')
       })
     })
@@ -140,14 +140,14 @@ describe('DesignSpecificationDetailService', () => {
 
   describe('getAdvancedParameters', () => {
     test('massages the data as expected', () => {
-      db.designSpecificationDetail.findAllByExperimentId = mockResolve([{
+      dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve([{
         ref_design_spec_id: 3,
         value: '4',
       }, {
         ref_design_spec_id: 5,
         value: 'test Value',
       }])
-      db.refDesignSpecification.all = mockResolve([{
+      dbRead.refDesignSpecification.all = mockResolve([{
         name: 'test Spec',
         id: 5,
       }, {
@@ -159,8 +159,8 @@ describe('DesignSpecificationDetailService', () => {
       }])
 
       return target.getAdvancedParameters(1, testTx).then((result) => {
-        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalled()
-        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
+        expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(result).toEqual({
           minReps: '4',
           testSpec: 'test Value',
@@ -171,7 +171,7 @@ describe('DesignSpecificationDetailService', () => {
 
   describe('saveDesignSpecifications', () => {
     test('correctly classifies design specs as adds, updates and deletes', () => {
-      db.designSpecificationDetail = {
+      dbRead.designSpecificationDetail = {
         findAllByExperimentId: mockResolve([
           { id: 3, ref_design_spec_id: 11, value: 'test 1' },
           { id: 4, ref_design_spec_id: 12, value: 'test 2' },
@@ -179,7 +179,7 @@ describe('DesignSpecificationDetailService', () => {
           { id: 6, ref_design_spec_id: 15, value: 'test 3' },
         ]),
       }
-      db.refDesignSpecification = {
+      dbRead.refDesignSpecification = {
         all: mockResolve([
           { id: 11, name: 'Something Else' },
           { id: 12, name: 'Locations' },
@@ -197,9 +197,9 @@ describe('DesignSpecificationDetailService', () => {
       AppUtil.createCompositePostResponse = mock()
 
       return target.saveDesignSpecifications(designSpecs, 5, false, testContext, testTx).then(() => {
-        expect(target.securityService.permissionsCheck).toBeCalledWith(5, testContext, false, testTx)
-        expect(db.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5, testTx)
-        expect(db.refDesignSpecification.all).toBeCalled()
+        expect(target.securityService.permissionsCheck).toBeCalledWith(5, testContext, false)
+        expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5)
+        expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(target.deleteDesignSpecificationDetails).toBeCalledWith([3, 6], testContext, testTx)
         expect(target.batchUpdateDesignSpecificationDetails).toBeCalledWith([{
           id: 4, refDesignSpecId: 12, value: '5', hasMatch: true,

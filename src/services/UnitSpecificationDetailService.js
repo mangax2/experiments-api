@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
@@ -28,18 +28,17 @@ class UnitSpecificationDetailService {
   }
 
   @setErrorCode('1S1000')
-  @Transactional('getUnitSpecificationDetailsByExperimentId')
-  getUnitSpecificationDetailsByExperimentId(id, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(id, isTemplate, context, tx)
-      .then(() => db.unitSpecificationDetail.findAllByExperimentId(id, tx))
+  getUnitSpecificationDetailsByExperimentId(id, isTemplate, context) {
+    return this.experimentService.getExperimentById(id, isTemplate, context)
+      .then(() => dbRead.unitSpecificationDetail.findAllByExperimentId(id))
   }
 
   @setErrorCode('1S3000')
   @Transactional('batchCreateUnitSpecificationDetails')
   batchCreateUnitSpecificationDetails(specificationDetails, context, tx) {
     this.backfillUnitSpecificationRecord(specificationDetails)
-    return this.validator.validate(specificationDetails, 'POST', tx)
-      .then(() => db.unitSpecificationDetail.batchCreate(specificationDetails, context, tx)
+    return this.validator.validate(specificationDetails, 'POST')
+      .then(() => dbWrite.unitSpecificationDetail.batchCreate(specificationDetails, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
@@ -47,8 +46,8 @@ class UnitSpecificationDetailService {
   @Transactional('batchUpdateUnitSpecificationDetails')
   batchUpdateUnitSpecificationDetails(unitSpecificationDetails, context, tx) {
     this.backfillUnitSpecificationRecord(unitSpecificationDetails)
-    return this.validator.validate(unitSpecificationDetails, 'PUT', tx)
-      .then(() => db.unitSpecificationDetail.batchUpdate(unitSpecificationDetails, context, tx)
+    return this.validator.validate(unitSpecificationDetails, 'PUT')
+      .then(() => dbWrite.unitSpecificationDetail.batchUpdate(unitSpecificationDetails, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
 
@@ -57,7 +56,7 @@ class UnitSpecificationDetailService {
   @Transactional('manageAllUnitSpecificationDetails')
   manageAllUnitSpecificationDetails(experimentId, unitSpecificationDetailsObj, context,
     isTemplate, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, isTemplate, tx).then(() => {
+    return this.securityService.permissionsCheck(experimentId, context, isTemplate).then(() => {
       UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj
         .updates, experimentId)
       UnitSpecificationDetailService.populateExperimentId(unitSpecificationDetailsObj
@@ -85,7 +84,7 @@ class UnitSpecificationDetailService {
     if (_.compact(idsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return db.unitSpecificationDetail.batchRemove(idsToDelete, tx)
+    return dbWrite.unitSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
         if (_.compact(data).length !== idsToDelete.length) {
           console.error(`[[${context.requestId}]] Not all unit specification detail ids requested for delete were found`)
@@ -120,48 +119,49 @@ class UnitSpecificationDetailService {
     return this.batchCreateUnitSpecificationDetails(unitSpecificationDetails, context, tx)
   }
 
-@setErrorCode('1SA000')
-@Transactional('syncUnitSpecificationDetails')
- syncUnitSpecificationDetails=(capacitySyncUnitSpecDetails, experimentId, context, tx) =>
-   this.getUnitSpecificationDetailsByExperimentId(experimentId, false, context, tx)
-     .then(unitSpecificationDetails => this.unitSpecificationService.getAllUnitSpecifications()
-       .then((refUnitSpecs) => {
-         const unitSpecUpsertValues = []
-         if (capacitySyncUnitSpecDetails['number of rows']) {
-           const refRowsPerPlotId = _.find(refUnitSpecs, uS => uS.name === 'Number of Rows').id
-           unitSpecUpsertValues.push({
-             refUnitSpecId: refRowsPerPlotId,
-             value: capacitySyncUnitSpecDetails['number of rows'],
-             experimentId,
-           })
-         }
-         if (capacitySyncUnitSpecDetails['row length']) {
-           const refPlotRowLengthId = _.find(refUnitSpecs, uS => uS.name === 'Row Length').id
-           unitSpecUpsertValues.push({
-             refUnitSpecId: refPlotRowLengthId,
-             value: capacitySyncUnitSpecDetails['row length'],
-             uomCode: capacitySyncUnitSpecDetails['plot row length uom'],
-             experimentId,
-           })
-         }
+  @setErrorCode('1SA000')
+  @Transactional('syncUnitSpecificationDetails')
+  syncUnitSpecificationDetails=(capacitySyncUnitSpecDetails, experimentId, context, tx) =>
+    this.getUnitSpecificationDetailsByExperimentId(experimentId, false, context)
+      .then(unitSpecificationDetails => this.unitSpecificationService.getAllUnitSpecifications()
+        .then((refUnitSpecs) => {
+          const unitSpecUpsertValues = []
+          if (capacitySyncUnitSpecDetails['number of rows']) {
+            const refRowsPerPlotId = _.find(refUnitSpecs, uS => uS.name === 'Number of Rows').id
+            unitSpecUpsertValues.push({
+              refUnitSpecId: refRowsPerPlotId,
+              value: capacitySyncUnitSpecDetails['number of rows'],
+              experimentId,
+            })
+          }
+          if (capacitySyncUnitSpecDetails['row length']) {
+            const refPlotRowLengthId = _.find(refUnitSpecs, uS => uS.name === 'Row Length').id
+            unitSpecUpsertValues.push({
+              refUnitSpecId: refPlotRowLengthId,
+              value: capacitySyncUnitSpecDetails['row length'],
+              uomCode: capacitySyncUnitSpecDetails['plot row length uom'],
+              experimentId,
+            })
+          }
 
-         if (capacitySyncUnitSpecDetails['row spacing']) {
-           const refRowSpacingId = _.find(refUnitSpecs, uS => uS.name === 'Row Spacing').id
-           unitSpecUpsertValues.push({
-             refUnitSpecId: refRowSpacingId,
-             value: capacitySyncUnitSpecDetails['row spacing'],
-             uomCode: capacitySyncUnitSpecDetails['row spacing uom'],
-             experimentId,
+          if (capacitySyncUnitSpecDetails['row spacing']) {
+            const refRowSpacingId = _.find(refUnitSpecs, uS => uS.name === 'Row Spacing').id
+            unitSpecUpsertValues.push({
+              refUnitSpecId: refRowSpacingId,
+              value: capacitySyncUnitSpecDetails['row spacing'],
+              uomCode: capacitySyncUnitSpecDetails['row spacing uom'],
+              experimentId,
 
-           })
-         }
+            })
+          }
 
-         if (unitSpecUpsertValues.length > 0) {
-           return db.unitSpecificationDetail.batchRemove(_.map(unitSpecificationDetails, 'id'), tx)
-             .then(() => db.unitSpecificationDetail.batchCreate(unitSpecUpsertValues, context, tx))
-         }
-         return Promise.resolve()
-       }))
+          if (unitSpecUpsertValues.length > 0) {
+            return dbWrite.unitSpecificationDetail.batchRemove(_.map(unitSpecificationDetails, 'id'), tx)
+              .then(() =>
+                dbWrite.unitSpecificationDetail.batchCreate(unitSpecUpsertValues, context, tx))
+          }
+          return Promise.resolve()
+        }))
 }
 
 module.exports = UnitSpecificationDetailService

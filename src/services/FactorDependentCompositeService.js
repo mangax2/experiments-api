@@ -7,11 +7,11 @@ import FactorService from './FactorService'
 import DependentVariableService from './DependentVariableService'
 import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociationEntityUtil'
 import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
-import FactorTypeService from './FactorTypeService'
 import SecurityService from './SecurityService'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import { notifyChanges } from '../decorators/notifyChanges'
+import { dbRead } from '../db/DbManager'
 
 const { addErrorHandling, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -147,17 +147,15 @@ class FactorDependentCompositeService {
     this.factorLevelAssociationService = new FactorLevelAssociationService()
     this.factorService = new FactorService()
     this.dependentVariableService = new DependentVariableService()
-    this.factorTypeService = new FactorTypeService()
     this.securityService = new SecurityService()
     this.variablesValidator = new VariablesValidator()
   }
 
   @setErrorCode('1AJ000')
-  @Transactional('getFactorsWithLevels')
-  static getFactorsWithLevels(experimentId, tx) {
-    return tx.batch([
-      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
-      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
+  static getFactorsWithLevels(experimentId) {
+    return Promise.all([
+      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
     ]).then(data => ({
       factors: data[0],
       levels: data[1],
@@ -293,17 +291,16 @@ class FactorDependentCompositeService {
   }
 
   @setErrorCode('1AU000')
-  @Transactional('getAllVariablesByExperimentId')
-  getAllVariablesByExperimentId(experimentId, isTemplate, context, tx) {
-    return tx.batch(
+  getAllVariablesByExperimentId = (experimentId, isTemplate, context) =>
+    Promise.all(
       [
-        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context, tx),
-        FactorDependentCompositeService.getFactorsWithLevels(experimentId, tx),
-        this.factorTypeService.getAllFactorTypes(tx),
+        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context),
+        FactorDependentCompositeService.getFactorsWithLevels(experimentId),
+        dbRead.factorType.all(),
         DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(
-          experimentId, tx),
+          experimentId),
         FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(
-          experimentId, tx),
+          experimentId),
       ],
     ).then(results => FactorDependentCompositeService.assembleVariablesObject(
       results[1].factors,
@@ -312,7 +309,6 @@ class FactorDependentCompositeService {
       results[3],
       results[4],
     ))
-  }
 
   @setErrorCode('1AV000')
   static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
@@ -447,12 +443,12 @@ class FactorDependentCompositeService {
     tx)
 
   @setErrorCode('1Ag000')
-  getCurrentDbEntities = ({ experimentId, tx }) => tx.batch([
-    FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
-    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId, tx),
-    this.factorTypeService.getAllFactorTypes()])
-    .then(formDbEntitiesObject)
+  getCurrentDbEntities = ({ experimentId }) => Promise.all([
+    FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
+    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
+    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId),
+    dbRead.factorType.all(),
+  ]).then(formDbEntitiesObject)
 
   @setErrorCode('1Ah000')
   categorizeRequestDTOs = (allIndependentDTOs) => {
@@ -537,8 +533,8 @@ class FactorDependentCompositeService {
   @Transactional('persistAllVariables')
   persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
     const expId = Number(experimentId)
-    return this.securityService.permissionsCheck(expId, context, isTemplate, tx)
-      .then(() => this.variablesValidator.validate(experimentVariables, 'POST', tx))
+    return this.securityService.permissionsCheck(expId, context, isTemplate)
+      .then(() => this.variablesValidator.validate(experimentVariables, 'POST'))
       .then(() => this.persistIndependentAndDependentVariables(
         expId, experimentVariables, context, isTemplate, tx))
       .then(() => AppUtil.createPostResponse([{ id: expId }]))

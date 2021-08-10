@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import BlockValidator from '../../src/validations/BlockValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('BlockValidator', () => {
   describe('getEntityName', () => {
@@ -16,7 +16,7 @@ describe('BlockValidator', () => {
       const target = new BlockValidator()
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
-        { paramName: 'id', type: 'refData', entity: db.block },
+        { paramName: 'id', type: 'refData', entity: dbRead.block },
         { paramName: 'name', type: 'string', required: true },
       ]
 

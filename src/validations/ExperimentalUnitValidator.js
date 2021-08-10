@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -19,7 +19,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
       },
       { paramName: 'groupId', type: 'numeric' },
       { paramName: 'treatmentId', type: 'numeric', required: true },
-      { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
+      { paramName: 'treatmentId', type: 'refData', entity: dbRead.treatment },
       { paramName: 'setEntryId', type: 'numeric' },
       { paramName: 'location', type: 'numeric' },
     ]
@@ -34,7 +34,7 @@ class ExperimentalUnitValidator extends SchemaValidator {
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.unit },
+      { paramName: 'id', type: 'refData', entity: dbRead.unit },
     ]
   }
 

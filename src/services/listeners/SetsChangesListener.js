@@ -4,7 +4,7 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import VaultUtil from '../utility/VaultUtil'
 import kafkaConfig from '../../config/kafkaConfig'
-import db from '../../db/DbManager'
+import { dbWrite } from '../../db/DbManager'
 import { sendKafkaNotification } from '../../decorators/notifyChanges'
 
 class SetsChangesListener {
@@ -73,8 +73,8 @@ class SetsChangesListener {
   }))
 
   @Transactional('ManageSetsChange')
-  clearSet = (setId, tx) => db.unit.batchClearEntryIds(setId, tx)
-    .then(() => db.locationAssociation.removeBySetId(setId, tx))
+  clearSet = (setId, tx) => dbWrite.unit.batchClearEntryIds(setId, tx)
+    .then(() => dbWrite.locationAssociation.removeBySetId(setId, tx))
 }
 
 const setsChangesListener = new SetsChangesListener()

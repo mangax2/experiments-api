@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import ExperimentalUnitValidator from '../../src/validations/ExperimentalUnitValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('ExperimentalUnitValidator', () => {
   let target
@@ -12,7 +12,7 @@ describe('ExperimentalUnitValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('returns schema', () => {
-      db.treatment = {}
+      dbRead.treatment = {}
 
       const schema = [
         {
@@ -31,7 +31,7 @@ describe('ExperimentalUnitValidator', () => {
 
   describe('get PATCH_VALIDATION_SCHEMA', () => {
     test('returns schema', () => {
-      db.unit = {}
+      dbRead.unit = {}
 
       const schema = [
         { paramName: 'setEntryId', type: 'numeric', required: true },
@@ -43,7 +43,7 @@ describe('ExperimentalUnitValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('returns schema', () => {
-      db.unit = {}
+      dbRead.unit = {}
 
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -62,7 +62,7 @@ describe('ExperimentalUnitValidator', () => {
 
   describe('getSchema', () => {
     test('returns the POST schema when POST is passed in', () => {
-      db.treatment = {}
+      dbRead.treatment = {}
       const schema = [
         {
           paramName: 'rep', type: 'numeric', numericRange: { min: 1, max: 999 }, required: true,
@@ -78,8 +78,8 @@ describe('ExperimentalUnitValidator', () => {
     })
 
     test('returns the POST and PUT schemas when PUT is passed in', () => {
-      db.treatment = {}
-      db.unit = {}
+      dbRead.treatment = {}
+      dbRead.unit = {}
 
       const schema = [
         {
@@ -98,8 +98,8 @@ describe('ExperimentalUnitValidator', () => {
     })
 
     test('returns the PATCH and PUT schemas when PATCH is passed in', () => {
-      db.treatment = {}
-      db.unit = {}
+      dbRead.treatment = {}
+      dbRead.unit = {}
 
       const schema = [
         { paramName: 'setEntryId', type: 'numeric', required: true },

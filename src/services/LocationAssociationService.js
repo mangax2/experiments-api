@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import ExperimentalUnitService from './ExperimentalUnitService'
@@ -17,11 +17,11 @@ class LocationAssociationService {
   @setErrorCode('1Y1000')
   @Transactional('associateSetsToLocations')
   associateSetsToLocations = (experimentId, rawNewAssociations, context, tx) =>
-    tx.batch([
+    Promise.all([
       this.experimentalUnitService
-        .getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx),
-      db.block.findByExperimentId(experimentId, tx),
-      this.experimentService.verifyExperimentExists(experimentId, false, context, tx),
+        .getExperimentalUnitsByExperimentIdNoValidate(experimentId),
+      dbRead.block.findByExperimentId(experimentId),
+      this.experimentService.verifyExperimentExists(experimentId, false, context),
     ]).then(([units, blocks]) => {
       const locations = _.uniq(_.map(units, 'location'))
 
@@ -38,8 +38,8 @@ class LocationAssociationService {
         }
       })
 
-      return db.locationAssociation.batchRemoveByLocationAndBlock(associations, tx)
-        .then(() => db.locationAssociation.batchCreate(associations, context, tx))
+      return dbWrite.locationAssociation.batchRemoveByLocationAndBlock(associations, tx)
+        .then(() => dbWrite.locationAssociation.batchCreate(associations, context, tx))
     })
 }
 

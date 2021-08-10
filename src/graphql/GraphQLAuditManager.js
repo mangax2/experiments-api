@@ -1,4 +1,4 @@
-import db from '../db/DbManager'
+import { dbWrite } from '../db/DbManager'
 
 const FIVE_MINUTES_IN_MS = 300000
 
@@ -22,7 +22,7 @@ class GraphQLAuditManager {
       const queriesToLog = this.queue
       this.queue = []
       try {
-        await db.graphqlAudit.batchCreate(queriesToLog)
+        await dbWrite.graphqlAudit.batchCreate(queriesToLog)
       } catch (err) {
         console.error('An error occurred while saving GraphQL audit data', err)
         this.queue = [

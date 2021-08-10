@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import SecurityService from './SecurityService'
@@ -19,24 +19,26 @@ class DesignSpecificationDetailService {
 
   @setErrorCode('131000')
   @Transactional('batchCreateDesignSpecificationDetails')
-  batchCreateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
+  batchCreateDesignSpecificationDetails = async (designSpecificationDetails, context, tx) => {
     if (_.compact(designSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    return this.validator.validate(designSpecificationDetails, 'POST', tx)
-      .then(() => db.designSpecificationDetail.batchCreate(designSpecificationDetails, context, tx)
-        .then(data => AppUtil.createPostResponse(data)))
+    await this.validator.validate(designSpecificationDetails, 'POST')
+    const data = await dbWrite.designSpecificationDetail.batchCreate(
+      designSpecificationDetails, context, tx)
+    return AppUtil.createPostResponse(data)
   }
 
   @setErrorCode('132000')
   @Transactional('batchUpdateDesignSpecificationDetails')
-  batchUpdateDesignSpecificationDetails(designSpecificationDetails, context, tx) {
+  batchUpdateDesignSpecificationDetails = async (designSpecificationDetails, context, tx) => {
     if (_.compact(designSpecificationDetails).length === 0) {
       return Promise.resolve()
     }
-    return this.validator.validate(designSpecificationDetails, 'PUT', tx)
-      .then(() => db.designSpecificationDetail.batchUpdate(designSpecificationDetails, context, tx)
-        .then(data => AppUtil.createPutResponse(data)))
+    await this.validator.validate(designSpecificationDetails, 'PUT')
+    const data = await dbWrite.designSpecificationDetail.batchUpdate(
+      designSpecificationDetails, context, tx)
+    return AppUtil.createPutResponse(data)
   }
 
   @setErrorCode('133000')
@@ -45,7 +47,7 @@ class DesignSpecificationDetailService {
     if (_.compact(idsToDelete).length === 0) {
       return Promise.resolve()
     }
-    return db.designSpecificationDetail.batchRemove(idsToDelete, tx)
+    return dbWrite.designSpecificationDetail.batchRemove(idsToDelete, tx)
       .then((data) => {
         if (data.length !== idsToDelete.length) {
           console.error(`[[${context.requestId}]] Not all design specification detail ids requested for delete were found`)
@@ -59,10 +61,10 @@ class DesignSpecificationDetailService {
 
   @setErrorCode('134000')
   @Transactional('getAdvancedParameters')
-  getAdvancedParameters = (experimentId, tx) =>
-    tx.batch([
-      db.refDesignSpecification.all(tx),
-      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
+  getAdvancedParameters = experimentId =>
+    Promise.all([
+      dbRead.refDesignSpecification.all(),
+      dbRead.designSpecificationDetail.findAllByExperimentId(experimentId),
     ]).then((results) => {
       const mappedDesignSpecs = {}
       const advancedParameters = {}
@@ -82,10 +84,10 @@ class DesignSpecificationDetailService {
   @notifyChanges('update', 1)
   @Transactional('saveDesignSpecifications')
   saveDesignSpecifications = (designSpecifications, experimentId, isTemplate, context, tx) =>
-    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
-      .then(() => tx.batch([
-        db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
-        db.refDesignSpecification.all(),
+    this.securityService.permissionsCheck(experimentId, context, isTemplate)
+      .then(() => Promise.all([
+        dbRead.designSpecificationDetail.findAllByExperimentId(experimentId),
+        dbRead.refDesignSpecification.all(),
       ]))
       .then(([existingDesignSpecs, refDesignSpecs]) => {
         const refMapper = {}
@@ -124,7 +126,7 @@ class DesignSpecificationDetailService {
   @setErrorCode('136000')
   @Transactional('syncDesignSpecificationDetails')
   syncDesignSpecificationDetails(capacitySyncDesignSpecDetails, experimentId, context, tx) {
-    return this.getAdvancedParameters(experimentId, tx)
+    return this.getAdvancedParameters(experimentId)
       .then((currentDesignSpecDetails) => {
         let shouldUpdate = false
 

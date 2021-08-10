@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -20,12 +20,12 @@ class DependentVariablesValidator extends SchemaValidator {
         paramName: 'name', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
       },
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
       {
         paramName: 'DependentVariable',
         type: 'businessKey',
         keys: ['experimentId', 'name'],
-        entity: db.dependentVariable,
+        entity: dbRead.dependentVariable,
       },
     ]
     switch (operationName) {
@@ -33,7 +33,7 @@ class DependentVariablesValidator extends SchemaValidator {
         return schema
       case 'PUT':
         return schema.concat([{ paramName: 'id', type: 'numeric', required: true },
-          { paramName: 'id', type: 'refData', entity: db.dependentVariable }])
+          { paramName: 'id', type: 'refData', entity: dbRead.dependentVariable }])
       default:
         throw AppError.badRequest('Invalid Operation', undefined, getFullErrorCode('321001'))
     }

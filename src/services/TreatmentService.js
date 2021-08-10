@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
@@ -20,14 +20,13 @@ class TreatmentService {
   @setErrorCode('1R1000')
   @Transactional('batchCreateTreatments')
   batchCreateTreatments(treatments, context, tx) {
-    return this.validator.validate(treatments, 'POST', tx)
-      .then(() => db.treatment.batchCreate(treatments, context, tx)
+    return this.validator.validate(treatments, 'POST')
+      .then(() => dbWrite.treatment.batchCreate(treatments, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
   @setErrorCode('1R4000')
-  @Transactional('getTreatmentById')
-  batchGetTreatmentByIds = (ids, context, tx) => db.treatment.batchFind(ids, tx)
+  batchGetTreatmentByIds = (ids, context) => dbRead.treatment.batchFind(ids)
     .then((data) => {
       if (_.filter(data, element => element !== null).length !== ids.length) {
         console.error(`[[${context.requestId}]] Treatment not found for all requested ids.`)
@@ -40,19 +39,19 @@ class TreatmentService {
   @setErrorCode('1R5000')
   @Transactional('batchUpdateTreatments')
   batchUpdateTreatments(treatments, context, tx) {
-    return this.validator.validate(treatments, 'PUT', tx)
-      .then(() => db.treatment.batchUpdate(treatments, context, tx)
+    return this.validator.validate(treatments, 'PUT')
+      .then(() => dbWrite.treatment.batchUpdate(treatments, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
 
   @setErrorCode('1R6000')
   @Transactional('batchDeleteTreatments')
-  batchDeleteTreatments = (ids, context, tx) => db.unit.batchFindAllByTreatmentIds(ids, tx)
+  batchDeleteTreatments = (ids, context, tx) => dbRead.unit.batchFindAllByTreatmentIds(ids)
     .then((units) => {
       if (_.some(units, u => !_.isNil(u.set_entry_id))) {
         throw AppError.badRequest('Cannot delete treatments that are used in sets', undefined, getFullErrorCode('1R6002'))
       }
-      return db.treatment.batchRemove(ids, tx)
+      return dbWrite.treatment.batchRemove(ids, tx)
         .then((data) => {
           if (_.filter(data, element => element !== null).length !== ids.length) {
             console.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)

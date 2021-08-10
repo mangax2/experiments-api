@@ -2,10 +2,9 @@ import { mock, mockResolve, mockReject } from '../jestUtil'
 import OwnerValidator from '../../src/validations/OwnerValidator'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import apiUrls from '../../src/config/apiUrls'
-
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('OwnerValidator', () => {
   let target
@@ -19,7 +18,7 @@ describe('OwnerValidator', () => {
     test('returns the schema', () => {
       const schema = [
         { paramName: 'experimentId', type: 'numeric', required: true },
-        { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+        { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
         {
           paramName: 'userIds',
           type: 'array',
@@ -53,7 +52,7 @@ describe('OwnerValidator', () => {
   describe('getSchema', () => {
     const schema = [
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
       {
         paramName: 'userIds',
         type: 'array',

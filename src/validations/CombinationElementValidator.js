@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -15,14 +15,14 @@ class CombinationElementValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'factorLevelId', type: 'numeric', required: true },
-      { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
+      { paramName: 'factorLevelId', type: 'refData', entity: dbRead.factorLevel },
       { paramName: 'treatmentId', type: 'numeric', required: true },
-      { paramName: 'treatmentId', type: 'refData', entity: db.treatment },
+      { paramName: 'treatmentId', type: 'refData', entity: dbRead.treatment },
       {
         paramName: 'CombinationElement',
         type: 'businessKey',
         keys: ['treatmentId', 'factorLevelId'],
-        entity: db.combinationElement,
+        entity: dbRead.combinationElement,
       },
     ]
   }
@@ -30,7 +30,7 @@ class CombinationElementValidator extends SchemaValidator {
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.combinationElement },
+      { paramName: 'id', type: 'refData', entity: dbRead.combinationElement },
     ]
   }
 

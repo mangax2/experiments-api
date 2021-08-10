@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import QuestionsUtil from './utility/QuestionsUtil'
@@ -49,12 +49,12 @@ class ExperimentalUnitService {
   @setErrorCode('172000')
   @Transactional('partialUpdateExperimentalUnitsTx')
   batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {
-    return this.validator.validate(experimentalUnits, 'PATCH', tx)
+    return this.validator.validate(experimentalUnits, 'PATCH')
       .then(() => {
         ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'id')
         ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'setEntryId')
 
-        return db.unit.batchPartialUpdate(experimentalUnits, context, tx)
+        return dbWrite.unit.batchPartialUpdate(experimentalUnits, context, tx)
           .then(data => AppUtil.createPutResponse(data))
       })
   }
@@ -68,28 +68,25 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('174000')
-  @Transactional('getUnitsFromTemplateByExperimentId')
-  getUnitsFromTemplateByExperimentId(id, context, tx) {
-    return this.experimentService.findExperimentWithTemplateCheck(id, true, context, tx)
-      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id, tx))
+  getUnitsFromTemplateByExperimentId(id, context) {
+    return this.experimentService.findExperimentWithTemplateCheck(id, true, context)
+      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id))
   }
 
   @setErrorCode('175000')
-  @Transactional('getUnitsFromExperimentByExperimentId')
-  getUnitsFromExperimentByExperimentId(id, context, tx) {
-    return this.experimentService.findExperimentWithTemplateCheck(id, false, context, tx)
-      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id, tx))
+  getUnitsFromExperimentByExperimentId(id, context) {
+    return this.experimentService.findExperimentWithTemplateCheck(id, false, context)
+      .then(() => this.getExperimentalUnitsByExperimentIdNoValidate(id))
   }
 
   @setErrorCode('178000')
-  @Transactional('getExperimentalUnitsByExperimentIdNoValidate')
-  getExperimentalUnitsByExperimentIdNoValidate = (id, tx) =>
-    db.unit.findAllByExperimentId(id, tx)
+  getExperimentalUnitsByExperimentIdNoValidate = id =>
+    dbRead.unit.findAllByExperimentId(id)
 
   @setErrorCode('179000')
   getExperimentalUnitInfoBySetId = (setId) => {
     if (setId) {
-      return db.unit.batchFindAllBySetId(setId).then((units) => {
+      return dbRead.unit.batchFindAllBySetId(setId).then((units) => {
         if (units.length === 0) {
           throw AppError.notFound('Either the set was not found or no set entries are associated with the set.', undefined, getFullErrorCode('179001'))
         }
@@ -103,7 +100,7 @@ class ExperimentalUnitService {
   @setErrorCode('17A000')
   getExperimentalUnitInfoBySetEntryId = (setEntryIds) => {
     if (setEntryIds) {
-      return db.unit.batchFindAllBySetEntryIds(setEntryIds)
+      return dbRead.unit.batchFindAllBySetEntryIds(setEntryIds)
         .then(this.mapUnitsToSetEntryFormat)
     }
 
@@ -124,20 +121,18 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('17C000')
-  @Transactional('getExperimentalUnitsBySetIds')
-  getExperimentalUnitsBySetIds = (ids, tx) =>
-    db.unit.batchFindAllBySetIds(ids, tx)
+  getExperimentalUnitsBySetIds = ids => dbRead.unit.batchFindAllBySetIds(ids)
 
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')
   updateUnitsForSet = (setId, experimentalUnits, context, tx) =>
-    this.locationAssocWithBlockService.getBySetId(setId, tx).then((setInfo) => {
+    this.locationAssocWithBlockService.getBySetId(setId).then((setInfo) => {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }
-      return tx.batch([
-        db.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id, tx),
-        db.experiments.find(setInfo.experiment_id, false, tx),
+      return Promise.all([
+        dbRead.combinationElement.findAllByExperimentIdIncludingControls(setInfo.experiment_id),
+        dbRead.experiments.find(setInfo.experiment_id, false),
       ]).then(([combinationElements, experiment]) => {
         if (experiment.randomization_strategy_code !== 'custom-build-on-map') {
           throw AppError.badRequest('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, getFullErrorCode('17F004'))
@@ -166,7 +161,7 @@ class ExperimentalUnitService {
           delete unit.factorLevelKey
         })
         const treatmentIdsUsed = _.uniq(_.map(units, 'treatmentId'))
-        return db.treatmentBlock.batchFindByBlockIds(setInfo.block_id, tx)
+        return dbRead.treatmentBlock.batchFindByBlockIds(setInfo.block_id)
           .then((treatmentBlocks) => {
             const treatmentWithMismatchedBlock = treatmentIdsUsed.filter(treatmentId =>
               !treatmentBlocks.find(treatmentBlock => treatmentBlock.treatment_id === treatmentId))
@@ -183,7 +178,7 @@ class ExperimentalUnitService {
   @setErrorCode('17G000')
   @Transactional('mergeSetEntriesToUnits')
   mergeSetEntriesToUnits = (experimentId, unitsToSave, location, treatmentBlocks, context, tx) =>
-    db.unit.batchFindAllByLocationAndTreatmentBlocks(location, _.map(treatmentBlocks, 'id'), tx)
+    dbRead.unit.batchFindAllByLocationAndTreatmentBlocks(location, _.map(treatmentBlocks, 'id'))
       .then((unitsFromDB) => {
         unitsToSave.forEach((unit) => {
           const matchingTreatmentBlock = treatmentBlocks.find(
@@ -227,15 +222,15 @@ class ExperimentalUnitService {
   saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
     const promises = []
     if (unitsToBeCreated.length > 0) {
-      promises.push(db.unit.batchCreate(unitsToBeCreated, context, tx))
+      promises.push(dbWrite.unit.batchCreate(unitsToBeCreated, context, tx))
     }
     if (unitsToBeUpdated.length > 0) {
-      promises.push(db.unit.batchUpdate(unitsToBeUpdated, context, tx))
+      promises.push(dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx))
     }
     return tx.batch(promises)
       .then(() => {
         if (unitsToBeDeleted.length > 0) {
-          return db.unit.batchRemove(unitsToBeDeleted, tx)
+          return dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
         }
         return Promise.resolve()
       })
@@ -250,10 +245,10 @@ class ExperimentalUnitService {
       const ids = _.map(idSubset, 'id')
 
       const unitsFromSetEntryIdsPromise = setEntryIds.length > 0
-        ? db.unit.batchFindAllBySetEntryIds(setEntryIds)
+        ? dbRead.unit.batchFindAllBySetEntryIds(setEntryIds)
         : []
       const unitsFromIdsPromise = ids.length > 0
-        ? db.unit.batchFindAllByIds(ids)
+        ? dbRead.unit.batchFindAllByIds(ids)
         : []
 
       return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
@@ -268,7 +263,7 @@ class ExperimentalUnitService {
               setEntryId: unit.set_entry_id,
             }
           })
-          return db.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
+          return dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
             this.sendDeactivationNotifications(results)
             return results
           })

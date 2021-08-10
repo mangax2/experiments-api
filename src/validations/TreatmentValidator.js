@@ -3,7 +3,7 @@ import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociati
 import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -121,7 +121,7 @@ class TreatmentValidator extends SchemaValidator {
         paramName: 'notes', type: 'text', lengthRange: { min: 0, max: 500 }, required: false,
       },
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
       { paramName: 'inAllBlocks', type: 'boolean' },
     ]
   }
@@ -129,7 +129,7 @@ class TreatmentValidator extends SchemaValidator {
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.treatment },
+      { paramName: 'id', type: 'refData', entity: dbRead.treatment },
     ]
   }
 
@@ -154,27 +154,27 @@ class TreatmentValidator extends SchemaValidator {
   getDuplicateBusinessKeyError = () => ({ message: 'Duplicate treatment number in request payload with same experiment id', errorCode: getFullErrorCode('3FA001') })
 
   @setErrorCode('3F4000')
-  getLevelsForExperiments = (experimentIds, tx) => tx.batch(
+  getLevelsForExperiments = experimentIds => Promise.all(
     _.map(experimentIds,
-      experimentId => db.factorLevel.findByExperimentId(experimentId, tx)))
+      experimentId => dbRead.factorLevel.findByExperimentId(experimentId)))
 
   @setErrorCode('3F5000')
-  getAssociationsForExperiments = (experimentIds, tx) => tx.batch(
+  getAssociationsForExperiments = experimentIds => Promise.all(
     _.map(experimentIds,
-      experimentId => db.factorLevelAssociation.findByExperimentId(experimentId, tx)))
+      experimentId => dbRead.factorLevelAssociation.findByExperimentId(experimentId)))
 
   @setErrorCode('3F6000')
   getDistinctExperimentIdsFromDTOs = treatmentDTOs =>
     _.uniq(_.map(treatmentDTOs, dto => Number(dto.experimentId)))
 
   @setErrorCode('3F7000')
-  getDataForEachExperiment = (experimentIds, treatmentDTOs, tx) => {
+  getDataForEachExperiment = (experimentIds, treatmentDTOs) => {
     const treatmentDTOsForEachExperiment =
       _.map(experimentIds, experimentId =>
         _.filter(treatmentDTOs, dto => dto.experimentId === experimentId))
-    return tx.batch([
-      this.getLevelsForExperiments(experimentIds, tx),
-      this.getAssociationsForExperiments(experimentIds, tx),
+    return Promise.all([
+      this.getLevelsForExperiments(experimentIds),
+      this.getAssociationsForExperiments(experimentIds),
     ]).then(([levelsForEachExperiment, associationsForEachExperiment]) => _.zip(
       levelsForEachExperiment,
       associationsForEachExperiment,
@@ -182,10 +182,10 @@ class TreatmentValidator extends SchemaValidator {
   }
 
   @setErrorCode('3F8000')
-  validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest, tx) => {
+  validateNestedFactorsInTreatmentDTOs = (treatmentDTOsFromRequest) => {
     const distinctExperimentIds =
       this.getDistinctExperimentIdsFromDTOs(treatmentDTOsFromRequest)
-    return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest, tx)
+    return this.getDataForEachExperiment(distinctExperimentIds, treatmentDTOsFromRequest)
       .then(dataGroupedByExperiment => _.flatMap(dataGroupedByExperiment,
         ([levels, associations, treatmentDTOsForExperiment]) => {
           const {
@@ -232,12 +232,12 @@ class TreatmentValidator extends SchemaValidator {
   }
 
   @setErrorCode('3F3000')
-  postValidate = (treatmentDTOs, context, tx) => {
+  postValidate = (treatmentDTOs) => {
     if (this.hasErrors()) {
       return Promise.resolve()
     }
     this.checkForDuplicateBusinessKeys(treatmentDTOs)
-    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs, tx)
+    return this.validateNestedFactorsInTreatmentDTOs(treatmentDTOs)
   }
 
   @setErrorCode('3F4000')

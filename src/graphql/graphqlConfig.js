@@ -1,6 +1,6 @@
 import graphqlHTTP from 'express-graphql'
 import { GraphQLError } from 'graphql'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import loaders from './loaders'
 import config from '../../config'
 import AuditManager from './GraphQLAuditManager'
@@ -55,25 +55,23 @@ function graphqlMiddlewareFunction(schema) {
   return function (request, response) {
     AuditManager.logRequest(request.body, request.context.userId, request.context.clientId)
 
-    return db.tx('GraphQLTransaction', (tx) => {
-      const handler = graphqlHTTP({
-        schema,
-        context: {
-          loaders: loaders.createLoaders(tx),
-          getAuditInfo: entity => ({
-            createdDate: args => formatDate(args, entity.created_date),
-            createdUserId: entity.created_user_id,
-            modifiedDate: entity.modified_date,
-            modifiedUserId: entity.modified_user_id,
-          }),
-        },
-        // NOTE: Depth must be greater than schema depth or
-        // GraphiQL will fail to retrieve documentation.
-        validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
-        graphiql: config.env === 'local',
-      })
-      return handler(request, response)
+    const handler = graphqlHTTP({
+      schema,
+      context: {
+        loaders: loaders.createLoaders(dbRead),
+        getAuditInfo: entity => ({
+          createdDate: args => formatDate(args, entity.created_date),
+          createdUserId: entity.created_user_id,
+          modifiedDate: entity.modified_date,
+          modifiedUserId: entity.modified_user_id,
+        }),
+      },
+      // NOTE: Depth must be greater than schema depth or
+      // GraphiQL will fail to retrieve documentation.
+      validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
+      graphiql: config.env === 'local',
     })
+    return handler(request, response)
   }
 }
 

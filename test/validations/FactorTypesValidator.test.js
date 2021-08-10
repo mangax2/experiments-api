@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import FactorTypesValidator from '../../src/validations/FactorTypesValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('FactorTypesValidator', () => {
   let target
@@ -12,7 +12,7 @@ describe('FactorTypesValidator', () => {
 
   describe('getSchema', () => {
     test('returns schema', () => {
-      db.factorType = {}
+      dbRead.factorType = {}
 
       const schema = [
         {

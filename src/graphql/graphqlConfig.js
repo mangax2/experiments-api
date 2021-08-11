@@ -1,6 +1,5 @@
 import graphqlHTTP from 'express-graphql'
 import { GraphQLError } from 'graphql'
-import { dbRead } from '../db/DbManager'
 import loaders from './loaders'
 import config from '../../config'
 import AuditManager from './GraphQLAuditManager'
@@ -58,7 +57,7 @@ function graphqlMiddlewareFunction(schema) {
     const handler = graphqlHTTP({
       schema,
       context: {
-        loaders: loaders.createLoaders(dbRead),
+        loaders: loaders.createLoaders(),
         getAuditInfo: entity => ({
           createdDate: args => formatDate(args, entity.created_date),
           createdUserId: entity.created_user_id,

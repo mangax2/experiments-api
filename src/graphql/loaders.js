@@ -36,7 +36,7 @@ function templatesBatchLoaderCallback() {
 const transactionalBatchResolverWrapper =
     () => (batchResolverFunction => (ids => batchResolverFunction(ids)))
 
-function createLoaders(tx) {
+function createLoaders() {
   const transactionalWrapper = transactionalBatchResolverWrapper()
 
   // This function is to be used for one-to-one relationships
@@ -46,53 +46,53 @@ function createLoaders(tx) {
 
   const experimentsByCriteriaLoader =
     new DataLoader(args =>
-      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg, tx))))
+      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
 
   const treatmentBySetIdLoader =
       new DataLoader(args =>
         Promise.all(_.map(args, arg =>
-          new TreatmentWithBlockService().getTreatmentsByBySetIds(arg, tx))))
+          new TreatmentWithBlockService().getTreatmentsByBySetIds(arg))))
 
   const unitsBySetIdLoader =
       new DataLoader(args =>
         Promise.all(_.map(args, arg =>
-          new ExperimentalUnitService().getExperimentalUnitsBySetIds(arg, tx))))
+          new ExperimentalUnitService().getExperimentalUnitsBySetIds(arg))))
 
   const groupByIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupsAndUnits(arg, tx))))
+        new GroupExperimentalUnitService().getGroupsAndUnits(arg))))
 
   const groupJsonBySetIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupsAndUnitsForSet(arg, tx))))
+        new GroupExperimentalUnitService().getGroupsAndUnitsForSet(arg))))
 
   const groupBySetIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getSetInformationBySetId(arg, tx))))
+        new GroupExperimentalUnitService().getSetInformationBySetId(arg))))
 
   const setsBySetIdsLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getSetInformationBySetIds(arg, tx))))
+        new GroupExperimentalUnitService().getSetInformationBySetIds(arg))))
 
   const designSpecDetailByExperimentIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new DesignSpecificationDetailService().getAdvancedParameters(arg, tx)
+        new DesignSpecificationDetailService().getAdvancedParameters(arg)
           .then(result => [result]))))
 
   const treatmentByExperimentIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new TreatmentWithBlockService().getTreatmentsByExperimentId(arg, tx))))
+        new TreatmentWithBlockService().getTreatmentsByExperimentId(arg))))
 
   const unitsByExperimentIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(arg, tx))))
+        new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(arg))))
 
   const blocksByBlockIdsLoader =
     new DataLoader(args =>
@@ -105,7 +105,7 @@ function createLoaders(tx) {
   const tagsByExperimentIdLoader =
     new DataLoader(args =>
       Promise.all(_.map(args, arg =>
-        new TagService().getTagsByExperimentId(arg, false, tx))))
+        new TagService().getTagsByExperimentId(arg, false))))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(dbRead.combinationElement.batchFind)

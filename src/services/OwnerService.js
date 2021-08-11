@@ -14,7 +14,7 @@ class OwnerService {
   @setErrorCode('1J1000')
   @Transactional('batchCreateOwners')
   batchCreateOwners(experimentsOwners, context, tx) {
-    return this.validator.validate(experimentsOwners, 'POST')
+    return this.validator.validate(experimentsOwners, 'POST', context)
       .then(() => dbWrite.owner.batchCreate(experimentsOwners, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }

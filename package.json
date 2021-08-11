@@ -27,7 +27,7 @@
   "dependencies": {
     "@babel/runtime": "7.8.3",
     "@monsantoit/cloud-foundry": "3.0.0",
-    "@monsantoit/config": "^0.10.0",
+    "@monsantoit/config": "0.10.0",
     "@monsantoit/custom-datadog-metrics-express-middleware": "0.0.4",
     "@monsantoit/error-decorator": "1.0.1",
     "@monsantoit/oauth-ping": "4.4.0",

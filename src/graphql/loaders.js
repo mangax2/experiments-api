@@ -32,80 +32,52 @@ function templateBatchLoaderCallback(ids) {
 function templatesBatchLoaderCallback() {
   return dbRead.experiments.all(true).then(data => [data])
 }
+// This function is to be used for one-to-one relationships
+// (e.g. Each Experiment has one and only one Analysis Model)
+const createDataLoader = batchLoaderCallback =>
+  new DataLoader(ids => batchLoaderCallback(ids))
 
-const transactionalBatchResolverWrapper =
-    () => (batchResolverFunction => (ids => batchResolverFunction(ids)))
+const createMultiDataLoader = batchLoaderCallback =>
+  new DataLoader(args => Promise.all(_.map(args, arg => batchLoaderCallback(arg))))
 
 function createLoaders() {
-  const transactionalWrapper = transactionalBatchResolverWrapper()
+  const experimentsByCriteriaLoader = createMultiDataLoader(
+    new ExperimentsService().getExperimentsByCriteria)
 
-  // This function is to be used for one-to-one relationships
-  // (e.g. Each Experiment has one and only one Analysis Model)
-  const createDataLoader = batchLoaderCallback =>
-    new DataLoader(transactionalWrapper(batchLoaderCallback))
+  const treatmentBySetIdLoader = createMultiDataLoader(
+    new TreatmentWithBlockService().getTreatmentsByBySetIds)
 
-  const experimentsByCriteriaLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg => new ExperimentsService().getExperimentsByCriteria(arg))))
+  const unitsBySetIdLoader = createMultiDataLoader(
+    new ExperimentalUnitService().getExperimentalUnitsBySetIds)
 
-  const treatmentBySetIdLoader =
-      new DataLoader(args =>
-        Promise.all(_.map(args, arg =>
-          new TreatmentWithBlockService().getTreatmentsByBySetIds(arg))))
+  const groupByIdLoader = createMultiDataLoader(
+    new GroupExperimentalUnitService().getGroupsAndUnits)
 
-  const unitsBySetIdLoader =
-      new DataLoader(args =>
-        Promise.all(_.map(args, arg =>
-          new ExperimentalUnitService().getExperimentalUnitsBySetIds(arg))))
+  const groupJsonBySetIdLoader = createMultiDataLoader(
+    new GroupExperimentalUnitService().getGroupsAndUnitsForSet)
 
-  const groupByIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupsAndUnits(arg))))
+  const groupBySetIdLoader = createMultiDataLoader(
+    new GroupExperimentalUnitService().getSetInformationBySetId)
 
-  const groupJsonBySetIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getGroupsAndUnitsForSet(arg))))
+  const setsBySetIdsLoader = createMultiDataLoader(
+    new GroupExperimentalUnitService().getSetInformationBySetIds)
 
-  const groupBySetIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getSetInformationBySetId(arg))))
+  const designSpecDetailByExperimentIdLoader = createMultiDataLoader(
+    arg => new DesignSpecificationDetailService().getAdvancedParameters(arg)
+      .then(result => [result]))
 
-  const setsBySetIdsLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new GroupExperimentalUnitService().getSetInformationBySetIds(arg))))
+  const treatmentByExperimentIdLoader = createMultiDataLoader(
+    new TreatmentWithBlockService().getTreatmentsByExperimentId)
 
-  const designSpecDetailByExperimentIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new DesignSpecificationDetailService().getAdvancedParameters(arg)
-          .then(result => [result]))))
+  const unitsByExperimentIdLoader = createMultiDataLoader(
+    new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate)
 
-  const treatmentByExperimentIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new TreatmentWithBlockService().getTreatmentsByExperimentId(arg))))
+  const blocksByBlockIdsLoader = createMultiDataLoader(dbRead.block.batchFind)
+  const locationAssociationByExperimentIdsLoader = createMultiDataLoader(
+    dbRead.locationAssociation.findByExperimentId)
 
-  const unitsByExperimentIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate(arg))))
-
-  const blocksByBlockIdsLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg => dbRead.block.batchFind(arg))))
-
-  const locationAssociationByExperimentIdsLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg => dbRead.locationAssociation.findByExperimentId(arg))))
-
-  const tagsByExperimentIdLoader =
-    new DataLoader(args =>
-      Promise.all(_.map(args, arg =>
-        new TagService().getTagsByExperimentId(arg, false))))
+  const tagsByExperimentIdLoader = createMultiDataLoader(
+    arg => TagService().getTagsByExperimentId(arg, false))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(dbRead.combinationElement.batchFind)

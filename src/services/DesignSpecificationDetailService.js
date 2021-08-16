@@ -60,7 +60,6 @@ class DesignSpecificationDetailService {
   }
 
   @setErrorCode('134000')
-  @Transactional('getAdvancedParameters')
   getAdvancedParameters = experimentId =>
     Promise.all([
       dbRead.refDesignSpecification.all(),

@@ -69,9 +69,12 @@ class GroupExperimentalUnitService {
   }
 
   @setErrorCode('1F5000')
-  batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
-    ? dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
-    : Promise.resolve())
+  batchDeleteExperimentalUnits = (unitDeletes, tx) => {
+    if (unitDeletes.length === 0) {
+      return Promise.resolve()
+    }
+    return dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
+  }
 
   @setErrorCode('1FA000')
   createExperimentalUnits = (experimentId, units, context, tx) => {

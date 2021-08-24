@@ -98,7 +98,7 @@ describe('OwnerService', () => {
       AppUtil.createPutResponse = mock()
 
       return target.batchUpdateOwners([], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testContext)
         expect(dbWrite.owner.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
       })
@@ -110,7 +110,7 @@ describe('OwnerService', () => {
       dbWrite.owner.batchUpdate = mockReject(error)
 
       return target.batchUpdateOwners([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testContext)
         expect(dbWrite.owner.batchUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(err).toEqual(error)
       })

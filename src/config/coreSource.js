@@ -1,7 +1,7 @@
-const env = process.env.ENV === 'local' ? 'dev' : process.env
+const env = process.env.ENV === 'local' ? 'dev' : process.env.ENV
 const formatVaultPath = relativePath => `vault://secret/cosmos/experiments/api/${env}/${relativePath}`
 
-const coreSource = {
+module.exports = {
   clientId: formatVaultPath('client/client_id'),
   clientSecret: formatVaultPath('client/client_secret'),
 
@@ -25,7 +25,3 @@ const coreSource = {
   databaseRoIdleTimeout: formatVaultPath('db-ro/idleTimeout'),
   databaseRoCa: formatVaultPath('db-ro/ca'),
 }
-
-console.info(coreSource)
-
-module.exports = coreSource

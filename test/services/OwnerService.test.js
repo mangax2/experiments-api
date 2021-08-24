@@ -122,7 +122,7 @@ describe('OwnerService', () => {
       dbWrite.owner.batchUpdate = mock()
 
       return target.batchUpdateOwners([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'PUT', testContext)
         expect(dbWrite.owner.batchUpdate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })

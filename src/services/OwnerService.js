@@ -28,7 +28,7 @@ class OwnerService {
   @setErrorCode('1J4000')
   @Transactional('batchUpdateOwners')
   batchUpdateOwners(experimentsOwners, context, tx) {
-    return this.validator.validate(experimentsOwners, 'PUT')
+    return this.validator.validate(experimentsOwners, 'PUT', context)
       .then(() => dbWrite.owner.batchUpdate(experimentsOwners, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }

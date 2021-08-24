@@ -1,5 +1,5 @@
 import GraphQLAuditManager from '../../src/graphql/GraphQLAuditManager'
-import db from '../../src/db/DbManager'
+import { dbWrite } from '../../src/db/DbManager'
 import { mockReject, mockResolve } from '../jestUtil'
 
 describe('GraphQLAuditManager', () => {
@@ -19,33 +19,33 @@ describe('GraphQLAuditManager', () => {
   describe('saveLogs', () => {
     test('calls batchCreate with the queries and clears the queue on success', async () => {
       const queries = [{ query: 'query 1' }, { query: 'query 2' }]
-      db.graphqlAudit.batchCreate = mockResolve()
+      dbWrite.graphqlAudit.batchCreate = mockResolve()
       GraphQLAuditManager.queue = queries
 
       await GraphQLAuditManager.saveLogs()
 
-      expect(db.graphqlAudit.batchCreate).toHaveBeenCalledWith(queries)
+      expect(dbWrite.graphqlAudit.batchCreate).toHaveBeenCalledWith(queries)
       expect(GraphQLAuditManager.queue).toEqual([])
     })
 
     test('calls batchCreate with the queries and does not clear the queue on failure', async () => {
       const queries = [{ query: 'query 1' }, { query: 'query 2' }]
-      db.graphqlAudit.batchCreate = mockReject()
+      dbWrite.graphqlAudit.batchCreate = mockReject()
       GraphQLAuditManager.queue = queries
 
       await GraphQLAuditManager.saveLogs()
 
-      expect(db.graphqlAudit.batchCreate).toHaveBeenCalledWith(queries)
+      expect(dbWrite.graphqlAudit.batchCreate).toHaveBeenCalledWith(queries)
       expect(GraphQLAuditManager.queue).toEqual(queries)
     })
 
     test('does not call batchCreate when no queries to save', async () => {
-      db.graphqlAudit.batchCreate = mockResolve()
+      dbWrite.graphqlAudit.batchCreate = mockResolve()
       GraphQLAuditManager.queue = []
 
       await GraphQLAuditManager.saveLogs()
 
-      expect(db.graphqlAudit.batchCreate).not.toHaveBeenCalled()
+      expect(dbWrite.graphqlAudit.batchCreate).not.toHaveBeenCalled()
     })
   })
 

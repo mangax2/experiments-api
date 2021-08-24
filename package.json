@@ -14,9 +14,9 @@
     "migrations": "node ./sqlMigration.js",
     "precommit": "npm run validateSchema && eslint src --ext .js",
     "start": "NODE_ENV=production node --max-http-header-size 64000 ./build/app",
-    "test": "jest --config .jestrc.json --detectOpenHandles",
-    "testCoverage": "jest --config .jestCoveragerc.json --detectOpenHandles",
-    "testDev": "jest --config .jestrc.json --watch",
+    "test": "NODE_ENV=UNITTEST jest --config .jestrc.json --detectOpenHandles",
+    "testCoverage": "NODE_ENV=UNITTEST jest --config .jestCoveragerc.json --detectOpenHandles",
+    "testDev": "NODE_ENV=UNITTEST jest --config .jestrc.json --watch",
     "validateSchema": "node ./src/graphql/scripts/verifySchema.js",
     "validateSwagger": "node ./src/swagger/validateSwagger.js"
   },

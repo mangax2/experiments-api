@@ -1,6 +1,6 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import kafkaConfig from '../../../src/config/kafkaConfig'
-import db from '../../../src/db/DbManager'
+import { dbWrite } from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
 import { sendKafkaNotification } from '../../../src/decorators/notifyChanges'
@@ -153,13 +153,13 @@ describe('SetsChangesListener', () => {
     describe('clearSet', () => {
       const testTx = { tx: {} }
       test('calls clearSetEntryIds and clearSetId', () => {
-        db.unit.batchClearEntryIds = mockResolve()
-        db.locationAssociation.removeBySetId = mockResolve()
+        dbWrite.unit.batchClearEntryIds = mockResolve()
+        dbWrite.locationAssociation.removeBySetId = mockResolve()
 
         const target = new SetsChangesListener()
         return target.clearSet(1, testTx).then(() => {
-          expect(db.unit.batchClearEntryIds).toHaveBeenCalledWith(1, testTx)
-          expect(db.locationAssociation.removeBySetId).toHaveBeenCalledWith(1, testTx)
+          expect(dbWrite.unit.batchClearEntryIds).toHaveBeenCalledWith(1, testTx)
+          expect(dbWrite.locationAssociation.removeBySetId).toHaveBeenCalledWith(1, testTx)
         })
       })
     })

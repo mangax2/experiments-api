@@ -19,7 +19,7 @@ describe('OwnerService', () => {
       AppUtil.createPostResponse = mock()
 
       return target.batchCreateOwners([], testContext, testTx).then(() => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testContext)
         expect(dbWrite.owner.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPostResponse).toHaveBeenCalledWith({})
       })
@@ -31,7 +31,7 @@ describe('OwnerService', () => {
       dbWrite.owner.batchCreate = mockReject(error)
 
       return target.batchCreateOwners([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testContext)
         expect(dbWrite.owner.batchCreate).toHaveBeenCalledWith([], testContext, testTx)
         expect(err).toEqual(error)
       })
@@ -43,7 +43,7 @@ describe('OwnerService', () => {
       dbWrite.owner.batchCreate = mock()
 
       return target.batchCreateOwners([], testContext, testTx).then(() => {}, (err) => {
-        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST')
+        expect(target.validator.validate).toHaveBeenCalledWith([], 'POST', testContext)
         expect(dbWrite.owner.batchCreate).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })

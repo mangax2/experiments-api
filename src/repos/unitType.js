@@ -14,7 +14,7 @@ class unitTypeRepo {
   all = () => this.rep.any('SELECT * FROM ref_unit_type')
 
   @setErrorCode('5M3000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM ref_unit_type WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })

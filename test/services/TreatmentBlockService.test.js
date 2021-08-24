@@ -1,5 +1,5 @@
 import TreatmentBlockService from '../../src/services/TreatmentBlockService'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import { mock, mockReject, mockResolve } from '../jestUtil'
 
@@ -8,10 +8,10 @@ describe('TreatmentBlockService', () => {
 
   describe('getTreatmentBlocksByExperimentId', () => {
     test('there is no block, return empty array', () => {
-      db.block.findByExperimentId = mockResolve([])
+      dbRead.block.findByExperimentId = mockResolve([])
       const target = new TreatmentBlockService()
 
-      return target.getTreatmentBlocksByExperimentId(1, testTx)
+      return target.getTreatmentBlocksByExperimentId(1)
         .then((data) => {
           expect(data).toEqual([])
         })
@@ -26,14 +26,14 @@ describe('TreatmentBlockService', () => {
         { id: 1, block_id: 11, treatment_id: 111 },
         { id: 2, block_id: 12, treatment_id: 112 },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksWithBlockInfo = mockResolve()
 
-      return target.getTreatmentBlocksByExperimentId(1, testTx).then(() => {
-        expect(db.treatmentBlock.batchFindByBlockIds).toHaveBeenCalledWith([11, 12], testTx)
+      return target.getTreatmentBlocksByExperimentId(1).then(() => {
+        expect(dbRead.treatmentBlock.batchFindByBlockIds).toHaveBeenCalledWith([11, 12])
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
       })
     })
@@ -44,7 +44,7 @@ describe('TreatmentBlockService', () => {
       const target = new TreatmentBlockService()
       target.locationAssocWithBlockService.getBySetId = mockResolve(null)
 
-      return target.getTreatmentBlocksBySetId(1, testTx)
+      return target.getTreatmentBlocksBySetId(1)
         .then((data) => {
           expect(data).toEqual([])
         })
@@ -58,16 +58,16 @@ describe('TreatmentBlockService', () => {
       ]
 
       const locationAssociation = { set_id: 1, block_id: 11 }
-      db.block.findByBlockId = mockResolve(block)
-      db.treatmentBlock.findByBlockId = mockResolve(treatmentBlocks)
+      dbRead.block.findByBlockId = mockResolve(block)
+      dbRead.treatmentBlock.findByBlockId = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.locationAssocWithBlockService.getBySetId = mockResolve(locationAssociation)
       target.getTreatmentBlocksWithBlockInfo = mockResolve()
 
-      return target.getTreatmentBlocksBySetId(1, testTx).then(() => {
-        expect(db.block.findByBlockId).toHaveBeenCalledWith(11, testTx)
-        expect(db.treatmentBlock.findByBlockId).toHaveBeenCalledWith(11, testTx)
+      return target.getTreatmentBlocksBySetId(1).then(() => {
+        expect(dbRead.block.findByBlockId).toHaveBeenCalledWith(11)
+        expect(dbRead.treatmentBlock.findByBlockId).toHaveBeenCalledWith(11)
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, [block])
       })
     })
@@ -77,7 +77,7 @@ describe('TreatmentBlockService', () => {
     test('empty treatmentIds, return []', () => {
       const target = new TreatmentBlockService()
 
-      return target.getTreatmentBlocksByTreatmentIds([], testTx)
+      return target.getTreatmentBlocksByTreatmentIds([])
         .then((data) => {
           expect(data).toEqual([])
         })
@@ -90,15 +90,15 @@ describe('TreatmentBlockService', () => {
         { id: 2, block_id: 11, treatment_id: 112 },
       ]
 
-      db.block.batchFind = mockResolve(blocks)
-      db.treatmentBlock.batchFindByTreatmentIds = mockResolve(treatmentBlocks)
+      dbRead.block.batchFind = mockResolve(blocks)
+      dbRead.treatmentBlock.batchFindByTreatmentIds = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksWithBlockInfo = mock()
 
-      return target.getTreatmentBlocksByTreatmentIds([111, 112], testTx).then(() => {
-        expect(db.block.batchFind).toHaveBeenCalledWith([11], testTx)
-        expect(db.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([111, 112], testTx)
+      return target.getTreatmentBlocksByTreatmentIds([111, 112]).then(() => {
+        expect(dbRead.block.batchFind).toHaveBeenCalledWith([11])
+        expect(dbRead.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([111, 112])
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
       })
     })
@@ -108,7 +108,7 @@ describe('TreatmentBlockService', () => {
     test('empty ids, return []', () => {
       const target = new TreatmentBlockService()
 
-      return target.getTreatmentBlocksByIds([], testTx)
+      return target.getTreatmentBlocksByIds([])
         .then((data) => {
           expect(data).toEqual([])
         })
@@ -121,15 +121,15 @@ describe('TreatmentBlockService', () => {
         { id: 2, block_id: 11, treatment_id: 112 },
       ]
 
-      db.block.batchFind = mockResolve(blocks)
-      db.treatmentBlock.batchFindByIds = mockResolve(treatmentBlocks)
+      dbRead.block.batchFind = mockResolve(blocks)
+      dbRead.treatmentBlock.batchFindByIds = mockResolve(treatmentBlocks)
 
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksWithBlockInfo = mock()
 
-      return target.getTreatmentBlocksByIds([1, 2], testTx).then(() => {
-        expect(db.block.batchFind).toHaveBeenCalledWith([11], testTx)
-        expect(db.treatmentBlock.batchFindByIds).toHaveBeenCalledWith([1, 2], testTx)
+      return target.getTreatmentBlocksByIds([1, 2]).then(() => {
+        expect(dbRead.block.batchFind).toHaveBeenCalledWith([11])
+        expect(dbRead.treatmentBlock.batchFindByIds).toHaveBeenCalledWith([1, 2])
         expect(target.getTreatmentBlocksWithBlockInfo).toHaveBeenCalledWith(treatmentBlocks, blocks)
       })
     })
@@ -169,13 +169,13 @@ describe('TreatmentBlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
+      dbRead.block.findByExperimentId = mockResolve(blocks)
       const target = new TreatmentBlockService()
       target.createTreatmentBlocks = mockResolve()
 
       return target.createTreatmentBlocksByExperimentId(1, [], {}, testTx)
         .then(() => {
-          expect(db.block.findByExperimentId).toHaveBeenCalledWith(1, testTx)
+          expect(dbRead.block.findByExperimentId).toHaveBeenCalledWith(1)
           expect(target.createTreatmentBlocks).toHaveBeenCalledWith([], blocks, {}, testTx)
         })
     })
@@ -208,7 +208,7 @@ describe('TreatmentBlockService', () => {
     test('uses the blocks and treatments to generate treatmentBlocks', async () => {
       const target = new TreatmentBlockService()
       target.createTreatmentBlockModels = mock(treatmentBlocks)
-      db.treatmentBlock.batchCreate = mockResolve()
+      dbWrite.treatmentBlock.batchCreate = mockResolve()
 
       await target.createTreatmentBlocks(treatments, blocks, {}, testTx)
 
@@ -218,11 +218,11 @@ describe('TreatmentBlockService', () => {
     test('returns the treatment blocks that are generated', async () => {
       const target = new TreatmentBlockService()
       target.createTreatmentBlockModels = mock(treatmentBlocks)
-      db.treatmentBlock.batchCreate = mockResolve(treatmentBlocks)
+      dbWrite.treatmentBlock.batchCreate = mockResolve(treatmentBlocks)
 
       const result = await target.createTreatmentBlocks(treatments, blocks, {}, testTx)
 
-      expect(db.treatmentBlock.batchCreate).toHaveBeenCalledWith(treatmentBlocks, {}, testTx)
+      expect(dbWrite.treatmentBlock.batchCreate).toHaveBeenCalledWith(treatmentBlocks, {}, testTx)
       expect(result).toBe(treatmentBlocks)
     })
   })
@@ -232,64 +232,60 @@ describe('TreatmentBlockService', () => {
     const creates = [{}, {}]
     const updates = [{}]
     const deletes = [{ id: 1 }]
-    const createMockedDb = () => ({
-      block: { findByExperimentId: mockResolve() },
-      treatmentBlock: {
-        batchFindByTreatmentIds: mockResolve(),
-        batchCreate: mockResolve(),
-        batchRemove: mockResolve(),
-        batchUpdate: mockResolve(),
-      },
-    })
 
     test('gets the existing blocks and treatmentBlocks from the database', async () => {
-      const mockedDb = createMockedDb()
-      const target = new TreatmentBlockService({}, {}, mockedDb)
+      const target = new TreatmentBlockService({}, {})
       target.createTreatmentBlockModels = mock()
-      target.splitTreatmentBlocksToActions = mock({})
+      target.splitTreatmentBlocksToActions = mockResolve()
+      dbRead.block.findByExperimentId = mockResolve()
+      dbRead.treatmentBlock.batchFindByTreatmentIds = mockResolve()
 
       await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
 
-      expect(mockedDb.block.findByExperimentId).toHaveBeenCalledWith(5, testTx)
-      expect(mockedDb.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([3, 7], testTx)
+      expect(dbRead.block.findByExperimentId).toHaveBeenCalledWith(5)
+      expect(dbRead.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([3, 7])
     })
 
     test('calls the treatment block repo to add, update, and delete', async () => {
-      const mockedDb = createMockedDb()
-      const target = new TreatmentBlockService({}, {}, mockedDb)
+      const target = new TreatmentBlockService({}, {})
       target.createTreatmentBlockModels = mock()
       target.splitTreatmentBlocksToActions = mock({
         creates,
         updates,
         deletes,
       })
+      dbWrite.treatmentBlock.batchCreate = mockResolve()
+      dbWrite.treatmentBlock.batchRemove = mockResolve()
+      dbWrite.treatmentBlock.batchUpdate = mockResolve()
 
       await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
 
-      expect(mockedDb.treatmentBlock.batchCreate).toHaveBeenCalledWith(creates, {}, testTx)
-      expect(mockedDb.treatmentBlock.batchRemove).toHaveBeenCalledWith([1], testTx)
-      expect(mockedDb.treatmentBlock.batchUpdate).toHaveBeenCalledWith(updates, {}, testTx)
+      expect(dbWrite.treatmentBlock.batchCreate).toHaveBeenCalledWith(creates, {}, testTx)
+      expect(dbWrite.treatmentBlock.batchRemove).toHaveBeenCalledWith([1], testTx)
+      expect(dbWrite.treatmentBlock.batchUpdate).toHaveBeenCalledWith(updates, {}, testTx)
     })
 
     test('does not call the treatment block repo to add, update, and delete if retrieving treatmentBlocks fails', async () => {
-      const mockedDb = createMockedDb()
-      mockedDb.treatmentBlock.batchFindByTreatmentIds = mockReject()
-      const target = new TreatmentBlockService({}, {}, mockedDb)
+      const target = new TreatmentBlockService({}, {})
       target.createTreatmentBlockModels = mock()
       target.splitTreatmentBlocksToActions = mock({
         creates,
         updates,
         deletes,
       })
+      dbRead.treatmentBlock.batchFindByTreatmentIds = mockReject()
+      dbWrite.treatmentBlock.batchCreate = mockResolve()
+      dbWrite.treatmentBlock.batchRemove = mockResolve()
+      dbWrite.treatmentBlock.batchUpdate = mockResolve()
 
       try {
         await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
       } catch {
         // no-op
       } finally {
-        expect(mockedDb.treatmentBlock.batchCreate).not.toHaveBeenCalled()
-        expect(mockedDb.treatmentBlock.batchRemove).not.toHaveBeenCalled()
-        expect(mockedDb.treatmentBlock.batchUpdate).not.toHaveBeenCalled()
+        expect(dbWrite.treatmentBlock.batchCreate).not.toHaveBeenCalled()
+        expect(dbWrite.treatmentBlock.batchRemove).not.toHaveBeenCalled()
+        expect(dbWrite.treatmentBlock.batchUpdate).not.toHaveBeenCalled()
       }
     })
   })
@@ -498,7 +494,7 @@ describe('TreatmentBlockService', () => {
       target.getTreatmentBlocksBySetId = mock()
       AppError.badRequest = mock('')
 
-      expect(() => target.getTreatmentDetailsBySetId(undefined, testTx)).toThrow()
+      expect(() => target.getTreatmentDetailsBySetId(undefined)).toThrow()
     })
 
     test('calls batchFindAllBySetId and batchFindAllTreatmentLevelDetails and mapTreatmentLevelsToOutputFormat', () => {
@@ -523,13 +519,13 @@ describe('TreatmentBlockService', () => {
           value: { id: 4 },
         },
       ]
-      db.treatment.batchFindAllTreatmentLevelDetails = mockResolve(treatmentLevelDetails)
+      dbRead.treatment.batchFindAllTreatmentLevelDetails = mockResolve(treatmentLevelDetails)
 
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1, testTx).then(() => {
-        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1, testTx)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1, 2], testTx)
+      return target.getTreatmentDetailsBySetId(1).then(() => {
+        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1)
+        expect(dbRead.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1, 2])
         expect(target.mapTreatmentLevelsToOutputFormat).toHaveBeenCalledWith(treatmentLevelDetails)
       })
     })
@@ -539,14 +535,14 @@ describe('TreatmentBlockService', () => {
       const error = { message: 'error' }
       target.getTreatmentBlocksBySetId = mockReject(error)
 
-      db.treatment.batchFindAllTreatmentLevelDetails = mock()
+      dbRead.treatment.batchFindAllTreatmentLevelDetails = mock()
 
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1, testTx).then(() => { }, (err) => {
+      return target.getTreatmentDetailsBySetId(1).then(() => { }, (err) => {
         expect(err).toEqual(error)
-        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1, testTx)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
+        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1)
+        expect(dbRead.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
       })
     })
@@ -555,13 +551,13 @@ describe('TreatmentBlockService', () => {
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksBySetId = mockResolve([{ treatment_id: 1 }, { treatment_id: 2 }])
 
-      db.treatment.batchFindAllTreatmentLevelDetails = mockReject('error')
+      dbRead.treatment.batchFindAllTreatmentLevelDetails = mockReject('error')
 
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1, testTx).then(() => { }, () => {
-        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1, testTx)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1, 2], testTx)
+      return target.getTreatmentDetailsBySetId(1).then(() => { }, () => {
+        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1)
+        expect(dbRead.treatment.batchFindAllTreatmentLevelDetails).toHaveBeenCalledWith([1, 2])
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
       })
     })
@@ -570,14 +566,14 @@ describe('TreatmentBlockService', () => {
       const target = new TreatmentBlockService()
       target.getTreatmentBlocksBySetId = mockResolve([])
 
-      db.treatment.batchFindAllTreatmentLevelDetails = mock()
+      dbRead.treatment.batchFindAllTreatmentLevelDetails = mock()
       AppError.notFound = mock('')
 
       target.mapTreatmentLevelsToOutputFormat = mock()
 
-      return target.getTreatmentDetailsBySetId(1, testTx).then(() => { }, () => {
-        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1, testTx)
-        expect(db.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
+      return target.getTreatmentDetailsBySetId(1).then(() => { }, () => {
+        expect(target.getTreatmentBlocksBySetId).toHaveBeenCalledWith(1)
+        expect(dbRead.treatment.batchFindAllTreatmentLevelDetails).not.toHaveBeenCalled()
         expect(target.mapTreatmentLevelsToOutputFormat).not.toHaveBeenCalled()
         expect(AppError.notFound).toHaveBeenCalled()
       })

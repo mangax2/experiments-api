@@ -1,12 +1,11 @@
 import _ from 'lodash'
-import Transactional from '@monsantoit/pg-transactional'
 import config from '../../config'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -17,10 +16,9 @@ class SecurityService {
   }
 
   @setErrorCode('1O1000')
-  @Transactional('permissionsCheck')
-  permissionsCheck(id, context, isTemplate, tx) {
+  permissionsCheck(id, context, isTemplate) {
     if (context.userId) {
-      return db.experiments.find(id, isTemplate, tx)
+      return dbRead.experiments.find(id, isTemplate)
         .then((data) => {
           if (!data) {
             const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
@@ -28,7 +26,7 @@ class SecurityService {
             console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
             throw AppError.notFound(errorMessage, undefined, getFullErrorCode('1O1001'))
           } else {
-            return this.getUserPermissionsForExperiment(id, context, tx).then((result) => {
+            return this.getUserPermissionsForExperiment(id, context).then((result) => {
               if (result.length === 0) {
                 console.error(`Access denied for ${context.userId} on id ${id}`)
                 throw AppError.unauthorized('Access denied', undefined, getFullErrorCode('1O1002'))
@@ -66,10 +64,10 @@ class SecurityService {
     })
 
   @setErrorCode('1O4000')
-  getUserPermissionsForExperiment(id, context, tx) {
+  getUserPermissionsForExperiment(id, context) {
     const userPermissions = []
-    return tx.batch([
-      this.ownerService.getOwnersByExperimentId(id, tx),
+    return Promise.all([
+      this.ownerService.getOwnersByExperimentId(id),
       this.getGroupsByUserId(context.userId)]).then((data) => {
       if (data[0] && data[1]) {
         const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)

@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import FactorLevelAssociationValidator from '../../src/validations/FactorLevelAssociationValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('FactorLevelAssociationValidator', () => {
   let target
@@ -14,14 +14,14 @@ describe('FactorLevelAssociationValidator', () => {
     test('returns validation schema', () => {
       expect(FactorLevelAssociationValidator.POST_VALIDATION_SCHEMA).toEqual([
         { paramName: 'associatedLevelId', type: 'numeric', required: true },
-        { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'associatedLevelId', type: 'refData', entity: dbRead.factorLevel },
         { paramName: 'nestedLevelId', type: 'numeric', required: true },
-        { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'nestedLevelId', type: 'refData', entity: dbRead.factorLevel },
         {
           paramName: 'FactorLevelAssociation',
           type: 'businessKey',
           keys: ['associatedLevelId', 'nestedLevelId'],
-          entity: db.factorLevelAssociation,
+          entity: dbRead.factorLevelAssociation,
         },
       ])
     })
@@ -31,14 +31,14 @@ describe('FactorLevelAssociationValidator', () => {
     test('returns POST schema for POST operation', () => {
       expect(target.getSchema('POST')).toEqual([
         { paramName: 'associatedLevelId', type: 'numeric', required: true },
-        { paramName: 'associatedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'associatedLevelId', type: 'refData', entity: dbRead.factorLevel },
         { paramName: 'nestedLevelId', type: 'numeric', required: true },
-        { paramName: 'nestedLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'nestedLevelId', type: 'refData', entity: dbRead.factorLevel },
         {
           paramName: 'FactorLevelAssociation',
           type: 'businessKey',
           keys: ['associatedLevelId', 'nestedLevelId'],
-          entity: db.factorLevelAssociation,
+          entity: dbRead.factorLevelAssociation,
         },
       ])
     })

@@ -12,16 +12,16 @@ class factorRepo {
   repository = () => this.rep
 
   @setErrorCode('572000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM factor WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('573000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
 
   @setErrorCode('574000')
-  all = (tx = this.rep) => tx.any('SELECT * FROM factor')
+  all = () => this.rep.any('SELECT * FROM factor')
 
   @setErrorCode('575000')
   batchCreate = (factors, context, tx = this.rep) => {
@@ -90,22 +90,22 @@ class factorRepo {
   }
 
   @setErrorCode('578000')
-  findByBusinessKey = (keys, tx = this.rep) => tx.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys)
+  findByBusinessKey = (keys) => this.rep.oneOrNone('SELECT * FROM factor WHERE experiment_id=$1 and name=$2', keys)
 
   @setErrorCode('579000')
-  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
+  batchFindByBusinessKey = (batchKeys) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],
       name: obj.keys[1],
       id: obj.updateId,
     }))
     const query = `WITH d(experiment_id, name, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'name', 'id'])}) select entity.experiment_id, entity.name from public.factor entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) and entity.name = d.name and (d.id is null or entity.id != CAST(d.id as integer))`
-    return tx.any(query)
+    return this.rep.any(query)
   }
 
   @setErrorCode('57A000')
-  batchFindByExperimentId = (experimentIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
+  batchFindByExperimentId = (experimentIds) => {
+    return this.rep.any('SELECT * FROM factor WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])

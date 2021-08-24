@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import DependentVariablesValidator from '../../src/validations/DependentVariablesValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('DependentVariablesValidator', () => {
   let target
@@ -12,8 +12,8 @@ describe('DependentVariablesValidator', () => {
 
   describe('getSchema', () => {
     test('returns post schema', () => {
-      db.experiments = {}
-      db.dependentVariable = {}
+      dbRead.experiments = {}
+      dbRead.dependentVariable = {}
       const schema = [
         { paramName: 'required', type: 'boolean', required: true },
         {
@@ -33,8 +33,8 @@ describe('DependentVariablesValidator', () => {
     })
 
     test('returns put schema', () => {
-      db.experiments = {}
-      db.dependentVariable = {}
+      dbRead.experiments = {}
+      dbRead.dependentVariable = {}
       const schema = [
         { paramName: 'required', type: 'boolean', required: true },
         {

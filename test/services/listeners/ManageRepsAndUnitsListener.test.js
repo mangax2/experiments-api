@@ -1,7 +1,6 @@
 import VaultUtil from '../../../src/services/utility/VaultUtil'
 import kafkaConfig from '../../../src/config/kafkaConfig'
-import SetEntryRemovalService from '../../../src/services/prometheus/SetEntryRemovalService'
-import db from '../../../src/db/DbManager'
+import { dbRead } from '../../../src/db/DbManager'
 import { mockResolve } from '../../jestUtil'
 
 jest.mock('kafka-node')
@@ -75,10 +74,8 @@ describe('ManageRepsAndUnitsListener', () => {
         const consumer = {}
         target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.resolve())
         target.consumer = consumer
-        SetEntryRemovalService.addWarning = jest.fn()
 
         return target.dataHandler([message], 'topic', 'partition').then(() => {
-          expect(SetEntryRemovalService.addWarning).not.toBeCalled()
           expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ setEntryId: 9886, rep: 1, treatmentId: 246 }] })
         })
       })
@@ -89,10 +86,8 @@ describe('ManageRepsAndUnitsListener', () => {
         const consumer = {}
         target.adjustExperimentWithRepPackChanges = jest.fn(() => Promise.reject())
         target.consumer = consumer
-        SetEntryRemovalService.addWarning = jest.fn()
 
         return target.dataHandler([message], 'topic', 'partition').then(() => {
-          expect(SetEntryRemovalService.addWarning).toBeCalled()
           expect(target.adjustExperimentWithRepPackChanges).toBeCalledWith({ setId: '1234', entryChanges: [{ rep: 1, treatmentId: 246 }] })
         })
       })
@@ -116,12 +111,12 @@ describe('ManageRepsAndUnitsListener', () => {
           { treatment_id: 25, block_id: 3 },
           { treatment_id: 20, block_id: 3 },
         ]
-        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+        dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
-          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
         })
@@ -142,12 +137,12 @@ describe('ManageRepsAndUnitsListener', () => {
           { treatment_id: 25, block_id: 3 },
           { treatment_id: 20, block_id: 3 },
         ]
-        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+        dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch(() => {
-          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5, testTx)
+          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         })
@@ -168,7 +163,7 @@ describe('ManageRepsAndUnitsListener', () => {
           { treatment_id: 25, block_id: 3 },
           { treatment_id: 20, block_id: 3 },
         ]
-        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+        dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 
@@ -197,7 +192,7 @@ describe('ManageRepsAndUnitsListener', () => {
           { treatment_id: 25, block_id: 3 },
           { treatment_id: 20, block_id: 3 },
         ]
-        db.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
+        dbRead.treatmentBlock.batchFindByBlockIds = mockResolve(treatmentBlocks)
         ManageRepsAndUnitsListener.sendResponseMessage = jest.fn()
         const testTx = { tx: {} }
 

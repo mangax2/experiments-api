@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import ExperimentsService from './ExperimentsService'
 import TreatmentService from './TreatmentService'
 import TreatmentBlockService from './TreatmentBlockService'
@@ -16,20 +16,16 @@ class TreatmentWithBlockService {
   }
 
   @setErrorCode('1Z1000')
-  @Transactional('getTreatmentsByExperimentIdWithTemplateCheck')
-  getTreatmentsByExperimentIdWithTemplateCheck(id, isTemplate, context, tx) {
-    return this.experimentsService.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
-      .then(() => this.getTreatmentsByExperimentId(id, tx))
+  getTreatmentsByExperimentIdWithTemplateCheck(id, isTemplate, context) {
+    return this.experimentsService.findExperimentWithTemplateCheck(id, isTemplate, context)
+      .then(() => this.getTreatmentsByExperimentId(id))
   }
 
   @setErrorCode('1Z2000')
-  @Transactional('getTreatmentsByExperimentId')
-  getTreatmentsByExperimentId = (id, tx) => db.treatment.findAllByExperimentId(id, tx)
+  getTreatmentsByExperimentId = id => dbRead.treatment.findAllByExperimentId(id)
 
   @setErrorCode('1Z3000')
-  @Transactional('getTreatmentsByBySetIds')
-  getTreatmentsByBySetIds = (ids, tx) =>
-    db.treatment.batchFindAllBySetId(ids, tx)
+  getTreatmentsByBySetIds = ids => dbRead.treatment.batchFindAllBySetId(ids)
 
   @setErrorCode('1Z6000')
   @Transactional('createTreatments')

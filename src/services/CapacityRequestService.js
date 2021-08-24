@@ -5,7 +5,7 @@ import AppUtil from './utility/AppUtil'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
-import db from '../db/DbManager'
+import { dbWrite, dbRead } from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -80,10 +80,10 @@ class CapacityRequestService {
   @setErrorCode('104000')
   @Transactional('capacityRequestSync')
   syncCapacityRequestDataWithExperiment(experimentId, capacityRequestData, context, tx) {
-    return this.securityService.permissionsCheck(experimentId, context, false, tx).then(() => {
+    return this.securityService.permissionsCheck(experimentId, context, false).then(() => {
       const syncPromises = []
       const designSpecificationDetailValues = _.pick(capacityRequestData, ['locations', 'reps'])
-      return db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx)
+      return dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId)
         .then((response) => {
           if (designSpecificationDetailValues.locations &&
             (designSpecificationDetailValues.locations < response.max)) {
@@ -111,8 +111,8 @@ class CapacityRequestService {
                 unitSpecificationDetailValues, experimentId, context, tx,
               ))
           }
-          syncPromises.push(db
-            .experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
+          syncPromises.push(
+            dbWrite.experiments.updateCapacityRequestSyncDate(experimentId, context, tx))
 
           return tx.batch(syncPromises).then(() => AppUtil.createNoContentResponse())
         })

@@ -1,5 +1,5 @@
 import BlockService from '../../src/services/BlockService'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 import AppError from '../../src/services/utility/AppError'
 import { mockReject, mockResolve, mock } from '../jestUtil'
 
@@ -12,12 +12,12 @@ describe('BlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.block.batchCreateByExperimentId = mockResolve([])
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbWrite.block.batchCreateByExperimentId = mockResolve([])
       const target = new BlockService()
       return target.createOnlyNewBlocksByExperimentId(1, ['block3', 'block3', 'block2'], {}, testTx)
         .then(() => {
-          expect(db.block.batchCreateByExperimentId).toHaveBeenCalledWith(1, ['block3'], {}, testTx)
+          expect(dbWrite.block.batchCreateByExperimentId).toHaveBeenCalledWith(1, ['block3'], {}, testTx)
         })
     })
 
@@ -26,12 +26,12 @@ describe('BlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.block.batchCreateByExperimentId = mockResolve([])
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbWrite.block.batchCreateByExperimentId = mockResolve([])
       const target = new BlockService()
       return target.createOnlyNewBlocksByExperimentId(1, ['block1', 'block2'], {}, testTx)
         .then(() => {
-          expect(db.block.batchCreateByExperimentId).toHaveBeenCalledWith(1, [], {}, testTx)
+          expect(dbWrite.block.batchCreateByExperimentId).toHaveBeenCalledWith(1, [], {}, testTx)
         })
     })
   })
@@ -42,15 +42,15 @@ describe('BlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.block.batchRemove = mockResolve([])
-      db.locationAssociation.findByExperimentId = mockResolve([])
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbWrite.block.batchRemove = mockResolve([])
+      dbRead.locationAssociation.findByExperimentId = mockResolve([])
 
       const target = new BlockService()
 
       return target.removeBlocksByExperimentId(1, ['block2', 'block2'], testTx)
         .then(() => {
-          expect(db.block.batchRemove).toHaveBeenCalledWith([11], testTx)
+          expect(dbWrite.block.batchRemove).toHaveBeenCalledWith([11], testTx)
         })
     })
 
@@ -59,14 +59,14 @@ describe('BlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.block.batchRemove = mockResolve([])
-      db.locationAssociation.findByExperimentId = mockResolve([])
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbWrite.block.batchRemove = mockResolve([])
+      dbRead.locationAssociation.findByExperimentId = mockResolve([])
 
       const target = new BlockService()
       return target.removeBlocksByExperimentId(1, ['block1', 'block2'], testTx)
         .then(() => {
-          expect(db.block.batchRemove).toHaveBeenCalledWith([], testTx)
+          expect(dbWrite.block.batchRemove).toHaveBeenCalledWith([], testTx)
         })
     })
 
@@ -76,9 +76,9 @@ describe('BlockService', () => {
         { id: 12, name: 'block2' },
       ]
       const testErr = { message: 'Ya dun goofed', status: 400 }
-      db.block.findByExperimentId = mockResolve(blocks)
-      db.block.batchRemove = mockResolve([])
-      db.locationAssociation.findByExperimentId = mockResolve([{ block_id: 11, id: 1 }])
+      dbRead.block.findByExperimentId = mockResolve(blocks)
+      dbWrite.block.batchRemove = mockResolve([])
+      dbRead.locationAssociation.findByExperimentId = mockResolve([{ block_id: 11, id: 1 }])
       AppError.badRequest = mock(testErr)
 
       const target = new BlockService()
@@ -87,7 +87,7 @@ describe('BlockService', () => {
         .catch((err) => {
           expect(err).toBe(testErr)
           expect(AppError.badRequest).toHaveBeenCalledWith('Cannot remove blocks that already have sets associated to them', [{ id: 11, name: 'block1' }], '212001')
-          expect(db.block.batchRemove).not.toHaveBeenCalled()
+          expect(dbWrite.block.batchRemove).not.toHaveBeenCalled()
         })
     })
   })
@@ -130,14 +130,14 @@ describe('BlockService', () => {
       const testError = { message: 'test message', status: 500 }
       const target = new BlockService()
       target.securityService = { permissionsCheck: mockReject(testError) }
-      db.block.batchUpdate = mockResolve()
+      dbWrite.block.batchUpdate = mockResolve()
       const renamedBlocks = [{ id: 2, name: 'block 2' }]
       const testContext = { userId: 'testUser' }
 
       return target.renameBlocks(5, false, renamedBlocks, testContext, testTx).catch((err) => {
         expect(err).toBe(testError)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(5, testContext, false, testTx)
-        expect(db.block.batchUpdate).not.toHaveBeenCalledWith()
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(5, testContext, false)
+        expect(dbWrite.block.batchUpdate).not.toHaveBeenCalledWith()
       })
     })
 
@@ -146,14 +146,14 @@ describe('BlockService', () => {
       const target = new BlockService()
       target.securityService = { permissionsCheck: mockResolve() }
       target.validator = { validate: mockReject(testError) }
-      db.block.batchUpdate = mockResolve()
+      dbWrite.block.batchUpdate = mockResolve()
       const renamedBlocks = [{ id: 2, name: 'block 2' }]
       const testContext = { userId: 'testUser' }
 
       return target.renameBlocks(5, false, renamedBlocks, testContext, testTx).catch((err) => {
         expect(err).toBe(testError)
-        expect(target.validator.validate).toHaveBeenCalledWith(renamedBlocks, 'PATCH', testTx)
-        expect(db.block.batchUpdate).not.toHaveBeenCalledWith()
+        expect(target.validator.validate).toHaveBeenCalledWith(renamedBlocks, 'PATCH')
+        expect(dbWrite.block.batchUpdate).not.toHaveBeenCalledWith()
       })
     })
 
@@ -162,8 +162,8 @@ describe('BlockService', () => {
       const target = new BlockService()
       target.securityService = { permissionsCheck: mockResolve() }
       target.validator = { validate: mockResolve() }
-      db.block.findByExperimentId = mockResolve([])
-      db.block.batchUpdate = mockResolve()
+      dbRead.block.findByExperimentId = mockResolve([])
+      dbWrite.block.batchUpdate = mockResolve()
       const renamedBlocks = [{ id: 2, name: 'block 2' }]
       const testContext = { userId: 'testUser' }
       AppError.badRequest = mock(testError)
@@ -171,7 +171,7 @@ describe('BlockService', () => {
       return target.renameBlocks(5, false, renamedBlocks, testContext, testTx).catch((err) => {
         expect(err).toBe(testError)
         expect(AppError.badRequest).toHaveBeenCalledWith('At least one block does not belong to the specified experiment', renamedBlocks, '213001')
-        expect(db.block.batchUpdate).not.toHaveBeenCalledWith()
+        expect(dbWrite.block.batchUpdate).not.toHaveBeenCalledWith()
       })
     })
 
@@ -179,13 +179,13 @@ describe('BlockService', () => {
       const target = new BlockService()
       target.securityService = { permissionsCheck: mockResolve() }
       target.validator = { validate: mockResolve() }
-      db.block.findByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
-      db.block.batchUpdate = mockResolve()
+      dbRead.block.findByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
+      dbWrite.block.batchUpdate = mockResolve()
       const renamedBlocks = [{ id: 2, name: 'block 2' }]
       const testContext = { userId: 'testUser' }
 
       return target.renameBlocks(5, false, renamedBlocks, testContext, testTx).then(() => {
-        expect(db.block.batchUpdate).toHaveBeenCalledWith(renamedBlocks, testContext, testTx)
+        expect(dbWrite.block.batchUpdate).toHaveBeenCalledWith(renamedBlocks, testContext, testTx)
       })
     })
   })

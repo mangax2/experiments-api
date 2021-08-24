@@ -43,16 +43,15 @@ class TreatmentDetailsService {
   }
 
   @setErrorCode('1Q1000')
-  @Transactional('getAllTreatmentDetails')
-  getAllTreatmentDetails = async (experimentId, isTemplate, context, tx) => {
+  getAllTreatmentDetails = async (experimentId, isTemplate, context) => {
     await this.experimentsService.findExperimentWithTemplateCheck(
-      experimentId, isTemplate, context, tx,
+      experimentId, isTemplate, context,
     )
-    const [treatments, combinationElements, factorLevels, factors] = await tx.batch([
-      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
-      this.combinationElementService.getCombinationElementsByExperimentId(experimentId, tx),
-      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId, tx),
-      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId, tx),
+    const [treatments, combinationElements, factorLevels, factors] = await Promise.all([
+      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId),
+      this.combinationElementService.getCombinationElementsByExperimentId(experimentId),
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
+      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
     ])
     const groupedFactors = _.groupBy(factors, 'id')
 
@@ -105,11 +104,11 @@ class TreatmentDetailsService {
   handleAllTreatments = async (experimentIdStr, inputTreatments, context, isTemplate, tx) => {
     const experimentId = _.toNumber(experimentIdStr)
     await Promise.all([
-      this.securityService.permissionsCheck(experimentId, context, isTemplate, tx),
+      this.securityService.permissionsCheck(experimentId, context, isTemplate),
       this.validator.validateBlockValue(inputTreatments),
     ])
 
-    const result = await this.getAllTreatmentDetails(experimentIdStr, isTemplate, context, tx)
+    const result = await this.getAllTreatmentDetails(experimentIdStr, isTemplate, context)
     const treatments = this.stringifyBlock(inputTreatments)
 
     formatTreatmentsWithNewBlocksStructure(treatments)
@@ -272,7 +271,7 @@ class TreatmentDetailsService {
 
   @setErrorCode('1QB000')
   deleteCombinationElements(treatmentUpdates, context, tx) {
-    return this.identifyCombinationElementIdsForDelete(treatmentUpdates, context, tx)
+    return this.identifyCombinationElementIdsForDelete(treatmentUpdates, context)
       .then((idsForDeletion) => {
         if (idsForDeletion.length === 0) {
           return Promise.resolve()
@@ -283,11 +282,11 @@ class TreatmentDetailsService {
   }
 
   @setErrorCode('1QC000')
-  identifyCombinationElementIdsForDelete(treatments, context, tx) {
+  identifyCombinationElementIdsForDelete(treatments, context) {
     const treatmentIds = _.map(treatments, treatment => treatment.id)
 
     return this.combinationElementService.batchGetCombinationElementsByTreatmentIds(
-      treatmentIds, context, tx)
+      treatmentIds, context)
       .then(currentCombinationElementsByTreatment =>
         _.flatMap(currentCombinationElementsByTreatment, (curCombinationElements, index) => {
           const currentCombinationElements = _.map(curCombinationElements, curCombinationElement =>

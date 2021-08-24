@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -24,14 +24,14 @@ class FactorLevelsValidator extends SchemaValidator {
     return [
       // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
       { paramName: 'factorId', type: 'numeric', required: true },
-      { paramName: 'factorId', type: 'refData', entity: db.factor },
+      { paramName: 'factorId', type: 'refData', entity: dbRead.factor },
     ]
   }
 
   static get PUT_ADDITIONAL_SCHEMA_ELEMENTS() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.factorLevel },
+      { paramName: 'id', type: 'refData', entity: dbRead.factorLevel },
     ]
   }
 

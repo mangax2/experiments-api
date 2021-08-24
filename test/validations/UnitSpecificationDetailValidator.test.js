@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import UnitSpecificationDetailValidator from '../../src/validations/UnitSpecificationDetailValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('UnitSpecificationDetailValidator', () => {
   let target
@@ -12,9 +12,9 @@ describe('UnitSpecificationDetailValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('gets the schema', () => {
-      db.experiments = {}
-      db.unitSpecification = {}
-      db.unitSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.unitSpecification = {}
+      dbRead.unitSpecificationDetail = {}
       const schema = [
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
@@ -40,7 +40,7 @@ describe('UnitSpecificationDetailValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('gets the elements', () => {
-      db.unitSpecificationDetail = {}
+      dbRead.unitSpecificationDetail = {}
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
         { paramName: 'id', type: 'refData', entity: {} },
@@ -58,9 +58,9 @@ describe('UnitSpecificationDetailValidator', () => {
 
   describe('getSchema', () => {
     test('gets post schema', () => {
-      db.experiments = {}
-      db.unitSpecification = {}
-      db.unitSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.unitSpecification = {}
+      dbRead.unitSpecificationDetail = {}
       const schema = [
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,
@@ -84,9 +84,9 @@ describe('UnitSpecificationDetailValidator', () => {
     })
 
     test('gets put schema', () => {
-      db.experiments = {}
-      db.unitSpecification = {}
-      db.unitSpecificationDetail = {}
+      dbRead.experiments = {}
+      dbRead.unitSpecification = {}
+      dbRead.unitSpecificationDetail = {}
       const schema = [
         {
           paramName: 'value', type: 'text', lengthRange: { min: 0, max: 500 }, required: true,

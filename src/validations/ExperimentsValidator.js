@@ -1,7 +1,7 @@
 import * as _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -23,7 +23,7 @@ class ExperimentsValidator extends SchemaValidator {
         lengthRange: { min: 0, max: 5000 },
         required: false,
       },
-      { paramName: 'refExperimentDesignId', type: 'refData', entity: db.experimentDesign },
+      { paramName: 'refExperimentDesignId', type: 'refData', entity: dbRead.experimentDesign },
       { paramName: 'status', type: 'constant', data: ['DRAFT', 'ACTIVE', 'SUBMITTED', 'APPROVED', 'REJECTED'] },
       { paramName: 'is_template', type: 'boolean' },
       { paramName: 'randomizationStrategyCode', type: 'text', lengthRange: { min: 1, max: 1000 } },

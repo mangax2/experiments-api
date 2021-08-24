@@ -1,5 +1,5 @@
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import OwnerValidator from '../validations/OwnerValidator'
 
@@ -14,24 +14,22 @@ class OwnerService {
   @setErrorCode('1J1000')
   @Transactional('batchCreateOwners')
   batchCreateOwners(experimentsOwners, context, tx) {
-    return this.validator.validate(experimentsOwners, 'POST', tx, context)
-      .then(() => db.owner.batchCreate(experimentsOwners, context, tx)
+    return this.validator.validate(experimentsOwners, 'POST', context)
+      .then(() => dbWrite.owner.batchCreate(experimentsOwners, context, tx)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
   @setErrorCode('1J2000')
-  @Transactional('getOwnersByExperimentId')
-  getOwnersByExperimentId = (id, tx) => db.owner.findByExperimentId(id, tx)
+  getOwnersByExperimentId = id => dbRead.owner.findByExperimentId(id)
 
   @setErrorCode('1J3000')
-  @Transactional('getOwnersByExperimentIds')
-  getOwnersByExperimentIds = (ids, tx) => db.owner.batchFindByExperimentIds(ids, tx)
+  getOwnersByExperimentIds = ids => dbRead.owner.batchFindByExperimentIds(ids)
 
   @setErrorCode('1J4000')
   @Transactional('batchUpdateOwners')
   batchUpdateOwners(experimentsOwners, context, tx) {
-    return this.validator.validate(experimentsOwners, 'PUT', tx, context)
-      .then(() => db.owner.batchUpdate(experimentsOwners, context, tx)
+    return this.validator.validate(experimentsOwners, 'PUT')
+      .then(() => dbWrite.owner.batchUpdate(experimentsOwners, context, tx)
         .then(data => AppUtil.createPutResponse(data)))
   }
 }

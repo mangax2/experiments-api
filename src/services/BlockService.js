@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbWrite, dbRead } from '../db/DbManager'
 import BlockValidator from '../validations/BlockValidator'
 import SecurityService from './SecurityService'
 import AppError from './utility/AppError'
@@ -17,21 +17,21 @@ class BlockService {
   @setErrorCode('211000')
   @Transactional('createOnlyNewBlocksByExperimentId')
   createOnlyNewBlocksByExperimentId = (experimentId, blockNames, context, tx) =>
-    db.block.findByExperimentId(experimentId, tx)
+    dbRead.block.findByExperimentId(experimentId)
       .then((blocksInDB) => {
         const inputBlockNames = _.uniqWith(blockNames, _.isEqual)
         const namesToAdd = _.filter(inputBlockNames, b =>
           _.isNil(_.find(blocksInDB, bInDB => bInDB.name === b)))
 
-        return db.block.batchCreateByExperimentId(experimentId, namesToAdd, context, tx)
+        return dbWrite.block.batchCreateByExperimentId(experimentId, namesToAdd, context, tx)
       })
 
   @setErrorCode('212000')
   @Transactional('removeBlocksByExperimentId')
   removeBlocksByExperimentId = (experimentId, blockNamesToKeep, tx) =>
     Promise.all([
-      db.block.findByExperimentId(experimentId, tx),
-      db.locationAssociation.findByExperimentId(experimentId, tx),
+      dbRead.block.findByExperimentId(experimentId),
+      dbRead.locationAssociation.findByExperimentId(experimentId),
     ]).then(([blocksInDB, locationAssociationsInDB]) => {
       const inputBlockNames = _.uniqWith(blockNamesToKeep, _.isEqual)
       const blocksToRemove = _.filter(blocksInDB, b => !_.includes(inputBlockNames, b.name))
@@ -43,7 +43,7 @@ class BlockService {
         throw AppError.badRequest('Cannot remove blocks that already have sets associated to them', blocksToRemoveWithLocationAssociation, getFullErrorCode('212001'))
       }
 
-      return db.block.batchRemove(_.map(blocksToRemove, 'id'), tx)
+      return dbWrite.block.batchRemove(_.map(blocksToRemove, 'id'), tx)
     })
 
   static getBlocksToRemoveWithLocationAssociation = (blocksToRemove, locationAssociationsInDB) => {
@@ -54,15 +54,15 @@ class BlockService {
   @setErrorCode('213000')
   @Transactional('renameBlocks')
   renameBlocks = (experimentId, isTemplate, renamedBlocks, context, tx) =>
-    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
-      .then(() => this.validator.validate(renamedBlocks, 'PATCH', tx))
-      .then(() => db.block.findByExperimentId(experimentId))
+    this.securityService.permissionsCheck(experimentId, context, isTemplate)
+      .then(() => this.validator.validate(renamedBlocks, 'PATCH'))
+      .then(() => dbRead.block.findByExperimentId(experimentId))
       .then((blocksFromDb) => {
         const blocksNotInExperiment = _.differenceBy(renamedBlocks, blocksFromDb, 'id')
         if (blocksNotInExperiment.length > 0) {
           throw AppError.badRequest('At least one block does not belong to the specified experiment', blocksNotInExperiment, getFullErrorCode('213001'))
         }
-        return db.block.batchUpdate(renamedBlocks, context, tx)
+        return dbWrite.block.batchUpdate(renamedBlocks, context, tx)
       })
 }
 

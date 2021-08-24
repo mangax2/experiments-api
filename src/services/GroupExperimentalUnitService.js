@@ -5,13 +5,11 @@ import DesignSpecificationDetailService from './DesignSpecificationDetailService
 import ExperimentalUnitService from './ExperimentalUnitService'
 import SecurityService from './SecurityService'
 import FactorService from './FactorService'
-import LambdaPerformanceService from './prometheus/LambdaPerformanceService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import TreatmentBlockService from './TreatmentBlockService'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
-
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
@@ -65,32 +63,34 @@ class GroupExperimentalUnitService {
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
-    this.lambdaPerformanceService = new LambdaPerformanceService()
     this.unitValidator = new ExperimentalUnitValidator()
     this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
     this.treatmentBlockService = new TreatmentBlockService()
   }
 
   @setErrorCode('1F5000')
-  batchDeleteExperimentalUnits = (unitDeletes, tx) => (unitDeletes.length > 0
-    ? db.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
-    : Promise.resolve())
+  batchDeleteExperimentalUnits = (unitDeletes, tx) => {
+    if (unitDeletes.length === 0) {
+      return Promise.resolve()
+    }
+    return dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
+  }
 
   @setErrorCode('1FA000')
   createExperimentalUnits = (experimentId, units, context, tx) => {
     if (units.length === 0) {
       return Promise.resolve()
     }
-    return db.unit.batchCreate(units, context, tx)
+    return dbWrite.unit.batchCreate(units, context, tx)
   }
 
   @setErrorCode('1FM000')
   @Transactional('resetSet')
   resetSet = (setId, context, tx) =>
-    this.verifySetAndGetDetails(setId, context, tx).then(({
+    this.verifySetAndGetDetails(setId, context).then(({
       experimentId, location, numberOfReps, blockId,
     }) =>
-      db.treatmentBlock.findByBlockId(blockId, tx).then((treatmentBlocks) => {
+      dbRead.treatmentBlock.findByBlockId(blockId).then((treatmentBlocks) => {
         const units = this.createUnits(location, treatmentBlocks, numberOfReps)
 
         return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
@@ -98,7 +98,7 @@ class GroupExperimentalUnitService {
             this.getSetEntriesFromSet(setId, numberOfReps, treatmentBlocks.length, context))
           .then((result) => {
             const treatmentBlockIds = _.map(treatmentBlocks, 'id')
-            return db.unit.batchFindAllByLocationAndTreatmentBlocks(location, treatmentBlockIds, tx)
+            return dbRead.unit.batchFindAllByLocationAndTreatmentBlocks(location, treatmentBlockIds)
               .then((unitsInDB) => {
                 const setEntryIds = _.map(result.body.entries, 'entryId')
                 _.forEach(unitsInDB, (unit, index) => {
@@ -143,17 +143,17 @@ class GroupExperimentalUnitService {
     })
 
   @setErrorCode('1FK000')
-  verifySetAndGetDetails = (setId, context, tx) =>
-    this.locationAssocWithBlockService.getBySetId(setId, tx).then((locAssociation) => {
+  verifySetAndGetDetails = (setId, context) =>
+    this.locationAssocWithBlockService.getBySetId(setId).then((locAssociation) => {
       if (!locAssociation) {
         console.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
       }
       const experimentId = locAssociation.experiment_id
-      const designSpecPromise = db.designSpecificationDetail.findAllByExperimentId(experimentId, tx)
-      const refDesignSpecPromise = db.refDesignSpecification.all()
+      const designSpecPromise = dbRead.designSpecificationDetail.findAllByExperimentId(experimentId)
+      const refDesignSpecPromise = dbRead.refDesignSpecification.all()
 
-      return tx.batch([designSpecPromise, refDesignSpecPromise])
+      return Promise.all([designSpecPromise, refDesignSpecPromise])
         .then(([designSpecs, refDesignSpecs]) => {
           const repsRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Reps')
           const minRepRefDesignSpec = _.find(refDesignSpecs, refDesignSpec => refDesignSpec.name === 'Min Rep')
@@ -188,18 +188,17 @@ class GroupExperimentalUnitService {
       })))
 
   @setErrorCode('1FO000')
-  @Transactional('getGroupsAndUnits')
-  getGroupsAndUnits = (experimentId, tx) =>
-    tx.batch([
-      db.factor.findByExperimentId(experimentId, tx),
-      db.factorLevel.findByExperimentId(experimentId, tx),
-      db.designSpecificationDetail.findAllByExperimentId(experimentId, tx),
-      db.refDesignSpecification.all(tx),
-      db.combinationElement.findAllByExperimentId(experimentId, tx),
-      db.experiments.findExperimentOrTemplate(experimentId, tx),
-      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId, tx),
-      db.unit.findAllByExperimentId(experimentId, tx),
-      this.locationAssocWithBlockService.getByExperimentId(experimentId, tx),
+  getGroupsAndUnits = experimentId =>
+    Promise.all([
+      dbRead.factor.findByExperimentId(experimentId),
+      dbRead.factorLevel.findByExperimentId(experimentId),
+      dbRead.designSpecificationDetail.findAllByExperimentId(experimentId),
+      dbRead.refDesignSpecification.all(),
+      dbRead.combinationElement.findAllByExperimentId(experimentId),
+      dbRead.experiments.findExperimentOrTemplate(experimentId),
+      this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId),
+      dbRead.unit.findAllByExperimentId(experimentId),
+      this.locationAssocWithBlockService.getByExperimentId(experimentId),
     ]).then((
       [
         variables,
@@ -239,8 +238,6 @@ class GroupExperimentalUnitService {
       return Promise.all(groupPromises)
         .then(data => _.map(data, (d) => {
           const response = JSON.parse(d.Payload)
-          this.lambdaPerformanceService.savePerformanceStats(response.inputSize,
-            d.Payload.length, response.responseTime)
           return response.locationGroups[0]
         }))
         .catch((err) => {
@@ -250,23 +247,22 @@ class GroupExperimentalUnitService {
     })
 
   @setErrorCode('1FC000')
-  @Transactional('getGroupsAndUnitsForSet')
-  getGroupsAndUnitsForSet = (setId, tx) =>
-    tx.batch([
-      this.treatmentWithBlockService.getTreatmentsByBySetIds([setId], tx),
-      this.experimentalUnitService.getExperimentalUnitsBySetIds([setId], tx),
-      this.locationAssocWithBlockService.getBySetId(setId, tx),
+  getGroupsAndUnitsForSet = setId =>
+    Promise.all([
+      this.treatmentWithBlockService.getTreatmentsByBySetIds([setId]),
+      this.experimentalUnitService.getExperimentalUnitsBySetIds([setId]),
+      this.locationAssocWithBlockService.getBySetId(setId),
     ]).then(([
       treatments,
       units,
       setLocAssociation,
-    ]) => tx.batch([
-      db.factor.findByExperimentId(setLocAssociation.experiment_id, tx),
-      db.factorLevel.findByExperimentId(setLocAssociation.experiment_id, tx),
-      db.designSpecificationDetail.findAllByExperimentId(setLocAssociation.experiment_id, tx),
-      db.refDesignSpecification.all(tx),
-      db.combinationElement.batchFindAllByTreatmentIds(_.map(treatments, 'id'), tx),
-      db.experiments.findExperimentOrTemplate(setLocAssociation.experiment_id, tx),
+    ]) => Promise.all([
+      dbRead.factor.findByExperimentId(setLocAssociation.experiment_id),
+      dbRead.factorLevel.findByExperimentId(setLocAssociation.experiment_id),
+      dbRead.designSpecificationDetail.findAllByExperimentId(setLocAssociation.experiment_id),
+      dbRead.refDesignSpecification.all(),
+      dbRead.combinationElement.batchFindAllByTreatmentIds(_.map(treatments, 'id')),
+      dbRead.experiments.findExperimentOrTemplate(setLocAssociation.experiment_id),
     ]).then((
       [
         variables,
@@ -296,8 +292,6 @@ class GroupExperimentalUnitService {
       return AWSUtil.callLambda(VaultUtil.awsLambdaName, body)
         .then((data) => {
           const response = JSON.parse(data.Payload)
-          this.lambdaPerformanceService.savePerformanceStats(response.inputSize,
-            data.Payload.length, response.responseTime)
           return [response.locationGroups[0]]
         })
         .catch((err) => {
@@ -307,17 +301,18 @@ class GroupExperimentalUnitService {
     }))
 
   @setErrorCode('1FP000')
-  getGroupsAndUnitsByExperimentIds = (experimentIds, tx) => tx.batch(_.map(experimentIds,
-    experimentId => this.getGroupsAndUnits(experimentId, tx)
-      .catch((err) => {
-        console.error(err)
-        return []
-      }),
-  ))
+  getGroupsAndUnitsByExperimentIds = experimentIds =>
+    Promise.all(_.map(experimentIds,
+      experimentId => this.getGroupsAndUnits(experimentId)
+        .catch((err) => {
+          console.error(err)
+          return []
+        }),
+    ))
 
   @setErrorCode('1FD000')
-  getGroupsAndUnitsBySetIds = (setIds, tx) => tx.batch(_.map(setIds,
-    setId => this.getGroupsAndUnitsForSet(setId, tx)
+  getGroupsAndUnitsBySetIds = setIds => Promise.all(_.map(setIds,
+    setId => this.getGroupsAndUnitsForSet(setId)
       .catch((err) => {
         console.error(err)
         return []
@@ -325,8 +320,7 @@ class GroupExperimentalUnitService {
   ))
 
   @setErrorCode('1FQ000')
-  @Transactional('getSetInformationBySetId')
-  getSetInformationBySetId = (setId, tx) => this.locationAssocWithBlockService.getBySetId(setId, tx)
+  getSetInformationBySetId = setId => this.locationAssocWithBlockService.getBySetId(setId)
     .then((setAssociation) => {
       if (!setAssociation) return {}
       const inflectedSetAssociation = inflector.transform(setAssociation, 'camelizeLower')
@@ -335,9 +329,8 @@ class GroupExperimentalUnitService {
     .catch(() => ({}))
 
   @setErrorCode('1FE000')
-  @Transactional('getSetInformationBySetIds')
-  getSetInformationBySetIds = (setIds, tx) => tx.batch(_.map(setIds,
-    setId => this.getSetInformationBySetId(setId, tx)
+  getSetInformationBySetIds = setIds => Promise.all(_.map(setIds,
+    setId => this.getSetInformationBySetId(setId)
       .catch((err) => {
         console.error(err)
         return []
@@ -386,10 +379,10 @@ class GroupExperimentalUnitService {
     if (designSpecsAndUnits) {
       const { designSpecifications, units } = designSpecsAndUnits
       const numberOfLocations = _.max(_.map(units, 'location'))
-      return this.unitValidator.validate(units, 'POST', tx)
-        .then(() => tx.batch([
-          db.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId, tx),
-          this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId, tx),
+      return this.unitValidator.validate(units, 'POST')
+        .then(() => Promise.all([
+          dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId),
+          this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId),
         ]))
         .then(([locations, treatmentBlocks]) => {
           if (units && (numberOfLocations < locations.max)) {
@@ -440,31 +433,32 @@ class GroupExperimentalUnitService {
   @setErrorCode('1FW000')
   @Transactional('saveUnitsByExperimentId')
   saveUnitsByExperimentId = (experimentId, units, isTemplate, context, tx) =>
-    this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)
-      .then(() => this.compareWithExistingUnitsByExperiment(experimentId, units, tx)
+    this.securityService.permissionsCheck(experimentId, context, isTemplate)
+      .then(() => this.compareWithExistingUnitsByExperiment(experimentId, units)
         .then(comparisonResults =>
           this.saveComparedUnits(experimentId, comparisonResults, context, tx)),
       )
 
   @setErrorCode('1FX000')
   saveUnitsBySetId = (setId, experimentId, units, context, tx) =>
-    this.compareWithExistingUnitsBySetId(setId, units, tx)
+    this.compareWithExistingUnitsBySetId(setId, units)
       .then(comparisonResults =>
         this.saveComparedUnits(experimentId, comparisonResults, context, tx))
 
   @setErrorCode('1FY000')
   saveComparedUnits = (experimentId, comparisonUnits, context, tx) => tx.batch([
     this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
-    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx)])
+    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
+  ])
 
   @setErrorCode('1FZ000')
-  compareWithExistingUnitsByExperiment = (experimentId, newUnits, tx) =>
-    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId, tx)
+  compareWithExistingUnitsByExperiment = (experimentId, newUnits) =>
+    this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId)
       .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
 
   @setErrorCode('1Fa000')
-  compareWithExistingUnitsBySetId = (setId, newUnits, tx) =>
-    db.unit.batchFindAllBySetId(setId, tx)
+  compareWithExistingUnitsBySetId = (setId, newUnits) =>
+    dbRead.unit.batchFindAllBySetId(setId)
       .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
 
   @setErrorCode('1Fb000')

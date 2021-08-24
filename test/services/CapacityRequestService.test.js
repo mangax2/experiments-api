@@ -3,7 +3,7 @@ import AppError from '../../src/services/utility/AppError'
 import apiUrls from '../../src/config/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 import {
   kafkaProducerMocker, mock, mockReject, mockResolve,
 } from '../jestUtil'
@@ -196,7 +196,7 @@ describe('CapacityRequestService', () => {
       }
 
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
 
@@ -206,7 +206,7 @@ describe('CapacityRequestService', () => {
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
-        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
@@ -224,10 +224,10 @@ describe('CapacityRequestService', () => {
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
 
-      db.locationAssociation = {
+      dbRead.locationAssociation = {
         findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 3 }),
       }
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
 
@@ -236,8 +236,8 @@ describe('CapacityRequestService', () => {
         reps: 3,
       }
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
-        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalled()
+        expect(dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
@@ -255,10 +255,10 @@ describe('CapacityRequestService', () => {
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
 
-      db.locationAssociation = {
+      dbRead.locationAssociation = {
         findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 5 }),
       }
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
 
@@ -268,9 +268,9 @@ describe('CapacityRequestService', () => {
       }
       AppError.badRequest = mock()
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).catch(() => {
-        expect(db.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
+        expect(dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalled()
-        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
       })
@@ -287,10 +287,10 @@ describe('CapacityRequestService', () => {
         syncUnitSpecificationDetails: mockResolve(),
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
-      db.locationAssociation = {
+      dbRead.locationAssociation = {
         findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 0 }),
       }
 
@@ -303,7 +303,7 @@ describe('CapacityRequestService', () => {
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
-        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).toHaveBeenCalled()
       })
@@ -320,10 +320,10 @@ describe('CapacityRequestService', () => {
         syncUnitSpecificationDetails: mockResolve(),
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
-      db.locationAssociation = {
+      dbRead.locationAssociation = {
         findNumberOfLocationsAssociatedWithSets: mockResolve({ max: 0 }),
       }
       AppError.badRequest = mock()
@@ -336,7 +336,7 @@ describe('CapacityRequestService', () => {
       }
 
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {}, () => {
-        expect(db.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).not.toHaveBeenCalled()
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
         expect(AppError.badRequest).toHaveBeenCalledWith('Cannot sync capacity request data because some Unit Specification values are missing', undefined, '104002')
@@ -354,7 +354,7 @@ describe('CapacityRequestService', () => {
         syncUnitSpecificationDetails: mockResolve(),
       }
 
-      db.experiments = {
+      dbWrite.experiments = {
         updateCapacityRequestSyncDate: mockResolve(),
       }
       const capacityRequestService = new CapacityRequestService(designSpecificationDetailService, unitSpecificationDetailService, securityService)
@@ -364,7 +364,7 @@ describe('CapacityRequestService', () => {
       return capacityRequestService.syncCapacityRequestDataWithExperiment(1, capacityRequestData, testContext, testTx).then(() => {
         expect(capacityRequestService.designSpecificationDetailService.syncDesignSpecificationDetails).not.toHaveBeenCalled()
         expect(capacityRequestService.unitSpecificationDetailService.syncUnitSpecificationDetails).not.toHaveBeenCalled()
-        expect(db.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
+        expect(dbWrite.experiments.updateCapacityRequestSyncDate).toHaveBeenCalledWith(1, testContext, testTx)
       })
     })
   })

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -14,7 +14,7 @@ class BlockValidator extends SchemaValidator {
   static get PATCH_VALIDATION_SCHEMA() {
     return [
       { paramName: 'id', type: 'numeric', required: true },
-      { paramName: 'id', type: 'refData', entity: db.block },
+      { paramName: 'id', type: 'refData', entity: dbRead.block },
       { paramName: 'name', type: 'string', required: true },
     ]
   }

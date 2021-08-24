@@ -1,5 +1,5 @@
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import FactorLevelAssociationsValidator from '../validations/FactorLevelAssociationValidator'
 
@@ -12,23 +12,22 @@ class FactorLevelAssociationService {
   }
 
   @setErrorCode('1B1000')
-  @Transactional('getFactorLevelAssociationByExperimentId')
-  static getFactorLevelAssociationByExperimentId(id, tx) {
-    return db.factorLevelAssociation.findByExperimentId(id, tx)
+  static getFactorLevelAssociationByExperimentId(id) {
+    return dbRead.factorLevelAssociation.findByExperimentId(id)
   }
 
   @setErrorCode('1B2000')
   @Transactional('batchDeleteFactorLevelAssociations')
   static batchDeleteFactorLevelAssociations(ids, tx) {
-    return db.factorLevelAssociation.batchRemove(ids, tx)
+    return dbWrite.factorLevelAssociation.batchRemove(ids, tx)
   }
 
   @setErrorCode('1B3000')
   @Transactional('batchCreateFactorLevelAssociations')
   batchCreateFactorLevelAssociations =
     (factorLevelAssociations, context, tx) =>
-      this.validator.validate(factorLevelAssociations, 'POST', tx)
-        .then(() => db.factorLevelAssociation.batchCreate(factorLevelAssociations, context, tx)
+      this.validator.validate(factorLevelAssociations, 'POST')
+        .then(() => dbWrite.factorLevelAssociation.batchCreate(factorLevelAssociations, context, tx)
           .then(data => AppUtil.createPostResponse(data)))
 }
 

@@ -7,6 +7,7 @@ import FactorDependentCompositeService from '../../src/services/FactorDependentC
 import FactorService from '../../src/services/FactorService'
 import FactorLevelService from '../../src/services/FactorLevelService'
 import FactorLevelAssociationService from '../../src/services/FactorLevelAssociationService'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('FactorDependentCompositeService', () => {
   let target
@@ -79,9 +80,9 @@ describe('FactorDependentCompositeService', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([{}, {}])
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1, testTx).then((data) => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
+      return FactorDependentCompositeService.getFactorsWithLevels(1).then((data) => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(data).toEqual({ factors: [{}], levels: [{}, {}] })
       })
     })
@@ -91,9 +92,9 @@ describe('FactorDependentCompositeService', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject(error)
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1, testTx).then(() => {}, (err) => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
+      return FactorDependentCompositeService.getFactorsWithLevels(1).then(() => {}, (err) => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
@@ -103,9 +104,9 @@ describe('FactorDependentCompositeService', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mock()
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1, testTx).then(() => {}, (err) => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
+      return FactorDependentCompositeService.getFactorsWithLevels(1).then(() => {}, (err) => {
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
@@ -355,7 +356,7 @@ describe('FactorDependentCompositeService', () => {
       ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
-      target.factorTypeService.getAllFactorTypes = mockResolve(factorTypes)
+      dbRead.factorType.all = mockResolve(factorTypes)
       const dependentVariables = [{
         name: 'testDependent',
         required: true,
@@ -455,12 +456,12 @@ describe('FactorDependentCompositeService', () => {
         responseVariables: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
-      return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllVariablesByExperimentId(1, false, testContext).then((data) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext)
+        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
+        expect(dbRead.factorType.all).toHaveBeenCalled()
+        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual(expectedReturn)
       })
     })
@@ -564,7 +565,7 @@ describe('FactorDependentCompositeService', () => {
       ExperimentsService.verifyExperimentExists = mockResolve({})
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
       const factorTypes = [{ id: 1, type: 'independent' }]
-      target.factorTypeService.getAllFactorTypes = mockResolve(factorTypes)
+      dbRead.factorType.all = mockResolve(factorTypes)
       const dependentVariables = [{
         name: 'testDependent',
         required: true,
@@ -715,12 +716,12 @@ describe('FactorDependentCompositeService', () => {
         responseVariables: [{ name: 'testDependent', required: true, questionCode: 'ABC_GDEG' }],
       }
 
-      return target.getAllVariablesByExperimentId(1, false, testContext, testTx).then((data) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext, testTx)
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllVariablesByExperimentId(1, false, testContext).then((data) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext)
+        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
+        expect(dbRead.factorType.all).toHaveBeenCalled()
+        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
         expect(data).toEqual(expectedReturn)
       })
     })
@@ -729,16 +730,16 @@ describe('FactorDependentCompositeService', () => {
       const error = { message: 'error' }
       ExperimentsService.verifyExperimentExists = mockResolve()
       FactorDependentCompositeService.getFactorsWithLevels = mockResolve()
-      target.factorTypeService.getAllFactorTypes = mockResolve()
+      dbRead.factorType.all = mockResolve()
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve()
 
-      return target.getAllVariablesByExperimentId(1, false, {}, testTx).then(() => {}, (err) => {
-        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, {}, testTx)
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1, testTx)
-        expect(target.factorTypeService.getAllFactorTypes).toHaveBeenCalled()
-        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1, testTx)
+      return target.getAllVariablesByExperimentId(1, false, {}).then(() => {}, (err) => {
+        expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, {})
+        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
+        expect(dbRead.factorType.all).toHaveBeenCalled()
+        expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
       })
     })
@@ -821,7 +822,7 @@ describe('FactorDependentCompositeService', () => {
 
   describe('persistAllVariables', () => {
     beforeEach(() => {
-      target.factorTypeService.getAllFactorTypes = mockResolve([
+      dbRead.factorType.all = mockResolve([
         {
           id: 1,
           type: 'Independent',
@@ -912,11 +913,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([
           {
             experimentId: 42,
@@ -1096,11 +1097,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).toHaveBeenCalledWith([
           {
             experimentId: 42,
@@ -1366,11 +1367,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -1579,11 +1580,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -1749,11 +1750,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -1860,11 +1861,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -1959,11 +1960,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).not.toHaveBeenCalled()
@@ -2097,11 +2098,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -2317,11 +2318,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([
@@ -2527,11 +2528,11 @@ describe('FactorDependentCompositeService', () => {
       }
 
       return target.persistAllVariables(experimentVariables, 42, testContext, false, testTx).then(() => {
-        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42, testTx)
-        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42, testTx)
-        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false, testTx)
-        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST', testTx)
+        expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(42)
+        expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(42)
+        expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(42, testContext, false)
+        expect(target.variablesValidator.validate).toHaveBeenCalledWith(experimentVariables, 'POST')
         expect(target.factorService.batchCreateFactors).not.toHaveBeenCalled()
         expect(target.factorLevelService.batchCreateFactorLevels).not.toHaveBeenCalled()
         expect(target.factorService.batchUpdateFactors).toHaveBeenCalledWith([

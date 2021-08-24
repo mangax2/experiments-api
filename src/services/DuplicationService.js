@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import TagService from './TagService'
@@ -48,7 +48,7 @@ class DuplicationService {
     _.forEach(ids, (id) => {
       for (let i = 0; i < numberOfCopies; i += 1) {
         sqlPromise = sqlPromise.then(() =>
-          db.duplication.duplicateExperiment(id, name, isTemplate, context, tx))
+          dbWrite.duplication.duplicateExperiment(id, name, isTemplate, context, tx))
           .then((newIdObject) => { conversionMap.push({ oldId: id, newId: newIdObject.id }) })
       }
     })

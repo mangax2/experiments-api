@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import OAuthUtil from '../services/utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
@@ -33,7 +33,7 @@ class OwnerValidator extends SchemaValidator {
   static get POST_VALIDATION_SCHEMA() {
     return [
       { paramName: 'experimentId', type: 'numeric', required: true },
-      { paramName: 'experimentId', type: 'refData', entity: db.experiments },
+      { paramName: 'experimentId', type: 'refData', entity: dbRead.experiments },
       {
         paramName: 'userIds',
         type: 'array',

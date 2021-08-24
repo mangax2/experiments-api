@@ -4,7 +4,7 @@ import Transactional from '@monsantoit/pg-transactional'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
 import apiUrls from '../config/apiUrls'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import ExperimentsValidator from '../validations/ExperimentsValidator'
@@ -36,9 +36,9 @@ class ExperimentsService {
   @setErrorCode('151000')
   @Transactional('batchCreateExperiments')
   batchCreateExperiments(experiments, context, isTemplate, tx) {
-    return this.validator.validate(experiments, 'POST', tx)
+    return this.validator.validate(experiments, 'POST')
       .then(() => this.validateAssociatedRequests(experiments, isTemplate))
-      .then(() => db.experiments.batchCreate(experiments, context, tx)
+      .then(() => dbWrite.experiments.batchCreate(experiments, context, tx)
         .then((data) => {
           const experimentIds = _.map(data, d => d.id)
           _.forEach(experiments, (experiment, index) => {
@@ -72,7 +72,9 @@ class ExperimentsService {
                 context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
-              .then(() => tx.batch(_.map(experiments, experiment => this.updateExperimentsRandomizationStrategyId(experiment.id, experiment.randomizationStrategyCode, true, context, tx))))
+              .then(() => tx.batch(_.map(experiments,
+                experiment => this.updateExperimentsRandomizationStrategyId(experiment.id,
+                  experiment.randomizationStrategyCode, true, context, tx))))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
@@ -140,9 +142,8 @@ class ExperimentsService {
   }
 
   @setErrorCode('157000')
-  @Transactional('verifyExperimentExists')
-  static verifyExperimentExists(id, isTemplate, context, tx) {
-    return db.experiments.find(id, isTemplate, tx).then((data) => {
+  static verifyExperimentExists(id, isTemplate, context) {
+    return dbRead.experiments.find(id, isTemplate).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
@@ -153,9 +154,8 @@ class ExperimentsService {
   }
 
   @setErrorCode('15U000')
-  @Transactional('findExperimentWithTemplateCheck')
-  findExperimentWithTemplateCheck = (id, isTemplate, context, tx) =>
-    db.experiments.find(id, isTemplate, tx).then((data) => {
+  findExperimentWithTemplateCheck = (id, isTemplate, context) =>
+    dbRead.experiments.find(id, isTemplate).then((data) => {
       if (!data) {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
@@ -166,17 +166,16 @@ class ExperimentsService {
     })
 
   @setErrorCode('158000')
-  @Transactional('getExperimentById')
-  getExperimentById = (id, isTemplate, context, tx) =>
-    this.findExperimentWithTemplateCheck(id, isTemplate, context, tx)
+  getExperimentById = (id, isTemplate, context) =>
+    this.findExperimentWithTemplateCheck(id, isTemplate, context)
       .then((data) => {
         const promises = []
 
-        promises.push(this.ownerService.getOwnersByExperimentId(id, tx))
+        promises.push(this.ownerService.getOwnersByExperimentId(id))
         promises.push(this.tagService.getTagsByExperimentId(id, isTemplate, context))
-        promises.push(db.comment.findRecentByExperimentId(data.id, tx))
-        promises.push(this.analysisModelService.getAnalysisModelByExperimentId(id, tx))
-        return tx.batch(promises).then(([owners, tags, comment, analysisModel]) => {
+        promises.push(dbRead.comment.findRecentByExperimentId(data.id))
+        promises.push(this.analysisModelService.getAnalysisModelByExperimentId(id))
+        return Promise.all(promises).then(([owners, tags, comment, analysisModel]) => {
           data.owners = owners.user_ids
           data.ownerGroups = owners.group_ids
           data.reviewers = owners.reviewer_ids
@@ -198,9 +197,9 @@ class ExperimentsService {
   updateExperiment(experimentId, experiment, context, isTemplate, tx) {
     const id = Number(experimentId)
     experiment.isTemplate = isTemplate
-    return this.securityService.permissionsCheck(id, context, isTemplate, tx)
-      .then(() => this.validator.validate([experiment], 'PUT', tx)
-        .then(() => db.experiments.update(id, experiment, context, tx)
+    return this.securityService.permissionsCheck(id, context, isTemplate)
+      .then(() => this.validator.validate([experiment], 'PUT')
+        .then(() => dbWrite.experiments.update(id, experiment, context, tx)
           .then((data) => {
             if (!data) {
               const errorMessage = isTemplate ? 'Template Not Found to Update for id'
@@ -231,7 +230,7 @@ class ExperimentsService {
                   analysisModelSubType: experiment.analysisModelSubType,
                   experimentId: id,
                 }
-                this.analysisModelService.getAnalysisModelByExperimentId(id, tx).then((res) => {
+                this.analysisModelService.getAnalysisModelByExperimentId(id).then((res) => {
                   if (!res) {
                     updateAnalysisModelService = this.analysisModelService.batchCreateAnalysisModel([analysisModelInfo], context, tx)
                   }
@@ -244,7 +243,7 @@ class ExperimentsService {
               promises.push(updateOwnerPromise)
 
               if (experiment.comment && experiment.status === 'REJECTED') {
-                const createExperimentCommentPromise = db.comment.batchCreate([comment], context, tx)
+                const createExperimentCommentPromise = dbWrite.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)
               }
               promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, false, context, tx))
@@ -282,14 +281,14 @@ class ExperimentsService {
   @setErrorCode('15A000')
   @Transactional('deleteExperiment')
   deleteExperiment(id, context, isTemplate, tx) {
-    return this.securityService.permissionsCheck(id, context, isTemplate, tx).then((permissions) => {
+    return this.securityService.permissionsCheck(id, context, isTemplate).then((permissions) => {
       if (permissions.includes('write')) {
-        return this.locationAssocWithBlockService.getByExperimentId(id, tx).then((associations) => {
+        return this.locationAssocWithBlockService.getByExperimentId(id).then((associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))
           }
-          return db.experiments.remove(id, isTemplate)
+          return dbWrite.experiments.remove(id, isTemplate, tx)
             .then((data) => {
               if (!data) {
                 console.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
@@ -344,14 +343,14 @@ class ExperimentsService {
             return []
           }
           const experimentIds = _.map(eTags, 'entityId')
-          return db.experiments.batchFindExperimentOrTemplate(experimentIds, isTemplate)
+          return dbRead.experiments.batchFindExperimentOrTemplate(experimentIds, isTemplate)
             .then(experiments => ExperimentsService.mergeTagsWithExperiments(experiments, eTags))
         })
     })
   }
 
   @setErrorCode('15C000')
-  getAllExperiments = isTemplate => db.experiments.all(isTemplate)
+  getAllExperiments = isTemplate => dbRead.experiments.all(isTemplate)
 
   @setErrorCode('15D000')
   assignExperimentIdToTags = experiments => _.compact(
@@ -402,7 +401,7 @@ class ExperimentsService {
                     value: String(requestBody.id),
                     experimentId,
                   }
-                  tagsPromise.push(this.getExperimentById(experimentId, false, context, tx)
+                  tagsPromise.push(this.getExperimentById(experimentId, false, context)
                     .then((result) => {
                       const tags = _.map(result.tags, (tag) => {
                         tag.experimentId = experimentId
@@ -538,8 +537,7 @@ class ExperimentsService {
   }
 
   @setErrorCode('15N000')
-  @Transactional('getExperimentsByUser')
-  getExperimentsByUser = (userId, isTemplate, tx) => {
+  getExperimentsByUser = (userId, isTemplate) => {
     if (!userId || !userId.slice) {
       return Promise.reject(AppError.badRequest('No UserId provided.', undefined, getFullErrorCode('15N001')))
     }
@@ -547,15 +545,14 @@ class ExperimentsService {
       return Promise.reject(AppError.badRequest('Multiple UserIds are not allowed.', undefined, getFullErrorCode('15N002')))
     }
     return this.securityService.getGroupsByUserId(userId[0]).then(groupIds =>
-      db.experiments.findExperimentsByUserIdOrGroup(isTemplate, userId[0], groupIds, tx))
+      dbRead.experiments.findExperimentsByUserIdOrGroup(isTemplate, userId[0], groupIds))
   }
 
   @setErrorCode('15O000')
-  @Transactional('getExperimentsByCriteria')
-  getExperimentsByCriteria = ({ criteria, value, isTemplate }, tx) => {
+  getExperimentsByCriteria = ({ criteria, value, isTemplate }) => {
     switch (criteria) {
       case 'owner':
-        return this.getExperimentsByUser(value, isTemplate, tx)
+        return this.getExperimentsByUser(value, isTemplate)
       default:
         return Promise.reject(AppError.badRequest('Invalid criteria provided', undefined, getFullErrorCode('15O001')))
     }
@@ -589,116 +586,128 @@ class ExperimentsService {
 
   @setErrorCode('15Q000')
   submitForReview = (experimentId, isTemplate, timestamp, context, tx) =>
-    tx.batch([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
-      .then(([experiment]) => {
-        if (!_.isNil(experiment.task_id)) {
-          return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has already been submitted for review. To submit a new review, please cancel the existing review.`, null, getFullErrorCode('15Q001')))
+    Promise.all([
+      this.getExperimentById(experimentId, isTemplate, context),
+      this.securityService.permissionsCheck(experimentId, context, isTemplate),
+    ]).then(([experiment]) => {
+      if (!_.isNil(experiment.task_id)) {
+        return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has already been submitted for review. To submit a new review, please cancel the existing review.`, null, getFullErrorCode('15Q001')))
+      }
+
+      if (experiment.reviewers.length === 0) {
+        return Promise.reject(AppError.badRequest(`No reviewers have been assigned to this ${isTemplate ? 'template' : 'experiment'}`, null, getFullErrorCode('15Q002')))
+      }
+      const date = new Date(timestamp)
+
+      if (date instanceof Date && !_.isNaN(date.getTime())) {
+        const isoDateString = date.toISOString()
+        const currentISODateString = new Date().toISOString()
+
+        if (isoDateString.slice(0, isoDateString.indexOf('T')) <= currentISODateString.slice(0, isoDateString.indexOf('T'))) {
+          return Promise.reject(AppError.badRequest('Provided date must be greater than current date', null, getFullErrorCode('15Q004')))
         }
 
-        if (experiment.reviewers.length === 0) {
-          return Promise.reject(AppError.badRequest(`No reviewers have been assigned to this ${isTemplate ? 'template' : 'experiment'}`, null, getFullErrorCode('15Q002')))
-        }
-        const date = new Date(timestamp)
-
-        if (date instanceof Date && !_.isNaN(date.getTime())) {
-          const isoDateString = date.toISOString()
-          const currentISODateString = new Date().toISOString()
-
-          if (isoDateString.slice(0, isoDateString.indexOf('T')) <= currentISODateString.slice(0, isoDateString.indexOf('T'))) {
-            return Promise.reject(AppError.badRequest('Provided date must be greater than current date', null, getFullErrorCode('15Q004')))
-          }
-
-          const taskTemplate = {
-            title: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" Review Requested`,
-            body: {
-              text: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" is ready for statistician review.`,
+        const taskTemplate = {
+          title: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" Review Requested`,
+          body: {
+            text: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" is ready for statistician review.`,
+          },
+          userGroups: experiment.reviewers,
+          actions: [
+            {
+              title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
+              url: `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
             },
-            userGroups: experiment.reviewers,
-            actions: [
-              {
-                title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,
-                url: `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experimentId}`,
-              },
-            ],
-            tags: [
-              'experiment-review-request',
-            ],
-            dueDate: isoDateString.slice(0, isoDateString.indexOf('T')),
-            tagKey: `${experimentId}|${isoDateString.slice(0, isoDateString.indexOf('T'))}`,
-          }
-
-          return OAuthUtil.getAuthorizationHeaders().then(headers =>
-            HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
-              .then((taskResult) => {
-                const taskId = taskResult.body.id
-                return db.experiments.updateExperimentStatus(experimentId, 'SUBMITTED', taskId, context, tx)
-              }),
-          ).catch(err => Promise.reject(AppError.internalServerError('Error encountered contacting the velocity messaging api', err.message, '15Q005')))
+          ],
+          tags: [
+            'experiment-review-request',
+          ],
+          dueDate: isoDateString.slice(0, isoDateString.indexOf('T')),
+          tagKey: `${experimentId}|${isoDateString.slice(0, isoDateString.indexOf('T'))}`,
         }
 
-        return Promise.reject(AppError.badRequest('The timestamp field is an invalid date string', null, getFullErrorCode('15Q003')))
-      })
+        return OAuthUtil.getAuthorizationHeaders().then(headers =>
+          HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/tasks`, headers, taskTemplate)
+            .then((taskResult) => {
+              const taskId = taskResult.body.id
+              return dbWrite.experiments.updateExperimentStatus(experimentId, 'SUBMITTED', taskId, context, tx)
+            }),
+        ).catch(err => Promise.reject(AppError.internalServerError('Error encountered contacting the velocity messaging api', err.message, '15Q005')))
+      }
+
+      return Promise.reject(AppError.badRequest('The timestamp field is an invalid date string', null, getFullErrorCode('15Q003')))
+    })
 
   @setErrorCode('15R000')
   submitReview = (experimentId, isTemplate, status, comment, context, tx) =>
-    tx.batch([this.getExperimentById(experimentId, isTemplate, context, tx), this.securityService.getUserPermissionsForExperiment(experimentId, context, tx)])
-      .then(([experiment, permissions]) => {
-        if (!permissions.includes('review')) {
-          return Promise.reject(AppError.forbidden('Only reviewers are allowed to submit a review', null, getFullErrorCode('15R001')))
-        }
+    Promise.all([
+      this.getExperimentById(experimentId, isTemplate, context),
+      this.securityService.getUserPermissionsForExperiment(experimentId, context),
+    ]).then(([experiment, permissions]) => {
+      if (!permissions.includes('review')) {
+        return Promise.reject(AppError.forbidden('Only reviewers are allowed to submit a review', null, getFullErrorCode('15R001')))
+      }
 
-        if (experiment.status !== 'SUBMITTED') {
-          return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has not been submitted for review`, null, getFullErrorCode('15R002')))
-        }
+      if (experiment.status !== 'SUBMITTED') {
+        return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has not been submitted for review`, null, getFullErrorCode('15R002')))
+      }
 
-        const taskID = experiment.task_id
+      const taskID = experiment.task_id
 
-        const newComment = {
-          description: comment,
-          experimentId,
-        }
+      const newComment = {
+        description: comment,
+        experimentId,
+      }
 
-        if (_.isNil(taskID)) {
-          return tx.batch([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])
-        }
+      if (_.isNil(taskID)) {
+        return tx.batch([
+          dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx),
+          dbWrite.comment.batchCreate([newComment], context, tx),
+        ])
+      }
 
-        return OAuthUtil.getAuthorizationHeaders().then(headers =>
-          HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
-            .catch((err) => {
-              console.error(`Unable to complete task. Reason: ${err.response.text}`)
-              if (err.status !== 404 && err.response.text !== 'task has already been completed') {
-                return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15R003')))
-              }
+      return OAuthUtil.getAuthorizationHeaders().then(headers =>
+        HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Completed' })
+          .catch((err) => {
+            console.error(`Unable to complete task. Reason: ${err.response.text}`)
+            if (err.status !== 404 && err.response.text !== 'task has already been completed') {
+              return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15R003')))
+            }
 
-              return Promise.resolve()
-            })
-            .then(() => tx.batch([db.experiments.updateExperimentStatus(experimentId, status, null, context, tx), db.comment.batchCreate([newComment], context, tx)])),
-        )
-      })
+            return Promise.resolve()
+          })
+          .then(() => tx.batch([
+            dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx),
+            dbWrite.comment.batchCreate([newComment], context, tx),
+          ])),
+      )
+    })
 
   @setErrorCode('15S000')
   cancelReview = (experimentId, isTemplate, context, tx) =>
-    tx.batch([this.getExperimentById(experimentId, isTemplate, context), this.securityService.permissionsCheck(experimentId, context, isTemplate, tx)])
-      .then(([experiment]) => {
-        const taskID = experiment.task_id
+    Promise.all([
+      this.getExperimentById(experimentId, isTemplate, context),
+      this.securityService.permissionsCheck(experimentId, context, isTemplate),
+    ]).then(([experiment]) => {
+      const taskID = experiment.task_id
 
-        if (_.isNil(taskID)) {
-          return db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)
-        }
+      if (_.isNil(taskID)) {
+        return dbWrite.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)
+      }
 
-        return OAuthUtil.getAuthorizationHeaders().then(headers =>
-          HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
-            .catch((err) => {
-              console.error(`Unable to complete task. Reason: ${err.response.text}`)
+      return OAuthUtil.getAuthorizationHeaders().then(headers =>
+        HttpUtil.put(`${apiUrls.velocityMessagingAPIUrl}/tasks/complete/${taskID}`, headers, { complete: true, completedBy: context.userId, result: 'Review Cancelled' })
+          .catch((err) => {
+            console.error(`Unable to complete task. Reason: ${err.response.text}`)
 
-              if (err.status !== 404 && err.response.text !== 'task has already been completed') {
-                return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15S001')))
-              }
-              return Promise.resolve()
-            })
-            .then(() => db.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)),
-        )
-      })
+            if (err.status !== 404 && err.response.text !== 'task has already been completed') {
+              return Promise.reject(AppError.badRequest('Unable to complete task', null, getFullErrorCode('15S001')))
+            }
+            return Promise.resolve()
+          })
+          .then(() => dbWrite.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)),
+      )
+    })
 }
 
 module.exports = ExperimentsService

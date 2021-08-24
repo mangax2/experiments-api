@@ -2,8 +2,6 @@ const HttpUtil = require('./HttpUtil')
 
 class VaultUtil {
   constructor() {
-    this.dbAppUser = ''
-    this.dbAppPassword = ''
     this.clientId = ''
     this.clientSecret = ''
     this.kafkaPrivateKey = ''
@@ -16,8 +14,6 @@ class VaultUtil {
     if (env === 'local') {
       this.clientId = process.env.EXPERIMENTS_API_CLIENT_ID
       this.clientSecret = process.env.EXPERIMENTS_API_CLIENT_SECRET
-      this.dbAppUser = process.env.EXPERIMENTS_DB_LOCAL_USER
-      this.dbAppPassword = process.env.EXPERIMENTS_DB_LOCAL_PASSWORD
       this.awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
       this.awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
       this.kafkaPassword = process.env.KAFKA_PASSWORD
@@ -44,10 +40,6 @@ class VaultUtil {
     }], JSON.stringify(body))
       .then((result) => {
         const vaultToken = result.body.auth.client_token
-        const dbPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/db`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
-          this.dbAppUser = vaultObj.body.data.appUser
-          this.dbAppPassword = vaultObj.body.data.appUserPassword
-        })
         const clientPromise = HttpUtil.get(`${vaultConfig.baseUrl}${vaultConfig.secretUri}/experiments/api/${vaultEnv}/client`, VaultUtil.getVaultHeader(vaultToken)).then((vaultObj) => {
           this.clientId = vaultObj.body.data.client_id
           this.clientSecret = vaultObj.body.data.client_secret
@@ -64,7 +56,7 @@ class VaultUtil {
           this.awsLambdaName = vaultObj.body.data.lambdaNameV2
           this.awsDocumentationBucketName = vaultObj.body.data.documentationBucketName
         })
-        return Promise.all([dbPromise, clientPromise, kafkaPromise, awsPromise])
+        return Promise.all([clientPromise, kafkaPromise, awsPromise])
       }).catch((err) => {
         console.error('error while retrieving vault secrets: ', err)
         return Promise.reject(err)

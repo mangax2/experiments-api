@@ -1,13 +1,12 @@
 import { ConsumerGroup } from 'kafka-node'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../../db/DbManager'
+import { dbRead } from '../../db/DbManager'
 import VaultUtil from '../utility/VaultUtil'
 import kafkaConfig from '../../config/kafkaConfig'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
-import SetEntryRemovalService from '../prometheus/SetEntryRemovalService'
 import LocationAssociationWithBlockService from '../LocationAssociationWithBlockService'
 
 class ManageRepsAndUnitsListener {
@@ -57,7 +56,6 @@ class ManageRepsAndUnitsListener {
 
     if (_.filter(set.entryChanges, entry => !entry.setEntryId).length > 0) {
       console.warn('An error occurred while parsing the kafka message. At least one SetEntryId was not found.')
-      SetEntryRemovalService.addWarning()
     }
 
     return this.adjustExperimentWithRepPackChanges(set).then(() => {
@@ -72,14 +70,14 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
-      return this.locationAssocWithBlockService.getBySetId(setId, tx).then((assoc) => {
+      return this.locationAssocWithBlockService.getBySetId(setId).then((assoc) => {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }
         const { location } = assoc
         const blockId = assoc.block_id
         const experimentId = assoc.experiment_id
-        return db.treatmentBlock.batchFindByBlockIds(blockId, tx)
+        return dbRead.treatmentBlock.batchFindByBlockIds(blockId)
           .then(treatmentBlocks =>
             this.experimentalUnitService.mergeSetEntriesToUnits(experimentId, unitsFromMessage,
               location, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, tx)

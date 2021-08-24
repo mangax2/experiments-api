@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import TagValidator from '../../src/validations/TagValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('TagValidator', () => {
   let target
@@ -11,7 +11,7 @@ describe('TagValidator', () => {
   })
 
   describe('get VALIDATION_SCHEMA', () => {
-    db.experiments = {}
+    dbRead.experiments = {}
     const schema = [
       {
         paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,
@@ -28,7 +28,7 @@ describe('TagValidator', () => {
 
   describe('getSchema', () => {
     test('returns schema', () => {
-      db.experiments = {}
+      dbRead.experiments = {}
       const schema = [
         {
           paramName: 'category', type: 'text', lengthRange: { min: 1, max: 500 }, required: true,

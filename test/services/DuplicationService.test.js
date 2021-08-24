@@ -2,12 +2,12 @@ import { mock } from '../jestUtil'
 import DuplicationService from '../../src/services/DuplicationService'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbWrite } from '../../src/db/DbManager'
 
 describe('DuplicationService', () => {
   const testContext = {}
   const testTx = { tx: {} }
-  db.duplication.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
+  dbWrite.duplication.repository = mock({ tx(transactionName, callback) { return callback(testTx) } })
 
   describe('duplicateExperiments', () => {
     test('calls the correct functions if valid copy', () => {
@@ -72,12 +72,12 @@ describe('DuplicationService', () => {
   describe('duplicateExperimentData', () => {
     test('calls duplicateExperiment the correct number of times', () => {
       const target = new DuplicationService()
-      db.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
+      dbWrite.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
 
       return target.duplicateExperimentData([3, 5], 3, null, false, testContext, testTx)
         .then((result) => {
           expect(result.length).toBe(6)
-          expect(db.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)
+          expect(dbWrite.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)
         })
     })
   })

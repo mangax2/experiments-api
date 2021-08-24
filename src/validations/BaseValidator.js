@@ -5,15 +5,6 @@ import ReferentialIntegrityService from '../services/ReferentialIntegrityService
 
 const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
-/* istanbul ignore next */
-function promiseAllOrTransactionBatch(promises, optionalTransaction) {
-  if (_.isNil(optionalTransaction)) {
-    return Promise.all(promises)
-  }
-
-  return optionalTransaction.batch(promises)
-}
-
 // Error Codes 30XXXX
 // Decorator isn't used because it would be less helpful compared to the child validator's file code
 class BaseValidator {
@@ -30,28 +21,28 @@ class BaseValidator {
     return this.messages.length > 0
   }
 
-  validateArray(objectArray, operationName, optionalTransaction) {
-    return promiseAllOrTransactionBatch(
+  validateArray(objectArray, operationName) {
+    return Promise.all(
       _.map(objectArray, element =>
-        this.validateEntity(element, operationName, optionalTransaction),
-      ), optionalTransaction).then(() => {
+        this.validateEntity(element, operationName),
+      )).then(() => {
       if (!this.hasErrors()) {
-        return this.validateBatchForRI(objectArray, operationName, optionalTransaction)
+        return this.validateBatchForRI(objectArray, operationName)
       }
       return Promise.resolve()
     })
   }
 
-  validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction) {
+  validateArrayOrSingleEntity(targetObject, operationName) {
     return _.isArray(targetObject)
-      ? this.validateArray(targetObject, operationName, optionalTransaction)
-      : this.validateEntity(targetObject, operationName, optionalTransaction)
+      ? this.validateArray(targetObject, operationName)
+      : this.validateEntity(targetObject, operationName)
   }
 
-  validate(targetObject, operationName, optionalTransaction, context) {
+  validate(targetObject, operationName, context) {
     return this.preValidate(targetObject)
-      .then(() => this.validateArrayOrSingleEntity(targetObject, operationName, optionalTransaction)
-        .then(() => this.postValidate(targetObject, context, optionalTransaction))
+      .then(() => this.validateArrayOrSingleEntity(targetObject, operationName)
+        .then(() => this.postValidate(targetObject, context))
         .then(() => this.check()))
   }
 
@@ -121,8 +112,8 @@ class BaseValidator {
     }
   }
 
-  checkReferentialIntegrityById(id, entity, optionalTransaction) {
-    return this.referentialIntegrityService.getById(id, entity, optionalTransaction)
+  checkReferentialIntegrityById(id, entity) {
+    return this.referentialIntegrityService.getById(id, entity)
       .then((data) => {
         if (!data) {
           this.messages.push({ message: `${this.getEntityName()} not found for id ${id}`, errorCode: getFullErrorCode(`${this.fileCode}ZZ09`) })
@@ -130,13 +121,12 @@ class BaseValidator {
       })
   }
 
-  checkRIBatch(riBatchOfGroups, optionalTransaction) {
-    return promiseAllOrTransactionBatch(
+  checkRIBatch(riBatchOfGroups) {
+    return Promise.all(
       _.map(riBatchOfGroups, groupSet =>
         // Note: It is assumed that all elements in the group set are either referential integrity
         // checks, or business key uniqueness checks
-        this.getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction)),
-      optionalTransaction,
+        this.getPromiseForRIorBusinessKeyCheck(groupSet)),
     )
   }
 
@@ -146,7 +136,7 @@ class BaseValidator {
     }
   }
 
-  getPromiseForRIorBusinessKeyCheck(groupSet, optionalTransaction) {
+  getPromiseForRIorBusinessKeyCheck(groupSet) {
     if (groupSet.length === 0) {
       return Promise.resolve()
     }
@@ -155,18 +145,18 @@ class BaseValidator {
     const ids = this.getDistinctIds(groupSet)
     if (ids.length > 0) {
       // Note: ids list is assumed to have no duplicates before calling this function
-      return this.verifyIdsExist(ids, groupSet, entity, optionalTransaction)
+      return this.verifyIdsExist(ids, groupSet, entity)
     }
-    return this.verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction)
+    return this.verifyBusinessKeysAreUnique(groupSet, entity)
   }
 
   getDistinctIds = groupSet =>
     _.chain(groupSet).map(g => g.id).filter((e => e !== undefined && e !== null)).uniq()
       .value()
 
-  verifyIdsExist(ids, groupSet, entity, optionalTransaction) {
+  verifyIdsExist(ids, groupSet, entity) {
     // Note: ids list is assumed to have no duplicates before calling this function
-    return this.referentialIntegrityService.getEntitiesByIds(ids, entity, optionalTransaction)
+    return this.referentialIntegrityService.getEntitiesByIds(ids, entity)
       .then((data) => {
         if (data.length !== ids.length) {
           this.messages.push({ message: `${this.getEntityName()} not found for ${groupSet[0].paramName}(s): ${this.getIdDifference(ids, data)}`, errorCode: getFullErrorCode(`${this.fileCode}ZZ0B`) })
@@ -176,12 +166,11 @@ class BaseValidator {
 
   extractBusinessKeys = groupSet => _.map(groupSet, r => ({ keys: r.keys, updateId: r.updateId }))
 
-  verifyBusinessKeysAreUnique(groupSet, entity, optionalTransaction) {
+  verifyBusinessKeysAreUnique(groupSet, entity) {
     const businessKeyObjects = this.extractBusinessKeys(groupSet)
     return this.referentialIntegrityService.getEntitiesByKeys(
       businessKeyObjects,
-      entity,
-      optionalTransaction).then((data) => {
+      entity).then((data) => {
       if (data && data.length > 0) {
         this.messages.push({ message: `${this.getEntityName()} already exists for business keys ${this.formatBusinessKey(data)}`, errorCode: getFullErrorCode(`${this.fileCode}ZZ0C`) })
       }

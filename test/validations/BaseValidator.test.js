@@ -4,7 +4,6 @@ import AppError from '../../src/services/utility/AppError'
 
 describe('BaseValidator', () => {
   let target
-  const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     target = new BaseValidator()
@@ -28,9 +27,9 @@ describe('BaseValidator', () => {
       target.validateEntity = mockResolve()
       target.validateBatchForRI = mockResolve()
 
-      return target.validateArray([{}], 'POST', testTx).then(() => {
-        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST', testTx)
-        expect(target.validateBatchForRI).toHaveBeenCalledWith([{}], 'POST', testTx)
+      return target.validateArray([{}], 'POST').then(() => {
+        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST')
+        expect(target.validateBatchForRI).toHaveBeenCalledWith([{}], 'POST')
       })
     })
 
@@ -39,8 +38,8 @@ describe('BaseValidator', () => {
       target.validateEntity = mockResolve()
       target.validateBatchForRI = mock()
 
-      return target.validateArray([{}], 'POST', testTx).then(() => {
-        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST', testTx)
+      return target.validateArray([{}], 'POST').then(() => {
+        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST')
         expect(target.validateBatchForRI).not.toHaveBeenCalled()
       })
     })
@@ -49,9 +48,9 @@ describe('BaseValidator', () => {
       target.validateEntity = mockResolve()
       target.validateBatchForRI = mockReject('error')
 
-      return target.validateArray([{}], 'POST', testTx).then(() => {}, (err) => {
-        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST', testTx)
-        expect(target.validateBatchForRI).toHaveBeenCalledWith([{}], 'POST', testTx)
+      return target.validateArray([{}], 'POST').then(() => {}, (err) => {
+        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST')
+        expect(target.validateBatchForRI).toHaveBeenCalledWith([{}], 'POST')
         expect(err).toEqual('error')
       })
     })
@@ -60,8 +59,8 @@ describe('BaseValidator', () => {
       target.validateEntity = mockReject('error')
       target.validateBatchForRI = mockReject('error')
 
-      return target.validateArray([{}], 'POST', testTx).then(() => {}, (err) => {
-        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST', testTx)
+      return target.validateArray([{}], 'POST').then(() => {}, (err) => {
+        expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST')
         expect(target.validateBatchForRI).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -73,8 +72,8 @@ describe('BaseValidator', () => {
       target.validateArray = mock()
       target.validateEntity = mock()
 
-      target.validateArrayOrSingleEntity([], 'POST', testTx)
-      expect(target.validateArray).toHaveBeenCalledWith([], 'POST', testTx)
+      target.validateArrayOrSingleEntity([], 'POST')
+      expect(target.validateArray).toHaveBeenCalledWith([], 'POST')
       expect(target.validateEntity).not.toHaveBeenCalled()
     })
 
@@ -82,8 +81,8 @@ describe('BaseValidator', () => {
       target.validateArray = mock()
       target.validateEntity = mock()
 
-      target.validateArrayOrSingleEntity({}, 'POST', testTx)
-      expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST', testTx)
+      target.validateArrayOrSingleEntity({}, 'POST')
+      expect(target.validateEntity).toHaveBeenCalledWith({}, 'POST')
       expect(target.validateArray).not.toHaveBeenCalled()
     })
   })
@@ -95,10 +94,10 @@ describe('BaseValidator', () => {
       target.postValidate = mockResolve()
       target.check = mockResolve()
 
-      return target.validate([], 'POST', testTx).then(() => {
+      return target.validate([], 'POST').then(() => {
         expect(target.preValidate).toHaveBeenCalledWith([])
-        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
+        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST')
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).toHaveBeenCalled()
       })
     })
@@ -109,10 +108,10 @@ describe('BaseValidator', () => {
       target.postValidate = mockResolve()
       target.check = mockReject('error')
 
-      return target.validate([], 'POST', testTx).then(() => {}, (err) => {
+      return target.validate([], 'POST').then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
-        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
+        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST')
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -124,10 +123,10 @@ describe('BaseValidator', () => {
       target.postValidate = mockReject('error')
       target.check = mockReject('error')
 
-      return target.validate([], 'POST', testTx).then(() => {}, (err) => {
+      return target.validate([], 'POST').then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
-        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
-        expect(target.postValidate).toHaveBeenCalledWith([], undefined, testTx)
+        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST')
+        expect(target.postValidate).toHaveBeenCalledWith([], undefined)
         expect(target.check).not.toHaveBeenCalled()
         expect(err).toEqual('error')
       })
@@ -139,9 +138,9 @@ describe('BaseValidator', () => {
       target.postValidate = mockReject('error')
       target.check = mockReject('error')
 
-      return target.validate([], 'POST', testTx).then(() => {}, (err) => {
+      return target.validate([], 'POST').then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
-        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST', testTx)
+        expect(target.validateArrayOrSingleEntity).toHaveBeenCalledWith([], 'POST')
         expect(target.postValidate).not.toHaveBeenCalled()
         expect(target.check).not.toHaveBeenCalled()
         expect(err).toEqual('error')
@@ -154,7 +153,7 @@ describe('BaseValidator', () => {
       target.postValidate = mockReject('error')
       target.check = mockReject('error')
 
-      return target.validate([], 'POST', testTx).then(() => {}, (err) => {
+      return target.validate([], 'POST').then(() => {}, (err) => {
         expect(target.preValidate).toHaveBeenCalledWith([])
         expect(target.validateArrayOrSingleEntity).not.toHaveBeenCalled()
         expect(target.postValidate).not.toHaveBeenCalled()
@@ -353,7 +352,7 @@ describe('BaseValidator', () => {
     test('does not add a message if data is found for id', () => {
       target.referentialIntegrityService.getById = mockResolve({})
 
-      return target.checkReferentialIntegrityById(1, {}, testTx).then(() => {
+      return target.checkReferentialIntegrityById(1, {}).then(() => {
         expect(target.messages.length).toEqual(0)
       })
     })
@@ -362,8 +361,8 @@ describe('BaseValidator', () => {
       target.referentialIntegrityService.getById = mockResolve()
       target.getEntityName = mock('test')
 
-      return target.checkReferentialIntegrityById(1, {}, testTx).then(() => {
-        expect(target.referentialIntegrityService.getById).toHaveBeenCalledWith(1, {}, testTx)
+      return target.checkReferentialIntegrityById(1, {}).then(() => {
+        expect(target.referentialIntegrityService.getById).toHaveBeenCalledWith(1, {})
         expect(target.messages[0]).toEqual({ message: 'test not found for id 1', errorCode: 'ZZ09' })
       })
     })
@@ -371,8 +370,8 @@ describe('BaseValidator', () => {
     test('rejects if getById fails', () => {
       target.referentialIntegrityService.getById = mockReject('error')
 
-      return target.checkReferentialIntegrityById(1, {}, testTx).then(() => {}, (err) => {
-        expect(target.referentialIntegrityService.getById).toHaveBeenCalledWith(1, {}, testTx)
+      return target.checkReferentialIntegrityById(1, {}).then(() => {}, (err) => {
+        expect(target.referentialIntegrityService.getById).toHaveBeenCalledWith(1, {})
         expect(err).toEqual('error')
       })
     })
@@ -382,7 +381,7 @@ describe('BaseValidator', () => {
     test('returns all promises for RI checks', () => {
       target.getPromiseForRIorBusinessKeyCheck = mockResolve()
 
-      return target.checkRIBatch([{}], testTx).then(() => {
+      return target.checkRIBatch([{}]).then(() => {
         expect(target.getPromiseForRIorBusinessKeyCheck).toHaveBeenCalledTimes(1)
       })
     })
@@ -390,7 +389,7 @@ describe('BaseValidator', () => {
     test('rejects when a promise fails in RI checks', () => {
       target.getPromiseForRIorBusinessKeyCheck = mockReject('error')
 
-      return target.checkRIBatch([{}], testTx).then(() => {}, (err) => {
+      return target.checkRIBatch([{}]).then(() => {}, (err) => {
         expect(target.getPromiseForRIorBusinessKeyCheck).toHaveBeenCalledTimes(1)
         expect(err).toEqual('error')
       })
@@ -420,7 +419,7 @@ describe('BaseValidator', () => {
       target.verifyBusinessKeysAreUnique = mock()
       target.verifyIdsExist = mock()
 
-      return target.getPromiseForRIorBusinessKeyCheck([], testTx).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck([]).then(() => {
         expect(target.verifyBusinessKeysAreUnique).not.toHaveBeenCalled()
         expect(target.verifyIdsExist).not.toHaveBeenCalled()
       })
@@ -431,7 +430,7 @@ describe('BaseValidator', () => {
       target.verifyIdsExist = mockResolve()
       target.getDistinctIds = mock([1])
 
-      return target.getPromiseForRIorBusinessKeyCheck([{}], testTx).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck([{}]).then(() => {
         expect(target.verifyBusinessKeysAreUnique).not.toHaveBeenCalled()
         expect(target.verifyIdsExist).toHaveBeenCalled()
       })
@@ -442,7 +441,7 @@ describe('BaseValidator', () => {
       target.verifyIdsExist = mock()
       target.getDistinctIds = mock([])
 
-      return target.getPromiseForRIorBusinessKeyCheck([{}], testTx).then(() => {
+      return target.getPromiseForRIorBusinessKeyCheck([{}]).then(() => {
         expect(target.verifyBusinessKeysAreUnique).toHaveBeenCalled()
         expect(target.verifyIdsExist).not.toHaveBeenCalled()
       })
@@ -461,8 +460,8 @@ describe('BaseValidator', () => {
     test('does not add a message if all ids exist', () => {
       target.referentialIntegrityService.getEntitiesByIds = mockResolve([{}, {}])
 
-      return target.verifyIdsExist([1, 2], {}, {}, testTx).then(() => {
-        expect(target.referentialIntegrityService.getEntitiesByIds).toHaveBeenCalledWith([1, 2], {}, testTx)
+      return target.verifyIdsExist([1, 2], {}, {}).then(() => {
+        expect(target.referentialIntegrityService.getEntitiesByIds).toHaveBeenCalledWith([1, 2], {})
         expect(target.messages.length).toEqual(0)
       })
     })
@@ -472,8 +471,8 @@ describe('BaseValidator', () => {
       target.getEntityName = mock('test')
       target.getIdDifference = mock([2])
 
-      return target.verifyIdsExist([1, 2], [{ paramName: 'testParam' }], {}, testTx).then(() => {
-        expect(target.referentialIntegrityService.getEntitiesByIds).toHaveBeenCalledWith([1, 2], {}, testTx)
+      return target.verifyIdsExist([1, 2], [{ paramName: 'testParam' }], {}).then(() => {
+        expect(target.referentialIntegrityService.getEntitiesByIds).toHaveBeenCalledWith([1, 2], {})
         expect(target.messages.length).toEqual(1)
         expect(target.messages[0]).toEqual({ message: 'test not found for testParam(s): 2', errorCode: 'ZZ0B' })
       })
@@ -482,7 +481,7 @@ describe('BaseValidator', () => {
     test('rejects when getEntitiesByIds fails', () => {
       target.referentialIntegrityService.getEntitiesByIds = mockReject('error')
 
-      return target.verifyIdsExist([1, 2], [], {}, testTx).then(() => {}, (err) => {
+      return target.verifyIdsExist([1, 2], [], {}).then(() => {}, (err) => {
         expect(err).toEqual('error')
       })
     })
@@ -503,7 +502,7 @@ describe('BaseValidator', () => {
       target.extractBusinessKeys = mock([{ keys: ['test1'] }])
       target.referentialIntegrityService.getEntitiesByKeys = mockResolve()
 
-      return target.verifyBusinessKeysAreUnique([], {}, testTx).then(() => {
+      return target.verifyBusinessKeysAreUnique([], {}).then(() => {
         expect(target.messages.length).toEqual(0)
       })
     })
@@ -512,7 +511,7 @@ describe('BaseValidator', () => {
       target.extractBusinessKeys = mock([{ keys: ['test1'] }])
       target.referentialIntegrityService.getEntitiesByKeys = mockResolve([])
 
-      return target.verifyBusinessKeysAreUnique([], {}, testTx).then(() => {
+      return target.verifyBusinessKeysAreUnique([], {}).then(() => {
         expect(target.messages.length).toEqual(0)
       })
     })
@@ -523,7 +522,7 @@ describe('BaseValidator', () => {
       target.getEntityName = mock('test')
       target.formatBusinessKey = mock('test1,test2')
 
-      return target.verifyBusinessKeysAreUnique([], {}, testTx).then(() => {
+      return target.verifyBusinessKeysAreUnique([], {}).then(() => {
         expect(target.messages[0]).toEqual({ message: 'test already exists for business keys test1,test2', errorCode: 'ZZ0C' })
       })
     })
@@ -532,7 +531,7 @@ describe('BaseValidator', () => {
       target.extractBusinessKeys = mock([{ keys: ['test1'] }])
       target.referentialIntegrityService.getEntitiesByKeys = mockReject('error')
 
-      return target.verifyBusinessKeysAreUnique([], {}, testTx).then(() => {}, (err) => {
+      return target.verifyBusinessKeysAreUnique([], {}).then(() => {}, (err) => {
         expect(err).toEqual('error')
       })
     })

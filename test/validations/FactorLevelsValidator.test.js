@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import FactorLevelsValidator from '../../src/validations/FactorLevelsValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('FactorLevelsValidator', () => {
   let target
@@ -12,8 +12,8 @@ describe('FactorLevelsValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('returns post schema', () => {
-      db.factor = {}
-      db.factorLevel = {}
+      dbRead.factor = {}
+      dbRead.factorLevel = {}
 
       const schema = [
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
@@ -25,7 +25,7 @@ describe('FactorLevelsValidator', () => {
     })
 
     test('returns put schema', () => {
-      db.factorLevel = {}
+      dbRead.factorLevel = {}
 
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -44,8 +44,8 @@ describe('FactorLevelsValidator', () => {
 
   describe('getSchema', () => {
     test('returns POST schema when POST is supplied', () => {
-      db.factor = {}
-      db.factorLevel = {}
+      dbRead.factor = {}
+      dbRead.factorLevel = {}
 
       const schema = [
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },
@@ -57,8 +57,8 @@ describe('FactorLevelsValidator', () => {
     })
 
     test('returns POST and PUT schemas when PUT is supplied', () => {
-      db.factor = {}
-      db.factorLevel = {}
+      dbRead.factor = {}
+      dbRead.factorLevel = {}
 
       const schema = [
         // { paramName: 'value', type: 'text', lengthRange: { min: 1, max: 500 }, required: true },

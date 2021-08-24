@@ -1,5 +1,5 @@
 import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import DependentVariablesValidator from '../validations/DependentVariablesValidator'
 import ExperimentsService from './ExperimentsService'
@@ -15,36 +15,35 @@ class DependentVariableService {
   @setErrorCode('121000')
   @Transactional('createDependentVariablesTx')
   batchCreateDependentVariables(dependentVariables, context, tx) {
-    return this.validator.validate(dependentVariables, 'POST', tx)
-      .then(() => db.dependentVariable.batchCreate(tx, dependentVariables, context)
+    return this.validator.validate(dependentVariables, 'POST')
+      .then(() => dbWrite.dependentVariable.batchCreate(tx, dependentVariables, context)
         .then(data => AppUtil.createPostResponse(data)))
   }
 
   @setErrorCode('123000')
-  @Transactional('getDependentVariablesByExperimentId')
-  getDependentVariablesByExperimentId(experimentId, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
-      .then(() => db.dependentVariable.findByExperimentId(experimentId, tx))
+  getDependentVariablesByExperimentId(experimentId, isTemplate, context) {
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context)
+      .then(() => dbRead.dependentVariable.findByExperimentId(experimentId))
   }
 
   @setErrorCode('124000')
-  @Transactional('getDependentVariablesByExperimentIdNoExistenceCheck')
-  static getDependentVariablesByExperimentIdNoExistenceCheck(experimentId, tx) {
-    return db.dependentVariable.findByExperimentId(experimentId, tx)
+  static getDependentVariablesByExperimentIdNoExistenceCheck(experimentId) {
+    return dbRead.dependentVariable.findByExperimentId(experimentId)
   }
 
   @setErrorCode('126000')
-  batchUpdateDependentVariables(dependentVariables, context) {
+  @Transactional('batchUpdateDependentVariables')
+  batchUpdateDependentVariables(dependentVariables, context, tx) {
     return this.validator.validate(dependentVariables, 'PUT')
-      .then(() => db.dependentVariable.repository().tx('updateDependentVariablesTx', t => db.dependentVariable.batchUpdate(t, dependentVariables, context)
-        .then(data => AppUtil.createPutResponse(data))))
+      .then(() => dbWrite.dependentVariable.batchUpdate(tx, dependentVariables, context)
+        .then(data => AppUtil.createPutResponse(data)))
   }
 
   @setErrorCode('127000')
   @Transactional('deleteDependentVariablesForExperimentId')
   deleteDependentVariablesForExperimentId(experimentId, isTemplate, context, tx) {
-    return this.experimentService.getExperimentById(experimentId, isTemplate, context, tx)
-      .then(() => db.dependentVariable.removeByExperimentId(tx, experimentId))
+    return this.experimentService.getExperimentById(experimentId, isTemplate, context)
+      .then(() => dbWrite.dependentVariable.removeByExperimentId(tx, experimentId))
   }
 }
 

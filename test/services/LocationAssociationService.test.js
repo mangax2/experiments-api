@@ -1,7 +1,7 @@
 import { mock, mockResolve } from '../jestUtil'
 import LocationAssociationService from '../../src/services/LocationAssociationService'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead, dbWrite } from '../../src/db/DbManager'
 
 describe('LocationAssociationService', () => {
   let target
@@ -11,7 +11,7 @@ describe('LocationAssociationService', () => {
   beforeEach(() => {
     target = new LocationAssociationService()
 
-    db.block.findByExperimentId = mockResolve([{ id: 1, name: null }, { id: 2, name: '1' }, { id: 3, name: '2' }, { id: 4, name: 'Test 2.5' }])
+    dbRead.block.findByExperimentId = mockResolve([{ id: 1, name: null }, { id: 2, name: '1' }, { id: 3, name: '2' }, { id: 4, name: 'Test 2.5' }])
   })
 
   describe('associateSetsToLocations', () => {
@@ -75,13 +75,13 @@ describe('LocationAssociationService', () => {
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
       target.experimentService.verifyExperimentExists = mockResolve({})
-      db.locationAssociation = {
+      dbWrite.locationAssociation = {
         batchCreate: mockResolve(),
         batchRemoveByLocationAndBlock: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {
-        expect(db.locationAssociation.batchCreate).toHaveBeenCalledWith([
+        expect(dbWrite.locationAssociation.batchCreate).toHaveBeenCalledWith([
           {
             location: 1,
             setId: 123,
@@ -101,13 +101,13 @@ describe('LocationAssociationService', () => {
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
       target.experimentService.verifyExperimentExists = mockResolve({})
-      db.locationAssociation = {
+      dbWrite.locationAssociation = {
         batchCreate: mockResolve(),
         batchRemoveByLocationAndBlock: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {
-        expect(db.locationAssociation.batchCreate).toHaveBeenCalledWith([
+        expect(dbWrite.locationAssociation.batchCreate).toHaveBeenCalledWith([
           {
             location: 1,
             setId: 123,
@@ -127,13 +127,13 @@ describe('LocationAssociationService', () => {
       AppError.badRequest = mock()
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
       target.experimentService.verifyExperimentExists = mockResolve({})
-      db.locationAssociation = {
+      dbWrite.locationAssociation = {
         batchCreate: mockResolve(),
         batchRemoveByLocationAndBlock: mockResolve(),
       }
 
       return target.associateSetsToLocations(1, groups, testContext, testTx).then(() => {
-        expect(db.locationAssociation.batchCreate).toHaveBeenCalledWith([
+        expect(dbWrite.locationAssociation.batchCreate).toHaveBeenCalledWith([
           {
             location: 1,
             setId: 123,

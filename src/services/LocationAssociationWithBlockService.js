@@ -1,6 +1,5 @@
 import _ from 'lodash'
-import Transactional from '@monsantoit/pg-transactional'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import BlockService from './BlockService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
@@ -12,14 +11,13 @@ class LocationAssociationWithBlockService {
   }
 
   @setErrorCode('2Z1000')
-  @Transactional('getLocationAssociationByExperimentId')
-  getByExperimentId(id, tx) {
-    return db.locationAssociation.findByExperimentId(id, tx)
+  getByExperimentId(id) {
+    return dbRead.locationAssociation.findByExperimentId(id)
       .then((locationAssociations) => {
         if (locationAssociations.length === 0) {
           return []
         }
-        return db.block.batchFind(_.uniq(_.map(locationAssociations, 'block_id')), tx)
+        return dbRead.block.batchFind(_.uniq(_.map(locationAssociations, 'block_id')))
           .then(blocks =>
             _.map(locationAssociations, (la) => {
               const block = _.find(blocks, { id: la.block_id })
@@ -30,11 +28,10 @@ class LocationAssociationWithBlockService {
   }
 
   @setErrorCode('2Z2000')
-  @Transactional('getLocationAssociationBySetId')
-  getBySetId(id, tx) {
-    return db.locationAssociation.findBySetId(id, tx)
+  getBySetId(id) {
+    return dbRead.locationAssociation.findBySetId(id)
       .then(locationAssociation => (_.isNil(locationAssociation) ? null :
-        db.block.findByBlockId(locationAssociation.block_id, tx)
+        dbRead.block.findByBlockId(locationAssociation.block_id)
           .then(block => this.addBlockInfoToLocationAssociation(locationAssociation, block))),
       )
   }

@@ -12,24 +12,24 @@ class commentRepo {
   repository = () => this.rep
 
   @setErrorCode('5O1000')
-  find = (id, tx = this.rep) => tx.oneOrNone('SELECT * FROM comment WHERE id = $1', id)
+  find = (id) => this.rep.oneOrNone('SELECT * FROM comment WHERE id = $1', id)
 
   @setErrorCode('5O2000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM comment WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM comment WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('5O3000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM comment WHERE experiment_id=$1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM comment WHERE experiment_id=$1', experimentId)
 
-  findRecentByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT * FROM' +
+  findRecentByExperimentId = (experimentId) => this.rep.oneOrNone('SELECT * FROM' +
     ' comment' +
     ' WHERE' +
     ' experiment_id=$1 order by id desc limit 1' , experimentId)
 
   @setErrorCode('5O4000')
-  all = (tx = this.rep) => tx.any('SELECT * FROM comment')
+  all = () => this.rep.any('SELECT * FROM comment')
 
   @setErrorCode('5O5000')
   batchCreate = (comments, context, tx = this.rep) => {
@@ -65,8 +65,8 @@ class commentRepo {
 
 
   @setErrorCode('5OA000')
-  batchFindByExperimentId = (experimentIds, tx = rep) => {
-    return tx.any('SELECT * FROM comment WHERE experiment_id IN ($1:csv)', [experimentIds])
+  batchFindByExperimentId = (experimentIds) => {
+    return this.rep.any('SELECT * FROM comment WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])

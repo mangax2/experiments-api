@@ -11,13 +11,13 @@ class ownerRepo {
   repository = () => this.rep
 
   @setErrorCode('5E1000')
-  findByExperimentId = (experimentId, tx = this.rep) => tx.oneOrNone('SELECT user_ids,' +
+  findByExperimentId = (experimentId) => this.rep.oneOrNone('SELECT user_ids,' +
     ' group_ids,reviewer_ids FROM' +
     ' owner WHERE' +
     ' experiment_id = $1', experimentId)
 
   @setErrorCode('5E2000')
-  batchFindByExperimentIds = (experimentIds, tx = this.rep) => tx.any('SELECT * FROM owner where experiment_id IN ($1:csv)', [experimentIds]).then(data => {
+  batchFindByExperimentIds = (experimentIds) => this.rep.any('SELECT * FROM owner where experiment_id IN ($1:csv)', [experimentIds]).then(data => {
     const keyedData = _.keyBy(data, 'experiment_id')
     return _.map(experimentIds, experimentId => keyedData[experimentId])
   })
@@ -60,7 +60,7 @@ class ownerRepo {
   )
 
   @setErrorCode('5E5000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM "owner" WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })

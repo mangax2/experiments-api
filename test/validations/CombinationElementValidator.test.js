@@ -1,7 +1,7 @@
 import { mock } from '../jestUtil'
 import CombinationElementValidator from '../../src/validations/CombinationElementValidator'
 import AppError from '../../src/services/utility/AppError'
-import db from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 
 describe('CombinationElementValidator', () => {
   let target
@@ -12,12 +12,12 @@ describe('CombinationElementValidator', () => {
 
   describe('get POST_VALIDATION_SCHEMA', () => {
     test('gets the schema', () => {
-      db.treatment = {}
-      db.combinationElement = {}
+      dbRead.treatment = {}
+      dbRead.combinationElement = {}
 
       const schema = [
         { paramName: 'factorLevelId', type: 'numeric', required: true },
-        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'factorLevelId', type: 'refData', entity: dbRead.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {
@@ -34,7 +34,7 @@ describe('CombinationElementValidator', () => {
 
   describe('get PUT_ADDITIONAL_SCHEMA_ELEMENTS', () => {
     test('gets the schema', () => {
-      db.combinationElement = {}
+      dbRead.combinationElement = {}
 
       const schema = [
         { paramName: 'id', type: 'numeric', required: true },
@@ -53,12 +53,12 @@ describe('CombinationElementValidator', () => {
 
   describe('getSchema', () => {
     test('gets the post schema', () => {
-      db.treatment = {}
-      db.combinationElement = {}
+      dbRead.treatment = {}
+      dbRead.combinationElement = {}
 
       const schema = [
         { paramName: 'factorLevelId', type: 'numeric', required: true },
-        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'factorLevelId', type: 'refData', entity: dbRead.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {
@@ -73,12 +73,12 @@ describe('CombinationElementValidator', () => {
     })
 
     test('gets the put schema', () => {
-      db.treatment = {}
-      db.combinationElement = {}
+      dbRead.treatment = {}
+      dbRead.combinationElement = {}
 
       const schema = [
         { paramName: 'factorLevelId', type: 'numeric', required: true },
-        { paramName: 'factorLevelId', type: 'refData', entity: db.factorLevel },
+        { paramName: 'factorLevelId', type: 'refData', entity: dbRead.factorLevel },
         { paramName: 'treatmentId', type: 'numeric', required: true },
         { paramName: 'treatmentId', type: 'refData', entity: {} },
         {

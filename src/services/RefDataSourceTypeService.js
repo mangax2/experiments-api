@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import db from '../db/DbManager'
+import { dbRead } from '../db/DbManager'
 import RefDataSourceService from './RefDataSourceService'
 
 const { setErrorCode } = require('@monsantoit/error-decorator')()
@@ -11,11 +11,11 @@ class RefDataSourceTypeService {
   }
 
   @setErrorCode('1L1000')
-  getRefDataSourceTypes = () => db.refDataSourceType.all()
+  getRefDataSourceTypes = () => dbRead.refDataSourceType.all()
 
   @setErrorCode('1L2000')
   getRefDataSourceTypesWithDataSources() {
-    return db.refDataSourceType.all()
+    return dbRead.refDataSourceType.all()
       .then(data => this.refDataSourceService.getRefDataSources()
         .then((refDataSources) => {
           const dataSourcesGroupedByTypeId = _.groupBy(refDataSources, rds =>

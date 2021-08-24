@@ -12,13 +12,13 @@ class designSpecificationDetailRepo {
   repository = () => this.rep
 
   @setErrorCode('522000')
-  batchFind = (ids, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
+  batchFind = (ids) => this.rep.any('SELECT * FROM design_spec_detail WHERE id IN ($1:csv)', [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
 
   @setErrorCode('523000')
-  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT * FROM design_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
+  findAllByExperimentId = (experimentId) => this.rep.any('SELECT * FROM design_spec_detail WHERE experiment_id=$1 ORDER BY id ASC', experimentId)
 
   @setErrorCode('524000')
   batchCreate = (designSpecificationDetails, context, tx = this.rep) => {
@@ -78,14 +78,14 @@ class designSpecificationDetailRepo {
   removeByExperimentId = (experimentId, tx = this.rep) => tx.any('DELETE FROM design_spec_detail WHERE experiment_id = $1 RETURNING id', experimentId)
 
   @setErrorCode('529000')
-  batchFindByBusinessKey = (batchKeys, tx = this.rep) => {
+  batchFindByBusinessKey = (batchKeys) => {
     const values = batchKeys.map(obj => ({
       experiment_id: obj.keys[0],
       ref_design_spec_id: obj.keys[1],
       id: obj.updateId,
     }))
     const query = `WITH d(experiment_id, ref_design_spec_id, id) AS (VALUES ${this.pgp.helpers.values(values, ['experiment_id', 'ref_design_spec_id', 'id'])}) select entity.experiment_id, entity.ref_design_spec_id from public.design_spec_detail entity inner join d on entity.experiment_id = CAST(d.experiment_id as integer) AND entity.ref_design_spec_id = CAST(d.ref_design_spec_id as integer) AND (d.id is null or entity.id != CAST(d.id as integer))`
-    return tx.any(query)
+    return this.rep.any(query)
   }
 
   @setErrorCode('52A000')
@@ -111,8 +111,8 @@ class designSpecificationDetailRepo {
   }
 
   @setErrorCode('52B000')
-  batchFindAllByExperimentId = (experimentIds, tx = this.rep) => {
-    return tx.any('SELECT * FROM design_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
+  batchFindAllByExperimentId = (experimentIds) => {
+    return this.rep.any('SELECT * FROM design_spec_detail WHERE experiment_id IN ($1:csv)', [experimentIds])
       .then(data => {
         const dataByExperimentId = _.groupBy(data, 'experiment_id')
         return _.map(experimentIds, experimentId => dataByExperimentId[experimentId] || [])
@@ -120,8 +120,8 @@ class designSpecificationDetailRepo {
   }
 
   @setErrorCode('52C000')
-  getRandomizationStrategyIdByExperimentId = (experimentId, tx = this.rep) => 
-    tx.oneOrNone('SELECT dsd.value FROM design_spec_detail dsd INNER JOIN ref_design_spec rds ON rds.id = dsd.ref_design_spec_id WHERE rds.name = \'Randomization Strategy ID\' AND experiment_id = $1', [experimentId])
+  getRandomizationStrategyIdByExperimentId = (experimentId) => 
+    this.rep.oneOrNone('SELECT dsd.value FROM design_spec_detail dsd INNER JOIN ref_design_spec rds ON rds.id = dsd.ref_design_spec_id WHERE rds.name = \'Randomization Strategy ID\' AND experiment_id = $1', [experimentId])
 
 
 }

@@ -3,7 +3,6 @@ import ReferentialIntegrityService from '../../src/services/ReferentialIntegrity
 
 describe('ReferentialIntegrityService', () => {
   let target
-  const testTx = { tx: {} }
 
   beforeEach(() => {
     target = new ReferentialIntegrityService()
@@ -13,8 +12,9 @@ describe('ReferentialIntegrityService', () => {
     test('calls entity find', () => {
       const entity = { find: mock() }
 
-      target.getById(1, entity, testTx)
-      expect(entity.find).toHaveBeenCalledWith(1, testTx)
+      target.getById(1, entity)
+
+      expect(entity.find).toHaveBeenCalledWith(1)
     })
   })
 
@@ -22,8 +22,9 @@ describe('ReferentialIntegrityService', () => {
     test('calls findByBusinessKey', () => {
       const entity = { findByBusinessKey: mock() }
 
-      target.getByBusinessKey(['key1', 'key2'], entity, testTx)
-      expect(entity.findByBusinessKey).toHaveBeenCalledWith(['key1', 'key2'], testTx)
+      target.getByBusinessKey(['key1', 'key2'], entity)
+
+      expect(entity.findByBusinessKey).toHaveBeenCalledWith(['key1', 'key2'])
     })
   })
 
@@ -31,8 +32,9 @@ describe('ReferentialIntegrityService', () => {
     test('gets entities by BusinessKey', () => {
       const entity = { batchFindByBusinessKey: mock() }
 
-      target.getEntitiesByKeys([{}], entity, testTx)
-      expect(entity.batchFindByBusinessKey).toHaveBeenCalledWith([{}], testTx)
+      target.getEntitiesByKeys([{}], entity)
+
+      expect(entity.batchFindByBusinessKey).toHaveBeenCalledWith([{}])
     })
   })
 
@@ -40,8 +42,9 @@ describe('ReferentialIntegrityService', () => {
     test('gets entities by ids', () => {
       const entity = { batchFind: mock() }
 
-      target.getEntitiesByIds([1, 2], entity, testTx)
-      expect(entity.batchFind).toHaveBeenCalledWith([1, 2], testTx)
+      target.getEntitiesByIds([1, 2], entity)
+
+      expect(entity.batchFind).toHaveBeenCalledWith([1, 2])
     })
   })
 })

@@ -35,6 +35,7 @@ benchmarks/graphs
 *.iml
 *.tgz
 
+/src/config/overrides*.json
 
 # pem files
 *.pem

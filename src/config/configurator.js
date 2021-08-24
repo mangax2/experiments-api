@@ -16,8 +16,8 @@ module.exports = new Config({
       enabled: true,
       auth: {
         type: 'auto',
-        roleId: process.env.APP_VAULT_ROLE_ID,
-        secretId: process.env.APP_VAULT_SECRET_ID,
+        roleId: process.env.vaultRoleId,
+        secretId: process.env.vaultSecretId,
       },
     }),
   ],

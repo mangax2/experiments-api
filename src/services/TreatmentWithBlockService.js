@@ -29,22 +29,22 @@ class TreatmentWithBlockService {
 
   @setErrorCode('1Z6000')
   @Transactional('createTreatments')
-  createTreatments(experimentId, treatments, context, tx) {
+  createTreatments(experimentId, treatments, newBlocks, context, tx) {
     return this.treatmentService.batchCreateTreatments(treatments, context, tx)
       .then((responses) => {
         const newTreatments = _.map(responses, (r, index) => ({ ...treatments[index], id: r.id }))
         return this.treatmentBlockService.createTreatmentBlocksByExperimentId(experimentId,
-          newTreatments, context, tx)
+          newTreatments, newBlocks, context, tx)
           .then(() => responses)
       })
   }
 
   @setErrorCode('1Z7000')
   @Transactional('updateTreatments')
-  updateTreatments = async (experimentId, treatments, context, tx) => {
+  updateTreatments = async (experimentId, treatments, newBlocks, context, tx) => {
     await this.treatmentService.batchUpdateTreatments(treatments, context, tx)
     return this.treatmentBlockService.persistTreatmentBlocksForExistingTreatments(
-      experimentId, treatments, context, tx)
+      experimentId, treatments, newBlocks, context, tx)
   }
 }
 

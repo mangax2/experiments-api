@@ -41,7 +41,7 @@ class blockRepo {
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
     }))
-    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id`
+    const query = `${this.pgp.helpers.insert(values, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} RETURNING id, name`
 
     return tx.any(query)
   }

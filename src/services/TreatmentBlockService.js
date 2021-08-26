@@ -80,9 +80,15 @@ class TreatmentBlockService {
 
   @setErrorCode('1V4000')
   @Transactional('createTreatmentBlocksByExperimentId')
-  createTreatmentBlocksByExperimentId = async (experimentId, treatments, context, tx) => {
+  createTreatmentBlocksByExperimentId = async (
+    experimentId,
+    treatments,
+    newBlocks,
+    context,
+    tx,
+  ) => {
     const blocks = await dbRead.block.findByExperimentId(experimentId)
-    return this.createTreatmentBlocks(treatments, blocks, context, tx)
+    return this.createTreatmentBlocks(treatments, [...blocks, ...newBlocks], context, tx)
   }
 
   @setErrorCode('1V5000')
@@ -99,19 +105,26 @@ class TreatmentBlockService {
 
   @setErrorCode('1V6000')
   @Transactional('persistTreatmentBlocksForExistingTreatments')
-  persistTreatmentBlocksForExistingTreatments = (experimentId, treatments, context, tx) =>
-    Promise.all([
+  persistTreatmentBlocksForExistingTreatments = async (
+    experimentId,
+    treatments,
+    newBlocks,
+    context,
+    tx,
+  ) => {
+    const [blocksInDb, tbsInDB] = await Promise.all([
       dbRead.block.findByExperimentId(experimentId),
       dbRead.treatmentBlock.batchFindByTreatmentIds(_.map(treatments, 'id')),
-    ]).then(([blocks, tbsInDB]) => {
-      const treatmentBlocksFromRequest = this.createTreatmentBlockModels(treatments, blocks)
-      const { creates, updates, deletes } =
-        this.splitTreatmentBlocksToActions(treatmentBlocksFromRequest, tbsInDB)
+    ])
+    const blocks = [...blocksInDb, ...newBlocks]
+    const treatmentBlocksFromRequest = this.createTreatmentBlockModels(treatments, blocks)
+    const { creates, updates, deletes } =
+      this.splitTreatmentBlocksToActions(treatmentBlocksFromRequest, tbsInDB)
 
-      return dbWrite.treatmentBlock.batchRemove(_.map(deletes, 'id'), tx)
-        .then(() => dbWrite.treatmentBlock.batchUpdate(updates, context, tx))
-        .then(() => dbWrite.treatmentBlock.batchCreate(creates, context, tx))
-    })
+    await dbWrite.treatmentBlock.batchRemove(_.map(deletes, 'id'), tx)
+    await dbWrite.treatmentBlock.batchUpdate(updates, context, tx)
+    await dbWrite.treatmentBlock.batchCreate(creates, context, tx)
+  }
 
   @setErrorCode('1V7000')
   createTreatmentBlockModels = (treatments, blocks) => {

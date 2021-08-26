@@ -115,26 +115,20 @@ class TreatmentDetailsService {
 
     const blockNames = _.uniq(_.flatMap(treatments, t => _.map(t.blocks, 'name')))
 
-    await this.blockService.createOnlyNewBlocksByExperimentId(experimentId, blockNames, context, tx)
-
+    const newBlocks = await this.blockService.createOnlyNewBlocksByExperimentId(
+      experimentId, blockNames, context, tx)
 
     const dbTreatments = _.sortBy(result, 'treatment_number')
     const sortedTreatments = _.sortBy(treatments, 'treatmentNumber')
 
     if (dbTreatments.length === 0 && sortedTreatments.length > 0) {
       TreatmentDetailsService.populateExperimentId(sortedTreatments, experimentId)
-      await this.createTreatments(experimentId, sortedTreatments, context, tx)
+      await this.createTreatments(experimentId, sortedTreatments, newBlocks, context, tx)
       await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
-      return AppUtil.createNoContentResponse()
-    }
-
-    if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
+    } else if (dbTreatments.length > 0 && sortedTreatments.length === 0) {
       await this.deleteTreatments(_.map(dbTreatments, 'id'), context, tx)
       await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
-      return AppUtil.createNoContentResponse()
-    }
-
-    if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
+    } else if (sortedTreatments.length > 0 && dbTreatments.length > 0) {
       _.forEach(dbTreatments, (treatment) => {
         treatment.sortedFactorLevelIds = _.join(_.map(treatment.combination_elements, ce => ce.factor_level.id).sort(), ',')
         treatment.used = false
@@ -154,10 +148,9 @@ class TreatmentDetailsService {
       TreatmentDetailsService.populateExperimentId(updates, experimentId)
       TreatmentDetailsService.populateExperimentId(adds, experimentId)
       await this.deleteTreatments(deletes, context, tx)
-      await this.updateTreatments(experimentId, updates, context, tx)
-      await this.createTreatments(experimentId, adds, context, tx)
+      await this.updateTreatments(experimentId, updates, newBlocks, context, tx)
+      await this.createTreatments(experimentId, adds, newBlocks, context, tx)
       await this.blockService.removeBlocksByExperimentId(experimentId, blockNames, tx)
-      await AppUtil.createNoContentResponse()
     }
 
     return AppUtil.createNoContentResponse()
@@ -215,23 +208,19 @@ class TreatmentDetailsService {
   }
 
   @setErrorCode('1Q5000')
-  createTreatments(experimentId, treatmentAdds, context, tx) {
-    if (_.compact(treatmentAdds).length === 0) {
-      return Promise.resolve()
-    }
+  async createTreatments(experimentId, treatmentAdds, newBlocks, context, tx) {
+    if (_.compact(treatmentAdds).length > 0) {
+      const createTreatmentsResponses = await this.treatmentWithBlockService.createTreatments(
+        experimentId, treatmentAdds, newBlocks, context, tx)
 
-    return this.treatmentWithBlockService.createTreatments(experimentId, treatmentAdds, context, tx)
-      .then((createTreatmentsResponses) => {
-        const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
-        return this.createCombinationElements(
-          this.assembleBatchCreateCombinationElementsRequestFromAdds(
-            treatmentAdds,
-            newTreatmentIds,
-          ),
-          context,
-          tx,
-        )
-      })
+      const newTreatmentIds = _.map(createTreatmentsResponses, response => response.id)
+      return this.createCombinationElements(
+        this.assembleBatchCreateCombinationElementsRequestFromAdds(treatmentAdds, newTreatmentIds),
+        context,
+        tx,
+      )
+    }
+    return undefined
   }
 
   @setErrorCode('1Q6000')
@@ -259,12 +248,12 @@ class TreatmentDetailsService {
   removeUndefinedElements = elements => _.filter(elements, element => !_.isUndefined(element))
 
   @setErrorCode('1QA000')
-  updateTreatments = async (experimentId, treatmentUpdates, context, tx) => {
+  updateTreatments = async (experimentId, treatmentUpdates, newBlocks, context, tx) => {
     if (_.compact(treatmentUpdates).length === 0) {
       return Promise.resolve()
     }
     await this.treatmentWithBlockService.updateTreatments(
-      experimentId, treatmentUpdates, context, tx)
+      experimentId, treatmentUpdates, newBlocks, context, tx)
     await this.deleteCombinationElements(treatmentUpdates, context, tx)
     return this.createAndUpdateCombinationElements(treatmentUpdates, context, tx)
   }

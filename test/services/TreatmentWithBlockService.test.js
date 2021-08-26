@@ -64,9 +64,9 @@ describe('TreatmentWithBlockService', () => {
       target.treatmentService.batchCreateTreatments = mockResolve(treatmentCreateResponse)
       target.treatmentBlockService.createTreatmentBlocksByExperimentId = mockResolve([])
 
-      return target.createTreatments(1, treatments, {}, testTx).then((data) => {
+      return target.createTreatments(1, treatments, [], {}, testTx).then((data) => {
         expect(target.treatmentBlockService.createTreatmentBlocksByExperimentId).toHaveBeenCalledWith(1,
-          [{ id: 111, treatmentNumber: 1 }, { id: 112, treatmentNumber: 2 }], {}, testTx)
+          [{ id: 111, treatmentNumber: 1 }, { id: 112, treatmentNumber: 2 }], [], {}, testTx)
         expect(data).toEqual(treatmentCreateResponse)
       })
     })
@@ -78,9 +78,9 @@ describe('TreatmentWithBlockService', () => {
       target.treatmentService.batchUpdateTreatments = mockResolve([])
       target.treatmentBlockService.persistTreatmentBlocksForExistingTreatments = mockResolve([])
 
-      return target.updateTreatments(1, [], {}, testTx).then(() => {
+      return target.updateTreatments(1, [], [], {}, testTx).then(() => {
         expect(target.treatmentService.batchUpdateTreatments).toHaveBeenCalledWith([], {}, testTx)
-        expect(target.treatmentBlockService.persistTreatmentBlocksForExistingTreatments).toHaveBeenCalledWith(1, [], {}, testTx)
+        expect(target.treatmentBlockService.persistTreatmentBlocksForExistingTreatments).toHaveBeenCalledWith(1, [], [], {}, testTx)
       })
     })
   })

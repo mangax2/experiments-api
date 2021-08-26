@@ -169,14 +169,22 @@ describe('TreatmentBlockService', () => {
         { id: 11, name: 'block1' },
         { id: 12, name: 'block2' },
       ]
+      const newBlocks = [
+        { id: 13, name: 'block3' },
+      ]
+      const allBlocks = [
+        { id: 11, name: 'block1' },
+        { id: 12, name: 'block2' },
+        { id: 13, name: 'block3' },
+      ]
       dbRead.block.findByExperimentId = mockResolve(blocks)
       const target = new TreatmentBlockService()
       target.createTreatmentBlocks = mockResolve()
 
-      return target.createTreatmentBlocksByExperimentId(1, [], {}, testTx)
+      return target.createTreatmentBlocksByExperimentId(1, [], newBlocks, {}, testTx)
         .then(() => {
           expect(dbRead.block.findByExperimentId).toHaveBeenCalledWith(1)
-          expect(target.createTreatmentBlocks).toHaveBeenCalledWith([], blocks, {}, testTx)
+          expect(target.createTreatmentBlocks).toHaveBeenCalledWith([], allBlocks, {}, testTx)
         })
     })
   })
@@ -237,10 +245,10 @@ describe('TreatmentBlockService', () => {
       const target = new TreatmentBlockService({}, {})
       target.createTreatmentBlockModels = mock()
       target.splitTreatmentBlocksToActions = mockResolve()
-      dbRead.block.findByExperimentId = mockResolve()
+      dbRead.block.findByExperimentId = mockResolve([])
       dbRead.treatmentBlock.batchFindByTreatmentIds = mockResolve()
 
-      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, [], {}, testTx)
 
       expect(dbRead.block.findByExperimentId).toHaveBeenCalledWith(5)
       expect(dbRead.treatmentBlock.batchFindByTreatmentIds).toHaveBeenCalledWith([3, 7])
@@ -258,7 +266,7 @@ describe('TreatmentBlockService', () => {
       dbWrite.treatmentBlock.batchRemove = mockResolve()
       dbWrite.treatmentBlock.batchUpdate = mockResolve()
 
-      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+      await target.persistTreatmentBlocksForExistingTreatments(5, treatments, [], {}, testTx)
 
       expect(dbWrite.treatmentBlock.batchCreate).toHaveBeenCalledWith(creates, {}, testTx)
       expect(dbWrite.treatmentBlock.batchRemove).toHaveBeenCalledWith([1], testTx)
@@ -279,7 +287,7 @@ describe('TreatmentBlockService', () => {
       dbWrite.treatmentBlock.batchUpdate = mockResolve()
 
       try {
-        await target.persistTreatmentBlocksForExistingTreatments(5, treatments, {}, testTx)
+        await target.persistTreatmentBlocksForExistingTreatments(5, treatments, [], {}, testTx)
       } catch {
         // no-op
       } finally {

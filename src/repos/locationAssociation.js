@@ -35,7 +35,7 @@ class locationAssociationRepo {
 
     const validSetIds = _.without(setIds, 'null')
     if (validSetIds.length > 0) {
-      promises.push(tx.any('SELECT e.*, la.set_id FROM experiment e, location_association la, block b WHERE e.id = b.experiment_id and b.id = la.block_id and la.set_id IN ($1:csv)', [validSetIds]))
+      promises.push(this.rep.any('SELECT e.*, la.set_id FROM experiment e, location_association la, block b WHERE e.id = b.experiment_id and b.id = la.block_id and la.set_id IN ($1:csv)', [validSetIds]))
     } else {
       promises.push(Promise.resolve())
     }

@@ -160,7 +160,7 @@ class ExperimentsService {
         const errorMessage = isTemplate ? 'Template Not Found for requested templateId'
           : 'Experiment Not Found for requested experimentId'
         console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-        throw AppError.notFound(errorMessage, undefined, getFullErrorCode('158001'))
+        throw AppError.notFound(errorMessage, undefined, getFullErrorCode('15U001'))
       }
       return data
     })
@@ -401,9 +401,9 @@ class ExperimentsService {
                     value: String(requestBody.id),
                     experimentId,
                   }
-                  tagsPromise.push(this.getExperimentById(experimentId, false, context)
+                  tagsPromise.push(this.tagService.getTagsByExperimentId(experimentId, false, context)
                     .then((result) => {
-                      const tags = _.map(result.tags, (tag) => {
+                      const tags = _.map(result, (tag) => {
                         tag.experimentId = experimentId
                         return tag
                       })

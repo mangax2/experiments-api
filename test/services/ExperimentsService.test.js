@@ -686,7 +686,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, false, testContext).then(() => {}, () => {
         expect(dbRead.experiments.find).toHaveBeenCalledWith(1, false)
-        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '158001')
+        expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experimentId', undefined, '15U001')
         expect(target.tagService.getTagsByExperimentId).not.toHaveBeenCalled()
       })
     })
@@ -698,7 +698,7 @@ describe('ExperimentsService', () => {
 
       return target.getExperimentById(1, true, testContext).then(() => {}, () => {
         expect(dbRead.experiments.find).toHaveBeenCalledWith(1, true)
-        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '158001')
+        expect(AppError.notFound).toHaveBeenCalledWith('Template Not Found for requested templateId', undefined, '15U001')
         expect(target.tagService.getTagsByExperimentId).not.toHaveBeenCalled()
       })
     })
@@ -1322,7 +1322,7 @@ describe('ExperimentsService', () => {
       const requestBody = { id: 1, name: 'newName' }
       target.createEntity = mockResolve([{ id: 2 }])
       target.tagService.saveTags = mockResolve()
-      target.getExperimentById = mockResolve({ tags: [{ category: 'a', value: 'b' }] })
+      target.tagService.getTagsByExperimentId = mockResolve([{ category: 'a', value: 'b' }])
       AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, 'newName', testContext, false, testTx)
@@ -1358,7 +1358,7 @@ describe('ExperimentsService', () => {
       const requestBody = { id: 1, name: 'newName', numberOfCopies: 1 }
       target.createEntity = mockResolve([{ id: 1 }])
       target.tagService.saveTags = mockResolve()
-      target.getExperimentById = mockResolve({ tags: [{ category: 'a', value: 'b' }] })
+      target.tagService.getTagsByExperimentId = mockResolve([{ category: 'a', value: 'b' }])
       AppUtil.createPostResponse = mockResolve({})
       return target.manageExperiments(requestBody, { source: 'template' }, testContext, testTx).then(() => {
         expect(target.createEntity).toHaveBeenCalledWith(1, 1, 'newName', testContext, false, testTx)

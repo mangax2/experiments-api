@@ -77,7 +77,7 @@ function createLoaders() {
     dbRead.locationAssociation.findByExperimentId)
 
   const tagsByExperimentIdLoader = createMultiDataLoader(
-    arg => TagService().getTagsByExperimentId(arg, false))
+    arg => new TagService().getTagsByExperimentId(arg, false))
 
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(dbRead.combinationElement.batchFind)

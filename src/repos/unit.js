@@ -25,7 +25,7 @@ class unitRepo {
     'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setIds) => this.rep.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
+  batchFindAllBySetId = (setId) => this.rep.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
     'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
     'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)

@@ -3,7 +3,18 @@ import {
 } from '../jestUtil'
 import DependentVariableService from '../../src/services/DependentVariableService'
 import ExperimentsService from '../../src/services/ExperimentsService'
-import FactorDependentCompositeService from '../../src/services/FactorDependentCompositeService'
+import FactorDependentCompositeService, {
+  assembleIndependentAndExogenous,
+  assembleVariablesResponseObject,
+  convertDbLevelToResponseFormat,
+  extractLevelsForFactor,
+  findFactorType,
+  getFactorsAndLevels,
+  mapDbDependentVariablesToResponseFormat,
+  mapDependentVariableRequestToDbFormat,
+  mapDbFactorLevelsToResponseFormat,
+  mapDbFactorsToFactorResponseFormat,
+} from '../../src/services/FactorDependentCompositeService'
 import FactorService from '../../src/services/FactorService'
 import FactorLevelService from '../../src/services/FactorLevelService'
 import FactorLevelAssociationService from '../../src/services/FactorLevelAssociationService'
@@ -16,71 +27,29 @@ describe('FactorDependentCompositeService', () => {
   kafkaProducerMocker()
 
   let verifyExperimentExistsOriginal
-  let getFactorsByExperimentIdNoExistenceCheckOriginal
-  let getFactorLevelsByExperimentIdNoExistenceCheckOriginal
-  let getFactorsWithLevelsOriginal
-  let extractLevelsForFactorOriginal
-  let appendLevelIdToLevelOriginal
-  let findFactorTypeOriginal
-  let assembleFactorLevelDTOsOriginal
-  let mapFactorEntitiesToFactorDTOsOriginal
-  let mapDependentVariablesEntitiesToDTOsOriginal
-  let createVariablesObjectOriginal
-  let assembleIndependentAndExogenousOriginal
-  let assembleVariablesObjectOriginal
   let getDependentVariablesByExperimentIdNoExistenceCheckOriginal
   let getFactorLevelAssociationByExperimentIdOriginal
-  let mapFactorLevelAssociationEntitiesToDTOsOriginal
-  let mapDependentVariableDTO2DbEntityOriginal
 
   beforeEach(() => {
     target = new FactorDependentCompositeService()
 
     verifyExperimentExistsOriginal = ExperimentsService.verifyExperimentExists
-    getFactorsByExperimentIdNoExistenceCheckOriginal = FactorService.getFactorsByExperimentIdNoExistenceCheck
-    getFactorLevelsByExperimentIdNoExistenceCheckOriginal = FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck
-    getFactorsWithLevelsOriginal = FactorDependentCompositeService.getFactorsWithLevels
-    extractLevelsForFactorOriginal = FactorDependentCompositeService.extractLevelsForFactor
-    appendLevelIdToLevelOriginal = FactorDependentCompositeService.appendLevelIdToLevel
-    findFactorTypeOriginal = FactorDependentCompositeService.findFactorType
-    assembleFactorLevelDTOsOriginal = FactorDependentCompositeService.assembleFactorLevelDTOs
-    mapFactorEntitiesToFactorDTOsOriginal = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs
-    mapDependentVariablesEntitiesToDTOsOriginal = FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs
-    createVariablesObjectOriginal = FactorDependentCompositeService.createVariablesObject
-    assembleIndependentAndExogenousOriginal = FactorDependentCompositeService.assembleIndependentAndExogenous
-    assembleVariablesObjectOriginal = FactorDependentCompositeService.assembleVariablesObject
     getDependentVariablesByExperimentIdNoExistenceCheckOriginal = DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck
     getFactorLevelAssociationByExperimentIdOriginal = FactorLevelAssociationService.getFactorLevelAssociationByExperimentId
-    mapFactorLevelAssociationEntitiesToDTOsOriginal = FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs
-    mapDependentVariableDTO2DbEntityOriginal = FactorDependentCompositeService.mapDependentVariableDTO2DbEntity
   })
 
   afterEach(() => {
     ExperimentsService.verifyExperimentExists = verifyExperimentExistsOriginal
-    FactorService.getFactorsByExperimentIdNoExistenceCheck = getFactorsByExperimentIdNoExistenceCheckOriginal
-    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = getFactorLevelsByExperimentIdNoExistenceCheckOriginal
-    FactorDependentCompositeService.getFactorsWithLevels = getFactorsWithLevelsOriginal
-    FactorDependentCompositeService.extractLevelsForFactor = extractLevelsForFactorOriginal
-    FactorDependentCompositeService.appendLevelIdToLevel = appendLevelIdToLevelOriginal
-    FactorDependentCompositeService.findFactorType = findFactorTypeOriginal
-    FactorDependentCompositeService.assembleFactorLevelDTOs = assembleFactorLevelDTOsOriginal
-    FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mapFactorEntitiesToFactorDTOsOriginal
-    FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mapDependentVariablesEntitiesToDTOsOriginal
-    FactorDependentCompositeService.createVariablesObject = createVariablesObjectOriginal
-    FactorDependentCompositeService.assembleIndependentAndExogenous = assembleIndependentAndExogenousOriginal
-    FactorDependentCompositeService.assembleVariablesObject = assembleVariablesObjectOriginal
     DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = getDependentVariablesByExperimentIdNoExistenceCheckOriginal
     FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = getFactorLevelAssociationByExperimentIdOriginal
-    FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs = mapFactorLevelAssociationEntitiesToDTOsOriginal
-    FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mapDependentVariableDTO2DbEntityOriginal
   })
 
-  describe('getFactorsWithLevels', () => {
+  describe('getFactorsAndLevels', () => {
     test('returns factors and levels object', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve([{}, {}])
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1).then((data) => {
+      return getFactorsAndLevels(1).then((data) => {
         expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(data).toEqual({ factors: [{}], levels: [{}, {}] })
@@ -92,7 +61,7 @@ describe('FactorDependentCompositeService', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve([{}])
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockReject(error)
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1).then(() => {}, (err) => {
+      return getFactorsAndLevels(1).then(() => {}, (err) => {
         expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
@@ -104,7 +73,7 @@ describe('FactorDependentCompositeService', () => {
       FactorService.getFactorsByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mock()
 
-      return FactorDependentCompositeService.getFactorsWithLevels(1).then(() => {}, (err) => {
+      return getFactorsAndLevels(1).then(() => {}, (err) => {
         expect(FactorService.getFactorsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(err).toEqual(error)
@@ -114,29 +83,29 @@ describe('FactorDependentCompositeService', () => {
 
   describe('extractLevelsForFactor', () => {
     test('returns empty list when no levels match', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 2 }])).toEqual([])
+      expect(extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 2 }])).toEqual([])
     })
 
     test('returns empty list when no levels exist', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [])).toEqual([])
+      expect(extractLevelsForFactor({ id: 42 }, [])).toEqual([])
     })
 
     test('returns levels that match', () => {
-      expect(FactorDependentCompositeService.extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 42 }, { factor_id: 2 }, { factor_id: 42 }]))
+      expect(extractLevelsForFactor({ id: 42 }, [{ factor_id: 1 }, { factor_id: 42 }, { factor_id: 2 }, { factor_id: 42 }]))
         .toEqual([{ factor_id: 42 }, { factor_id: 42 }])
     })
   })
 
-  describe('appendLevelIdToLevel', () => {
+  describe('convertDbLevelToResponseFormat', () => {
     test('creates new entity with level id and items', () => {
-      expect(FactorDependentCompositeService.appendLevelIdToLevel({ id: 42, value: { items: [1, 2, 3] } }))
+      expect(convertDbLevelToResponseFormat({ id: 42, value: { items: [1, 2, 3] } }))
         .toEqual({ id: 42, items: [1, 2, 3] })
     })
   })
 
   describe('findFactorType', () => {
     test('returns lower case type name of the factor', () => {
-      expect(FactorDependentCompositeService.findFactorType([
+      expect(findFactorType([
         { id: 1, type: 'notIt' },
         { id: 2, type: 'IT' },
         { id: 3, type: 'notIt' },
@@ -144,51 +113,35 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('assembleFactorLevelDTOs', () => {
+  describe('mapDbFactorLevelsToResponseFormat', () => {
     test('creates empty array when levels are not found.', () => {
-      FactorDependentCompositeService.appendLevelIdToLevel = mock()
-
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([]))
+      expect(mapDbFactorLevelsToResponseFormat([]))
         .toEqual([])
-
-      expect(FactorDependentCompositeService.appendLevelIdToLevel).not.toHaveBeenCalled()
     })
 
     test('creates factor level DTOs', () => {
-      FactorDependentCompositeService.appendLevelIdToLevel = mock()
-      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({ id: 8, items: [] })
-      FactorDependentCompositeService.appendLevelIdToLevel.mockReturnValueOnce({ id: 9, items: [] })
-
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs([1, 2]))
-        .toEqual([{ id: 8, items: [] }, { id: 9, items: [] }])
-
-      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledTimes(2)
-      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(1)
-      expect(FactorDependentCompositeService.appendLevelIdToLevel).toHaveBeenCalledWith(2)
+      expect(mapDbFactorLevelsToResponseFormat([
+        { id: 1, value: { items: [] } },
+        { id: 2, value: { items: [] } },
+      ])).toEqual([{ id: 1, items: [] }, { id: 2, items: [] }])
     })
   })
 
-  describe('mapFactorEntitiesToFactorDTOs', () => {
+  describe('mapDbFactorsToFactorResponseFormat', () => {
     test('returns empty list when no factors are present', () => {
-      FactorDependentCompositeService.findFactorType = mock()
-      FactorDependentCompositeService.assembleFactorLevelDTOs = mock()
-
-      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs([], [1, 2, 3], [{}, {}], []))
+      expect(mapDbFactorsToFactorResponseFormat([], [1, 2, 3], [{}, {}], []))
         .toEqual([])
-
-      expect(FactorDependentCompositeService.findFactorType).not.toHaveBeenCalled()
-      expect(FactorDependentCompositeService.assembleFactorLevelDTOs).not.toHaveBeenCalled()
     })
   })
 
   describe('mapDependentVariablesEntitiesToDTOs', () => {
     test('creates empty array when input is an empty array', () => {
-      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([]))
+      expect(mapDbDependentVariablesToResponseFormat([]))
         .toEqual([])
     })
 
     test('creates dependent variable DTOs', () => {
-      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs([
+      expect(mapDbDependentVariablesToResponseFormat([
         {
           name: 'dvName',
           required: true,
@@ -204,34 +157,14 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('createVariablesObject', () => {
-    test('creates default object with empty arrays when empty object passed in', () => {
-      expect(FactorDependentCompositeService.createVariablesObject({})).toEqual({
-        treatmentVariables: [],
-        responseVariables: [],
-        treatmentVariableAssociations: [],
-      })
-    })
-
-    test('builds object with supplied data', () => {
-      expect(FactorDependentCompositeService.createVariablesObject({
-        independent: [1, 2, 3],
-      }, [7, 8, 9], [10, 11, 12])).toEqual({
-        treatmentVariables: [1, 2, 3],
-        responseVariables: [7, 8, 9],
-        treatmentVariableAssociations: [10, 11, 12],
-      })
-    })
-  })
-
   describe('assembleIndependentAndExogenous', () => {
     test('returns empty object when input is empty array', () => {
-      expect(FactorDependentCompositeService.assembleIndependentAndExogenous([]))
+      expect(assembleIndependentAndExogenous([]))
         .toEqual({})
     })
 
     test('appends factors to properties named of type and removes type property', () => {
-      expect(FactorDependentCompositeService.assembleIndependentAndExogenous([
+      expect(assembleIndependentAndExogenous([
         { type: 'independent', data: { value: 'A' } },
         { type: 'independent', data: { value: 'B' } },
         { type: 'exogenous', data: { value: 'C' } },
@@ -249,93 +182,103 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('assembleVariablesObject', () => {
+  describe('assembleVariablesResponseObject', () => {
     test('builds variable object from results of functions', () => {
-      FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs = mock([{ name: 'factor1DTO' }, { name: 'factor2DTO' }])
-      FactorDependentCompositeService.assembleIndependentAndExogenous = mock({ independent: [], exogenous: [] })
-      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs = mock([{}, {}])
-      FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs = mock([{ name: 'associationDTO' }])
-      FactorDependentCompositeService.createVariablesObject = mock({ name: 'variablesObject' })
+      const factors = [
+        { id: 3, name: 'factor1', ref_factor_type_id: 1 },
+        { id: 5, name: 'factor2', ref_factor_type_id: 1 },
+      ]
+      const factorLevels = [
+        { id: 11, factor_id: 3, value: { objectType: 'f1l1' } },
+        { id: 13, factor_id: 3, value: { objectType: 'f1l2' } },
+        { id: 15, factor_id: 5, value: { objectType: 'f2l1' } },
+        { id: 17, factor_id: 5, value: { objectType: 'f2l2' } },
+      ]
+      const factorLevelAssociations = [
+        { associated_level_id: 11, nested_level_id: 15 },
+        { associated_level_id: 13, nested_level_id: 17 },
+      ]
 
-      expect(FactorDependentCompositeService.assembleVariablesObject(
-        [{ name: 'factor1' }, { name: 'factor2' }],
-        [{ name: 'f1l1' }, { name: 'f1l2' }, { name: 'f2l1' }, { name: 'f2l2' }],
-        [{ name: 'type1' }, { name: 'type2' }],
+      expect(assembleVariablesResponseObject(
+        factors,
+        factorLevels,
+        [{ id: 1, type: 'Independent' }, { id: 2, type: 'Exogenous' }],
         [{ name: 'depVar1' }, { name: 'depVar2' }],
-        [{ name: 'association' }],
+        factorLevelAssociations,
       )).toEqual({
-        name: 'variablesObject',
+        responseVariables: [{ name: 'depVar1' }, { name: 'depVar2' }],
+        treatmentVariableAssociations: [{
+          associatedLevelId: 11,
+          nestedLevelId: 15,
+        }, {
+          associatedLevelId: 13,
+          nestedLevelId: 17,
+        }],
+        treatmentVariables: [{
+          id: 3,
+          name: 'factor1',
+          levels: [
+            { id: 11, objectType: 'f1l1' },
+            { id: 13, objectType: 'f1l2' },
+          ],
+          nestedTreatmentVariables: [{ id: 5, name: 'factor2' }],
+        }, {
+          associatedTreatmentVariables: [{ id: 3, name: 'factor1' }],
+          id: 5,
+          name: 'factor2',
+          levels: [
+            { id: 15, objectType: 'f2l1' },
+            { id: 17, objectType: 'f2l2' },
+          ],
+        }],
       })
-
-      expect(FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs)
-        .toHaveBeenCalledWith(
-          [{ name: 'factor1' }, { name: 'factor2' }],
-          [{ name: 'f1l1' }, { name: 'f1l2' }, { name: 'f2l1' }, { name: 'f2l2' }],
-          [{ name: 'type1' }, { name: 'type2' }],
-          [{ name: 'association' }],
-        )
-      expect(FactorDependentCompositeService.assembleIndependentAndExogenous)
-        .toHaveBeenCalledWith([{ name: 'factor1DTO' }, { name: 'factor2DTO' }])
-      expect(FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs)
-        .toHaveBeenCalledWith([{ name: 'depVar1' }, { name: 'depVar2' }])
-      expect(FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs)
-        .toHaveBeenCalledWith([{ name: 'association' }])
-      expect(FactorDependentCompositeService.createVariablesObject)
-        .toHaveBeenCalledWith(
-          { independent: [], exogenous: [] },
-          [{}, {}],
-          [{ name: 'associationDTO' }],
-        )
     })
   })
 
   describe('getAllVariablesByExperimentId', () => {
     test('returns all variables with their levels', () => {
-      const factorsWithLevels = {
-        factors: [{
-          id: 42,
-          name: 'GermPlasm',
-          tier: undefined,
-          ref_data_source_id: 1,
-          ref_factor_type_id: 1,
+      const factors = [{
+        id: 42,
+        name: 'GermPlasm',
+        tier: undefined,
+        ref_data_source_id: 1,
+        ref_factor_type_id: 1,
+      },
+      {
+        id: 43,
+        name: 'RM',
+        tier: undefined,
+        ref_data_source_id: 1,
+        ref_factor_type_id: 1,
+      }]
+
+      const levels = [
+        {
+          id: 1,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
+          factor_id: 42,
         },
         {
-          id: 43,
-          name: 'RM',
-          tier: undefined,
-          ref_data_source_id: 1,
-          ref_factor_type_id: 1,
+          id: 2,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
+          factor_id: 42,
         },
-        ],
-
-        levels: [
-          {
-            id: 1,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
-            factor_id: 42,
-          },
-          {
-            id: 2,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
-            factor_id: 42,
-          },
-          {
-            id: 3,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
-            factor_id: 42,
-          },
-          {
-            id: 4,
-            value: { items: [{ label: 'RM', text: 'RM1' }] },
-            factor_id: 43,
-          },
-          {
-            id: 5,
-            value: { items: [{ label: 'RM', text: 'RM2' }] },
-            factor_id: 43,
-          },
-        ],
-      }
+        {
+          id: 3,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
+          factor_id: 42,
+        },
+        {
+          id: 4,
+          value: { items: [{ label: 'RM', text: 'RM1' }] },
+          factor_id: 43,
+        },
+        {
+          id: 5,
+          value: { items: [{ label: 'RM', text: 'RM2' }] },
+          factor_id: 43,
+        },
+      ]
       const factorLevelAssociations = [
         {
           id: 1,
@@ -354,7 +297,8 @@ describe('FactorDependentCompositeService', () => {
         },
       ]
       ExperimentsService.verifyExperimentExists = mockResolve({})
-      FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve(factors)
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve(levels)
       const factorTypes = [{ id: 1, type: 'independent' }]
       dbRead.factorType.all = mockResolve(factorTypes)
       const dependentVariables = [{
@@ -458,7 +402,6 @@ describe('FactorDependentCompositeService', () => {
 
       return target.getAllVariablesByExperimentId(1, false, testContext).then((data) => {
         expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext)
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(dbRead.factorType.all).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
@@ -467,69 +410,67 @@ describe('FactorDependentCompositeService', () => {
     })
 
     test('returns all variables with their levels and multiple nested vars', () => {
-      const factorsWithLevels = {
-        factors: [
-          {
-            id: 42,
-            name: 'GermPlasm',
-            tier: undefined,
-            ref_data_source_id: 1,
-            ref_factor_type_id: 1,
-          },
-          {
-            id: 43,
-            name: 'RM',
-            tier: undefined,
-            ref_data_source_id: 1,
-            ref_factor_type_id: 1,
-          },
-          {
-            id: 44,
-            name: 'PlantHeight',
-            tier: undefined,
-            ref_data_source_id: 1,
-            ref_factor_type_id: 1,
-          },
-        ],
+      const factors = [
+        {
+          id: 42,
+          name: 'GermPlasm',
+          tier: undefined,
+          ref_data_source_id: 1,
+          ref_factor_type_id: 1,
+        },
+        {
+          id: 43,
+          name: 'RM',
+          tier: undefined,
+          ref_data_source_id: 1,
+          ref_factor_type_id: 1,
+        },
+        {
+          id: 44,
+          name: 'PlantHeight',
+          tier: undefined,
+          ref_data_source_id: 1,
+          ref_factor_type_id: 1,
+        },
+      ]
 
-        levels: [
-          {
-            id: 1,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
-            factor_id: 42,
-          },
-          {
-            id: 2,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
-            factor_id: 42,
-          },
-          {
-            id: 3,
-            value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
-            factor_id: 42,
-          },
-          {
-            id: 4,
-            value: { items: [{ label: 'RM', text: 'RM1' }] },
-            factor_id: 43,
-          },
-          {
-            id: 5,
-            value: { items: [{ label: 'RM', text: 'RM2' }] },
-            factor_id: 43,
-          },
-          {
-            id: 6,
-            value: { items: [{ label: 'PlantHeight', text: 'Tall' }] },
-            factor_id: 44,
-          },
-          {
-            id: 7,
-            value: { items: [{ label: 'PlantHeight', text: 'Dwarf' }] },
-            factor_id: 44,
-          },
-        ],
-      }
+      const levels = [
+        {
+          id: 1,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm1' }] },
+          factor_id: 42,
+        },
+        {
+          id: 2,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm2' }] },
+          factor_id: 42,
+        },
+        {
+          id: 3,
+          value: { items: [{ label: 'GermPlasm', text: 'GermPlasm3' }] },
+          factor_id: 42,
+        },
+        {
+          id: 4,
+          value: { items: [{ label: 'RM', text: 'RM1' }] },
+          factor_id: 43,
+        },
+        {
+          id: 5,
+          value: { items: [{ label: 'RM', text: 'RM2' }] },
+          factor_id: 43,
+        },
+        {
+          id: 6,
+          value: { items: [{ label: 'PlantHeight', text: 'Tall' }] },
+          factor_id: 44,
+        },
+        {
+          id: 7,
+          value: { items: [{ label: 'PlantHeight', text: 'Dwarf' }] },
+          factor_id: 44,
+        },
+      ]
       const factorLevelAssociations = [
         {
           id: 1,
@@ -563,7 +504,8 @@ describe('FactorDependentCompositeService', () => {
         },
       ]
       ExperimentsService.verifyExperimentExists = mockResolve({})
-      FactorDependentCompositeService.getFactorsWithLevels = mockResolve(factorsWithLevels)
+      FactorService.getFactorsByExperimentIdNoExistenceCheck = mockResolve(factors)
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck = mockResolve(levels)
       const factorTypes = [{ id: 1, type: 'independent' }]
       dbRead.factorType.all = mockResolve(factorTypes)
       const dependentVariables = [{
@@ -718,7 +660,6 @@ describe('FactorDependentCompositeService', () => {
 
       return target.getAllVariablesByExperimentId(1, false, testContext).then((data) => {
         expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, testContext)
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(dbRead.factorType.all).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
@@ -729,14 +670,12 @@ describe('FactorDependentCompositeService', () => {
     test('rejects when a call fails in the Promise all', () => {
       const error = { message: 'error' }
       ExperimentsService.verifyExperimentExists = mockResolve()
-      FactorDependentCompositeService.getFactorsWithLevels = mockResolve()
       dbRead.factorType.all = mockResolve()
       DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck = mockReject(error)
       FactorLevelAssociationService.getFactorLevelAssociationByExperimentId = mockResolve()
 
       return target.getAllVariablesByExperimentId(1, false, {}).then(() => {}, (err) => {
         expect(ExperimentsService.verifyExperimentExists).toHaveBeenCalledWith(1, false, {})
-        expect(FactorDependentCompositeService.getFactorsWithLevels).toHaveBeenCalledWith(1)
         expect(dbRead.factorType.all).toHaveBeenCalled()
         expect(DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck).toHaveBeenCalledWith(1)
         expect(FactorLevelAssociationService.getFactorLevelAssociationByExperimentId).toHaveBeenCalledWith(1)
@@ -745,15 +684,15 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('mapDependentVariableDTO2DbEntity', () => {
+  describe('mapDependentVariableRequestToDbFormat', () => {
     test('returns empty array when dependentVariables is undefined, null, or empty', () => {
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(undefined, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(null, 1)).toEqual([])
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([], 1)).toEqual([])
+      expect(mapDependentVariableRequestToDbFormat(undefined, 1)).toEqual([])
+      expect(mapDependentVariableRequestToDbFormat(null, 1)).toEqual([])
+      expect(mapDependentVariableRequestToDbFormat([], 1)).toEqual([])
     })
 
     test('maps dependent variables to db entities', () => {
-      expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity([{ name: 'testDependent' }, { name: 'testDependent2' }], 1)).toEqual([{
+      expect(mapDependentVariableRequestToDbFormat([{ name: 'testDependent' }, { name: 'testDependent2' }], 1)).toEqual([{
         name: 'testDependent',
         experimentId: 1,
       }, { name: 'testDependent2', experimentId: 1 }])
@@ -807,15 +746,12 @@ describe('FactorDependentCompositeService', () => {
   })
 
   describe('persistDependentVariables', () => {
-    test('maps DTOs to entities and calls persist method', () => {
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity = mock([{ entity: true }])
+    test('adds experimentId to dependent variables and calls persist method', () => {
       target.persistVariablesWithoutLevels = mockResolve()
 
       return target.persistDependentVariables([{}], 42, testContext, false, testTx)
         .then(() => {
-          expect(FactorDependentCompositeService.mapDependentVariableDTO2DbEntity)
-            .toHaveBeenCalledWith([{}], 42)
-          expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(42, [{ entity: true }], testContext, false, testTx)
+          expect(target.persistVariablesWithoutLevels).toHaveBeenCalledWith(42, [{ experimentId: 42 }], testContext, false, testTx)
         })
     })
   })

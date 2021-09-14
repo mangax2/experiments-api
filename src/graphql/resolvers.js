@@ -133,7 +133,7 @@ export default {
     associatedSets: (entity, args, context) =>
       context.loaders.locationAssociationByExperimentId.load(entity.id),
     tags: (entity, args, context) =>
-      context.loaders.tagsByExperimentId.load(entity.id),
+      context.loaders.tagsByExperimentId.load({ id: entity.id, isTemplate: entity.is_template }),
   },
   ExperimentalSet: {
     groupsJSON: (entity, args, context) =>

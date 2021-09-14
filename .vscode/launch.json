@@ -5,16 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Launch via NPM",
             "request": "launch",
-            "name": "VS Code Debug",
-            "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
-                "debug"
+                "dev"
             ],
-            "port": 5858,
-            "protocol": "legacy"
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
         }
     ]
 }

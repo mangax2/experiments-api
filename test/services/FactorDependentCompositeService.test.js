@@ -5,10 +5,10 @@ import DependentVariableService from '../../src/services/DependentVariableServic
 import ExperimentsService from '../../src/services/ExperimentsService'
 import FactorDependentCompositeService, {
   assembleIndependentAndExogenous,
-  assembleVariablesResponseObject,
   convertDbLevelToResponseFormat,
   extractLevelsForFactor,
   findFactorType,
+  formatVariablesForOutput,
   getFactorsAndLevels,
   mapDbDependentVariablesToResponseFormat,
   mapDependentVariableRequestToDbFormat,
@@ -182,7 +182,7 @@ describe('FactorDependentCompositeService', () => {
     })
   })
 
-  describe('assembleVariablesResponseObject', () => {
+  describe('formatVariablesForOutput', () => {
     test('builds variable object from results of functions', () => {
       const factors = [
         { id: 3, name: 'factor1', ref_factor_type_id: 1 },
@@ -199,7 +199,7 @@ describe('FactorDependentCompositeService', () => {
         { associated_level_id: 13, nested_level_id: 17 },
       ]
 
-      expect(assembleVariablesResponseObject(
+      expect(formatVariablesForOutput(
         factors,
         factorLevels,
         [{ id: 1, type: 'Independent' }, { id: 2, type: 'Exogenous' }],

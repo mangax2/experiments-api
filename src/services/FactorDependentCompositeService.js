@@ -43,14 +43,14 @@ const getEntitiesToUpdate = addErrorHandling('1A4000',
 const getEntitiesToCreate = addErrorHandling('1A5000',
   requestEntities => (requestEntities || []).filter(entity => !entity.id))
 
-const invokeFuncIfDataIsNotEmpty = addErrorHandling('1A6000',
-  (asyncBatchFunction, data, ...contextAndTx) =>
-    (isEmpty(data) ? Promise.resolve([]) : asyncBatchFunction(data, ...contextAndTx)))
+const invokeAsyncFuncIfDataIsNotEmpty = addErrorHandling('1A6000',
+  async (asyncBatchFunction, data, context, tx) =>
+    (isEmpty(data) ? [] : asyncBatchFunction(data, context, tx)))
 
 const deleteDbRecordsNotInRequest = addErrorHandling('1A7000',
   (dbEntities, requestEntities, asyncBatchDeleteFunction, context, tx) => {
     const idsToDelete = determineIdsToDelete(dbEntities, requestEntities)
-    return invokeFuncIfDataIsNotEmpty(asyncBatchDeleteFunction, idsToDelete,
+    return invokeAsyncFuncIfDataIsNotEmpty(asyncBatchDeleteFunction, idsToDelete,
       context, tx)
   })
 
@@ -253,7 +253,7 @@ export const findFactorType = addErrorHandling('1AM000', (factorTypes, factor) =
 export const mapDbFactorLevelsToResponseFormat = addErrorHandling('1AN000', factorLevels =>
   factorLevels.map(level => convertDbLevelToResponseFormat(level)))
 
-export const assembleVariablesResponseObject = addErrorHandling('1AT000', (
+export const formatVariablesForOutput = addErrorHandling('1AT000', (
   dbFactors,
   dbFactorLevels,
   factorTypes,
@@ -311,7 +311,7 @@ class FactorDependentCompositeService {
           experimentId),
       ],
     )
-    return assembleVariablesResponseObject(
+    return formatVariablesForOutput(
       factorsAndLevels.factors,
       factorsAndLevels.levels,
       factorTypes,
@@ -367,7 +367,7 @@ class FactorDependentCompositeService {
     const formattedFactorsToUpdate = mapFactorRequestsToDbFormat(experimentId, factorsToUpdate,
       treatmentVariableTypeId)
 
-    return invokeFuncIfDataIsNotEmpty(this.factorService.batchUpdateFactors,
+    return invokeAsyncFuncIfDataIsNotEmpty(this.factorService.batchUpdateFactors,
       formattedFactorsToUpdate, context, tx)
   }
 
@@ -381,11 +381,11 @@ class FactorDependentCompositeService {
   ) => {
     const formattedRequestFactorLevels = mapFactorLevelRequestsToDbFormat(requestFactorLevels,
       requestFactorLevelAssociations)
-    const mappedDbFactorLevels = mapValues(groupBy(dbLevels, 'id'), x => x[0])
+    const mappedDbFactorLevels = keyBy(dbLevels, 'id')
     const factorLevelsWithChanges = formattedRequestFactorLevels.filter(factorLevel =>
       !isEqual(factorLevel.value, (mappedDbFactorLevels[factorLevel.id] || {}).value))
 
-    return invokeFuncIfDataIsNotEmpty(this.factorLevelService.batchUpdateFactorLevels,
+    return invokeAsyncFuncIfDataIsNotEmpty(this.factorLevelService.batchUpdateFactorLevels,
       factorLevelsWithChanges,
       context,
       tx)
@@ -420,7 +420,7 @@ class FactorDependentCompositeService {
       INDEPENDENT_VARIABLE_FACTOR_TYPE)
     const formattedFactorsForCreate = mapFactorRequestsToDbFormat(experimentId,
       requestFactorsToCreate, treatmentVariableTypeId)
-    const responses = await invokeFuncIfDataIsNotEmpty(
+    const responses = await invokeAsyncFuncIfDataIsNotEmpty(
       this.factorService.batchCreateFactors, formattedFactorsForCreate, context, tx)
     const levelsToCreate = requestFactorsToCreate.flatMap((factor, index) =>
       factor.levels.map(level => ({ factorId: responses[index].id, ...level })))
@@ -435,7 +435,7 @@ class FactorDependentCompositeService {
       const formattedFactorsToCreate = mapFactorLevelRequestsToDbFormat(
         factorLevelsToCreate, requestFactorLevelAssociations)
 
-      return invokeFuncIfDataIsNotEmpty(this.factorLevelService.batchCreateFactorLevels,
+      return invokeAsyncFuncIfDataIsNotEmpty(this.factorLevelService.batchCreateFactorLevels,
         formattedFactorsToCreate, context, tx)
     }
 
@@ -449,7 +449,7 @@ class FactorDependentCompositeService {
   ) => {
     const levelAssociationsToCreate = getLevelAssociationsToCreate(refIdToIdMap,
       dbFactorLevelAssociations, requestFactorLevelAssociations)
-    return invokeFuncIfDataIsNotEmpty(
+    return invokeAsyncFuncIfDataIsNotEmpty(
       this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
       levelAssociationsToCreate, context, tx)
   }

@@ -66,7 +66,8 @@ describe('ExperimentsService', () => {
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
-          reviewerIds: ['group2'],
+          reviewerIds: [],
+          reviewerGroupIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
@@ -98,6 +99,7 @@ describe('ExperimentsService', () => {
         owners: ['KMCCL '],
         ownerGroups: ['group1 '],
         reviewers: ['group2 '],
+        reviewerUsers: ['user1'],
         request: { id: 1, type: 'field' },
       }], testContext, true, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([{
@@ -105,6 +107,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
           reviewers: ['group2 '],
+          reviewerUsers: ['user1'],
           request: { id: 1, type: 'field' },
         }], 'POST')
         expect(dbWrite.experiments.batchCreate).toHaveBeenCalledWith([{
@@ -112,19 +115,22 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
           reviewers: ['group2 '],
+          reviewerUsers: ['user1'],
           request: { id: 1, type: 'field' },
         }], testContext, testTx)
         expect(target.ownerService.batchCreateOwners).toHaveBeenCalledWith([{
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
-          reviewerIds: ['group2'],
+          reviewerIds: ['user1'],
+          reviewerGroupIds: ['group2'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
           owners: ['KMCCL '],
           ownerGroups: ['group1 '],
           reviewers: ['group2 '],
+          reviewerUsers: ['user1'],
           request: { id: 1, type: 'field' },
         }])
         expect(target.tagService.batchCreateTags).toHaveBeenCalledWith([{}], {}, true)
@@ -591,7 +597,8 @@ describe('ExperimentsService', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['KMCCL'],
         group_ids: ['cosmos-dev-team'],
-        reviewer_ids: ['cosmos-admin'],
+        reviewer_group_ids: ['cosmos-admin'],
+        reviewer_user_ids: ['user'],
       })
       target.analysisModelService.getAnalysisModelByExperimentId = mockResolve({
         analysis_model_type: 'RCB',
@@ -611,6 +618,7 @@ describe('ExperimentsService', () => {
           ownerGroups: ['cosmos-dev-team'],
           owners: ['KMCCL'],
           reviewers: ['cosmos-admin'],
+          reviewerUsers: ['user'],
           status: 'REJECTED',
           tags: [],
         })
@@ -626,7 +634,8 @@ describe('ExperimentsService', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['KMCCL'],
         group_ids: ['cosmos-dev-team'],
-        reviewer_ids: ['cosmos-admin'],
+        reviewer_group_ids: ['cosmos-admin'],
+        reviewer_user_ids: ['user'],
       })
       target.analysisModelService.getAnalysisModelByExperimentId = mockResolve()
 
@@ -641,6 +650,7 @@ describe('ExperimentsService', () => {
             ownerGroups: ['cosmos-dev-team'],
             owners: ['KMCCL'],
             reviewers: ['cosmos-admin'],
+            reviewerUsers: ['user'],
             status: 'REJECTED',
             tags: [],
           },
@@ -725,6 +735,7 @@ describe('ExperimentsService', () => {
         owners: ['KMCCL'],
         ownerGroups: ['group1'],
         reviewers: ['group2'],
+        reviewerUsers: ['user'],
         status: 'REJECTED',
         comment: 'rejection reason',
       }, testContext, false, testTx).then((data) => {
@@ -735,6 +746,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          reviewerUsers: ['user'],
           status: 'REJECTED',
           comment: 'rejection reason',
 
@@ -745,6 +757,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          reviewerUsers: ['user'],
           status: 'REJECTED',
           comment: 'rejection reason',
         }, testContext, testTx)
@@ -753,7 +766,8 @@ describe('ExperimentsService', () => {
           experimentId: 1,
           userIds: ['KMCCL'],
           groupIds: ['group1'],
-          reviewerIds: ['group2'],
+          reviewerGroupIds: ['group2'],
+          reviewerIds: ['user'],
         }], testContext, testTx)
         expect(target.assignExperimentIdToTags).toHaveBeenCalledWith([{
           id: 1,
@@ -761,6 +775,7 @@ describe('ExperimentsService', () => {
           owners: ['KMCCL'],
           ownerGroups: ['group1'],
           reviewers: ['group2'],
+          reviewerUsers: ['user'],
           status: 'REJECTED',
           comment: 'rejection reason',
         }])
@@ -1750,7 +1765,7 @@ describe('ExperimentsService', () => {
 
     test('rejects when experiment does not have reviewers assigned', () => {
       AppError.badRequest = mock()
-      target.getExperimentById = mockResolve({ reviewers: [] })
+      target.getExperimentById = mockResolve({ reviewers: [], reviewerUsers: [] })
       target.securityService.permissionsCheck = mockResolve()
 
       return target.submitForReview(1, false, '123', testContext, testTx).then(() => {}, () => {
@@ -1760,7 +1775,7 @@ describe('ExperimentsService', () => {
 
     test('rejects when template does not have reviewers assigned', () => {
       AppError.badRequest = mock()
-      target.getExperimentById = mockResolve({ reviewers: [] })
+      target.getExperimentById = mockResolve({ reviewers: [], reviewerUsers: [] })
       target.securityService.permissionsCheck = mockResolve()
 
       return target.submitForReview(1, true, '123', testContext, testTx).then(() => {}, () => {
@@ -1789,7 +1804,7 @@ describe('ExperimentsService', () => {
     })
 
     test('creates a task and updates experiment status when everything is valid', () => {
-      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'EXP NAME' })
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], reviewerUsers: [], name: 'EXP NAME' })
       target.securityService.permissionsCheck = mockResolve()
       OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
@@ -1824,8 +1839,43 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('creates a task and updates experiment status when a reviewer is provided', async () => {
+      target.getExperimentById = mockResolve({ reviewers: [], reviewerUsers: ['REVIEWER'], name: 'EXP NAME' })
+      target.securityService.permissionsCheck = mockResolve()
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
+      dbWrite.experiments.updateExperimentStatus = mockResolve()
+
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+
+      const expectedTaskTemplate = {
+        title: 'Experiment "EXP NAME" Review Requested',
+        body: {
+          text: 'Experiment "EXP NAME" is ready for statistician review.',
+        },
+        recipients: ['REVIEWER'],
+        actions: [
+          {
+            title: 'Review Experiment "EXP NAME"',
+            url: 'https://dev.velocity-np.ag/experiments/1',
+          },
+        ],
+        tags: [
+          'experiment-review-request',
+        ],
+        dueDate: date.toISOString().slice(0, date.toISOString().indexOf('T')),
+        tagKey: `1|${date.toISOString().slice(0, date.toISOString().indexOf('T'))}`,
+      }
+
+      await target.submitForReview(1, false, date.toISOString(), testContext, testTx)
+      expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
+      expect(HttpUtil.post).toHaveBeenCalledWith('https://messaging.velocity-np.ag/v5/tasks', [], expectedTaskTemplate)
+      expect(dbWrite.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'SUBMITTED', 123, testContext, testTx)
+    })
+
     test('creates a task and updates experiment status when everything is valid for a template', () => {
-      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], reviewerUsers: [], name: 'TEMPLATE NAME' })
       target.securityService.permissionsCheck = mockResolve()
       OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
@@ -1861,7 +1911,7 @@ describe('ExperimentsService', () => {
     })
 
     test('fails to create a task', () => {
-      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], name: 'TEMPLATE NAME' })
+      target.getExperimentById = mockResolve({ reviewers: ['REVIEWER'], reviewerUsers: [], name: 'TEMPLATE NAME' })
       target.securityService.permissionsCheck = mockResolve()
       OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
       HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('error')))

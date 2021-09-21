@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import uniq from 'lodash/uniq'
 import SchemaValidator from './SchemaValidator'
 import AppError from '../services/utility/AppError'
 import { dbRead } from '../db/DbManager'
@@ -46,6 +47,18 @@ class OwnerValidator extends SchemaValidator {
         entityCount: { min: 0 },
         required: false,
       },
+      {
+        paramName: 'reviewerGroupIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
+      },
+      {
+        paramName: 'reviewerIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
+      },
     ]
   }
 
@@ -79,16 +92,17 @@ class OwnerValidator extends SchemaValidator {
   }
 
   @setErrorCode('3D3000')
-  postValidate = (ownerObj, context) => {
+  postValidate = async (ownerObj, context) => {
     if (!this.hasErrors()) {
       const groupIds = _.compact(ownerObj[0].groupIds)
       const userIds = _.compact(ownerObj[0].userIds)
-      return this.requiredOwnerCheck(groupIds, userIds)
-        .then(() => this.validateUserIds(userIds)
-          .then(() => this.validateGroupIds(groupIds)
-            .then(() => this.userOwnershipCheck(groupIds, userIds, context.userId))))
+      const reviewerGroupIds = _.compact(ownerObj[0].reviewerGroupIds)
+      const reviewerIds = _.compact(ownerObj[0].reviewerIds)
+      await this.requiredOwnerCheck(groupIds, userIds)
+      await this.validateUserIds(uniq(userIds.concat(reviewerIds)))
+      await this.validateGroupIds(uniq(groupIds.concat(reviewerGroupIds)))
+      await this.userOwnershipCheck(groupIds, userIds, context.userId)
     }
-    return Promise.resolve()
   }
 
   @setErrorCode('3D4000')

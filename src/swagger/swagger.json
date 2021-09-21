@@ -147,7 +147,7 @@
       },
       "post": {
         "summary": "post one or more experiment entities",
-        "description": "Creates new experiment(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>template: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0,\n  \"name\": \"new name\"\n}</pre><br/></li><li>experiment: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br/></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ],\n    \"request\": {\n      \"id\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]</pre></li></ul>",
+        "description": "Creates new experiment(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>template: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0,\n  \"name\": \"new name\"\n}</pre><br/></li><li>experiment: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br/></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ],\n    \"reviewers\": [\n      \"string\"\n    ],\n  \"reviewerUsers\": [\n      \"string\"\n    ],\n \"request\": {\n      \"id\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]</pre></li></ul>",
         "operationId": "postExperiments",
         "tags": [
           "Experiments"
@@ -1950,7 +1950,7 @@
       },
       "post": {
         "summary": "post one or more template entities",
-        "description": "Creates new template(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>experiment: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0,\n  \"name\": \"new name\"\n}</pre><br /></li><li>template: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ]  }\n]</pre></li></ul>",
+        "description": "Creates new template(s) in the Experiments System. The definition to use for the POST body is based upon the source query parameter as described below: <ul><li>experiment: <pre>{\n  \"id\": 0,\n  \"numberOfCopies\": 0,\n  \"name\": \"new name\"\n}</pre><br /></li><li>template: <pre>{\n  \"ids\": [\n    0\n  ],\n  \"numberOfCopies\": 0\n}</pre><br /></li><li>undefined/not provided: <pre>[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"experimentDesign\": \"string\",\n    \"status\": \"string\",\n    \"tags\": [\n      {\n        \"name\": \"string\",\n        \"value\": \"string\",\n        \"experimentId\": 0\n      }\n    ],\n    \"owners\": [\n      \"string\"\n    ],\n    \"ownerGroups\": [\n      \"string\"\n    ]\n \"reviewers\": [\n      \"string\"\n    ],\n  \"reviewerUsers\": [\n      \"string\"\n    ],\n  }\n]</pre></li></ul>",
         "operationId": "postTemplates",
         "tags": [
           "Templates"
@@ -3710,6 +3710,12 @@
             "type": "string"
           }
         },
+        "reviewerUsers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "request": {
           "type": "object",
           "description": "The identifiers for the Capacity Request to associate with the experiment. This element is optional.",
@@ -3788,6 +3794,12 @@
           "description": "The type of randomization to be used for this experiment"
         },
         "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewerUsers": {
           "type": "array",
           "items": {
             "type": "string"

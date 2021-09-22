@@ -1,4 +1,12 @@
-import * as _ from 'lodash'
+import compact from 'lodash/compact'
+import differenceWith from 'lodash/differenceWith'
+import difference from 'lodash/difference'
+import groupBy from 'lodash/groupBy'
+import isEmpty from 'lodash/isEmpty'
+import isEqual from 'lodash/isEqual'
+import keyBy from 'lodash/keyBy'
+import mapValues from 'lodash/mapValues'
+import omit from 'lodash/omit'
 import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import ExperimentsService from './ExperimentsService'
@@ -15,130 +23,264 @@ import { dbRead } from '../db/DbManager'
 
 const { addErrorHandling, setErrorCode } = require('@monsantoit/error-decorator')()
 
-const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
 // Error Codes 1AXXXX
+const INDEPENDENT_VARIABLE_FACTOR_TYPE = 'Independent'
 
 const getIdForFactorType = addErrorHandling('1A1000',
-  (allFactorTypes, type) => _.find(allFactorTypes, factorType => factorType.type === type).id)
+  (factorTypes, type) => factorTypes.find(factorType => factorType.type === type).id)
 
 const extractIds = addErrorHandling('1A2000',
-  sources => _.compact(_.map(sources, 'id')))
+  sources => compact((sources || []).map(source => source.id)))
 
 const determineIdsToDelete = addErrorHandling('1A3000',
-  (dbEntities, DTOs) => _.difference(extractIds(dbEntities), extractIds(DTOs)))
+  (dbEntities, requestEntities) =>
+    difference(extractIds(dbEntities), extractIds(requestEntities)))
 
 
-const determineDTOsForUpdate = addErrorHandling('1A4000',
-  DTOs => _.filter(DTOs, dto => !_.isNil(dto.id)))
+const getEntitiesToUpdate = addErrorHandling('1A4000',
+  requestEntities => (requestEntities || []).filter(entity => entity.id))
 
-const determineDTOsForCreate = addErrorHandling('1A5000',
-  DTOs => _.filter(DTOs, dto => _.isNil(dto.id)))
+const getEntitiesToCreate = addErrorHandling('1A5000',
+  requestEntities => (requestEntities || []).filter(entity => !entity.id))
 
-const applyAsyncBatchToNonEmptyArray = addErrorHandling('1A6000',
-  (asyncBatchFunction, ids, ...contextAndTx) =>
-    (_.isEmpty(ids) ? Promise.resolve([]) : asyncBatchFunction(ids, ...contextAndTx)))
+const invokeAsyncFuncIfDataIsNotEmpty = addErrorHandling('1A6000',
+  async (asyncBatchFunction, data, context, tx) =>
+    (isEmpty(data) ? [] : asyncBatchFunction(data, context, tx)))
 
-const batchDeleteDbEntitiesWithoutMatchingDTO = addErrorHandling('1A7000',
-  (dbEntities, DTOs, asyncBatchDeleteFunction, context, tx) =>
-    applyAsyncBatchToNonEmptyArray(asyncBatchDeleteFunction,
-      determineIdsToDelete(dbEntities, DTOs), context, tx))
-
-const formDbEntitiesObject = addErrorHandling('1A8000',
-  ([allDbFactors, allDbLevels, allDbFactorLevelAssociations,
-    allFactorTypes]) =>
-    ({
-      allDbFactors,
-      allDbLevels,
-      allDbFactorLevelAssociations,
-      allFactorTypes,
-    }))
+const deleteDbRecordsNotInRequest = addErrorHandling('1A7000',
+  (dbEntities, requestEntities, asyncBatchDeleteFunction, context, tx) => {
+    const idsToDelete = determineIdsToDelete(dbEntities, requestEntities)
+    return invokeAsyncFuncIfDataIsNotEmpty(asyncBatchDeleteFunction, idsToDelete,
+      context, tx)
+  })
 
 const createRefIdToIdMap = addErrorHandling('1A9000',
-  (refIdSource, idSource) => _.zipObject(_.map(refIdSource, '_refId'), _.map(idSource, 'id')))
+  (refIdSource, idSource) => {
+    const refIdMap = {}
+    refIdSource.forEach((source, index) => {
+      // eslint-disable-next-line no-underscore-dangle
+      refIdMap[source._refId] = idSource[index].id
+    })
+    return refIdMap
+  })
 
-const createCompleteRefIdToIdMap = addErrorHandling('1AA000',
-  ({
-    factorDependentLevelDTOsForCreate,
-    factorIndependentLevelDTOsForCreate,
-    allLevelDTOsWithParentFactorIdForUpdate,
+const mapAllRefs = addErrorHandling('1AA000',
+  (
+    requestDependentLevelsToCreate,
+    requestLevelsToCreate,
+    requestLevelsToUpdate,
     dependentLevelResponses,
     independentLevelResponses,
-  }) =>
-    _.assign(createRefIdToIdMap(factorDependentLevelDTOsForCreate, dependentLevelResponses),
-      createRefIdToIdMap(factorIndependentLevelDTOsForCreate, independentLevelResponses),
-      createRefIdToIdMap(allLevelDTOsWithParentFactorIdForUpdate,
-        allLevelDTOsWithParentFactorIdForUpdate)))
+  ) => ({
+    ...createRefIdToIdMap(requestDependentLevelsToCreate, dependentLevelResponses),
+    ...createRefIdToIdMap(requestLevelsToCreate, independentLevelResponses),
+    ...createRefIdToIdMap(requestLevelsToUpdate, requestLevelsToUpdate),
+  }))
 
-const mapFactorLevelAssociationDTOToEntity = addErrorHandling('1AB000',
-  (refIdToIdMap, DTOs) => _.map(DTOs, dto => ({
-    associatedLevelId: refIdToIdMap[dto.associatedLevelRefId],
-    nestedLevelId: refIdToIdMap[dto.nestedLevelRefId],
+const mapLevelAssociationRequestToDbFormat = addErrorHandling('1AB000',
+  (refIdToIdMap, levelAssociationRequests) => (levelAssociationRequests || []).map(request => ({
+    associatedLevelId: refIdToIdMap[request.associatedLevelRefId],
+    nestedLevelId: refIdToIdMap[request.nestedLevelRefId],
   })))
 
-const determineFactorLevelAssociationIdsToDelete = addErrorHandling('1AC000',
-  (refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs) =>
-    _.map(_.differenceWith(factorLevelAssociationEntities,
-      mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
-      (a, b) => (a.associated_level_id === b.associatedLevelId
-        && a.nested_level_id === b.nestedLevelId)), 'id'))
+const determineFactorLevelAssociationIdsToDelete = addErrorHandling('1AC000', (
+  refIdToIdMap,
+  dbLevelAssociations,
+  requestLevelAssociations,
+) => {
+  const formattedLevelAssociations = mapLevelAssociationRequestToDbFormat(refIdToIdMap,
+    requestLevelAssociations)
+  const levelAssociationsToDelete = differenceWith(dbLevelAssociations,
+    formattedLevelAssociations,
+    (a, b) => (a.associated_level_id === b.associatedLevelId
+      && a.nested_level_id === b.nestedLevelId))
+  return levelAssociationsToDelete.map(la => la.id)
+})
 
-const determineFactorLevelAssociationEntitiesToCreate = addErrorHandling('1AD000', (
-  (refIdToIdMap, factorLevelAssociationEntities, factorLevelAssociationDTOs) =>
-    _.differenceWith(
-      mapFactorLevelAssociationDTOToEntity(refIdToIdMap, factorLevelAssociationDTOs),
-      factorLevelAssociationEntities,
+const getLevelAssociationsToCreate = addErrorHandling('1AD000', (
+  (refIdToIdMap, dbFactorLevelAssociations, levelAssociationRequests) =>
+    differenceWith(
+      mapLevelAssociationRequestToDbFormat(refIdToIdMap, levelAssociationRequests),
+      dbFactorLevelAssociations,
       (a, b) => a.associatedLevelId === b.associated_level_id
         && a.nestedLevelId === b.nested_level_id)))
 
 const deleteFactorLevelAssociations = addErrorHandling('1AE000',
-  ({
+  (
     refIdToIdMap,
-    allDbFactorLevelAssociations,
-    allFactorLevelAssociationDTOs,
+    dbFactorLevelAssociations,
+    requestFactorLevelAssociations,
     tx,
-  }) => {
+  ) => {
     const idsToDelete = determineFactorLevelAssociationIdsToDelete(
-      refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs)
-    return _.isEmpty(idsToDelete)
+      refIdToIdMap, dbFactorLevelAssociations, requestFactorLevelAssociations)
+    return isEmpty(idsToDelete)
       ? Promise.resolve()
       : FactorLevelAssociationService.batchDeleteFactorLevelAssociations(
         idsToDelete,
         tx)
   })
 
-const mapFactorLevelDTOsToFactorLevelEntities = addErrorHandling('1AF000',
-  (allLevelDTOsWithParentFactorId, factorLevelAssociations) =>
-    _.map(allLevelDTOsWithParentFactorId, level => ({
+const mapFactorLevelRequestsToDbFormat = addErrorHandling('1AF000',
+  (requestLevelsWithParentFactorId, factorLevelAssociations) =>
+    requestLevelsWithParentFactorId.map(level => ({
       id: level.id,
       value: { items: level.items, objectType: level.objectType },
       factorId: level.factorId,
-      associatedFactorLevelRefIds: _.map(_.filter(factorLevelAssociations,
+      associatedFactorLevelRefIds: factorLevelAssociations.filter(
         // eslint-disable-next-line no-underscore-dangle
-        fla => fla.nestedLevelRefId === level._refId), 'associatedLevelRefId'),
+        fla => fla.nestedLevelRefId === level._refId).map(fla => fla.associatedLevelRefId),
     })))
 
-const mapFactorDTOsToFactorEntities = addErrorHandling('1AG000',
-  (experimentId, factorDTOs, refFactorTypeId) =>
-    _.map(factorDTOs, factorDTO => ({
-      id: factorDTO.id,
-      name: factorDTO.name,
+const mapFactorRequestsToDbFormat = addErrorHandling('1AG000',
+  (experimentId, factorRequests, refFactorTypeId) =>
+    factorRequests.map(factorRequest => ({
+      id: factorRequest.id,
+      name: factorRequest.name,
       refFactorTypeId,
       experimentId,
-      tier: factorDTO.tier,
-      isBlockingFactorOnly: factorDTO.isBlockingFactorOnly,
+      tier: factorRequest.tier,
+      isBlockingFactorOnly: factorRequest.isBlockingFactorOnly,
     })))
 
 const appendParentIdToChildren = addErrorHandling('1AH000',
-  (parents, childArrayPropertyName, nameOfNewIdProperty) => _.map(parents,
+  (parents, childArrayPropertyName, nameOfNewIdProperty) => (parents || []).map(
     parent => ({
-      [childArrayPropertyName]: _.map(parent[childArrayPropertyName],
+      [childArrayPropertyName]: parent[childArrayPropertyName].map(
         child => ({ [nameOfNewIdProperty]: parent.id, ...child })),
-      ..._.omit(parent, childArrayPropertyName),
+      ...omit(parent, childArrayPropertyName),
     })))
 
 const concatChildArrays = addErrorHandling('1AI000',
   (parents, childArrayPropertyName) =>
-    _.concat(..._.map(parents, parent => parent[childArrayPropertyName])))
+    [].concat(...parents.map(parent => parent[childArrayPropertyName])))
+
+export const assembleIndependentAndExogenous = addErrorHandling('1AS000',
+  requestFactors => mapValues(groupBy(requestFactors, factor => factor.type),
+    factorsOfType => factorsOfType.map(factorOfType => omit(factorOfType, 'type'))))
+
+export const mapDbFactorsToFactorResponseFormat = addErrorHandling('1AO000', (
+  factors,
+  allFactorLevels,
+  factorTypes,
+  dbFactorLevelAssociation,
+) => {
+  const factorHashById = keyBy(factors, 'id')
+  const factorLevelHashById =
+    FactorLevelEntityUtil.assembleFactorLevelHashById(allFactorLevels)
+  return factors.map((factor) => {
+    const factorLevels = extractLevelsForFactor(factor, allFactorLevels)
+    const nestedFactorIds =
+      FactorLevelAssociationEntityUtil.getNestedFactorIds(
+        factorLevels,
+        FactorLevelAssociationEntityUtil.assembleAssociationsGroupByAssociatedLevelId(
+          dbFactorLevelAssociation),
+        factorLevelHashById)
+    const nestedFactorResponse = nestedFactorIds.map((factorId) => {
+      const factorMatch = factorHashById[factorId]
+      return {
+        id: factorMatch.id,
+        name: factorMatch.name,
+      }
+    })
+    const associatedFactorIds =
+      FactorLevelAssociationEntityUtil.getAssociatedFactorIds(
+        factorLevels,
+        FactorLevelAssociationEntityUtil.assembleAssociationsGroupedByNestedLevelId(
+          dbFactorLevelAssociation),
+        factorLevelHashById)
+    const associatedFactorResponse = associatedFactorIds.map((factorId) => {
+      const factorMatch = factorHashById[factorId]
+      return {
+        id: factorMatch.id,
+        name: factorMatch.name,
+      }
+    })
+    return {
+      id: factor.id,
+      name: factor.name,
+      nestedTreatmentVariables:
+        isEmpty(nestedFactorResponse) ? undefined : nestedFactorResponse,
+      associatedTreatmentVariables:
+        isEmpty(associatedFactorResponse) ? undefined : associatedFactorResponse,
+      type: findFactorType(factorTypes, factor),
+      levels: mapDbFactorLevelsToResponseFormat(factorLevels),
+      tier: factor.tier,
+      isBlockingFactorOnly: factor.is_blocking_factor_only,
+    }
+  })
+})
+
+export const mapDbDependentVariablesToResponseFormat = addErrorHandling('1AP000',
+  dbDependentVariables => dbDependentVariables.map(dependentVariable => ({
+    name: dependentVariable.name,
+    required: dependentVariable.required,
+    questionCode: dependentVariable.question_code,
+  })))
+
+export const mapDbFactorLevelAssociationToResponseFormat = addErrorHandling('1AQ000',
+  dbFactorLevelAssociations =>
+    dbFactorLevelAssociations.map(factorLevelAssociation => ({
+      id: factorLevelAssociation.id,
+      associatedLevelId: factorLevelAssociation.associated_level_id,
+      nestedLevelId: factorLevelAssociation.nested_level_id,
+    })))
+
+export const convertDbLevelToResponseFormat = addErrorHandling('1AL000', level => ({
+  id: level.id,
+  items: level.value.items,
+  objectType: level.value.objectType,
+}))
+
+export const getFactorsAndLevels = addErrorHandling('1AJ000', experimentId =>
+  Promise.all([
+    FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
+    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
+  ]).then(([factors, levels]) => ({
+    factors,
+    levels,
+  })))
+
+export const extractLevelsForFactor = addErrorHandling('1AK000', (
+  factor,
+  allLevelsForAllFactors,
+) => allLevelsForAllFactors.filter(level => Number(level.factor_id) === Number(factor.id)))
+
+export const findFactorType = addErrorHandling('1AM000', (factorTypes, factor) =>
+  factorTypes.find(factorType => factorType.id === factor.ref_factor_type_id)
+    .type.toLowerCase())
+
+export const mapDbFactorLevelsToResponseFormat = addErrorHandling('1AN000', factorLevels =>
+  factorLevels.map(level => convertDbLevelToResponseFormat(level)))
+
+export const formatVariablesForOutput = addErrorHandling('1AT000', (
+  dbFactors,
+  dbFactorLevels,
+  factorTypes,
+  dbDependentVariable,
+  dbFactorLevelAssociation,
+) => {
+  const formattedFactors = mapDbFactorsToFactorResponseFormat(
+    dbFactors, dbFactorLevels, factorTypes, dbFactorLevelAssociation)
+  const { independent = [] } = assembleIndependentAndExogenous(formattedFactors)
+  const responseVariables = mapDbDependentVariablesToResponseFormat(dbDependentVariable) || []
+  const treatmentVariableAssociations = mapDbFactorLevelAssociationToResponseFormat(
+    dbFactorLevelAssociation) || []
+
+  return {
+    treatmentVariables: independent,
+    responseVariables,
+    treatmentVariableAssociations,
+  }
+})
+
+export const mapDependentVariableRequestToDbFormat = addErrorHandling('1AV000', (
+  dependentVariables,
+  experimentId,
+) => (dependentVariables || []).map((dependentVariable) => {
+  dependentVariable.experimentId = experimentId
+  return dependentVariable
+}))
 
 class FactorDependentCompositeService {
   constructor() {
@@ -151,171 +293,31 @@ class FactorDependentCompositeService {
     this.variablesValidator = new VariablesValidator()
   }
 
-  @setErrorCode('1AJ000')
-  static getFactorsWithLevels(experimentId) {
-    return Promise.all([
-      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
-      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
-    ]).then(data => ({
-      factors: data[0],
-      levels: data[1],
-    }))
-  }
-
-  @setErrorCode('1AK000')
-  static extractLevelsForFactor(factor, allLevelsForAllFactors) {
-    return _.filter(allLevelsForAllFactors, level =>
-      Number(level.factor_id) === Number(factor.id),
-    )
-  }
-
-  @setErrorCode('1AL000')
-  static appendLevelIdToLevel(level) {
-    return {
-      id: level.id,
-      items: level.value.items,
-      objectType: level.value.objectType,
-    }
-  }
-
-  @setErrorCode('1AM000')
-  static findFactorType(factorTypes, factor) {
-    return _.find(factorTypes, { id: factor.ref_factor_type_id }).type.toLowerCase()
-  }
-
-  @setErrorCode('1AN000')
-  static assembleFactorLevelDTOs(factorLevels) {
-    return _.map(
-      factorLevels,
-      level => FactorDependentCompositeService.appendLevelIdToLevel(level))
-  }
-
-  @setErrorCode('1AO000')
-  static mapFactorEntitiesToFactorDTOs(
-    factors, allFactorLevels, allFactorTypes, factorLevelAssociationEntities) {
-    const factorHashById = _.keyBy(factors, 'id')
-    const factorLevelHashById =
-      FactorLevelEntityUtil.assembleFactorLevelHashById(allFactorLevels)
-    return _.map(factors, (factor) => {
-      const factorLevels = FactorDependentCompositeService.extractLevelsForFactor(
-        factor, allFactorLevels)
-      const nestedFactorIds =
-        FactorLevelAssociationEntityUtil.getNestedFactorIds(
-          factorLevels,
-          FactorLevelAssociationEntityUtil.assembleAssociationsGroupByAssociatedLevelId(
-            factorLevelAssociationEntities),
-          factorLevelHashById)
-      const nestedFactorDTOs = _.map(nestedFactorIds, (factorId) => {
-        const factorMatch = factorHashById[factorId]
-        return {
-          id: factorMatch.id,
-          name: factorMatch.name,
-        }
-      })
-      const associatedFactorIds =
-        FactorLevelAssociationEntityUtil.getAssociatedFactorIds(
-          factorLevels,
-          FactorLevelAssociationEntityUtil.assembleAssociationsGroupedByNestedLevelId(
-            factorLevelAssociationEntities),
-          factorLevelHashById)
-      const associatedFactorDTOs = _.map(associatedFactorIds, (factorId) => {
-        const factorMatch = factorHashById[factorId]
-        return {
-          id: factorMatch.id,
-          name: factorMatch.name,
-        }
-      })
-      return {
-        id: factor.id,
-        name: factor.name,
-        nestedTreatmentVariables: _.isEmpty(nestedFactorDTOs) ? undefined : nestedFactorDTOs,
-        associatedTreatmentVariables:
-          _.isEmpty(associatedFactorDTOs) ? undefined : associatedFactorDTOs,
-        type: FactorDependentCompositeService.findFactorType(allFactorTypes, factor),
-        levels: FactorDependentCompositeService.assembleFactorLevelDTOs(factorLevels),
-        tier: factor.tier,
-        isBlockingFactorOnly: factor.is_blocking_factor_only,
-      }
-    })
-  }
-
-  @setErrorCode('1AP000')
-  static mapDependentVariablesEntitiesToDTOs(dependentVariableEntities) {
-    return _.map(dependentVariableEntities, dependentVariable => ({
-      name: dependentVariable.name,
-      required: dependentVariable.required,
-      questionCode: dependentVariable.question_code,
-    }))
-  }
-
-  @setErrorCode('1AQ000')
-  static mapFactorLevelAssociationEntitiesToDTOs(factorLevelAssociationEntities) {
-    return _.map(factorLevelAssociationEntities, factorLevelAssociationEntity => ({
-      id: factorLevelAssociationEntity.id,
-      associatedLevelId: factorLevelAssociationEntity.associated_level_id,
-      nestedLevelId: factorLevelAssociationEntity.nested_level_id,
-    }))
-  }
-
-  @setErrorCode('1AR000')
-  static createVariablesObject(
-    { independent = [] },
-    responseVariables = [],
-    treatmentVariableAssociations = []) {
-    return {
-      treatmentVariables: independent,
-      responseVariables,
-      treatmentVariableAssociations,
-    }
-  }
-
-  @setErrorCode('1AS000')
-  static assembleIndependentAndExogenous(factorDTOs) {
-    return _.mapValues(_.groupBy(factorDTOs, factor => factor.type),
-      factorsOfType => _.map(factorsOfType,
-        factorOfType => _.omit(factorOfType, 'type')))
-  }
-
-  @setErrorCode('1AT000')
-  static assembleVariablesObject(
-    factorEntities, allFactorLevels, factorTypes, dependentVariableEntities,
-    factorLevelAssociationEntities) {
-    const factorDTOs = FactorDependentCompositeService.mapFactorEntitiesToFactorDTOs(
-      factorEntities, allFactorLevels, factorTypes, factorLevelAssociationEntities)
-    return FactorDependentCompositeService.createVariablesObject(
-      FactorDependentCompositeService.assembleIndependentAndExogenous(factorDTOs),
-      FactorDependentCompositeService.mapDependentVariablesEntitiesToDTOs(
-        dependentVariableEntities),
-      FactorDependentCompositeService.mapFactorLevelAssociationEntitiesToDTOs(
-        factorLevelAssociationEntities))
-  }
-
   @setErrorCode('1AU000')
-  getAllVariablesByExperimentId = (experimentId, isTemplate, context) =>
-    Promise.all(
+  getAllVariablesByExperimentId = async (experimentId, isTemplate, context) => {
+    await ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context)
+    const [
+      factorsAndLevels,
+      factorTypes,
+      dependentVariables,
+      factorLevelAssociations,
+    ] = await Promise.all(
       [
-        ExperimentsService.verifyExperimentExists(experimentId, isTemplate, context),
-        FactorDependentCompositeService.getFactorsWithLevels(experimentId),
+        getFactorsAndLevels(experimentId),
         dbRead.factorType.all(),
         DependentVariableService.getDependentVariablesByExperimentIdNoExistenceCheck(
           experimentId),
         FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(
           experimentId),
       ],
-    ).then(results => FactorDependentCompositeService.assembleVariablesObject(
-      results[1].factors,
-      results[1].levels,
-      results[2],
-      results[3],
-      results[4],
-    ))
-
-  @setErrorCode('1AV000')
-  static mapDependentVariableDTO2DbEntity(dependentVariables, experimentId) {
-    return _.map(dependentVariables, (dependentVariable) => {
-      dependentVariable.experimentId = experimentId
-      return dependentVariable
-    })
+    )
+    return formatVariablesForOutput(
+      factorsAndLevels.factors,
+      factorsAndLevels.levels,
+      factorTypes,
+      dependentVariables,
+      factorLevelAssociations,
+    )
   }
 
   @setErrorCode('1AW000')
@@ -336,209 +338,241 @@ class FactorDependentCompositeService {
 
   @setErrorCode('1AY000')
   persistDependentVariables(dependentVariables, experimentId, context, isTemplate, tx) {
-    const dependentVariableEntities =
-      FactorDependentCompositeService.mapDependentVariableDTO2DbEntity(
-        dependentVariables, experimentId)
+    const dbDependentVariables = mapDependentVariableRequestToDbFormat(
+      dependentVariables, experimentId)
     return this.persistVariablesWithoutLevels(
-      experimentId, dependentVariableEntities, context, isTemplate, tx)
+      experimentId, dbDependentVariables, context, isTemplate, tx)
   }
 
   @setErrorCode('1AZ000')
-  deleteFactorsAndLevels =
-    ({
-      allDbFactors,
-      allDbLevels,
-      allIndependentDTOs: allFactorDTOs,
-      allLevelDTOsWithParentFactorId: allLevelDTOs,
-      tx,
-      context,
-    }) =>
-      batchDeleteDbEntitiesWithoutMatchingDTO(
-        allDbLevels, allLevelDTOs, this.factorLevelService.batchDeleteFactorLevels, context, tx)
-        .then(() => batchDeleteDbEntitiesWithoutMatchingDTO(
-          allDbFactors, allFactorDTOs, this.factorService.batchDeleteFactors, context, tx))
+  deleteFactorsAndLevels = async (
+    dbFactors,
+    dbLevels,
+    requestFactors,
+    requestLevels,
+    tx,
+    context,
+  ) => {
+    await deleteDbRecordsNotInRequest(dbLevels, requestLevels,
+      this.factorLevelService.batchDeleteFactorLevels, context, tx)
+    await deleteDbRecordsNotInRequest(dbFactors, requestFactors,
+      this.factorService.batchDeleteFactors, context, tx)
+  }
 
   @setErrorCode('1Aa000')
-  updateFactors =
-    (experimentId, allFactorDTOs, allFactorTypes, context, tx) =>
-      applyAsyncBatchToNonEmptyArray(
-        this.factorService.batchUpdateFactors,
-        mapFactorDTOsToFactorEntities(
-          experimentId,
-          determineDTOsForUpdate(allFactorDTOs),
-          getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE)),
-        context,
-        tx)
+  updateFactors = (experimentId, requestFactors, factorTypes, context, tx) => {
+    const factorsToUpdate = getEntitiesToUpdate(requestFactors)
+    const treatmentVariableTypeId = getIdForFactorType(factorTypes,
+      INDEPENDENT_VARIABLE_FACTOR_TYPE)
+    const formattedFactorsToUpdate = mapFactorRequestsToDbFormat(experimentId, factorsToUpdate,
+      treatmentVariableTypeId)
+
+    return invokeAsyncFuncIfDataIsNotEmpty(this.factorService.batchUpdateFactors,
+      formattedFactorsToUpdate, context, tx)
+  }
 
   @setErrorCode('1Ab000')
-  updateLevels = (levelDTOsForUpdate, allFactorLevelAssociationDTOs, allDbLevels, context, tx) => {
-    const requestFactorLevels =
-      mapFactorLevelDTOsToFactorLevelEntities(levelDTOsForUpdate, allFactorLevelAssociationDTOs)
-    const mappedDbFactorLevels = _.mapValues(_.groupBy(allDbLevels, 'id'), x => x[0])
-    return applyAsyncBatchToNonEmptyArray(
-      this.factorLevelService.batchUpdateFactorLevels,
-      _.filter(requestFactorLevels, factorLevel => mappedDbFactorLevels[factorLevel.id] &&
-        !_.isEqual(factorLevel.value, mappedDbFactorLevels[factorLevel.id].value)),
+  updateLevels = (
+    requestFactorLevels,
+    requestFactorLevelAssociations,
+    dbLevels,
+    context,
+    tx,
+  ) => {
+    const formattedRequestFactorLevels = mapFactorLevelRequestsToDbFormat(requestFactorLevels,
+      requestFactorLevelAssociations)
+    const mappedDbFactorLevels = keyBy(dbLevels, 'id')
+    const factorLevelsWithChanges = formattedRequestFactorLevels.filter(factorLevel =>
+      !isEqual(factorLevel.value, (mappedDbFactorLevels[factorLevel.id] || {}).value))
+
+    return invokeAsyncFuncIfDataIsNotEmpty(this.factorLevelService.batchUpdateFactorLevels,
+      factorLevelsWithChanges,
       context,
       tx)
   }
 
   @setErrorCode('1Ac000')
-  updateFactorsAndLevels = ({
-    experimentId, allIndependentDTOs: allFactorDTOs, allFactorLevelAssociationDTOs,
-    allLevelDTOsWithParentFactorIdForUpdate, allFactorTypes, allDbLevels, context, tx,
-  }) => tx.batch([
-    this.updateFactors(
-      experimentId, allFactorDTOs, allFactorTypes, context, tx),
-    this.updateLevels(allLevelDTOsWithParentFactorIdForUpdate, allFactorLevelAssociationDTOs,
-      allDbLevels, context, tx),
-  ])
+  updateFactorsAndLevels = async (
+    experimentId,
+    requestFactors,
+    requestFactorLevelAssociations,
+    requestLevelsToUpdate,
+    factorTypes,
+    dbLevels,
+    context,
+    tx,
+  ) => {
+    await this.updateFactors(experimentId, requestFactors, factorTypes, context, tx)
+    await this.updateLevels(requestLevelsToUpdate, requestFactorLevelAssociations,
+      dbLevels, context, tx)
+  }
 
   @setErrorCode('1Ad000')
-  createFactorsAndDependentLevels = (
-    {
-      experimentId, factorDTOsForCreate, allFactorLevelAssociationDTOs, allFactorTypes, context, tx,
-    }) => {
-    const factorEntitiesForCreate = mapFactorDTOsToFactorEntities(
-      experimentId,
-      factorDTOsForCreate,
-      getIdForFactorType(allFactorTypes, INDEPENDENT_VARIABLE_FACTOR_TYPE))
-    return applyAsyncBatchToNonEmptyArray(
-      this.factorService.batchCreateFactors,
-      factorEntitiesForCreate,
-      context,
-      tx)
-      .then((responses) => {
-        const levelDTOsWithFactorIdForCreate =
-          _.flatMap(factorDTOsForCreate, (factorDTO, index) =>
-            _.map(factorDTO.levels, level => ({ factorId: responses[index].id, ...level })))
-        return this.createFactorLevels(levelDTOsWithFactorIdForCreate,
-          allFactorLevelAssociationDTOs, context, tx)
-      })
+  createFactorsAndDependentLevels = async (
+    experimentId,
+    requestFactorsToCreate,
+    requestFactorLevelAssociations,
+    factorTypes,
+    context,
+    tx,
+  ) => {
+    const treatmentVariableTypeId = getIdForFactorType(factorTypes,
+      INDEPENDENT_VARIABLE_FACTOR_TYPE)
+    const formattedFactorsForCreate = mapFactorRequestsToDbFormat(experimentId,
+      requestFactorsToCreate, treatmentVariableTypeId)
+    const responses = await invokeAsyncFuncIfDataIsNotEmpty(
+      this.factorService.batchCreateFactors, formattedFactorsForCreate, context, tx)
+    const levelsToCreate = requestFactorsToCreate.flatMap((factor, index) =>
+      factor.levels.map(level => ({ factorId: responses[index].id, ...level })))
+
+    return this.createFactorLevels(levelsToCreate, requestFactorLevelAssociations, context, tx)
   }
 
   @setErrorCode('1Ae000')
   createFactorLevels =
-    (allFactorLevelDTOs, allFactorLevelAssociationDTOs, context, tx) =>
-      applyAsyncBatchToNonEmptyArray(
-        this.factorLevelService.batchCreateFactorLevels,
-        mapFactorLevelDTOsToFactorLevelEntities(
-          determineDTOsForCreate(allFactorLevelDTOs), allFactorLevelAssociationDTOs),
-        context,
-        tx)
+    (requestFactorLevels, requestFactorLevelAssociations, context, tx) => {
+      const factorLevelsToCreate = getEntitiesToCreate(requestFactorLevels)
+      const formattedFactorsToCreate = mapFactorLevelRequestsToDbFormat(
+        factorLevelsToCreate, requestFactorLevelAssociations)
+
+      return invokeAsyncFuncIfDataIsNotEmpty(this.factorLevelService.batchCreateFactorLevels,
+        formattedFactorsToCreate, context, tx)
+    }
 
   @setErrorCode('1Af000')
   createFactorLevelAssociations = (
-    {
-      refIdToIdMap,
-      allDbFactorLevelAssociations,
-      allFactorLevelAssociationDTOs,
-      context,
-      tx,
-    }) => applyAsyncBatchToNonEmptyArray(
-    this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
-    determineFactorLevelAssociationEntitiesToCreate(
-      refIdToIdMap, allDbFactorLevelAssociations, allFactorLevelAssociationDTOs),
+    refIdToIdMap,
+    dbFactorLevelAssociations,
+    requestFactorLevelAssociations,
     context,
-    tx)
+    tx,
+  ) => {
+    const levelAssociationsToCreate = getLevelAssociationsToCreate(refIdToIdMap,
+      dbFactorLevelAssociations, requestFactorLevelAssociations)
+    return invokeAsyncFuncIfDataIsNotEmpty(
+      this.factorLevelAssociationService.batchCreateFactorLevelAssociations,
+      levelAssociationsToCreate, context, tx)
+  }
 
   @setErrorCode('1Ag000')
-  getCurrentDbEntities = ({ experimentId }) => Promise.all([
-    FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
-    FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
-    FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId),
-    dbRead.factorType.all(),
-  ]).then(formDbEntitiesObject)
+  getCurrentDbEntities = experimentId =>
+    Promise.all([
+      FactorService.getFactorsByExperimentIdNoExistenceCheck(experimentId),
+      FactorLevelService.getFactorLevelsByExperimentIdNoExistenceCheck(experimentId),
+      FactorLevelAssociationService.getFactorLevelAssociationByExperimentId(experimentId),
+      dbRead.factorType.all(),
+    ])
 
   @setErrorCode('1Ah000')
-  categorizeRequestDTOs = (allIndependentDTOs) => {
-    const allLevelDTOsWithParentFactorId = concatChildArrays(
-      appendParentIdToChildren(allIndependentDTOs, 'levels', 'factorId'),
+  categorizeRequestFactorsAndLevels = (requestFactors) => {
+    const requestLevels = concatChildArrays(
+      appendParentIdToChildren(requestFactors, 'levels', 'factorId'),
       'levels')
     return {
-      allLevelDTOsWithParentFactorId,
-      allLevelDTOsWithParentFactorIdForUpdate:
-        determineDTOsForUpdate(allLevelDTOsWithParentFactorId),
-      factorDTOsForCreate: determineDTOsForCreate(allIndependentDTOs),
-      factorDependentLevelDTOsForCreate:
-        _.filter(allLevelDTOsWithParentFactorId,
-          dto => _.isNil(dto.factorId)),
-      factorIndependentLevelDTOsForCreate:
-        _.filter(allLevelDTOsWithParentFactorId,
-          dto => !_.isNil(dto.factorId) && _.isNil(dto.id)),
+      requestLevels,
+      requestLevelsToUpdate: getEntitiesToUpdate(requestLevels),
+      requestFactorsToCreate: getEntitiesToCreate(requestFactors),
+      requestDependentLevelsToCreate: requestLevels.filter(level => !level.factorId),
+      requestLevelsToCreate: requestLevels.filter(level => level.factorId && !level.id),
     }
   }
 
   @setErrorCode('1Ai000')
-  createFactorsAndLevels = params => params.tx.batch([
-    this.createFactorsAndDependentLevels(params),
-    this.createFactorLevels(
-      params.factorIndependentLevelDTOsForCreate,
-      params.allFactorLevelAssociationDTOs,
-      params.context,
-      params.tx)])
+  createFactorsAndLevels = async (
+    experimentId,
+    requestFactorsToCreate,
+    requestLevelsToCreate,
+    requestFactorLevelAssociations,
+    factorTypes,
+    context,
+    tx,
+  ) => {
+    const dbDependentLevels = await this.createFactorsAndDependentLevels(experimentId,
+      requestFactorsToCreate, requestFactorLevelAssociations, factorTypes, context, tx)
+    const dbFactorLevels = await this.createFactorLevels(requestLevelsToCreate,
+      requestFactorLevelAssociations, context, tx)
+    return [dbDependentLevels, dbFactorLevels]
+  }
 
   @setErrorCode('1AJ000')
-  persistIndependentAndAssociations = (
-    experimentId, allIndependentDTOs, allFactorLevelAssociationDTOs, context, tx) => {
-    const requestData = {
-      experimentId,
-      allIndependentDTOs,
-      allFactorLevelAssociationDTOs,
-      context,
-      tx,
-    }
-    this.factorLevelService.processFactorLevelValues(allIndependentDTOs)
+  persistIndependentAndAssociations = async (
+    experimentId,
+    requestFactors,
+    requestFactorLevelAssociations,
+    context,
+    tx,
+  ) => {
+    this.factorLevelService.processFactorLevelValues(requestFactors)
+    const [
+      dbFactors,
+      dbLevels,
+      dbFactorLevelAssociations,
+      factorTypes,
+    ] = await this.getCurrentDbEntities(experimentId)
 
-    return this.getCurrentDbEntities(requestData).then(
-      (dbEntities) => {
-        const inputsAndDbEntities = {
-          ...requestData,
-          ...dbEntities,
-          ...this.categorizeRequestDTOs(allIndependentDTOs),
-          context,
-        }
-        return this.deleteFactorsAndLevels(inputsAndDbEntities)
-          .then(() => this.updateFactorsAndLevels(inputsAndDbEntities))
-          .then(() => this.createFactorsAndLevels(inputsAndDbEntities))
-          .then(([dependentLevelResponses, independentLevelResponses]) => {
-            const refIdToIdMap = createCompleteRefIdToIdMap({
-              ...inputsAndDbEntities,
-              dependentLevelResponses,
-              independentLevelResponses,
-            })
-            const inputsAndDbEntitiesWithRefIdToIdMap = {
-              ...inputsAndDbEntities,
-              refIdToIdMap,
-            }
-            return tx.batch([
-              deleteFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
-              this.createFactorLevelAssociations(inputsAndDbEntitiesWithRefIdToIdMap),
-            ])
-          })
-      })
+    const {
+      requestDependentLevelsToCreate,
+      requestFactorsToCreate,
+      requestLevels,
+      requestLevelsToCreate,
+      requestLevelsToUpdate,
+    } = this.categorizeRequestFactorsAndLevels(requestFactors)
+
+    await this.deleteFactorsAndLevels(dbFactors, dbLevels, requestFactors, requestLevels,
+      tx, context)
+    await this.updateFactorsAndLevels(experimentId, requestFactors, requestFactorLevelAssociations,
+      requestLevelsToUpdate, factorTypes, dbLevels, context, tx)
+
+    const [
+      dependentLevelResponses,
+      independentLevelResponses,
+    ] = await this.createFactorsAndLevels(experimentId, requestFactorsToCreate,
+      requestLevelsToCreate, requestFactorLevelAssociations, factorTypes, context, tx)
+
+    const refIdToIdMap = mapAllRefs(requestDependentLevelsToCreate, requestLevelsToCreate,
+      requestLevelsToUpdate, dependentLevelResponses, independentLevelResponses)
+    await deleteFactorLevelAssociations(refIdToIdMap, dbFactorLevelAssociations,
+      requestFactorLevelAssociations, tx)
+    await this.createFactorLevelAssociations(refIdToIdMap, dbFactorLevelAssociations,
+      requestFactorLevelAssociations, context, tx)
   }
 
   @setErrorCode('1Ak000')
-  persistIndependentAndDependentVariables = (
-    experimentId, variables, context, isTemplate, tx) => tx.batch([
-    this.persistIndependentAndAssociations(
-      experimentId, variables.treatmentVariables,
-      variables.treatmentVariableAssociations, context, tx),
-    this.persistDependentVariables(
-      variables.responseVariables, experimentId, context, isTemplate, tx)])
+  persistIndependentAndDependentVariables = async (
+    experimentId,
+    variables,
+    context,
+    isTemplate,
+    tx,
+  ) => {
+    const {
+      responseVariables,
+      treatmentVariables,
+      treatmentVariableAssociations,
+    } = variables
+
+    await this.persistIndependentAndAssociations(experimentId, treatmentVariables,
+      treatmentVariableAssociations, context, tx)
+    await this.persistDependentVariables(responseVariables, experimentId, context, isTemplate, tx)
+  }
 
   @notifyChanges('update', 1)
   @setErrorCode('1Al000')
   @Transactional('persistAllVariables')
-  persistAllVariables(experimentVariables, experimentId, context, isTemplate, tx) {
-    const expId = Number(experimentId)
-    return this.securityService.permissionsCheck(expId, context, isTemplate)
-      .then(() => this.variablesValidator.validate(experimentVariables, 'POST'))
-      .then(() => this.persistIndependentAndDependentVariables(
-        expId, experimentVariables, context, isTemplate, tx))
-      .then(() => AppUtil.createPostResponse([{ id: expId }]))
+  persistAllVariables = async (
+    experimentVariables,
+    experimentIdString,
+    context,
+    isTemplate,
+    tx,
+  ) => {
+    const experimentId = Number(experimentIdString)
+    await this.securityService.permissionsCheck(experimentId, context, isTemplate)
+    await this.variablesValidator.validate(experimentVariables, 'POST')
+    await this.persistIndependentAndDependentVariables(experimentId, experimentVariables,
+      context, isTemplate, tx)
+    return AppUtil.createPostResponse([{ id: experimentId }])
   }
 }
 
-module.exports = FactorDependentCompositeService
+export default FactorDependentCompositeService

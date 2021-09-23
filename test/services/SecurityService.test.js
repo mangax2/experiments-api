@@ -138,57 +138,74 @@ describe('SecurityService', () => {
   })
 
   describe('getUserPermissionsForExperiment', () => {
-    test('returns user permissions array ignoringCase', () => {
+    test('returns user permissions array ignoringCase', async () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
+        group_ids: [],
+        reviewer_group_ids: [],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'AK' }).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
+      const permissions = await target.getUserPermissionsForExperiment(1, { userId: 'AK' })
+      expect(permissions).toEqual(expectedResult)
     })
 
-    test('returns user permissions array , when user is part of the group', () => {
+    test('returns user permissions array , when user is part of the group', async () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
         group_ids: ['group_1'],
+        reviewer_group_ids: [],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' }).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
+      const permissions = await target.getUserPermissionsForExperiment(1, { userId: 'KPRAT1' })
+      expect(permissions).toEqual(expectedResult)
     })
 
-    test('returns user permissions array , when reviewer is part of the group', () => {
+    test('returns user permissions array , when reviewer group is part of the group', async () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
-        reviewer_ids: ['reviewer_1'],
+        group_ids: [],
+        reviewer_group_ids: ['reviewer_1'],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() => ['reviewer_1', 'reviewer_2'])
       const expectedResult = ['review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
+      const permissions = await target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' })
+      expect(permissions).toEqual(expectedResult)
     })
 
-    test('returns user permissions array , when user and reviewer is part of the group', () => {
+    test('returns review permission , when the user is one of the reviewers', async () => {
+      target.ownerService.getOwnersByExperimentId = mockResolve({
+        user_ids: [],
+        group_ids: [],
+        reviewer_group_ids: [],
+        reviewer_user_ids: ['USER'],
+      })
+      target.getGroupsByUserId = mock([])
+
+      const permissions = await target.getUserPermissionsForExperiment(1, { userId: 'USER' })
+      expect(permissions).toEqual(['review'])
+    })
+
+    test('returns user permissions array , when user and reviewer is part of the group', async () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['ak'],
         group_ids: ['group_1'],
-        reviewer_ids: ['reviewer_1'],
+        reviewer_group_ids: ['reviewer_1'],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() =>
         ['group_1', 'group_2', 'group_3', 'reviewer_1', 'reviewer_3'])
       const expectedResult = ['write', 'review']
 
-      return target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' }).then((data) => {
-        expect(data).toEqual(expectedResult)
-      })
+      const permissions = await target.getUserPermissionsForExperiment(1, { userId: 'KCHIT' })
+      expect(permissions).toEqual(expectedResult)
     })
 
     test('returns error when owner service fails', () => {
@@ -220,6 +237,9 @@ describe('SecurityService', () => {
     test('returns user permissions array when more than one owner exists', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['AK', 'ky'],
+        group_ids: [],
+        reviewer_group_ids: [],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = ['write']
@@ -232,6 +252,9 @@ describe('SecurityService', () => {
     test('returns empty permissions array when user not matched', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['AK'],
+        group_ids: [],
+        reviewer_group_ids: [],
+        reviewer_user_ids: [],
       })
       target.getGroupsByUserId = jest.fn(() => ['group_1', 'group_2'])
       const expectedResult = []

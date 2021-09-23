@@ -12,7 +12,7 @@ class ownerRepo {
 
   @setErrorCode('5E1000')
   findByExperimentId = (experimentId) => this.rep.oneOrNone('SELECT user_ids,' +
-    ' group_ids,reviewer_ids FROM' +
+    ' group_ids, reviewer_user_ids, reviewer_group_ids FROM' +
     ' owner WHERE' +
     ' experiment_id = $1', experimentId)
 
@@ -26,16 +26,17 @@ class ownerRepo {
   batchCreate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.one(
-        'insert into owner(experiment_id, user_ids, group_ids, reviewer_ids,created_user_id, ' +
+        'insert into owner(experiment_id, user_ids, group_ids, reviewer_user_ids, reviewer_group_ids, created_user_id, ' +
         ' created_date,' +
-        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[],$4::varchar[],' +
-        ' $5,' +
-        ' CURRENT_TIMESTAMP, $5,' +
+        'modified_user_id, modified_date) values($1, $2::varchar[], $3::varchar[],$4::varchar[],$5::varchar[],' +
+        ' $6,' +
+        ' CURRENT_TIMESTAMP, $6,' +
         ' CURRENT_TIMESTAMP)  RETURNING id',
         [ownershipInfo.experimentId,
-          ownershipInfo.userIds,
+          ownershipInfo.userIds.map(id => id.toUpperCase()),
           ownershipInfo.groupIds,
-          ownershipInfo.reviewerIds,
+          ownershipInfo.reviewerIds.map(id => id.toUpperCase()),
+          ownershipInfo.reviewerGroupIds,
           context.userId],
       ),
     ),
@@ -45,13 +46,14 @@ class ownerRepo {
   batchUpdate = (experimentsOwners, context, tx = this.rep) => tx.batch(
     experimentsOwners.map(
       ownershipInfo => tx.oneOrNone(
-        'UPDATE owner SET (user_ids, group_ids,reviewer_ids,' +
-        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[], $3::varchar[], $4,' +
-        ' CURRENT_TIMESTAMP) WHERE experiment_id=$5 RETURNING *',
+        'UPDATE owner SET (user_ids, group_ids, reviewer_user_ids, reviewer_group_ids,' +
+        'modified_user_id, modified_date) = ($1::varchar[], $2::varchar[], $3::varchar[], $4::varchar[], $5,' +
+        ' CURRENT_TIMESTAMP) WHERE experiment_id=$6 RETURNING *',
         [
-          ownershipInfo.userIds,
+          ownershipInfo.userIds.map(id => id.toUpperCase()),
           ownershipInfo.groupIds,
-          ownershipInfo.reviewerIds,
+          ownershipInfo.reviewerIds.map(id => id.toUpperCase()),
+          ownershipInfo.reviewerGroupIds,
           context.userId,
           ownershipInfo.experimentId,
         ],

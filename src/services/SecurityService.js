@@ -64,26 +64,25 @@ class SecurityService {
     })
 
   @setErrorCode('1O4000')
-  getUserPermissionsForExperiment(id, context) {
+  getUserPermissionsForExperiment = async (id, context) => {
     const userPermissions = []
-    return Promise.all([
+    const [experimentOwners, userPAPIGroups] = await Promise.all([
       this.ownerService.getOwnersByExperimentId(id),
-      this.getGroupsByUserId(context.userId)]).then((data) => {
-      if (data[0] && data[1]) {
-        const groupIdsAssignedToExperiments = _.concat(data[0].group_ids, config.admin_group)
-        const reviewerIdsAssignedToExperiments = _.concat(data[0].reviewer_ids, config.admin_group)
-        const upperCaseUserIds = _.map(data[0].user_ids, _.toUpper)
-        const userGroupIds = data[1]
-        if (upperCaseUserIds.includes(context.userId) ||
-            _.intersection(groupIdsAssignedToExperiments, userGroupIds).length > 0) {
-          userPermissions.push('write')
-        }
-        if (_.intersection(reviewerIdsAssignedToExperiments, userGroupIds).length > 0) {
-          userPermissions.push('review')
-        }
+      this.getGroupsByUserId(context.userId)])
+    if (experimentOwners && userPAPIGroups) {
+      const ownerGroups = experimentOwners.group_ids.concat(config.admin_group)
+      const reviewerGroups = experimentOwners.reviewer_group_ids.concat(config.admin_group)
+      const upperCaseUserIds = experimentOwners.user_ids.map(user => user.toUpperCase())
+      if (upperCaseUserIds.includes(context.userId) ||
+        _.intersection(ownerGroups, userPAPIGroups).length > 0) {
+        userPermissions.push('write')
       }
-      return userPermissions
-    })
+      if (experimentOwners.reviewer_user_ids.includes(context.userId) ||
+        _.intersection(reviewerGroups, userPAPIGroups).length > 0) {
+        userPermissions.push('review')
+      }
+    }
+    return userPermissions
   }
 
   @setErrorCode('1O5000')

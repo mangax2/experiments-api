@@ -46,11 +46,12 @@ class ExperimentsService {
           })
 
           const experimentsOwners = _.map(experiments, (exp) => {
-            const owners = _.map(exp.owners, _.trim)
-            const ownerGroups = _.map(exp.ownerGroups, _.trim)
-            const reviewers = _.map(exp.reviewers, _.trim)
+            const owners = (exp.owners || []).map(owner => owner.trim())
+            const ownerGroups = (exp.ownerGroups || []).map(ownerGroup => ownerGroup.trim())
+            const reviewerGroups = (exp.reviewers || []).map(reviewerGroup => reviewerGroup.trim())
+            const reviewers = (exp.reviewerUsers || []).map(reviewer => reviewer.trim())
             return {
-              experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerIds: reviewers,
+              experimentId: exp.id, userIds: owners, groupIds: ownerGroups, reviewerGroupIds: reviewerGroups, reviewerIds: reviewers,
             }
           })
           const promises = []
@@ -127,7 +128,8 @@ class ExperimentsService {
         const owners = _.find(result, o => o.experiment_id === experiment.id) || { user_ids: [] }
         experiment.owners = owners.user_ids
         experiment.ownerGroups = owners.group_ids
-        experiment.reviewers = owners.reviewer_ids
+        experiment.reviewerUsers = owners.reviewer_user_ids
+        experiment.reviewers = owners.reviewer_group_ids
         return experiment
       }),
     )
@@ -178,7 +180,8 @@ class ExperimentsService {
         return Promise.all(promises).then(([owners, tags, comment, analysisModel]) => {
           data.owners = owners.user_ids
           data.ownerGroups = owners.group_ids
-          data.reviewers = owners.reviewer_ids
+          data.reviewerUsers = owners.reviewer_user_ids
+          data.reviewers = owners.reviewer_group_ids
           data.tags = ExperimentsService.prepareTagResponse(tags)
           if (!_.isNil(comment)) {
             data.comment = comment.description
@@ -212,14 +215,16 @@ class ExperimentsService {
                 comment.description = experiment.comment
                 comment.experimentId = experiment.id
               }
-              const trimmedUserIds = _.map(experiment.owners, _.trim)
-              const trimmedOwnerGroups = _.map(experiment.ownerGroups, _.trim)
-              const trimmedReviewers = _.map(experiment.reviewers, _.trim)
+              const trimmedUserIds = (experiment.owners || []).map(owner => owner.trim())
+              const trimmedOwnerGroups = (experiment.ownerGroups || []).map(ownerGroup => ownerGroup.trim())
+              const reviewersGroups = (experiment.reviewers || []).map(reviewerGroup => reviewerGroup.trim())
+              const reviewers = (experiment.reviewerUsers || []).map(reviewer => reviewer.trim())
               const owners = {
                 experimentId: id,
                 userIds: trimmedUserIds,
                 groupIds: trimmedOwnerGroups,
-                reviewerIds: trimmedReviewers,
+                reviewerGroupIds: reviewersGroups,
+                reviewerIds: reviewers,
               }
               const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
               const promises = []
@@ -594,7 +599,7 @@ class ExperimentsService {
         return Promise.reject(AppError.badRequest(`${isTemplate ? 'Template' : 'Experiment'} has already been submitted for review. To submit a new review, please cancel the existing review.`, null, getFullErrorCode('15Q001')))
       }
 
-      if (experiment.reviewers.length === 0) {
+      if (experiment.reviewers.length === 0 && experiment.reviewerUsers.length === 0) {
         return Promise.reject(AppError.badRequest(`No reviewers have been assigned to this ${isTemplate ? 'template' : 'experiment'}`, null, getFullErrorCode('15Q002')))
       }
       const date = new Date(timestamp)
@@ -612,7 +617,8 @@ class ExperimentsService {
           body: {
             text: `${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}" is ready for statistician review.`,
           },
-          userGroups: experiment.reviewers,
+          ...experiment.reviewerUsers.length > 0 && { recipients: experiment.reviewerUsers },
+          ...experiment.reviewers.length > 0 && { userGroups: experiment.reviewers },
           actions: [
             {
               title: `Review ${isTemplate ? 'Template' : 'Experiment'} "${experiment.name}"`,

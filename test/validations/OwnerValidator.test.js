@@ -31,6 +31,18 @@ describe('OwnerValidator', () => {
           entityCount: { min: 0 },
           required: false,
         },
+        {
+          paramName: 'reviewerGroupIds',
+          type: 'array',
+          entityCount: { min: 0 },
+          required: false,
+        },
+        {
+          paramName: 'reviewerIds',
+          type: 'array',
+          entityCount: { min: 0 },
+          required: false,
+        },
       ]
 
       expect(OwnerValidator.POST_VALIDATION_SCHEMA).toEqual(schema)
@@ -61,6 +73,18 @@ describe('OwnerValidator', () => {
       },
       {
         paramName: 'groupIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
+      },
+      {
+        paramName: 'reviewerGroupIds',
+        type: 'array',
+        entityCount: { min: 0 },
+        required: false,
+      },
+      {
+        paramName: 'reviewerIds',
         type: 'array',
         entityCount: { min: 0 },
         required: false,
@@ -121,28 +145,32 @@ describe('OwnerValidator', () => {
       })
     })
 
-    test('calls validateUserIds and resolves', () => {
+    test('calls validateUserIds and resolves', async () => {
       target.hasErrors = mock(false)
       target.requiredOwnerCheck = mockResolve()
       target.validateUserIds = mockResolve()
       target.validateGroupIds = mockResolve()
       target.userOwnershipCheck = mockResolve()
 
-      return target.postValidate([{ userIds: ['KMCCL'] }], testContext).then(() => {
-        expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
-      })
+      await target.postValidate([{ userIds: ['KMCCL'], reviewerIds: ['KMCCL'] }], testContext)
+      expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL'])
+
+      await target.postValidate([{ userIds: ['KMCCL'], reviewerIds: ['USER'] }], testContext)
+      expect(target.validateUserIds).toHaveBeenCalledWith(['KMCCL', 'USER'])
     })
 
-    test('calls validateGroupIds and resolves', () => {
+    test('calls validateGroupIds and resolves', async () => {
       target.hasErrors = mock(false)
       target.requiredOwnerCheck = mockResolve()
       target.validateUserIds = mockResolve()
       target.validateGroupIds = mockResolve()
       target.userOwnershipCheck = mockResolve()
 
-      return target.postValidate([{ groupIds: ['group1'] }], testContext).then(() => {
-        expect(target.validateGroupIds).toHaveBeenCalledWith(['group1'])
-      })
+      await target.postValidate([{ groupIds: ['group1'], reviewerGroupIds: ['group1'] }], testContext)
+      expect(target.validateGroupIds).toHaveBeenCalledWith(['group1'])
+
+      await target.postValidate([{ groupIds: ['group1'], reviewerGroupIds: ['group2'] }], testContext)
+      expect(target.validateGroupIds).toHaveBeenCalledWith(['group1', 'group2'])
     })
 
     test('rejects when validateUserIds fails', () => {

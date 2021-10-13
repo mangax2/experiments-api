@@ -38,6 +38,7 @@ type ClusterComposite {
   uomCode: String
   catalogType: String
   isPlaceholder: Boolean
+  valueType: String
   items: [ClusterComposite]
 }
 

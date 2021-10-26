@@ -39,6 +39,7 @@ type ClusterComposite {
   catalogType: String
   isPlaceholder: Boolean
   valueType: String
+  multiQuestionTag: String
   items: [ClusterComposite]
 }
 

@@ -30,8 +30,11 @@ export default {
     getExperimentsByCriteria: (entity, args, context) =>
       context.loaders.experimentsByCriteria.load(
         { criteria: args.criteria, value: args.value, isTemplate: false }),
-    getExperimentsByName: (entity, args, context) =>
-      context.loaders.experimentsByName.load(args.name),
+    // eslint-disable-next-line no-confusing-arrow
+    getExperimentsByName: (_, { name, partial = false }, context) =>
+      partial ?
+        context.loaders.experimentsByPartialName.load(name) :
+        context.loaders.experimentsByName.load(name),
     // 'null' is passed here because the load function won't take null
     // and a string is an invalid type for this call, so it's guaranteed to act the way we need
     getExperimentBySetId: (entity, args, context) =>

@@ -158,6 +158,38 @@ class unitRepo {
     const query = `${this.pgp.helpers.update(data, columnSet).replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP')} WHERE v.id = t.id RETURNING *`
     return tx.any(query)
   }
+
+  @setErrorCode('5JL000')
+  batchUpdateSetEntryIds = (setEntryIdPairs, context, tx = this.rep) => {
+    const columnSet = new this.pgp.helpers.ColumnSet(
+      [
+        'old_set_entry_id',
+        'new_set_entry_id',
+      ],
+      {table: 'temp_update_set_entry_ids'})
+    const values = setEntryIdPairs.map(setEntryIdPair => ({
+      old_set_entry_id: setEntryIdPair.oldSetEntryId,
+      new_set_entry_id: setEntryIdPair.newSetEntryId,
+    }))
+
+    const tempTableQuery = "DROP TABLE IF EXISTS temp_update_set_entry_ids;"
+      + " CREATE TEMP TABLE temp_update_set_entry_ids(old_set_entry_id INT, new_set_entry_id INT);"
+      + ` ${this.pgp.helpers.insert(values, columnSet)};`
+    const updateQuery = "UPDATE unit SET"
+      + " set_entry_id = tusei.new_set_entry_id,"
+      + " modified_user_id = $1,"
+      + " modified_date = 'CURRENT_TIMESTAMP'" 
+      + " FROM temp_update_set_entry_ids tusei WHERE unit.set_entry_id = tusei.old_set_entry_id"
+
+    return tx.query(tempTableQuery)
+      .then(() => tx.any(updateQuery.replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP'), context.userId))
+  }
+
+  @setErrorCode('5JM000')
+  batchFindSetEntryIds = async (setEntryIds) => {
+    const units = await this.rep.any('SELECT u.set_entry_id, u.id FROM unit u WHERE set_entry_id IN ($1:csv)', [setEntryIds])
+    return units.map(unit => unit.set_entry_id)
+  }
 }
 
 module.exports = (rep, pgp) => new unitRepo(rep, pgp)

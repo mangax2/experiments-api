@@ -183,9 +183,9 @@ router.post('/set-entries', (req, res, next) => new ExperimentalUnitService().ge
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.put('/set-entries', (req, res, next) => new ExperimentalUnitService()
+router.patch('/set-entries', (req, res, next) => new ExperimentalUnitService()
   .batchUpdateSetEntryIds(req.body, req.context)
-  .then(value => res.json(value))
+  .then(() => res.sendStatus(204))
   .catch(err => next(err)))
 
 router.post('/templates', (req, res, next) => new ExperimentsService().manageTemplates(req.body, req.query, req.context)

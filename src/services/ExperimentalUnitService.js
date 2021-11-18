@@ -309,30 +309,31 @@ class ExperimentalUnitService {
       }
     })
 
-  @setErrorCode('17M000')
+  // @setErrorCode('17M000')
+  // TODO: Fix setErrorCode so it does not throw unhandled exceptions
   @Transactional('partialUpdateSetEntryIdsTx')
   batchUpdateSetEntryIds = async (setEntryPairs, context, tx) => {
     const oldSetEntryIds = setEntryPairs.map(pair => pair.oldSetEntryId).filter(Number)
     const newSetEntryIds = setEntryPairs.map(pair => pair.newSetEntryId).filter(Number)
     const allSetEntryIds = [...oldSetEntryIds, ...newSetEntryIds]
     if (allSetEntryIds.length !== _.uniq(allSetEntryIds).length) {
-      throw AppError.badRequest('All set entry IDs in request payload must be unique', undefined, getFullErrorCode('173001'))
+      throw AppError.badRequest('All set entry IDs in request payload must be unique', undefined, getFullErrorCode('17M001'))
     }
 
     const foundSetEntryIds = await dbRead.unit.batchFindSetEntryIds(oldSetEntryIds)
     if (oldSetEntryIds.length !== foundSetEntryIds.length) {
-      throw AppError.badRequest('All oldSetEntryIds in request payload must exist', undefined, getFullErrorCode('17M001'))
+      throw AppError.badRequest('All oldSetEntryIds in request payload must exist', undefined, getFullErrorCode('17M002'))
     }
 
     if (oldSetEntryIds.length !== newSetEntryIds.length) {
       throw AppError.badRequest(
         'There must be a newSetEntryId for every oldSetEntryId and vice versa in the request payload',
         undefined,
-        getFullErrorCode('17M001'),
+        getFullErrorCode('17M003'),
       )
     }
 
-    await dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
+    return dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
   }
 }
 

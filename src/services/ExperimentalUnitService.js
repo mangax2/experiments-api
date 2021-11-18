@@ -322,12 +322,12 @@ class ExperimentalUnitService {
 
     const foundSetEntryIds = await dbRead.unit.batchFindSetEntryIds(oldSetEntryIds)
     if (oldSetEntryIds.length !== foundSetEntryIds.length) {
-      throw AppError.badRequest('All oldSetEntryIds in request payload must exist', undefined, getFullErrorCode('17M002'))
+      throw AppError.badRequest('All the old set entry IDs in request payload must exist', undefined, getFullErrorCode('17M002'))
     }
 
     if (oldSetEntryIds.length !== newSetEntryIds.length) {
       throw AppError.badRequest(
-        'There must be a newSetEntryId for every oldSetEntryId and vice versa in the request payload',
+        'There must be a new set entry ID for every old set entry ID and vice versa in the request payload',
         undefined,
         getFullErrorCode('17M003'),
       )

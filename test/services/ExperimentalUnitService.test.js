@@ -881,7 +881,7 @@ describe('ExperimentalUnitService', () => {
         .catch((error) => {
           expect(error).toBe(testError)
           expect(AppError.badRequest).toHaveBeenCalledWith(
-            'All oldSetEntryIds in request payload must exist',
+            'All the old set entry IDs in request payload must exist',
             undefined,
             '17M002',
           )
@@ -904,7 +904,7 @@ describe('ExperimentalUnitService', () => {
       return target.batchUpdateSetEntryIds(requestBody).catch((error) => {
         expect(error).toBe(testError)
         expect(AppError.badRequest).toHaveBeenCalledWith(
-          'There must be a newSetEntryId for every oldSetEntryId and vice versa in the request payload',
+          'There must be a new set entry ID for every old set entry ID and vice versa in the request payload',
           undefined,
           '17M003',
         )

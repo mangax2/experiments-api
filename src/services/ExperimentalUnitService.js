@@ -12,6 +12,7 @@ import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import KafkaProducer from './kafka/KafkaProducer'
 import kafkaConfig from '../config/kafkaConfig'
+import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -313,24 +314,19 @@ class ExperimentalUnitService {
   // TODO: Fix setErrorCode so it does not throw unhandled exceptions
   @Transactional('partialUpdateSetEntryIdsTx')
   batchUpdateSetEntryIds = async (setEntryPairs, context, tx) => {
-    const oldSetEntryIds = setEntryPairs.map(pair => pair.oldSetEntryId).filter(Number)
-    const newSetEntryIds = setEntryPairs.map(pair => pair.newSetEntryId).filter(Number)
-    const allSetEntryIds = [...oldSetEntryIds, ...newSetEntryIds]
+    await validateSetEntryIdPairs(setEntryPairs)
+
+    const existingSetEntryIds = setEntryPairs.map(pair => pair.existingSetEntryId)
+    const incomingSetEntryIds = setEntryPairs.map(pair => pair.incomingSetEntryId)
+
+    const allSetEntryIds = [...existingSetEntryIds, ...incomingSetEntryIds]
     if (allSetEntryIds.length !== _.uniq(allSetEntryIds).length) {
       throw AppError.badRequest('All set entry IDs in request payload must be unique', undefined, getFullErrorCode('17M001'))
     }
 
-    const foundSetEntryIds = await dbRead.unit.batchFindSetEntryIds(oldSetEntryIds)
-    if (oldSetEntryIds.length !== foundSetEntryIds.length) {
-      throw AppError.badRequest('All the old set entry IDs in request payload must exist', undefined, getFullErrorCode('17M002'))
-    }
-
-    if (oldSetEntryIds.length !== newSetEntryIds.length) {
-      throw AppError.badRequest(
-        'There must be a new set entry ID for every old set entry ID and vice versa in the request payload',
-        undefined,
-        getFullErrorCode('17M003'),
-      )
+    const foundSetEntryIds = await dbRead.unit.batchFindSetEntryIds(existingSetEntryIds)
+    if (existingSetEntryIds.length !== foundSetEntryIds.length) {
+      throw AppError.badRequest('One or more of the existing set entry IDs in request payload were not found', undefined, getFullErrorCode('17M002'))
     }
 
     return dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)

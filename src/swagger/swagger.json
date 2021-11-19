@@ -1729,6 +1729,60 @@
             }
           }
         }
+      },
+      "patch": {
+        "summary": "Updates set entry IDs",
+        "description": "Updates a list of existing set entry IDs with the incoming values",
+        "operationId": "updateSetEntryIds",
+        "tags": [
+          "Set Entry"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Set Entry ID Pairs",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SetEntryIdPairForPATCH"
+              }
+            },
+            "description": "Array of pairs made of existing and incoming set entry IDs"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success with no content"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/sets/{setId}/reset": {
@@ -4147,6 +4201,19 @@
         "comment": {
           "type": "string",
           "description": "An optional description for reviewing an experiment"
+        }
+      }
+    },
+    "SetEntryIdPairForPATCH": {
+      "type": "object",
+      "properties": {
+        "existingSetEntryId": {
+          "type": "integer",
+          "description": "ID of the existing set entry that it is intended to change"
+        },
+        "incomingSetEntryId": {
+          "type": "integer",
+          "description": "Set entry ID that will replace the existing one"
         }
       }
     },

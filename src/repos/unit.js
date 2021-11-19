@@ -163,23 +163,23 @@ class unitRepo {
   batchUpdateSetEntryIds = (setEntryIdPairs, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
-        'old_set_entry_id',
-        'new_set_entry_id',
+        'existing_set_entry_id',
+        'incoming_set_entry_id',
       ],
       {table: 'temp_update_set_entry_ids'})
     const values = setEntryIdPairs.map(setEntryIdPair => ({
-      old_set_entry_id: setEntryIdPair.oldSetEntryId,
-      new_set_entry_id: setEntryIdPair.newSetEntryId,
+      existing_set_entry_id: setEntryIdPair.existingSetEntryId,
+      incoming_set_entry_id: setEntryIdPair.incomingSetEntryId,
     }))
 
     const tempTableQuery = "DROP TABLE IF EXISTS temp_update_set_entry_ids;"
-      + " CREATE TEMP TABLE temp_update_set_entry_ids(old_set_entry_id INT, new_set_entry_id INT);"
+      + " CREATE TEMP TABLE temp_update_set_entry_ids(existing_set_entry_id INT, incoming_set_entry_id INT);"
       + ` ${this.pgp.helpers.insert(values, columnSet)};`
     const updateQuery = "UPDATE unit SET"
-      + " set_entry_id = tusei.new_set_entry_id,"
+      + " set_entry_id = tusei.incoming_set_entry_id,"
       + " modified_user_id = $1,"
       + " modified_date = 'CURRENT_TIMESTAMP'" 
-      + " FROM temp_update_set_entry_ids tusei WHERE unit.set_entry_id = tusei.old_set_entry_id"
+      + " FROM temp_update_set_entry_ids tusei WHERE unit.set_entry_id = tusei.existing_set_entry_id"
 
     return tx.query(tempTableQuery)
       .then(() => tx.any(updateQuery.replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP'), context.userId))

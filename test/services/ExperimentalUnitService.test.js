@@ -789,15 +789,15 @@ describe('ExperimentalUnitService', () => {
   describe('batchUpdateSetEntryIds', () => {
     test('calls batchFindSetEntryIds on the unit repo', async () => {
       const requestBody = [
-        { oldSetEntryId: 12216200, newSetEntryId: 12217200 },
-        { oldSetEntryId: 12216201, newSetEntryId: 12217201 },
-        { oldSetEntryId: 12216202, newSetEntryId: 12217202 },
-        { oldSetEntryId: 12216203, newSetEntryId: 12217203 },
-        { oldSetEntryId: 12216204, newSetEntryId: 12217204 },
-        { oldSetEntryId: 12216205, newSetEntryId: 12217205 },
-        { oldSetEntryId: 12216206, newSetEntryId: 12217206 },
+        { existingSetEntryId: 12216200, incomingSetEntryId: 12217200 },
+        { existingSetEntryId: 12216201, incomingSetEntryId: 12217201 },
+        { existingSetEntryId: 12216202, incomingSetEntryId: 12217202 },
+        { existingSetEntryId: 12216203, incomingSetEntryId: 12217203 },
+        { existingSetEntryId: 12216204, incomingSetEntryId: 12217204 },
+        { existingSetEntryId: 12216205, incomingSetEntryId: 12217205 },
+        { existingSetEntryId: 12216206, incomingSetEntryId: 12217206 },
       ]
-      const oldSetEntryIds = [
+      const existingSetEntryIds = [
         12216200,
         12216201,
         12216202,
@@ -806,25 +806,25 @@ describe('ExperimentalUnitService', () => {
         12216205,
         12216206,
       ]
-      dbRead.unit.batchFindSetEntryIds = mockResolve(oldSetEntryIds)
+      dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
 
       await target.batchUpdateSetEntryIds(requestBody)
 
-      expect(dbRead.unit.batchFindSetEntryIds).toHaveBeenCalledWith(oldSetEntryIds)
+      expect(dbRead.unit.batchFindSetEntryIds).toHaveBeenCalledWith(existingSetEntryIds)
     })
 
     test('calls batchUpdateSetEntryIds on the unit repo', async () => {
       const requestBody = [
-        { oldSetEntryId: 12216200, newSetEntryId: 12217200 },
-        { oldSetEntryId: 12216201, newSetEntryId: 12217201 },
-        { oldSetEntryId: 12216202, newSetEntryId: 12217202 },
-        { oldSetEntryId: 12216203, newSetEntryId: 12217203 },
-        { oldSetEntryId: 12216204, newSetEntryId: 12217204 },
-        { oldSetEntryId: 12216205, newSetEntryId: 12217205 },
-        { oldSetEntryId: 12216206, newSetEntryId: 12217206 },
+        { existingSetEntryId: 12216200, incomingSetEntryId: 12217200 },
+        { existingSetEntryId: 12216201, incomingSetEntryId: 12217201 },
+        { existingSetEntryId: 12216202, incomingSetEntryId: 12217202 },
+        { existingSetEntryId: 12216203, incomingSetEntryId: 12217203 },
+        { existingSetEntryId: 12216204, incomingSetEntryId: 12217204 },
+        { existingSetEntryId: 12216205, incomingSetEntryId: 12217205 },
+        { existingSetEntryId: 12216206, incomingSetEntryId: 12217206 },
       ]
-      const oldSetEntryIds = [
+      const existingSetEntryIds = [
         12216200,
         12216201,
         12216202,
@@ -833,7 +833,7 @@ describe('ExperimentalUnitService', () => {
         12216205,
         12216206,
       ]
-      dbRead.unit.batchFindSetEntryIds = mockResolve(oldSetEntryIds)
+      dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
 
       await target.batchUpdateSetEntryIds(requestBody)
@@ -844,14 +844,14 @@ describe('ExperimentalUnitService', () => {
     test('throws error when duplicate IDs are present', () => {
       const testError = { message: 'error' }
       const requestBody = [
-        { oldSetEntryId: 6200, newSetEntryId: 7200 },
-        { oldSetEntryId: 6201, newSetEntryId: 6201 },
+        { existingSetEntryId: 6200, incomingSetEntryId: 7200 },
+        { existingSetEntryId: 6201, incomingSetEntryId: 6201 },
       ]
-      const oldSetEntryIds = [
+      const existingSetEntryIds = [
         6200,
         6201,
       ]
-      dbRead.unit.batchFindSetEntryIds = mockResolve(oldSetEntryIds)
+      dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
       AppError.badRequest = mock(testError)
 
@@ -865,49 +865,45 @@ describe('ExperimentalUnitService', () => {
       })
     })
 
-    test('throws error when an oldSetEntryId in payload does not already exist in db', () => {
+    test('throws error when an existingSetEntryId in payload does not already exist in db', () => {
       const testError = { message: 'error' }
       const requestBody = [
-        { oldSetEntryId: 6200, newSetEntryId: 7200 },
-        { oldSetEntryId: 6201, newSetEntryId: 7201 },
+        { existingSetEntryId: 6200, incomingSetEntryId: 7200 },
+        { existingSetEntryId: 6201, incomingSetEntryId: 7201 },
       ]
-      const oldSetEntryIds = [
+      const existingSetEntryIds = [
         6200,
       ]
-      dbRead.unit.batchFindSetEntryIds = mockResolve(oldSetEntryIds)
+      dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       AppError.badRequest = jest.fn(() => testError)
 
       return target.batchUpdateSetEntryIds(requestBody)
         .catch((error) => {
           expect(error).toBe(testError)
           expect(AppError.badRequest).toHaveBeenCalledWith(
-            'All the old set entry IDs in request payload must exist',
+            'One or more of the existing set entry IDs in request payload were not found',
             undefined,
             '17M002',
           )
         })
     })
 
-    test('throws error when the lengths of oldSetEntryId and newSetEntryIds do not match', () => {
+    test('throws error when no incomingSetEntryId is present in one of the objects', () => {
       const testError = { message: 'error' }
       const requestBody = [
-        { oldSetEntryId: 6200, newSetEntryId: 7200 },
-        { oldSetEntryId: 6201 },
+        { existingSetEntryId: 6200, incomingSetEntryId: 7200 },
+        { existingSetEntryId: 6201 },
       ]
-      const oldSetEntryIds = [
+      const existingSetEntryIds = [
         6200,
         6201,
       ]
-      dbRead.unit.batchFindSetEntryIds = mockResolve(oldSetEntryIds)
+      dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       AppError.badRequest = mock(testError)
 
       return target.batchUpdateSetEntryIds(requestBody).catch((error) => {
         expect(error).toBe(testError)
-        expect(AppError.badRequest).toHaveBeenCalledWith(
-          'There must be a new set entry ID for every old set entry ID and vice versa in the request payload',
-          undefined,
-          '17M003',
-        )
+        expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
   })

@@ -7,6 +7,12 @@ import isEqual from 'lodash/isEqual'
 import keyBy from 'lodash/keyBy'
 import mapValues from 'lodash/mapValues'
 import omit from 'lodash/omit'
+import values from 'lodash/values'
+import zip from 'lodash/zip'
+import zipWith from 'lodash/zipWith'
+import flatten from 'lodash/flatten'
+import merge from 'lodash/merge'
+import concat from 'lodash/concat'
 import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import ExperimentsService from './ExperimentsService'
@@ -19,7 +25,7 @@ import SecurityService from './SecurityService'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import { notifyChanges } from '../decorators/notifyChanges'
-import { dbRead } from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 
 const { addErrorHandling, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -528,6 +534,130 @@ class FactorDependentCompositeService {
       independentLevelResponses,
     ] = await this.createFactorsAndLevels(experimentId, requestFactorsToCreate,
       requestLevelsToCreate, requestFactorLevelAssociations, factorTypes, context, tx)
+
+    /*
+     * In addition to storing factor levels in the factor_levels table, we now store them in a
+     * different format in the factor_level_details and factor_properties_for_level table as well;
+     * eventually the old table will be phased out in favor of this new design.
+     *
+     * Updates are done in a "total replacement" fashion, where all the old rows are deleted and
+     * replaced.
+     */
+
+    // Do not execute if there are no factor levels
+    if (requestLevels.length !== 0) {
+      // Delete all rows in factorPropertiesForLevel and factorLevelDetails (uses ON DELETE CASCADE)
+      await dbWrite.factorPropertiesForLevel.batchRemoveByExperimentId([experimentId], tx)
+
+      // fLG = factorLevelGroups
+      // fLGWithIds will have all the new and existing factor levels in it; the existing factor
+      // levels will have an "id" and "factorId" key, but the new ones will not
+      let fLGWithIds = requestLevels
+
+      // If there are new factor levels created, their ids will be in dependentLevelResponses; we
+      // need to add "id" and "factorId" values to them so they match the already-existing factor
+      // level objects
+      if (dependentLevelResponses.length > 0) {
+        // Await to get the factorIds for the factor levels and then stitch them into the objects
+        const factorLevels = await dbRead.factorLevel.batchFind(
+          dependentLevelResponses.map(obj => obj.id), tx,
+        )
+        const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.factorId), factorLevels)
+        const newfLGWithIds = factorLevelsGroup.map(arrs => ({
+          ...arrs[0],
+          factorId: arrs[1].factor_id,
+          id: arrs[1].id,
+        }))
+
+        // Combine the newly created factor levels with the existing ones
+        fLGWithIds = concat(fLGWithIds, newfLGWithIds)
+      }
+
+      // Group objects into seperate arrays by factorId
+      const fLGMatrix = values(groupBy(fLGWithIds, factorLevel => factorLevel.factorId))
+
+      // For each factor level, build a "schema" for the properties table from the first array of
+      // items
+      const propertiesForFactorLevels = []
+      fLGMatrix.forEach((factorLevel) => {
+        // Data from POST can be in two formats, a flat items array or multi-row items arrays; we
+        // just need the first array for the properties
+        const firstItems = factorLevel[0].items[0].items || factorLevel[0].items
+        firstItems.forEach((item, i) => {
+          propertiesForFactorLevels.push({
+            ...item,
+            factorId: factorLevel[0].factorId,
+            order: i,
+            // Question code logic:
+            // 1. questionCode is in property data for single questionCode
+            // 2. questionCode is in level detail data for multi-tag questions, multiQuestionTag is
+            // in the property data
+            questionCode: (!item.multiQuestionTag ? item.questionCode : null),
+          })
+        })
+      })
+
+      // Await insert to factorPropertiesForLevel
+      const propertyIds = await dbWrite.factorPropertiesForLevel.batchCreate(
+        propertiesForFactorLevels, context, tx,
+      )
+
+      // pFFL = propertiesForFactorLevels
+      // Add the propertyIds to the original propertiesForFactorLevels objects
+      const pFFLWithIds = zipWith(propertiesForFactorLevels, propertyIds, (a, b) => merge(a, b))
+
+      // Group objects into seperate arrays by factorId
+      const pFFLMatrix = values(groupBy(pFFLWithIds, property => property.factorId))
+
+      // Create a row in the details table for each "cell" inside a factor level
+      const factorLevelDetails = []
+      // For each group of factor levels
+      fLGMatrix.forEach((factorLevelGroup, i) => {
+        // For each factor level
+        factorLevelGroup.forEach((factorLevel) => {
+          // Set items assuming they are not multi-row format
+          let { items } = factorLevel
+
+          // If the items (cells) are multi-row, then flatten them; else, just process them
+          if (factorLevel.items[0].items) {
+            items = flatten(factorLevel.items.map((nestedItem, k) => nestedItem.items.map(
+              ((cell, l) => ({
+                ...cell,
+                // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
+                factorPropertiesForLevelId: pFFLMatrix[i][l].id,
+                // Set order by row, since there are multiple rows
+                order: k,
+              })),
+            )))
+
+            // Build a row for each factor level detail
+            items.forEach((cell) => {
+              factorLevelDetails.push({
+                ...cell,
+                factorLevelId: factorLevel.id,
+                questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
+              })
+            })
+          } else {
+            // Build a row for each factor level detail
+            items.forEach((cell, k) => {
+              factorLevelDetails.push({
+                ...cell,
+                factorLevelId: factorLevel.id,
+                // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
+                factorPropertiesForLevelId: pFFLMatrix[i][k].id,
+                // Set order to 0, since there is only one row
+                order: 0,
+                questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
+              })
+            })
+          }
+        })
+      })
+
+      // Await insert to factorLevelDetails
+      await dbWrite.factorLevelDetails.batchCreate(factorLevelDetails, context, tx)
+    }
 
     const refIdToIdMap = mapAllRefs(requestDependentLevelsToCreate, requestLevelsToCreate,
       requestLevelsToUpdate, dependentLevelResponses, independentLevelResponses)

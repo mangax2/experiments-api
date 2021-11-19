@@ -11,6 +11,8 @@ import ExperimentSummary from '../repos/experimentSummary'
 import Factor from '../repos/factor'
 import FactorLevel from '../repos/factorLevel'
 import FactorLevelAssociation from '../repos/factorLevelAssociation'
+import FactorLevelDetails from '../repos/factorLevelDetails'
+import FactorPropertiesForLevel from '../repos/factorPropertiesForLevel'
 import FactorType from '../repos/factorType'
 import LocationAssociation from '../repos/locationAssociation'
 import Owner from '../repos/owner'
@@ -43,6 +45,8 @@ const options = {
     obj.factor = Factor(obj, pgp)
     obj.factorLevel = FactorLevel(obj, pgp)
     obj.factorLevelAssociation = FactorLevelAssociation(obj, pgp)
+    obj.factorLevelDetails = FactorLevelDetails(obj, pgp)
+    obj.factorPropertiesForLevel = FactorPropertiesForLevel(obj, pgp)
     obj.factorType = FactorType(obj, pgp)
     obj.graphqlAudit = GraphQLAudit(obj, pgp)
     obj.owner = Owner(obj, pgp)

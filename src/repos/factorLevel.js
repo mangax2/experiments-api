@@ -15,7 +15,7 @@ class factorLevelRepo {
   repository = () => this.rep
 
   @setErrorCode('582000')
-  batchFind = (ids) => this.rep.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
+  batchFind = (ids, tx = this.rep) => tx.any(`SELECT ${columns} FROM factor_level WHERE id IN ($1:csv) ORDER BY id asc`, [ids]).then(data => {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
@@ -25,7 +25,7 @@ class factorLevelRepo {
   this.rep.any(`SELECT ${qualifiedColumns} FROM factor f inner join factor_level fl on f.id = fl.factor_id WHERE experiment_id=$1  ORDER BY  fl.id asc`, experimentId)
 
   @setErrorCode('585000')
-  all = () => this.rep.any('SELECT ${columns} FROM factor_level')
+  all = () => this.rep.any(`SELECT ${columns} FROM factor_level`)
 
   @setErrorCode('586000')
   batchCreate = (factorLevels, context, tx = this.rep) => {

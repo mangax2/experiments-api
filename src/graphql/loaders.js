@@ -156,7 +156,9 @@ function createLoaders() {
     experimentBySetId: experimentBySetIdLoader,
     experiments: createDataLoader(experimentsBatchLoaderCallback),
     experimentsByCriteria: experimentsByCriteriaLoader,
-    experimentsByName: createDataLoader(dbRead.experiments.batchFindExperimentsByName),
+    experimentsByName: createMultiDataLoader(dbRead.experiments.batchFindExperimentsByName),
+    experimentsByPartialName:
+      createMultiDataLoader(dbRead.experiments.batchFindExperimentsByPartialName),
     factor: factorByIdLoader,
     factorByExperimentIds: factorByExperimentIdLoader,
     factorLevel: factorLevelByIdLoader,

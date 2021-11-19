@@ -1,4 +1,5 @@
 import _ from 'lodash'
+
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 55XXXX
@@ -61,10 +62,12 @@ class experimentsRepo {
     [context.userId, id])
 
   @setErrorCode('559000')
-  batchFindExperimentsByName = (names) => this.rep.any('SELECT * FROM experiment WHERE name IN ($1:csv) AND is_template = FALSE', [names]).then(data => {
-    const groupedData = _.groupBy(data, 'name')
-    return _.map(names, name => groupedData[name] || [])
-  })
+  batchFindExperimentsByName = name =>
+    this.rep.any('SELECT * FROM experiment WHERE name = $1 AND is_template = FALSE', name)
+
+  @setErrorCode('559000')
+  batchFindExperimentsByPartialName = name =>
+    this.rep.any('SELECT * FROM experiment WHERE position(lower($1) IN lower(name)) > 0 AND is_template = FALSE', name)
 
   @setErrorCode('55B000')
   findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds) => this.rep.any(

@@ -12,6 +12,7 @@ import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import KafkaProducer from './kafka/KafkaProducer'
 import kafkaConfig from '../config/kafkaConfig'
+import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -308,6 +309,28 @@ class ExperimentalUnitService {
         throw AppError.badRequest(`Invalid deactivation reasons provided: ${JSON.stringify(invalidDeactivationKeys)}`, undefined, getFullErrorCode('17L002'))
       }
     })
+
+  // @setErrorCode('17M000')
+  // TODO: Fix setErrorCode so it does not throw unhandled exceptions
+  @Transactional('partialUpdateSetEntryIdsTx')
+  batchUpdateSetEntryIds = async (setEntryPairs, context, tx) => {
+    await validateSetEntryIdPairs(setEntryPairs)
+
+    const existingSetEntryIds = setEntryPairs.map(pair => pair.existingSetEntryId)
+    const incomingSetEntryIds = setEntryPairs.map(pair => pair.incomingSetEntryId)
+
+    const allSetEntryIds = [...existingSetEntryIds, ...incomingSetEntryIds]
+    if (allSetEntryIds.length !== _.uniq(allSetEntryIds).length) {
+      throw AppError.badRequest('All set entry IDs in request payload must be unique', undefined, getFullErrorCode('17M001'))
+    }
+
+    const foundSetEntryIds = await dbRead.unit.batchFindSetEntryIds(existingSetEntryIds)
+    if (existingSetEntryIds.length !== foundSetEntryIds.length) {
+      throw AppError.badRequest('One or more of the existing set entry IDs in request payload were not found', undefined, getFullErrorCode('17M002'))
+    }
+
+    return dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
+  }
 }
 
 module.exports = ExperimentalUnitService

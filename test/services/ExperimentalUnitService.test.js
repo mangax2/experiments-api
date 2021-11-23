@@ -809,7 +809,7 @@ describe('ExperimentalUnitService', () => {
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
 
-      await target.batchUpdateSetEntryIds(requestBody)
+      await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbRead.unit.batchFindSetEntryIds).toHaveBeenCalledWith(existingSetEntryIds)
     })
@@ -836,7 +836,7 @@ describe('ExperimentalUnitService', () => {
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
 
-      await target.batchUpdateSetEntryIds(requestBody)
+      await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbWrite.unit.batchUpdateSetEntryIds).toHaveBeenCalled()
     })
@@ -855,7 +855,7 @@ describe('ExperimentalUnitService', () => {
       dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
       AppError.badRequest = mock(testError)
 
-      return target.batchUpdateSetEntryIds(requestBody).catch((error) => {
+      return target.batchUpdateSetEntryIds(requestBody, testContext, testTx).catch((error) => {
         expect(error).toBe(testError)
         expect(AppError.badRequest).toHaveBeenCalledWith(
           'All set entry IDs in request payload must be unique',
@@ -877,7 +877,7 @@ describe('ExperimentalUnitService', () => {
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       AppError.badRequest = jest.fn(() => testError)
 
-      return target.batchUpdateSetEntryIds(requestBody)
+      return target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
         .catch((error) => {
           expect(error).toBe(testError)
           expect(AppError.badRequest).toHaveBeenCalledWith(
@@ -901,7 +901,7 @@ describe('ExperimentalUnitService', () => {
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
       AppError.badRequest = mock(testError)
 
-      return target.batchUpdateSetEntryIds(requestBody).catch((error) => {
+      return target.batchUpdateSetEntryIds(requestBody, testContext, testTx).catch((error) => {
         expect(error).toBe(testError)
         expect(AppError.badRequest).toHaveBeenCalled()
       })

@@ -310,8 +310,7 @@ class ExperimentalUnitService {
       }
     })
 
-  // @setErrorCode('17M000')
-  // TODO: Fix setErrorCode so it does not throw unhandled exceptions
+  @setErrorCode('17M000')
   @Transactional('partialUpdateSetEntryIdsTx')
   batchUpdateSetEntryIds = async (setEntryPairs, context, tx) => {
     await validateSetEntryIdPairs(setEntryPairs)

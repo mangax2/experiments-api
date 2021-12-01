@@ -549,113 +549,26 @@ class FactorDependentCompositeService {
       // Delete all rows in factorPropertiesForLevel and factorLevelDetails (uses ON DELETE CASCADE)
       await dbWrite.factorPropertiesForLevel.batchRemoveByExperimentId([experimentId], tx)
 
-      // fLG = factorLevelGroups
-      // fLGWithIds will have all the new and existing factor levels in it; the existing factor
-      // levels will have an "id" and "factorId" key, but the new ones will not
-      let fLGWithIds = requestLevels
-
-      // If there are new factor levels created, their ids will be in dependentLevelResponses; we
-      // need to add "id" and "factorId" values to them so they match the already-existing factor
-      // level objects
-      if (dependentLevelResponses.length > 0) {
-        // Await to get the factorIds for the factor levels and then stitch them into the objects
-        const factorLevels = await dbRead.factorLevel.batchFind(
-          dependentLevelResponses.map(obj => obj.id), tx,
-        )
-        const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.factorId), factorLevels)
-        const newfLGWithIds = factorLevelsGroup.map(arrs => ({
-          ...arrs[0],
-          factorId: arrs[1].factor_id,
-          id: arrs[1].id,
-        }))
-
-        // Combine the newly created factor levels with the existing ones
-        fLGWithIds = concat(fLGWithIds, newfLGWithIds)
+      // Await to get the factorIds for the factor levels and then stitch them into the objects
+      let factorLevels = []
+      const dependentIds = dependentLevelResponses.map(obj => obj.id)
+      if (dependentIds.length > 0) {
+        factorLevels = await dbWrite.factorLevel.batchFind(dependentIds, tx)
       }
 
-      // Group objects into seperate arrays by factorId
-      const fLGMatrix = values(groupBy(fLGWithIds, factorLevel => factorLevel.factorId))
+      // Build the factor level group matrix
+      const fLGMatrix = this.buildFLGMatrix(requestLevels, factorLevels)
 
-      // For each factor level, build a "schema" for the properties table from the first array of
-      // items
-      const propertiesForFactorLevels = []
-      fLGMatrix.forEach((factorLevel) => {
-        // Data from POST can be in two formats, a flat items array or multi-row items arrays; we
-        // just need the first array for the properties
-        const firstItems = factorLevel[0].items[0].items || factorLevel[0].items
-        firstItems.forEach((item, i) => {
-          propertiesForFactorLevels.push({
-            ...item,
-            factorId: factorLevel[0].factorId,
-            order: i,
-            // Question code logic:
-            // 1. questionCode is in property data for single questionCode
-            // 2. questionCode is in level detail data for multi-tag questions, multiQuestionTag is
-            // in the property data
-            questionCode: (!item.multiQuestionTag ? item.questionCode : null),
-          })
-        })
-      })
-
-      // Await insert to factorPropertiesForLevel
+      // Build properties for factor levels; await insert
+      const propsForFactorLevels = this.buildPropsForFactorLevels(fLGMatrix)
       const propertyIds = await dbWrite.factorPropertiesForLevel.batchCreate(
-        propertiesForFactorLevels, context, tx,
+        propsForFactorLevels, context, tx,
       )
 
-      // pFFL = propertiesForFactorLevels
-      // Add the propertyIds to the original propertiesForFactorLevels objects
-      const pFFLWithIds = zipWith(propertiesForFactorLevels, propertyIds, (a, b) => merge(a, b))
-
-      // Group objects into seperate arrays by factorId
-      const pFFLMatrix = values(groupBy(pFFLWithIds, property => property.factorId))
-
-      // Create a row in the details table for each "cell" inside a factor level
-      const factorLevelDetails = []
-      // For each group of factor levels
-      fLGMatrix.forEach((factorLevelGroup, i) => {
-        // For each factor level
-        factorLevelGroup.forEach((factorLevel) => {
-          // Set items assuming they are not multi-row format
-          let { items } = factorLevel
-
-          // If the items (cells) are multi-row, then flatten them; else, just process them
-          if (factorLevel.items[0].items) {
-            items = flatten(factorLevel.items.map((nestedItem, k) => nestedItem.items.map(
-              ((cell, l) => ({
-                ...cell,
-                // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
-                factorPropertiesForLevelId: pFFLMatrix[i][l].id,
-                // Set order by row, since there are multiple rows
-                order: k,
-              })),
-            )))
-
-            // Build a row for each factor level detail
-            items.forEach((cell) => {
-              factorLevelDetails.push({
-                ...cell,
-                factorLevelId: factorLevel.id,
-                questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
-              })
-            })
-          } else {
-            // Build a row for each factor level detail
-            items.forEach((cell, k) => {
-              factorLevelDetails.push({
-                ...cell,
-                factorLevelId: factorLevel.id,
-                // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
-                factorPropertiesForLevelId: pFFLMatrix[i][k].id,
-                // Set order to 0, since there is only one row
-                order: 0,
-                questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
-              })
-            })
-          }
-        })
-      })
-
-      // Await insert to factorLevelDetails
+      // Build factor level details; await insert
+      const factorLevelDetails = this.buildFactorLevelDetails(
+        fLGMatrix, propsForFactorLevels, propertyIds,
+      )
       await dbWrite.factorLevelDetails.batchCreate(factorLevelDetails, context, tx)
     }
 
@@ -702,6 +615,99 @@ class FactorDependentCompositeService {
     await this.persistIndependentAndDependentVariables(experimentId, experimentVariables,
       context, isTemplate, tx)
     return AppUtil.createPostResponse([{ id: experimentId }])
+  }
+
+  @setErrorCode('1Am000')
+  buildFLGMatrix = (requestLevels, factorLevels) => {
+    // fLG = factorLevelGroups
+    // fLGWithIds will have all the new and existing factor levels in it; the existing factor
+    // levels will have an "id" and "factorId" key, but the new ones will not
+    let fLGWithIds = requestLevels
+
+    // If there are new factor levels created, their ids will be in dependentLevelResponses; we
+    // need to add "id" and "factorId" values to them so they match the already-existing factor
+    // level objects
+    if (factorLevels.length > 0) {
+      const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.factorId), factorLevels)
+      const newfLGWithIds = factorLevelsGroup.map(arrs => ({
+        ...arrs[0],
+        factorId: arrs[1].factor_id,
+        id: arrs[1].id,
+      }))
+
+      // Combine the newly created factor levels with the existing ones
+      fLGWithIds = concat(requestLevels.filter(obj => obj.factorId), newfLGWithIds)
+    }
+
+    // Group objects into seperate arrays by factorId
+    return values(groupBy(fLGWithIds, factorLevel => factorLevel.factorId))
+  }
+
+  @setErrorCode('1An000')
+  // For each factor level, build the properties table "schema" for the first array of items
+  buildPropsForFactorLevels = fLGMatrix => flatten(fLGMatrix.map(factorLevel =>
+    // Data from POST can be in two formats, a flat items array or multi-row items arrays; we just
+    // need the first array for the properties
+    (factorLevel[0].items[0].items || factorLevel[0].items).map((item, i) => ({
+      ...item,
+      factorId: factorLevel[0].factorId,
+      order: i,
+      // Question code logic:
+      // 1. questionCode is in property data for single questionCode
+      // 2. questionCode is in level detail data for multi-tag questions, multiQuestionTag is
+      // in the property data
+      questionCode: (!item.multiQuestionTag ? item.questionCode : null),
+    })),
+  ))
+
+  @setErrorCode('1Ao000')
+  buildFactorLevelDetails = (fLGMatrix, propertiesForFactorLevels, propertyIds) => {
+    // pFFL = propertiesForFactorLevels
+    // Add the propertyIds to the original propertiesForFactorLevels objects
+    const pFFLWithIds = zipWith(propertiesForFactorLevels, propertyIds, (a, b) => merge(a, b))
+
+    // Group objects into seperate arrays by factorId
+    const pFFLMatrix = values(groupBy(pFFLWithIds, property => property.factorId))
+
+    // Create a row in the details table for each "cell" inside a factor level
+    const factorLevelDetails = []
+    // For each group of factor levels
+    fLGMatrix.forEach((factorLevelGroup, i) => {
+      // For each factor level
+      factorLevelGroup.forEach((factorLevel) => {
+        // Set items assuming they are not multi-row format
+        let { items } = factorLevel
+
+        // If the items (cells) are multi-row, then flatten them
+        if (factorLevel.items[0].items) {
+          items = flatten(factorLevel.items.map((nestedItem, k) => nestedItem.items.map(
+            ((cell, l) => ({
+              ...cell,
+              // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
+              factorPropertiesForLevelId: pFFLMatrix[i][l].id,
+              // Set order by row, since there are multiple rows
+              order: k,
+            })),
+          )))
+        }
+
+        // Build a row for each factor level detail
+        items.forEach((cell, k) => {
+          factorLevelDetails.push({
+            ...cell,
+            factorLevelId: factorLevel.id,
+            // If the data is single-row, then the factorPropertiesForLevelId is in
+            // pFFLMatrix[factorGroup][column]
+            factorPropertiesForLevelId: cell.factorPropertiesForLevelId ?? pFFLMatrix[i][k].id,
+            // If the data is single-row, the order is 0
+            order: cell.order ?? 0,
+            questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
+          })
+        })
+      })
+    })
+
+    return factorLevelDetails
   }
 }
 

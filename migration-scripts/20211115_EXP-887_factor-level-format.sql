@@ -2,7 +2,7 @@ CREATE TABLE "public"."factor_level_details" (
 	"id" serial,
     "factor_level_id" int4 NOT NULL,
 	"factor_properties_for_level_id" int4 NOT NULL,
-	"order" varchar NOT NULL,
+	"order" int4 NOT NULL,
 	"value_type" varchar NOT NULL,
 	"text" varchar,
 	"value" varchar,

@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import keyBy from 'lodash/keyBy'
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 5QXXXX
@@ -13,8 +13,8 @@ class factorLevelDetailsRepo {
 
   @setErrorCode('5Q2000')
   batchFind = (ids) => this.rep.any('SELECT * FROM factor_level_details WHERE id IN ($1:csv) ORDER BY id asc', [ids]).then(data => {
-    const keyedData = _.keyBy(data, 'id')
-    return _.map(ids, id => keyedData[id])
+    const keyedData = keyBy(data, 'id')
+    return ids.map(id => keyedData[id])
   })
 
   @setErrorCode('5Q5000')

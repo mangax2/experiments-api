@@ -167,8 +167,8 @@ const duplicateFactorPropertiesForLevelScript =
   "                #= hstore('id', mfpfli.new_factor_properties_for_level_id)  " +
   "                #= hstore('created_date', CURRENT_TIMESTAMP::text)  " +
   "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('created_user_id', 'TLAMB')  " +
-  "                #= hstore('modified_user_id', 'TLAMB')  " +
+  "                #= hstore('created_user_id', $2)  " +
+  "                #= hstore('modified_user_id', $2)  " +
   "                #= hstore('factor_id', mfi.new_id::text) AS c  " +
   "            FROM factor_properties_for_level fpfl  " +
   "                INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id  " +
@@ -202,8 +202,8 @@ const duplicateFactorLevelDetails =
   "                #= hstore('id', mfldi.new_factor_level_details_id)  " +
   "                #= hstore('created_date', CURRENT_TIMESTAMP::text)  " +
   "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('created_user_id', 'TLAMB')  " +
-  "                #= hstore('modified_user_id', 'TLAMB')  " +
+  "                #= hstore('created_user_id', $2)  " +
+  "                #= hstore('modified_user_id', $2)  " +
   "                #= hstore('factor_properties_for_level_id', mfpfli.new_factor_properties_for_level_id::text)  " +
   "                #= hstore('factor_level_id', mfli.new_factor_level_id::text) AS c  " +
   "            FROM factor_level_details fpfl  " +

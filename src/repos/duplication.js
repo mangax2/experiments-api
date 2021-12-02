@@ -7,9 +7,7 @@ const duplicateExperimentInfoScript =
   "DROP TABLE IF EXISTS mapped_factor_ids; " +
   "DROP TABLE IF EXISTS new_factor_levels; " +
   "DROP TABLE IF EXISTS mapped_factor_level_ids; " +
-  "DROP TABLE IF EXISTS new_factor_properties_for_levels; " +
   "DROP TABLE IF EXISTS mapped_factor_properties_for_level_ids; " +
-  "DROP TABLE IF EXISTS new_factor_level_details; " +
   "DROP TABLE IF EXISTS mapped_factor_level_details_ids; " +
   "DROP TABLE IF EXISTS new_treatments; " +
   "DROP TABLE IF EXISTS mapped_treatment_ids; " +
@@ -160,24 +158,19 @@ const duplicateFactorPropertiesForLevelScript =
   "INTO TEMP mapped_factor_properties_for_level_ids  " +
   "FROM temp_ordered_old_factor_properties_for_level_ids ofpfl  " +
   "         INNER JOIN temp_ordered_new_factor_properties_for_level_ids nfpfl ON ofpfl.row_number = nfpfl.row_number;  " +
-  "WITH temp_factor_properties_for_level AS (  " +
-  "    INSERT INTO factor_properties_for_level  " +
-  "        SELECT (c).* FROM  (  " +
-  "            SELECT fpfl  " +
-  "                #= hstore('id', mfpfli.new_factor_properties_for_level_id)  " +
-  "                #= hstore('created_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('created_user_id', $2)  " +
-  "                #= hstore('modified_user_id', $2)  " +
-  "                #= hstore('factor_id', mfi.new_id::text) AS c  " +
-  "            FROM factor_properties_for_level fpfl  " +
-  "                INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id  " +
-  "                INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.id = mfpfli.old_factor_properties_for_level_id ) sub  " +
-  "        RETURNING id, factor_id, factor_properties_for_level.order, object_type, label, question_code, multi_question_tag, catalog_type  " +
-  ")  " +
-  "SELECT *  " +
-  "INTO TEMP new_factor_properties_for_levels  " +
-  "FROM temp_factor_properties_for_level;  "
+  "INSERT INTO factor_properties_for_level   " +
+  "    SELECT (c).* FROM  (   " +
+  "        SELECT fpfl   " +
+  "            #= hstore('id', mfpfli.new_factor_properties_for_level_id)   " +
+  "            #= hstore('created_date', CURRENT_TIMESTAMP::text)   " +
+  "            #= hstore('modified_date', CURRENT_TIMESTAMP::text)   " +
+  "            #= hstore('created_user_id', $2)   " +
+  "            #= hstore('modified_user_id', $2)   " +
+  "            #= hstore('factor_id', mfi.new_id::text) AS c   " +
+  "        FROM factor_properties_for_level fpfl   " +
+  "            INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id   " +
+  "            INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.id = mfpfli.old_factor_properties_for_level_id ) sub   " +
+  "RETURNING id, factor_id, factor_properties_for_level.order, object_type, label, question_code, multi_question_tag, catalog_type; "
 
 const duplicateFactorLevelDetails =
   "WITH temp_ordered_old_factor_level_details_ids AS (  " +
@@ -195,26 +188,21 @@ const duplicateFactorLevelDetails =
   "INTO TEMP mapped_factor_level_details_ids  " +
   "FROM temp_ordered_old_factor_level_details_ids ofld  " +
   "    INNER JOIN temp_ordered_new_factor_level_details_ids nfld ON ofld.row_number = nfld.row_number;  " +
-  "WITH temp_factor_level_details AS (  " +
-  "    INSERT INTO factor_level_details  " +
-  "        SELECT (c).* FROM  (  " +
-  "            SELECT fpfl  " +
-  "                #= hstore('id', mfldi.new_factor_level_details_id)  " +
-  "                #= hstore('created_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)  " +
-  "                #= hstore('created_user_id', $2)  " +
-  "                #= hstore('modified_user_id', $2)  " +
-  "                #= hstore('factor_properties_for_level_id', mfpfli.new_factor_properties_for_level_id::text)  " +
-  "                #= hstore('factor_level_id', mfli.new_factor_level_id::text) AS c  " +
-  "            FROM factor_level_details fpfl  " +
-  "                INNER JOIN mapped_factor_level_ids mfli ON fpfl.factor_level_id = mfli.old_factor_level_id  " +
-  "                INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id  " +
-  "                INNER JOIN mapped_factor_level_details_ids mfldi ON fpfl.id = mfldi.old_factor_level_details_id ) sub  " +
-  "        RETURNING id, factor_level_id, factor_properties_for_level_id, factor_level_details.order, value_type, text, value, question_code, uom_code  " +
-  ")  " +
-  "SELECT *  " +
-  "INTO TEMP new_factor_level_details  " +
-  "FROM temp_factor_level_details;  "
+  "INSERT INTO factor_level_details   " +
+  "        SELECT (c).* FROM  (   " +
+  "            SELECT fpfl   " +
+  "                #= hstore('id', mfldi.new_factor_level_details_id)   " +
+  "                #= hstore('created_date', CURRENT_TIMESTAMP::text)   " +
+  "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)   " +
+  "                #= hstore('created_user_id', $2)   " +
+  "                #= hstore('modified_user_id', $2)   " +
+  "                #= hstore('factor_properties_for_level_id', mfpfli.new_factor_properties_for_level_id::text)   " +
+  "                #= hstore('factor_level_id', mfli.new_factor_level_id::text) AS c   " +
+  "        FROM factor_level_details fpfl   " +
+  "                INNER JOIN mapped_factor_level_ids mfli ON fpfl.factor_level_id = mfli.old_factor_level_id   " +
+  "                INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id   " +
+  "                INNER JOIN mapped_factor_level_details_ids mfldi ON fpfl.id = mfldi.old_factor_level_details_id ) sub   " +
+  "    RETURNING id, factor_level_id, factor_properties_for_level_id, factor_level_details.order, value_type, text, value, question_code, uom_code;  "
   
 const duplicateFactorLevelAssociationScript =
   "INSERT INTO factor_level_association " +

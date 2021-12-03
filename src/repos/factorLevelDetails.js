@@ -7,18 +7,6 @@ class factorLevelDetailsRepo {
     this.rep = rep
     this.pgp = pgp
   }
-
-  @setErrorCode('5Q0000')
-  repository = () => this.rep
-
-  @setErrorCode('5Q2000')
-  batchFind = (ids) => this.rep.any('SELECT * FROM factor_level_details WHERE id IN ($1:csv) ORDER BY id asc', [ids]).then(data => {
-    const keyedData = keyBy(data, 'id')
-    return ids.map(id => keyedData[id])
-  })
-
-  @setErrorCode('5Q5000')
-  all = () => this.rep.any('SELECT * FROM factor_level_details')
   
   @setErrorCode('5Q6000')
   batchCreate = (factorLevelDetails, context, tx = this.rep) => {
@@ -61,49 +49,6 @@ class factorLevelDetailsRepo {
     const query2 = "INSERT INTO factor_level_details SELECT * FROM temp_insert_factor_level_details RETURNING id"
     return tx.query(query1)
       .then(() => tx.any(query2))
-  }
-
-  @setErrorCode('5Q7000')
-  batchUpdate = (factorLevelDetails, context, tx = this.rep) => {
-    const columnSet = new this.pgp.helpers.ColumnSet(
-      [
-        '?id',
-        'factor_level_id',
-        'factor_properties_for_level_id',
-        'row_number',
-        'value_type',
-        'text',
-        'value',
-        'question_code',
-        'uom_code',
-        'modified_user_id',
-        'modified_date:raw'
-      ],
-      {table: 'factor_level_details'}
-    )
-    const data = factorLevelDetails.map(factorLevelDetail => ({
-      id: factorLevelDetail.id,
-      factor_level_id: factorLevelDetail.factorLevelId,
-      factor_properties_for_level_id: factorLevelDetail.factorPropertiesforLevelId,
-      row_number: factorLevelDetail.rowNumber,
-      value_type: factorLevelDetail.valueType,
-      text: factorLevelDetail.text,
-      value: factorLevelDetail.value,
-      question_code: factorLevelDetail.questionCode,
-      uom_code: factorLevelDetail.uomCode,
-      modified_user_id: context.userId,
-      modified_date: 'CURRENT_TIMESTAMP'
-    }))
-    const query = `${this.pgp.helpers.update(data, columnSet)} WHERE v.id = t.id RETURNING *`
-    return tx.any(query)
-  }
-
-  @setErrorCode('5Q8000')
-  batchRemove = (ids, tx = this.rep) => {
-    if (!ids || ids.length === 0) {
-      return Promise.resolve([])
-    }
-    return tx.any('DELETE FROM factor_level_details WHERE id IN ($1:csv) RETURNING id', [ids])
   }
 }
 

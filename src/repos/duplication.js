@@ -170,7 +170,7 @@ const duplicateFactorPropertiesForLevelScript =
   "        FROM factor_properties_for_level fpfl   " +
   "            INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id   " +
   "            INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.id = mfpfli.old_factor_properties_for_level_id ) sub   " +
-  "RETURNING id, factor_id, factor_properties_for_level.order, object_type, label, question_code, multi_question_tag, catalog_type; "
+  "RETURNING id, factor_id, column_number, object_type, label, question_code, multi_question_tag, catalog_type; "
 
 const duplicateFactorLevelDetails =
   "WITH temp_ordered_old_factor_level_details_ids AS (  " +
@@ -202,7 +202,7 @@ const duplicateFactorLevelDetails =
   "                INNER JOIN mapped_factor_level_ids mfli ON fpfl.factor_level_id = mfli.old_factor_level_id   " +
   "                INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id   " +
   "                INNER JOIN mapped_factor_level_details_ids mfldi ON fpfl.id = mfldi.old_factor_level_details_id ) sub   " +
-  "    RETURNING id, factor_level_id, factor_properties_for_level_id, factor_level_details.order, value_type, text, value, question_code, uom_code;  "
+  "    RETURNING id, factor_level_id, factor_properties_for_level_id, row_number, value_type, text, value, question_code, uom_code;  "
   
 const duplicateFactorLevelAssociationScript =
   "INSERT INTO factor_level_association " +

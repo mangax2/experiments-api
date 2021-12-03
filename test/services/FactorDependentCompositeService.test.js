@@ -4670,7 +4670,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Seed 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 0,
+          columnNumber: 1,
         },
         {
           label: 'Chemical',
@@ -4680,7 +4680,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Chemical 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 1,
+          columnNumber: 2,
         },
         {
           label: 'Insects',
@@ -4690,7 +4690,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Insects 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 2,
+          columnNumber: 3,
         },
         {
           label: 'Chemical',
@@ -4700,7 +4700,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Chemical 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 0,
+          columnNumber: 1,
         },
         {
           label: 'Application Rate',
@@ -4712,7 +4712,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'App Rate 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 1,
+          columnNumber: 2,
         },
         {
           label: 'Application Timing',
@@ -4723,7 +4723,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Application Timing 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 2,
+          columnNumber: 3,
         },
         {
           label: 'Application Method',
@@ -4734,7 +4734,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Application Method 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 3,
+          columnNumber: 4,
         },
       ]
 
@@ -4799,7 +4799,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Seed Density per Area A',
           isPlaceholder: true,
           factorId: 5668,
-          columnNumber: 0,
+          columnNumber: 1,
         },
       ]
 
@@ -5054,7 +5054,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Seed 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 0,
+          columnNumber: 1,
         },
         {
           label: 'Chemical',
@@ -5064,7 +5064,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Chemical 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 1,
+          columnNumber: 2,
         },
         {
           label: 'Insects',
@@ -5074,7 +5074,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Insects 1',
           isPlaceholder: true,
           factorId: 5510,
-          columnNumber: 2,
+          columnNumber: 3,
         },
         {
           label: 'Chemical',
@@ -5084,7 +5084,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Chemical 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 0,
+          columnNumber: 1,
         },
         {
           label: 'Application Rate',
@@ -5096,7 +5096,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'App Rate 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 1,
+          columnNumber: 2,
         },
         {
           label: 'Application Timing',
@@ -5107,7 +5107,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Application Timing 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 2,
+          columnNumber: 3,
         },
         {
           label: 'Application Method',
@@ -5118,7 +5118,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Application Method 1',
           isPlaceholder: true,
           factorId: 5511,
-          columnNumber: 3,
+          columnNumber: 4,
         },
       ]
 
@@ -5156,7 +5156,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493975,
           factorPropertiesForLevelId: 90,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5168,7 +5168,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493975,
           factorPropertiesForLevelId: 91,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5180,7 +5180,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493975,
           factorPropertiesForLevelId: 92,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5191,7 +5191,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Seed 2',
           isPlaceholder: true,
           factorPropertiesForLevelId: 90,
-          rowNumber: 0,
+          rowNumber: 1,
           factorLevelId: 2493976,
           questionCode: null,
         },
@@ -5203,7 +5203,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Chemical 2',
           isPlaceholder: true,
           factorPropertiesForLevelId: 91,
-          rowNumber: 0,
+          rowNumber: 1,
           factorLevelId: 2493976,
           questionCode: null,
         },
@@ -5215,42 +5215,6 @@ describe('FactorDependentCompositeService', () => {
           text: 'Insects 2',
           isPlaceholder: true,
           factorPropertiesForLevelId: 92,
-          rowNumber: 0,
-          factorLevelId: 2493976,
-          questionCode: null,
-        },
-        {
-          label: 'Seed',
-          objectType: 'Catalog',
-          valueType: 'placeholder',
-          catalogType: 'INTERNAL_SEED',
-          text: 'Seed 3',
-          isPlaceholder: true,
-          factorPropertiesForLevelId: 90,
-          rowNumber: 1,
-          factorLevelId: 2493976,
-          questionCode: null,
-        },
-        {
-          label: 'Chemical',
-          objectType: 'Catalog',
-          valueType: 'placeholder',
-          catalogType: 'CHEMICAL',
-          text: 'Chemical 3',
-          isPlaceholder: true,
-          factorPropertiesForLevelId: 91,
-          rowNumber: 1,
-          factorLevelId: 2493976,
-          questionCode: null,
-        },
-        {
-          label: 'Insects',
-          objectType: 'Catalog',
-          valueType: 'placeholder',
-          catalogType: 'INSECTS',
-          text: 'Insects 3',
-          isPlaceholder: true,
-          factorPropertiesForLevelId: 92,
           rowNumber: 1,
           factorLevelId: 2493976,
           questionCode: null,
@@ -5262,9 +5226,45 @@ describe('FactorDependentCompositeService', () => {
           catalogType: 'INTERNAL_SEED',
           text: 'Seed 3',
           isPlaceholder: true,
+          factorPropertiesForLevelId: 90,
+          rowNumber: 2,
+          factorLevelId: 2493976,
+          questionCode: null,
+        },
+        {
+          label: 'Chemical',
+          objectType: 'Catalog',
+          valueType: 'placeholder',
+          catalogType: 'CHEMICAL',
+          text: 'Chemical 3',
+          isPlaceholder: true,
+          factorPropertiesForLevelId: 91,
+          rowNumber: 2,
+          factorLevelId: 2493976,
+          questionCode: null,
+        },
+        {
+          label: 'Insects',
+          objectType: 'Catalog',
+          valueType: 'placeholder',
+          catalogType: 'INSECTS',
+          text: 'Insects 3',
+          isPlaceholder: true,
+          factorPropertiesForLevelId: 92,
+          rowNumber: 2,
+          factorLevelId: 2493976,
+          questionCode: null,
+        },
+        {
+          label: 'Seed',
+          objectType: 'Catalog',
+          valueType: 'placeholder',
+          catalogType: 'INTERNAL_SEED',
+          text: 'Seed 3',
+          isPlaceholder: true,
           factorLevelId: 2493977,
           factorPropertiesForLevelId: 90,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5276,7 +5276,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493977,
           factorPropertiesForLevelId: 91,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5288,7 +5288,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493977,
           factorPropertiesForLevelId: 92,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5300,7 +5300,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493978,
           factorPropertiesForLevelId: 93,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5314,7 +5314,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493978,
           factorPropertiesForLevelId: 94,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Application Timing',
@@ -5326,7 +5326,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493978,
           factorPropertiesForLevelId: 95,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Application Method',
@@ -5338,7 +5338,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493978,
           factorPropertiesForLevelId: 96,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Chemical',
@@ -5349,7 +5349,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493979,
           factorPropertiesForLevelId: 93,
-          rowNumber: 0,
+          rowNumber: 1,
           questionCode: null,
         },
         {
@@ -5363,7 +5363,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493979,
           factorPropertiesForLevelId: 94,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Application Timing',
@@ -5375,7 +5375,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493979,
           factorPropertiesForLevelId: 95,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Application Method',
@@ -5387,7 +5387,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2493979,
           factorPropertiesForLevelId: 96,
-          rowNumber: 0,
+          rowNumber: 1,
         },
       ]
 
@@ -5452,7 +5452,7 @@ describe('FactorDependentCompositeService', () => {
           text: 'Seed Density per Area A',
           isPlaceholder: true,
           factorId: 5668,
-          columnNumber: 0,
+          columnNumber: 1,
         },
       ]
 
@@ -5474,7 +5474,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2494448,
           factorPropertiesForLevelId: 305,
-          rowNumber: 0,
+          rowNumber: 1,
         },
         {
           label: 'Seed Density per Area',
@@ -5487,7 +5487,7 @@ describe('FactorDependentCompositeService', () => {
           isPlaceholder: true,
           factorLevelId: 2494449,
           factorPropertiesForLevelId: 305,
-          rowNumber: 0,
+          rowNumber: 1,
         },
       ]
 

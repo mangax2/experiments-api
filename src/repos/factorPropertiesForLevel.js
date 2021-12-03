@@ -26,7 +26,7 @@ class factorPropertiesForLevelRepo {
       [
         'id:raw',
         'factor_id',
-        'order',
+        'column_number',
         'object_type',
         'label',
         'question_code',
@@ -41,7 +41,7 @@ class factorPropertiesForLevelRepo {
     const values = factorPropertiesForLevels.map(factorPropertiesForLevel => ({
       id: 'nextval(pg_get_serial_sequence(\'factor_properties_for_level\', \'id\'))::integer',
       factor_id: factorPropertiesForLevel.factorId,
-      order: factorPropertiesForLevel.order,
+      column_number: factorPropertiesForLevel.columnNumber,
       object_type: factorPropertiesForLevel.objectType,
       label: factorPropertiesForLevel.label,
       question_code: factorPropertiesForLevel.questionCode,
@@ -67,7 +67,7 @@ class factorPropertiesForLevelRepo {
       [
         '?id',
         'factor_id',
-        'order',
+        'column_number',
         'object_type',
         'label',
         'question_code',
@@ -81,7 +81,7 @@ class factorPropertiesForLevelRepo {
     const data = factorPropertiesForLevels.map(factorPropertiesForLevel => ({
       id: factorLevel.id,
       factor_id: factorPropertiesForLevel.factorId,
-      order: factorPropertiesForLevel.order,
+      column_number: factorPropertiesForLevel.columnNumber,
       object_type: factorPropertiesForLevel.objectType,
       label: factorPropertiesForLevel.label,
       question_code: factorPropertiesForLevel.questionCode,

@@ -651,7 +651,7 @@ class FactorDependentCompositeService {
     (factorLevel[0].items[0].items || factorLevel[0].items).map((item, i) => ({
       ...item,
       factorId: factorLevel[0].factorId,
-      order: i,
+      columnNumber: i,
       // Question code logic:
       // 1. questionCode is in property data for single questionCode
       // 2. questionCode is in level detail data for multi-tag questions, multiQuestionTag is
@@ -685,8 +685,8 @@ class FactorDependentCompositeService {
               ...cell,
               // The factorPropertiesForLevelId is in pFFLMatrix[factorGroup][column]
               factorPropertiesForLevelId: pFFLMatrix[i][l].id,
-              // Set order by row, since there are multiple rows
-              order: k,
+              // Set rowNumber by row, since there are multiple rows for this level
+              rowNumber: k,
             })),
           )))
         }
@@ -699,8 +699,8 @@ class FactorDependentCompositeService {
             // If the data is single-row, then the factorPropertiesForLevelId is in
             // pFFLMatrix[factorGroup][column]
             factorPropertiesForLevelId: cell.factorPropertiesForLevelId ?? pFFLMatrix[i][k].id,
-            // If the data is single-row, the order is 0
-            order: cell.order ?? 0,
+            // If the data is single-row, the rowNumber is 0
+            rowNumber: cell.rowNumber ?? 0,
             questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
           })
         })

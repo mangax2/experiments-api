@@ -19,7 +19,7 @@ class factorLevelDetailsRepo {
 
   @setErrorCode('5Q5000')
   all = () => this.rep.any('SELECT * FROM factor_level_details')
-
+  
   @setErrorCode('5Q6000')
   batchCreate = (factorLevelDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
@@ -27,7 +27,7 @@ class factorLevelDetailsRepo {
         'id:raw',
         'factor_level_id',
         'factor_properties_for_level_id',
-        'order',
+        'row_number',
         'value_type',
         'text',
         'value',
@@ -43,7 +43,7 @@ class factorLevelDetailsRepo {
       id: 'nextval(pg_get_serial_sequence(\'factor_level_details\', \'id\'))::integer',
       factor_level_id: factorLevelDetail.factorLevelId,
       factor_properties_for_level_id: factorLevelDetail.factorPropertiesForLevelId,
-      order: factorLevelDetail.order,
+      row_number: factorLevelDetail.rowNumber,
       value_type: factorLevelDetail.valueType,
       text: factorLevelDetail.text,
       value: factorLevelDetail.value,
@@ -70,7 +70,7 @@ class factorLevelDetailsRepo {
         '?id',
         'factor_level_id',
         'factor_properties_for_level_id',
-        'order',
+        'row_number',
         'value_type',
         'text',
         'value',
@@ -85,7 +85,7 @@ class factorLevelDetailsRepo {
       id: factorLevelDetail.id,
       factor_level_id: factorLevelDetail.factorLevelId,
       factor_properties_for_level_id: factorLevelDetail.factorPropertiesforLevelId,
-      order: factorLevelDetail.order,
+      row_number: factorLevelDetail.rowNumber,
       value_type: factorLevelDetail.valueType,
       text: factorLevelDetail.text,
       value: factorLevelDetail.value,

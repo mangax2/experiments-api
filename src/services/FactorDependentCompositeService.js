@@ -536,39 +536,33 @@ class FactorDependentCompositeService {
       requestLevelsToCreate, requestFactorLevelAssociations, factorTypes, context, tx)
 
     /*
-     * In addition to storing factor levels in the factor_levels table, we now store them in a
-     * different format in the factor_level_details and factor_properties_for_level table as well;
-     * eventually the old table will be phased out in favor of this new design.
+     * In addition to storing factor levels in the factor_levels table, we store them in a
+     * different format in the factor_level_details and factor_properties_for_level table as well.
      *
-     * Updates are done in a "total replacement" fashion, where all the old rows are deleted and
-     * replaced.
+     * Updates to factor_level_details and factor_properties_for_level are done in a
+     * "total replacement" fashion, where all the old rows are deleted and replaced; deletes on the
+     * factor_properties_for_level table cascade to factor_level_details.
      */
 
-    // Do not execute if there are no factor levels
     if (requestLevels.length !== 0) {
-      // Delete all rows in factorPropertiesForLevel and factorLevelDetails (uses ON DELETE CASCADE)
       await dbWrite.factorPropertiesForLevel.batchRemoveByExperimentId([experimentId], tx)
 
-      // Await to get the factorIds for the factor levels and then stitch them into the objects
       let factorLevels = []
-      const dependentIds = dependentLevelResponses.map(obj => obj.id)
-      if (dependentIds.length > 0) {
-        factorLevels = await dbWrite.factorLevel.batchFind(dependentIds, tx)
+      const newFactorLevelIds = dependentLevelResponses.map(obj => obj.id)
+      if (newFactorLevelIds.length > 0) {
+        // Get the full factor_level rows by id so we have the factorId for each new factor level
+        factorLevels = await dbWrite.factorLevel.batchFind(newFactorLevelIds, tx)
       }
 
-      // Build the factor level group matrix
       const fLGMatrix = this.buildFLGMatrix(requestLevels, factorLevels)
-
-      // Build properties for factor levels; await insert
       const propsForFactorLevels = this.buildPropsForFactorLevels(fLGMatrix)
       const propertyIds = await dbWrite.factorPropertiesForLevel.batchCreate(
         propsForFactorLevels, context, tx,
       )
-
-      // Build factor level details; await insert
       const factorLevelDetails = this.buildFactorLevelDetails(
         fLGMatrix, propsForFactorLevels, propertyIds,
       )
+
       await dbWrite.factorLevelDetails.batchCreate(factorLevelDetails, context, tx)
     }
 
@@ -620,6 +614,7 @@ class FactorDependentCompositeService {
   @setErrorCode('1Am000')
   buildFLGMatrix = (requestLevels, factorLevels) => {
     // fLG = factorLevelGroups
+
     // fLGWithIds will have all the new and existing factor levels in it; the existing factor
     // levels will have an "id" and "factorId" key, but the new ones will not
     let fLGWithIds = requestLevels
@@ -663,6 +658,7 @@ class FactorDependentCompositeService {
   @setErrorCode('1Ao000')
   buildFactorLevelDetails = (fLGMatrix, propertiesForFactorLevels, propertyIds) => {
     // pFFL = propertiesForFactorLevels
+
     // Add the propertyIds to the original propertiesForFactorLevels objects
     const pFFLWithIds = zipWith(propertiesForFactorLevels, propertyIds, (a, b) => merge(a, b))
 
@@ -671,9 +667,7 @@ class FactorDependentCompositeService {
 
     // Create a row in the details table for each "cell" inside a factor level
     const factorLevelDetails = []
-    // For each group of factor levels
     fLGMatrix.forEach((factorLevelGroup, i) => {
-      // For each factor level
       factorLevelGroup.forEach((factorLevel) => {
         // Set items assuming they are not multi-row format
         let { items } = factorLevel
@@ -696,8 +690,6 @@ class FactorDependentCompositeService {
           factorLevelDetails.push({
             ...cell,
             factorLevelId: factorLevel.id,
-            // If the data is single-row, then the factorPropertiesForLevelId is in
-            // pFFLMatrix[factorGroup][column]
             factorPropertiesForLevelId: cell.factorPropertiesForLevelId ?? pFFLMatrix[i][k].id,
             // If the data is single-row, the rowNumber is 0
             rowNumber: cell.rowNumber ?? 0,

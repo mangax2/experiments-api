@@ -7,6 +7,12 @@ import isEqual from 'lodash/isEqual'
 import keyBy from 'lodash/keyBy'
 import mapValues from 'lodash/mapValues'
 import omit from 'lodash/omit'
+import values from 'lodash/values'
+import zip from 'lodash/zip'
+import zipWith from 'lodash/zipWith'
+import flatten from 'lodash/flatten'
+import merge from 'lodash/merge'
+import concat from 'lodash/concat'
 import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import ExperimentsService from './ExperimentsService'
@@ -19,7 +25,7 @@ import SecurityService from './SecurityService'
 import VariablesValidator from '../validations/VariablesValidator'
 import FactorLevelAssociationService from './FactorLevelAssociationService'
 import { notifyChanges } from '../decorators/notifyChanges'
-import { dbRead } from '../db/DbManager'
+import { dbRead, dbWrite } from '../db/DbManager'
 
 const { addErrorHandling, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -529,6 +535,27 @@ class FactorDependentCompositeService {
     ] = await this.createFactorsAndLevels(experimentId, requestFactorsToCreate,
       requestLevelsToCreate, requestFactorLevelAssociations, factorTypes, context, tx)
 
+    if (requestLevels.length !== 0) {
+      await dbWrite.factorPropertiesForLevel.batchRemoveByExperimentId([experimentId], tx)
+
+      let factorLevels = []
+      const newFactorLevelIds = dependentLevelResponses.map(obj => obj.id)
+      if (newFactorLevelIds.length > 0) {
+        factorLevels = await dbWrite.factorLevel.batchFind(newFactorLevelIds, tx)
+      }
+
+      const fLGMatrix = this.buildFLGMatrix(requestLevels, factorLevels)
+      const propsForFactorLevels = this.buildPropsForFactorLevels(fLGMatrix)
+      const propertyIds = await dbWrite.factorPropertiesForLevel.batchCreate(
+        propsForFactorLevels, context, tx,
+      )
+      const factorLevelDetails = this.buildFactorLevelDetails(
+        fLGMatrix, propsForFactorLevels, propertyIds,
+      )
+
+      await dbWrite.factorLevelDetails.batchCreate(factorLevelDetails, context, tx)
+    }
+
     const refIdToIdMap = mapAllRefs(requestDependentLevelsToCreate, requestLevelsToCreate,
       requestLevelsToUpdate, dependentLevelResponses, independentLevelResponses)
     await deleteFactorLevelAssociations(refIdToIdMap, dbFactorLevelAssociations,
@@ -572,6 +599,67 @@ class FactorDependentCompositeService {
     await this.persistIndependentAndDependentVariables(experimentId, experimentVariables,
       context, isTemplate, tx)
     return AppUtil.createPostResponse([{ id: experimentId }])
+  }
+
+  @setErrorCode('1Am000')
+  buildFLGMatrix = (requestLevels, factorLevels) => {
+    let fLGWithIds = requestLevels
+    if (factorLevels.length > 0) {
+      const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.factorId), factorLevels)
+      const newfLGWithIds = factorLevelsGroup.map(arrs => ({
+        ...arrs[0],
+        factorId: arrs[1].factor_id,
+        id: arrs[1].id,
+      }))
+      fLGWithIds = concat(requestLevels.filter(obj => obj.factorId), newfLGWithIds)
+    }
+
+    return values(groupBy(fLGWithIds, factorLevel => factorLevel.factorId))
+  }
+
+  @setErrorCode('1An000')
+  buildPropsForFactorLevels = fLGMatrix => flatten(fLGMatrix.map(factorLevel =>
+    (factorLevel[0].items[0].items || factorLevel[0].items).map((item, i) => ({
+      ...item,
+      factorId: factorLevel[0].factorId,
+      columnNumber: i + 1,
+      questionCode: (!item.multiQuestionTag ? item.questionCode : null),
+    })),
+  ))
+
+  @setErrorCode('1Ao000')
+  buildFactorLevelDetails = (fLGMatrix, propertiesForFactorLevels, propertyIds) => {
+    const pFFLWithIds = zipWith(propertiesForFactorLevels, propertyIds, (a, b) => merge(a, b))
+    const pFFLMatrix = values(groupBy(pFFLWithIds, property => property.factorId))
+
+    const factorLevelDetails = []
+    fLGMatrix.forEach((factorLevelGroup, i) => {
+      factorLevelGroup.forEach((factorLevel) => {
+        let { items } = factorLevel
+
+        if (factorLevel.items[0].items) {
+          items = flatten(factorLevel.items.map((nestedItem, k) => nestedItem.items.map(
+            ((cell, l) => ({
+              ...cell,
+              factorPropertiesForLevelId: pFFLMatrix[i][l].id,
+              rowNumber: k + 1,
+            })),
+          )))
+        }
+
+        items.forEach((cell, k) => {
+          factorLevelDetails.push({
+            ...cell,
+            factorLevelId: factorLevel.id,
+            factorPropertiesForLevelId: cell.factorPropertiesForLevelId ?? pFFLMatrix[i][k].id,
+            rowNumber: cell.rowNumber ?? 1,
+            questionCode: (cell.multiQuestionTag ? cell.questionCode : null),
+          })
+        })
+      })
+    })
+
+    return factorLevelDetails
   }
 }
 

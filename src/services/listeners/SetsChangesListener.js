@@ -73,7 +73,7 @@ class SetsChangesListener {
   }))
 
   @Transactional('ManageSetsChange')
-  clearSet = (setId, tx) => dbWrite.unit.batchClearEntryIds(setId, tx)
+  clearSet = (setId, tx) => dbWrite.unit.batchClearEntryIdsBySetId(setId, tx)
     .then(() => dbWrite.locationAssociation.removeBySetId(setId, tx))
 }
 

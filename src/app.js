@@ -187,6 +187,10 @@ configurator.init().then(() => {
         }
       }
 
+      if (kafkaConfig.enableKafka === 'false') {
+        console.info('Experiments Kafka has been disabled for this session.')
+      }
+
       const repPackingMessageConsume = () => {
         if (kafkaConfig.enableKafka === 'true') {
           try {
@@ -194,8 +198,6 @@ configurator.init().then(() => {
           } catch (error) {
             console.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
           }
-        } else {
-          console.info('Experiments Kafka has been disabled for this session.')
         }
       }
       const setsChangesMessageConsume = () => {
@@ -205,12 +207,20 @@ configurator.init().then(() => {
           } catch (error) {
             console.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
           }
-        } else {
-          console.info('Sets Changes Kafka has been disabled for this session.')
+        }
+      }
+      const setEntriesChangesMessageConsume = () => {
+        if (kafkaConfig.enableKafka === 'true') {
+          try {
+            require('./services/listeners/SetEntriesChangesListener').setEntriesChangesListener.listen()
+          } catch (error) {
+            console.error('Exception during SetEntriesChanges message consume : SetEntriesChangesListener.', error.stack)
+          }
         }
       }
       repPackingMessageConsume()
       setsChangesMessageConsume()
+      setEntriesChangesMessageConsume()
 
 
       server.timeout = 300000

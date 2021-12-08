@@ -6,6 +6,7 @@ const localKafkaConfig = {
     repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json',
     product360OutgoingTopic: 'rsr.field-experiments.product360-test.outgoing.avro',
     setsChangesTopic: 'rsr.field-sets.dev.product360.outgoing.avro',
+    setEntriesChangesTopic: 'rsr.field-sets.dev.set-entry-association.outgoing.json',
     unitDeactivation: 'rsr.field-experiments.experimental-unit-deactivations-test.outgoing.avro',
   },
   schema: {

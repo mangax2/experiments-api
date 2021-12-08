@@ -178,7 +178,8 @@ createDbInstance()
 
     try {
       while (migratedExperimentsCount > 0) {
-        migratedExperimentsCount = migrationFunction(db)
+        // eslint-disable-next-line no-await-in-loop
+        migratedExperimentsCount = await migrationFunction(db)
         totalExperimentsMigrated += migratedExperimentsCount
       }
       console.info('Migration completed successfully.')

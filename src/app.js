@@ -188,29 +188,34 @@ configurator.init().then(() => {
       }
 
       const repPackingMessageConsume = () => {
-        if (kafkaConfig.enableKafka === 'true') {
-          try {
-            require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
-          } catch (error) {
-            console.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
-          }
-        } else {
-          console.info('Experiments Kafka has been disabled for this session.')
+        try {
+          require('./services/listeners/ManageRepsAndUnitsListener').manageRepsAndUnitsListener.listen()
+        } catch (error) {
+          console.error('Exception during Repacking message consume : ManageRepsAndUnitsListener.', error.stack)
         }
       }
       const setsChangesMessageConsume = () => {
-        if (kafkaConfig.enableKafka === 'true') {
-          try {
-            require('./services/listeners/SetsChangesListener').setsChangesListener.listen()
-          } catch (error) {
-            console.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
-          }
-        } else {
-          console.info('Sets Changes Kafka has been disabled for this session.')
+        try {
+          require('./services/listeners/SetsChangesListener').setsChangesListener.listen()
+        } catch (error) {
+          console.error('Exception during SetsChanges message consume : SetsChangesListener.', error.stack)
         }
       }
-      repPackingMessageConsume()
-      setsChangesMessageConsume()
+      const setEntriesChangesMessageConsume = () => {
+        try {
+          require('./services/listeners/SetEntriesChangesListener').setEntriesChangesListener.listen()
+        } catch (error) {
+          console.error('Exception during SetEntriesChanges message consume : SetEntriesChangesListener.', error.stack)
+        }
+      }
+
+      if (kafkaConfig.enableKafka === 'true') {
+        repPackingMessageConsume()
+        setsChangesMessageConsume()
+        setEntriesChangesMessageConsume()
+      } else {
+        console.info('Experiments Kafka has been disabled for this session.')
+      }
 
 
       server.timeout = 300000

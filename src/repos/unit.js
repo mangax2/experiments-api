@@ -129,7 +129,7 @@ class unitRepo {
   }
 
   @setErrorCode('5JH000')
-  batchClearEntryIds = (setId, tx = this.rep) => {
+  batchClearEntryIdsBySetId = (setId, tx = this.rep) => {
     if (!setId) {
       return Promise.resolve()
     }
@@ -189,6 +189,15 @@ class unitRepo {
   batchFindSetEntryIds = async (setEntryIds) => {
     const units = await this.rep.any('SELECT u.set_entry_id, u.id FROM unit u WHERE set_entry_id IN ($1:csv)', [setEntryIds])
     return units.map(unit => unit.set_entry_id)
+  }
+
+  @setErrorCode('5JM001')
+  batchClearEntryIds = (entryIds) => {
+    if (!entryIds || entryIds.length === 0) {
+      return
+    }
+
+    return this.rep.none('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv)', [entryIds])
   }
 }
 

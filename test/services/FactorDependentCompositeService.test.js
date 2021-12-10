@@ -3997,6 +3997,7 @@ describe('FactorDependentCompositeService', () => {
         },
         {
           factorId: 5510,
+          id: 2493978,
           isValidLevelNumber: true,
           isActive: false,
           items: [
@@ -4251,6 +4252,7 @@ describe('FactorDependentCompositeService', () => {
           },
           {
             factorId: 5510,
+            id: 2493978,
             isValidLevelNumber: true,
             isActive: false,
             items: [

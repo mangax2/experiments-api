@@ -539,7 +539,20 @@ class FactorDependentCompositeService {
       await dbWrite.factorPropertiesForLevel.batchRemoveByExperimentId([experimentId], tx)
 
       let factorLevels = []
-      const newFactorLevelIds = dependentLevelResponses.map(obj => obj.id)
+      let newFactorLevelIds = []
+
+      if (independentLevelResponses.length > 0) {
+        newFactorLevelIds = newFactorLevelIds.concat(
+          independentLevelResponses.map(obj => obj.id),
+        )
+      }
+
+      if (dependentLevelResponses.length > 0) {
+        newFactorLevelIds = newFactorLevelIds.concat(
+          dependentLevelResponses.map(obj => obj.id),
+        )
+      }
+
       if (newFactorLevelIds.length > 0) {
         factorLevels = await dbWrite.factorLevel.batchFind(newFactorLevelIds, tx)
       }
@@ -605,13 +618,13 @@ class FactorDependentCompositeService {
   buildFLGMatrix = (requestLevels, factorLevels) => {
     let fLGWithIds = requestLevels
     if (factorLevels.length > 0) {
-      const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.factorId), factorLevels)
+      const factorLevelsGroup = zip(requestLevels.filter(obj => !obj.id), factorLevels)
       const newfLGWithIds = factorLevelsGroup.map(arrs => ({
         ...arrs[0],
         factorId: arrs[1].factor_id,
         id: arrs[1].id,
       }))
-      fLGWithIds = concat(requestLevels.filter(obj => obj.factorId), newfLGWithIds)
+      fLGWithIds = concat(requestLevels.filter(obj => obj.id), newfLGWithIds)
     }
 
     return values(groupBy(fLGWithIds, factorLevel => factorLevel.factorId))

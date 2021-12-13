@@ -1084,7 +1084,7 @@ describe('GroupExperimentalUnitService', () => {
       dbRead.unit.batchFindAllBySetId = mockResolve([{ treatment_id: 2 }])
       target.compareWithExistingUnits = mockResolve([{}])
       return target.compareWithExistingUnitsBySetId(3, [{ treatmentId: 3 }]).then(() => {
-        expect(dbRead.unit.batchFindAllBySetId).toHaveBeenCalledWith(3)
+        expect(dbRead.unit.batchFindAllBySetId).toHaveBeenCalledWith(3, true)
         expect(target.compareWithExistingUnits).toHaveBeenCalledWith([{ treatment_id: 2 }], [{ treatmentId: 3 }])
       })
     })

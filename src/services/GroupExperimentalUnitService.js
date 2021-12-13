@@ -458,7 +458,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1Fa000')
   compareWithExistingUnitsBySetId = (setId, newUnits) =>
-    dbRead.unit.batchFindAllBySetId(setId)
+    dbRead.unit.batchFindAllBySetId(setId, true)
       .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
 
   @setErrorCode('1Fb000')

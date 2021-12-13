@@ -25,17 +25,18 @@ class unitRepo {
     'INNER JOIN treatment t ON tb.treatment_id = t.id WHERE t.id IN ($1:csv)', [treatmentIds])
 
   @setErrorCode('5J7000')
-  batchFindAllBySetId = (setId) => this.rep.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
+  batchFindAllBySetId = (setId, allowUnassociatedUnits) => this.rep.any('SELECT t.treatment_number, u.id, u.rep, u.set_entry_id, u.location, u.treatment_block_id, tb.treatment_id ' +
     'FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id\n' +
     'INNER JOIN treatment t ON tb.treatment_id = t.id\n' +
-    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1', setId)
+    'INNER JOIN location_association la ON la.block_id = tb.block_id AND la.location = u.location AND la.set_id = $1\n' +
+    (allowUnassociatedUnits ? '' : 'WHERE u.set_entry_id IS NOT NULL'), setId)
 
   @setErrorCode('5JE000')
   batchFindAllBySetIds = (setIds) => this.rep.any('SELECT la.set_id, u.*, tb.treatment_id, tb.block_id, b.name AS block FROM location_association la\n' +
     'INNER JOIN treatment_block tb ON tb.block_id = la.block_id\n' +
     'INNER JOIN unit u ON u.treatment_block_id = tb.id and u.location = la.location\n' +
     'INNER JOIN block b ON tb.block_id = b.id\n' +
-    'WHERE la.set_id IN ($1:csv)', [setIds]).then(data => {
+    'WHERE la.set_id IN ($1:csv) AND u.set_entry_id IS NOT NULL', [setIds]).then(data => {
     const unitsGroupedBySet = _.groupBy(data, 'set_id')
     return _.compact(_.flatMap(setIds, setId =>
       _.map(unitsGroupedBySet[setId] || [], unit => _.omit(unit, ['set_id']))))

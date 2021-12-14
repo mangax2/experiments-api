@@ -13,6 +13,7 @@ import zipWith from 'lodash/zipWith'
 import flatten from 'lodash/flatten'
 import merge from 'lodash/merge'
 import concat from 'lodash/concat'
+import partition from 'lodash/partition'
 import Transactional from '@monsantoit/pg-transactional'
 import AppUtil from './utility/AppUtil'
 import ExperimentsService from './ExperimentsService'
@@ -516,17 +517,20 @@ class FactorDependentCompositeService {
       factorTypes,
     ] = await this.getCurrentDbEntities(experimentId)
 
+    const [existingFactors, newFactors] = partition(requestFactors, factor => factor.id)
+    const orderedFactors = [...existingFactors, ...newFactors]
+
     const {
       requestDependentLevelsToCreate,
       requestFactorsToCreate,
       requestLevels,
       requestLevelsToCreate,
       requestLevelsToUpdate,
-    } = this.categorizeRequestFactorsAndLevels(requestFactors)
+    } = this.categorizeRequestFactorsAndLevels(orderedFactors)
 
-    await this.deleteFactorsAndLevels(dbFactors, dbLevels, requestFactors, requestLevels,
+    await this.deleteFactorsAndLevels(dbFactors, dbLevels, orderedFactors, requestLevels,
       tx, context)
-    await this.updateFactorsAndLevels(experimentId, requestFactors, requestFactorLevelAssociations,
+    await this.updateFactorsAndLevels(experimentId, orderedFactors, requestFactorLevelAssociations,
       requestLevelsToUpdate, factorTypes, dbLevels, context, tx)
 
     const [

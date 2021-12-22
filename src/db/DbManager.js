@@ -30,6 +30,7 @@ import AnalysisModel from '../repos/analysisModel'
 import Block from '../repos/block'
 import TreatmentBlock from '../repos/treatmentBlock'
 import configurator from '../config/configurator'
+import TreatmentVariableLevelDetails from '../repos/treatmentFactorLevelDetails'
 
 // pg-promise initialization options:
 const options = {
@@ -63,6 +64,7 @@ const options = {
     obj.analysisModel = AnalysisModel(obj, pgp)
     obj.block = Block(obj, pgp)
     obj.treatmentBlock = TreatmentBlock(obj, pgp)
+    obj.treatmentVariableLevelDetails = TreatmentVariableLevelDetails(obj, pgp)
   },
 }
 

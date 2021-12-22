@@ -183,6 +183,8 @@ export default {
       context.loaders.nestedFactorLevel.load(entity.id),
     associatedLevels: (entity, args, context) =>
       context.loaders.associatedFactorLevel.load(entity.id),
+    treatmentVariableLevelDetails: (entity, _, context) =>
+      context.loaders.treatmentVariableLevelDetails.load(entity.id),
   },
   Group: {
     childGroups: entity => entity.childGroups,

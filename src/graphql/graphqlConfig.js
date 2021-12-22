@@ -46,6 +46,24 @@ function LimitNumQueries(maxQueries) {
   }
 }
 
+const mutuallyExclusiveFields = (parentNode, ...exclusiveFields) => context => ({
+  Field(node) {
+    if (node.name.value === parentNode) {
+      let matches = 0
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const { name: { value } } of node.selectionSet.selections) {
+        matches += exclusiveFields.includes(value) ? 1 : 0
+
+        if (matches > 1) {
+          context.reportError(new GraphQLError(
+            `Validation: Under ${parentNode}, ${exclusiveFields[0]} and ${exclusiveFields[1]} are mutually exclusive.`))
+        }
+      }
+    }
+  },
+})
+
 function formatDate(args, date) {
   return args.format === 'YYYYMM' ? new Date(date).toISOString().slice(0, 7) : date
 }
@@ -67,7 +85,11 @@ function graphqlMiddlewareFunction(schema) {
       },
       // NOTE: Depth must be greater than schema depth or
       // GraphiQL will fail to retrieve documentation.
-      validationRules: [LimitQueryDepth(15), LimitNumQueries(5)],
+      validationRules: [
+        LimitQueryDepth(15),
+        LimitNumQueries(5),
+        mutuallyExclusiveFields('treatmentVariableLevels', 'valueJSON', 'treatmentVariableLevelDetails'),
+      ],
       graphiql: config.env === 'local',
     })
     return handler(request, response)

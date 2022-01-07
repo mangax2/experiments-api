@@ -232,6 +232,7 @@ type Query {
   getDesignSpecificationDetailsByExperimentId(experimentId: Int!): [DesignSpecificationDetail]
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
+  getUnitsBySetEntryIds(setEntryIds: [Int!]!): [ExperimentalUnit]
   getSetBySetId(setId: Int!): ExperimentalSet
   getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]

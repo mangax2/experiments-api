@@ -153,6 +153,7 @@ export default {
     setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
     deactivationReason: entity => (has(entity, 'deactivation_reason') ? entity.deactivation_reason : entity.deactivationReason),
     blockId: entity => (has(entity, 'block_id') ? entity.block_id : entity.blockId),
+    block: entity => (has(entity, 'name') ? entity.name : entity.name),
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),

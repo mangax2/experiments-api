@@ -63,6 +63,8 @@ export default {
       context.loaders.groupsByExperimentIds.load(args.experimentId),
     getUnitsByExperimentId: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(args.experimentId),
+    getUnitsBySetEntryIds: (entity, args, context) =>
+      context.loaders.unitsBySetEntryIds.load(args.setEntryIds),
     getSetBySetId: (entity, args, context) =>
       context.loaders.setBySetIds.load(args.setId),
     getSetsBySetId: (entity, args, context) =>
@@ -151,6 +153,7 @@ export default {
     setEntryId: entity => (has(entity, 'set_entry_id') ? entity.set_entry_id : entity.setEntryId),
     deactivationReason: entity => (has(entity, 'deactivation_reason') ? entity.deactivation_reason : entity.deactivationReason),
     blockId: entity => (has(entity, 'block_id') ? entity.block_id : entity.blockId),
+    block: property('name'),
   },
   ExperimentInfo: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),

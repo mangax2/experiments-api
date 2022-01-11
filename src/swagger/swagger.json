@@ -3583,6 +3583,10 @@
         "areAllBlocksAtAllLocations": {
           "type": "boolean",
           "description": "indicates if all experiment blocks are intended to be tested at all locations where the experiment will be run"
+        },
+        "borderSize": {
+          "type": "integer",
+          "description": "the number of experimental units that separate one set from another"
         }
       }
     },

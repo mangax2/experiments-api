@@ -73,6 +73,7 @@ type DesignSpecificationDetail {
   repRangeMax: String
   reps: String
   areAllBlocksAtAllLocations: Boolean
+  borderSize: Int
 }
 
 type Experiment {

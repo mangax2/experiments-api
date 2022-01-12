@@ -49,10 +49,7 @@ class factorRepo {
       select * from non_null_set
     ) select id, json_agg(nested_factor_id) as nested_variables from dedupe_set group by id`
 
-    console.log('ids', JSON.stringify(ids, null, 2))
-      
     const data = await this.rep.any(query, [ids])
-    console.log('data', JSON.stringify(data, null, 2))
     const keyed = data.reduce((acc, mem) => ({
         ...acc,
         [mem.id]: every(mem.nested_variables, isNull) ? null : mem.nested_variables

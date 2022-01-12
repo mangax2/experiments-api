@@ -172,6 +172,10 @@ export default {
     treatmentVariableLevels: (entity, args, context) =>
       context.loaders.factorLevelByFactorIds.load(entity.id),
     isBlockingFactorOnly: property('is_blocking_factor_only'),
+    associatedVariable: (entity, _, context) =>
+      context.loaders.associatedVariable.load(entity.id),
+    nestedVariables: (entity, _, context) =>
+      context.loaders.nestedVariables.load(entity.id),
   },
   TreatmentVariableLevel: {
     valueJSON: property('value'),

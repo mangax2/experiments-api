@@ -158,6 +158,8 @@ type TreatmentVariable {
   auditInfo: AuditInfo
   treatmentVariableLevels: [TreatmentVariableLevel]
   isBlockingFactorOnly: Boolean
+  associatedVariable: Int,
+  nestedVariables: [Int],
 }
 
 type TreatmentVariableLevel {

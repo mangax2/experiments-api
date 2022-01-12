@@ -106,6 +106,9 @@ function createLoaders() {
   const treatmentVariableLevelDetailsLoader =
     createDataLoader(dbRead.treatmentVariableLevelDetails.batchFind)
 
+  const associatedVariableLoader = createDataLoader(dbRead.factor.batchFindAssociatedVariables)
+  const nestedVariableLoader = createDataLoader(dbRead.factor.batchFindNestedVariables)
+
   // Loaders that load by parent ID.  These prime the caches of loaders that load by entity ID.
   function createLoaderToPrimeCacheOfChildren(dbCallback, loaderPrimeTarget) {
     return createDataLoader((ids, dbTransaction) => dbCallback(ids, dbTransaction)
@@ -151,6 +154,7 @@ function createLoaders() {
 
   return {
     associatedFactorLevel: associatedFactorLevelsByNestedFactorLevelIds,
+    associatedVariable: associatedVariableLoader,
     blocksByBlockIds: blocksByBlockIdsLoader,
     combinationElement: combinationElementByIdLoader,
     combinationElementByTreatmentIds: combinationElementsByTreatmentIdLoader,
@@ -173,6 +177,7 @@ function createLoaders() {
     groupsByExperimentIds: groupByExperimentIdLoader,
     groupsJsonsBySetIds: groupJsonsBySetIdLoader,
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
+    nestedVariables: nestedVariableLoader,
     owner: ownerByIdLoader,
     ownersByExperimentIds: ownerByExperimentIdLoader,
     refDataSource: refDataSourceByIdLoader,

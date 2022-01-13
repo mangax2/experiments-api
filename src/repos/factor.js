@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { every, isNull } from 'lodash'
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 57XXXX
@@ -16,6 +16,47 @@ class factorRepo {
     const keyedData = _.keyBy(data, 'id')
     return _.map(ids, id => keyedData[id])
   })
+
+  @setErrorCode('57C000')
+  batchFindAssociatedVariables = ids => {
+    const query = `select f.id, fl_parent.factor_id as associated_factor_id
+    from factor f 
+    join factor_level fl_this on f.id = fl_this.factor_id
+    left join factor_level_association fla_1 on fla_1.nested_level_id = fl_this.id
+    left join factor_level fl_parent on fl_parent.id = fla_1.associated_level_id
+    where f.id IN ($1:csv)
+    group by fl_parent.factor_id, f.id`
+
+    return this.rep.any(query, [ids]).map(({ associated_factor_id }) => associated_factor_id)
+  }
+
+  @setErrorCode('57D000')
+  batchFindNestedVariables = async ids => {
+    const query = `with grouped_children as (
+      select f.id, fl_child.factor_id as nested_factor_id
+      from factor f 
+      join factor_level fl_this on f.id = fl_this.factor_id
+      left join factor_level_association fla on fla.associated_level_id = fl_this.id
+      left join factor_level fl_child on fl_child.id = fla.nested_level_id
+      where f.id IN ($1:csv)
+       group by fl_child.factor_id, f.id
+      order by f.id, fl_child.factor_id
+    ), non_null_set as (
+      select * from grouped_children where nested_factor_id is not null
+    ), dedupe_set as (
+      select * from grouped_children g where g.id not in ( select id from non_null_set)
+      union all
+      select * from non_null_set
+    ) select id, json_agg(nested_factor_id) as nested_variables from dedupe_set group by id`
+
+    const data = await this.rep.any(query, [ids])
+    const keyed = data.reduce((acc, mem) => ({
+        ...acc,
+        [mem.id]: every(mem.nested_variables, isNull) ? null : mem.nested_variables
+      }), {})
+
+    return ids.map(id => keyed[id])
+  }
 
   @setErrorCode('573000')
   findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)

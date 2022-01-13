@@ -12,7 +12,7 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 12
+      nodejs: 14
   pre_build:
     commands:
       - npm config set //npm.platforms.engineering/:_authToken $npm_access_token
@@ -22,11 +22,11 @@ phases:
       - echo Running tests
       - npm run testCoverage
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $DOCKER_URL
   build:
     commands:
       - echo Build started on `date`
-      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
       - echo Packaging Node application
       - npm run build-server
       - echo Removing dev packages

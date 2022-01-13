@@ -102,7 +102,8 @@ describe('CapacityRequestService', () => {
       const result = CapacityRequestService.batchAssociateExperimentsToCapacityRequests([], {})
 
       expect(result.length).toBe(1)
-      expect(result[0]).toEqual(Promise.resolve())
+      expect(result[0].then).toBeInstanceOf(Function)
+      expect(result[0].catch).toBeInstanceOf(Function)
       expect(CapacityRequestService.associateExperimentToCapacityRequest).not.toBeCalled()
     })
 

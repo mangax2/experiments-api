@@ -12,15 +12,15 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 12
+      nodejs: 14
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $DOCKER_URL
   build:
     commands:
       - echo Rollback started on `date`
-      - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
       - echo Pulling NP Docker image...
       - docker pull $DOCKER_URL:$VERSION
       - echo Tagging the Docker image...

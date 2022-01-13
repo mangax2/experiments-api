@@ -1,6 +1,6 @@
 # start with alpine (a 5MB runtime), and add what we need
 # note: if you need native deps, you'll have to do more work here.
-FROM 286985534438.dkr.ecr.us-east-1.amazonaws.com/node:12.14.0-alpine
+FROM 286985534438.dkr.ecr.us-east-1.amazonaws.com/node:16.13.1-alpine
 
 WORKDIR /usr/src/app
 

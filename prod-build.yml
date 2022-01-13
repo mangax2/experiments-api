@@ -13,21 +13,21 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 12
+      nodejs: 14
   pre_build:
     commands:
       - echo Logging in to NP Amazon ECR...
-      - $(aws ecr get-login --registry-ids $NP_AWS_ACCOUNT_ID --no-include-email --region $AWS_DEFAULT_REGION)
+      - export NP_DOCKER_URL=$NP_AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $NP_DOCKER_URL
   build:
     commands:
       - echo Build started on `date`
       - echo Version is $VERSION
       - export DOCKER_URL=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
-      - export NP_DOCKER_URL=$NP_AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$AWS_REPO_NAME
       - echo Pulling NP Docker image...
       - docker pull $NP_DOCKER_URL:$VERSION
       - echo Logging in to Prod Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $DOCKER_URL
       - echo Tagging the Docker image...
       - docker tag $NP_DOCKER_URL:$VERSION $DOCKER_URL:latest
       - echo Pushing the Docker image to Prod...

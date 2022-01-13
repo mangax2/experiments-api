@@ -60,7 +60,7 @@ class unitRepo {
     t.treatment_number,
     tb.treatment_id,
     tb.block_id,
-    b.name,
+    b.name AS block,
     u.location,
     u.rep,
     u.set_entry_id,

@@ -63,6 +63,8 @@ export default {
       context.loaders.groupsByExperimentIds.load(args.experimentId),
     getUnitsByExperimentId: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(args.experimentId),
+    getUnitsBySetEntryIds: (entity, args, context) =>
+      context.loaders.unitsBySetEntryIds.load(args.setEntryIds),
     getSetBySetId: (entity, args, context) =>
       context.loaders.setBySetIds.load(args.setId),
     getSetsBySetId: (entity, args, context) =>

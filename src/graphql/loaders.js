@@ -72,6 +72,9 @@ function createLoaders() {
   const unitsByExperimentIdLoader = createMultiDataLoader(
     new ExperimentalUnitService().getExperimentalUnitsByExperimentIdNoValidate)
 
+  const unitsBySetEntryIdsLoader = createMultiDataLoader(
+    dbRead.unit.batchFindUnitDetailsBySetEntryIds)
+
   const blocksByBlockIdsLoader = createMultiDataLoader(dbRead.block.batchFind)
   const locationAssociationByExperimentIdsLoader = createMultiDataLoader(
     dbRead.locationAssociation.findByExperimentId)
@@ -188,6 +191,7 @@ function createLoaders() {
     treatmentBySetIds: treatmentBySetIdLoader,
     unitByExperimentIds: unitsByExperimentIdLoader,
     unitsByBlockIds: unitsByBlockIdsLoader,
+    unitsBySetEntryIds: unitsBySetEntryIdsLoader,
     unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,

@@ -148,6 +148,22 @@ class DesignSpecificationDetailService {
         return Promise.resolve()
       })
   }
+
+  @setErrorCode('137000')
+  deleteInvalidSpecsForRandomization = async (experimentId, randomizationStrategy, tx) => {
+    const designSpecKeys = await dbRead.refDesignSpecification.all()
+    const isBordersAllowed = randomizationStrategy.rules?.buffers?.border
+    const keyIdsToDelete = []
+    if (!isBordersAllowed) {
+      const borderSizeId = designSpecKeys.find(key => key.name === 'Border Size').id
+      keyIdsToDelete.push(borderSizeId)
+    }
+
+    if (keyIdsToDelete.length > 0) {
+      await dbWrite.designSpecificationDetail.deleteByExperimentAndKey(experimentId,
+        keyIdsToDelete, tx)
+    }
+  }
 }
 
 module.exports = DesignSpecificationDetailService

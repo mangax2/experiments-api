@@ -275,4 +275,36 @@ describe('DesignSpecificationDetailService', () => {
       })
     })
   })
+
+  describe('deleteInvalidSpecsForRandomization', () => {
+    test('calls deleteByExperimentAndKey with the correct key if the strategy does not allow borders', async () => {
+      target = new DesignSpecificationDetailService()
+      dbRead.refDesignSpecification.all = mockResolve([
+        { id: 2, name: 'Reps' },
+        { id: 3, name: 'Border Size' },
+        { id: 4, name: 'Locations' },
+      ])
+      dbWrite.designSpecificationDetail.deleteByExperimentAndKey = mockResolve()
+      const randomizationStrategy = { rules: {} }
+
+      await target.deleteInvalidSpecsForRandomization(5, randomizationStrategy, testTx)
+
+      expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).toHaveBeenCalledWith(5, [3], testTx)
+    })
+
+    test('does not call deleteExperimentAndKey if the strategy does allow borders', async () => {
+      target = new DesignSpecificationDetailService()
+      dbRead.refDesignSpecification.all = mockResolve([
+        { id: 2, name: 'Reps' },
+        { id: 3, name: 'Border Size' },
+        { id: 4, name: 'Locations' },
+      ])
+      dbWrite.designSpecificationDetail.deleteByExperimentAndKey = mockResolve()
+      const randomizationStrategy = { rules: { buffers: { border: true } } }
+
+      await target.deleteInvalidSpecsForRandomization(5, randomizationStrategy, testTx)
+
+      expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).not.toHaveBeenCalled()
+    })
+  })
 })

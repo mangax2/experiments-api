@@ -1039,25 +1039,16 @@ describe('ExperimentsService', () => {
   })
 
   describe('updateExperimentsRandomizationStrategyId', () => {
-    test('saves the matching randomizationStrategyId', () => {
+    test('calls the factor and designSpecDetails services', async () => {
       OAuthUtil.getAuthorizationHeaders = mockResolve()
       HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
       target.factorService = { updateFactorsForDesign: mockResolve() }
-      return target.updateExperimentsRandomizationStrategyId(5, 'crd', false, testContext, testTx)
-        .then(() => {
-          expect(target.factorService.updateFactorsForDesign).toBeCalledWith(5, { strategyCode: 'crd' }, testTx)
-        })
-    })
+      target.designSpecificationDetailService = { deleteInvalidSpecsForRandomization: mockResolve() }
 
-    test('does not call factorService on creates', () => {
-      OAuthUtil.getAuthorizationHeaders = mockResolve()
-      HttpUtil.get = mockResolve({ body: [{ strategyCode: 'rcb' }, { strategyCode: 'crd' }, { strategyCode: 'custom' }] })
-      target.factorService = { updateFactorsForDesign: mockResolve() }
+      await target.updateExperimentsRandomizationStrategyId(5, 'crd', testTx)
 
-      return target.updateExperimentsRandomizationStrategyId(5, 'crd', true, testContext, testTx)
-        .then(() => {
-          expect(target.factorService.updateFactorsForDesign).not.toBeCalled()
-        })
+      expect(target.factorService.updateFactorsForDesign).toBeCalledWith(5, { strategyCode: 'crd' }, testTx)
+      expect(target.designSpecificationDetailService.deleteInvalidSpecsForRandomization).toHaveBeenCalledWith(5, { strategyCode: 'crd' }, testTx)
     })
   })
 

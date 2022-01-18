@@ -17,6 +17,7 @@ import FactorService from './FactorService'
 import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -31,6 +32,7 @@ class ExperimentsService {
     this.factorService = new FactorService()
     this.analysisModelService = new AnalysisModelService()
     this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
+    this.designSpecificationDetailService = new DesignSpecificationDetailService()
   }
 
   @setErrorCode('151000')
@@ -73,9 +75,6 @@ class ExperimentsService {
                 context) : []
             return Promise.all(capacityRequestPromises)
               .then(() => this.batchCreateExperimentTags(experiments, context, isTemplate))
-              .then(() => tx.batch(_.map(experiments,
-                experiment => this.updateExperimentsRandomizationStrategyId(experiment.id,
-                  experiment.randomizationStrategyCode, true, context, tx))))
               .then(() => AppUtil.createPostResponse(data))
           })
         }))
@@ -251,7 +250,7 @@ class ExperimentsService {
                 const createExperimentCommentPromise = dbWrite.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)
               }
-              promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, false, context, tx))
+              promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, tx))
               return tx.batch(promises)
                 .then(() => {
                   experiment.id = id
@@ -269,17 +268,13 @@ class ExperimentsService {
   }
 
   @setErrorCode('15T000')
-  updateExperimentsRandomizationStrategyId(experimentId, strategyCode, isCreate, context, tx) {
-    return OAuthUtil.getAuthorizationHeaders().then((headers) => {
-      const { randomizeTreatmentsAPIUrl } = apiUrls
-      return HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)
-        .then((strategies) => {
-          const randStrategy = _.find(strategies.body, strategy =>
-            strategy.strategyCode === strategyCode)
-          return (isCreate ? Promise.resolve()
-            : this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx))
-        })
-    })
+  updateExperimentsRandomizationStrategyId = async (experimentId, strategyCode, tx) => {
+    const headers = await OAuthUtil.getAuthorizationHeaders()
+    const { randomizeTreatmentsAPIUrl } = apiUrls
+    const strategies = await HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)
+    const randStrategy = _.find(strategies.body, strategy => strategy.strategyCode === strategyCode)
+    await this.factorService.updateFactorsForDesign(experimentId, randStrategy, tx)
+    await this.designSpecificationDetailService.deleteInvalidSpecsForRandomization(experimentId, randStrategy, tx)
   }
 
   @notifyChanges('delete', 0, 2)

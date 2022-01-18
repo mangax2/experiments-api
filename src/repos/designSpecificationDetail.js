@@ -123,7 +123,9 @@ class designSpecificationDetailRepo {
   getRandomizationStrategyIdByExperimentId = (experimentId) => 
     this.rep.oneOrNone('SELECT dsd.value FROM design_spec_detail dsd INNER JOIN ref_design_spec rds ON rds.id = dsd.ref_design_spec_id WHERE rds.name = \'Randomization Strategy ID\' AND experiment_id = $1', [experimentId])
 
-
+  @setErrorCode('52D000')
+  deleteByExperimentAndKey = (experimentId, keyIds, tx) =>
+    tx.none('DELETE FROM design_spec_detail WHERE experiment_id = $1 AND ref_design_spec_id in ($2:csv)', [experimentId, keyIds])
 }
 
 module.exports = (rep, pgp) => new designSpecificationDetailRepo(rep, pgp)

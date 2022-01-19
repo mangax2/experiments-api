@@ -172,9 +172,22 @@ type TreatmentVariableLevel {
   nestedLevels: [TreatmentVariableLevel]
   associatedLevels: [TreatmentVariableLevel]
   treatmentVariableLevelDetails: [[TreatmentVariableLevelDetail]]
+  treatmentVariableLevelFlatDetails: [[TreatmentVariableLevelDetail]]
 }
 
 type TreatmentVariableLevelDetail {
+  objectType: String
+  label: String
+  questionCode: String
+  multiQuestionTag: String
+  catalogType: String
+  valueType: String
+  text: String,
+  value: String
+  uomCode: String
+}
+
+type TreatmentVariableLevelFlatDetail {
   objectType: String
   label: String
   questionCode: String

@@ -31,6 +31,7 @@ import Block from '../repos/block'
 import TreatmentBlock from '../repos/treatmentBlock'
 import configurator from '../config/configurator'
 import TreatmentVariableLevelDetails from '../repos/treatmentFactorLevelDetails'
+import TreatmentVariableLevelFlatDetails from '../repos/treatmentFactorLevelFlatDetails'
 
 // pg-promise initialization options:
 const options = {
@@ -65,6 +66,7 @@ const options = {
     obj.block = Block(obj, pgp)
     obj.treatmentBlock = TreatmentBlock(obj, pgp)
     obj.treatmentVariableLevelDetails = TreatmentVariableLevelDetails(obj, pgp)
+    obj.treatmentVariableLevelFlatDetails = TreatmentVariableLevelFlatDetails(obj, pgp)
   },
 }
 

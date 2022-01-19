@@ -88,7 +88,7 @@ function graphqlMiddlewareFunction(schema) {
       validationRules: [
         LimitQueryDepth(15),
         LimitNumQueries(5),
-        mutuallyExclusiveFields('treatmentVariableLevels', 'valueJSON', 'treatmentVariableLevelDetails'),
+        mutuallyExclusiveFields('treatmentVariableLevels', 'valueJSON', 'treatmentVariableLevelDetails', 'treatmentVariableLevelFlatDetails'),
       ],
       graphiql: config.env === 'local',
     })

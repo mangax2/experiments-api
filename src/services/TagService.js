@@ -137,7 +137,7 @@ class TagService {
           return Promise.resolve()
         }
         const errorMessage = `[[${context.requestId}]] An error occurred while deleting tags.`
-        const data = _.get(err, 'response.body')
+        const data = _.get(err, 'response.body') || err
         console.error(errorMessage, data)
         return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P9001')))
       })

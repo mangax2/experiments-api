@@ -172,7 +172,7 @@ type TreatmentVariableLevel {
   nestedLevels: [TreatmentVariableLevel]
   associatedLevels: [TreatmentVariableLevel]
   treatmentVariableLevelDetails: [[TreatmentVariableLevelDetail]]
-  treatmentVariableLevelFlatDetails: [[TreatmentVariableLevelDetail]]
+  treatmentVariableLevelFlatDetails: [TreatmentVariableLevelFlatDetail]
 }
 
 type TreatmentVariableLevelDetail {
@@ -188,6 +188,7 @@ type TreatmentVariableLevelDetail {
 }
 
 type TreatmentVariableLevelFlatDetail {
+  rowNumber: Int
   objectType: String
   label: String
   questionCode: String

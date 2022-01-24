@@ -191,6 +191,8 @@ export default {
       context.loaders.associatedFactorLevel.load(entity.id),
     treatmentVariableLevelDetails: (entity, _, context) =>
       context.loaders.treatmentVariableLevelDetails.load(entity.id),
+    treatmentVariableLevelFlatDetails: (entity, _, context) =>
+      context.loaders.treatmentVariableLevelFlatDetails.load(entity.id),
   },
   Group: {
     childGroups: entity => entity.childGroups,

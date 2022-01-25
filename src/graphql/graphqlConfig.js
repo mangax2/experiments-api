@@ -57,7 +57,9 @@ const mutuallyExclusiveFields = (parentNode, ...exclusiveFields) => context => (
 
         if (matches > 1) {
           context.reportError(new GraphQLError(
-            `Validation: Under ${parentNode}, ${exclusiveFields[0]} and ${exclusiveFields[1]} are mutually exclusive.`))
+            `Validation: Under ${parentNode}: ${exclusiveFields.join(', ')} are mutually exclusive.`,
+          ))
+          break
         }
       }
     }

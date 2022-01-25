@@ -250,7 +250,7 @@ class ExperimentsService {
                 const createExperimentCommentPromise = dbWrite.comment.batchCreate([comment], context, tx)
                 promises.push(createExperimentCommentPromise)
               }
-              promises.push(this.updateExperimentsRandomizationStrategyId(experimentId, experiment.randomizationStrategyCode, tx))
+              promises.push(this.removeInvalidRandomizationConfig(experimentId, experiment.randomizationStrategyCode, tx))
               return tx.batch(promises)
                 .then(() => {
                   experiment.id = id
@@ -268,7 +268,7 @@ class ExperimentsService {
   }
 
   @setErrorCode('15T000')
-  updateExperimentsRandomizationStrategyId = async (experimentId, strategyCode, tx) => {
+  removeInvalidRandomizationConfig = async (experimentId, strategyCode, tx) => {
     const headers = await OAuthUtil.getAuthorizationHeaders()
     const { randomizeTreatmentsAPIUrl } = apiUrls
     const strategies = await HttpUtil.get(`${randomizeTreatmentsAPIUrl}/strategies`, headers)

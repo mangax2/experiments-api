@@ -3587,6 +3587,10 @@
         "borderSize": {
           "type": "integer",
           "description": "the number of experimental units that separate one set from another"
+        },
+        "repBufferSize": {
+          "type": "integer",
+          "description": "the number of experimental units that separate one rep from another"
         }
       }
     },

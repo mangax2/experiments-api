@@ -74,6 +74,7 @@ type DesignSpecificationDetail {
   reps: String
   areAllBlocksAtAllLocations: Boolean
   borderSize: Int
+  repBufferSize: Int
 }
 
 type Experiment {

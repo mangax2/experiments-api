@@ -277,34 +277,52 @@ describe('DesignSpecificationDetailService', () => {
   })
 
   describe('deleteInvalidSpecsForRandomization', () => {
-    test('calls deleteByExperimentAndKey with the correct key if the strategy does not allow borders', async () => {
+    test('calls deleteByExperimentAndKey with the correct key if the strategy does not allow borders nor rep buffers', async () => {
       target = new DesignSpecificationDetailService()
       dbRead.refDesignSpecification.all = mockResolve([
         { id: 2, name: 'Reps' },
         { id: 3, name: 'Border Size' },
         { id: 4, name: 'Locations' },
+        { id: 5, name: 'Rep Buffer Size' },
       ])
       dbWrite.designSpecificationDetail.deleteByExperimentAndKey = mockResolve()
       const randomizationStrategy = { rules: {} }
 
       await target.deleteInvalidSpecsForRandomization(5, randomizationStrategy, testTx)
 
-      expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).toHaveBeenCalledWith(5, [3], testTx)
+      expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).toHaveBeenCalledWith(5, [3, 5], testTx)
     })
 
-    test('does not call deleteExperimentAndKey if the strategy does allow borders', async () => {
+    test('does not call deleteExperimentAndKey if the strategy does allow borders and rep buffers', async () => {
       target = new DesignSpecificationDetailService()
       dbRead.refDesignSpecification.all = mockResolve([
         { id: 2, name: 'Reps' },
         { id: 3, name: 'Border Size' },
         { id: 4, name: 'Locations' },
+        { id: 5, name: 'Rep Buffer Size' },
       ])
       dbWrite.designSpecificationDetail.deleteByExperimentAndKey = mockResolve()
-      const randomizationStrategy = { rules: { buffers: { border: true } } }
+      const randomizationStrategy = { rules: { buffers: { border: true, rep: true } } }
 
       await target.deleteInvalidSpecsForRandomization(5, randomizationStrategy, testTx)
 
       expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).not.toHaveBeenCalled()
+    })
+
+    test('calls deleteByExperimentAndKey with the correct key if the strategy allows borders but does not allow rep buffers', async () => {
+      target = new DesignSpecificationDetailService()
+      dbRead.refDesignSpecification.all = mockResolve([
+        { id: 2, name: 'Reps' },
+        { id: 3, name: 'Border Size' },
+        { id: 4, name: 'Locations' },
+        { id: 5, name: 'Rep Buffer Size' },
+      ])
+      dbWrite.designSpecificationDetail.deleteByExperimentAndKey = mockResolve()
+      const randomizationStrategy = { rules: { buffers: { border: true, rep: false } } }
+
+      await target.deleteInvalidSpecsForRandomization(5, randomizationStrategy, testTx)
+
+      expect(dbWrite.designSpecificationDetail.deleteByExperimentAndKey).toHaveBeenCalledWith(5, [5], testTx)
     })
   })
 })

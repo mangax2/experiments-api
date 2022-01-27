@@ -152,11 +152,16 @@ class DesignSpecificationDetailService {
   @setErrorCode('137000')
   deleteInvalidSpecsForRandomization = async (experimentId, randomizationStrategy, tx) => {
     const designSpecKeys = await dbRead.refDesignSpecification.all()
-    const isBordersAllowed = randomizationStrategy.rules?.buffers?.border
+    const areBordersAllowed = randomizationStrategy.rules?.buffers?.border
+    const areRepBuffersAllowed = randomizationStrategy.rules?.buffers?.rep
     const keyIdsToDelete = []
-    if (!isBordersAllowed) {
+    if (!areBordersAllowed) {
       const borderSizeId = designSpecKeys.find(key => key.name === 'Border Size').id
       keyIdsToDelete.push(borderSizeId)
+    }
+    if (!areRepBuffersAllowed) {
+      const repBufferSizeId = designSpecKeys.find(key => key.name === 'Rep Buffer Size').id
+      keyIdsToDelete.push(repBufferSizeId)
     }
 
     if (keyIdsToDelete.length > 0) {

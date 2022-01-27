@@ -22,7 +22,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-push": "eslint src --ext .js && eslint test --ext .js && jest --config .jestrc.json"
+      "pre-push": "eslint src --ext .js && eslint test --ext .js && npm run testCoverage"
     }
   },
   "repository": {

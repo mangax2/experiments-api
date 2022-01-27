@@ -20,6 +20,11 @@
     "validateSchema": "node ./src/graphql/scripts/verifySchema.js",
     "validateSwagger": "node ./src/swagger/validateSwagger.js"
   },
+  "husky": {
+    "hooks": {
+      "pre-push": "eslint public --ext .js --ext .jsx && eslint test --ext .js && jest --config .jestrc.json"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.platforms.engineering:Cosmos/experiments-api.git"
@@ -85,7 +90,7 @@
     "eslint-plugin-import": "2.13.0",
     "eslint-plugin-jest": "21.18.0",
     "eslint-plugin-jest-async": "1.0.3",
-    "husky": "0.14.3",
+    "husky": "4.3.0",
     "jest": "24.9.0",
     "nodemon": "1.19.1",
     "pg-monitor": "1.0.0"

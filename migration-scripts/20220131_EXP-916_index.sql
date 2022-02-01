@@ -1,0 +1,1 @@
+CREATE INDEX design_spec_detail_experiment_id_ref_design_spec_id ON design_spec_detail (experiment_id, ref_design_spec_id);

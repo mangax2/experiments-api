@@ -1,5 +1,5 @@
 import { mock, mockResolve } from '../jestUtil'
-import TreatmentValidator from '../../src/validations/TreatmentValidator'
+import TreatmentValidator, { treatmentInputSchemaValidate } from '../../src/validations/TreatmentValidator'
 import AppError from '../../src/services/utility/AppError'
 import { dbRead } from '../../src/db/DbManager'
 
@@ -1008,6 +1008,23 @@ describe('TreatmentValidator', () => {
       } catch {
         expect(AppError.badRequest).toHaveBeenCalledWith('Treatments cannot be added to the same block twice', undefined, '3F4007')
       }
+    })
+  })
+
+  describe('treatmentInputSchemaValidate', () => {
+    test('validation should fail when there are treatment numbers less than 1 in the input body', async () => {
+      AppError.badRequest = mock('')
+      try {
+        await treatmentInputSchemaValidate([{ treatmentNumber: 1 }, { treatmentNumber: 0 }])
+      } catch (e) {
+        expect(AppError.badRequest).toHaveBeenCalled()
+      }
+    })
+
+    test('validation should succeed when all treatment numbers greater than 0 in the input body', async () => {
+      AppError.badRequest = mock('')
+      await treatmentInputSchemaValidate([{ treatmentNumber: 1 }, { treatmentNumber: 2 }])
+      expect(AppError.badRequest).not.toHaveBeenCalled()
     })
   })
 })

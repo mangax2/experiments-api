@@ -7,7 +7,7 @@ import FactorService from './FactorService'
 import SecurityService from './SecurityService'
 import AppUtil from './utility/AppUtil'
 import { notifyChanges } from '../decorators/notifyChanges'
-import TreatmentValidator from '../validations/TreatmentValidator'
+import TreatmentValidator, { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import BlockService from './BlockService'
 import ExperimentsService from './ExperimentsService'
@@ -102,6 +102,7 @@ class TreatmentDetailsService {
   @setErrorCode('1QI000')
   @Transactional('handleAllTreatments')
   handleAllTreatments = async (experimentIdStr, inputTreatments, context, isTemplate, tx) => {
+    await treatmentInputSchemaValidate(inputTreatments)
     const experimentId = _.toNumber(experimentIdStr)
     await Promise.all([
       this.securityService.permissionsCheck(experimentId, context, isTemplate),

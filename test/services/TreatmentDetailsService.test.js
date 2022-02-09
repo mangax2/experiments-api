@@ -233,11 +233,12 @@ describe('TreatmentDetailsService', () => {
 
       AppUtil.createNoContentResponse = mock()
 
-      return target.handleAllTreatments(1, [{}], testContext, false, testTx).then(() => {
+      return target.handleAllTreatments(1, [{ treatmentNumber: 1 }], testContext, false, testTx).then(() => {
         expect(AppUtil.createNoContentResponse).toHaveBeenCalled()
         expect(target.createTreatments).toHaveBeenCalledWith(1, [{
           experimentId: 1,
           blocks: [{ name: null, numPerRep: 1 }],
+          treatmentNumber: 1,
         }], [], testContext, testTx)
         expect(target.updateTreatments).not.toHaveBeenCalled()
         expect(target.deleteTreatments).not.toHaveBeenCalled()
@@ -323,6 +324,7 @@ describe('TreatmentDetailsService', () => {
               factorLevelId: 102,
             },
           ],
+          treatmentNumber: 1,
         },
         {
           combinationElements: [
@@ -333,6 +335,7 @@ describe('TreatmentDetailsService', () => {
               factorLevelId: 104,
             },
           ],
+          treatmentNumber: 2,
         },
         {
           combinationElements: [
@@ -340,6 +343,7 @@ describe('TreatmentDetailsService', () => {
               factorLevelId: 102,
             },
           ],
+          treatmentNumber: 3,
         },
       ]
 

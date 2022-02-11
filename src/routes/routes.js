@@ -25,6 +25,7 @@ import UnitSpecificationService from '../services/UnitSpecificationService'
 import UnitSpecificationDetailService from '../services/UnitSpecificationDetailService'
 import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
+import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 
 const router = express.Router()
 
@@ -97,9 +98,15 @@ router.get('/experiments/:id/treatments', (req, res, next) => new TreatmentDetai
 router.patch('/experiments/:id/review', (req, res, next) => new ExperimentsService().handleReviewStatus(req.params.id, false, req.body, req.context)
   .then(() => res.sendStatus(204))
   .catch(err => next(err)))
-router.put('/experiments/:id/treatments', (req, res, next) => new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, false)
-  .then(result => res.json(result))
-  .catch(err => next(err)))
+router.put('/experiments/:id/treatments', async (req, res, next) => {
+  try {
+    await treatmentInputSchemaValidate(req.body)
+    new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, false)
+      .then(result => res.json(result))
+  } catch (err) {
+    next(err)
+  }
+})
 
 router.get('/experiments/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromExperimentByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))
@@ -233,9 +240,15 @@ router.get('/templates/:id/treatment-variables', (req, res, next) => new FactorS
 router.get('/templates/:id/treatments', (req, res, next) => new TreatmentDetailsService().getAllTreatmentDetails(req.params.id, true, req.context)
   .then(value => res.json(value))
   .catch(err => next(err)))
-router.put('/templates/:id/treatments', (req, res, next) => new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, true)
-  .then(result => res.json(result))
-  .catch(err => next(err)))
+router.put('/templates/:id/treatments', async (req, res, next) => {
+  try {
+    await treatmentInputSchemaValidate(req.body)
+    new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, true)
+      .then(result => res.json(result))
+  } catch (err) {
+    next(err)
+  }
+})
 
 router.get('/templates/:id/experimental-units', (req, res, next) => new ExperimentalUnitService().getUnitsFromTemplateByExperimentId(req.params.id, req.context)
   .then(experimentalUnits => res.json(experimentalUnits))

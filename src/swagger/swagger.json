@@ -4389,6 +4389,10 @@
                 }
               }
             }
+          },
+          "treatmentNumber":  {
+            "type": "integer",
+            "description": "Treatment Number"
           }
         }
       }

@@ -1,4 +1,6 @@
 import _ from 'lodash'
+import get from 'lodash/get'
+import Joi from 'joi'
 import FactorLevelAssociationEntityUtil from '../repos/util/FactorLevelAssociationEntityUtil'
 import FactorLevelEntityUtil from '../repos/util/FactorLevelEntityUtil'
 import SchemaValidator from './SchemaValidator'
@@ -108,7 +110,7 @@ function formatInvalidRelationshipsErrorMessage(invalidRelationships) {
 }
 
 // Error Codes 3FXXXX
-class TreatmentValidator extends SchemaValidator {
+export default class TreatmentValidator extends SchemaValidator {
   constructor() {
     super()
     super.setFileCode('3F')
@@ -323,4 +325,16 @@ class TreatmentValidator extends SchemaValidator {
     _.find(treatmentDTOs, t => t.blocks.length !== _.uniq(_.map(t.blocks, 'name')).length)
 }
 
-module.exports = TreatmentValidator
+const treatmentInputSchema = Joi.array().items(
+  Joi.object({
+    treatmentNumber: Joi.number().greater(0).required(),
+  }),
+)
+
+export const treatmentInputSchemaValidate = async (body) => {
+  try {
+    await treatmentInputSchema.validateAsync(body, { allowUnknown: true })
+  } catch (error) {
+    throw AppError.badRequest(get(error, 'details[0].message', 'treatment input schema error'))
+  }
+}

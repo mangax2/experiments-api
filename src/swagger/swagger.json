@@ -3298,6 +3298,64 @@
           }
         }
       }
+    },
+    "/chemAP-sync": {
+      "post": {
+        "summary": "Create a Chemical Application plan based on an existing Experiment",
+        "description": "Create a Chemical Application plan based on an existing Experiment and set up the association between the two",
+        "operationId": "chemApSync",
+        "tags": ["ChemAP"],
+        "produces": ["application/json"],
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "ChemApSyncBody",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChemApSyncPayload"
+            }
+          },
+          {
+            "name": "username",
+            "description": "A required header for entitlement check.",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "planId": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -3329,6 +3387,16 @@
           }
         }
       }
+    },
+    "ChemApSyncPayload": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "integer",
+          "description": "ID of the Experiment the Chemical Application plan will be created from."
+        }
+      },
+      "required": ["experimentId"]
     },
     "ClusterResponse": {
       "type": "object",

@@ -10,7 +10,7 @@ const localApiUrls = {
   setsAPIUrl: 'https://api01-np.agro.services/sets-api/v2',
   velocityMessagingAPIUrl: 'https://messaging.velocity-np.ag/v5',
   velocityUrl: 'https://dev.velocity-np.ag',
-  chemApAPIUrl: 'https://api01-np.agro.services/chemical-application-plan/v2',
+  chemApAPIUrl: 'https://cap-d.velocity-np.ag/chemical-application-plan',
 }
 const apiUrls = process.env.EXTERNAL_API_URLS
   ? JSON.parse(process.env.EXTERNAL_API_URLS)

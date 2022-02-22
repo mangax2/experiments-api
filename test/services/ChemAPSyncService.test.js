@@ -1,11 +1,10 @@
 import createAndSyncChemApPlanFromExperiment from '../../src/services/chemApSyncService'
-import SecurityService from '../../src/services/SecurityService'
 import AppError from '../../src/services/utility/AppError'
 import apiUrls from '../../src/config/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import { dbRead } from '../../src/db/DbManager'
-import { mockReject, mockResolve } from '../jestUtil'
+import { mockResolve } from '../jestUtil'
 
 jest.mock('../../src/services/SecurityService')
 jest.mock('../../src/services/utility/OAuthUtil')
@@ -18,11 +17,16 @@ describe('ChemApSyncService', () => {
     dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester'], group_ids: [] })
     OAuthUtil.getAuthorizationHeaders = mockResolve([])
     AppError.internalServerError = jest.fn()
+    AppError.notFound = jest.fn()
   })
 
-  test('should fail when the user does not have permission to experiment', async () => {
-    SecurityService.permissionsCheck = mockReject()
-    expect(dbRead.experiments.find).not.toHaveBeenCalled()
+  test('should fail when experiment does not exist', async () => {
+    dbRead.experiments.find = mockResolve(null)
+    try {
+      await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+    expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experiment Id: 1', undefined, '1G4001')
   })
 
   test('user header is added', async () => {

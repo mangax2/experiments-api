@@ -737,7 +737,7 @@ class ExperimentsService {
     const headers = await OAuthUtil.getAuthorizationHeaders()
     HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/messages`, headers, request)
       .catch(error =>
-        console.error('Users are failed to be notified of the experiment review result', request, error)
+        console.error('Users are failed to be notified of the experiment review result', request, error),
       )
   }
 }

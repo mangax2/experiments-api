@@ -37,8 +37,12 @@ export default {
         context.loaders.experimentsByName.load(name),
     // 'null' is passed here because the load function won't take null
     // and a string is an invalid type for this call, so it's guaranteed to act the way we need
-    getExperimentBySetId: (entity, args, context) =>
-      context.loaders.experimentBySetId.load(args.setId || 'null'),
+    getExperimentBySetId: (entity, args, context) => {
+      if (args.setId !== null && args.setId < 1) {
+        throw new Error('Set Id should be greater than 0')
+      }
+      return context.loaders.experimentBySetId.load(args.setId || 'null')
+    },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
     getTemplatesByCriteria: (entity, args, context) =>

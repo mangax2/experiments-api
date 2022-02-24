@@ -677,10 +677,13 @@ class ExperimentsService {
 
             return Promise.resolve()
           })
-          .then(() => tx.batch([
-            dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx),
-            dbWrite.comment.batchCreate([newComment], context, tx),
-          ])),
+          .then(() => {
+            this.notifyUsersReviewCompletion(isTemplate, experiment, status, comment)
+            return tx.batch([
+              dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx),
+              dbWrite.comment.batchCreate([newComment], context, tx),
+            ])
+          }),
       )
     })
 
@@ -709,6 +712,34 @@ class ExperimentsService {
           .then(() => dbWrite.experiments.updateExperimentStatus(experimentId, 'DRAFT', null, context, tx)),
       )
     })
+
+  notifyUsersReviewCompletion = async (isTemplate, experiment, status, comment) => {
+    const statusesForNotification = ['APPROVED', 'REJECTED']
+    if (!statusesForNotification.includes(status)) {
+      return
+    }
+
+    const experimentUrl = `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experiment.id}`
+    const experimentType = isTemplate ? 'Template' : 'Experiment'
+    const message = status === 'REJECTED' ?
+      `${experimentType} ${experiment.name} has been rejected. Reason: ${comment} ${experimentUrl}`
+      : `${experimentType} ${experiment.name} has been approved ${experimentUrl}`
+    const request = {
+      title: `COMPLETED: ${experimentType} ${experiment.name} Review Request`,
+      body: {
+        text: message,
+      },
+      ...experiment.owners?.length > 0 && { recipients: experiment.owners },
+      ...experiment.ownerGroups?.length > 0 && { userGroups: experiment.ownerGroups },
+      tags: ['experiment-review-request'],
+    }
+
+    const headers = await OAuthUtil.getAuthorizationHeaders()
+    HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/messages`, headers, request)
+      .catch(error =>
+        console.error('Users are failed to be notified of the experiment review result', request, error),
+      )
+  }
 }
 
 module.exports = ExperimentsService

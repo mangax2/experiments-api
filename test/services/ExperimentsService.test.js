@@ -2111,7 +2111,7 @@ describe('ExperimentsService', () => {
       const expected = {
         title: 'COMPLETED: Experiment test exp Review Request',
         body: {
-          text: `Experiment test exp has been approved ${apiUrls.experimentsUIUrl}/12`,
+          text: `Experiment test exp has been approved ${apiUrls.velocityUrl}/experiments/12`,
         },
         recipients: ['tester'],
         tags: ['experiment-review-request'],
@@ -2127,7 +2127,7 @@ describe('ExperimentsService', () => {
       const expected = {
         title: 'COMPLETED: Template test exp Review Request',
         body: {
-          text: `Template test exp has been rejected. Reason: reason ${apiUrls.experimentsUIUrl}/12`,
+          text: `Template test exp has been rejected. Reason: reason ${apiUrls.velocityUrl}/experiments/templates/12`,
         },
         userGroups: ['tester'],
         tags: ['experiment-review-request'],

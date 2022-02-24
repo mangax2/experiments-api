@@ -1,6 +1,5 @@
 const localApiUrls = {
   capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
-  experimentsUIUrl: 'https://dev.velocity-np.ag/experiments',
   experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',
   materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
   oauthUrl: 'https://login.microsoftonline.com/fcb2b37b-5da0-466b-9b83-0014b67a7c78/oauth2/v2.0/token',

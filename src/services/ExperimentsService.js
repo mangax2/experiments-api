@@ -719,7 +719,7 @@ class ExperimentsService {
       return
     }
 
-    const experimentUrl = `${apiUrls.experimentsUIUrl}/${experiment.id}`
+    const experimentUrl = `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experiment.id}`
     const experimentType = isTemplate ? 'Template' : 'Experiment'
     const message = status === 'REJECTED' ?
       `${experimentType} ${experiment.name} has been rejected. Reason: ${comment} ${experimentUrl}`

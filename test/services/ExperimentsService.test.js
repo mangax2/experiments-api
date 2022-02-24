@@ -8,6 +8,7 @@ import AppError from '../../src/services/utility/AppError'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
+import apiUrls from '../../src/config/apiUrls'
 
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')
@@ -2098,6 +2099,57 @@ describe('ExperimentsService', () => {
       return target.cancelReview(1, false, testContext, testTx).then(() => {
         expect(dbWrite.experiments.updateExperimentStatus).toHaveBeenCalledWith(1, 'DRAFT', null, testContext, testTx)
       })
+    })
+  })
+
+  describe('notifyUsersReviewCompletion', () => {
+    test('should send a message when a review is approved', async () => {
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: '60556ed1a58' } }))
+      await target.notifyUsersReviewCompletion(false,
+        { id: 12, name: 'test exp', owners: ['tester'] }, 'APPROVED', '')
+      const expected = {
+        title: 'COMPLETED: Experiment test exp Review Request',
+        body: {
+          text: `Experiment test exp has been approved ${apiUrls.experimentsUIUrl}/12`,
+        },
+        recipients: ['tester'],
+        tags: ['experiment-review-request'],
+      }
+      expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.velocityMessagingAPIUrl}/messages`, [], expected)
+    })
+
+    test('should send a message when a review is rejected', async () => {
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: '60556ed1a58' } }))
+      await target.notifyUsersReviewCompletion(true,
+        { id: 12, name: 'test exp', ownerGroups: ['tester'] }, 'REJECTED', 'reason')
+      const expected = {
+        title: 'COMPLETED: Template test exp Review Request',
+        body: {
+          text: `Template test exp has been rejected. Reason: reason ${apiUrls.experimentsUIUrl}/12`,
+        },
+        userGroups: ['tester'],
+        tags: ['experiment-review-request'],
+      }
+      expect(HttpUtil.post).toHaveBeenCalledWith(`${apiUrls.velocityMessagingAPIUrl}/messages`, [], expected)
+    })
+
+    test('should not send a message if the status is not rejected or approved', async () => {
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockRestore()
+      await target.notifyUsersReviewCompletion(true,
+        { id: 12, name: 'test exp', ownerGroups: ['tester'] }, 'SUBMITTED', '')
+      expect(HttpUtil.post).not.toHaveBeenCalled()
+    })
+
+    test('log an error when failed to send a message', async () => {
+      OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
+      HttpUtil.post.mockReturnValueOnce(Promise.reject())
+      console.error.mockRestore()
+      console.error = jest.fn()
+      await target.notifyUsersReviewCompletion(true, { id: 12, name: 'test exp', ownerGroups: ['tester'] }, 'REJECTED', '')
+      expect(console.error).toHaveBeenCalled()
     })
   })
 })

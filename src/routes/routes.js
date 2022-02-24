@@ -26,6 +26,8 @@ import UnitSpecificationDetailService from '../services/UnitSpecificationDetailS
 import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
+import chemApSyncInputSchemaValidate from '../validations/chemApSyncValidator'
+import createAndSyncChemApPlanFromExperiment from '../services/chemApSyncService'
 
 const router = express.Router()
 
@@ -101,8 +103,9 @@ router.patch('/experiments/:id/review', (req, res, next) => new ExperimentsServi
 router.put('/experiments/:id/treatments', async (req, res, next) => {
   try {
     await treatmentInputSchemaValidate(req.body)
-    new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, false)
-      .then(result => res.json(result))
+    const result = await new TreatmentDetailsService()
+      .handleAllTreatments(req.params.id, req.body, req.context, false)
+    res.json(result)
   } catch (err) {
     next(err)
   }
@@ -243,8 +246,9 @@ router.get('/templates/:id/treatments', (req, res, next) => new TreatmentDetails
 router.put('/templates/:id/treatments', async (req, res, next) => {
   try {
     await treatmentInputSchemaValidate(req.body)
-    new TreatmentDetailsService().handleAllTreatments(req.params.id, req.body, req.context, true)
-      .then(result => res.json(result))
+    const result = await new TreatmentDetailsService()
+      .handleAllTreatments(req.params.id, req.body, req.context, true)
+    res.json(result)
   } catch (err) {
     next(err)
   }
@@ -316,6 +320,16 @@ router.post('/deactivations', (req, res, next) => new ExperimentalUnitService().
   .then(value => res.json(value))
   .catch(err => next(err)),
 )
+
+router.post('/chemAP-sync', async (req, res, next) => {
+  try {
+    await chemApSyncInputSchemaValidate(req.body)
+    const value = await createAndSyncChemApPlanFromExperiment(req.body, req.context)
+    res.json(value)
+  } catch (err) {
+    next(err)
+  }
+})
 
 const swaggerfiedRoutes = _.compact(_.map(router.stack, (r) => {
   if (r.route && r.route.path && r.route.path !== '/ping' && r.route.path !== '/kafka-publish') {

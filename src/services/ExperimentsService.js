@@ -719,16 +719,21 @@ class ExperimentsService {
       return
     }
 
-    const experimentUrl = `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experiment.id}`
     const experimentType = isTemplate ? 'Template' : 'Experiment'
     const message = status === 'REJECTED' ?
-      `${experimentType} ${experiment.name} has been rejected. Reason: ${comment} ${experimentUrl}`
-      : `${experimentType} ${experiment.name} has been approved ${experimentUrl}`
+      `${experimentType} ${experiment.name} has been rejected. Reason: ${comment}`
+      : `${experimentType} ${experiment.name} has been approved`
     const request = {
       title: `COMPLETED: ${experimentType} ${experiment.name} Review Request`,
       body: {
         text: message,
       },
+      actions: [
+        {
+          title: `${experimentType} "${experiment.name}"`,
+          url: `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experiment.id}`,
+        },
+      ],
       ...experiment.owners?.length > 0 && { recipients: experiment.owners },
       ...experiment.ownerGroups?.length > 0 && { userGroups: experiment.ownerGroups },
       tags: ['experiment-review-request'],

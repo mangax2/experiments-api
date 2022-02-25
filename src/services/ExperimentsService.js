@@ -730,7 +730,7 @@ class ExperimentsService {
       },
       actions: [
         {
-          title: `Review ${experimentType} "${experiment.name}"`,
+          title: `${experimentType} "${experiment.name}"`,
           url: `${apiUrls.velocityUrl}/experiments/${isTemplate ? 'templates/' : ''}${experiment.id}`,
         },
       ],

@@ -2115,7 +2115,7 @@ describe('ExperimentsService', () => {
         },
         actions: [
           {
-            title: 'Review Experiment "test exp"',
+            title: 'Experiment "test exp"',
             url: `${apiUrls.velocityUrl}/experiments/12`,
           },
         ],
@@ -2137,7 +2137,7 @@ describe('ExperimentsService', () => {
         },
         actions: [
           {
-            title: 'Review Template "test exp"',
+            title: 'Template "test exp"',
             url: `${apiUrls.velocityUrl}/experiments/templates/12`,
           },
         ],

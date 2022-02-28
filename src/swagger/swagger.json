@@ -4298,11 +4298,14 @@
       "items": {
         "type": "object",
         "properties": {
-          "treatmentVariableType": {
+          "factorLevelIds": {
             "type": "array",
             "items": {
               "type": "integer"
             }
+          },
+          "location": {
+            "type": "integer"
           },
           "rep": {
             "type": "integer"

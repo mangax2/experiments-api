@@ -18,7 +18,8 @@
     "testCoverage": "NODE_ENV=UNITTEST jest --config .jestCoveragerc.json --detectOpenHandles",
     "testDev": "NODE_ENV=UNITTEST jest --config .jestrc.json --watch",
     "validateSchema": "node ./src/graphql/scripts/verifySchema.js",
-    "validateSwagger": "node ./src/swagger/validateSwagger.js"
+    "validateSwagger": "node ./src/swagger/validateSwagger.js",
+    "cswBackfillService": "cross-env NODE_ENV=development nodemon $NODE_DEBUG_OPTION ./scripts/cswBackFill.js"
   },
   "husky": {
     "hooks": {

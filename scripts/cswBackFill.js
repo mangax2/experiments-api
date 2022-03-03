@@ -15,10 +15,11 @@ const formatMessage = (id, timestamp) => ({
 })
 
 const backFillExperimentData = async () => {
-  const [experimentIds, templateIds] = await Promise.all(
-    [getExperimentIds(true),
-      getExperimentIds(false)],
-  )
+  const [experimentIds, templateIds] =
+    await Promise.all(
+      [getExperimentIds(false),
+        getExperimentIds(true)],
+    )
   const ids = experimentIds.concat(templateIds)
   const timestamp = new Date(Date.now()).toISOString()
   const messages = ids.map(id => formatMessage(id, timestamp))

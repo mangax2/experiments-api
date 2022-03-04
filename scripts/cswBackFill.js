@@ -1,3 +1,4 @@
+const debounce = require('lodash/debounce')
 const configurator = require('../src/config/configurator')
 
 const QUEUE_ULR = 'https://sqs.us-east-1.amazonaws.com/286985534438/Exp-CSW-backfill-test' // dev queue
@@ -14,6 +15,21 @@ const formatMessage = (id, timestamp) => ({
   time: timestamp,
 })
 
+const asyncDebounce = (func, wait) => {
+  const debounced = debounce(async (resolve, reject, args) => {
+    const result = await func(...args)
+    resolve(result)
+  }, wait)
+  return (...args) =>
+    new Promise((resolve, reject) => {
+      debounced(resolve, reject, args)
+    })
+}
+
+// eslint-disable-next-line
+require('@babel/register')
+const debouncedBatchSendSQSMessages = asyncDebounce(require('../src/SQS/sqs').batchSendSQSMessages, 60000)
+
 const backFillExperimentData = async () => {
   const [experimentIds, templateIds] =
     await Promise.all(
@@ -21,12 +37,13 @@ const backFillExperimentData = async () => {
         getExperimentIds(true)],
     )
   const ids = experimentIds.concat(templateIds)
+  console.info(`number of experiments: ${ids.length}`)
   const timestamp = new Date(Date.now()).toISOString()
   const messages = ids.map(id => formatMessage(id, timestamp))
+  const promise = require('bluebird')
   const chunk = require('lodash/chunk')
-  chunk(messages, 10).map(async (m) => {
-    const { batchSendSQSMessages } = require('../src/SQS/sqs')
-    await batchSendSQSMessages(m, QUEUE_ULR)
+  promise.each(chunk(messages, 5), async (message) => {
+    await debouncedBatchSendSQSMessages(message, QUEUE_ULR)
   })
 }
 

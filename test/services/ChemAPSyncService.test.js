@@ -4,7 +4,7 @@ import apiUrls from '../../src/config/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import { dbRead } from '../../src/db/DbManager'
-import { mockResolve } from '../jestUtil'
+import { mock, mockResolve } from '../jestUtil'
 
 jest.mock('../../src/services/SecurityService')
 jest.mock('../../src/services/utility/OAuthUtil')
@@ -15,9 +15,11 @@ describe('ChemApSyncService', () => {
     apiUrls.chemApAPIUrl = 'chemApAPIUrl'
     dbRead.experiments.find = mockResolve({ name: 'test' })
     dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester'], group_ids: [] })
+    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([{ object_type: 'Catalog', catalog_type: 'Chemical' }])
     OAuthUtil.getAuthorizationHeaders = mockResolve([])
-    AppError.internalServerError = jest.fn()
-    AppError.notFound = jest.fn()
+    AppError.internalServerError = mock()
+    AppError.notFound = mock()
+    AppError.badRequest = mock()
   })
 
   test('should fail when experiment does not exist', async () => {
@@ -27,6 +29,28 @@ describe('ChemApSyncService', () => {
       // eslint-disable-next-line no-empty
     } catch (e) {}
     expect(AppError.notFound).toHaveBeenCalledWith('Experiment Not Found for requested experiment Id: 1', undefined, '1G4001')
+  })
+
+  test('should fail when experiment does not have a chemical property', async () => {
+    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([{}])
+    try {
+      await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+    expect(AppError.badRequest).toHaveBeenCalledWith('The experiment does not have any chemical data', undefined, '1G5001')
+  })
+
+  test('should fail when experiment has duplicate QandA properties', async () => {
+    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
+      { object_type: 'Catalog', catalog_type: 'Chemical' },
+      { object_type: 'QandAV3', question_code: 'APP_TIM' },
+      { object_type: 'QandAV3', question_code: 'APP_TIM' },
+    ])
+    try {
+      await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+    expect(AppError.badRequest).toHaveBeenCalledWith('Unable to parse experiment data, the following QandA data is defined more than once: APP_TIM', undefined, '1G5002')
   })
 
   test('user header is added', async () => {

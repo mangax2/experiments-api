@@ -15,7 +15,7 @@ describe('ChemApSyncService', () => {
     apiUrls.chemApAPIUrl = 'chemApAPIUrl'
     dbRead.experiments.find = mockResolve({ name: 'test' })
     dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester'], group_ids: [] })
-    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([{ object_type: 'Catalog', catalog_type: 'Chemical' }])
+    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([{ object_type: 'Catalog', catalog_type: 'CHEMICAL' }])
     OAuthUtil.getAuthorizationHeaders = mockResolve([])
     AppError.internalServerError = mock()
     AppError.notFound = mock()
@@ -42,7 +42,7 @@ describe('ChemApSyncService', () => {
 
   test('should fail when experiment has duplicate QandA properties', async () => {
     dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
-      { object_type: 'Catalog', catalog_type: 'Chemical' },
+      { object_type: 'Catalog', catalog_type: 'CHEMICAL' },
       { object_type: 'QandAV3', question_code: 'APP_TIM' },
       { object_type: 'QandAV3', question_code: 'APP_TIM' },
     ])

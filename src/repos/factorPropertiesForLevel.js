@@ -10,7 +10,7 @@ class factorPropertiesForLevelRepo {
 
   @setErrorCode('5W1000')
   findByExperimentId = (experimentId) => {
-    return this.rep.all('SELECT fp.* FROM factor_properties_for_level fp INNER JOIN factor f ON fp.factor_id = f.id WHERE f.experiment_id = $1', [experimentId])
+    return this.rep.any('SELECT fp.* FROM factor_properties_for_level fp INNER JOIN factor f ON fp.factor_id = f.id WHERE f.experiment_id = $1', [experimentId])
   }
 
   @setErrorCode('5W6000')

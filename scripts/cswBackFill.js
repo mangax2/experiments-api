@@ -1,7 +1,7 @@
-const debounce = require('lodash/debounce')
 const configurator = require('../src/config/configurator')
 
-const QUEUE_ULR = 'https://sqs.us-east-1.amazonaws.com/286985534438/Exp-CSW-backfill-test' // dev queue
+const EXP_QUEUE_ULR = 'https://sqs.us-east-1.amazonaws.com/286985534438/csw-experiment-backfill-test' // dev exp queue
+const UNIT_QUEUE_ULR = 'https://sqs.us-east-1.amazonaws.com/286985534438/csw-experimental-units-test' // unit exp queue
 
 const getExperimentIds = async (isTemplate) => {
   const { dbRead } = require('../src/db/DbManager')
@@ -15,35 +15,16 @@ const formatMessage = (id, timestamp) => ({
   time: timestamp,
 })
 
-const asyncDebounce = (func, wait) => {
-  const debounced = debounce(async (resolve, reject, args) => {
-    const result = await func(...args)
-    resolve(result)
-  }, wait)
-  return (...args) =>
-    new Promise((resolve, reject) => {
-      debounced(resolve, reject, args)
-    })
-}
-
-// eslint-disable-next-line
-require('@babel/register')
-const debouncedBatchSendSQSMessages = asyncDebounce(require('../src/SQS/sqs').batchSendSQSMessages, 60000)
-
 const backFillExperimentData = async () => {
-  const [experimentIds, templateIds] =
-    await Promise.all(
-      [getExperimentIds(false),
-        getExperimentIds(true)],
-    )
-  const ids = experimentIds.concat(templateIds)
-  console.info(`number of experiments: ${ids.length}`)
+  const experimentIds = await getExperimentIds(false)
   const timestamp = new Date(Date.now()).toISOString()
-  const messages = ids.map(id => formatMessage(id, timestamp))
-  const promise = require('bluebird')
+  console.info(`number of experiments: ${experimentIds.length}`, `timestamp: ${timestamp}`)
+  const messages = experimentIds.map(id => formatMessage(id, timestamp))
   const chunk = require('lodash/chunk')
-  promise.each(chunk(messages, 5), async (message) => {
-    await debouncedBatchSendSQSMessages(message, QUEUE_ULR)
+  const { batchSendSQSMessages } = require('../src/SQS/sqs')
+  chunk(messages, 10).map(async (message) => {
+    await batchSendSQSMessages(message, EXP_QUEUE_ULR)
+    await batchSendSQSMessages(message, UNIT_QUEUE_ULR)
   })
 }
 

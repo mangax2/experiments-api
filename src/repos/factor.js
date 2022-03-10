@@ -18,7 +18,7 @@ class factorRepo {
   })
 
   @setErrorCode('57C000')
-  batchFindAssociatedVariables = ids => {
+  batchFindAssociatedVariables = async ids => {
     const query = `select f.id, fl_parent.factor_id as associated_factor_id
     from factor f 
     join factor_level fl_this on f.id = fl_this.factor_id
@@ -27,7 +27,13 @@ class factorRepo {
     where f.id IN ($1:csv)
     group by fl_parent.factor_id, f.id`
 
-    return this.rep.any(query, [ids]).map(({ associated_factor_id }) => associated_factor_id)
+    const data = await this.rep.any(query, [ids])
+    const keyed = data.reduce((acc, row) => ({
+      ...acc,
+      [row.id]: row.associated_factor_id
+    }), {})
+
+    return ids.map(id => keyed[id])
   }
 
   @setErrorCode('57D000')

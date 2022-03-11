@@ -13,6 +13,7 @@ import LocationAssociationWithBlockService from './LocationAssociationWithBlockS
 import KafkaProducer from './kafka/KafkaProducer'
 import kafkaConfig from '../config/kafkaConfig'
 import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -180,7 +181,7 @@ class ExperimentalUnitService {
   @Transactional('mergeSetEntriesToUnits')
   mergeSetEntriesToUnits = (experimentId, unitsToSave, location, treatmentBlocks, context, tx) =>
     dbRead.unit.batchFindAllByLocationAndTreatmentBlocks(location, _.map(treatmentBlocks, 'id'))
-      .then((unitsFromDB) => {
+      .then(async (unitsFromDB) => {
         unitsToSave.forEach((unit) => {
           const matchingTreatmentBlock = treatmentBlocks.find(
             treatmentBlock => treatmentBlock.treatment_id === unit.treatmentId)
@@ -191,7 +192,12 @@ class ExperimentalUnitService {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
         } = this.getDbActions(unitsToSave, unitsFromDB, location)
 
-        return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
+        const createdUnits =
+          await this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
+        batchSendUnitChangeNotification(createdUnits || [].map(u => u.id), 'create')
+        batchSendUnitChangeNotification(unitsToBeUpdated || [].map(u => u.id), 'update')
+        batchSendUnitChangeNotification(unitsToBeDeleted || [], 'delete')
+        return createdUnits
       })
 
   @setErrorCode('17H000')
@@ -220,7 +226,7 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('17I000')
-  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
+  saveToDb = async (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
     const promises = []
     if (unitsToBeCreated.length > 0) {
       promises.push(dbWrite.unit.batchCreate(unitsToBeCreated, context, tx))
@@ -228,13 +234,11 @@ class ExperimentalUnitService {
     if (unitsToBeUpdated.length > 0) {
       promises.push(dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx))
     }
-    return tx.batch(promises)
-      .then(() => {
-        if (unitsToBeDeleted.length > 0) {
-          return dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
-        }
-        return Promise.resolve()
-      })
+    const [created] = await tx.batch(promises)
+    if (unitsToBeDeleted.length > 0) {
+      await dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
+    }
+    return created
   }
 
   @setErrorCode('17J000')
@@ -264,10 +268,12 @@ class ExperimentalUnitService {
               setEntryId: unit.set_entry_id,
             }
           })
-          return dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
-            this.sendDeactivationNotifications(results)
-            return results
-          })
+          return dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx)
+            .then(async () => {
+              this.sendDeactivationNotifications(results)
+              batchSendUnitChangeNotification(results.map(unit => unit.id), 'update')
+              return results
+            })
         })
     })
 

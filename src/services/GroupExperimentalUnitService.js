@@ -18,6 +18,7 @@ import OAuthUtil from './utility/OAuthUtil'
 import VaultUtil from './utility/VaultUtil'
 import apiUrls from '../config/apiUrls'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -446,10 +447,14 @@ class GroupExperimentalUnitService {
         this.saveComparedUnits(experimentId, comparisonResults, context, tx))
 
   @setErrorCode('1FY000')
-  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => tx.batch([
-    this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
-    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
-  ])
+  saveComparedUnits = async (experimentId, comparisonUnits, context, tx) => {
+    const [createdUnitIds, deletedUnitIds] = await tx.batch([
+      this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
+      this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
+    ])
+    batchSendUnitChangeNotification(createdUnitIds || [], 'create')
+    batchSendUnitChangeNotification(deletedUnitIds || [], 'delete')
+  }
 
   @setErrorCode('1FZ000')
   compareWithExistingUnitsByExperiment = (experimentId, newUnits) =>

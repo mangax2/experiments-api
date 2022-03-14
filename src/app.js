@@ -8,9 +8,13 @@ configurator.init().then(() => {
     require('@babel/register')
   }
 
-  configurator.set('kafka.ca', Buffer.from(configurator.get('kafka.ca'), 'base64').toString())
-  configurator.set('kafka.clientCert', Buffer.from(configurator.get('kafka.clientCert'), 'base64').toString())
-  configurator.set('kafka.privateKey', Buffer.from(configurator.get('kafka.privateKey'), 'base64').toString())
+  const kafkaSSL = {
+    ...configurator.get('kafka.ssl'),
+    ca: Buffer.from(configurator.get('kafka.ssl.ca'), 'base64').toString(),
+    cert: Buffer.from(configurator.get('kafka.ssl.cert'), 'base64').toString(),
+    key: Buffer.from(configurator.get('kafka.ssl.key'), 'base64').toString(),
+  }
+  configurator.set('kafka.ssl', kafkaSSL)
 
   const swaggerDoc = require('./swagger/swagger.json')
   const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')

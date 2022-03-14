@@ -75,36 +75,32 @@ if (!process.env.VAULT_ENV) {
 }
 
 // Database connection parameters:
-const dbWriteConfig = {
+let dbWriteConfig = {
   type: 'conn',
   application_name: `experiments-api-${process.env.VAULT_ENV}`,
 }
-const dbReadConfig = {
+let dbReadConfig = {
   type: 'conn',
   application_name: `experiments-api-${process.env.VAULT_ENV}-ro`,
 }
 
 // Setup database config if not running unit tests
 if (process.env.VAULT_ENV) {
-  dbWriteConfig.host = configurator.get('database.host')
-  dbWriteConfig.port = configurator.get('database.port')
-  dbWriteConfig.database = configurator.get('database.name')
-  dbWriteConfig.min = configurator.get('database.min')
-  dbWriteConfig.max = configurator.get('database.max')
-  dbWriteConfig.idleTimeoutMillis = configurator.get('database.idleTimeout')
-  dbWriteConfig.ssl = { ca: Buffer.from(configurator.get('database.ca'), 'base64').toString() }
-  dbWriteConfig.user = configurator.get('database.appUser')
-  dbWriteConfig.password = configurator.get('database.appUserPassword')
+  dbWriteConfig = {
+    ...dbWriteConfig,
+    ...configurator.get('database'),
+    ssl: {
+      ca: Buffer.from(configurator.get('database.ca'), 'base64').toString(),
+    },
+  }
 
-  dbReadConfig.host = configurator.get('databaseRo.host')
-  dbReadConfig.port = configurator.get('databaseRo.port')
-  dbReadConfig.database = configurator.get('databaseRo.name')
-  dbReadConfig.min = configurator.get('databaseRo.min')
-  dbReadConfig.max = configurator.get('databaseRo.max')
-  dbReadConfig.idleTimeoutMillis = configurator.get('databaseRo.idleTimeout')
-  dbReadConfig.ssl = { ca: Buffer.from(configurator.get('databaseRo.ca'), 'base64').toString() }
-  dbReadConfig.user = configurator.get('databaseRo.appUser')
-  dbReadConfig.password = configurator.get('databaseRo.appUserPassword')
+  dbReadConfig = {
+    ...dbReadConfig,
+    ...configurator.get('databaseRo'),
+    ssl: {
+      ca: Buffer.from(configurator.get('databaseRo.ca'), 'base64').toString(),
+    },
+  }
 
   console.info('loaded db connection config')
 }

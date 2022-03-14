@@ -9,10 +9,7 @@ class KafkaProducer {
       client_id: configurator.get('client.clientId'),
       kafkaHost: configurator.get('kafka.host'),
       sslOptions: {
-        cert: configurator.get('kafka.clientCert'),
-        key: configurator.get('kafka.privateKey'),
-        passphrase: configurator.get('kafka.password'),
-        ca: configurator.get('kafka.ca'),
+        ...configurator.get('kafka.ssl'),
         rejectUnauthorized: false,
       },
     }

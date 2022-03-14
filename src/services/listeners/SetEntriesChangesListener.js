@@ -10,10 +10,7 @@ class SetEntriesChangesListener {
       kafkaHost: configurator.get('kafka.host'),
       ssl: true,
       sslOptions: {
-        cert: configurator.get('kafka.clientCert'),
-        key: configurator.get('kafka.privateKey'),
-        passphrase: configurator.get('kafka.password'),
-        ca: configurator.get('kafka.ca'),
+        ...configurator.get('kafka.ssl'),
       },
     }
 

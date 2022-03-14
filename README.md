@@ -15,15 +15,10 @@ Before running the application locally, you must run:
 
 ### Development
 
-With hot reloading:
 `npm run dev`
 
 ### Debugging
 
-With hot reloading:
-`npm run devDebug`
-
-Without hot reloading:
 `npm run debug`
 
 If you are using VSCode, you may also use the launch configuration in `.vscode`.

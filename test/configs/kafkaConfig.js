@@ -1,9 +1,12 @@
 const kafkaConfig = {
   enableKafka: false,
   host: 'kfk.awsuse1.tst.edh.cnb:9093',
-  ca: 'ca',
-  clientCert: 'cert',
-  privateKey: 'key',
+  ssl: {
+    ca: 'ca',
+    cert: 'cert',
+    key: 'key',
+    passphrase: 'password',
+  },
   topics: {
     repPackingTopic: 'rsr.field-experiments.test.incoming.json',
     repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json',

@@ -25,11 +25,11 @@ If you are using VSCode, you may also use the launch configuration in `.vscode`.
 
 ### Tests
 
-With hot reloading:
-`npm run testDev`
-
-Without hot reloading:
+Run all tests:
 `npm run test`
+
+Run with file watching:
+`npm run testDev`
 
 Generate code coverage report in `./coverage`:
 `npm run testCoverage`

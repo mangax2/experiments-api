@@ -2,7 +2,9 @@ import _ from 'lodash'
 import AppError from './AppError'
 import HttpUtil from './HttpUtil'
 import OAuthUtil from './OAuthUtil'
-import apiUrls from '../../config/apiUrls'
+import configurator from '../../configs/configurator'
+
+const apiUrls = configurator.get('urls')
 
 class QuestionsUtil {
   static getAnswerKeys = (questionCode, uomCode) =>

@@ -4,10 +4,11 @@ import AppError from './utility/AppError'
 import AppUtil from './utility/AppUtil'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import { dbWrite, dbRead } from '../db/DbManager'
 import { notifyChanges } from '../decorators/notifyChanges'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 10XXXX

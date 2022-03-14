@@ -2,9 +2,10 @@ import _ from 'lodash'
 import TagValidator from '../validations/TagValidator'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import AppError from './utility/AppError'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1PXXXX

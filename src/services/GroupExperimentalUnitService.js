@@ -15,10 +15,11 @@ import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import VaultUtil from './utility/VaultUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 
+const apiUrls = configurator.get('urls')
+const aws = configurator.get('aws')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 const trimGroupGenerationData =
@@ -232,7 +233,7 @@ class GroupExperimentalUnitService {
 
         // return AWSUtil.callLambdaLocal(body)
         // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-        return AWSUtil.callLambda(VaultUtil.awsLambdaName, body)
+        return AWSUtil.callLambda(aws.lambdaName, body)
       }))
 
       return Promise.all(groupPromises)
@@ -289,7 +290,7 @@ class GroupExperimentalUnitService {
 
       // return AWSUtil.callLambdaLocal(body)
       // return AWSUtil.callLambda('cosmos-experiments-test-lambda', body)
-      return AWSUtil.callLambda(VaultUtil.awsLambdaName, body)
+      return AWSUtil.callLambda(aws.lambdaName, body)
         .then((data) => {
           const response = JSON.parse(data.Payload)
           return [response.locationGroups[0]]

@@ -2,8 +2,9 @@ import * as _ from 'lodash'
 import AppError from './utility/AppError'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 
+const apiUrls = configurator.get('urls')
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1WXXXX

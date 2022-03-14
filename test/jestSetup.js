@@ -1,4 +1,17 @@
 import '@babel/polyfill'
+import lodash from 'lodash'
+import configurator from '../src/configs/configurator'
+import apiUrls from './configs/apiUrls'
+import kafkaConfig from './configs/kafkaConfig'
+import coreSource from './configs/coreSource'
+
+const configs = {
+  urls: apiUrls,
+  kafka: kafkaConfig,
+  ...coreSource,
+}
+
+configurator.get = path => (lodash.get(configs, path) ?? path.split('.').pop())
 
 jest.setTimeout(1000)
 beforeEach(() => { expect.hasAssertions() })

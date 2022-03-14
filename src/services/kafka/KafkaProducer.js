@@ -1,19 +1,18 @@
 import _ from 'lodash'
 import { KafkaClient, Producer } from 'kafka-node'
+import configurator from '../../configs/configurator'
 import AvroUtil from '../utility/AvroUtil'
-import VaultUtil from '../utility/VaultUtil'
-import kafkaConfig from '../../config/kafkaConfig'
 
 class KafkaProducer {
   static init = () => {
     const params = {
-      client_id: VaultUtil.clientId,
-      kafkaHost: kafkaConfig.host,
+      client_id: configurator.get('client.clientId'),
+      kafkaHost: configurator.get('kafka.host'),
       sslOptions: {
-        cert: VaultUtil.kafkaClientCert,
-        key: VaultUtil.kafkaPrivateKey,
-        passphrase: VaultUtil.kafkaPassword,
-        ca: VaultUtil.kafkaCA,
+        cert: configurator.get('kafka.clientCert'),
+        key: configurator.get('kafka.privateKey'),
+        passphrase: configurator.get('kafka.password'),
+        ca: configurator.get('kafka.ca'),
         rejectUnauthorized: false,
       },
     }

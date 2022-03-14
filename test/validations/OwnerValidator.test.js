@@ -1,7 +1,7 @@
 import { mock, mockResolve, mockReject } from '../jestUtil'
 import OwnerValidator from '../../src/validations/OwnerValidator'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import apiUrls from '../../src/config/apiUrls'
+import apiUrls from '../configs/apiUrls'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import AppError from '../../src/services/utility/AppError'
 import { dbRead } from '../../src/db/DbManager'

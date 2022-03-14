@@ -1,6 +1,6 @@
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import AppError from '../../src/services/utility/AppError'
-import apiUrls from '../../src/config/apiUrls'
+import apiUrls from '../configs/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import { dbRead, dbWrite } from '../../src/db/DbManager'

@@ -1,7 +1,7 @@
 import { mock, mockReject, mockResolve } from '../jestUtil'
 import TagService from '../../src/services/TagService'
 import AppUtil from '../../src/services/utility/AppUtil'
-import apiUrls from '../../src/config/apiUrls'
+import apiUrls from '../configs/apiUrls'
 
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'

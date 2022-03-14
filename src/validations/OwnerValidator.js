@@ -5,11 +5,10 @@ import AppError from '../services/utility/AppError'
 import { dbRead } from '../db/DbManager'
 import HttpUtil from '../services/utility/HttpUtil'
 import OAuthUtil from '../services/utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
-import config from '../../config'
+import configurator from '../configs/configurator'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
-
 
 function getPAPIResult(graphqlQuery, errorCode) {
   return OAuthUtil.getAuthorizationHeaders().then(header =>
@@ -167,7 +166,7 @@ class OwnerValidator extends SchemaValidator {
       const profileGroupIds = _.compact(_.map(result.body.data.getUserById.groups, 'id'))
       const errorMessage = 'You cannot remove yourself as an owner'
 
-      const concatGroups = _.concat(groupIds, config.admin_group)
+      const concatGroups = _.concat(groupIds, 'COSMOS-ADMIN')
 
       if (_.intersection(concatGroups, profileGroupIds).length === 0) {
         return Promise.reject(AppError.badRequest(errorMessage, undefined, getFullErrorCode('3D7001')))

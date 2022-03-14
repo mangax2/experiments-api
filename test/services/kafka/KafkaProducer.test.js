@@ -1,6 +1,5 @@
 import { mock } from '../../jestUtil'
-import VaultUtil from '../../../src/services/utility/VaultUtil'
-import kafkaConfig from '../../../src/config/kafkaConfig'
+import kafkaConfig from '../../configs/kafkaConfig'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
 
 jest.mock('kafka-node')
@@ -11,10 +10,6 @@ const KafkaProducer = require('../../../src/services/kafka/KafkaProducer').defau
 describe('KafkaProducer', () => {
   describe('init', () => {
     test('calls to create a new producer', () => {
-      VaultUtil.kafkaClientCert = 'cert'
-      VaultUtil.kafkaPrivateKey = 'key'
-      VaultUtil.kafkaPassword = 'password'
-      VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
       kafkaConfig.host = 'host'
       KafkaProducer.createProducer = mock()
       const kafkaClient = { constructor() { return {} } }

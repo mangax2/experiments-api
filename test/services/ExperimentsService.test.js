@@ -8,7 +8,7 @@ import AppError from '../../src/services/utility/AppError'
 import CapacityRequestService from '../../src/services/CapacityRequestService'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
-import apiUrls from '../../src/config/apiUrls'
+import apiUrls from '../configs/apiUrls'
 
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')

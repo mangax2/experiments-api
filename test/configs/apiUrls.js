@@ -1,4 +1,4 @@
-const localApiUrls = {
+const apiUrls = {
   capacityRequestAPIUrl: 'https://api01-np.agro.services/capacity-request-api',
   experimentsTaggingAPIUrl: 'https://experiments-tagging-api-d.velocity-np.ag/experiments-tagging-api',
   materialListsAPIUrl: 'https://api01-np.agro.services/material-lists-api/v1',
@@ -12,8 +12,5 @@ const localApiUrls = {
   velocityUrl: 'https://dev.velocity-np.ag',
   chemApAPIUrl: 'https://api01-np.agro.services/chemical-application-plan/v2',
 }
-const apiUrls = process.env.EXTERNAL_API_URLS
-  ? JSON.parse(process.env.EXTERNAL_API_URLS)
-  : localApiUrls
 
 export default apiUrls

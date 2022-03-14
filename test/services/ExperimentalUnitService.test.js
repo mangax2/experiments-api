@@ -5,7 +5,7 @@ import AppError from '../../src/services/utility/AppError'
 import AppUtil from '../../src/services/utility/AppUtil'
 import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
-import kafkaConfig from '../../src/config/kafkaConfig'
+import kafkaConfig from '../configs/kafkaConfig'
 
 describe('ExperimentalUnitService', () => {
   let target

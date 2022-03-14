@@ -8,8 +8,7 @@ import { dbRead, dbWrite } from '../../src/db/DbManager'
 import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
-import VaultUtil from '../../src/services/utility/VaultUtil'
-import apiUrls from '../../src/config/apiUrls'
+import apiUrls from '../configs/apiUrls'
 
 describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
@@ -17,7 +16,6 @@ describe('GroupExperimentalUnitService', () => {
   let target
   const testContext = {}
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
-  VaultUtil.awsLambdaName = 'cosmos-group-generation-lambda-dev'
 
   beforeEach(() => {
     target = new GroupExperimentalUnitService()

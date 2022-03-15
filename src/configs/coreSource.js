@@ -4,7 +4,7 @@ const paths = {
   client: {
     clientId: formatVaultPath('client/client_id'),
     clientSecret: formatVaultPath('client/client_secret'),
-    groupId: 'COSMOS-ADMIN',
+    adminGroup: 'COSMOS-ADMIN',
   },
   aws: {
     accessKeyId: formatVaultPath('aws/accessKeyId'),

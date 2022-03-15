@@ -1,7 +1,7 @@
 const coreSource = {
   client: {
     clientId: 'PD-EXPERIMENTS-API-DEV-SVC',
-    groupId: 'COSMOS-ADMIN',
+    adminGroup: 'COSMOS-ADMIN',
   },
   aws: {
     lambdaName: 'cosmos-group-generation-lambda-dev',

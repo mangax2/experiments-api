@@ -166,7 +166,7 @@ class OwnerValidator extends SchemaValidator {
       const profileGroupIds = _.compact(_.map(result.body.data.getUserById.groups, 'id'))
       const errorMessage = 'You cannot remove yourself as an owner'
 
-      const concatGroups = _.concat(groupIds, 'COSMOS-ADMIN')
+      const concatGroups = _.concat(groupIds, configurator.get('client.groupId'))
 
       if (_.intersection(concatGroups, profileGroupIds).length === 0) {
         return Promise.reject(AppError.badRequest(errorMessage, undefined, getFullErrorCode('3D7001')))

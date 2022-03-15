@@ -70,8 +70,8 @@ class SecurityService {
       this.ownerService.getOwnersByExperimentId(id),
       this.getGroupsByUserId(context.userId)])
     if (experimentOwners && userPAPIGroups) {
-      const ownerGroups = experimentOwners.group_ids.concat('COSMOS-ADMIN')
-      const reviewerGroups = experimentOwners.reviewer_group_ids.concat('COSMOS-ADMIN')
+      const ownerGroups = experimentOwners.group_ids.concat(configurator.get('client.groupId'))
+      const reviewerGroups = experimentOwners.reviewer_group_ids.concat(configurator.get('client.groupId'))
       const upperCaseUserIds = experimentOwners.user_ids.map(user => user.toUpperCase())
       if (upperCaseUserIds.includes(context.userId) ||
         _.intersection(ownerGroups, userPAPIGroups).length > 0) {

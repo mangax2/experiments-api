@@ -4,6 +4,7 @@ const paths = {
   client: {
     clientId: formatVaultPath('client/client_id'),
     clientSecret: formatVaultPath('client/client_secret'),
+    groupId: 'COSMOS-ADMIN',
   },
   aws: {
     accessKeyId: formatVaultPath('aws/accessKeyId'),
@@ -83,6 +84,22 @@ if (['np', 'prod'].includes(process.env.VAULT_ENV)) {
     port: formatVaultPath('migrations/port'),
     user: formatVaultPath('migrations/user'),
   }
+}
+
+if (process.env.NODE_ENV === 'development') {
+  paths.database = {
+    ...paths.database,
+    host: 'localhost',
+    port: '9000',
+  }
+
+  paths.databaseRo = {
+    ...paths.databaseRo,
+    host: 'localhost',
+    port: '9001',
+  }
+
+  paths.kafka.enableKafka = false
 }
 
 module.exports = paths

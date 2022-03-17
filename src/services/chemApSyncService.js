@@ -1,9 +1,10 @@
 import { dbRead } from '../db/DbManager'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import AppError from './utility/AppError'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
 const chemicalQAndATags = ['APP_RATE']

@@ -1,7 +1,9 @@
 import {
   has, property, compact, uniq,
 } from 'lodash'
-import settings from '../config/settings'
+import configurator from '../configs/configurator'
+
+const settings = configurator.get('settings')
 
 const maxIdCountCheck = (ids, maxLength) => {
   if (ids.length > maxLength) {

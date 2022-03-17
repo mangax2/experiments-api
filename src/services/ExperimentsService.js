@@ -3,7 +3,7 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -19,6 +19,7 @@ import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 15XXXX

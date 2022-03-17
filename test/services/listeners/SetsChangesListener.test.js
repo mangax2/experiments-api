@@ -1,5 +1,4 @@
-import VaultUtil from '../../../src/services/utility/VaultUtil'
-import kafkaConfig from '../../../src/config/kafkaConfig'
+import kafkaConfig from '../../configs/kafkaConfig'
 import { dbWrite } from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
@@ -19,10 +18,6 @@ describe('SetsChangesListener', () => {
     describe('listen', () => {
       test('calls things correctly', () => {
         const target = new SetsChangesListener()
-        VaultUtil.kafkaClientCert = 'cert'
-        VaultUtil.kafkaPrivateKey = 'key'
-        VaultUtil.kafkaPassword = 'password'
-        VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
         kafkaConfig.host = 'host'
         kafkaConfig.topics = { setsChangesTopic: 'topic' }
         const consumer = { on: jest.fn() }
@@ -42,6 +37,7 @@ describe('SetsChangesListener', () => {
             cert: 'cert',
             key: 'key',
             passphrase: 'password',
+            ca: 'ca',
           },
         }, ['topic'])
       })

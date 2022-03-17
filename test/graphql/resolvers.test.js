@@ -1,13 +1,11 @@
 import { mock } from '../jestUtil'
 import resolvers from '../../src/graphql/resolvers'
-import settings from '../../src/config/settings'
 
 describe('resolvers', () => {
   let loadMock
   let context
 
   beforeEach(() => {
-    settings.maxExperimentsToRetrieve = 10
     loadMock = mock()
     context = {
       loaders: {

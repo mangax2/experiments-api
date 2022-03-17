@@ -2,6 +2,7 @@ import _ from 'lodash'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
 import { dbRead, dbWrite } from '../db/DbManager'
+import configurator from '../configs/configurator'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import QuestionsUtil from './utility/QuestionsUtil'
@@ -11,7 +12,6 @@ import ExperimentsService from './ExperimentsService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import KafkaProducer from './kafka/KafkaProducer'
-import kafkaConfig from '../config/kafkaConfig'
 import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -273,7 +273,7 @@ class ExperimentalUnitService {
 
   @setErrorCode('17K000')
   sendDeactivationNotifications = (deactivations) => {
-    if (kafkaConfig.enableKafka === 'true') {
+    if (configurator.get('kafka.enableKafka')) {
       _.forEach(deactivations, (deactivation) => {
         try {
           const message = {
@@ -282,9 +282,9 @@ class ExperimentalUnitService {
             setEntryId: deactivation.setEntryId,
           }
           KafkaProducer.publish({
-            topic: kafkaConfig.topics.unitDeactivation,
+            topic: configurator.get('kafka.topics.unitDeactivation'),
             message,
-            schemaId: kafkaConfig.schema.unitDeactivation,
+            schemaId: configurator.get('kafka.schema.unitDeactivation'),
             schema: experimentalUnitDeactivationSchema,
           })
         } catch (err) {

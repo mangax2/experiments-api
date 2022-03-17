@@ -1,26 +1,49 @@
 # experiments-api
 This is the API project for Velocity Experiments Workflow.
 
-### Secrets Needed to Run
-To run this project, you will need the following secrets from Vault:
+## Install
 
-In your .bash_profile, you will need
-```
-export EXPERIMENTS_API_CLIENT_ID=
-export EXPERIMENTS_API_CLIENT_SECRET=
-export KAFKA_PASSWORD=
+`npm ci`
 
-export ENV=local
-```
+## Running
 
-Also, you will need to create `experiments-api-cosmos.pem` in the src directory. This item can be found base64 encoded in Vault at cosmos/experiments/api/dev/kafka/privateKey.
+Before running the application locally, you must run:
 
-Lastly, you will need to create an `overrides.json` in the `./src/config` directory with the following values: 
+- `vaultAuth` to authenticate to Vault
+- `ssh pg-dev` to open a connection to dev database
+- `ssh pg-dev-ro` to open a connection to read-only dev database
+
+### Development
+
+`npm run dev`
+
+### Debugging
+
+`npm run debug`
+
+If you are using VSCode, you may also use the launch configuration in `.vscode`.
+
+### Tests
+
+Run all tests:
+`npm run test`
+
+Run with file watching:
+`npm run testDev`
+
+Generate code coverage report in `./coverage`:
+`npm run testCoverage`
+
+### Overrides
+
+To override configuration values in `./src/configs/coreSource.js` pulled from Vault, you can create an `overrides.json`
+in the `./src/configs/` directory containing keys and values you wish to override.
+
+i.e. to enable Kafka locally;
 ```
 {
-    "databaseHost": "localhost",
-    "databasePort": "9000",
-    "databaseRoHost": "localhost",
-    "databaseRoPort": "9001"
+    "kafka": {
+        "enableKafka": true,
+    }
 }
 ```

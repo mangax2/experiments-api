@@ -2,7 +2,7 @@ import QuestionsUtil from '../../../src/services/utility/QuestionsUtil'
 import AppError from '../../../src/services/utility/AppError'
 import HttpUtil from '../../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../../src/services/utility/OAuthUtil'
-import apiUrls from '../../../src/config/apiUrls'
+import apiUrls from '../../configs/apiUrls'
 import { mock, mockReject, mockResolve } from '../../jestUtil'
 
 const testHeaders = [{ name: 'authorization', value: 'bearer token' }]

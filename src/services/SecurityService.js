@@ -1,12 +1,12 @@
 import _ from 'lodash'
-import config from '../../config'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
-import apiUrls from '../config/apiUrls'
+import configurator from '../configs/configurator'
 import AppError from './utility/AppError'
 import OwnerService from './OwnerService'
 import { dbRead } from '../db/DbManager'
 
+const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1OXXXX
@@ -70,8 +70,8 @@ class SecurityService {
       this.ownerService.getOwnersByExperimentId(id),
       this.getGroupsByUserId(context.userId)])
     if (experimentOwners && userPAPIGroups) {
-      const ownerGroups = experimentOwners.group_ids.concat(config.admin_group)
-      const reviewerGroups = experimentOwners.reviewer_group_ids.concat(config.admin_group)
+      const ownerGroups = experimentOwners.group_ids.concat(configurator.get('client.adminGroup'))
+      const reviewerGroups = experimentOwners.reviewer_group_ids.concat(configurator.get('client.adminGroup'))
       const upperCaseUserIds = experimentOwners.user_ids.map(user => user.toUpperCase())
       if (upperCaseUserIds.includes(context.userId) ||
         _.intersection(ownerGroups, userPAPIGroups).length > 0) {

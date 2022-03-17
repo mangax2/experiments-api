@@ -1,7 +1,6 @@
 import graphqlHTTP from 'express-graphql'
 import { GraphQLError } from 'graphql'
 import loaders from './loaders'
-import config from '../../config'
 import AuditManager from './GraphQLAuditManager'
 
 function LimitQueryDepth(maxDepth) {
@@ -92,7 +91,7 @@ function graphqlMiddlewareFunction(schema) {
         LimitNumQueries(5),
         mutuallyExclusiveFields('treatmentVariableLevels', 'valueJSON', 'treatmentVariableLevelDetails', 'treatmentVariableLevelFlatDetails'),
       ],
-      graphiql: config.env === 'local',
+      graphiql: process.env.NODE_ENV === 'development',
     })
     return handler(request, response)
   }

@@ -1,19 +1,18 @@
 import agent from 'superagent'
 import AppError from './AppError'
 import HttpUtil from './HttpUtil'
-import VaultUtil from './VaultUtil'
-import apiUrls from '../../config/apiUrls'
+import configurator from '../../configs/configurator'
 
 class OAuthUtil {
   static getAuthorizationHeaders() {
     const params = {
-      client_id: VaultUtil.clientId,
-      client_secret: VaultUtil.clientSecret,
-      scope: `${VaultUtil.clientId}/.default`,
+      client_id: configurator.get('client.clientId'),
+      client_secret: configurator.get('client.clientSecret'),
+      scope: `${configurator.get('client.clientId')}/.default`,
       grant_type: 'client_credentials',
     }
     const startTime = new Date().getTime()
-    return agent.post(apiUrls.oauthUrl)
+    return agent.post(configurator.get('apiUrls.oauthUrl'))
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .send(params)
       .then((result) => {

@@ -2,8 +2,7 @@ import { ConsumerGroup } from 'kafka-node'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import { dbRead } from '../../db/DbManager'
-import VaultUtil from '../utility/VaultUtil'
-import kafkaConfig from '../../config/kafkaConfig'
+import configurator from '../../configs/configurator'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
@@ -16,19 +15,16 @@ class ManageRepsAndUnitsListener {
 
   listen() {
     const params = {
-      client_id: VaultUtil.clientId,
-      groupId: VaultUtil.clientId,
-      kafkaHost: kafkaConfig.host,
+      client_id: configurator.get('client.clientId'),
+      groupId: configurator.get('client.clientId'),
+      kafkaHost: configurator.get('kafka.host'),
       ssl: true,
       sslOptions: {
-        cert: VaultUtil.kafkaClientCert,
-        key: VaultUtil.kafkaPrivateKey,
-        passphrase: VaultUtil.kafkaPassword,
-        ca: VaultUtil.kafkaCA,
+        ...configurator.get('kafka.ssl'),
       },
     }
 
-    const topics = [kafkaConfig.topics.repPackingTopic]
+    const topics = [configurator.get('kafka.topics.repPackingTopic')]
     this.consumer = ManageRepsAndUnitsListener.createConsumer(params, topics)
 
     // cannot test this event
@@ -96,7 +92,7 @@ class ManageRepsAndUnitsListener {
 
   static sendResponseMessage = (setId, isSuccess) => {
     KafkaProducer.publish({
-      topic: kafkaConfig.topics.repPackingResultTopic,
+      topic: configurator.get('kafka.topics.repPackingResultTopic'),
       message: {
         setId,
         result: isSuccess ? 'SUCCESS' : 'FAILURE',

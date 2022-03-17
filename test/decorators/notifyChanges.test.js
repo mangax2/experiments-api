@@ -1,5 +1,5 @@
 import { mock } from '../jestUtil'
-import kafkaConfig from '../../src/config/kafkaConfig'
+import kafkaConfig from '../configs/kafkaConfig'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 
 kafkaConfig.enableKafka = 'true'

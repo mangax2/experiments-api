@@ -1,7 +1,6 @@
 import promise from 'bluebird'
 import pgPromise from 'pg-promise'
 import { setDbInstance } from '@monsantoit/pg-transactional'
-import config from '../../config'
 import CombinationElement from '../repos/combinationElement'
 import DependentVariable from '../repos/dependentVariable'
 import DesignSpecificationDetail from '../repos/designSpecificationDetail'
@@ -29,7 +28,7 @@ import GraphQLAudit from '../repos/graphqlAudit'
 import AnalysisModel from '../repos/analysisModel'
 import Block from '../repos/block'
 import TreatmentBlock from '../repos/treatmentBlock'
-import configurator from '../config/configurator'
+import configurator from '../configs/configurator'
 import TreatmentVariableLevelDetails from '../repos/treatmentFactorLevelDetails'
 import TreatmentVariableLevelFlatDetails from '../repos/treatmentFactorLevelFlatDetails'
 
@@ -71,41 +70,37 @@ const options = {
 }
 
 // Without this option, mocking parts of pg-promise in tests is not possible
-if (config.node_env === 'UNITTEST' || config.node_env === 'test') {
+if (!process.env.VAULT_ENV) {
   options.noLocking = true
 }
 
 // Database connection parameters:
-const dbWriteConfig = {
+let dbWriteConfig = {
   type: 'conn',
-  application_name: `experiments-api-${config.node_env}`,
+  application_name: `experiments-api-${process.env.VAULT_ENV}`,
 }
-const dbReadConfig = {
+let dbReadConfig = {
   type: 'conn',
-  application_name: `experiments-api-${config.node_env}-ro`,
+  application_name: `experiments-api-${process.env.VAULT_ENV}-ro`,
 }
 
 // Setup database config if not running unit tests
-if (config.node_env !== 'UNITTEST') {
-  dbWriteConfig.host = configurator.get('databaseHost')
-  dbWriteConfig.port = configurator.get('databasePort')
-  dbWriteConfig.database = configurator.get('databaseName')
-  dbWriteConfig.min = configurator.get('databaseMin')
-  dbWriteConfig.max = configurator.get('databaseMax')
-  dbWriteConfig.idleTimeoutMillis = configurator.get('databaseIdleTimeout')
-  dbWriteConfig.ssl = { ca: Buffer.from(configurator.get('databaseCa'), 'base64').toString() }
-  dbWriteConfig.user = configurator.get('databaseAppUser')
-  dbWriteConfig.password = configurator.get('databaseAppUserPassword')
+if (process.env.VAULT_ENV) {
+  dbWriteConfig = {
+    ...dbWriteConfig,
+    ...configurator.get('database'),
+    ssl: {
+      ca: Buffer.from(configurator.get('database.ca'), 'base64').toString(),
+    },
+  }
 
-  dbReadConfig.host = configurator.get('databaseRoHost')
-  dbReadConfig.port = configurator.get('databaseRoPort')
-  dbReadConfig.database = configurator.get('databaseRoName')
-  dbReadConfig.min = configurator.get('databaseRoMin')
-  dbReadConfig.max = configurator.get('databaseRoMax')
-  dbReadConfig.idleTimeoutMillis = configurator.get('databaseRoIdleTimeout')
-  dbReadConfig.ssl = { ca: Buffer.from(configurator.get('databaseRoCa'), 'base64').toString() }
-  dbReadConfig.user = configurator.get('databaseRoAppUser')
-  dbReadConfig.password = configurator.get('databaseRoAppUserPassword')
+  dbReadConfig = {
+    ...dbReadConfig,
+    ...configurator.get('databaseRo'),
+    ssl: {
+      ca: Buffer.from(configurator.get('databaseRo.ca'), 'base64').toString(),
+    },
+  }
 
   console.info('loaded db connection config')
 }

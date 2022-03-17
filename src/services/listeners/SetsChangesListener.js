@@ -2,28 +2,24 @@ import { ConsumerGroup } from 'kafka-node'
 import avro from 'avsc'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
-import VaultUtil from '../utility/VaultUtil'
-import kafkaConfig from '../../config/kafkaConfig'
+import configurator from '../../configs/configurator'
 import { dbWrite } from '../../db/DbManager'
 import { sendKafkaNotification } from '../../decorators/notifyChanges'
 
 class SetsChangesListener {
   listen() {
     const params = {
-      client_id: VaultUtil.clientId,
-      groupId: VaultUtil.clientId,
-      kafkaHost: kafkaConfig.host,
+      client_id: configurator.get('client.clientId'),
+      groupId: configurator.get('client.clientId'),
+      kafkaHost: configurator.get('kafka.host'),
       ssl: true,
       sslOptions: {
-        cert: VaultUtil.kafkaClientCert,
-        key: VaultUtil.kafkaPrivateKey,
-        passphrase: VaultUtil.kafkaPassword,
-        ca: VaultUtil.kafkaCA,
+        ...configurator.get('kafka.ssl'),
       },
       encoding: 'buffer',
     }
 
-    const topics = [kafkaConfig.topics.setsChangesTopic]
+    const topics = [configurator.get('kafka.topics.setsChangesTopic')]
     this.consumer = SetsChangesListener.createConsumer(params, topics)
 
     // cannot test this event

@@ -1,5 +1,4 @@
-import VaultUtil from '../../../src/services/utility/VaultUtil'
-import kafkaConfig from '../../../src/config/kafkaConfig'
+import kafkaConfig from '../../configs/kafkaConfig'
 import { dbRead } from '../../../src/db/DbManager'
 import { mockResolve } from '../../jestUtil'
 
@@ -41,10 +40,6 @@ describe('ManageRepsAndUnitsListener', () => {
     describe('listen', () => {
       test('calls things correctly', () => {
         const target = new ManageRepsAndUnitsListener()
-        VaultUtil.kafkaClientCert = 'cert'
-        VaultUtil.kafkaPrivateKey = 'key'
-        VaultUtil.kafkaPassword = 'password'
-        VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
         kafkaConfig.host = 'host'
         kafkaConfig.topics = { repPackingTopic: 'topic' }
         const consumer = { on: jest.fn() }
@@ -62,6 +57,7 @@ describe('ManageRepsAndUnitsListener', () => {
             cert: 'cert',
             key: 'key',
             passphrase: 'password',
+            ca: 'ca',
           },
         }, ['topic'])
       })

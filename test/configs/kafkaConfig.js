@@ -1,6 +1,12 @@
-const localKafkaConfig = {
-  enableKafka: 'false',
+const kafkaConfig = {
+  enableKafka: false,
   host: 'kfk.awsuse1.tst.edh.cnb:9093',
+  ssl: {
+    ca: 'ca',
+    cert: 'cert',
+    key: 'key',
+    passphrase: 'password',
+  },
   topics: {
     repPackingTopic: 'rsr.field-experiments.test.incoming.json',
     repPackingResultTopic: 'rsr.field-experiments.test.outgoing.json',
@@ -14,8 +20,5 @@ const localKafkaConfig = {
     unitDeactivation: 3420,
   },
 }
-const kafkaConfig = process.env.KAFKA_CONFIG
-  ? JSON.parse(process.env.KAFKA_CONFIG)
-  : localKafkaConfig
 
 export default kafkaConfig

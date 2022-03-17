@@ -1,5 +1,4 @@
-import VaultUtil from '../../../src/services/utility/VaultUtil'
-import kafkaConfig from '../../../src/config/kafkaConfig'
+import kafkaConfig from '../../configs/kafkaConfig'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import { dbWrite } from '../../../src/db/DbManager'
 import SetEntriesChangesListener from '../../../src/services/listeners/SetEntriesChangesListener'
@@ -8,10 +7,6 @@ describe('SetEntriesChangesListener', () => {
   describe('listen', () => {
     test('check createConsumer is called with right parameters', () => {
       const target = new SetEntriesChangesListener()
-      VaultUtil.kafkaClientCert = 'cert'
-      VaultUtil.kafkaPrivateKey = 'key'
-      VaultUtil.kafkaPassword = 'password'
-      VaultUtil.clientId = 'PD-EXPERIMENTS-API-DEV-SVC'
       kafkaConfig.host = 'host'
       kafkaConfig.topics = { setEntriesChangesTopic: 'test-topic' }
       const consumer = { on: jest.fn() }
@@ -30,6 +25,7 @@ describe('SetEntriesChangesListener', () => {
           cert: 'cert',
           key: 'key',
           passphrase: 'password',
+          ca: 'ca',
         },
       }, ['test-topic'])
     })

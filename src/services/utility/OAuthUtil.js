@@ -12,7 +12,7 @@ class OAuthUtil {
       grant_type: 'client_credentials',
     }
     const startTime = new Date().getTime()
-    return agent.post(configurator.get('apiUrls.oauthUrl'))
+    return agent.post(configurator.get('urls.oauthUrl'))
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .send(params)
       .then((result) => {

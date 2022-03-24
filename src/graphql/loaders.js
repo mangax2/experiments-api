@@ -75,6 +75,12 @@ function createLoaders() {
   const unitsBySetEntryIdsLoader = createMultiDataLoader(
     dbRead.unit.batchFindUnitDetailsBySetEntryIds)
 
+  const unitsByUnitIdsBatchLoader = new DataLoader(async (ids) => {
+    const result = await Promise.all(_.map(ids, id => dbRead.unit.batchFindAllByIds(id)))
+    setTimeout(() => { ids.forEach(id => unitsByUnitIdsBatchLoader.clear(id)) }, 0)
+    return result
+  }, { batchScheduleFn: callback => setTimeout(callback, 1000) })
+
   const blocksByBlockIdsLoader = createMultiDataLoader(dbRead.block.batchFind)
   const locationAssociationByExperimentIdsLoader = createMultiDataLoader(
     dbRead.locationAssociation.findByExperimentId)
@@ -199,6 +205,7 @@ function createLoaders() {
     unitByExperimentIds: unitsByExperimentIdLoader,
     unitsByBlockIds: unitsByBlockIdsLoader,
     unitsBySetEntryIds: unitsBySetEntryIdsLoader,
+    unitsByUnitIds: unitsByUnitIdsBatchLoader,
     unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,

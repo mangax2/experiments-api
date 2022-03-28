@@ -40,9 +40,9 @@ const createDataLoader = batchLoaderCallback =>
 const createMultiDataLoader = batchLoaderCallback =>
   new DataLoader(args => Promise.all(_.map(args, arg => batchLoaderCallback(arg))))
 
-const unitsByUnitIdsDataLoader = new DataLoader(async (ids) => {
-  const result = await Promise.all(_.map(ids, id => dbRead.unit.batchFindAllByIds(id)))
-  setTimeout(() => { ids.forEach(id => unitsByUnitIdsDataLoader.clear(id)) }, 0)
+const unitsByUnitIdDataLoader = new DataLoader(async (id) => {
+  const result = await dbRead.unit.batchFindAllByIds(id)
+  setTimeout(() => { unitsByUnitIdDataLoader.clear(id) }, 0)
   return result
 }, { batchScheduleFn: callback => setTimeout(callback, 1000) })
 
@@ -81,7 +81,7 @@ function createLoaders() {
   const unitsBySetEntryIdsLoader = createMultiDataLoader(
     dbRead.unit.batchFindUnitDetailsBySetEntryIds)
 
-  const unitsByUnitIdsBatchLoader = unitsByUnitIdsDataLoader
+  const unitsByUnitIdsBatchLoader = unitsByUnitIdDataLoader
 
   const blocksByBlockIdsLoader = createMultiDataLoader(dbRead.block.batchFind)
   const locationAssociationByExperimentIdsLoader = createMultiDataLoader(

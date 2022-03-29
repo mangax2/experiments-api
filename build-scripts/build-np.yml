@@ -1,0 +1,25 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+  pre_build:
+    commands:
+      - npm config set //npm.platforms.engineering/:_authToken $npm_access_token
+      - npm config set @monsantoit:registry https://npm.platforms.engineering
+      - echo Running npm ci
+      - npm ci
+      - echo Running tests
+      - npm run testCoverage
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Packaging Node application
+      - npm run build-server
+      - echo Removing dev packages
+      - npm prune --production
+      - npm i -g @monsantoit/fg-deploy@latest
+      - fg-deploy -m build-scripts/fg-deploy-np.js
+      - echo Build completed on `date`

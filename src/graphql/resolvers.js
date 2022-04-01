@@ -69,10 +69,6 @@ export default {
       context.loaders.groupsByExperimentIds.load(args.experimentId),
     getUnitsByExperimentId: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(args.experimentId),
-    getUnitsByUnitIds: (entity, args, context) => {
-      maxIdCountCheck(args.unitIds, 100)
-      return args.unitIds.map(id => context.loaders.unitsByUnitIds.load(id))
-    },
     getUnitsBySetEntryIds: (entity, args, context) =>
       context.loaders.unitsBySetEntryIds.load(args.setEntryIds),
     getSetBySetId: (entity, args, context) =>

@@ -1,6 +1,6 @@
 {
   "name": "experiments-api",
-  "version": "3.44.0",
+  "version": "3.45.0",
   "description": "Experiments API",
   "main": "app.js",
   "scripts": {
@@ -46,7 +46,7 @@
     "connect-datadog": "0.0.9",
     "console-timestamp": "0.3.0",
     "cors": "2.8.4",
-    "dataloader": "2.0.0",
+    "dataloader": "1.4.0",
     "dd-trace": "0.33.2",
     "express": "4.17.1",
     "express-graphql": "0.6.12",

@@ -194,9 +194,9 @@ class ExperimentalUnitService {
 
         const createdUnits =
           await this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
-        batchSendUnitChangeNotification(createdUnits || [].map(u => u.id), 'create')
-        batchSendUnitChangeNotification(unitsToBeUpdated || [].map(u => u.id), 'update')
-        batchSendUnitChangeNotification(unitsToBeDeleted || [], 'delete')
+        batchSendUnitChangeNotification((createdUnits || []).map(u => u.id), 'create')
+        batchSendUnitChangeNotification((unitsToBeUpdated || []).map(u => u.id), 'update')
+        batchSendUnitChangeNotification(unitsToBeDeleted, 'delete')
         return createdUnits
       })
 
@@ -257,7 +257,7 @@ class ExperimentalUnitService {
         : []
 
       return Promise.all([unitsFromSetEntryIdsPromise, unitsFromIdsPromise])
-        .then(([setEntriesFromDb, unitsByIdFromDb]) => {
+        .then(async ([setEntriesFromDb, unitsByIdFromDb]) => {
           const unitsFromDb = [...setEntriesFromDb, ...unitsByIdFromDb]
           const results = _.map(unitsFromDb, (unit) => {
             const correspondingUnit = _.find(requestBody, requestObject =>
@@ -268,12 +268,10 @@ class ExperimentalUnitService {
               setEntryId: unit.set_entry_id,
             }
           })
-          return dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx)
-            .then(async () => {
-              this.sendDeactivationNotifications(results)
-              batchSendUnitChangeNotification(results.map(unit => unit.id), 'update')
-              return results
-            })
+          await dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx)
+          this.sendDeactivationNotifications(results)
+          batchSendUnitChangeNotification(results.map(unit => unit.id), 'update')
+          return results
         })
     })
 

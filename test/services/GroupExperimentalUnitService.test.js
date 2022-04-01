@@ -9,6 +9,9 @@ import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import apiUrls from '../configs/apiUrls'
+import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
+
+jest.mock('../../src/SQS/sendUnitChangeNotification')
 
 describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
@@ -1054,12 +1057,14 @@ describe('GroupExperimentalUnitService', () => {
   describe('saveComparedUnits', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
-      target.createExperimentalUnits = mockResolve()
-      target.batchDeleteExperimentalUnits = mockResolve()
+      target.createExperimentalUnits = mockResolve([1])
+      target.batchDeleteExperimentalUnits = mockResolve([2])
       return target.saveComparedUnits(3, { adds: [], deletes: [] }, {}, testTx)
         .then(() => {
           expect(target.createExperimentalUnits).toHaveBeenCalledWith(3, [], {}, testTx)
           expect(target.batchDeleteExperimentalUnits).toHaveBeenCalledWith([], testTx)
+          expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'create')
+          expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([2], 'delete')
         })
     })
   })

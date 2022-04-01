@@ -11,6 +11,9 @@ const coreSource = {
     maxBlocksToRetrieve: 100,
     maxExperimentsToRetrieve: 10,
   },
+  SQS: {
+    unitUrl: 'test-unit-queue',
+  },
 }
 
 export default coreSource

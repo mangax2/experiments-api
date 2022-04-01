@@ -453,8 +453,8 @@ class GroupExperimentalUnitService {
       this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
       this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
     ])
-    batchSendUnitChangeNotification(createdUnitIds || [], 'create')
-    batchSendUnitChangeNotification(deletedUnitIds || [], 'delete')
+    batchSendUnitChangeNotification(createdUnitIds, 'create')
+    batchSendUnitChangeNotification(deletedUnitIds, 'delete')
   }
 
   @setErrorCode('1FZ000')

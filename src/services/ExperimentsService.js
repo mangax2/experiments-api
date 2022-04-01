@@ -18,6 +18,7 @@ import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -284,13 +285,15 @@ class ExperimentsService {
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate).then((permissions) => {
       if (permissions.includes('write')) {
-        return this.locationAssocWithBlockService.getByExperimentId(id).then((associations) => {
+        return this.locationAssocWithBlockService.getByExperimentId(id).then(async (associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))
           }
+          const units = await dbRead.unit.findAllByExperimentId(id)
           return dbWrite.experiments.remove(id, isTemplate, tx)
             .then((data) => {
+              batchSendUnitChangeNotification(units.map(unit => unit.id), 'delete')
               if (!data) {
                 console.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
                 throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))

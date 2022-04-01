@@ -12,7 +12,7 @@ class unitRepo {
   repository = () => this.rep
 
   @setErrorCode('5J4000')
-  findAllByExperimentId = (experimentId) => this.rep.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
 
   @setErrorCode('5JD000')
   batchFind = (ids) => this.batchFindAllByIds(ids).then(data => {

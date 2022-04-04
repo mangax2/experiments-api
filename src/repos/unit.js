@@ -77,6 +77,29 @@ class unitRepo {
   @setErrorCode('5JF000')
   batchFindAllByIds = (experimentalUnitIds) => this.rep.any('SELECT * FROM unit WHERE id IN ($1:csv)', [experimentalUnitIds])
 
+  @setErrorCode('5JJ000')
+  batchFindUnitDetailsByIds = (experimentalUnitIds) => this.rep.any(
+    `SELECT
+      t.treatment_number,
+      tb.treatment_id,
+      tb.block_id,
+      b.name AS block,
+      u.location,
+      u.rep,
+      u.set_entry_id,
+      u.deactivation_reason,
+      u.id
+    FROM unit u
+    INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id
+    INNER JOIN treatment t ON tb.treatment_id = t.id
+    INNER JOIN block b ON tb.block_id = b.id
+    WHERE u.id IN ($1:csv)`,
+    [experimentalUnitIds]
+  ).then(data => {
+    const keyedData = _.keyBy(data, 'id')
+    return _.map(experimentalUnitIds, id => keyedData[id])
+  })
+
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(

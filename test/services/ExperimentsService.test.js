@@ -9,6 +9,7 @@ import CapacityRequestService from '../../src/services/CapacityRequestService'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import apiUrls from '../configs/apiUrls'
+import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')
@@ -716,6 +717,10 @@ describe('ExperimentsService', () => {
   })
 
   describe('updateExperiment', () => {
+    beforeEach(() => {
+      dbRead.experiments.find = mockResolve({ name: 'oldName' })
+    })
+
     test('calls validate, update, batchUpdateOwners,' +
       ' batchCreateTags', () => {
       target.validator.validate = mockResolve()
@@ -1036,6 +1041,69 @@ describe('ExperimentsService', () => {
         expect(target.tagService.batchCreateTags).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
+    })
+
+    test('sends kafka notification if name has changed', async () => {
+      const newExperiment = { name: 'newName' }
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      dbWrite.experiments.update = mockResolve(newExperiment)
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.removeInvalidRandomizationConfig = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
+      KafkaProducer.publish = mock()
+
+      await target.updateExperiment(1, newExperiment, testContext, false, testTx)
+
+      expect(KafkaProducer.publish).toHaveBeenCalled()
+    })
+
+    test('does not send kafka notification if name has not changed', async () => {
+      const newExperiment = { name: 'oldName' }
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      dbWrite.experiments.update = mockResolve(newExperiment)
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.removeInvalidRandomizationConfig = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
+      KafkaProducer.publish = mock()
+
+      await target.updateExperiment(1, newExperiment, testContext, false, testTx)
+
+      expect(KafkaProducer.publish).not.toHaveBeenCalled()
+    })
+
+    test('does not send kafka notification if error occurs while saving', async () => {
+      target.securityService.permissionsCheck = mockResolve()
+      target.validator.validate = mockResolve()
+      target.assignExperimentIdToTags = mock([])
+      target.tagService.saveTags = mock()
+      target.tagService.deleteTagsForExperimentId = mockResolve()
+      target.ownerService.batchUpdateOwners = mockResolve()
+      target.analysisModelService.batchUpdateAnalysisModel = mockResolve()
+      target.removeInvalidRandomizationConfig = mockResolve()
+      target.analysisModelService.deleteAnalysisModelByExperimentId = mockResolve()
+      const newExperiment = { name: 'newName' }
+      KafkaProducer.publish = mock()
+      dbWrite.experiments.update = mockReject()
+      let errorThrown = false
+
+      try {
+        await target.updateExperiment(1, newExperiment, testContext, false, testTx)
+      } catch {
+        errorThrown = true
+      }
+
+      expect(errorThrown).toBe(true)
+      expect(KafkaProducer.publish).not.toHaveBeenCalled()
     })
   })
 

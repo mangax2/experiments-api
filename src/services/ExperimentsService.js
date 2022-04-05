@@ -18,9 +18,22 @@ import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
+import KafkaProducer from './kafka/KafkaProducer'
 
 const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
+
+export const sendExperimentNameChangeMessage = (experimentId, isTemplate, name) => {
+  KafkaProducer.publish({
+    topic: configurator.get('kafka.topics.experimentNameChangeTopic'),
+    message: {
+      experimentId,
+      isTemplate,
+      name,
+      time: new Date().toISOString(),
+    },
+  })
+}
 
 // Error Codes 15XXXX
 class ExperimentsService {
@@ -197,75 +210,70 @@ class ExperimentsService {
   @notifyChanges('update', 0, 3)
   @setErrorCode('159000')
   @Transactional('updateExperiment')
-  updateExperiment(experimentId, experiment, context, isTemplate, tx) {
+  updateExperiment = async (experimentId, experiment, context, isTemplate, tx) => {
     const id = Number(experimentId)
     experiment.isTemplate = isTemplate
-    return this.securityService.permissionsCheck(id, context, isTemplate)
-      .then(() => this.validator.validate([experiment], 'PUT')
-        .then(() => dbWrite.experiments.update(id, experiment, context, tx)
-          .then((data) => {
-            if (!data) {
-              const errorMessage = isTemplate ? 'Template Not Found to Update for id'
-                : 'Experiment Not Found to Update for id'
-              console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
-              throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
-            } else {
-              const comment = {}
-              if (!_.isNil(experiment.comment)) {
-                comment.description = experiment.comment
-                comment.experimentId = experiment.id
-              }
-              const trimmedUserIds = (experiment.owners || []).map(owner => owner.trim())
-              const trimmedOwnerGroups = (experiment.ownerGroups || []).map(ownerGroup => ownerGroup.trim())
-              const reviewersGroups = (experiment.reviewers || []).map(reviewerGroup => reviewerGroup.trim())
-              const reviewers = (experiment.reviewerUsers || []).map(reviewer => reviewer.trim())
-              const owners = {
-                experimentId: id,
-                userIds: trimmedUserIds,
-                groupIds: trimmedOwnerGroups,
-                reviewerGroupIds: reviewersGroups,
-                reviewerIds: reviewers,
-              }
-              const updateOwnerPromise = this.ownerService.batchUpdateOwners([owners], context, tx)
-              const promises = []
-              let updateAnalysisModelService = null
-              if (experiment.analysisModelType) {
-                const analysisModelInfo = {
-                  analysisModelType: experiment.analysisModelType,
-                  analysisModelSubType: experiment.analysisModelSubType,
-                  experimentId: id,
-                }
-                this.analysisModelService.getAnalysisModelByExperimentId(id).then((res) => {
-                  if (!res) {
-                    updateAnalysisModelService = this.analysisModelService.batchCreateAnalysisModel([analysisModelInfo], context, tx)
-                  }
-                  updateAnalysisModelService = this.analysisModelService.batchUpdateAnalysisModel([analysisModelInfo], context, tx)
-                })
-              } else {
-                updateAnalysisModelService = this.analysisModelService.deleteAnalysisModelByExperimentId(id)
-              }
-              promises.push(updateAnalysisModelService)
-              promises.push(updateOwnerPromise)
+    await this.securityService.permissionsCheck(id, context, isTemplate)
+    await this.validator.validate([experiment], 'PUT')
+    const oldData = await dbRead.experiments.find(id, isTemplate)
+    const data = await dbWrite.experiments.update(id, experiment, context, tx)
 
-              if (experiment.comment && experiment.status === 'REJECTED') {
-                const createExperimentCommentPromise = dbWrite.comment.batchCreate([comment], context, tx)
-                promises.push(createExperimentCommentPromise)
-              }
-              promises.push(this.removeInvalidRandomizationConfig(experimentId, experiment.randomizationStrategyCode, tx))
-              return tx.batch(promises)
-                .then(() => {
-                  experiment.id = id
-                  const tags = this.assignExperimentIdToTags([experiment])
-                  if (tags.length > 0) {
-                    return this.tagService.saveTags(tags, id, context, isTemplate)
-                      .then(() => data)
-                  }
-                  return this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
-                    .then(() => data)
-                },
-                )
-            }
-          })))
+    if (!data) {
+      const errorMessage = isTemplate ? 'Template Not Found to Update for id'
+        : 'Experiment Not Found to Update for id'
+      console.error(`[[${context.requestId}]] ${errorMessage} = ${id}`)
+      throw AppError.notFound(errorMessage, undefined, getFullErrorCode('159001'))
+    } else {
+      const comment = {}
+      if (!_.isNil(experiment.comment)) {
+        comment.description = experiment.comment
+        comment.experimentId = experiment.id
+      }
+      const trimmedUserIds = (experiment.owners || []).map(owner => owner.trim())
+      const trimmedOwnerGroups = (experiment.ownerGroups || []).map(ownerGroup => ownerGroup.trim())
+      const reviewersGroups = (experiment.reviewers || []).map(reviewerGroup => reviewerGroup.trim())
+      const reviewers = (experiment.reviewerUsers || []).map(reviewer => reviewer.trim())
+      const owners = {
+        experimentId: id,
+        userIds: trimmedUserIds,
+        groupIds: trimmedOwnerGroups,
+        reviewerGroupIds: reviewersGroups,
+        reviewerIds: reviewers,
+      }
+      await this.ownerService.batchUpdateOwners([owners], context, tx)
+      if (experiment.analysisModelType) {
+        const analysisModelInfo = {
+          analysisModelType: experiment.analysisModelType,
+          analysisModelSubType: experiment.analysisModelSubType,
+          experimentId: id,
+        }
+        const result = await this.analysisModelService.getAnalysisModelByExperimentId(id)
+        if (!result) {
+          await this.analysisModelService.batchCreateAnalysisModel([analysisModelInfo], context, tx)
+        } else {
+          await this.analysisModelService.batchUpdateAnalysisModel([analysisModelInfo], context, tx)
+        }
+      } else {
+        await this.analysisModelService.deleteAnalysisModelByExperimentId(id)
+      }
+
+      if (experiment.comment && experiment.status === 'REJECTED') {
+        await dbWrite.comment.batchCreate([comment], context, tx)
+      }
+      await this.removeInvalidRandomizationConfig(experimentId, experiment.randomizationStrategyCode, tx)
+
+      experiment.id = id
+      const tags = this.assignExperimentIdToTags([experiment])
+      if (tags.length > 0) {
+        await this.tagService.saveTags(tags, id, context, isTemplate)
+      } else {
+        await this.tagService.deleteTagsForExperimentId(id, context, isTemplate)
+      }
+      if (oldData.name !== data.name) {
+        sendExperimentNameChangeMessage(id, isTemplate, experiment.name)
+      }
+      return data
+    }
   }
 
   @setErrorCode('15T000')
@@ -748,4 +756,4 @@ class ExperimentsService {
   }
 }
 
-module.exports = ExperimentsService
+export default ExperimentsService

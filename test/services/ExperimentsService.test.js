@@ -2010,6 +2010,10 @@ describe('ExperimentsService', () => {
   })
 
   describe('submitReview', () => {
+    beforeEach(() => {
+      target.notifyUsersReviewCompletion = mockResolve()
+    })
+
     test('rejects when submitting user is not a reviewer', () => {
       target.getExperimentById = mockResolve()
       target.securityService.getUserPermissionsForExperiment = mockResolve(['write'])
@@ -2074,11 +2078,6 @@ describe('ExperimentsService', () => {
       target.getExperimentById = mockResolve({ status: 'SUBMITTED', task_id: 123 })
       target.securityService.getUserPermissionsForExperiment = mockResolve(['review'])
       OAuthUtil.getAuthorizationHeaders.mockReturnValueOnce(Promise.resolve([]))
-      const error = new Error('text')
-      error.status = 400
-      error.response = {
-        text: 'error',
-      }
       HttpUtil.put.mockReturnValueOnce(Promise.resolve())
       dbWrite.experiments.updateExperimentStatus = mockResolve()
       dbWrite.comment.batchCreate = mockResolve()

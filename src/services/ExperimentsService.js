@@ -686,12 +686,11 @@ class ExperimentsService {
 
             return Promise.resolve()
           })
-          .then(() => {
-            this.notifyUsersReviewCompletion(isTemplate, experiment, status, comment)
-            return tx.batch([
-              dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx),
-              dbWrite.comment.batchCreate([newComment], context, tx),
-            ])
+          .then(async () => {
+            const notificationPromise = this.notifyUsersReviewCompletion(isTemplate, experiment, status, comment)
+            await dbWrite.experiments.updateExperimentStatus(experimentId, status, null, context, tx)
+            await dbWrite.comment.batchCreate([newComment], context, tx)
+            await notificationPromise
           }),
       )
     })
@@ -748,11 +747,12 @@ class ExperimentsService {
       tags: ['experiment-review-request'],
     }
 
-    const headers = await OAuthUtil.getAuthorizationHeaders()
-    HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/messages`, headers, request)
-      .catch(error =>
-        console.error('Users are failed to be notified of the experiment review result', request, error),
-      )
+    try {
+      const headers = await OAuthUtil.getAuthorizationHeaders()
+      await HttpUtil.post(`${apiUrls.velocityMessagingAPIUrl}/messages`, headers, request)
+    } catch (error) {
+      console.error('Users are failed to be notified of the experiment review result', request, error?.message || error)
+    }
   }
 }
 

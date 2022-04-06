@@ -155,8 +155,8 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
-      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1', setId)
+    return tx.any('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
+      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1 RETURNING u.id', setId)
   }
 
   @setErrorCode('5JI000')
@@ -201,6 +201,7 @@ class unitRepo {
       + " modified_user_id = $1,"
       + " modified_date = 'CURRENT_TIMESTAMP'" 
       + " FROM temp_update_set_entry_ids tusei WHERE unit.set_entry_id = tusei.existing_set_entry_id"
+      + " RETURNING id"
 
     return tx.query(tempTableQuery)
       .then(() => tx.any(updateQuery.replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP'), context.userId))
@@ -218,7 +219,7 @@ class unitRepo {
       return
     }
 
-    return this.rep.none('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv)', [entryIds])
+    return this.rep.any('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv) RETURNING id', [entryIds])
   }
 }
 

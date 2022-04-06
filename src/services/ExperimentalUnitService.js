@@ -52,12 +52,13 @@ class ExperimentalUnitService {
   @Transactional('partialUpdateExperimentalUnitsTx')
   batchPartialUpdateExperimentalUnits(experimentalUnits, context, tx) {
     return this.validator.validate(experimentalUnits, 'PATCH')
-      .then(() => {
+      .then(async () => {
         ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'id')
         ExperimentalUnitService.uniqueIdsCheck(experimentalUnits, 'setEntryId')
 
-        return dbWrite.unit.batchPartialUpdate(experimentalUnits, context, tx)
-          .then(data => AppUtil.createPutResponse(data))
+        const data = await dbWrite.unit.batchPartialUpdate(experimentalUnits, context, tx)
+        batchSendUnitChangeNotification((data || []).map(unit => unit.id), 'update')
+        AppUtil.createPutResponse(data)
       })
   }
 
@@ -192,12 +193,7 @@ class ExperimentalUnitService {
           unitsToBeCreated, unitsToBeDeleted, unitsToBeUpdated,
         } = this.getDbActions(unitsToSave, unitsFromDB, location)
 
-        const createdUnits =
-          await this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
-        batchSendUnitChangeNotification((createdUnits || []).map(u => u.id), 'create')
-        batchSendUnitChangeNotification((unitsToBeUpdated || []).map(u => u.id), 'update')
-        batchSendUnitChangeNotification(unitsToBeDeleted, 'delete')
-        return createdUnits
+        return this.saveToDb(unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx)
       })
 
   @setErrorCode('17H000')
@@ -227,18 +223,20 @@ class ExperimentalUnitService {
 
   @setErrorCode('17I000')
   saveToDb = async (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
-    const promises = []
     if (unitsToBeCreated.length > 0) {
-      promises.push(dbWrite.unit.batchCreate(unitsToBeCreated, context, tx))
+      const results = await dbWrite.unit.batchCreate(unitsToBeCreated, context, tx)
+      batchSendUnitChangeNotification((results || []).map(u => u.id), 'create')
     }
     if (unitsToBeUpdated.length > 0) {
-      promises.push(dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx))
+      const results = await dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx)
+      batchSendUnitChangeNotification((results || []).map(u => u.id), 'update')
     }
-    const [created] = await tx.batch(promises)
     if (unitsToBeDeleted.length > 0) {
-      await dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
+      const results = await dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
+      batchSendUnitChangeNotification((results || []).map(unit => unit.id), 'delete')
+      return results
     }
-    return created
+    return []
   }
 
   @setErrorCode('17J000')
@@ -332,7 +330,9 @@ class ExperimentalUnitService {
       throw AppError.badRequest('One or more of the existing set entry IDs in request payload were not found', undefined, getFullErrorCode('17M002'))
     }
 
-    return dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
+    const results = await dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
+    batchSendUnitChangeNotification(results.map(unit => unit.id), 'update')
+    return results
   }
 }
 

@@ -147,15 +147,20 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('batchPartialUpdateExperimentalUnits', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()
-      dbWrite.unit.batchPartialUpdate = mockResolve({})
+      dbWrite.unit.batchPartialUpdate = mockResolve([{ id: 1 }])
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
         expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
+        expect(AppUtil.createPutResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'update')
       })
     })
 
@@ -169,6 +174,7 @@ describe('ExperimentalUnitService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
         expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
@@ -409,9 +415,6 @@ describe('ExperimentalUnitService', () => {
         expect(dbRead.unit.batchFindAllByLocationAndTreatmentBlocks).toBeCalledWith(5, [3, 4])
         expect(target.getDbActions).toBeCalledWith(unitsToBeSaved, 'unitsFromDb', 5)
         expect(target.saveToDb).toBeCalledWith([{}], [{ id: 3 }], [2], {}, testTx)
-        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'create')
-        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([3], 'update')
-        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([2], 'delete')
       })
     })
   })
@@ -484,17 +487,24 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('saveToDb', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls everything correctly when values are present', () => {
       target = new ExperimentalUnitService()
       const context = { userId: 'REP_PACKING' }
-      dbWrite.unit.batchCreate = mockResolve()
-      dbWrite.unit.batchUpdate = mockResolve()
-      dbWrite.unit.batchRemove = mockResolve()
+      dbWrite.unit.batchCreate = mockResolve([{ id: 3 }, { id: 4 }])
+      dbWrite.unit.batchUpdate = mockResolve([{ id: 5 }])
+      dbWrite.unit.batchRemove = mockResolve([{ id: 6 }])
 
       return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, testTx).then(() => {
         expect(dbWrite.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
         expect(dbWrite.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, testTx)
         expect(dbWrite.unit.batchRemove).toBeCalledWith([6], testTx)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([3, 4], 'create')
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([5], 'update')
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([6], 'delete')
       })
     })
 
@@ -508,6 +518,7 @@ describe('ExperimentalUnitService', () => {
         expect(dbWrite.unit.batchCreate).not.toBeCalled()
         expect(dbWrite.unit.batchUpdate).not.toBeCalled()
         expect(dbWrite.unit.batchRemove).not.toBeCalled()
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
   })
@@ -797,6 +808,10 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('batchUpdateSetEntryIds', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls batchFindSetEntryIds on the unit repo', async () => {
       const requestBody = [
         { existingSetEntryId: 12216200, incomingSetEntryId: 12217200 },
@@ -817,11 +832,12 @@ describe('ExperimentalUnitService', () => {
         12216206,
       ]
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
-      dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
+      dbWrite.unit.batchUpdateSetEntryIds = mockResolve([{ id: 1 }, { id: 2 }])
 
       await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbRead.unit.batchFindSetEntryIds).toHaveBeenCalledWith(existingSetEntryIds)
+      expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
     })
 
     test('calls batchUpdateSetEntryIds on the unit repo', async () => {
@@ -844,11 +860,12 @@ describe('ExperimentalUnitService', () => {
         12216206,
       ]
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
-      dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
+      dbWrite.unit.batchUpdateSetEntryIds = mockResolve([{ id: 1 }, { id: 2 }])
 
       await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbWrite.unit.batchUpdateSetEntryIds).toHaveBeenCalled()
+      expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
     })
 
     test('throws error when duplicate IDs are present', () => {
@@ -872,6 +889,7 @@ describe('ExperimentalUnitService', () => {
           undefined,
           '17M001',
         )
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
 

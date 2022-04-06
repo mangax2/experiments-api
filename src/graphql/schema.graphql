@@ -251,6 +251,7 @@ type Query {
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
   getUnitsBySetEntryIds(setEntryIds: [Int!]!): [ExperimentalUnit]
+  getUnitsByUnitIds(unitIds: [Int!]!): [ExperimentalUnit]
   getSetBySetId(setId: Int!): ExperimentalSet
   getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]

@@ -6,6 +6,7 @@ import AppError from './utility/AppError'
 import ExperimentsService from './ExperimentsService'
 import TreatmentBlockService from './TreatmentBlockService'
 import TreatmentValidator from '../validations/TreatmentValidator'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -53,6 +54,7 @@ class TreatmentService {
       }
       return dbWrite.treatment.batchRemove(ids, tx)
         .then((data) => {
+          batchSendUnitChangeNotification(units.map(unit => unit.id), 'delete')
           if (_.filter(data, element => element !== null).length !== ids.length) {
             console.error(`[[${context.requestId}]] Not all treatments requested for delete were found`)
             throw AppError.notFound('Not all treatments requested for delete were found', undefined, getFullErrorCode('1R6001'))

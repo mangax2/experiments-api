@@ -9,6 +9,9 @@ import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import apiUrls from '../configs/apiUrls'
+import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
+
+jest.mock('../../src/SQS/sendUnitChangeNotification')
 
 describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
@@ -28,34 +31,42 @@ describe('GroupExperimentalUnitService', () => {
 
       return target.batchDeleteExperimentalUnits([], testTx).then(() => {
         expect(dbWrite.unit.batchRemove).not.toBeCalled()
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
 
     test('does call experimentalUnitService if units are passed in', () => {
-      dbWrite.unit = { batchRemove: mockResolve() }
+      dbWrite.unit = { batchRemove: mockResolve([{ id: 5 }]) }
 
       return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
         expect(dbWrite.unit.batchRemove).toBeCalledWith([5], testTx)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([5], 'delete')
       })
     })
   })
 
   describe('createExperimentalUnits', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('does nothing if no units are passed in', () => {
       dbWrite.unit.batchCreate = mockResolve()
 
       return target.createExperimentalUnits(1, [], testContext, testTx).then((data) => {
         expect(dbWrite.unit.batchCreate).not.toBeCalled()
-        expect(data).toEqual(undefined)
+        expect(data).toEqual([])
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
 
     test('batch creates experimental units', () => {
-      dbWrite.unit.batchCreate = mockResolve([1])
+      dbWrite.unit.batchCreate = mockResolve([{ id: 1 }])
 
       return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then((data) => {
         expect(dbWrite.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
-        expect(data).toEqual([1])
+        expect(data).toEqual([{ id: 1 }])
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'create')
       })
     })
 
@@ -66,6 +77,7 @@ describe('GroupExperimentalUnitService', () => {
       return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, (err) => {
         expect(dbWrite.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
         expect(err).toEqual(error)
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
   })
@@ -1054,8 +1066,8 @@ describe('GroupExperimentalUnitService', () => {
   describe('saveComparedUnits', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
-      target.createExperimentalUnits = mockResolve()
-      target.batchDeleteExperimentalUnits = mockResolve()
+      target.createExperimentalUnits = mockResolve([1])
+      target.batchDeleteExperimentalUnits = mockResolve([2])
       return target.saveComparedUnits(3, { adds: [], deletes: [] }, {}, testTx)
         .then(() => {
           expect(target.createExperimentalUnits).toHaveBeenCalledWith(3, [], {}, testTx)

@@ -9,9 +9,11 @@ import CapacityRequestService from '../../src/services/CapacityRequestService'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import apiUrls from '../configs/apiUrls'
+import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
 
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')
+jest.mock('../../src/SQS/sendUnitChangeNotification')
 
 describe('ExperimentsService', () => {
   let target
@@ -1058,6 +1060,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = {
@@ -1074,6 +1077,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false)
         expect(dbWrite.experiments.remove).toHaveBeenCalledWith(1, false, testTx)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2, 3], 'delete')
         expect(data).toEqual([{}, {}])
       })
     })
@@ -1082,6 +1086,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 500
@@ -1099,6 +1104,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 404
@@ -1117,6 +1123,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
       target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = undefined
@@ -1127,6 +1134,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then((data) => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false)
         expect(dbWrite.experiments.remove).toHaveBeenCalledWith(1, false, testTx)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2, 3], 'delete')
         expect(data).toEqual([undefined, {}])
       })
     })

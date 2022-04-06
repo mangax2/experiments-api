@@ -18,6 +18,7 @@ import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const apiUrls = configurator.get('urls')
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
@@ -284,48 +285,48 @@ class ExperimentsService {
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate).then((permissions) => {
       if (permissions.includes('write')) {
-        return this.locationAssocWithBlockService.getByExperimentId(id).then((associations) => {
+        return this.locationAssocWithBlockService.getByExperimentId(id).then(async (associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))
           }
-          return dbWrite.experiments.remove(id, isTemplate, tx)
-            .then((data) => {
-              if (!data) {
-                console.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
-                throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
-              } else {
-                const url = `${apiUrls.capacityRequestAPIUrl}/requests/experiments/${id}`
+          const units = await dbRead.unit.findAllByExperimentId(id)
+          const data = await dbWrite.experiments.remove(id, isTemplate, tx)
+          batchSendUnitChangeNotification(units.map(unit => unit.id), 'delete')
+          if (!data) {
+            console.error(`[[${context.requestId}]] Experiment Not Found for requested experimentId = ${id}`)
+            throw AppError.notFound('Experiment Not Found for requested experimentId', undefined, getFullErrorCode('15A001'))
+          } else {
+            const url = `${apiUrls.capacityRequestAPIUrl}/requests/experiments/${id}`
 
-                const promises = []
-                const requestPromise = OAuthUtil.getAuthorizationHeaders()
-                  .then(headers => HttpUtil.get(url, headers)
-                    .then((response) => {
-                      if (response && response.body) {
-                        const putUrl = `${apiUrls.capacityRequestAPIUrl}/requests/${response.body.id}?type=${response.body.request_type}`
-                        const modifiedData = {
-                          request:
+            const promises = []
+            const requestPromise = OAuthUtil.getAuthorizationHeaders()
+              .then(headers => HttpUtil.get(url, headers)
+                .then((response) => {
+                  if (response && response.body) {
+                    const putUrl = `${apiUrls.capacityRequestAPIUrl}/requests/${response.body.id}?type=${response.body.request_type}`
+                    const modifiedData = {
+                      request:
                             {
                               id: response.body.id,
                               experiment_id: null,
                             },
-                        }
-
-                        return HttpUtil.put(putUrl, headers, JSON.stringify(modifiedData))
-                      }
-                      return Promise.resolve()
-                    })).catch((err) => {
-                    if (err.status !== 404 && err.response.text !== `No requests for experiment ${id} were found.`) {
-                      return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15A004')))
                     }
-                    return Promise.resolve()
-                  })
-                promises.push(requestPromise)
-                promises.push(this.tagService.deleteTagsForExperimentId(id, context, isTemplate).then(() => data))
 
-                return Promise.all(promises)
-              }
-            })
+                    return HttpUtil.put(putUrl, headers, JSON.stringify(modifiedData))
+                  }
+                  return Promise.resolve()
+                })).catch((err) => {
+                if (err.status !== 404 && err.response.text !== `No requests for experiment ${id} were found.`) {
+                  return Promise.reject(AppError.badRequest('Unable to delete Experiment', null, getFullErrorCode('15A004')))
+                }
+                return Promise.resolve()
+              })
+            promises.push(requestPromise)
+            promises.push(this.tagService.deleteTagsForExperimentId(id, context, isTemplate).then(() => data))
+
+            return Promise.all(promises)
+          }
         })
       }
       throw AppError.unauthorized('Unauthorized to delete', undefined, getFullErrorCode('15A003'))

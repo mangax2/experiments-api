@@ -2,6 +2,9 @@ import kafkaConfig from '../../configs/kafkaConfig'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import { dbWrite } from '../../../src/db/DbManager'
 import SetEntriesChangesListener from '../../../src/services/listeners/SetEntriesChangesListener'
+import { batchSendUnitChangeNotification } from '../../../src/SQS/sendUnitChangeNotification'
+
+jest.mock('../../../src/SQS/sendUnitChangeNotification')
 
 describe('SetEntriesChangesListener', () => {
   describe('listen', () => {
@@ -32,6 +35,10 @@ describe('SetEntriesChangesListener', () => {
   })
 
   describe('dataHandler', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('parse deleted entries and remove unit to entry associations', async () => {
       const entryChange = [
         {
@@ -49,11 +56,12 @@ describe('SetEntriesChangesListener', () => {
       ]
 
       const target = new SetEntriesChangesListener()
-      dbWrite.unit.batchClearEntryIds = mockResolve()
+      dbWrite.unit.batchClearEntryIds = mockResolve([{ id: 1 }, { id: 2 }, { id: 3 }])
 
       const message = { value: { toString: mock(JSON.stringify(entryChange)) }, offset: 3 }
       await target.dataHandler([message])
       expect(dbWrite.unit.batchClearEntryIds).toHaveBeenCalledWith([11806124, 11806125, 11806128])
+      expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2, 3], 'update')
     })
   })
 

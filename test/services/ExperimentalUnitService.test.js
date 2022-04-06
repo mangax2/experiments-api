@@ -6,6 +6,9 @@ import AppUtil from '../../src/services/utility/AppUtil'
 import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
 import kafkaConfig from '../configs/kafkaConfig'
+import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
+
+jest.mock('../../src/SQS/sendUnitChangeNotification')
 
 describe('ExperimentalUnitService', () => {
   let target
@@ -144,15 +147,20 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('batchPartialUpdateExperimentalUnits', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls validate, batchUpdate, and createPutResponse', () => {
       target.validator.validate = mockResolve()
-      dbWrite.unit.batchPartialUpdate = mockResolve({})
+      dbWrite.unit.batchPartialUpdate = mockResolve([{ id: 1 }])
       AppUtil.createPutResponse = mock()
 
       return target.batchPartialUpdateExperimentalUnits([], testContext, testTx).then(() => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
         expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
-        expect(AppUtil.createPutResponse).toHaveBeenCalledWith({})
+        expect(AppUtil.createPutResponse).toHaveBeenCalledWith([{ id: 1 }])
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'update')
       })
     })
 
@@ -166,6 +174,7 @@ describe('ExperimentalUnitService', () => {
         expect(target.validator.validate).toHaveBeenCalledWith([], 'PATCH')
         expect(dbWrite.unit.batchPartialUpdate).toHaveBeenCalledWith([], testContext, testTx)
         expect(AppUtil.createPutResponse).not.toHaveBeenCalled()
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
         expect(err).toEqual(error)
       })
     })
@@ -393,11 +402,11 @@ describe('ExperimentalUnitService', () => {
     test('correctly handles the flow', () => {
       target = new ExperimentalUnitService()
       target.getDbActions = mock({
-        unitsToBeCreated: 'unitsToBeCreated',
-        unitsToBeDeleted: 'unitsToBeDeleted',
-        unitsToBeUpdated: 'unitsToBeUpdated',
+        unitsToBeCreated: [{}],
+        unitsToBeDeleted: [2],
+        unitsToBeUpdated: [{ id: 3 }],
       })
-      target.saveToDb = mockResolve()
+      target.saveToDb = mockResolve([{ id: 1 }])
       target.detectWarnableUnitUpdateConditions = mock()
       dbRead.unit.batchFindAllByLocationAndTreatmentBlocks = mockResolve('unitsFromDb')
       const unitsToBeSaved = [{}]
@@ -405,7 +414,7 @@ describe('ExperimentalUnitService', () => {
       return target.mergeSetEntriesToUnits(7, unitsToBeSaved, 5, [{ id: 3 }, { id: 4 }], {}, testTx).then(() => {
         expect(dbRead.unit.batchFindAllByLocationAndTreatmentBlocks).toBeCalledWith(5, [3, 4])
         expect(target.getDbActions).toBeCalledWith(unitsToBeSaved, 'unitsFromDb', 5)
-        expect(target.saveToDb).toBeCalledWith('unitsToBeCreated', 'unitsToBeUpdated', 'unitsToBeDeleted', {}, testTx)
+        expect(target.saveToDb).toBeCalledWith([{}], [{ id: 3 }], [2], {}, testTx)
       })
     })
   })
@@ -478,17 +487,24 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('saveToDb', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls everything correctly when values are present', () => {
       target = new ExperimentalUnitService()
       const context = { userId: 'REP_PACKING' }
-      dbWrite.unit.batchCreate = mockResolve()
-      dbWrite.unit.batchUpdate = mockResolve()
-      dbWrite.unit.batchRemove = mockResolve()
+      dbWrite.unit.batchCreate = mockResolve([{ id: 3 }, { id: 4 }])
+      dbWrite.unit.batchUpdate = mockResolve([{ id: 5 }])
+      dbWrite.unit.batchRemove = mockResolve([{ id: 6 }])
 
       return target.saveToDb([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], [{ id: 5 }], [6], context, testTx).then(() => {
         expect(dbWrite.unit.batchCreate).toBeCalledWith([{ id: 3, groupId: 7 }, { id: 4, groupId: null }], context, testTx)
         expect(dbWrite.unit.batchUpdate).toBeCalledWith([{ id: 5 }], context, testTx)
         expect(dbWrite.unit.batchRemove).toBeCalledWith([6], testTx)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([3, 4], 'create')
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([5], 'update')
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([6], 'delete')
       })
     })
 
@@ -502,6 +518,7 @@ describe('ExperimentalUnitService', () => {
         expect(dbWrite.unit.batchCreate).not.toBeCalled()
         expect(dbWrite.unit.batchUpdate).not.toBeCalled()
         expect(dbWrite.unit.batchRemove).not.toBeCalled()
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
   })
@@ -519,7 +536,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 1, deactivationReason: 'foo' },
         { id: 2, deactivationReason: 'bar' },
       ]
-      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+      const setEntryIdMockReturnValue = [{ id: 1, set_entry_id: 1, deactivation_reason: null }]
       const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
@@ -531,6 +548,7 @@ describe('ExperimentalUnitService', () => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
         expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
       })
     })
 
@@ -553,6 +571,7 @@ describe('ExperimentalUnitService', () => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
         expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
       })
     })
 
@@ -562,8 +581,8 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 2, deactivationReason: 'bar' },
       ]
       const setEntryIdMockReturnValue = [
-        { set_entry_id: 1, deactivationReason: null },
-        { set_entry_id: 2, deactivationReason: null },
+        { id: 1, set_entry_id: 1, deactivationReason: null },
+        { id: 2, set_entry_id: 2, deactivationReason: null },
       ]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
@@ -575,6 +594,7 @@ describe('ExperimentalUnitService', () => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
         expect(dbRead.unit.batchFindAllByIds).not.toHaveBeenCalled()
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
       })
     })
 
@@ -583,7 +603,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 1, deactivationReason: 'foo' },
         { id: 2, deactivationReason: 'bar' },
       ]
-      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
+      const setEntryIdMockReturnValue = [{ id: 1, set_entry_id: 1, deactivation_reason: null }]
       const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
@@ -593,6 +613,7 @@ describe('ExperimentalUnitService', () => {
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(target.sendDeactivationNotifications).toHaveBeenCalled()
+        expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
       })
     })
   })
@@ -787,6 +808,10 @@ describe('ExperimentalUnitService', () => {
   })
 
   describe('batchUpdateSetEntryIds', () => {
+    beforeEach(() => {
+      batchSendUnitChangeNotification.mockRestore()
+    })
+
     test('calls batchFindSetEntryIds on the unit repo', async () => {
       const requestBody = [
         { existingSetEntryId: 12216200, incomingSetEntryId: 12217200 },
@@ -807,11 +832,12 @@ describe('ExperimentalUnitService', () => {
         12216206,
       ]
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
-      dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
+      dbWrite.unit.batchUpdateSetEntryIds = mockResolve([{ id: 1 }, { id: 2 }])
 
       await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbRead.unit.batchFindSetEntryIds).toHaveBeenCalledWith(existingSetEntryIds)
+      expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
     })
 
     test('calls batchUpdateSetEntryIds on the unit repo', async () => {
@@ -834,11 +860,12 @@ describe('ExperimentalUnitService', () => {
         12216206,
       ]
       dbRead.unit.batchFindSetEntryIds = mockResolve(existingSetEntryIds)
-      dbWrite.unit.batchUpdateSetEntryIds = mockResolve()
+      dbWrite.unit.batchUpdateSetEntryIds = mockResolve([{ id: 1 }, { id: 2 }])
 
       await target.batchUpdateSetEntryIds(requestBody, testContext, testTx)
 
       expect(dbWrite.unit.batchUpdateSetEntryIds).toHaveBeenCalled()
+      expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'update')
     })
 
     test('throws error when duplicate IDs are present', () => {
@@ -862,6 +889,7 @@ describe('ExperimentalUnitService', () => {
           undefined,
           '17M001',
         )
+        expect(batchSendUnitChangeNotification).not.toHaveBeenCalled()
       })
     })
 

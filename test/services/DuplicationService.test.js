@@ -1,8 +1,11 @@
-import { mock } from '../jestUtil'
+import { mock, mockResolve } from '../jestUtil'
 import DuplicationService from '../../src/services/DuplicationService'
 import AppUtil from '../../src/services/utility/AppUtil'
 import AppError from '../../src/services/utility/AppError'
 import { dbWrite } from '../../src/db/DbManager'
+import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
+
+jest.mock('../../src/SQS/sendUnitChangeNotification')
 
 describe('DuplicationService', () => {
   const testContext = {}
@@ -73,11 +76,13 @@ describe('DuplicationService', () => {
     test('calls duplicateExperiment the correct number of times', () => {
       const target = new DuplicationService()
       dbWrite.duplication.duplicateExperiment = jest.fn(() => Promise.resolve({}))
+      dbWrite.unit.findAllByExperimentId = mockResolve([{ id: 1 }, { id: 2 }])
 
       return target.duplicateExperimentData([3, 5], 3, null, false, testContext, testTx)
         .then((result) => {
           expect(result.length).toBe(6)
           expect(dbWrite.duplication.duplicateExperiment).toHaveBeenCalledTimes(6)
+          expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1, 2], 'create')
         })
     })
   })

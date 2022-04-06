@@ -12,7 +12,7 @@ class unitRepo {
   repository = () => this.rep
 
   @setErrorCode('5J4000')
-  findAllByExperimentId = (experimentId) => this.rep.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
+  findAllByExperimentId = (experimentId, tx = this.rep) => tx.any('SELECT u.*, tb.treatment_id, tb.block_id, b.name AS block FROM unit u INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id INNER JOIN block b ON tb.block_id = b.id WHERE b.experiment_id=$1', experimentId)
 
   @setErrorCode('5JD000')
   batchFind = (ids) => this.batchFindAllByIds(ids).then(data => {
@@ -178,8 +178,8 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
-      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1', setId)
+    return tx.any('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
+      'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1 RETURNING u.id', setId)
   }
 
   @setErrorCode('5JI000')
@@ -224,6 +224,7 @@ class unitRepo {
       + " modified_user_id = $1,"
       + " modified_date = 'CURRENT_TIMESTAMP'" 
       + " FROM temp_update_set_entry_ids tusei WHERE unit.set_entry_id = tusei.existing_set_entry_id"
+      + " RETURNING id"
 
     return tx.query(tempTableQuery)
       .then(() => tx.any(updateQuery.replace(/'CURRENT_TIMESTAMP'/g, 'CURRENT_TIMESTAMP'), context.userId))
@@ -241,7 +242,7 @@ class unitRepo {
       return
     }
 
-    return this.rep.none('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv)', [entryIds])
+    return this.rep.any('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv) RETURNING id', [entryIds])
   }
 }
 

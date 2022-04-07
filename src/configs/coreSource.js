@@ -44,6 +44,7 @@ const paths = {
       passphrase: formatVaultPath('kafka/password'),
     },
     topics: {
+      experimentNameChangeTopic: formatVaultPath('kafka-topics/experimentNameChangeTopic'),
       repPackingTopic: formatVaultPath('kafka-topics/repPackingTopic'),
       repPackingResultTopic: formatVaultPath('kafka-topics/repPackingResultTopic'),
       product360OutgoingTopic: formatVaultPath('kafka-topics/product360OutgoingTopic'),

@@ -4,6 +4,7 @@ import { dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
 import TagService from './TagService'
+import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -47,9 +48,13 @@ class DuplicationService {
     const conversionMap = []
     _.forEach(ids, (id) => {
       for (let i = 0; i < numberOfCopies; i += 1) {
-        sqlPromise = sqlPromise.then(() =>
-          dbWrite.duplication.duplicateExperiment(id, name, isTemplate, context, tx))
-          .then((newIdObject) => { conversionMap.push({ oldId: id, newId: newIdObject.id }) })
+        sqlPromise = sqlPromise.then(async () => {
+          const newIdObject =
+            await dbWrite.duplication.duplicateExperiment(id, name, isTemplate, context, tx)
+          const units = await dbWrite.unit.findAllByExperimentId(newIdObject.id, tx)
+          batchSendUnitChangeNotification(units.map(unit => unit.id), 'create')
+          conversionMap.push({ oldId: id, newId: newIdObject.id })
+        })
       }
     })
 

@@ -14,28 +14,35 @@ module.exports = {
     instanceCount: 6,
     healthCheckPath: '/ping',
     healthCheckGracePeriod: 25,
+    loadBalancingAlgorithmType: 'least_outstanding_requests',
     taskRoleName: 'experiments-api-prod-role',
     environmentVars: {
       VAULT_ENV: 'prod',
     },
-    autoScaling: {
-      enabled: true,
-      maxInstances: 20,
-      scalingPolicies: [
-        {
-          scaleBy: 'CPU',
-          targetValue: 70,
-          scaleInCooldown: 600,
-          scaleOutCooldown: 60,
-        },
-        {
-          scaleBy: 'RequestCount',
-          targetValue: 150,
-          scaleInCooldown: 600,
-          scaleOutCooldown: 60,
-        },
-      ],
-    },
+  },
+  autoScaling: {
+    enabled: true,
+    maxInstances: 20,
+    scalingPolicies: [
+      {
+        scaleBy: 'CPU',
+        targetValue: 70,
+        scaleInCooldown: 600,
+        scaleOutCooldown: 60,
+      },
+      {
+        scaleBy: 'Memory',
+        targetValue: 50,
+        scaleInCooldown: 300,
+        scaleOutCooldown: 60,
+      },
+      {
+        scaleBy: 'RequestCount',
+        targetValue: 150,
+        scaleInCooldown: 600,
+        scaleOutCooldown: 60,
+      },
+    ],
   },
   aws: {
     accountId: PROD_AWS_ACCOUNT_ID,

@@ -10,7 +10,6 @@ import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import apiUrls from '../configs/apiUrls'
 import KafkaProducer from '../../src/services/kafka/KafkaProducer'
-import { batchSendUnitChangeNotification } from '../../src/SQS/sendUnitChangeNotification'
 
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')

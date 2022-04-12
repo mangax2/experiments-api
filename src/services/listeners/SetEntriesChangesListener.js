@@ -1,7 +1,6 @@
 import { ConsumerGroup } from 'kafka-node'
 import configurator from '../../configs/configurator'
 import { dbWrite } from '../../db/DbManager'
-import { batchSendUnitChangeNotification } from '../../SQS/sendUnitChangeNotification'
 
 class SetEntriesChangesListener {
   listen() {
@@ -42,8 +41,7 @@ class SetEntriesChangesListener {
     }, [])
 
     try {
-      const results = await dbWrite.unit.batchClearEntryIds(entryIds)
-      batchSendUnitChangeNotification((results || []).map(unit => unit.id), 'update')
+      await dbWrite.unit.batchClearEntryIds(entryIds)
     } catch (err) {
       console.error(`Failed to clear set entries to unit associations: ${entryIds}`, err)
     }

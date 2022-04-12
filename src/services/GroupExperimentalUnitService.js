@@ -17,7 +17,6 @@ import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
 import configurator from '../configs/configurator'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
-import { batchSendUnitChangeNotification } from '../SQS/sendUnitChangeNotification'
 
 const apiUrls = configurator.get('urls')
 const aws = configurator.get('aws')
@@ -71,23 +70,19 @@ class GroupExperimentalUnitService {
   }
 
   @setErrorCode('1F5000')
-  batchDeleteExperimentalUnits = async (unitDeletes, tx) => {
+  batchDeleteExperimentalUnits = (unitDeletes, tx) => {
     if (unitDeletes.length === 0) {
-      return []
+      return Promise.resolve()
     }
-    const results = await dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
-    batchSendUnitChangeNotification((results || []).map(unit => unit.id), 'delete')
-    return results
+    return dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
   }
 
   @setErrorCode('1FA000')
-  createExperimentalUnits = async (experimentId, units, context, tx) => {
+  createExperimentalUnits = (experimentId, units, context, tx) => {
     if (units.length === 0) {
-      return []
+      return Promise.resolve()
     }
-    const results = await dbWrite.unit.batchCreate(units, context, tx)
-    batchSendUnitChangeNotification((results || []).map(unit => unit.id), 'create')
-    return results
+    return dbWrite.unit.batchCreate(units, context, tx)
   }
 
   @setErrorCode('1FM000')
@@ -452,11 +447,10 @@ class GroupExperimentalUnitService {
         this.saveComparedUnits(experimentId, comparisonResults, context, tx))
 
   @setErrorCode('1FY000')
-  saveComparedUnits = async (experimentId, comparisonUnits, context, tx) =>
-    tx.batch([
-      this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
-      this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
-    ])
+  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => tx.batch([
+    this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
+    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
+  ])
 
   @setErrorCode('1FZ000')
   compareWithExistingUnitsByExperiment = (experimentId, newUnits) =>

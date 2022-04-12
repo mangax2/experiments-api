@@ -3,11 +3,9 @@ import { dbWrite } from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
 import AvroUtil from '../../../src/services/utility/AvroUtil'
 import { sendKafkaNotification } from '../../../src/decorators/notifyChanges'
-import { batchSendUnitChangeNotification } from '../../../src/SQS/sendUnitChangeNotification'
 
 jest.mock('kafka-node')
 jest.mock('../../../src/decorators/notifyChanges')
-jest.mock('../../../src/SQS/sendUnitChangeNotification')
 
 const SetsChangesListener = require('../../../src/services/listeners/SetsChangesListener').default
 
@@ -151,14 +149,13 @@ describe('SetsChangesListener', () => {
     describe('clearSet', () => {
       const testTx = { tx: {} }
       test('calls clearSetEntryIds and clearSetId', () => {
-        dbWrite.unit.batchClearEntryIdsBySetId = mockResolve([{ id: 1 }])
+        dbWrite.unit.batchClearEntryIdsBySetId = mockResolve()
         dbWrite.locationAssociation.removeBySetId = mockResolve()
 
         const target = new SetsChangesListener()
         return target.clearSet(1, testTx).then(() => {
           expect(dbWrite.unit.batchClearEntryIdsBySetId).toHaveBeenCalledWith(1, testTx)
           expect(dbWrite.locationAssociation.removeBySetId).toHaveBeenCalledWith(1, testTx)
-          expect(batchSendUnitChangeNotification).toHaveBeenCalledWith([1], 'update')
         })
       })
     })

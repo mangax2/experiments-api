@@ -5,7 +5,6 @@ import Transactional from '@monsantoit/pg-transactional'
 import configurator from '../../configs/configurator'
 import { dbWrite } from '../../db/DbManager'
 import { sendKafkaNotification } from '../../decorators/notifyChanges'
-import { batchSendUnitChangeNotification } from '../../SQS/sendUnitChangeNotification'
 
 class SetsChangesListener {
   listen() {
@@ -70,11 +69,8 @@ class SetsChangesListener {
   }))
 
   @Transactional('ManageSetsChange')
-  clearSet = async (setId, tx) => {
-    const results = await dbWrite.unit.batchClearEntryIdsBySetId(setId, tx)
-    batchSendUnitChangeNotification((results || []).map(unit => unit.id), 'update')
-    return dbWrite.locationAssociation.removeBySetId(setId, tx)
-  }
+  clearSet = (setId, tx) => dbWrite.unit.batchClearEntryIdsBySetId(setId, tx)
+    .then(() => dbWrite.locationAssociation.removeBySetId(setId, tx))
 }
 
 const setsChangesListener = new SetsChangesListener()

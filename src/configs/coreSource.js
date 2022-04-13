@@ -75,9 +75,6 @@ const paths = {
     maxBlocksToRetrieve: formatVaultPath('settings/maxBlocksToRetrieve'),
     maxExperimentsToRetrieve: formatVaultPath('settings/maxExperimentsToRetrieve'),
   },
-  SQS: {
-    unitUrl: formatVaultPath('SQS/unitUrl'),
-  },
 }
 
 if (['np', 'prod'].includes(process.env.VAULT_ENV)) {

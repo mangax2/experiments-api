@@ -6,6 +6,11 @@ const {
   PROD_FARGATE_STACK_NAME,
 } = require('./build-constants')
 
+const version = process.env.DEPLOYMENT_APPROVALS_SOURCE_VERSION
+if (!version || version === '') {
+  throw new Error('Missing DEPLOYMENT_APPROVALS_SOURCE_VERSION environment variable!')
+}
+
 module.exports = {
   appParameters: {
     cpu: '2048',
@@ -55,7 +60,7 @@ module.exports = {
     environment: 'prod',
   },
   docker: {
-    image: `${NP_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${NP_REPO_NAME}:${process.env.VERSION}`,
+    image: `${NP_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${NP_REPO_NAME}:${version}`,
     ecrLifecyclePolicyFile: 'build-scripts/lifecycle-policy.json',
   },
 }

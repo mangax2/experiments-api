@@ -62,7 +62,15 @@ class locationAssociationRepo {
   @setErrorCode('5P4000')
   batchCreate = (associations, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
-      ['location', 'set_id', 'block_id'],
+      [
+        'location',
+        'set_id',
+        'block_id',
+        'created_user_id',
+        'created_date:raw',
+        'modified_user_id',
+        'modified_date:raw',
+      ],
       {table: 'location_association'},
     )
 
@@ -70,6 +78,10 @@ class locationAssociationRepo {
       location: association.location,
       set_id: association.setId,
       block_id: association.block_id,
+      created_user_id: context.userId,
+      created_date: 'CURRENT_TIMESTAMP',
+      modified_user_id: context.userId,
+      modified_date: 'CURRENT_TIMESTAMP',
     }))
 
     const query = `${this.pgp.helpers.insert(values, columnSet)}`

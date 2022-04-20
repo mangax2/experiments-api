@@ -1,6 +1,4 @@
-GRANT ALL PRIVILEGES ON SCHEMA audit TO GROUP exp_db_audit_cleanup_user;
-GRANT DELETE ON ALL TABLES IN SCHEMA audit TO exp_db_audit_cleanup_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA audit TO exp_db_audit_cleanup_user;
+GRANT DELETE ON TABLE audit.graphql_audit TO exp_db_audit_cleanup_user;
 
 DROP TRIGGER IF EXISTS purge_graphql_audit ON audit.graphql_audit;
 

@@ -15,7 +15,7 @@ phases:
       - npm config set @monsantoit:registry https://npm.platforms.engineering
   build:
     commands:
-      - echo Rollback started on `date`
+      - echo Build started on `date`
       - npm i -g @monsantoit/fg-deploy@latest
       - fg-deploy -m build-scripts/fg-deploy-prod.js
-      - echo Rollback completed on `date`
+      - echo Build completed on `date`

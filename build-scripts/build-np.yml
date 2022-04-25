@@ -25,5 +25,5 @@ phases:
       - echo Adding deployment to release docs
       - npm i -g @monsantoit/deploytool-cli@latest
       - VERSION=$(node -e "console.log(require('./package.json').version)")
-      - deploytool add --clientId $CLIENT_ID --clientSecret $CLIENT_SECRET -d "RENAME BEFORE PROD DEPLOY" -t "COSMOS-DEV-TEAM" -c "experiments-api-cf-aws" -v $VERSION --platform "Pipeline"
+      - deploytool add --clientId $CLIENT_ID --clientSecret $CLIENT_SECRET -d "EXP-RENAME BEFORE PROD DEPLOY" -t "COSMOS-DEV-TEAM" -c "experiments-api-cf-aws" -v $VERSION --platform "Pipeline"
       - echo Build completed on `date`

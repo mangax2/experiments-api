@@ -1,4 +1,4 @@
-GRANT DELETE ON TABLE audit.graphql_audit TO exp_db_audit_cleanup_user;
+GRANT SELECT, DELETE ON TABLE audit.graphql_audit TO exp_db_audit_cleanup_user;
 
 DROP TRIGGER IF EXISTS purge_graphql_audit ON audit.graphql_audit;
 

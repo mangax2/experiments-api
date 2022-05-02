@@ -82,6 +82,9 @@ function createLoaders() {
   const tagsByExperimentIdLoader = createMultiDataLoader(
     arg => new TagService().getTagsByExperimentId(arg.id, arg.isTemplate))
 
+  const locationBlocksByLocationBlockIdsLoader =
+    createMultiDataLoader(dbRead.locationAssociation.batchFindByIds)
+
   // Loaders that load by ID
   const combinationElementByIdLoader = createDataLoader(dbRead.combinationElement.batchFind)
   const dependentVariableByIdLoader = createDataLoader(dbRead.dependentVariable.batchFind)
@@ -103,6 +106,7 @@ function createLoaders() {
   const unitSpecDetailByIdLoader = createDataLoader(dbRead.unitSpecificationDetail.batchFind)
   const analysisModelByIdLoader = createDataLoader(dbRead.analysisModel.batchFindByExperimentIds)
   const unitsByBlockIdsLoader = createDataLoader(dbRead.unit.batchFindByBlockIds)
+  const unitsByLocationBlockIdsLoader = createDataLoader(dbRead.unit.batchFindByLocationBlockIds)
   const treatmentVariableLevelDetailsLoader =
     createDataLoader(dbRead.treatmentVariableLevelDetails.batchFind)
   const treatmentVariableLevelFlatDetailsLoader =
@@ -178,6 +182,7 @@ function createLoaders() {
     group: groupByIdLoader,
     groupsByExperimentIds: groupByExperimentIdLoader,
     groupsJsonsBySetIds: groupJsonsBySetIdLoader,
+    locationBlocksByLocationBlockIds: locationBlocksByLocationBlockIdsLoader,
     nestedFactorLevel: nestedFactorLevelByAssociatedFactorLevelIds,
     nestedVariables: nestedVariableLoader,
     owner: ownerByIdLoader,
@@ -198,6 +203,7 @@ function createLoaders() {
     treatmentBySetIds: treatmentBySetIdLoader,
     unitByExperimentIds: unitsByExperimentIdLoader,
     unitsByBlockIds: unitsByBlockIdsLoader,
+    unitsByLocationBlockIds: unitsByLocationBlockIdsLoader,
     unitsBySetEntryIds: unitsBySetEntryIdsLoader,
     unitsBySetId: unitsBySetIdLoader,
     unitSpecDetail: unitSpecDetailByIdLoader,

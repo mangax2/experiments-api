@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import groupBy from "lodash/groupBy"
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 5JXXXX
@@ -77,6 +78,16 @@ class unitRepo {
   @setErrorCode('5JF000')
   batchFindAllByIds = (experimentalUnitIds) => this.rep.any('SELECT * FROM unit WHERE id IN ($1:csv)', [experimentalUnitIds])
 
+  @setErrorCode('5JA000')
+  batchFindByLocationBlockIds = async (ids) => {
+    const data = await this.rep.any('SELECT unit.*, tb.treatment_id, tb.block_id, b.name AS block, la.id AS location_block_id FROM unit ' +
+      'INNER JOIN treatment_block tb ON unit.treatment_block_id = tb.id ' +
+      'INNER JOIN location_association la ON tb.block_id = la.block_id INNER JOIN block b ON tb.block_id = b.id ' +
+      'WHERE unit.location = la.location AND la.id IN ($1:csv)', [ids])
+    const groupByData = groupBy(data, 'location_block_id')
+    return ids.map(id => groupByData[id] || new Error(`No unit for block location id ${id}`))
+  }
+  
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(

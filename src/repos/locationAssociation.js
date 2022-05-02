@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import keyBy from 'lodash/keyBy'
 const { setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 5PXXXX
@@ -11,6 +12,14 @@ class locationAssociationRepo {
   @setErrorCode('5P0000')
   repository = () => this.rep
 
+  @setErrorCode('5P5000')
+  batchFindByIds = async (ids) => {
+    const data = await this.rep.any('SELECT la.*, block.experiment_id FROM location_association la INNER JOIN block ON la.block_id = block.id WHERE la.id IN ($1:csv)', [ids])
+    const keyedData = keyBy(data, 'id')
+    return ids.map(id => keyedData[id] || new Error(`No location association for id ${id}`))
+  }
+      
+  
   @setErrorCode('5P2000')
   findBySetId = (setId,) => this.rep.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
 

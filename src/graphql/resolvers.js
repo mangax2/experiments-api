@@ -4,6 +4,7 @@ import {
 import configurator from '../configs/configurator'
 
 const settings = configurator.get('settings')
+const MAX_LOCATION_BLOCKS = 100
 
 const maxIdCountCheck = (ids, maxLength) => {
   if (ids.length > maxLength) {
@@ -87,6 +88,11 @@ export default {
       emptyInputIdCheck(args.blockId)
       maxIdCountCheck(args.blockId, settings.maxBlocksToRetrieve)
       return context.loaders.blocksByBlockIds.load(args.blockId)
+    },
+    getLocationBlocksLocationBlockIds: (entity, args, context) => {
+      emptyInputIdCheck(args.ids)
+      maxIdCountCheck(args.ids, MAX_LOCATION_BLOCKS)
+      return context.loaders.locationBlocksByLocationBlockIds.load(args.ids)
     },
   },
   AssociatedSet: {
@@ -247,5 +253,14 @@ export default {
       context.getAuditInfo(entity),
     analysisModelType: property('analysis_model_type'),
     analysisModelSubType: property('analysis_model_sub_type'),
+  },
+  LocationBlock: {
+    experimentId: property('experiment_id'),
+    blockId: property('block_id'),
+    setId: property('set_id'),
+    auditInfo: (entity, args, context) =>
+      context.getAuditInfo(entity),
+    units: (entity, args, context) =>
+      context.loaders.unitsByLocationBlockIds.load(entity.id),
   },
 }

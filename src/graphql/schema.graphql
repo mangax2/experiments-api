@@ -256,6 +256,7 @@ type Query {
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
   getBlocksByBlockIds(blockId: [Int!]!): [Block]
+  getLocationBlocksLocationBlockIds(ids: [Int!]!): [LocationBlock]
 }
 
 type Treatment {
@@ -308,4 +309,14 @@ type UnitSpecificationDetail {
 type UnitType {
   id: Int
   name: String
+}
+
+type LocationBlock {
+  id: Int
+  auditInfo: AuditInfo
+  blockId: Int
+  experimentId: Int
+  location: Int
+  setId: Int
+  units: [ExperimentalUnit]
 }

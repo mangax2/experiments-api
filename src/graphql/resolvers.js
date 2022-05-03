@@ -89,7 +89,7 @@ export default {
       maxIdCountCheck(args.blockId, settings.maxBlocksToRetrieve)
       return context.loaders.blocksByBlockIds.load(args.blockId)
     },
-    getLocationBlocksLocationBlockIds: (entity, args, context) => {
+    getLocationBlocksLocationByBlockIds: (entity, args, context) => {
       emptyInputIdCheck(args.ids)
       maxIdCountCheck(args.ids, MAX_LOCATION_BLOCKS)
       return context.loaders.locationBlocksByLocationBlockIds.load(args.ids)

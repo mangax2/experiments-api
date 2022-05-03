@@ -256,7 +256,7 @@ type Query {
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
   getBlocksByBlockIds(blockId: [Int!]!): [Block]
-  getLocationBlocksLocationBlockIds(ids: [Int!]!): [LocationBlock]
+  getLocationBlocksLocationByBlockIds(ids: [Int!]!): [LocationBlock]
 }
 
 type Treatment {

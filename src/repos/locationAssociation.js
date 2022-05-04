@@ -31,13 +31,26 @@ class locationAssociationRepo {
     const promises = []
 
     if (setIds.includes('null')) {
-      promises.push(this.rep.any('WITH experiment_location_blocks AS\n' +
-      '(SELECT DISTINCT e.id, u.location, b.id as block_id FROM experiment e, unit u, treatment_block tb, block b ' +
-        'WHERE u.treatment_block_id = tb.id AND tb.block_id = b.id AND b.experiment_id = e.id AND e.is_template = false),\n' +
-        'experiment_ids_missing_setIds AS(\n' +
-        'SELECT DISTINCT elb.id FROM experiment_location_blocks elb\n' +
-        'LEFT JOIN location_association la ON la.block_id = elb.block_id AND elb.location = la.location WHERE la.set_id IS NULL)\n' +
-        'SELECT e.* from experiment e, experiment_ids_missing_setIds eid WHERE e.id = eid.id ORDER BY id ASC;'))
+      promises.push(this.rep.any(`
+        WITH experiment_location_blocks AS (
+          SELECT DISTINCT e.id, u.location, b.id as block_id
+          FROM experiment e, unit u, treatment_block tb, block b
+          WHERE u.treatment_block_id = tb.id
+            AND tb.block_id = b.id
+            AND b.experiment_id = e.id
+            AND e.is_template = false
+        ), experiment_ids_missing_setIds AS (
+          SELECT DISTINCT elb.id
+          FROM experiment_location_blocks elb
+            LEFT JOIN location_association la
+              ON la.block_id = elb.block_id
+                AND elb.location = la.location
+          WHERE la.set_id IS NULL
+        )
+        SELECT e.*
+        FROM experiment e, experiment_ids_missing_setIds eid
+        WHERE e.id = eid.id
+        ORDER BY id ASC;`))
     } else {
       promises.push(Promise.resolve())
     }

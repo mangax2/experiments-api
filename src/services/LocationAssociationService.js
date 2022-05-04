@@ -21,15 +21,16 @@ class LocationAssociationService {
       this.experimentalUnitService
         .getExperimentalUnitsByExperimentIdNoValidate(experimentId),
       dbRead.block.findByExperimentId(experimentId),
+      dbRead.locationAssociation.findByExperimentId(experimentId),
       this.experimentService.verifyExperimentExists(experimentId, false, context),
-    ]).then(([units, blocks]) => {
+    ]).then(([units, blocks, locationAssociations]) => {
       const locations = _.uniq(_.map(units, 'location'))
 
       const associations = _.map(rawNewAssociations, (rawNewAssociation) => {
         const newAssociation = destructureInput(rawNewAssociation)
         const block = _.find(blocks, { name: newAssociation.block || null })
 
-        validateNewAssociation(newAssociation, experimentId, locations, block)
+        validateNewAssociation(newAssociation, experimentId, locations, block, locationAssociations)
 
         return {
           location: newAssociation.location,
@@ -38,8 +39,7 @@ class LocationAssociationService {
         }
       })
 
-      return dbWrite.locationAssociation.batchRemoveByLocationAndBlock(associations, tx)
-        .then(() => dbWrite.locationAssociation.batchCreate(associations, context, tx))
+      return dbWrite.locationAssociation.batchCreate(associations, context, tx)
     })
 }
 
@@ -53,7 +53,13 @@ const destructureInput = (rawInput) => {
   }
 }
 
-const validateNewAssociation = (newAssociation, experimentId, locations, existingBlock) => {
+const validateNewAssociation = (
+  newAssociation,
+  experimentId,
+  locations,
+  existingBlock,
+  locationAssociations,
+) => {
   if (_.isNil(newAssociation.experimentId)
     || _.isNaN(newAssociation.experimentId)
     || newAssociation.experimentId !== Number(experimentId)
@@ -71,6 +77,14 @@ const validateNewAssociation = (newAssociation, experimentId, locations, existin
 
   if (!existingBlock) {
     throw AppError.badRequest('Invalid block value passed for association', null, getFullErrorCode('1Y1004'))
+  }
+
+  const existingLocAssoc = locationAssociations.find(locAssoc =>
+    locAssoc.location === newAssociation.location
+      && locAssoc.block_id === existingBlock.id)
+
+  if (existingLocAssoc) {
+    throw AppError.badRequest('A set already exists for the location and block combination', null, getFullErrorCode('1Y1005'))
   }
 }
 

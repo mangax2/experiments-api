@@ -62,4 +62,63 @@ describe('QuestionsUtil', () => {
       })
     })
   })
+
+  describe('getCompleteQuestion', () => {
+    test('calls getWithRetry with the expected URL', async () => {
+      OAuthUtil.getAuthorizationHeaders = mockResolve(testHeaders)
+      HttpUtil.getWithRetry = mockResolve({ body: [] })
+
+      await QuestionsUtil.getCompleteQuestion('questionCode')
+
+      expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
+      expect(HttpUtil.getWithRetry).toHaveBeenCalledWith('baseUrl/question-complete?questionCode=questionCode', testHeaders)
+    })
+
+    test('does not catch the OAuthUtil error if retrieving headers fails', async () => {
+      OAuthUtil.getAuthorizationHeaders = mockReject('error')
+      HttpUtil.getWithRetry = mockResolve({})
+      AppError.internalServerError = mock()
+
+      try {
+        await QuestionsUtil.getCompleteQuestion('questionCode')
+      } catch (err) {
+        expect(err).toBe('error')
+        expect(OAuthUtil.getAuthorizationHeaders).toHaveBeenCalled()
+        expect(HttpUtil.getWithRetry).not.toHaveBeenCalled()
+        expect(AppError.internalServerError).not.toHaveBeenCalled()
+      }
+    })
+
+    test('formats a new error message with AppError if HttpUtil fails', async () => {
+      OAuthUtil.getAuthorizationHeaders = mockResolve(testHeaders)
+      HttpUtil.getWithRetry = mockReject('error')
+      const error = new Error()
+      AppError.internalServerError = mock(error)
+
+      try {
+        await QuestionsUtil.getCompleteQuestion('questionCode')
+      } catch (err) {
+        expect(err).toBe(error)
+        expect(AppError.internalServerError).toHaveBeenCalledWith('Internal Server Error', 'Questions API returned an error')
+      }
+    })
+
+    test('picks out the keys from the http response on success', async () => {
+      OAuthUtil.getAuthorizationHeaders = mockResolve(testHeaders)
+      const questionComplete = {
+        code: 'APP_TIM',
+        text: 'Application Timing',
+        uoms: [],
+      }
+      HttpUtil.getWithRetry = mockResolve({
+        body: [questionComplete],
+      })
+      AppError.internalServerError = mock()
+
+      const result = await QuestionsUtil.getCompleteQuestion('questionCode')
+
+      expect(result).toEqual(questionComplete)
+      expect(AppError.internalServerError).not.toHaveBeenCalled()
+    })
+  })
 })

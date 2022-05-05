@@ -8,7 +8,7 @@ class factorLevelDetailsRepo {
     this.pgp = pgp
   }
   
-  @setErrorCode('5Q6000')
+  @setErrorCode('5Q1000')
   batchCreate = (factorLevelDetails, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
@@ -50,6 +50,23 @@ class factorLevelDetailsRepo {
     return tx.query(query1)
       .then(() => tx.any(query2))
   }
+
+  @setErrorCode('5Q2000')
+  findByExperimentId = (experimentId) => this.rep.any(`
+    WITH treatment_numbers AS (
+      SELECT fl.id, MIN(t.treatment_number) AS treatment_number
+      FROM factor_level fl
+        LEFT OUTER JOIN combination_element ce ON fl.id = ce.factor_level_id
+        LEFT OUTER JOIN treatment t ON ce.treatment_id = t.id
+      WHERE t.experiment_id = $1
+      GROUP BY fl.id
+    )
+    SELECT fld.*, tn.treatment_number
+    FROM factor_level_details fld
+      INNER JOIN factor_level fl ON fld.factor_level_id = fl.id
+      INNER JOIN factor f ON fl.factor_id = f.id
+      INNER JOIN treatment_numbers tn ON fld.factor_level_id = tn.id
+    WHERE f.experiment_id = $1`, [experimentId])
 }
 
 module.exports = (rep, pgp) => new factorLevelDetailsRepo(rep, pgp)

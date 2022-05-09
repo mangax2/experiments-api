@@ -223,7 +223,7 @@ describe('ChemApSyncService', () => {
     ]
     const requestId = '12345'
 
-    test('returns an empty array if there is not timing property', () => {
+    test('returns an empty array if there is no timing property', () => {
       const levelDetails = []
 
       const result = getUniqueTimings([], levelDetails, timingUomMap, requestId)

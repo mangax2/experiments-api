@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import uniq from 'lodash/uniq'
 import inflector from 'json-inflector'
 import Transactional from '@monsantoit/pg-transactional'
 import { dbRead, dbWrite } from '../db/DbManager'
@@ -9,7 +10,7 @@ import QuestionsUtil from './utility/QuestionsUtil'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
-import { notifyChanges } from '../decorators/notifyChanges'
+import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
 import KafkaProducer from './kafka/KafkaProducer'
 import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
@@ -266,10 +267,21 @@ class ExperimentalUnitService {
           })
           return dbWrite.unit.batchUpdateDeactivationReasons(results, context, tx).then(() => {
             this.sendDeactivationNotifications(results)
+            this.sendProd360KafkaNotifications(
+              (unitsFromDb || []).map(unit => unit.treatment_block_id),
+            )
             return results
           })
         })
     })
+
+  @setErrorCode('17N000')
+  sendProd360KafkaNotifications = async (treatmentBlockIds) => {
+    const experiments =
+      await dbWrite.unit.batchFindExperimentIdsByTreatmentBlockIds(treatmentBlockIds)
+    const experimentIds = uniq(experiments.map(exp => exp.experiment_id))
+    Promise.all(experimentIds.map(id => sendKafkaNotification('update', id)))
+  }
 
   @setErrorCode('17K000')
   sendDeactivationNotifications = (deactivations) => {

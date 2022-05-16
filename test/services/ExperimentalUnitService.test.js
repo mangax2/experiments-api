@@ -519,18 +519,22 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 1, deactivationReason: 'foo' },
         { id: 2, deactivationReason: 'bar' },
       ]
-      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null }]
-      const unitMockReturnValue = [{ id: 2, deactivationReason: null, set_entry_id: 7 }]
+      const setEntryIdMockReturnValue = [{ set_entry_id: 1, deactivation_reason: null, treatment_block_id: 2 }]
+      const unitMockReturnValue = [{
+        id: 2, deactivationReason: null, set_entry_id: 7, treatment_block_id: 1,
+      }]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
       dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
+      target.sendProd360KafkaNotifications = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
         expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(target.sendProd360KafkaNotifications).toHaveBeenCalledWith([2, 1])
       })
     })
 
@@ -540,19 +544,25 @@ describe('ExperimentalUnitService', () => {
         { id: 2, deactivationReason: 'bar' },
       ]
       const unitMockReturnValue = [
-        { id: 1, deactivationReason: null, set_entry_id: 5 },
-        { id: 2, deactivationReason: null, set_entry_id: 7 },
+        {
+          id: 1, deactivationReason: null, set_entry_id: 5, treatment_block_id: 2,
+        },
+        {
+          id: 2, deactivationReason: null, set_entry_id: 7, treatment_block_id: 1,
+        },
       ]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve()
       dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
+      target.sendProd360KafkaNotifications = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).not.toHaveBeenCalled()
         expect(dbRead.unit.batchFindAllByIds).toHaveBeenCalledTimes(1)
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(target.sendProd360KafkaNotifications).toHaveBeenCalledWith([2, 1])
       })
     })
 
@@ -562,19 +572,21 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 2, deactivationReason: 'bar' },
       ]
       const setEntryIdMockReturnValue = [
-        { set_entry_id: 1, deactivationReason: null },
-        { set_entry_id: 2, deactivationReason: null },
+        { set_entry_id: 1, deactivationReason: null, treatment_block_id: 2 },
+        { set_entry_id: 2, deactivationReason: null, treatment_block_id: 1 },
       ]
 
       dbRead.unit.batchFindAllBySetEntryIds = mockResolve(setEntryIdMockReturnValue)
       dbRead.unit.batchFindAllByIds = mockResolve()
       dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
+      target.sendProd360KafkaNotifications = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(dbRead.unit.batchFindAllBySetEntryIds).toHaveBeenCalledTimes(1)
         expect(dbRead.unit.batchFindAllByIds).not.toHaveBeenCalled()
         expect(dbWrite.unit.batchUpdateDeactivationReasons).toHaveBeenCalledTimes(1)
+        expect(target.sendProd360KafkaNotifications).toHaveBeenCalledWith([2, 1])
       })
     })
 
@@ -590,6 +602,7 @@ describe('ExperimentalUnitService', () => {
       dbRead.unit.batchFindAllByIds = mockResolve(unitMockReturnValue)
       dbWrite.unit.batchUpdateDeactivationReasons = mockResolve()
       target.sendDeactivationNotifications = mock()
+      target.sendProd360KafkaNotifications = mockResolve()
 
       return target.deactivateExperimentalUnits(payload, context, testTx).then(() => {
         expect(target.sendDeactivationNotifications).toHaveBeenCalled()

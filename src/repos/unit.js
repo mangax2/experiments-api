@@ -223,13 +223,22 @@ class unitRepo {
     return units.map(unit => unit.set_entry_id)
   }
 
-  @setErrorCode('5JM001')
+  @setErrorCode('5JO000')
   batchClearEntryIds = (entryIds) => {
     if (!entryIds || entryIds.length === 0) {
       return
     }
 
     return this.rep.none('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv)', [entryIds])
+  }
+
+  @setErrorCode('5JN000')
+  batchFindExperimentIdsByTreatmentBlockIds = (treatmentBlockIds) => {
+    if (!treatmentBlockIds || treatmentBlockIds.length === 0) {
+      return
+    }
+
+    return this.rep.any('SELECT t.experiment_id FROM treatment_block tb INNER JOIN treatment t ON tb.treatment_id = t.id WHERE tb.id IN ($1:csv)', [treatmentBlockIds])
   }
 }
 

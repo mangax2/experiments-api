@@ -67,7 +67,7 @@ describe('ChemApSyncService', () => {
       { factor_properties_for_level_id: 6, text: '4' },
     ])
     dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
-      { object_type: 'Catalog', catalog_type: 'CHEMICAL' },
+      { object_type: 'Catalog', material_type: 'CHEMICAL' },
       { id: 6, question_code: 'APP_TIM' },
     ])
     OAuthUtil.getAuthorizationHeaders = mockResolve([])
@@ -97,7 +97,7 @@ describe('ChemApSyncService', () => {
 
   test('should fail when experiment has duplicate QandA properties', async () => {
     dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
-      { object_type: 'Catalog', catalog_type: 'CHEMICAL' },
+      { object_type: 'Catalog', material_type: 'CHEMICAL' },
       { object_type: 'QandAV3', question_code: 'APP_TIM' },
       { object_type: 'QandAV3', question_code: 'APP_TIM' },
     ])

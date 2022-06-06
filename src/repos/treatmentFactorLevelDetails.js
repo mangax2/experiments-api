@@ -5,7 +5,7 @@ const query = `WITH temp_generate_json as (
 	json_build_object('questionCode', CASE WHEN fpl.multi_question_tag IS NOT NULL THEN fld.question_code ELSE fpl.question_code END, 'objectType', object_type,
 		'label', label,
 		'multiQuestionTag', multi_question_tag,
-		'catalogType', catalog_type,
+		'catalogType', material_type,
 		'valueType', value_type,
 		'text', text,
 		'value', value,

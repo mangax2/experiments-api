@@ -170,7 +170,7 @@ const duplicateFactorPropertiesForLevelScript =
   "        FROM factor_properties_for_level fpfl   " +
   "            INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id   " +
   "            INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.id = mfpfli.old_factor_properties_for_level_id ) sub   " +
-  "RETURNING id, factor_id, column_number, object_type, label, question_code, multi_question_tag, catalog_type; "
+  "RETURNING id, factor_id, column_number, object_type, label, question_code, multi_question_tag, material_type; "
 
 const duplicateFactorLevelDetails =
   "WITH temp_ordered_old_factor_level_details_ids AS (  " +

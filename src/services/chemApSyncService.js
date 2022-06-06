@@ -95,7 +95,7 @@ const getExperimentData = async (experimentId, requestId) => {
 }
 
 const validateExperimentChemicalProperties = (factorProperties, requestId) => {
-  if (!factorProperties.find(property => property.object_type === 'Catalog' && property.catalog_type === 'CHEMICAL')) {
+  if (!factorProperties.find(property => property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')) {
     const message = 'The experiment does not have any chemical data'
     console.error(`[[${requestId}]] ${message}`)
     throw AppError.badRequest(message, undefined, getFullErrorCode('1G5001'))

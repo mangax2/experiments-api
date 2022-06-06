@@ -20,7 +20,7 @@ WITH temp_generate_json AS (
 			'multiQuestionTag',
 			multi_question_tag,
 			'catalogType',
-			catalog_type,
+			material_type,
 			'valueType',
 			value_type,
 			'text',

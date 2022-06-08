@@ -5,7 +5,6 @@ import configurator from '../../configs/configurator'
 
 class OAuthUtil {
   static getAuthorizationHeaders = async () => {
-
     const params = {
       clientId: configurator.get('client.clientId'),
       clientSecret: configurator.get('client.clientSecret'),
@@ -26,7 +25,6 @@ class OAuthUtil {
         AppError.create(500, 'Internal Server Error', 'Authentication Service Returned An Error'),
       )
     }
-
   }
 }
 

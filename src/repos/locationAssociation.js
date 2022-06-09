@@ -16,7 +16,7 @@ class locationAssociationRepo {
   batchFindByIds = async (ids) => {
     const data = await this.rep.any('SELECT la.*, block.experiment_id FROM location_association la INNER JOIN block ON la.block_id = block.id WHERE la.id IN ($1:csv)', [ids])
     const keyedData = keyBy(data, 'id')
-    return ids.map(id => keyedData[id] || new Error(`No location association for id ${id}`))
+    return ids.map(id => keyedData[id])
   }
       
   

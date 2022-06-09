@@ -85,7 +85,7 @@ class unitRepo {
       'INNER JOIN location_association la ON tb.block_id = la.block_id INNER JOIN block b ON tb.block_id = b.id ' +
       'WHERE unit.location = la.location AND la.id IN ($1:csv)', [ids])
     const groupByData = groupBy(data, 'location_block_id')
-    return ids.map(id => groupByData[id] || new Error(`No unit for block location id ${id}`))
+    return ids.map(id => groupByData[id])
   }
   
   @setErrorCode('5J9000')

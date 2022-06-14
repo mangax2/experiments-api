@@ -35,6 +35,7 @@
     "@monsantoit/config": "1.2.0",
     "@monsantoit/custom-datadog-metrics-express-middleware": "0.0.4",
     "@monsantoit/error-decorator": "1.0.1",
+    "@monsantoit/oauth-azure": "1.2.1",
     "@monsantoit/oauth-ping": "4.4.0",
     "@monsantoit/pg-transactional": "1.0.1",
     "@monsantoit/ping-page": "2.0.10",

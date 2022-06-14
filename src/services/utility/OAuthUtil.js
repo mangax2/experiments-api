@@ -1,33 +1,30 @@
-import agent from 'superagent'
+import oauth from '@monsantoit/oauth-azure'
 import AppError from './AppError'
 import HttpUtil from './HttpUtil'
 import configurator from '../../configs/configurator'
 
 class OAuthUtil {
-  static getAuthorizationHeaders() {
+  static getAuthorizationHeaders = async () => {
     const params = {
-      client_id: configurator.get('client.clientId'),
-      client_secret: configurator.get('client.clientSecret'),
-      scope: `${configurator.get('client.clientId')}/.default`,
-      grant_type: 'client_credentials',
+      clientId: configurator.get('client.clientId'),
+      clientSecret: configurator.get('client.clientSecret'),
+      url: configurator.get('urls.oauthUrl'),
     }
     const startTime = new Date().getTime()
-    return agent.post(configurator.get('urls.oauthUrl'))
-      .set('Content-Type', 'application/x-www-form-urlencoded')
-      .send(params)
-      .then((result) => {
-        HttpUtil.logExternalTime(startTime, 10000, 'oauth-azure-token', 'GET')
-        return [
-          { headerName: 'authorization', headerValue: `Bearer ${result.body.access_token}` },
-          { headerName: 'Content-Type', headerValue: 'application/json' },
-        ]
-      })
-      .catch((error) => {
-        console.error('Authentication service returned an error', error.status, error.body)
-        return Promise.reject(
-          AppError.create(500, 'Internal Server Error', 'Authentication service returned an error'),
-        )
-      })
+
+    try {
+      const token = await oauth.httpGetToken(params)()
+      HttpUtil.logExternalTime(startTime, 10000, 'oauth-azure-token', 'GET')
+      return [
+        { headerName: 'authorization', headerValue: `Bearer ${token}` },
+        { headerName: 'Content-Type', headerValue: 'application/json' },
+      ]
+    } catch (err) {
+      console.error('Authentication service returned an error', err.status, err.body)
+      return Promise.reject(
+        AppError.create(500, 'Internal Server Error', 'Authentication Service Returned An Error'),
+      )
+    }
   }
 }
 

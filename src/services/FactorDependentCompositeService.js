@@ -43,7 +43,6 @@ const determineIdsToDelete = addErrorHandling('1A3000',
   (dbEntities, requestEntities) =>
     difference(extractIds(dbEntities), extractIds(requestEntities)))
 
-
 const getEntitiesToUpdate = addErrorHandling('1A4000',
   requestEntities => (requestEntities || []).filter(entity => entity.id))
 

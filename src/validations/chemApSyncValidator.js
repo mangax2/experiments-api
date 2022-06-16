@@ -6,8 +6,7 @@ const chemApSyncInputSchema = Joi.object({
   experimentId: Joi.number().greater(0).required(),
 })
 
-
-const chemApSyncInputSchemaValidate = async (body) => {
+export const chemApSyncInputSchemaValidate = async (body) => {
   try {
     await chemApSyncInputSchema.validateAsync(body)
   } catch (error) {
@@ -15,4 +14,4 @@ const chemApSyncInputSchemaValidate = async (body) => {
   }
 }
 
-export { chemApSyncInputSchemaValidate as default }
+export default chemApSyncInputSchemaValidate

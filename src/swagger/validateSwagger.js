@@ -1,5 +1,5 @@
 const swaggerTools = require('swagger-tools')
-const swaggerDoc = require('./swagger')
+const swaggerDoc = require('./swagger.json')
 
 function validateSwagger() {
   swaggerTools.specs.v2.validate(swaggerDoc, (err, result) => {

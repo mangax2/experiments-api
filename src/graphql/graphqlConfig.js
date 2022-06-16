@@ -50,7 +50,7 @@ const mutuallyExclusiveFields = (parentNode, ...exclusiveFields) => context => (
     if (node.name.value === parentNode) {
       let matches = 0
 
-      // eslint-disable-next-line no-restricted-syntax
+      // eslint-disable-next-line
       for (const { name: { value } } of node.selectionSet.selections) {
         matches += exclusiveFields.includes(value) ? 1 : 0
 

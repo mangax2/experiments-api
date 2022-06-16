@@ -24,9 +24,6 @@
     "import/first": [
       0
     ],
-    "import/no-named-as-default": [
-      0
-    ],
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
     "jest/no-identical-title": "error",
@@ -62,6 +59,12 @@
       "never"
     ],
     "implicit-arrow-linebreak": "off",
-    "operator-linebreak": "off"
+    "operator-linebreak": "off",
+    "import/no-named-as-default-member": "off",
+    "import/no-named-as-default": "off",
+    "function-paren-newline": "off",
+    "import/no-import-module-exports": "off",
+    "arrow-parens": "off",
+    "function-call-argument-newline": "off"
   }
 }

@@ -85,6 +85,7 @@ class SchemaValidator extends BaseValidator {
 
       if (riCheckArray.length === 0) {
         resolve()
+        return
       }
 
       const riCheckGroupByEntity = _.values(_.groupBy(riCheckArray, 'paramName'))

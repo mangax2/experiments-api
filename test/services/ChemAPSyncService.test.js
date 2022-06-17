@@ -197,7 +197,7 @@ describe('ChemApSyncService', () => {
 
     await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
 
-    expect(HttpUtil.put).toHaveBeenCalled()
+    expect(HttpUtil.put).toHaveBeenCalledTimes(2)
   })
 
   test('does not save target timings when there are no timings to save', async () => {
@@ -208,7 +208,7 @@ describe('ChemApSyncService', () => {
 
     await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
 
-    expect(HttpUtil.put).not.toHaveBeenCalled()
+    expect(HttpUtil.put).toHaveBeenCalledTimes(1)
   })
 
   describe('getTimingQuestionUoms', () => {

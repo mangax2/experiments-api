@@ -107,7 +107,6 @@ describe('LocationAssociationService', () => {
       target.experimentService.verifyExperimentExists = mockResolve({})
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
-
       await target.associateSetsToLocations(1, groups, testContext, testTx)
 
       expect(dbWrite.locationAssociation.batchCreate).toHaveBeenCalledWith([

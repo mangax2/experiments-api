@@ -8,7 +8,7 @@ const { setErrorCode } = require('@monsantoit/error-decorator')()
 class AnalysisModelService {
   @setErrorCode('1W1000')
   @Transactional('batchCreateAnalysisModel')
-  batchCreateAnalysisModel=(analysisModelInfo, context, tx) =>
+  batchCreateAnalysisModel = (analysisModelInfo, context, tx) =>
     dbWrite.analysisModel.batchCreate(analysisModelInfo, context, tx)
       .then(data => AppUtil.createPostResponse(data))
 
@@ -21,7 +21,7 @@ class AnalysisModelService {
 
   @setErrorCode('1W4000')
   @Transactional('batchUpdateAnalysisModel')
-  batchUpdateAnalysisModel=(analysisModelInfo, context, tx) =>
+  batchUpdateAnalysisModel = (analysisModelInfo, context, tx) =>
     dbWrite.analysisModel.batchUpdate(analysisModelInfo, context, tx)
       .then(data => AppUtil.createPutResponse(data))
 }

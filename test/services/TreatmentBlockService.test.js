@@ -196,7 +196,6 @@ describe('TreatmentBlockService', () => {
       name: 'blah', treatmentId: 3, blockId: 5, numPerRep: 1,
     }]
 
-
     test('returns an empty array when given no treatments', async () => {
       const target = new TreatmentBlockService()
 

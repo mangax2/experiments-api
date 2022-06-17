@@ -25,7 +25,6 @@ describe('TagValidator', () => {
     expect(TagValidator.VALIDATION_SCHEMA).toEqual(schema)
   })
 
-
   describe('getSchema', () => {
     test('returns schema', () => {
       dbRead.experiments = {}

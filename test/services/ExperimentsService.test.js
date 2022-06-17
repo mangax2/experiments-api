@@ -248,7 +248,6 @@ describe('ExperimentsService', () => {
       })
     })
 
-
     test('rejects when batchCreateTags fails', () => {
       const error = { message: 'error' }
       target.validator.validate = mockResolve()

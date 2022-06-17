@@ -224,7 +224,7 @@ describe('requestContextMiddlewareFunction', () => {
         },
       }
 
-      return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      return new Promise(resolve => { resolve(requestContextMiddlewareFunction(req, res, nextFunc)) })
         .then(() => {
           expect(nextFunc).toHaveBeenCalled()
           expect(req.context.isApiRequest).toEqual(true)
@@ -240,7 +240,7 @@ describe('requestContextMiddlewareFunction', () => {
         },
       }
 
-      return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      return new Promise(resolve => { resolve(requestContextMiddlewareFunction(req, res, nextFunc)) })
         .then(() => {
           expect(nextFunc).toHaveBeenCalled()
           expect(req.context.userId).toEqual('FAKEUSER2')
@@ -250,7 +250,7 @@ describe('requestContextMiddlewareFunction', () => {
     test('calls to get client id when graphql call', () => {
       const req = { method: 'POST', headers: validHeaders, url: '/experiments-api-graphql/graphql' }
 
-      return new Promise(resolve => resolve(requestContextMiddlewareFunction(req, res, nextFunc)))
+      return new Promise(resolve => { resolve(requestContextMiddlewareFunction(req, res, nextFunc)) })
         .then(() => {
           expect(nextFunc).toHaveBeenCalled()
           expect(req.context.userId).toEqual('FAKEUSER')

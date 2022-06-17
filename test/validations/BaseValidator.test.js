@@ -265,7 +265,6 @@ describe('BaseValidator', () => {
       expect(target.messages[0]).toEqual({ message: 'test must be numeric', errorCode: 'ZZ05' })
     })
 
-
     test('does not add a message if the value is numeric', () => {
       target.checkNumeric(1, 'test')
 
@@ -291,7 +290,6 @@ describe('BaseValidator', () => {
 
       expect(target.messages[0]).toEqual({ message: 'block must be an integer', errorCode: 'ZZ10' })
     })
-
 
     test('does not add a message if the value is an integer', () => {
       target.checkInteger(1, 'block')

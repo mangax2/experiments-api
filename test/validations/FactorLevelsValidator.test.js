@@ -134,7 +134,6 @@ describe('FactorLevelsValidator', () => {
       ]
       target.getBusinessKeyPropertyNames = mock(['factorId', 'value', 'associatedFactorLevelRefIds'])
 
-
       return target.postValidate(targetObject).then(() => {
         expect(target.messages.length).toEqual(0)
       })

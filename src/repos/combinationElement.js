@@ -119,6 +119,14 @@ class combinationElementRepo {
 
   @setErrorCode('50B000')
   findAllByExperimentIdIncludingControls = (experimentId) => this.rep.any('SELECT ce.id, ce.factor_level_id, t.id AS treatment_id FROM combination_element ce RIGHT OUTER JOIN treatment t ON ce.treatment_id = t.id WHERE t.experiment_id = $1', experimentId)
+
+  @setErrorCode('50C000')
+  findByExperimentIdWithTreatmentNumber = (experimentId) =>
+    this.rep.any(`
+      SELECT ce.*, t.treatment_number
+      FROM combination_element ce
+        INNER JOIN treatment t ON ce.treatment_id = t.id
+      WHERE t.experiment_id = $1`, experimentId)
 }
 
 module.exports = (rep, pgp) => new combinationElementRepo(rep, pgp)

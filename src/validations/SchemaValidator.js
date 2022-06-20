@@ -84,11 +84,12 @@ class SchemaValidator extends BaseValidator {
       })
 
       if (riCheckArray.length === 0) {
-        return resolve()
+        resolve()
+        return
       }
 
       const riCheckGroupByEntity = _.values(_.groupBy(riCheckArray, 'paramName'))
-      return this.checkRIBatch(riCheckGroupByEntity, optionalTransaction).then(() => {
+      this.checkRIBatch(riCheckGroupByEntity, optionalTransaction).then(() => {
         resolve()
       }, (err) => {
         reject(err)

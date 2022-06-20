@@ -141,7 +141,6 @@ router.post('/experiments/:id/design-experimental-units', (req, res, next) => ne
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
   .catch(err => next(err)))
@@ -288,7 +287,6 @@ router.patch('/templates/:id/review', (req, res, next) => new ExperimentsService
 router.patch('/templates/:id/blocks', (req, res, next) => new BlockService().renameBlocks(req.params.id, true, req.body, req.context)
   .then(() => res.sendStatus(204))
   .catch(err => next(err)))
-
 
 router.get('/getDoc/:fileName', (req, res, next) => {
   DocumentationService.getDoc(req.params.fileName).then((documentationFile) => {

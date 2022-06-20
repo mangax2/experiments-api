@@ -19,12 +19,9 @@
     "jest",
     "jest-async"
   ],
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "rules": {
     "import/first": [
-      0
-    ],
-    "import/no-named-as-default": [
       0
     ],
     "jest/no-disabled-tests": "warn",
@@ -62,6 +59,14 @@
       "never"
     ],
     "implicit-arrow-linebreak": "off",
-    "operator-linebreak": "off"
+    "operator-linebreak": "off",
+    "import/no-named-as-default-member": "off",
+    "import/no-named-as-default": "off",
+    "function-paren-newline": "off",
+    "import/no-import-module-exports": "off",
+    "arrow-parens": "off",
+    "function-call-argument-newline": "off",
+    "class-methods-use-this": ["error", { "enforceForClassFields": false }],
+    "indent": "off" // this rule is broken as of 2022-06-17
   }
 }

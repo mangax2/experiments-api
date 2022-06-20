@@ -2,7 +2,6 @@ import { mockReject, mockResolve } from '../jestUtil'
 import UnitTypeService from '../../src/services/UnitTypeService'
 import { dbRead } from '../../src/db/DbManager'
 
-
 describe('UnitTypeService', () => {
   let target
 

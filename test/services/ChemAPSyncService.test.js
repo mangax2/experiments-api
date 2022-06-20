@@ -1,4 +1,5 @@
 import createAndSyncChemApPlanFromExperiment, {
+  getChemicalsWithGroups,
   getTimingQuestionUoms,
   getUniqueTimings,
 } from '../../src/services/chemApSyncService'
@@ -14,7 +15,7 @@ jest.mock('../../src/services/SecurityService')
 jest.mock('../../src/services/utility/OAuthUtil')
 jest.mock('../../src/services/utility/HttpUtil')
 
-const questionComplete = {
+const timingQuestionComplete = {
   uoms: [
     { code: 'TEXT' },
     {
@@ -51,6 +52,8 @@ const timingUomMap = {
   TEXT: {},
 }
 
+const timingProperty = { id: 6, question_code: 'APP_TIM' }
+
 describe('ChemApSyncService', () => {
   beforeEach(() => {
     apiUrls.chemApAPIUrl = 'chemApAPIUrl'
@@ -70,11 +73,12 @@ describe('ChemApSyncService', () => {
       { object_type: 'Catalog', material_type: 'CHEMICAL' },
       { id: 6, question_code: 'APP_TIM' },
     ])
+    dbRead.combinationElement.findByExperimentIdWithTreatmentNumber = mockResolve([])
     OAuthUtil.getAuthorizationHeaders = mockResolve([])
     AppError.internalServerError = mock()
     AppError.notFound = mock()
     AppError.badRequest = mock()
-    QuestionsUtil.getCompleteQuestion = mockResolve(questionComplete)
+    QuestionsUtil.getCompleteQuestion = mockResolve(timingQuestionComplete)
   })
 
   test('should fail when experiment does not exist', async () => {
@@ -193,7 +197,7 @@ describe('ChemApSyncService', () => {
 
     await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
 
-    expect(HttpUtil.put).toHaveBeenCalled()
+    expect(HttpUtil.put).toHaveBeenCalledTimes(2)
   })
 
   test('does not save target timings when there are no timings to save', async () => {
@@ -204,7 +208,7 @@ describe('ChemApSyncService', () => {
 
     await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
 
-    expect(HttpUtil.put).not.toHaveBeenCalled()
+    expect(HttpUtil.put).toHaveBeenCalledTimes(1)
   })
 
   describe('getTimingQuestionUoms', () => {
@@ -216,11 +220,6 @@ describe('ChemApSyncService', () => {
   })
 
   describe('getUniqueTimings', () => {
-    const factorProperties = [
-      { id: 2, question_code: 'APP_MET' },
-      { id: 6, question_code: 'APP_TIM' },
-      { id: 4, object_type: 'Catalog' },
-    ]
     const requestId = '12345'
 
     test('returns an empty array if there is no timing property', () => {
@@ -263,7 +262,7 @@ describe('ChemApSyncService', () => {
       ]
 
       try {
-        getUniqueTimings(factorProperties, levelDetails, timingUomMap, requestId)
+        getUniqueTimings(timingProperty, levelDetails, timingUomMap, requestId)
       } catch (error) {
         expect(AppError.badRequest).toHaveBeenCalledWith('The experiment has too many unique timings. The maximum unique timings allowed is 26.', undefined, '1G6001')
       }
@@ -281,7 +280,7 @@ describe('ChemApSyncService', () => {
         { factor_properties_for_level_id: 6, text: '4' },
       ]
 
-      const result = getUniqueTimings(factorProperties, levelDetails, timingUomMap, requestId)
+      const result = getUniqueTimings(timingProperty, levelDetails, timingUomMap, requestId)
 
       expect(result.length).toBe(5)
     })
@@ -326,7 +325,7 @@ describe('ChemApSyncService', () => {
         },
       ]
 
-      const result = getUniqueTimings(factorProperties, levelDetails, timingUomMap, requestId)
+      const result = getUniqueTimings(timingProperty, levelDetails, timingUomMap, requestId)
 
       expect(result).toEqual([
         { code: 'A', description: '1.1' },
@@ -356,13 +355,2489 @@ describe('ChemApSyncService', () => {
         },
       ]
 
-      const result = getUniqueTimings(factorProperties, levelDetails, timingUomMap, requestId)
+      const result = getUniqueTimings(timingProperty, levelDetails, timingUomMap, requestId)
 
       expect(result).toEqual([
         { code: 'A' },
         { code: 'B', description: '2' },
         { code: 'C', description: '3' },
         { code: 'D', description: 'Flowering' },
+      ])
+    })
+  })
+
+  describe('getChemicalsWithGroups', () => {
+    const factorProperties = [
+      { id: 4, multi_question_tag: 'APP_RATE' },
+      { id: 6, question_code: 'APP_TIM' },
+      { id: 2, object_type: 'Catalog', material_type: 'CHEMICAL' },
+      { id: 7, question_code: 'APP_MET' },
+      { id: 5, object_type: 'Catalog', material_type: 'INTERNAL_SEED' },
+    ]
+    const uniqueTimings = [
+      { code: 'A', description: '1' },
+      { code: 'B', description: '2' },
+      { code: 'C', description: '3' },
+    ]
+
+    describe('3 variable (chemical, appRate, timing)', () => {
+      test('returns 4 chemicals when 2 rows in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 4 chemicals when 2 rows in each except timing with 1', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 2 rows in each except 1 chemical', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 2 rows in each except 1 appRate', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row in each except 2 timings', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 1 row in each except 2 chemicals', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 1 row in each except appRate', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 3,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+          { treatment_number: 1, factor_level_id: 3 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+    })
+
+    describe('2 variable (chemical+appRate, timing)', () => {
+      test('returns 2 chemicals when 2 rows in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 2 chemical/appRate and 1 timing', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 chemical/appRate and 2 timings', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A', 'B'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+    })
+
+    describe('2 variable (chemical, appRate+timing)', () => {
+      test('returns 4 chemicals when 2 rows in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 2 chemical and 1 appRate/timing', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 1 chemical and 2 appRate/timings', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['B'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+    })
+
+    describe('2 variable (chemical+timing, appRate)', () => {
+      test('returns 4 chemicals when 2 rows in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['B'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 2 chemical/timings and 1 appRate', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['B'],
+          },
+        ])
+      })
+
+      test('returns 2 chemicals when 1 chemical/timing and 2 appRates', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row in each', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 2,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+          { treatment_number: 1, factor_level_id: 2 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+    })
+
+    describe('1 variable (chemical+appRate+timing)', () => {
+      test('returns 2 chemicals when 2 rows', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '2',
+            value_type: 'placeholder',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '2',
+            row_number: 2,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '6',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 2,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '6',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '2',
+            targetTimingCodes: ['B'],
+          },
+        ])
+      })
+
+      test('returns 1 chemical when 1 row', () => {
+        const factorLevelDetails = [
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 2,
+            text: '1',
+            value_type: 'placeholder',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 6,
+            text: '1',
+            row_number: 1,
+          },
+          {
+            factor_level_id: 1,
+            factor_properties_for_level_id: 4,
+            text: '5',
+            question_code: 'APP_MET1',
+            uom_code: 'uom',
+            row_number: 1,
+          },
+        ]
+        const combinationElements = [
+          { treatment_number: 1, factor_level_id: 1 },
+        ]
+
+        const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+          uniqueTimings, timingUomMap, timingProperty)
+
+        expect(chemicals).toEqual([
+          {
+            applicationRate: {
+              questionCode: 'APP_MET1',
+              value: '5',
+              uomCode: 'uom',
+            },
+            chemicalGroupNumber: 1,
+            entryType: 'placeholder',
+            placeholder: '1',
+            targetTimingCodes: ['A'],
+          },
+        ])
+      })
+    })
+
+    test('ignores any variables and levels without relevant information', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          text: '5',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 5,
+          text: '7',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 7,
+          text: '7',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A'],
+        },
+      ])
+    })
+
+    test('generates chemicals even if there are not timings or appRates', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+        },
+        {
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+        },
+      ])
+    })
+
+    test('creates a different chemical group for each treatment', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '2',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '5',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '6',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 4,
+          factor_properties_for_level_id: 2,
+          text: '3',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 5,
+          factor_properties_for_level_id: 6,
+          text: '3',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 6,
+          factor_properties_for_level_id: 4,
+          text: '7',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_number: 1, factor_level_id: 3 },
+        { treatment_number: 2, factor_level_id: 1 },
+        { treatment_number: 2, factor_level_id: 2 },
+        { treatment_number: 2, factor_level_id: 6 },
+        { treatment_number: 3, factor_level_id: 1 },
+        { treatment_number: 3, factor_level_id: 5 },
+        { treatment_number: 3, factor_level_id: 3 },
+        { treatment_number: 4, factor_level_id: 1 },
+        { treatment_number: 4, factor_level_id: 5 },
+        { treatment_number: 4, factor_level_id: 6 },
+        { treatment_number: 5, factor_level_id: 4 },
+        { treatment_number: 5, factor_level_id: 2 },
+        { treatment_number: 5, factor_level_id: 3 },
+        { treatment_number: 6, factor_level_id: 4 },
+        { treatment_number: 6, factor_level_id: 2 },
+        { treatment_number: 6, factor_level_id: 6 },
+        { treatment_number: 7, factor_level_id: 4 },
+        { treatment_number: 7, factor_level_id: 5 },
+        { treatment_number: 7, factor_level_id: 3 },
+        { treatment_number: 8, factor_level_id: 4 },
+        { treatment_number: 8, factor_level_id: 5 },
+        { treatment_number: 8, factor_level_id: 6 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 2,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 2,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 4,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 4,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 5,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 5,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 6,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 7,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 7,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 8,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+      ])
+    })
+
+    test('does not return duplicate groups of chemicals', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '2',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          text: '5',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          text: '6',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 7,
+          text: '7',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 7,
+          text: '8',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_number: 2, factor_level_id: 1 },
+        { treatment_number: 2, factor_level_id: 3 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['B'],
+        },
+      ])
+    })
+
+    test('returns chemicalGroups in treatment order', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '2',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '5',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '6',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 4,
+          factor_properties_for_level_id: 2,
+          text: '3',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 5,
+          factor_properties_for_level_id: 6,
+          text: '3',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 6,
+          factor_properties_for_level_id: 4,
+          text: '7',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_number: 1, factor_level_id: 3 },
+        { treatment_number: 4, factor_level_id: 1 },
+        { treatment_number: 4, factor_level_id: 5 },
+        { treatment_number: 4, factor_level_id: 6 },
+        { treatment_number: 2, factor_level_id: 1 },
+        { treatment_number: 2, factor_level_id: 2 },
+        { treatment_number: 2, factor_level_id: 6 },
+        { treatment_number: 8, factor_level_id: 4 },
+        { treatment_number: 8, factor_level_id: 5 },
+        { treatment_number: 8, factor_level_id: 6 },
+        { treatment_number: 3, factor_level_id: 1 },
+        { treatment_number: 3, factor_level_id: 5 },
+        { treatment_number: 3, factor_level_id: 3 },
+        { treatment_number: 7, factor_level_id: 4 },
+        { treatment_number: 7, factor_level_id: 5 },
+        { treatment_number: 7, factor_level_id: 3 },
+        { treatment_number: 5, factor_level_id: 4 },
+        { treatment_number: 5, factor_level_id: 2 },
+        { treatment_number: 5, factor_level_id: 3 },
+        { treatment_number: 6, factor_level_id: 4 },
+        { treatment_number: 6, factor_level_id: 2 },
+        { treatment_number: 6, factor_level_id: 6 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 2,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 2,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 3,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 4,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 4,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 5,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 5,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 6,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 7,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 7,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '7',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 8,
+          entryType: 'placeholder',
+          placeholder: '3',
+          targetTimingCodes: ['C'],
+        },
+      ])
+    })
+
+    test('returns chemicals and timings within groups in row order', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '2',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '5',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 3,
+          factor_properties_for_level_id: 4,
+          text: '6',
+          question_code: 'APP_MET1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_number: 1, factor_level_id: 3 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '5',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+          targetTimingCodes: ['A', 'B'],
+        },
+        {
+          applicationRate: {
+            questionCode: 'APP_MET1',
+            value: '6',
+            uomCode: 'uom',
+          },
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '2',
+          targetTimingCodes: ['A', 'B'],
+        },
+      ])
+    })
+
+    test('handles both placeholder and exact chemical materials', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          value: 1234567,
+          value_type: 'exact',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+      ]
+
+      const chemicals = getChemicalsWithGroups(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(chemicals).toEqual([
+        {
+          chemicalGroupNumber: 1,
+          entryType: 'placeholder',
+          placeholder: '1',
+        },
+        {
+          chemicalGroupNumber: 1,
+          entryType: 'exact',
+          materialCategory: 'catalog',
+          materialId: 1234567,
+        },
       ])
     })
   })

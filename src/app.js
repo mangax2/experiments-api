@@ -17,7 +17,7 @@ configurator.init().then(() => {
   configurator.set('kafka.ssl', kafkaSSL)
 
   const swaggerDoc = require('./swagger/swagger.json')
-  const graphqlSwaggerDoc = require('./swagger/graphqlSwagger')
+  const graphqlSwaggerDoc = require('./swagger/graphqlSwagger.json')
 
   process.on('unhandledRejection', (reason, p) => {
     // NOTE: THIS SHOULD BE A TEMPORARY METHOD UNTIL WE CAN FIGURE OUT HOW TO FIX ALL UNHANDLED!

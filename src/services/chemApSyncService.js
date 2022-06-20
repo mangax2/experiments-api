@@ -1,4 +1,9 @@
-import { sortBy, uniqWith } from 'lodash'
+import {
+  groupBy,
+  isEqual,
+  sortBy,
+  uniqWith,
+} from 'lodash'
 import { dbRead } from '../db/DbManager'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
@@ -10,7 +15,8 @@ const apiUrls = configurator.get('urls')
 const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
 const qandaTimingCode = 'APP_TIM'
-const chemicalQAndATags = ['APP_RATE']
+const qandaAppRateTag = 'APP_RATE'
+const chemicalQAndATags = [qandaAppRateTag]
 const chemicalQAndACodes = [qandaTimingCode, 'APP_MET']
 
 const sendApiPostRequest = async (url, headers, request, errorMsg, errorCode, requestId) => {
@@ -33,6 +39,23 @@ const createChemApPlan = async (experiment, owner, headers, requestId) => {
   const errorMsg = 'An error occurred to create a chemical application plan'
   const result = await sendApiPostRequest('/plans', headers, request, errorMsg, '1G1001', requestId)
   return result.body.id
+}
+
+const updateChemApPlan = async (planId, experiment, owner, chemicals, headers, requestId) => {
+  const request = {
+    chemicals,
+    name: experiment.name,
+    owners: owner.user_ids,
+    ownerGroups: owner.group_ids,
+    isTemplate: false,
+  }
+  try {
+    return await HttpUtil.put(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers, request)
+  } catch (error) {
+    const message = `An error occurred to update a chemAp plan: ${planId}`
+    console.error(`[[${requestId}]] ${message}`, error.message)
+    throw AppError.internalServerError(message, undefined, getFullErrorCode('1G8001'))
+  }
 }
 
 const createPlanAssociation = async (planId, experimentId, headers, requestId) => {
@@ -79,14 +102,23 @@ const getExperimentData = async (experimentId, requestId) => {
     ownerData,
     factorPropertyData,
     factorLevelDetailsData,
+    combinationElements,
   ] = await Promise.all([
     dbRead.experiments.find(experimentId, false),
     dbRead.owner.findByExperimentId(experimentId),
     dbRead.factorPropertiesForLevel.findByExperimentId(experimentId),
     dbRead.factorLevelDetails.findByExperimentId(experimentId),
+    dbRead.combinationElement.findByExperimentIdWithTreatmentNumber(experimentId),
   ])
-  if (experimentData && ownerData && factorPropertyData && factorLevelDetailsData) {
-    return [experimentData, ownerData, factorPropertyData, factorLevelDetailsData]
+  if (experimentData && ownerData && factorPropertyData && factorLevelDetailsData
+    && combinationElements) {
+    return [
+      experimentData,
+      ownerData,
+      factorPropertyData,
+      factorLevelDetailsData,
+      combinationElements,
+    ]
   }
 
   const message = `Experiment Not Found for requested experiment Id: ${experimentId}`
@@ -95,16 +127,16 @@ const getExperimentData = async (experimentId, requestId) => {
 }
 
 const validateExperimentChemicalProperties = (factorProperties, requestId) => {
-  if (!factorProperties.find(property => property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')) {
+  if (!factorProperties.find((property) => property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')) {
     const message = 'The experiment does not have any chemical data'
     console.error(`[[${requestId}]] ${message}`)
     throw AppError.badRequest(message, undefined, getFullErrorCode('1G5001'))
   }
 
-  const unclearQAndATags = chemicalQAndATags.filter(tag =>
-    factorProperties.filter(property => property.multi_question_tag === tag).length > 1)
-  const unclearQAndACodes = chemicalQAndACodes.filter(code =>
-    factorProperties.filter(property => property.question_code === code).length > 1)
+  const unclearQAndATags = chemicalQAndATags.filter((tag) =>
+    factorProperties.filter((property) => property.multi_question_tag === tag).length > 1)
+  const unclearQAndACodes = chemicalQAndACodes.filter((code) =>
+    factorProperties.filter((property) => property.question_code === code).length > 1)
   const unclearQAndAData = [...unclearQAndACodes, ...unclearQAndATags]
 
   if (unclearQAndAData.length > 0) {
@@ -114,12 +146,15 @@ const validateExperimentChemicalProperties = (factorProperties, requestId) => {
   }
 }
 
-export const getUniqueTimings = (factorProperties, levelDetails, timingUomMap, requestId) => {
-  const timingProperty = factorProperties.find(prop => prop.question_code === qandaTimingCode)
+const getTimingDescriptionFromDetail = (detail, timingUomMap) =>
+  (detail.value_type === 'noTreatment' ? undefined
+    : detail.text || timingUomMap[detail.uom_code][detail.value])
+
+export const getUniqueTimings = (timingProperty, levelDetails, timingUomMap, requestId) => {
   if (!timingProperty) {
     return []
   }
-  const timingDetails = levelDetails.filter(detail =>
+  const timingDetails = levelDetails.filter((detail) =>
     detail.factor_properties_for_level_id === timingProperty.id)
 
   const sortedTimingDetails = sortBy(timingDetails, ['treatment_number', 'row_number'])
@@ -133,16 +168,156 @@ export const getUniqueTimings = (factorProperties, levelDetails, timingUomMap, r
     throw AppError.badRequest(message, undefined, getFullErrorCode('1G6001'))
   }
 
-  return uniqueTimingDetails.map((detail, index) => {
-    const code = String.fromCharCode(65 + index)
-    if (detail.value_type === 'noTreatment') {
-      return { code }
+  return uniqueTimingDetails.map((detail, index) => ({
+    code: String.fromCharCode(65 + index),
+    description: getTimingDescriptionFromDetail(detail, timingUomMap),
+  }))
+}
+
+const applyTimingCodesToChemicals = (baseChemicals, timingDetails, timingCodeMap, timingUomMap) => {
+  const targetTimingCodes = timingDetails.map((detail) =>
+    timingCodeMap.get(getTimingDescriptionFromDetail(detail, timingUomMap)))
+  return baseChemicals.map((chemical) => ({
+    ...chemical,
+    targetTimingCodes,
+  }))
+}
+
+const applyDetailRowToChemicals = (
+  baseChemicals,
+  chemicalDetail,
+  appRateDetail,
+  timingDetail,
+  timingCodeMap,
+  timingUomMap,
+) => {
+  if (chemicalDetail) {
+    baseChemicals = baseChemicals.map((chemical) => ({
+      ...chemical,
+      entryType: chemicalDetail.value_type,
+      materialCategory: chemicalDetail.value ? 'catalog' : undefined,
+      materialId: chemicalDetail.value || undefined,
+      placeholder: chemicalDetail.text || undefined,
+    }))
+  }
+
+  if (appRateDetail) {
+    baseChemicals = baseChemicals.map((chemical) => ({
+      ...chemical,
+      applicationRate: {
+        questionCode: appRateDetail.question_code,
+        value: appRateDetail.text,
+        uomCode: appRateDetail.uom_code,
+      },
+    }))
+  }
+
+  if (timingDetail) {
+    baseChemicals = applyTimingCodesToChemicals(baseChemicals, [timingDetail], timingCodeMap,
+      timingUomMap)
+  }
+  return baseChemicals
+}
+
+const createChemicalsFromDetails = (
+  baseChemicals,
+  details,
+  relevantProperties,
+  timingCodeMap,
+  timingUomMap,
+) => {
+  const timingDetails = details.filter((detail) =>
+    detail.factor_properties_for_level_id === relevantProperties.timing.id
+      && detail.value_type !== 'noTreatment')
+  const chemicalDetails = details.filter((detail) =>
+    detail.factor_properties_for_level_id === relevantProperties.chemical.id
+      && detail.value_type !== 'noTreatment')
+  const appRateDetails = details.filter((detail) =>
+    detail.factor_properties_for_level_id === relevantProperties.applicationRate.id
+      && detail.value_type !== 'noTreatment')
+
+  if (chemicalDetails.length > 1 || appRateDetails.length > 1) {
+    const detailsToLoopThrough = chemicalDetails.length === 0 ? appRateDetails : chemicalDetails
+    return sortBy(detailsToLoopThrough, 'row_number').flatMap((loopingDetail) => {
+      const rowNumber = loopingDetail.row_number
+      const chemicalDetail = chemicalDetails.find((detail) => detail.row_number === rowNumber)
+      const appRateDetail = appRateDetails.find((detail) => detail.row_number === rowNumber)
+      const timingDetail = timingDetails.find((detail) => detail.row_number === rowNumber)
+
+      return applyDetailRowToChemicals(baseChemicals, chemicalDetail, appRateDetail, timingDetail,
+        timingCodeMap, timingUomMap)
+    })
+  }
+  if (chemicalDetails.length === 1 || appRateDetails.length === 1) {
+    const chemicalDetail = chemicalDetails[0]
+    const appRateDetail = appRateDetails[0]
+    const timingDetail = timingDetails[0]
+
+    return applyDetailRowToChemicals(baseChemicals, chemicalDetail, appRateDetail, timingDetail,
+      timingCodeMap, timingUomMap)
+  }
+  if (timingDetails.length > 0) {
+    const sortedTimingDetails = sortBy(timingDetails, 'row_number')
+    return applyTimingCodesToChemicals(baseChemicals, sortedTimingDetails, timingCodeMap,
+      timingUomMap)
+  }
+  return baseChemicals
+}
+
+const createTreatmentsFromCombinationElements = (combinationElements, factorLevelDetailsMap) =>
+  combinationElements.reduce((agg, ce) => {
+    const existingTreatment = agg.find((treatment) =>
+      treatment.treatmentNumber === ce.treatment_number)
+    const factorLevel = factorLevelDetailsMap[ce.factor_level_id]
+    if (existingTreatment) {
+      existingTreatment.factorLevels.push(factorLevel)
+      return agg
     }
-    return {
-      code,
-      description: detail.text || timingUomMap[detail.uom_code][detail.value],
-    }
-  })
+    return [
+      ...agg,
+      {
+        treatmentNumber: ce.treatment_number,
+        factorLevels: [factorLevel],
+      },
+    ]
+  }, [])
+
+export const getChemicalsWithGroups = (
+  factorLevelDetails,
+  factorPropertyData,
+  combinationElements,
+  uniqueTimings,
+  timingUomMap,
+  timingProperty,
+) => {
+  const factorLevelDetailsMap = groupBy(factorLevelDetails, (detail) => detail.factor_level_id)
+  const timingCodeMap = new Map()
+  uniqueTimings.forEach((timing) => timingCodeMap.set(timing.description, timing.code))
+  const treatments = createTreatmentsFromCombinationElements(combinationElements,
+    factorLevelDetailsMap)
+  const sortedTreatments = sortBy(treatments, 'treatmentNumber')
+
+  const applicationRateProperty = factorPropertyData.find((prop) =>
+    prop.multi_question_tag === qandaAppRateTag)
+  const chemicalProperty = factorPropertyData.find((property) =>
+    property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')
+  const relevantProperties = {
+    applicationRate: applicationRateProperty,
+    chemical: chemicalProperty,
+    timing: timingProperty,
+  }
+
+  const factorLevelsToChemicalsReducer = (currentChemicals, levelDetails) =>
+    createChemicalsFromDetails(currentChemicals, levelDetails, relevantProperties, timingCodeMap,
+      timingUomMap)
+  const chemicalsForTreatments = sortedTreatments.map((treatment) =>
+    treatment.factorLevels.reduce(factorLevelsToChemicalsReducer, [{}]))
+
+  const uniqueChemicalGroups = uniqWith(chemicalsForTreatments, isEqual)
+  return uniqueChemicalGroups.flatMap((chemicals, index) => chemicals.map((chemical) => {
+    chemical.chemicalGroupNumber = index + 1
+    return chemical
+  }))
 }
 
 export const getTimingQuestionUoms = async () => {
@@ -156,12 +331,13 @@ export const getTimingQuestionUoms = async () => {
   }, {})
 }
 
-const createAndSyncChemApPlanFromExperiment = async (body, context) => {
+export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   const [
     experimentData,
     ownerData,
     factorPropertyData,
     factorLevelDetailsData,
+    combinationElements,
   ] = await getExperimentData(body.experimentId, context.requestId)
   const questionPromise = getTimingQuestionUoms()
 
@@ -171,8 +347,12 @@ const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   const headers = [...header, { headerName: 'username', headerValue: context.userId }]
 
   const timingUomMap = await questionPromise
-  const uniqueTimings = getUniqueTimings(factorPropertyData, factorLevelDetailsData, timingUomMap,
+  const timingProperty = factorPropertyData.find((prop) => prop.question_code === qandaTimingCode)
+  const uniqueTimings = getUniqueTimings(timingProperty, factorLevelDetailsData, timingUomMap,
     context.requestId)
+
+  const chemicalsWithGroups = getChemicalsWithGroups(factorLevelDetailsData, factorPropertyData,
+    combinationElements, uniqueTimings, timingUomMap, timingProperty)
 
   const planId = await createChemApPlan(experimentData, ownerData, headers, context.requestId)
   try {
@@ -180,6 +360,8 @@ const createAndSyncChemApPlanFromExperiment = async (body, context) => {
       createPlanAssociation(planId, body.experimentId, headers, context.requestId),
       createPlanTimings(planId, uniqueTimings, headers, context.requestId),
     ])
+    await updateChemApPlan(planId, experimentData, ownerData, chemicalsWithGroups, headers,
+      context.requestId)
   } catch (error) {
     await deleteChemApPlan(planId, headers, context.requestId)
     throw (error)
@@ -188,4 +370,4 @@ const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   return { planId }
 }
 
-export { createAndSyncChemApPlanFromExperiment as default }
+export default createAndSyncChemApPlanFromExperiment

@@ -185,5 +185,4 @@ class TreatmentBlockService {
   }
 }
 
-
 module.exports = TreatmentBlockService

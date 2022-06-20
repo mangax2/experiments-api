@@ -101,7 +101,6 @@ class TagService {
         return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P6001')))
       })
 
-
   @setErrorCode('1P7000')
   getAllTagsForEntity = entityName => OAuthUtil.getAuthorizationHeaders()
     .then(header => HttpUtil.get(`${apiUrls.experimentsTaggingAPIUrl}/entity-tags/${entityName}`, header))
@@ -115,7 +114,6 @@ class TagService {
       console.error(errorMessage, data)
       return Promise.reject(AppError.internalServerErrorWithMessage(errorMessage, data, getFullErrorCode('1P7001')))
     })
-
 
   @setErrorCode('1P8000')
   getEntityName = (isTemplate) => {

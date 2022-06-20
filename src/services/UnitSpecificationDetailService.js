@@ -121,7 +121,7 @@ class UnitSpecificationDetailService {
 
   @setErrorCode('1SA000')
   @Transactional('syncUnitSpecificationDetails')
-  syncUnitSpecificationDetails=(capacitySyncUnitSpecDetails, experimentId, context, tx) =>
+  syncUnitSpecificationDetails = (capacitySyncUnitSpecDetails, experimentId, context, tx) =>
     this.getUnitSpecificationDetailsByExperimentId(experimentId, false, context)
       .then(unitSpecificationDetails => this.unitSpecificationService.getAllUnitSpecifications()
         .then((refUnitSpecs) => {

@@ -233,7 +233,6 @@ describe('SecurityService', () => {
       })
     })
 
-
     test('returns user permissions array when more than one owner exists', () => {
       target.ownerService.getOwnersByExperimentId = mockResolve({
         user_ids: ['AK', 'ky'],
@@ -294,7 +293,6 @@ describe('SecurityService', () => {
         expect(err).toBe(error)
       })
     })
-
 
     test('Does not call getUserPermissionsForExperiment and throws error when we are trying check' +
       ' for an invalid experimentId', () => {

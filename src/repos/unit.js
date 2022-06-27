@@ -166,7 +166,7 @@ class unitRepo {
       return Promise.resolve()
     }
 
-    return tx.none('UPDATE unit u SET set_entry_id = NULL FROM treatment_block tb, location_association la\n' +
+    return tx.none("UPDATE unit u SET set_entry_id = NULL, modified_date = 'CURRENT_TIMESTAMP', modified_user_id = 'REP_USER' FROM treatment_block tb, location_association la\n" +
       'WHERE u.treatment_block_id = tb.id AND tb.block_id = la.block_id AND u.location = la.location AND la.set_id = $1', setId)
   }
 
@@ -229,7 +229,7 @@ class unitRepo {
       return
     }
 
-    return this.rep.none('UPDATE unit SET set_entry_id = NULL WHERE set_entry_id IN ($1:csv)', [entryIds])
+    return this.rep.none("UPDATE unit SET set_entry_id = NULL, modified_date = 'CURRENT_TIMESTAMP', modified_user_id = 'REP_USER' WHERE set_entry_id IN ($1:csv)", [entryIds])
   }
 
   @setErrorCode('5JN000')

@@ -97,7 +97,7 @@ if (process.env.NODE_ENV === 'development') {
   paths.databaseRo = {
     ...paths.databaseRo,
     host: 'localhost',
-    port: '9001',
+    port: '9000',
   }
 
   paths.kafka.enableKafka = false

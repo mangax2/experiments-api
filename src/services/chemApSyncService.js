@@ -329,7 +329,7 @@ const createIntentsFromDetails = (
   const appEquipmentDetails = details.filter(filterByPropertyGenerator(
     relevantProperties.applicationEquipment))
 
-  const detailsToLoopThrough = [
+  const allRowNumbers = uniq([
     appMethodDetails,
     appVolumeDetails,
     mixSizeDetails,
@@ -340,11 +340,11 @@ const createIntentsFromDetails = (
     appRateDetails,
     timingDetails,
   ].filter(array => array.length > 0)
-    .sort((a, b) => b.length - a.length)[0]
+    .flatMap(array => array.map(detail => detail.row_number)))
+    .sort()
 
-  if (detailsToLoopThrough) {
-    return sortBy(detailsToLoopThrough, 'row_number').flatMap((loopingDetail) => {
-      const rowNumber = loopingDetail.row_number
+  if (allRowNumbers.length > 0) {
+    return allRowNumbers.flatMap((rowNumber) => {
       const findByRowNumber = detail => detail.row_number === rowNumber
       const appMethodDetail = appMethodDetails.find(findByRowNumber)
       const appVolumeDetail = appVolumeDetails.find(findByRowNumber)
@@ -392,6 +392,29 @@ const createTreatmentsFromCombinationElements = (combinationElements, factorLeve
     ]
   }, [])
 
+const collapseChemicals = (intent) => {
+  const chemicals = intent.chemicals || []
+  const uniqueChemicals = chemicals.reduce((chemicalArray, chemical) => {
+    const matchedChemical = chemicalArray.find(uniqueChemical =>
+      isEqual(omit(uniqueChemical, ['targetTimingCodes']), omit(chemical, ['targetTimingCodes'])))
+    if (matchedChemical) {
+      matchedChemical.targetTimingCodes = [
+        ...(matchedChemical.targetTimingCodes),
+        ...(chemical.targetTimingCodes),
+      ]
+      return chemicalArray
+    }
+    return [
+      ...chemicalArray,
+      chemical,
+    ]
+  }, [])
+  uniqueChemicals.forEach((chemical) => {
+    chemical.targetTimingCodes = uniq(chemical.targetTimingCodes)
+  })
+  intent.chemicals = uniqueChemicals
+}
+
 const applyTimingsToChemicalsAcrossIntents = (intents) => {
   const chemicals = intents.flatMap(intent => intent.chemicals || [])
     .reduce((chemicalArray, chemical) => {
@@ -431,6 +454,7 @@ const collapseIntents = (intents) => {
       intent,
     ]
   }, [])
+  uniqueIntents.forEach(collapseChemicals)
   applyTimingsToChemicalsAcrossIntents(uniqueIntents)
   return uniqueIntents
 }

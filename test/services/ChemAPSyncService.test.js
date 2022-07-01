@@ -1895,6 +1895,7 @@ describe('ChemApSyncService', () => {
               uomCode: 'uom',
               value: '8',
             },
+            chemicals: [],
           }],
           treatmentNumber: 1,
         },
@@ -2007,6 +2008,188 @@ describe('ChemApSyncService', () => {
               targetTimingCodes: ['A'],
             }],
             targetTimingCode: 'A',
+          }],
+          treatmentNumber: 1,
+        },
+      ])
+    })
+
+    test('collapses duplicate chemicals', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 2,
+          text: 'chem1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 2,
+          text: 'chem1',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 5,
+          text: 'seed1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 5,
+          text: 'seed2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '5',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 7,
+          value_type: 'exact',
+          value: 'appMetGuid',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 8,
+          value_type: 'placeholder',
+          text: '7',
+          question_code: 'APP_VOL1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 9,
+          value_type: 'exact',
+          text: '8',
+          question_code: 'MIX_SIZE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+      ]
+
+      const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(intents).toEqual([
+        {
+          intents: [{
+            applicationMethod: {
+              isPlaceholder: false,
+              questionCode: 'APP_MET',
+              uomCode: 'uom',
+              value: 'appMetGuid',
+            },
+            applicationVolume: {
+              isPlaceholder: true,
+              questionCode: 'APP_VOL1',
+              uomCode: 'uom',
+              value: '7',
+            },
+            mixSize: {
+              isPlaceholder: false,
+              questionCode: 'MIX_SIZE1',
+              uomCode: 'uom',
+              value: '8',
+            },
+            chemicals: [{
+              applicationRate: {
+                isPlaceholder: false,
+                questionCode: 'APP_RATE1',
+                value: '5',
+                uomCode: 'uom',
+              },
+              entryType: 'placeholder',
+              placeholder: 'chem1',
+              targetTimingCodes: ['A'],
+            }],
+            targetTimingCode: 'A',
+          }],
+          treatmentNumber: 1,
+        },
+      ])
+    })
+
+    test('parses all available data when no treatments are present', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'noTreatment',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          value_type: 'noTreatment',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '5',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+      ]
+
+      const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(intents).toEqual([
+        {
+          intents: [{
+            chemicals: [
+              {
+                entryType: 'placeholder',
+                placeholder: '1',
+                targetTimingCodes: [],
+              },
+              {
+                applicationRate: {
+                  isPlaceholder: false,
+                  questionCode: 'APP_RATE1',
+                  value: '5',
+                  uomCode: 'uom',
+                },
+                targetTimingCodes: [],
+              },
+            ],
           }],
           treatmentNumber: 1,
         },

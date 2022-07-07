@@ -153,9 +153,9 @@ const validateExperimentChemicalProperties = (factorProperties, requestId) => {
   }
 
   const unclearQAndATags = chemicalQAndATags.filter((tag) =>
-    factorProperties.filter((property) => property.multi_question_tag === tag).length > 1)
+    factorProperties.filter((property) => property.multi_question_tag === tag && property.object_type === 'QandAV3').length > 1)
   const unclearQAndACodes = chemicalQAndACodes.filter((code) =>
-    factorProperties.filter((property) => property.question_code === code).length > 1)
+    factorProperties.filter((property) => property.question_code === code && property.object_type === 'QandAV3').length > 1)
   const unclearQAndAData = [...unclearQAndACodes, ...unclearQAndATags]
 
   if (unclearQAndAData.length > 0) {
@@ -475,9 +475,9 @@ export const getIntentsForTreatments = (
   const sortedTreatments = sortBy(treatments, 'treatmentNumber')
 
   const findByQandaCode = qandaCode => factorPropertyData.find((prop) =>
-    prop.question_code === qandaCode)
+    prop.question_code === qandaCode && prop.object_type === 'QandAV3')
   const findByQandaTag = qandaTag => factorPropertyData.find((prop) =>
-    prop.multi_question_tag === qandaTag)
+    prop.multi_question_tag === qandaTag && prop.object_type === 'QandAV3')
   const chemicalProperty = factorPropertyData.find((property) =>
     property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')
   const relevantProperties = {

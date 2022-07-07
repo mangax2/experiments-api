@@ -113,6 +113,20 @@ describe('ChemApSyncService', () => {
     expect(AppError.badRequest).toHaveBeenCalledWith('Unable to parse experiment data, the following QandA data is defined more than once: APP_TIM', undefined, '1G5002')
   })
 
+  test('should not fail when experiment has duplicate QandA properties from v2 and v3', async () => {
+    dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
+      { object_type: 'Catalog', material_type: 'CHEMICAL' },
+      { object_type: 'QandAV3', question_code: 'APP_TIM' },
+      { object_type: 'QandA', question_code: 'APP_TIM' },
+    ])
+    HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
+      .mockReturnValueOnce(Promise.resolve({}))
+
+    await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
+
+    expect(AppError.badRequest).not.toHaveBeenCalledWith('Unable to parse experiment data, the following QandA data is defined more than once: APP_TIM', undefined, '1G5002')
+  })
+
   test('user header is added', async () => {
     HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
       .mockReturnValueOnce(Promise.resolve({}))
@@ -369,17 +383,16 @@ describe('ChemApSyncService', () => {
 
   describe('getIntentsForTreatments', () => {
     const factorProperties = [
-      { id: 4, multi_question_tag: 'APP_RATE' },
-      { id: 6, question_code: 'APP_TIM' },
+      { id: 4, object_type: 'QandAV3', multi_question_tag: 'APP_RATE' },
+      { id: 6, object_type: 'QandAV3', question_code: 'APP_TIM' },
       { id: 2, object_type: 'Catalog', material_type: 'CHEMICAL' },
-      { id: 7, question_code: 'APP_MET' },
-      { id: 7, question_code: 'APP_MET' },
+      { id: 7, object_type: 'QandAV3', question_code: 'APP_MET' },
       { id: 5, object_type: 'Catalog', material_type: 'INTERNAL_SEED' },
-      { id: 8, multi_question_tag: 'APP_VOL' },
-      { id: 9, multi_question_tag: 'MIX_SIZE' },
-      { id: 10, question_code: 'APPPLCT' },
-      { id: 11, question_code: 'APPPLCDT' },
-      { id: 12, question_code: 'APP_EQUIP' },
+      { id: 8, object_type: 'QandAV3', multi_question_tag: 'APP_VOL' },
+      { id: 9, object_type: 'QandAV3', multi_question_tag: 'MIX_SIZE' },
+      { id: 10, object_type: 'QandAV3', question_code: 'APPPLCT' },
+      { id: 11, object_type: 'QandAV3', question_code: 'APPPLCDT' },
+      { id: 12, object_type: 'QandAV3', question_code: 'APP_EQUIP' },
     ]
     const uniqueTimings = [
       { code: 'A', description: '1' },
@@ -2190,6 +2203,124 @@ describe('ChemApSyncService', () => {
                 targetTimingCodes: [],
               },
             ],
+          }],
+          treatmentNumber: 1,
+        },
+      ])
+    })
+
+    test('ignores non-v3 QandA properties', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '5',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 13,
+          value_type: 'exact',
+          value: 'appMetGuid',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 8,
+          value_type: 'placeholder',
+          text: '7',
+          question_code: 'APP_VOL1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 9,
+          value_type: 'exact',
+          text: '8',
+          question_code: 'MIX_SIZE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 5,
+          text: '21',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 5,
+          text: '31',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_number: 1, factor_level_id: 2 },
+      ]
+      const localFactorProperties = [
+        { id: 4, object_type: 'QandAV3', multi_question_tag: 'APP_RATE' },
+        { id: 6, object_type: 'QandAV3', question_code: 'APP_TIM' },
+        { id: 2, object_type: 'Catalog', material_type: 'CHEMICAL' },
+        { id: 13, object_type: 'QandA', question_code: 'APP_MET' },
+        { id: 5, object_type: 'Catalog', material_type: 'INTERNAL_SEED' },
+        { id: 8, object_type: 'QandAV3', multi_question_tag: 'APP_VOL' },
+        { id: 9, object_type: 'QandAV3', multi_question_tag: 'MIX_SIZE' },
+        { id: 10, object_type: 'QandAV3', question_code: 'APPPLCT' },
+        { id: 11, object_type: 'QandAV3', question_code: 'APPPLCDT' },
+        { id: 12, object_type: 'QandAV3', question_code: 'APP_EQUIP' },
+      ]
+
+      const intents = getIntentsForTreatments(factorLevelDetails, localFactorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(intents).toEqual([
+        {
+          intents: [{
+            applicationVolume: {
+              isPlaceholder: true,
+              questionCode: 'APP_VOL1',
+              uomCode: 'uom',
+              value: '7',
+            },
+            mixSize: {
+              isPlaceholder: false,
+              questionCode: 'MIX_SIZE1',
+              uomCode: 'uom',
+              value: '8',
+            },
+            chemicals: [{
+              applicationRate: {
+                isPlaceholder: false,
+                questionCode: 'APP_RATE1',
+                value: '5',
+                uomCode: 'uom',
+              },
+              entryType: 'placeholder',
+              placeholder: '1',
+              targetTimingCodes: ['A'],
+            }],
+            targetTimingCode: 'A',
           }],
           treatmentNumber: 1,
         },

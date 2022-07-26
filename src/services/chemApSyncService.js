@@ -92,6 +92,39 @@ const createPlanAssociation = async (planId, experimentId, headers, requestId) =
   await sendApiPostRequest('/plan-associations', headers, request, message, '1G2001', requestId)
 }
 
+const getChemApPlan = async (planId, headers, requestId) => {
+  try {
+    const response = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/plans/${planId}?includeIncomplete=true`, headers)
+    return response.body
+  } catch (error) {
+    const message = `An error occurred while retrieving chemAp plan: ${planId}`
+    console.error(`[[${requestId}]] ${message}`, error.message)
+    throw AppError.internalServerError(message, undefined, getFullErrorCode('1GA001'))
+  }
+}
+
+export const createIntentAssociations = async (
+  planId,
+  intentsWithTreatments,
+  headers,
+  requestId,
+) => {
+  const { intents } = await getChemApPlan(planId, headers, requestId)
+  const associations = intents.flatMap(intent => {
+    const matchingIntentTreatment = intentsWithTreatments.find(intentWithTreatment =>
+      intentWithTreatment.intent.intentNumber === intent.intentNumber)
+    return matchingIntentTreatment.treatmentIds.map(treatmentId => ({
+      intentId: intent.id,
+      externalEntity: 'treatment',
+      externalEntityId: treatmentId,
+      isSource: true,
+    }))
+  })
+
+  const message = `An error occurred to create intent associations for plan ${planId}`
+  await sendApiPostRequest('/intent-associations', headers, associations, message, '1G9001', requestId)
+}
+
 const deleteChemApPlan = async (planId, headers, requestId) => {
   try {
     return await HttpUtil.delete(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers)
@@ -386,6 +419,7 @@ const createTreatmentsFromCombinationElements = (combinationElements, factorLeve
     return [
       ...agg,
       {
+        treatmentId: ce.treatment_id,
         treatmentNumber: ce.treatment_number,
         factorLevels: [factorLevel],
       },
@@ -500,7 +534,7 @@ export const getIntentsForTreatments = (
     const uniqueIntents = collapseIntents(allIntents)
     return {
       intents: uniqueIntents,
-      treatmentNumber: treatment.treatmentNumber,
+      treatmentId: treatment.treatmentId,
     }
   })
   return intentsForTreatments
@@ -538,14 +572,14 @@ export const getUniqueIntentsWithTreatment = (intentsByTreatment) => {
       const matchingIntent = uniqueIntentsWithTreatmentNumber.find(intentGroup =>
         isEqual(intentGroup.intent, intent))
       if (matchingIntent) {
-        matchingIntent.treatmentNumbers = [
-          ...(matchingIntent.treatmentNumbers),
-          treatmentIntents.treatmentNumber,
+        matchingIntent.treatmentIds = [
+          ...(matchingIntent.treatmentIds),
+          treatmentIntents.treatmentId,
         ]
       } else {
         uniqueIntentsWithTreatmentNumber.push({
           intent,
-          treatmentNumbers: [treatmentIntents.treatmentNumber],
+          treatmentIds: [treatmentIntents.treatmentId],
         })
       }
     })
@@ -601,6 +635,7 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
     ])
     await updateChemApPlan(planId, experimentData, ownerData, uniqueIntents, headers,
       context.requestId)
+    await createIntentAssociations(planId, uniqueIntentsWithTreatment, headers, context.requestId)
   } catch (error) {
     await deleteChemApPlan(planId, headers, context.requestId)
     throw (error)

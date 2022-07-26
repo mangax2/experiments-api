@@ -1,4 +1,5 @@
 import createAndSyncChemApPlanFromExperiment, {
+  createIntentAssociations,
   getIntentsForTreatments,
   getTimingQuestionUoms,
   getUniqueIntentsWithTreatment,
@@ -9,7 +10,7 @@ import apiUrls from '../configs/apiUrls'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
 import { dbRead } from '../../src/db/DbManager'
-import { mock, mockResolve } from '../jestUtil'
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import QuestionsUtil from '../../src/services/utility/QuestionsUtil'
 
 jest.mock('../../src/services/SecurityService')
@@ -80,6 +81,7 @@ describe('ChemApSyncService', () => {
     AppError.notFound = mock()
     AppError.badRequest = mock()
     QuestionsUtil.getCompleteQuestion = mockResolve(timingQuestionComplete)
+    HttpUtil.getWithRetry = mockResolve({ body: { intents: [] } })
   })
 
   test('should fail when experiment does not exist', async () => {
@@ -476,7 +478,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -534,7 +536,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -591,7 +593,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -631,7 +633,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -736,7 +738,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -789,7 +791,7 @@ describe('ChemApSyncService', () => {
             ],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -894,7 +896,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -972,7 +974,7 @@ describe('ChemApSyncService', () => {
             targetTimingCode: 'A',
           },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1125,7 +1127,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1214,7 +1216,7 @@ describe('ChemApSyncService', () => {
             targetTimingCode: 'A',
           },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1295,8 +1297,8 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
-        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1354,7 +1356,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1476,8 +1478,8 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
-        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1587,7 +1589,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'A',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1692,7 +1694,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1770,7 +1772,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'B',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1811,7 +1813,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1846,7 +1848,7 @@ describe('ChemApSyncService', () => {
               },
             ],
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1881,7 +1883,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -1910,7 +1912,7 @@ describe('ChemApSyncService', () => {
             },
             chemicals: [],
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -1981,8 +1983,8 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
-        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -2022,7 +2024,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -2100,8 +2102,8 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
-        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -2141,7 +2143,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -2178,7 +2180,7 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
@@ -2204,7 +2206,7 @@ describe('ChemApSyncService', () => {
               },
             ],
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -2275,8 +2277,8 @@ describe('ChemApSyncService', () => {
         },
       ]
       const combinationElements = [
-        { treatment_number: 1, factor_level_id: 1 },
-        { treatment_number: 1, factor_level_id: 2 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
       ]
       const localFactorProperties = [
         { id: 4, object_type: 'QandAV3', multi_question_tag: 'APP_RATE' },
@@ -2322,7 +2324,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ])
     })
@@ -2355,7 +2357,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'A',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
         {
           intents: [{
@@ -2379,7 +2381,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 2,
+          treatmentId: 2,
         },
       ]
 
@@ -2410,7 +2412,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [1],
+          treatmentIds: [1],
         },
         {
           intent: {
@@ -2436,7 +2438,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [2],
+          treatmentIds: [2],
         },
       ])
     })
@@ -2467,7 +2469,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'A',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
         {
           intents: [{
@@ -2491,7 +2493,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 2,
+          treatmentId: 2,
         },
         {
           intents: [{
@@ -2515,7 +2517,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'B',
           }],
-          treatmentNumber: 3,
+          treatmentId: 3,
         },
       ]
 
@@ -2546,7 +2548,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [1, 2],
+          treatmentIds: [1, 2],
         },
         {
           intent: {
@@ -2572,7 +2574,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'B',
           },
-          treatmentNumbers: [3],
+          treatmentIds: [3],
         },
       ])
     })
@@ -2624,7 +2626,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'B',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
       ]
 
@@ -2655,7 +2657,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [1],
+          treatmentIds: [1],
         },
         {
           intent: {
@@ -2681,7 +2683,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'B',
           },
-          treatmentNumbers: [1],
+          treatmentIds: [1],
         },
       ])
     })
@@ -2733,7 +2735,7 @@ describe('ChemApSyncService', () => {
               targetTimingCode: 'B',
             },
           ],
-          treatmentNumber: 1,
+          treatmentId: 1,
         },
         {
           intents: [{
@@ -2757,7 +2759,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
-          treatmentNumber: 2,
+          treatmentId: 2,
         },
       ]
 
@@ -2789,7 +2791,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [1],
+          treatmentIds: [1],
         },
         {
           intent: {
@@ -2815,7 +2817,7 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'B',
           },
-          treatmentNumbers: [1],
+          treatmentIds: [1],
         },
         {
           intent: {
@@ -2841,9 +2843,157 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           },
-          treatmentNumbers: [2],
+          treatmentIds: [2],
         },
       ])
+    })
+  })
+
+  describe('createIntentAssociations', () => {
+    const headers = ['header1', 'header2']
+    const requestId = '1233456'
+
+    test('converts intents to associations correctly', async () => {
+      HttpUtil.getWithRetry = mockResolve({
+        body: {
+          intents: [
+            { id: 5, intentNumber: 1 },
+            { id: 6, intentNumber: 2 },
+            { id: 7, intentNumber: 3 },
+            { id: 8, intentNumber: 4 },
+            { id: 9, intentNumber: 5 },
+          ],
+        },
+      })
+      const intentsWithTreatments = [
+        {
+          intent: { intentNumber: 1 },
+          treatmentIds: [11, 12, 13],
+        },
+        {
+          intent: { intentNumber: 2 },
+          treatmentIds: [11],
+        },
+        {
+          intent: { intentNumber: 3 },
+          treatmentIds: [12, 13],
+        },
+        {
+          intent: { intentNumber: 4 },
+          treatmentIds: [14],
+        },
+        {
+          intent: { intentNumber: 5 },
+          treatmentIds: [14],
+        },
+      ]
+      const expectedAssociations = [
+        {
+          intentId: 5,
+          externalEntity: 'treatment',
+          externalEntityId: 11,
+          isSource: true,
+        },
+        {
+          intentId: 5,
+          externalEntity: 'treatment',
+          externalEntityId: 12,
+          isSource: true,
+        },
+        {
+          intentId: 5,
+          externalEntity: 'treatment',
+          externalEntityId: 13,
+          isSource: true,
+        },
+        {
+          intentId: 6,
+          externalEntity: 'treatment',
+          externalEntityId: 11,
+          isSource: true,
+        },
+        {
+          intentId: 7,
+          externalEntity: 'treatment',
+          externalEntityId: 12,
+          isSource: true,
+        },
+        {
+          intentId: 7,
+          externalEntity: 'treatment',
+          externalEntityId: 13,
+          isSource: true,
+        },
+        {
+          intentId: 8,
+          externalEntity: 'treatment',
+          externalEntityId: 14,
+          isSource: true,
+        },
+        {
+          intentId: 9,
+          externalEntity: 'treatment',
+          externalEntityId: 14,
+          isSource: true,
+        },
+      ]
+
+      await createIntentAssociations(5, intentsWithTreatments, headers, requestId)
+
+      expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/intent-associations', headers, expectedAssociations)
+    })
+
+    test('throws an exception if we cannot retrieve the plan', async () => {
+      HttpUtil.getWithRetry = mockReject({})
+
+      try {
+        await createIntentAssociations(5, [], headers, requestId)
+      } catch (err) {
+        expect(AppError.internalServerError).toHaveBeenCalledWith('An error occurred while retrieving chemAp plan: 5', undefined, '1GA001')
+      }
+    })
+
+    test('throws an exception if we cannot save the intent associations', async () => {
+      HttpUtil.getWithRetry = mockResolve({
+        body: {
+          intents: [
+            { id: 5, intentNumber: 1 },
+            { id: 6, intentNumber: 2 },
+            { id: 7, intentNumber: 3 },
+            { id: 8, intentNumber: 4 },
+            { id: 9, intentNumber: 5 },
+          ],
+        },
+      })
+      const intentsWithTreatments = [
+        {
+          intent: { intentNumber: 1 },
+          treatmentIds: [11, 12, 13],
+        },
+        {
+          intent: { intentNumber: 2 },
+          treatmentIds: [11],
+        },
+        {
+          intent: { intentNumber: 3 },
+          treatmentIds: [12, 13],
+        },
+        {
+          intent: { intentNumber: 4 },
+          treatmentIds: [14],
+        },
+        {
+          intent: { intentNumber: 5 },
+          treatmentIds: [14],
+        },
+      ]
+      HttpUtil.post = mockReject({})
+
+      try {
+        await createIntentAssociations(5, intentsWithTreatments, headers, requestId)
+      } catch (err) {
+        expect(AppError.internalServerError).toHaveBeenCalledWith('An error occurred to create intent associations for plan 5', undefined, '1G9001')
+      }
     })
   })
 })

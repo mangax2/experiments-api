@@ -1,396 +1,353 @@
 const { setErrorCode } = require('@monsantoit/error-decorator')()
-const duplicateExperimentInfoScript =
-  "DROP TABLE IF EXISTS experiment_parent; " +
-  "DROP TABLE IF EXISTS owner_ids; " +
-  "DROP TABLE IF EXISTS dependent_variable_ids; " +
-  "DROP TABLE IF EXISTS new_factors; " +
-  "DROP TABLE IF EXISTS mapped_factor_ids; " +
-  "DROP TABLE IF EXISTS new_factor_levels; " +
-  "DROP TABLE IF EXISTS mapped_factor_level_ids; " +
-  "DROP TABLE IF EXISTS mapped_factor_properties_for_level_ids; " +
-  "DROP TABLE IF EXISTS mapped_factor_level_details_ids; " +
-  "DROP TABLE IF EXISTS new_treatments; " +
-  "DROP TABLE IF EXISTS mapped_treatment_ids; " +
-  "DROP TABLE IF EXISTS combination_element_ids; " +
-  "DROP TABLE IF EXISTS unit_spec_detail_ids; " +
-  "DROP TABLE IF EXISTS design_spec_detail_ids; " +
-  "DROP TABLE IF EXISTS unit_ids; " +
-  "DROP TABLE IF EXISTS analysis_model_ids; " +
-  "DROP TABLE IF EXISTS new_blocks; " +
-  "DROP TABLE IF EXISTS mapped_block_ids; " +
-  "DROP TABLE IF EXISTS new_treatment_blocks; " +
-  "DROP TABLE IF EXISTS mapped_treatment_block_ids; " +
-  "WITH temp_experiment_parent AS (" +
-    "INSERT INTO experiment " +
-    "SELECT (e1).* FROM (" +
-      "SELECT e " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('experiment', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('name', COALESCE($4, CAST(('COPY OF ' || e.name) AS varchar(100)))) " +
-        "#= hstore('is_template', $3) " +
-      "AS e1 FROM experiment e " +
-    "WHERE id = $1) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP experiment_parent " +
-  "FROM temp_experiment_parent;"
 
-const duplicateOwnersScript =
-  "WITH temp_owner_ids AS (" +
-    "INSERT INTO owner " +
-    "SELECT (c).* FROM  (" +
-      "SELECT o " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('owner', 'id'))::text) " +
-        "#= hstore('user_ids', " +
-        "CASE WHEN o.user_ids @> ARRAY[$2]::varchar[] THEN " +
-        "o.user_ids::text " +
-        "ELSE " +
-        "array_cat(o.user_ids, ARRAY[$2]::varchar[])::text " +
-        "END) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-      "AS c FROM owner o " +
-    "WHERE experiment_id = $1 ) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP owner_ids " +
-  "FROM temp_owner_ids;"
+const dropTablesScript = `
+DROP TABLE IF EXISTS experiment_to_create;
+DROP TABLE IF EXISTS owners_to_create;
+DROP TABLE IF EXISTS dependent_variables_to_create;
+DROP TABLE IF EXISTS factors_to_create;
+DROP TABLE IF EXISTS factor_levels_to_create;
+DROP TABLE IF EXISTS factor_properties_for_levels_to_create;
+DROP TABLE IF EXISTS factor_level_details_to_create;
+DROP TABLE IF EXISTS factor_level_associations_to_create;
+DROP TABLE IF EXISTS treatments_to_create;
+DROP TABLE IF EXISTS combination_elements_to_create;
+DROP TABLE IF EXISTS analysis_models_to_create;
+DROP TABLE IF EXISTS unit_spec_details_to_create;
+DROP TABLE IF EXISTS design_spec_details_to_create;
+DROP TABLE IF EXISTS blocks_to_create;
+DROP TABLE IF EXISTS treatment_blocks_to_create;
+DROP TABLE IF EXISTS units_to_create;
 
-const duplicateDependentVariableScript =
-  "WITH temp_dependent_variable_ids AS (" +
-    "INSERT INTO dependent_variable " +
-    "SELECT (c).* FROM  (" +
-      "SELECT dv " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('dependent_variable', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-      "AS c FROM dependent_variable dv " +
-    "WHERE experiment_id = $1 ) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP dependent_variable_ids " +
-  "FROM temp_dependent_variable_ids;"
+DROP TABLE IF EXISTS mapped_factor_ids;
+DROP TABLE IF EXISTS mapped_factor_level_ids;
+DROP TABLE IF EXISTS mapped_factor_properties_for_level_ids;
+DROP TABLE IF EXISTS mapped_factor_level_details_ids;
+DROP TABLE IF EXISTS mapped_treatment_ids;
+DROP TABLE IF EXISTS mapped_block_ids;
+DROP TABLE IF EXISTS mapped_treatment_block_ids;`
 
-const duplicateFactorScript =
-  "WITH temp_new_factors AS (" +
-    "INSERT INTO factor " +
-      "SELECT (c).* FROM  (" +
-        "SELECT f " +
-          "#= hstore('id', nextval(pg_get_serial_sequence('factor', 'id'))::text) " +
-          "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-          "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-          "#= hstore('created_user_id', $2) " +
-          "#= hstore('modified_user_id', $2) " +
-          "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-        "AS c FROM factor f " +
-      "WHERE experiment_id = $1 ) sub " +
-    "RETURNING id, name" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP new_factors " +
-  "FROM temp_new_factors;"
+const generateDataScript = `
+SELECT *
+INTO TEMP experiment_to_create
+FROM experiment e
+WHERE e.id = $1;
 
-const duplicateFactorLevelScript =
-  "SELECT f.id AS old_id, n.id AS new_id " +
-  "INTO TEMP mapped_factor_ids " +
-  "FROM factor f " +
-    "INNER JOIN new_factors n ON f.name = n.name " +
-  "WHERE f.experiment_id = $1" +
-  "; WITH temp_ordered_old_factor_level_ids AS (" +
-    "SELECT fl.id AS old_factor_level_id, ROW_NUMBER() OVER (ORDER BY fl.id) AS row_number " +
-    "FROM factor_level fl " +
-      "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id" +
-  "), temp_new_factor_level_ids AS (" +
-    "SELECT nextval(pg_get_serial_sequence('factor_level', 'id'))::text as new_factor_level_id " +
-    "FROM temp_ordered_old_factor_level_ids" +
-  "), temp_ordered_new_factor_level_ids AS (" +
-    "SELECT new_factor_level_id, ROW_NUMBER() OVER (ORDER BY new_factor_level_id) AS row_number " +
-    "FROM temp_new_factor_level_ids" +
-  ")" + 
-  "SELECT old_factor_level_id, new_factor_level_id " +
-  "INTO TEMP mapped_factor_level_ids " +
-  "FROM temp_ordered_old_factor_level_ids ofl " +
-    "INNER JOIN temp_ordered_new_factor_level_ids nfl ON ofl.row_number = nfl.row_number;" +
-  "WITH temp_factor_levels AS ( " +
-    "INSERT INTO factor_level " +
-    "SELECT (c).* FROM  (" +
-      "SELECT fl " +
-        "#= hstore('id', mfli.new_factor_level_id) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('factor_id', mfi.new_id::text) AS c " +
-      "FROM factor_level fl " +
-        "INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id " +
-        "INNER JOIN mapped_factor_level_ids mfli ON fl.id = mfli.old_factor_level_id ) sub " +
-    "RETURNING id, factor_id, value" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP new_factor_levels " +
-  "FROM temp_factor_levels;"
+UPDATE experiment_to_create
+SET id = nextval(pg_get_serial_sequence('experiment', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    name = COALESCE($4, CAST(('COPY OF ' || name) AS varchar(100))),
+    is_template = $3;
 
-const duplicateFactorPropertiesForLevelScript = 
-  "WITH temp_ordered_old_factor_properties_for_level_ids AS (  " +
-  "    SELECT fpfl.id AS old_factor_properties_for_level_id, ROW_NUMBER() OVER (ORDER BY fpfl.id) AS row_number  " +
-  "    FROM factor_properties_for_level fpfl  " +
-  "             INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id  " +
-  "), temp_new_factor_properties_for_level_ids AS (  " +
-  "    SELECT nextval(pg_get_serial_sequence('factor_properties_for_level', 'id'))::text as new_factor_properties_for_level_id  " +
-  "    FROM temp_ordered_old_factor_properties_for_level_ids  " +
-  "), temp_ordered_new_factor_properties_for_level_ids AS (  " +
-  "    SELECT new_factor_properties_for_level_id, ROW_NUMBER() OVER (ORDER BY new_factor_properties_for_level_id) AS row_number  " +
-  "    FROM temp_new_factor_properties_for_level_ids  " +
-  ")  " +
-  "SELECT old_factor_properties_for_level_id, new_factor_properties_for_level_id  " +
-  "INTO TEMP mapped_factor_properties_for_level_ids  " +
-  "FROM temp_ordered_old_factor_properties_for_level_ids ofpfl  " +
-  "         INNER JOIN temp_ordered_new_factor_properties_for_level_ids nfpfl ON ofpfl.row_number = nfpfl.row_number;  " +
-  "INSERT INTO factor_properties_for_level   " +
-  "    SELECT (c).* FROM  (   " +
-  "        SELECT fpfl   " +
-  "            #= hstore('id', mfpfli.new_factor_properties_for_level_id)   " +
-  "            #= hstore('created_date', CURRENT_TIMESTAMP::text)   " +
-  "            #= hstore('modified_date', CURRENT_TIMESTAMP::text)   " +
-  "            #= hstore('created_user_id', $2)   " +
-  "            #= hstore('modified_user_id', $2)   " +
-  "            #= hstore('factor_id', mfi.new_id::text) AS c   " +
-  "        FROM factor_properties_for_level fpfl   " +
-  "            INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id   " +
-  "            INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.id = mfpfli.old_factor_properties_for_level_id ) sub   " +
-  "RETURNING id, factor_id, column_number, object_type, label, question_code, multi_question_tag, material_type; "
+SELECT *
+INTO TEMP owners_to_create
+FROM owner o
+WHERE o.experiment_id = $1;
 
-const duplicateFactorLevelDetails =
-  "WITH temp_ordered_old_factor_level_details_ids AS (  " +
-  "    SELECT fld.id AS old_factor_level_details_id, ROW_NUMBER() OVER (ORDER BY fld.id) AS row_number  " +
-  "    FROM factor_level_details fld  " +
-  "             INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fld.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id  " +
-  "), temp_new_factor_level_details_ids AS (  " +
-  "    SELECT nextval(pg_get_serial_sequence('factor_level_details', 'id'))::text as new_factor_level_details_id  " +
-  "    FROM temp_ordered_old_factor_level_details_ids  " +
-  "), temp_ordered_new_factor_level_details_ids AS (  " +
-  "    SELECT new_factor_level_details_id, ROW_NUMBER() OVER (ORDER BY new_factor_level_details_id) AS row_number  " +
-  "    FROM temp_new_factor_level_details_ids  " +
-  ")  " +
-  "SELECT old_factor_level_details_id, new_factor_level_details_id  " +
-  "INTO TEMP mapped_factor_level_details_ids  " +
-  "FROM temp_ordered_old_factor_level_details_ids ofld  " +
-  "    INNER JOIN temp_ordered_new_factor_level_details_ids nfld ON ofld.row_number = nfld.row_number;  " +
-  "INSERT INTO factor_level_details   " +
-  "        SELECT (c).* FROM  (   " +
-  "            SELECT fpfl   " +
-  "                #= hstore('id', mfldi.new_factor_level_details_id)   " +
-  "                #= hstore('created_date', CURRENT_TIMESTAMP::text)   " +
-  "                #= hstore('modified_date', CURRENT_TIMESTAMP::text)   " +
-  "                #= hstore('created_user_id', $2)   " +
-  "                #= hstore('modified_user_id', $2)   " +
-  "                #= hstore('factor_properties_for_level_id', mfpfli.new_factor_properties_for_level_id::text)   " +
-  "                #= hstore('factor_level_id', mfli.new_factor_level_id::text) AS c   " +
-  "        FROM factor_level_details fpfl   " +
-  "                INNER JOIN mapped_factor_level_ids mfli ON fpfl.factor_level_id = mfli.old_factor_level_id   " +
-  "                INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fpfl.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id   " +
-  "                INNER JOIN mapped_factor_level_details_ids mfldi ON fpfl.id = mfldi.old_factor_level_details_id ) sub   " +
-  "    RETURNING id, factor_level_id, factor_properties_for_level_id, row_number, value_type, text, value, question_code, uom_code;  "
-  
-const duplicateFactorLevelAssociationScript =
-  "INSERT INTO factor_level_association " +
-  "SELECT (c).* FROM (" +
-    "SELECT fla " +
-      "#= hstore('id', nextval(pg_get_serial_sequence('factor_level_association', 'id'))::text) " +
-      "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-      "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-      "#= hstore('created_user_id', $2) " +
-      "#= hstore('modified_user_id', $2) " +
-      "#= hstore('associated_level_id', mflia.new_factor_level_id::text) " +
-      "#= hstore('nested_level_id', mflin.new_factor_level_id::text) AS c " +
-    "FROM factor_level_association fla " +
-      "INNER JOIN mapped_factor_level_ids mflia ON fla.associated_level_id = mflia.old_factor_level_id " +
-      "INNER JOIN mapped_factor_level_ids mflin ON fla.nested_level_id = mflin.old_factor_level_id) sub;"
+UPDATE owners_to_create
+SET id = nextval(pg_get_serial_sequence('owner', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create),
+    user_ids = CASE WHEN user_ids @> ARRAY[$2]::VARCHAR[] THEN user_ids ELSE array_cat(user_ids, ARRAY[$2]::VARCHAR[]) END;
 
-const duplicateTreatmentScript =
-  "WITH temp_new_treatments AS (" +
-      "INSERT INTO treatment " +
-      "SELECT (c).* FROM (" +
-        "SELECT t " +
-          "#= hstore('id', nextval(pg_get_serial_sequence('treatment', 'id'))::text) " +
-          "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-          "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-          "#= hstore('created_user_id', $2) " +
-          "#= hstore('modified_user_id', $2) " +
-          "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-        "AS c FROM treatment t " +
-      "WHERE experiment_id = $1 ) sub " +
-      "RETURNING id, treatment_number" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP new_treatments " +
-  "FROM temp_new_treatments;"
+SELECT *
+INTO TEMP dependent_variables_to_create
+FROM dependent_variable dv
+WHERE dv.experiment_id = $1;
 
-const duplicateCombinationElementScript =
-  "SELECT t.id AS old_id, n.id AS new_id " +
-  "INTO TEMP mapped_treatment_ids " +
-  "FROM treatment t " +
-    "INNER JOIN new_treatments n ON t.treatment_number = n.treatment_number " +
-  "WHERE t.experiment_id = $1;" +
-  "WITH temp_combination_element_ids AS (" +
-    "INSERT INTO combination_element " +
-    "SELECT (c).* FROM (" +
-      "SELECT ce " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('combination_element', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('factor_level_id', mfli.new_factor_level_id::text) " +
-        "#= hstore('treatment_id', mti.new_id::text) AS c " +
-      "FROM combination_element ce " +
-        "INNER JOIN mapped_treatment_ids mti ON ce.treatment_id = mti.old_id " +
-        "INNER JOIN mapped_factor_level_ids mfli ON ce.factor_level_id = mfli.old_factor_level_id ) " +
-        " sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP combination_element_ids " +
-  "FROM temp_combination_element_ids;"
+UPDATE dependent_variables_to_create
+SET id = nextval(pg_get_serial_sequence('dependent_variable', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
 
-const duplicateUnitSpecificationScript =
-  "WITH temp_unit_spec_detail_ids AS (" +
-    "INSERT INTO unit_spec_detail " +
-    "SELECT (c).* FROM  (" +
-      "SELECT usd " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('unit_spec_detail', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-      "AS c FROM unit_spec_detail usd " +
-    "WHERE experiment_id = $1 ) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP unit_spec_detail_ids " +
-  "FROM temp_unit_spec_detail_ids;"
+SELECT *
+INTO TEMP factors_to_create
+FROM factor f
+WHERE f.experiment_id = $1;
 
-const duplicateDesignSpecificationScript =
-  "WITH temp_design_spec_detail_ids AS (" +
-    "INSERT INTO design_spec_detail " +
-    "SELECT (c).* FROM  (" +
-      "SELECT dsd " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('design_spec_detail', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-      "AS c FROM design_spec_detail dsd " +
-    "WHERE experiment_id = $1 ) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP design_spec_detail_ids " +
-  "FROM temp_design_spec_detail_ids;"
+UPDATE factors_to_create
+SET id = nextval(pg_get_serial_sequence('factor', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
 
-const duplicateBlockScript =
-  "WITH temp_blocks AS (" +
-  "INSERT INTO block " +
-  "SELECT (c).* FROM (" +
-  "SELECT b " +
-  "#= hstore('id', nextval(pg_get_serial_sequence('block', 'id'))::text) " +
-  "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-  "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-  "#= hstore('created_user_id', $2) " +
-  "#= hstore('modified_user_id', $2) " +
-  "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-  "AS c FROM block b " +
-  "WHERE experiment_id = $1 ) sub " +
-  "RETURNING id, name" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP new_blocks " +
-  "FROM temp_blocks;"
+SELECT f.id AS old_id, n.id AS new_id
+INTO TEMP mapped_factor_ids
+FROM factor f
+    INNER JOIN factors_to_create n ON f.name = n.name
+WHERE f.experiment_id = $1;
 
-const duplicateTreatmentBlockScript =
-  "SELECT b.id AS old_id, n.id AS new_id " +
-  "INTO TEMP mapped_block_ids " +
-  "FROM block b " +
-    "INNER JOIN new_blocks n ON (b.name = n.name) OR (b.name is NULL AND n.name is NULL) " +
-  "WHERE b.experiment_id = $1;" +
-  "WITH temp_new_treatment_blocks AS (" +
-  "INSERT INTO treatment_block " +
-  "SELECT (c).* FROM (" +
-  "SELECT tb " +
-  "#= hstore('id', nextval(pg_get_serial_sequence('treatment_block', 'id'))::text) " +
-  "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-  "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-  "#= hstore('created_user_id', $2) " +
-  "#= hstore('modified_user_id', $2) " +
-  "#= hstore('treatment_id', mti.new_id::text) " +
-  "#= hstore('block_id', mbi.new_id::text) " +
-  "AS c FROM treatment_block tb " +
-  "INNER JOIN mapped_treatment_ids mti ON tb.treatment_id = mti.old_id " +
-  "INNER JOIN mapped_block_ids mbi ON tb.block_id = mbi.old_id) sub " +
-  "RETURNING id, treatment_id, block_id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP new_treatment_blocks " +
-  "FROM temp_new_treatment_blocks;"
+WITH temp_ordered_old_factor_level_ids AS (
+    SELECT fl.id AS old_factor_level_id, ROW_NUMBER() OVER (ORDER BY fl.id) AS row_number 
+    FROM factor_level fl 
+        INNER JOIN mapped_factor_ids mfi ON fl.factor_id = mfi.old_id
+), temp_new_factor_level_ids AS (
+    SELECT nextval(pg_get_serial_sequence('factor_level', 'id')) as new_factor_level_id 
+    FROM temp_ordered_old_factor_level_ids
+), temp_ordered_new_factor_level_ids AS (
+    SELECT new_factor_level_id, ROW_NUMBER() OVER (ORDER BY new_factor_level_id) AS row_number 
+    FROM temp_new_factor_level_ids
+) 
+SELECT old_factor_level_id, new_factor_level_id 
+INTO TEMP mapped_factor_level_ids 
+FROM temp_ordered_old_factor_level_ids ofl 
+    INNER JOIN temp_ordered_new_factor_level_ids nfl ON ofl.row_number = nfl.row_number;
 
-const duplicateUnitScript =
-  "SELECT tb.id AS old_id, n.id AS new_id " +
-  "INTO TEMP mapped_treatment_block_ids " +
-  "FROM treatment_block tb " +
-    "INNER JOIN mapped_block_ids mbi ON mbi.old_id = tb.block_id " +
-    "INNER JOIN mapped_treatment_ids mti ON mti.old_id = tb.treatment_id " +
-    "INNER JOIN new_treatment_blocks n ON mti.new_id = n.treatment_id AND mbi.new_id = n.block_id;" +
-  "WITH temp_unit_ids AS (" +
-    "INSERT INTO unit " +
-    "SELECT (c).* FROM (" +
-      "SELECT u " +
-        "#= hstore('id', nextval(pg_get_serial_sequence('unit', 'id'))::text) " +
-        "#= hstore('created_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('modified_date', CURRENT_TIMESTAMP::text) " +
-        "#= hstore('created_user_id', $2) " +
-        "#= hstore('modified_user_id', $2) " +
-        "#= hstore('treatment_block_id', mtbi.new_id::text) " +
-        "#= hstore('set_entry_id', null) " +
-        "#= hstore('deactivation_reason', null) " +
-      "AS c FROM unit u " +
-        "INNER JOIN mapped_treatment_block_ids mtbi ON u.treatment_block_id = mtbi.old_id) sub " +
-    "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP unit_ids " +
-  "FROM temp_unit_ids;"
+SELECT *
+INTO TEMP factor_levels_to_create
+FROM factor_level fl
+WHERE fl.factor_id in (SELECT old_id FROM mapped_factor_ids);
 
-const duplicateAnalysisModelScript =
-  "WITH temp_analysis_model_ids AS (" +
-  "INSERT INTO analysis_model " +
-  "SELECT (c).* FROM (" +
-  "SELECT am " +
-  "#= hstore('id', nextval(pg_get_serial_sequence('analysis_model', 'id'))::text) " +
-  "#= hstore('analysis_model_type', am.analysis_model_type) " +
-  "#= hstore('analysis_model_sub_type', am.analysis_model_sub_type) " +
-  "#= hstore('experiment_id', (SELECT id::text FROM experiment_parent)) " +
-  "AS c FROM analysis_model am " +
-  "WHERE experiment_id = $1 ) sub " +
-  "RETURNING id" +
-  ")" +
-  "SELECT * " +
-  "INTO TEMP analysis_model_ids " +
-  "FROM temp_analysis_model_ids;"
+UPDATE factor_levels_to_create
+SET id = mfli.new_factor_level_id,
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    factor_id = mfi.new_id
+FROM mapped_factor_ids mfi, mapped_factor_level_ids mfli
+WHERE factor_levels_to_create.factor_id = mfi.old_id
+    AND factor_levels_to_create.id = mfli.old_factor_level_id;
+
+WITH temp_ordered_old_factor_properties_for_level_ids AS (
+    SELECT fpfl.id AS old_factor_properties_for_level_id,
+        ROW_NUMBER() OVER (ORDER BY fpfl.id) AS row_number
+    FROM factor_properties_for_level fpfl
+        INNER JOIN mapped_factor_ids mfi ON fpfl.factor_id = mfi.old_id
+), temp_new_factor_properties_for_level_ids AS (
+    SELECT nextval(pg_get_serial_sequence('factor_properties_for_level', 'id')) as new_factor_properties_for_level_id
+    FROM temp_ordered_old_factor_properties_for_level_ids
+), temp_ordered_new_factor_properties_for_level_ids AS (
+    SELECT new_factor_properties_for_level_id, ROW_NUMBER() OVER (ORDER BY new_factor_properties_for_level_id) AS row_number
+    FROM temp_new_factor_properties_for_level_ids
+)
+SELECT old_factor_properties_for_level_id, new_factor_properties_for_level_id
+INTO TEMP mapped_factor_properties_for_level_ids
+FROM temp_ordered_old_factor_properties_for_level_ids ofpfl
+    INNER JOIN temp_ordered_new_factor_properties_for_level_ids nfpfl
+        ON ofpfl.row_number = nfpfl.row_number;
+
+SELECT *
+INTO TEMP factor_properties_for_levels_to_create
+FROM factor_properties_for_level fpfl
+WHERE fpfl.factor_id in (SELECT old_id FROM mapped_factor_ids);
+
+UPDATE factor_properties_for_levels_to_create
+SET id = mfpfli.new_factor_properties_for_level_id,
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    factor_id = mfi.new_id
+FROM mapped_factor_ids mfi, mapped_factor_properties_for_level_ids mfpfli
+WHERE factor_properties_for_levels_to_create.factor_id = mfi.old_id
+    AND factor_properties_for_levels_to_create.id = mfpfli.old_factor_properties_for_level_id;
+
+WITH temp_ordered_old_factor_level_details_ids AS (
+    SELECT fld.id AS old_factor_level_details_id, ROW_NUMBER() OVER (ORDER BY fld.id) AS row_number
+    FROM factor_level_details fld
+        INNER JOIN mapped_factor_properties_for_level_ids mfpfli ON fld.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id
+), temp_new_factor_level_details_ids AS (
+    SELECT nextval(pg_get_serial_sequence('factor_level_details', 'id')) as new_factor_level_details_id
+    FROM temp_ordered_old_factor_level_details_ids
+), temp_ordered_new_factor_level_details_ids AS (
+    SELECT new_factor_level_details_id, ROW_NUMBER() OVER (ORDER BY new_factor_level_details_id) AS row_number
+    FROM temp_new_factor_level_details_ids
+)
+SELECT old_factor_level_details_id, new_factor_level_details_id
+INTO TEMP mapped_factor_level_details_ids
+FROM temp_ordered_old_factor_level_details_ids ofld
+    INNER JOIN temp_ordered_new_factor_level_details_ids nfld ON ofld.row_number = nfld.row_number;
+
+SELECT *
+INTO TEMP factor_level_details_to_create
+FROM factor_level_details fld
+WHERE fld.factor_level_id in (SELECT old_factor_level_id FROM mapped_factor_level_ids);
+
+UPDATE factor_level_details_to_create
+SET id = mfldi.new_factor_level_details_id,
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    factor_properties_for_level_id = mfpfli.new_factor_properties_for_level_id,
+    factor_level_id = mfli.new_factor_level_id
+FROM mapped_factor_level_ids mfli, mapped_factor_properties_for_level_ids mfpfli, mapped_factor_level_details_ids mfldi
+WHERE factor_level_details_to_create.factor_level_id = mfli.old_factor_level_id
+    AND factor_level_details_to_create.factor_properties_for_level_id = mfpfli.old_factor_properties_for_level_id
+    AND factor_level_details_to_create.id = mfldi.old_factor_level_details_id;
+
+SELECT *
+INTO TEMP factor_level_associations_to_create
+FROM factor_level_association fla
+WHERE fla.associated_level_id in (SELECT old_factor_level_id FROM mapped_factor_level_ids)
+    AND fla.nested_level_id in (SELECT old_factor_level_id FROM mapped_factor_level_ids);
+
+UPDATE factor_level_associations_to_create
+SET id = nextval(pg_get_serial_sequence('factor_level_association', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    associated_level_id = mflia.new_factor_level_id,
+    nested_level_id = mflin.new_factor_level_id
+FROM mapped_factor_level_ids mflia, mapped_factor_level_ids mflin
+WHERE factor_level_associations_to_create.associated_level_id = mflia.old_factor_level_id
+    AND factor_level_associations_to_create.nested_level_id = mflin.old_factor_level_id;
+
+SELECT *
+INTO TEMP treatments_to_create
+FROM treatment t
+WHERE t.experiment_id = $1;
+
+UPDATE treatments_to_create
+SET id = nextval(pg_get_serial_sequence('treatment', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
+
+SELECT t.id AS old_id, n.id AS new_id
+INTO TEMP mapped_treatment_ids
+FROM treatment t
+    INNER JOIN treatments_to_create n ON t.treatment_number = n.treatment_number
+WHERE t.experiment_id = $1;
+
+SELECT *
+INTO TEMP combination_elements_to_create
+FROM combination_element ce
+WHERE ce.treatment_id in (SELECT old_id FROM mapped_treatment_ids);
+
+UPDATE combination_elements_to_create
+SET id = nextval(pg_get_serial_sequence('combination_element', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    factor_level_id = mfli.new_factor_level_id,
+    treatment_id = mti.new_id
+FROM mapped_treatment_ids mti, mapped_factor_level_ids mfli
+WHERE combination_elements_to_create.treatment_id = mti.old_id
+    AND combination_elements_to_create.factor_level_id = mfli.old_factor_level_id;
+
+SELECT *
+INTO TEMP analysis_models_to_create
+FROM analysis_model am
+WHERE am.experiment_id = $1;
+
+UPDATE analysis_models_to_create
+SET id = nextval(pg_get_serial_sequence('analysis_model', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
+
+SELECT *
+INTO TEMP unit_spec_details_to_create
+FROM unit_spec_detail usd
+WHERE usd.experiment_id = $1;
+
+UPDATE unit_spec_details_to_create
+SET id = nextval(pg_get_serial_sequence('unit_spec_detail', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
+
+SELECT *
+INTO TEMP design_spec_details_to_create
+FROM design_spec_detail dsd
+WHERE dsd.experiment_id = $1;
+
+UPDATE design_spec_details_to_create
+SET id = nextval(pg_get_serial_sequence('design_spec_detail', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
+
+SELECT *
+INTO TEMP blocks_to_create
+FROM block b
+WHERE b.experiment_id = $1;
+
+UPDATE blocks_to_create
+SET id = nextval(pg_get_serial_sequence('block', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    experiment_id = (SELECT id FROM experiment_to_create);
+
+SELECT *
+INTO TEMP treatment_blocks_to_create
+FROM treatment_block tb
+WHERE tb.treatment_id in (SELECT old_id FROM mapped_treatment_ids);
+
+SELECT b.id AS old_id, n.id AS new_id
+INTO TEMP mapped_block_ids
+FROM block b
+    INNER JOIN blocks_to_create n ON (b.name = n.name) OR (b.name is NULL AND n.name is NULL)
+WHERE b.experiment_id = $1;
+
+UPDATE treatment_blocks_to_create
+SET id = nextval(pg_get_serial_sequence('treatment_block', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    treatment_id = mti.new_id,
+    block_id = mbi.new_id
+FROM mapped_treatment_ids mti, mapped_block_ids mbi
+WHERE treatment_blocks_to_create.treatment_id = mti.old_id
+    AND treatment_blocks_to_create.block_id = mbi.old_id;
+
+SELECT tb.id AS old_id, n.id AS new_id
+INTO TEMP mapped_treatment_block_ids
+FROM treatment_block tb
+    INNER JOIN block b on tb.block_id = b.id
+    INNER JOIN mapped_block_ids mbi ON mbi.old_id = tb.block_id 
+    INNER JOIN mapped_treatment_ids mti ON mti.old_id = tb.treatment_id 
+    INNER JOIN treatment_blocks_to_create n ON mti.new_id = n.treatment_id AND mbi.new_id = n.block_id
+WHERE b.experiment_id = $1;
+
+SELECT *
+INTO TEMP units_to_create
+FROM unit u
+WHERE u.treatment_block_id in (SELECT old_id FROM mapped_treatment_block_ids);
+
+UPDATE units_to_create
+SET id = nextval(pg_get_serial_sequence('unit', 'id')),
+    created_date = CURRENT_TIMESTAMP,
+    modified_date = CURRENT_TIMESTAMP,
+    created_user_id = $2,
+    modified_user_id = $2,
+    treatment_block_id = mtbi.new_id,
+    set_entry_id = NULL,
+    deactivation_reason = NULL
+FROM mapped_treatment_block_ids mtbi
+WHERE units_to_create.treatment_block_id = mtbi.old_id;`
+
+const runQueryAndLogTime = async (description, query, tx, params) => {
+  const start = new Date()
+  await tx.none(query, params)
+  const totalTime = new Date() - start
+  console.debug(`${description || 'script'} took ${totalTime / 1000} seconds to complete`)
+}
 
 // Error Codes 53XXXX
 class duplicationRepo {
@@ -402,27 +359,31 @@ class duplicationRepo {
   repository = () => this.rep
 
   @setErrorCode('531000')
-  duplicateExperiment= function(experimentId, name, isTemplate, context, tx = this.rep) {
-    return tx.oneOrNone(
-      duplicateExperimentInfoScript +
-      duplicateOwnersScript +
-      duplicateFactorScript +
-      duplicateFactorLevelScript +
-      duplicateFactorPropertiesForLevelScript +
-      duplicateFactorLevelDetails +
-      duplicateFactorLevelAssociationScript +
-      duplicateDependentVariableScript +
-      duplicateTreatmentScript +
-      duplicateCombinationElementScript +
-      duplicateUnitSpecificationScript +
-      duplicateDesignSpecificationScript +
-      duplicateBlockScript +
-      duplicateTreatmentBlockScript +
-      duplicateUnitScript +
-      duplicateAnalysisModelScript +
-      " SELECT * FROM experiment_parent;",
-      [experimentId, context.userId, isTemplate.toString(), name],
-    )
+  duplicateExperiment= async (experimentId, name, isTemplate, context, tx = this.rep) => {
+    const start = new Date()
+    await runQueryAndLogTime('drop tables', dropTablesScript, tx)
+    await runQueryAndLogTime('generate data', generateDataScript, tx,
+      [experimentId, context.userId, isTemplate.toString(), name])
+    await runQueryAndLogTime('create experiment', 'INSERT INTO experiment SELECT * FROM experiment_to_create;', tx)
+    await runQueryAndLogTime('create owner', 'INSERT INTO owner SELECT * FROM owners_to_create;', tx)
+    await runQueryAndLogTime('create dependent_variable', 'INSERT INTO dependent_variable SELECT * FROM dependent_variables_to_create;', tx)
+    await runQueryAndLogTime('create factor', 'INSERT INTO factor SELECT * FROM factors_to_create;', tx)
+    await runQueryAndLogTime('create factor_level', 'INSERT INTO factor_level SELECT * FROM factor_levels_to_create;', tx)
+    await runQueryAndLogTime('create factor_properties_for_level', 'INSERT INTO factor_properties_for_level SELECT * FROM factor_properties_for_levels_to_create;', tx)
+    await runQueryAndLogTime('create factor_level_detail', 'INSERT INTO factor_level_detail SELECT * FROM factor_level_details_to_create;', tx)
+    await runQueryAndLogTime('create factor_level_association', 'INSERT INTO factor_level_association SELECT * FROM factor_level_associations_to_create;', tx)
+    await runQueryAndLogTime('create treatment', 'INSERT INTO treatment SELECT * FROM treatments_to_create;', tx)
+    await runQueryAndLogTime('create combination_element', 'INSERT INTO combination_element SELECT * FROM combination_elements_to_create;', tx)
+    await runQueryAndLogTime('create analysis_model', 'INSERT INTO analysis_model SELECT * FROM analysis_models_to_create;', tx)
+    await runQueryAndLogTime('create unit_spec_detail', 'INSERT INTO unit_spec_detail SELECT * FROM unit_spec_details_to_create;', tx)
+    await runQueryAndLogTime('create design_spec_detail', 'INSERT INTO design_spec_detail SELECT * FROM design_spec_details_to_create;', tx)
+    await runQueryAndLogTime('create block', 'INSERT INTO block SELECT * FROM blocks_to_create;', tx)
+    await runQueryAndLogTime('create treatment_block', 'INSERT INTO treatment_block SELECT * FROM treatment_blocks_to_create;', tx)
+    await runQueryAndLogTime('create unit', 'INSERT INTO unit SELECT * FROM units_to_create;', tx)
+    const totalTime = new Date() - start
+    console.debug(`complete duplication took ${totalTime / 1000} seconds to complete`)
+
+    return tx.oneOrNone('SELECT * FROM experiment_to_create')
   }
 }
 

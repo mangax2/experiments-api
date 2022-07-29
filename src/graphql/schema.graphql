@@ -95,6 +95,7 @@ type Experiment {
   unitSpecificationDetails: [UnitSpecificationDetail]
   units: [ExperimentalUnit]
   analysisModel: AnalysisModel
+  analysisType: String
   isTemplate: Boolean
   associatedSets: [AssociatedSet]
   tags: [Tag]

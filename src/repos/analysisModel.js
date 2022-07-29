@@ -35,11 +35,12 @@ class analysisModelRepo {
       analysisModel => {
         return tx.one(
         'insert into' +
-          ' analysis_model(experiment_id,analysis_model_type,analysis_model_sub_type,created_user_id,created_date,modified_user_id,modified_date) values($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP )' +
+          ' analysis_model(experiment_id,analysis_model_type,analysis_model_sub_type,analysis_type,created_user_id,created_date,modified_user_id,modified_date) values($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP )' +
         '  RETURNING *',
          [analysisModel.experimentId,
           analysisModel.analysisModelType,
           analysisModel.analysisModelSubType,
+          analysisModel.analysisType,
            context.userId,
           ],
       )},
@@ -52,9 +53,10 @@ class analysisModelRepo {
     return tx.batch(
       analysisModelInfo.map(
       analysisModel => tx.oneOrNone(
-        'UPDATE analysis_model SET (analysis_model_type,analysis_model_sub_type,modified_user_id, modified_date)= ($1, $2, $3, CURRENT_TIMESTAMP ) WHERE experiment_id=$4 RETURNING *',
+        'UPDATE analysis_model SET (analysis_model_type,analysis_model_sub_type,analysis_type,modified_user_id, modified_date)= ($1, $2, $3, CURRENT_TIMESTAMP ) WHERE experiment_id=$4 RETURNING *',
         [analysisModel.analysisModelType,
           analysisModel.analysisModelSubType,
+          analysisModel.analysisType,
           context.userId,
           analysisModel.experimentId,
         ],

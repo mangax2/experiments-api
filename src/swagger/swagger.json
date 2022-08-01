@@ -3356,53 +3356,6 @@
           }
         }
       }
-    },
-    "/getPlanAssociation/{id}": {
-      "get": {
-        "summary": "Returns a chemical application plan for a given experiment id",
-        "description": "Returns a chemical application plan for a given experiment id",
-        "operationId": "getPlanAssociation",
-        "tags": ["ChemAP"],
-        "produces": ["application/json"],
-        "consumes": ["application/json"],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plan association",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/PlanAssociation"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid Request",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
     }
   },
   "definitions": {
@@ -3444,48 +3397,6 @@
         }
       },
       "required": ["experimentId"]
-    },
-    "PlanAssociation": {
-      "type": "object",
-      "properties": {
-        "planId": {
-          "type": "integer",
-          "description": "Id of the associated plan."
-        },
-        "id": {
-          "type": "integer",
-          "description": "Link id"
-        },
-        "externalEntity": {
-          "type": "string",
-          "description": "The type of entity"
-        },
-        "externalEntityId": {
-          "type": "string",
-          "description": "The id of the external entity"
-        },
-        "isSource": {
-          "type": "boolean",
-          "description": "True if plan has a source"
-        },
-        "createdDate": {
-          "type": "string",
-          "description": "created timestamp in UTC."
-        },
-        "createdUserId": {
-          "type": "string",
-          "description": "created user id for audit tracking."
-        },
-        "modifiedDate": {
-          "type": "string",
-          "description": "Modified timestamp in UTC."
-        },
-        "modifiedUserId": {
-          "type": "string",
-          "description": "modified user id for audit tracking."
-        }
-      },
-      "required": ["planId"]
     },
     "ClusterResponse": {
       "type": "object",

@@ -27,7 +27,7 @@ import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 import chemApSyncInputSchemaValidate from '../validations/chemApSyncValidator'
-import { createAndSyncChemApPlanFromExperiment, getPlanAssociation } from '../services/chemApSyncService'
+import createAndSyncChemApPlanFromExperiment from '../services/chemApSyncService'
 
 const router = express.Router()
 
@@ -324,15 +324,6 @@ router.post('/chemAP-sync', async (req, res, next) => {
     await chemApSyncInputSchemaValidate(req.body)
     const value = await createAndSyncChemApPlanFromExperiment(req.body, req.context)
     res.json(value)
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.get('/getPlanAssociation/:id', async (req, res, next) => {
-  try {
-    const plan = await getPlanAssociation(req.params.id)
-    res.json(plan)
   } catch (err) {
     next(err)
   }

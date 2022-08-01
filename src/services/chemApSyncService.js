@@ -333,8 +333,8 @@ export const getTimingQuestionUoms = async () => {
 
 export const getPlanAssociation = async (experimentId) => {
   try {
-    let header = await OAuthUtil.getAuthorizationHeaders();
-    let response = await HttpUtil.get(`${apiUrls.chemApAPIUrl}/plan-associations?externalEntityId=${experimentId}&externalEntity=experiment`, header)
+    const header = await OAuthUtil.getAuthorizationHeaders()
+    const response = await HttpUtil.get(`${apiUrls.chemApAPIUrl}/plan-associations?externalEntityId=${experimentId}&externalEntity=experiment`, header)
     return response._body
   } catch (error) {
     console.error('Error retrieving plan association.')

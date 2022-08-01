@@ -27,7 +27,7 @@ import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 import chemApSyncInputSchemaValidate from '../validations/chemApSyncValidator'
-import {createAndSyncChemApPlanFromExperiment, getPlanAssociation} from '../services/chemApSyncService'
+import { createAndSyncChemApPlanFromExperiment, getPlanAssociation } from '../services/chemApSyncService'
 
 const router = express.Router()
 

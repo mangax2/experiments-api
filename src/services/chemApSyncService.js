@@ -227,13 +227,13 @@ const createChemicalsFromDetails = (
   timingUomMap,
 ) => {
   const timingDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.timing.id
+    detail.factor_properties_for_level_id === relevantProperties.timing?.id
       && detail.value_type !== 'noTreatment')
   const chemicalDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.chemical.id
+    detail.factor_properties_for_level_id === relevantProperties.chemical?.id
       && detail.value_type !== 'noTreatment')
   const appRateDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.applicationRate.id
+    detail.factor_properties_for_level_id === relevantProperties.applicationRate?.id
       && detail.value_type !== 'noTreatment')
 
   if (chemicalDetails.length > 1 || appRateDetails.length > 1) {
@@ -329,6 +329,17 @@ export const getTimingQuestionUoms = async () => {
     }, {})
     return uomMapper
   }, {})
+}
+
+export const getPlanAssociation = async (experimentId) => {
+  try {
+    let header = await OAuthUtil.getAuthorizationHeaders();
+    let response = await HttpUtil.get(`${apiUrls.chemApAPIUrl}/plan-associations?externalEntityId=${experimentId}&externalEntity=experiment`, header)
+    return response._body
+  } catch (error) {
+    console.error('Error retrieving plan association.')
+    throw AppError.internalServerError('Error retrieving plan association.')
+  }
 }
 
 export const createAndSyncChemApPlanFromExperiment = async (body, context) => {

@@ -370,7 +370,7 @@ class duplicationRepo {
     await runQueryAndLogTime('create factor', 'INSERT INTO factor SELECT * FROM factors_to_create;', tx)
     await runQueryAndLogTime('create factor_level', 'INSERT INTO factor_level SELECT * FROM factor_levels_to_create;', tx)
     await runQueryAndLogTime('create factor_properties_for_level', 'INSERT INTO factor_properties_for_level SELECT * FROM factor_properties_for_levels_to_create;', tx)
-    await runQueryAndLogTime('create factor_level_detail', 'INSERT INTO factor_level_detail SELECT * FROM factor_level_details_to_create;', tx)
+    await runQueryAndLogTime('create factor_level_details', 'INSERT INTO factor_level_details SELECT * FROM factor_level_details_to_create;', tx)
     await runQueryAndLogTime('create factor_level_association', 'INSERT INTO factor_level_association SELECT * FROM factor_level_associations_to_create;', tx)
     await runQueryAndLogTime('create treatment', 'INSERT INTO treatment SELECT * FROM treatments_to_create;', tx)
     await runQueryAndLogTime('create combination_element', 'INSERT INTO combination_element SELECT * FROM combination_elements_to_create;', tx)

@@ -255,12 +255,6 @@ export default {
     analysisModelType: property('analysis_model_type'),
     analysisModelSubType: property('analysis_model_sub_type'),
   },
-  AnalysisType: {
-    experimentId: property('experiment_id'),
-    auditInfo: (entity, args, context) =>
-      context.getAuditInfo(entity),
-    analysisType: property('analysis_type'),
-  },
   LocationBlock: {
     experimentId: property('experiment_id'),
     blockId: property('block_id'),

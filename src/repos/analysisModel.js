@@ -35,7 +35,7 @@ class analysisModelRepo {
       analysisModel => {
         return tx.one(
         'insert into' +
-          ' analysis_model(experiment_id,analysis_model_type,analysis_model_sub_type,created_user_id,created_date,modified_user_id,modified_date) values($1, $2, $3, $4, $5 CURRENT_TIMESTAMP, $5, CURRENT_TIMESTAMP )' +
+          ' analysis_model(experiment_id,analysis_model_type,analysis_model_sub_type,created_user_id,created_date,modified_user_id,modified_date) values($1, $2, $3, $4, CURRENT_TIMESTAMP, $4, CURRENT_TIMESTAMP )' +
         '  RETURNING *',
          [analysisModel.experimentId,
           analysisModel.analysisModelType,

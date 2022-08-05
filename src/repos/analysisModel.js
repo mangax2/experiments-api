@@ -40,7 +40,7 @@ class analysisModelRepo {
          [analysisModel.experimentId,
           analysisModel.analysisModelType,
           analysisModel.analysisModelSubType,
-           context.userId,
+          context.userId,
           ],
       )},
     ),

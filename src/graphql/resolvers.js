@@ -124,6 +124,7 @@ export default {
   Experiment: {
     capacityRequestSyncDate: property('capacity_request_sync_date'),
     randomizationStrategyCode: property('randomization_strategy_code'),
+    analysisType: property('analysis_type'),
     isTemplate: property('is_template'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),

@@ -21,5 +21,9 @@ phases:
       - echo Removing dev packages
       - npm prune --production
       - npm i -g @monsantoit/fg-deploy@latest
-      - fg-deploy -m build-scripts/fg-deploy-dev-v4.js
+      - fg-deploy -m build-scripts/fg-deploy-np.js
+      - echo Adding deployment to release docs
+      - npm i -g @monsantoit/deploytool-cli@latest
+      - VERSION=$(node -e "console.log(require('./package.json').version)")
+      - deploytool add --clientId $CLIENT_ID --clientSecret $CLIENT_SECRET -d "EXP-RENAME BEFORE PROD DEPLOY" -t "COSMOS-DEV-TEAM" -c "experiments-api-cf-aws" -v $VERSION --platform "Pipeline"
       - echo Build completed on `date`

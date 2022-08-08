@@ -1,0 +1,16 @@
+{
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Sid": "share with prod account",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::745421575498:root"
+      },
+      "Action": [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    }
+  ]
+}

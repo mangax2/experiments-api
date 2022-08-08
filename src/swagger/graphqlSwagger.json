@@ -3,7 +3,7 @@
   "info": {
     "title": "Experiments GraphQL API",
     "description": "Experiment GraphQL APIs to query experiment data",
-    "version": "v1"
+    "version": "v2"
   },
   "host": "api01-np.agro.services",
   "schemes": [

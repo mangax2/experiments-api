@@ -17,5 +17,5 @@ phases:
     commands:
       - echo Build started on `date`
       - npm i -g @monsantoit/fg-deploy@latest
-      - fg-deploy -m build-scripts/fg-deploy-prod.js
+      - fg-deploy -m build-scripts/fg-deploy-prod-v4.js
       - echo Build completed on `date`

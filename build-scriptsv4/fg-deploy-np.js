@@ -1,28 +1,23 @@
 const {
   AWS_REGION,
   NP_AWS_ACCOUNT_ID,
+  NP_FARGATE_STACK_NAME,
   NP_REPO_NAME,
-  PROD_AWS_ACCOUNT_ID,
-  PROD_FARGATE_STACK_NAME,
 } = require('./build-constants')
+const packageJSON = require('../package.json')
 
-const version = process.env.DEPLOYMENT_APPROVALS_SOURCE_VERSION
-if (!version || version === '') {
-  throw new Error('Missing DEPLOYMENT_APPROVALS_SOURCE_VERSION environment variable!')
-}
-
-module.exports = {
+const coreConfig = {
   appParameters: {
-    cpu: '2048',
+    cpu: '512',
     memory: '4GB',
-    appName: 'exp-api-prod-v4',
+    appName: NP_REPO_NAME,
     instanceCount: 6,
     healthCheckPath: '/ping',
     healthCheckGracePeriod: 25,
     loadBalancingAlgorithmType: 'least_outstanding_requests',
-    taskRoleName: 'experiments-api-prod-role',
+    taskRoleName: 'experiments-api-np-role',
     environmentVars: {
-      VAULT_ENV: 'prod',
+      VAULT_ENV: 'np',
     },
   },
   autoScaling: {
@@ -43,24 +38,31 @@ module.exports = {
       },
       {
         scaleBy: 'RequestCount',
-        targetValue: 150,
+        targetValue: 100,
         scaleInCooldown: 600,
         scaleOutCooldown: 60,
       },
     ],
   },
   aws: {
-    accountId: PROD_AWS_ACCOUNT_ID,
-    fargateStackName: PROD_FARGATE_STACK_NAME,
+    accountId: NP_AWS_ACCOUNT_ID,
+    fargateStackName: NP_FARGATE_STACK_NAME,
     region: AWS_REGION,
   },
   datadog: {
     enabled: true,
-    apiKeyArn: `arn:aws:ssm:${AWS_REGION}:${PROD_AWS_ACCOUNT_ID}:parameter/datadog-api-key`,
-    environment: 'prod',
+    apiKeyArn: `arn:aws:ssm:${AWS_REGION}:${NP_AWS_ACCOUNT_ID}:parameter/datadog-api-key`,
+    environment: 'nonprod',
   },
   docker: {
-    image: `${NP_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${NP_REPO_NAME}:${version}`,
-    ecrLifecyclePolicyFile: 'build-scripts/lifecycle-policy.json',
+    ecrPolicyFile: 'build-scripts/ecr-policy-np.json',
   },
 }
+
+if (process.env.VERSION) {
+  coreConfig.docker.image = `${NP_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${NP_REPO_NAME}:${process.env.VERSION}`
+} else {
+  coreConfig.docker.tags = [packageJSON.version]
+}
+
+module.exports = coreConfig

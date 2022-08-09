@@ -53,6 +53,6 @@ module.exports = {
     environment: 'develop',
   },
   docker: {
-    ecrLifecyclePolicyFile: 'build-scripts/lifecycle-policy.json',
+    ecrLifecyclePolicyFile: 'build-scriptsv4/lifecycle-policy.json',
   },
 }

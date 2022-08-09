@@ -55,7 +55,7 @@ const coreConfig = {
     environment: 'nonprod',
   },
   docker: {
-    ecrPolicyFile: 'build-scripts/ecr-policy-np.json',
+    ecrPolicyFile: 'build-scriptsv4/ecr-policy-np.json',
   },
 }
 

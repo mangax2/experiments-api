@@ -61,6 +61,6 @@ module.exports = {
   },
   docker: {
     image: `${NP_AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${NP_REPO_NAME}:${version}`,
-    ecrLifecyclePolicyFile: 'build-scripts/lifecycle-policy.json',
+    ecrLifecyclePolicyFile: 'build-scriptsv4/lifecycle-policy.json',
   },
 }

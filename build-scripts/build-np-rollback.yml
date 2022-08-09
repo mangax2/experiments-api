@@ -17,5 +17,5 @@ phases:
     commands:
       - echo Rollback started on `date`
       - npm i -g @monsantoit/fg-deploy@latest
-      - fg-deploy -m build-scripts/fg-deploy-np-v4.js
+      - fg-deploy -m build-scripts/fg-deploy-np.js
       - echo Rollback completed on `date`

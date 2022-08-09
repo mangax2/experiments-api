@@ -15,7 +15,7 @@ module.exports = {
   appParameters: {
     cpu: '2048',
     memory: '4GB',
-    appName: 'exp-api-prod-v4',
+    appName: 'exp-api-prod',
     instanceCount: 6,
     healthCheckPath: '/ping',
     healthCheckGracePeriod: 25,

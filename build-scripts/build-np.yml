@@ -21,7 +21,7 @@ phases:
       - echo Removing dev packages
       - npm prune --production
       - npm i -g @monsantoit/fg-deploy@latest
-      - fg-deploy -m build-scripts/fg-deploy-np-v4.js
+      - fg-deploy -m build-scripts/fg-deploy-np.js
       - echo Adding deployment to release docs
       - npm i -g @monsantoit/deploytool-cli@latest
       - VERSION=$(node -e "console.log(require('./package.json').version)")

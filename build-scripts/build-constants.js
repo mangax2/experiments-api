@@ -2,7 +2,7 @@ module.exports = {
   AWS_REGION: 'us-east-1',
   NP_AWS_ACCOUNT_ID: '286985534438',
   NP_FARGATE_STACK_NAME: 'SC-286985534438-pp-dkhy74li7feue',
-  NP_REPO_NAME: 'exp-api-np-v4',
+  NP_REPO_NAME: 'exp-api-np',
   PROD_AWS_ACCOUNT_ID: '745421575498',
   PROD_FARGATE_STACK_NAME: 'SC-745421575498-pp-5wffbcl37of72',
 }

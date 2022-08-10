@@ -3,7 +3,7 @@
   "info": {
     "title": "Experiments API",
     "description": "Experiment APIs to create experiment model, managed by the Cosmos team. Reach out in the #experiments channel on Slack for support.",
-    "version": "v3"
+    "version": "v4"
   },
   "host": "api01-np.agro.services",
   "schemes": [

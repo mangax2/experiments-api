@@ -27,7 +27,10 @@ import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 import chemApSyncInputSchemaValidate from '../validations/chemApSyncValidator'
-import createAndSyncChemApPlanFromExperiment from '../services/chemApSyncService'
+import {
+  addSetAssociationsToChemAP,
+  createAndSyncChemApPlanFromExperiment,
+ } from '../services/chemApSyncService'
 
 const router = express.Router()
 
@@ -324,6 +327,16 @@ router.post('/chemAP-sync', async (req, res, next) => {
     await chemApSyncInputSchemaValidate(req.body)
     const value = await createAndSyncChemApPlanFromExperiment(req.body, req.context)
     res.json(value)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/chemap-sync/set-entry-associations', async (req, res, next) => {
+  try {
+    await chemApSyncInputSchemaValidate(req.body)
+    await addSetAssociationsToChemAP(req.body, req.context)
+    res.sendStatus(204)
   } catch (err) {
     next(err)
   }

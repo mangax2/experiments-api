@@ -1,4 +1,6 @@
-import createAndSyncChemApPlanFromExperiment, {
+import {
+  addSetAssociationsToChemAP,
+  createAndSyncChemApPlanFromExperiment,
   createIntentAssociations,
   getIntentsForTreatments,
   getTimingQuestionUoms,
@@ -164,7 +166,7 @@ describe('ChemApSyncService', () => {
   })
 
   test('when chemAp fails to be created, an error is throw', async () => {
-    HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error()))
+    HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('test message')))
     try {
       await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
       // eslint-disable-next-line no-empty
@@ -174,7 +176,7 @@ describe('ChemApSyncService', () => {
 
   test('when chemAp plan fails to be associated with an experiment, plan is deleted', async () => {
     HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
-      .mockReturnValueOnce(Promise.reject(new Error()))
+      .mockReturnValueOnce(Promise.reject(new Error('test message')))
     try {
       await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
       // eslint-disable-next-line no-empty
@@ -186,7 +188,7 @@ describe('ChemApSyncService', () => {
   test('when chemAp plan timings fails to be saved, plan is deleted', async () => {
     HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
       .mockReturnValueOnce(Promise.resolve({}))
-    HttpUtil.put.mockReturnValueOnce(Promise.reject(new Error()))
+    HttpUtil.put.mockReturnValueOnce(Promise.reject(new Error('test message')))
     try {
       await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
       // eslint-disable-next-line no-empty
@@ -197,8 +199,8 @@ describe('ChemApSyncService', () => {
 
   test('when chemAp plan fails to be associated with an experiment and failed to delete', async () => {
     HttpUtil.post.mockReturnValueOnce(Promise.resolve({ body: { id: 123 } }))
-      .mockReturnValueOnce(Promise.reject(new Error()))
-    HttpUtil.delete.mockReturnValueOnce(Promise.reject(new Error()))
+      .mockReturnValueOnce(Promise.reject(new Error('test message')))
+    HttpUtil.delete.mockReturnValueOnce(Promise.reject(new Error('test message')))
     try {
       await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
       // eslint-disable-next-line no-empty
@@ -2994,6 +2996,227 @@ describe('ChemApSyncService', () => {
       } catch (err) {
         expect(AppError.internalServerError).toHaveBeenCalledWith('An error occurred to create intent associations for plan 5', undefined, '1G9001')
       }
+    })
+  })
+
+  describe('addSetAssociationsToChemAP', () => {
+    dbRead.unit.findAllByExperimentId = mockResolve([
+      { id: 1, set_entry_id: 101, treatment_id: 11 },
+      { id: 2, set_entry_id: 102, treatment_id: 12 },
+      { id: 3, set_entry_id: 103, treatment_id: 13 },
+      { id: 4, set_entry_id: 111, treatment_id: 11 },
+      { id: 5, set_entry_id: 112, treatment_id: 12 },
+      { id: 6, set_entry_id: 113, treatment_id: 13 },
+    ])
+
+    test('adds all the associations if none already exist', async () => {
+      HttpUtil.getWithRetry = mock()
+      .mockReturnValueOnce(Promise.resolve({ body: [{ planId: 5 }] }))
+      .mockReturnValueOnce({
+        body: [
+          {
+            intentId: 1001,
+            externalEntity: 'treatment',
+            externalEntityId: '11',
+            isSource: true,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'treatment',
+            externalEntityId: '12',
+            isSource: true,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'treatment',
+            externalEntityId: '13',
+            isSource: true,
+          },
+        ],
+      })
+      HttpUtil.post = mockResolve({})
+
+      await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
+
+      expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/intent-associations',
+        [{ headerName: 'username', headerValue: 'tester1' }],
+        [
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '101',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '102',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '103',
+            isSource: false,
+          },
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '111',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '112',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '113',
+            isSource: false,
+          },
+        ])
+    })
+
+    test('adds missing associations if some already exist', async () => {
+      HttpUtil.getWithRetry = mock()
+      .mockReturnValueOnce(Promise.resolve({ body: [{ planId: 5 }] }))
+      .mockReturnValueOnce({
+        body: [
+          {
+            intentId: 1001,
+            externalEntity: 'treatment',
+            externalEntityId: '11',
+            isSource: true,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'treatment',
+            externalEntityId: '12',
+            isSource: true,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'treatment',
+            externalEntityId: '13',
+            isSource: true,
+          },
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '101',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '102',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '103',
+            isSource: false,
+          },
+        ],
+      })
+      HttpUtil.post = mockResolve({})
+
+      await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
+
+      expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/intent-associations',
+        [{ headerName: 'username', headerValue: 'tester1' }],
+        [
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '111',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '112',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '113',
+            isSource: false,
+          },
+        ])
+    })
+
+    test('does not add any associations if all already exist', async () => {
+      HttpUtil.getWithRetry = mock()
+      .mockReturnValueOnce(Promise.resolve({ body: [{ planId: 5 }] }))
+      .mockReturnValueOnce({
+        body: [
+          {
+            intentId: 1001,
+            externalEntity: 'treatment',
+            externalEntityId: '11',
+            isSource: true,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'treatment',
+            externalEntityId: '12',
+            isSource: true,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'treatment',
+            externalEntityId: '13',
+            isSource: true,
+          },
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '101',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '102',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '103',
+            isSource: false,
+          },
+          {
+            intentId: 1001,
+            externalEntity: 'set entry',
+            externalEntityId: '111',
+            isSource: false,
+          },
+          {
+            intentId: 1002,
+            externalEntity: 'set entry',
+            externalEntityId: '112',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '113',
+            isSource: false,
+          },
+        ],
+      })
+      HttpUtil.post = mockResolve({})
+
+      await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
+
+      expect(HttpUtil.post).not.toHaveBeenCalled()
     })
   })
 })

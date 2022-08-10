@@ -2,6 +2,7 @@ import {
   addSetAssociationsToChemAP,
   createAndSyncChemApPlanFromExperiment,
   createIntentAssociations,
+  getErrorFromChemAP,
   getIntentsForTreatments,
   getTimingQuestionUoms,
   getUniqueIntentsWithTreatment,
@@ -3217,6 +3218,71 @@ describe('ChemApSyncService', () => {
       await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
 
       expect(HttpUtil.post).not.toHaveBeenCalled()
+    })
+
+    test('throws an error if we cannot retrieve information from ChemAP API', async () => {
+      try {
+        HttpUtil.getWithRetry = mockReject(new Error())
+        AppError.internalServerError = mock()
+
+        await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
+      } catch {
+        expect(AppError.internalServerError).toHaveBeenCalledWith('An error occurred while retrieving chemAp details for experiment 5', undefined, '1GC001')
+      }
+    })
+  })
+
+  describe('getErrorFromChemAP', () => {
+    test('attempts to get the err.response.body first', () => {
+      const error = {
+        response: {
+          body: 'body error',
+          statusCode: '404',
+          text: 'Not Found',
+        },
+        message: 'message',
+        otherInfo: 'something',
+      }
+
+      const result = getErrorFromChemAP(error)
+
+      expect(result).toBe('body error')
+    })
+
+    test('attempts to get the err.response.statusCode/text second', () => {
+      const error = {
+        response: {
+          statusCode: '404',
+          text: 'Not Found',
+        },
+        message: 'message',
+        otherInfo: 'something',
+      }
+
+      const result = getErrorFromChemAP(error)
+
+      expect(result).toBe('404: Not Found')
+    })
+
+    test('attempts to get the err.message third', () => {
+      const error = {
+        message: 'message',
+        otherInfo: 'something',
+      }
+
+      const result = getErrorFromChemAP(error)
+
+      expect(result).toBe('message')
+    })
+
+    test('returns the error if all other attempts fail', () => {
+      const error = {
+        otherInfo: 'something',
+      }
+
+      const result = getErrorFromChemAP(error)
+
+      expect(result).toBe(error)
     })
   })
 })

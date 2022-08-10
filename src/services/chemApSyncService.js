@@ -39,7 +39,7 @@ const chemicalQAndACodes = [
   qandaAppEquipmentCode,
 ]
 
-const getErrorFromChemAP = (err) => {
+export const getErrorFromChemAP = (err) => {
   if (err.response) {
     if (err.response.body && !isEqual(err.response.body, {})) {
       return err.response.body

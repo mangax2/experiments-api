@@ -332,7 +332,7 @@ router.post('/chemAP-sync', async (req, res, next) => {
   }
 })
 
-router.post('/chemap-sync/set-entry-associations', async (req, res, next) => {
+router.post('/chemAP-sync/set-entry-associations', async (req, res, next) => {
   try {
     await chemApSyncInputSchemaValidate(req.body)
     await addSetAssociationsToChemAP(req.body, req.context)

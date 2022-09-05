@@ -671,7 +671,7 @@ const getIntentAssociationsByExperimentId = async (experimentId, header, request
 }
 
 const createSetEntryAssociations = (treatmentAssociations, experimentalUnits) =>
-  experimentalUnits.flatMap(unit => {
+  experimentalUnits.filter((unit) => unit.set_entry_id).flatMap(unit => {
     const matchingTreatmentAssociations = treatmentAssociations.filter(assoc =>
       Number(assoc.externalEntityId) === unit.treatment_id)
     return matchingTreatmentAssociations.map(assoc => ({

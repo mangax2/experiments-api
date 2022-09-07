@@ -134,10 +134,6 @@ export default {
       context.loaders.designSpecDetailByExperimentIds.load(entity.id),
     treatmentVariables: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(entity.id),
-    groups: (entity, args, context) =>
-      context.loaders.groupsByExperimentIds.load(entity.id),
-    groupsJSON: (entity, args, context) =>
-      context.loaders.groupsByExperimentIds.load(entity.id),
     owners: (entity, args, context) =>
       context.loaders.ownersByExperimentIds.load(entity.id),
     treatments: (entity, args, context) =>
@@ -154,8 +150,6 @@ export default {
       context.loaders.tagsByExperimentId.load({ id: entity.id, isTemplate: entity.is_template }),
   },
   ExperimentalSet: {
-    groupsJSON: (entity, args, context) =>
-      context.loaders.groupsJsonsBySetIds.load(entity.setId),
     setEntries: (entity, args, context) =>
       context.loaders.unitsBySetId.load([entity.setId]),
   },
@@ -190,7 +184,6 @@ export default {
       context.loaders.nestedVariables.load(entity.id),
   },
   TreatmentVariableLevel: {
-    valueJSON: property('value'),
     treatmentVariableId: property('factor_id'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
@@ -202,8 +195,6 @@ export default {
       context.loaders.nestedFactorLevel.load(entity.id),
     associatedLevels: (entity, args, context) =>
       context.loaders.associatedFactorLevel.load(entity.id),
-    treatmentVariableLevelDetails: (entity, _, context) =>
-      context.loaders.treatmentVariableLevelDetails.load(entity.id),
     treatmentVariableLevelFlatDetails: (entity, _, context) =>
       context.loaders.treatmentVariableLevelFlatDetails.load(entity.id),
   },
@@ -214,6 +205,8 @@ export default {
     experimentId: property('experiment_id'),
     userIds: property('user_ids'),
     groupIds: property('group_ids'),
+    reviewerUserIds: property('reviewer_user_ids'),
+    reviewerGroupIds: property('reviewer_group_ids'),
     auditInfo: (entity, args, context) =>
       context.getAuditInfo(entity),
   },

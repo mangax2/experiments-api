@@ -3220,6 +3220,50 @@ describe('ChemApSyncService', () => {
       expect(HttpUtil.post).not.toHaveBeenCalled()
     })
 
+    test('does not add associations for units with no set entry associated', async () => {
+      dbRead.unit.findAllByExperimentId = mockResolve([
+        { id: 1, set_entry_id: null, treatment_id: 11 },
+        { id: 2, set_entry_id: null, treatment_id: 12 },
+        { id: 3, set_entry_id: 103, treatment_id: 13 },
+        { id: 4, set_entry_id: 111, treatment_id: 11 },
+        { id: 5, set_entry_id: 112, treatment_id: 12 },
+        { id: 6, set_entry_id: 113, treatment_id: 13 },
+      ])
+
+      HttpUtil.getWithRetry = mock()
+      .mockReturnValueOnce(Promise.resolve({ body: [{ planId: 5 }] }))
+      .mockReturnValueOnce({
+        body: [
+          {
+            intentId: 1003,
+            externalEntity: 'treatment',
+            externalEntityId: '13',
+            isSource: true,
+          },
+        ],
+      })
+      HttpUtil.post = mockResolve({})
+
+      await addSetAssociationsToChemAP({ experimentId: 5 }, { userId: 'tester1', requestId: 123 })
+
+      expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/intent-associations',
+        [{ headerName: 'username', headerValue: 'tester1' }],
+        [
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '103',
+            isSource: false,
+          },
+          {
+            intentId: 1003,
+            externalEntity: 'set entry',
+            externalEntityId: '113',
+            isSource: false,
+          },
+        ])
+    })
+
     test('throws an error if we cannot retrieve information from ChemAP API', async () => {
       try {
         HttpUtil.getWithRetry = mockReject(new Error())

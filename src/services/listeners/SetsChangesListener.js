@@ -1,5 +1,4 @@
 import { ConsumerGroup } from 'kafka-node'
-import avro from 'avsc'
 import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import configurator from '../../configs/configurator'

@@ -1,5 +1,6 @@
 import {
   cloneDeep,
+  differenceWith,
   groupBy,
   isEqual,
   omit,
@@ -38,11 +39,24 @@ const chemicalQAndACodes = [
   qandaAppEquipmentCode,
 ]
 
+export const getErrorFromChemAP = (err) => {
+  if (err.response) {
+    if (err.response.body && !isEqual(err.response.body, {})) {
+      return err.response.body
+    }
+    return `${err.response.statusCode}: ${err.response.text}`
+  }
+  if (err.message) {
+    return err.message
+  }
+  return err
+}
+
 const sendApiPostRequest = async (url, headers, request, errorMsg, errorCode, requestId) => {
   try {
     return await HttpUtil.post(`${apiUrls.chemApAPIUrl}${url}`, headers, request)
   } catch (error) {
-    console.error(`[[${requestId}]] ${errorMsg}`, errorCode, error.message)
+    console.error(`[[${requestId}]] ${errorMsg}`, errorCode, getErrorFromChemAP(error))
     throw AppError.internalServerError(errorMsg, undefined, getFullErrorCode(errorCode))
   }
 }
@@ -72,7 +86,7 @@ const updateChemApPlan = async (planId, experiment, owner, intents, headers, req
     return await HttpUtil.put(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers, request)
   } catch (error) {
     const message = `An error occurred to update a chemAp plan: ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G8001'))
   }
 }
@@ -98,7 +112,7 @@ const getChemApPlan = async (planId, headers, requestId) => {
     return response.body
   } catch (error) {
     const message = `An error occurred while retrieving chemAp plan: ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1GA001'))
   }
 }
@@ -130,7 +144,7 @@ const deleteChemApPlan = async (planId, headers, requestId) => {
     return await HttpUtil.delete(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers)
   } catch (error) {
     const message = `An error occurred to delete a chemAp plan: ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G3001'))
   }
 }
@@ -143,7 +157,7 @@ const createPlanTimings = async (planId, targetTimings, headers, requestId) => {
     return await HttpUtil.put(`${apiUrls.chemApAPIUrl}/target-timings?planId=${planId}`, headers, targetTimings)
   } catch (error) {
     const message = `An error occurred while creating target timings for planId ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G7001'))
   }
 }
@@ -529,7 +543,7 @@ export const getIntentsForTreatments = (
   const factorLevelsToIntentsReducer = (currentIntents, levelDetails) =>
     createIntentsFromDetails(currentIntents, levelDetails, relevantProperties, timingCodeMap,
       timingUomMap)
-  const intentsForTreatments = sortedTreatments.flatMap((treatment) => {
+  return sortedTreatments.flatMap((treatment) => {
     const allIntents = treatment.factorLevels.reduce(factorLevelsToIntentsReducer, [{}])
     const uniqueIntents = collapseIntents(allIntents)
     return {
@@ -537,7 +551,12 @@ export const getIntentsForTreatments = (
       treatmentId: treatment.treatmentId,
     }
   })
-  return intentsForTreatments
+}
+
+const assignGroupNumber = (chemicals, groupNumber) => {
+  chemicals.forEach((chemical) => {
+    chemical.chemicalGroupNumber = groupNumber
+  })
 }
 
 const getUniqueChemicalGroups = (uniqueChemicalGroups, chemicals) => {
@@ -545,19 +564,13 @@ const getUniqueChemicalGroups = (uniqueChemicalGroups, chemicals) => {
     isEqual(chemicalGroup, chemicals))
   if (matchingIndex === -1) {
     const groupCopy = cloneDeep(chemicals)
-    const groupNumber = uniqueChemicalGroups.length + 1
-    chemicals.forEach((chemical) => {
-      chemical.chemicalGroupNumber = groupNumber
-    })
+    assignGroupNumber(chemicals, uniqueChemicalGroups.length + 1)
     return [
       ...uniqueChemicalGroups,
       groupCopy,
     ]
   }
-  const groupNumber = matchingIndex + 1
-  chemicals.forEach((chemical) => {
-    chemical.chemicalGroupNumber = groupNumber
-  })
+  assignGroupNumber(chemicals, matchingIndex + 1)
   return uniqueChemicalGroups
 }
 
@@ -644,4 +657,56 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   return { planId }
 }
 
-export default createAndSyncChemApPlanFromExperiment
+const getIntentAssociationsByExperimentId = async (experimentId, header, requestId) => {
+  try {
+    const { body: planAssociations } = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/plan-associations?externalEntity=experiment&externalEntityId=${experimentId}`, header)
+    const planId = planAssociations[0]?.planId
+    const { body: intentAssociations } = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/intent-associations?planId=${planId}`, header)
+    return intentAssociations
+  } catch (error) {
+    const message = `An error occurred while retrieving chemAp details for experiment ${experimentId}`
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
+    throw AppError.internalServerError(message, undefined, getFullErrorCode('1GC001'))
+  }
+}
+
+const createSetEntryAssociations = (treatmentAssociations, experimentalUnits) =>
+  experimentalUnits.flatMap(unit => {
+    const matchingTreatmentAssociations = treatmentAssociations.filter(assoc =>
+      Number(assoc.externalEntityId) === unit.treatment_id)
+    return matchingTreatmentAssociations.map(assoc => ({
+      intentId: assoc.intentId,
+      externalEntity: 'set entry',
+      externalEntityId: unit.set_entry_id.toString(),
+      isSource: false,
+    }))
+  })
+
+export const addSetAssociationsToChemAP = async ({ experimentId }, context) => {
+  const header = await OAuthUtil.getAuthorizationHeaders()
+  const [
+    experimentalUnits,
+    intentAssociations,
+  ] = await Promise.all([
+    dbRead.unit.findAllByExperimentId(experimentId),
+    getIntentAssociationsByExperimentId(experimentId, header, context.requestId),
+  ])
+  const treatmentAssociations = intentAssociations.filter(assoc => assoc.externalEntity === 'treatment' && assoc.isSource)
+  const existingSetEntryAssociations = intentAssociations.filter(assoc => assoc.externalEntity === 'set entry' && !assoc.isSource)
+    .map(assoc => ({
+      intentId: assoc.intentId,
+      externalEntity: assoc.externalEntity,
+      externalEntityId: assoc.externalEntityId,
+      isSource: assoc.isSource,
+    }))
+  const setEntryAssociations = createSetEntryAssociations(treatmentAssociations, experimentalUnits)
+
+  const newSetEntryAssociations = differenceWith(setEntryAssociations,
+    existingSetEntryAssociations, isEqual)
+
+  if (newSetEntryAssociations.length > 0) {
+    const headers = [...header, { headerName: 'username', headerValue: context.userId }]
+    const message = `An error occurred while trying to associate intents to set entries for experiment ${experimentId}`
+    await sendApiPostRequest('/intent-associations', headers, newSetEntryAssociations, message, '1GB001', context.requestId)
+  }
+}

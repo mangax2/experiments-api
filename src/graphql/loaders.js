@@ -107,8 +107,6 @@ function createLoaders() {
   const analysisModelByIdLoader = createDataLoader(dbRead.analysisModel.batchFindByExperimentIds)
   const unitsByBlockIdsLoader = createDataLoader(dbRead.unit.batchFindByBlockIds)
   const unitsByLocationBlockIdsLoader = createDataLoader(dbRead.unit.batchFindByLocationBlockIds)
-  const treatmentVariableLevelDetailsLoader =
-    createDataLoader(dbRead.treatmentVariableLevelDetails.batchFind)
   const treatmentVariableLevelFlatDetailsLoader =
     createDataLoader(dbRead.treatmentVariableLevelFlatDetails.batchFind)
 
@@ -210,7 +208,6 @@ function createLoaders() {
     unitSpecDetailByExperimentIds: unitSpecDetailByExperimentIdLoader,
     analysisModel: analysisModelByIdLoader,
     locationAssociationByExperimentId: locationAssociationByExperimentIdsLoader,
-    treatmentVariableLevelDetails: treatmentVariableLevelDetailsLoader,
     treatmentVariableLevelFlatDetails: treatmentVariableLevelFlatDetailsLoader,
   }
 }

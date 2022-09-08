@@ -3356,6 +3356,56 @@
           }
         }
       }
+    },
+    "/chemAP-sync/set-entry-associations": {
+      "post": {
+        "summary": "Assign set entry associations to chemical application plan intents",
+        "description": "Creates intent associations on the chemical application plan associated to the experiment for the set entries belonging to that experiment.",
+        "operationId": "chemApSyncSetEntryAssociations",
+        "tags": ["ChemAP"],
+        "produces": ["application/json"],
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "ChemApSyncBody",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChemApSyncPayload"
+            }
+          },
+          {
+            "name": "username",
+            "description": "A required header for entitlement check.",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid body",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {

@@ -1,7 +1,6 @@
 import kafkaConfig from '../../configs/kafkaConfig'
 import { dbWrite } from '../../../src/db/DbManager'
 import { mock, mockResolve, mockReject } from '../../jestUtil'
-import AvroUtil from '../../../src/services/utility/AvroUtil'
 import { sendKafkaNotification } from '../../../src/decorators/notifyChanges'
 
 jest.mock('kafka-node')
@@ -47,32 +46,26 @@ describe('SetsChangesListener', () => {
       kafkaConfig.topics = { product360OutgoingTopic: 'outgoingTopic' }
       kafkaConfig.schema = { product360Outgoing: 'outgoing' }
 
-      test('converts data from avro to json and calls clearSet', () => {
+      test('calls clearSet', () => {
         const message = {
-          resource_id: 123,
-          event_category: 'delete',
-          time: '123',
+          id: 123,
+          actionType: 'D',
         }
-
-        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve([])
         target.consumer = {}
 
-        return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
+        return target.dataHandler([{ value: JSON.stringify(message), offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
         })
       })
 
-      test('converts data from avro to json and calls clearSet that returns data', () => {
+      test('calls clearSet that returns data', () => {
         const message = {
-          resource_id: 123,
-          event_category: 'delete',
-          time: '123',
+          id: 123,
+          actionType: 'D',
         }
-
-        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve([{ experiment_id: 1 }])
@@ -80,19 +73,16 @@ describe('SetsChangesListener', () => {
         kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
         kafkaConfig.schema = { product360Outgoing: 123 }
 
-        return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
+        return target.dataHandler([{ value: JSON.stringify(message), offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
         })
       })
 
-      test('converts data from avro to json and calls clearSet that has no return data', () => {
+      test('calls clearSet that has no return data', () => {
         const message = {
-          resource_id: 123,
-          event_category: 'delete',
-          time: '123',
+          id: 123,
+          actionType: 'D',
         }
-
-        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockResolve(null)
@@ -100,20 +90,17 @@ describe('SetsChangesListener', () => {
         kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
         kafkaConfig.schema = { product360Outgoing: 123 }
 
-        return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
+        return target.dataHandler([{ value: JSON.stringify(message), offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
           expect(sendKafkaNotification).not.toHaveBeenCalled()
         })
       })
 
-      test('converts data from avro to json but fails to clear set', () => {
+      test('fails to clear set', () => {
         const message = {
-          resource_id: 123,
-          event_category: 'delete',
-          time: '123',
+          id: 123,
+          actionType: 'D',
         }
-
-        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mockReject(new Error('error'))
@@ -121,7 +108,7 @@ describe('SetsChangesListener', () => {
         kafkaConfig.topics = { product360OutgoingTopic: 'topic1' }
         kafkaConfig.schema = { product360Outgoing: 123 }
 
-        return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(null, (err) => {
+        return target.dataHandler([{ value: JSON.stringify(message), offset: 1 }], 'topic', 'partition').then(null, (err) => {
           expect(target.clearSet).toHaveBeenCalledWith(123)
           expect(err.message).toEqual('error')
         })
@@ -129,18 +116,15 @@ describe('SetsChangesListener', () => {
 
       test('calls nothing if event is not delete', () => {
         const message = {
-          resource_id: 123,
-          event_category: 'update',
-          time: '123',
+          id: 123,
+          actionType: 'U',
         }
-
-        const serializedMessage = AvroUtil.serializeKafkaAvroMsg(message, 777)
 
         const target = new SetsChangesListener()
         target.clearSet = mock()
         target.consumer = {}
 
-        return target.dataHandler([{ value: serializedMessage, offset: 1 }], 'topic', 'partition').then(() => {
+        return target.dataHandler([{ value: JSON.stringify(message), offset: 1 }], 'topic', 'partition').then(() => {
           expect(target.clearSet).not.toHaveBeenCalled()
         })
       })

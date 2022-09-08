@@ -35,25 +35,12 @@ class SetsChangesListener {
   }
 
   dataHandler = messageSet => Promise.all(_.map(messageSet, (m) => {
-    const message = m.value
+    const message = m.value.toString('utf8')
+    console.info(m.topic, m.partition, m.offset, message)
 
-    console.info(m.topic, m.partition, m.offset)
-    const type = avro.Type.forSchema({
-      type: 'record',
-      fields: [
-        { name: 'resource_id', type: 'int' },
-        { name: 'event_category', type: 'string' },
-        { name: 'time', type: 'string' },
-      ],
-    })
-    // TODO: Pull this out into the AvroUtil so that it can be properly mocked the next
-    // time we consume an AVRO topic. As it is, our unit tests for this currently rely on
-    // the AvroUtil class to even test this function.
-    const data = type.fromBuffer(message.slice(5))
-    const eventCategory = data.event_category
-
-    if (eventCategory === 'delete') {
-      const setId = data.resource_id
+    const setChanges = JSON.parse(message)
+    if (setChanges.actionType === 'D') {
+      const setId = setChanges.id
       return this.clearSet(setId).then((setClearResults) => {
         if (!_.isNil(setClearResults)) {
           console.info(`Successfully cleared SetId: ${setId} and related set entry ids`)

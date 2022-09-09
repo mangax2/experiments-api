@@ -37,9 +37,9 @@ class SetsChangesListener {
     const message = m.value.toString('utf8')
     console.info(m.topic, m.partition, m.offset, message)
 
-    const setChanges = JSON.parse(message)
-    if (setChanges.actionType === 'D') {
-      const setId = setChanges.id
+    const setChange = JSON.parse(message)
+    if (setChange.actionType === 'D') {
+      const setId = setChange.id
       return this.clearSet(setId).then((setClearResults) => {
         if (!_.isNil(setClearResults)) {
           console.info(`Successfully cleared SetId: ${setId} and related set entry ids`)

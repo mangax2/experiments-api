@@ -156,6 +156,8 @@ export default {
   ExperimentalSet: {
     groupsJSON: (entity, args, context) =>
       context.loaders.groupsJsonsBySetIds.load(entity.setId),
+    treatments: (entity, args, context) =>
+      context.loaders.treatmentBySetIds.load([entity.setId]),
     setEntries: (entity, args, context) =>
       context.loaders.unitsBySetId.load([entity.setId]),
   },

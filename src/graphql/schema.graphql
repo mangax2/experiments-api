@@ -106,6 +106,7 @@ type ExperimentalSet {
   experimentId: Int
   refGroupTypeId: Int
   setId: Int
+  treatments: [Treatment]
   groupValues: [GroupValue]
   groupsJSON: JSON
   setEntries: [ExperimentalUnit]

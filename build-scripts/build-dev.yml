@@ -1,6 +1,12 @@
 # Do not change version. This is the version of aws buildspec, not the version of your buildspec file.
 version: 0.2
 
+env:
+  parameter-store:
+    SONARQUBE_TOKEN: "/CodeBuild/sonar/token"
+    SONARQUBE_ENDPOINT: "/CodeBuild/sonar/endpoint"
+    SONARQUBE_SCANNER_PACKAGE_URL: "/CodeBuild/sonar/scanner-package-url"
+
 phases:
   install:
     runtime-versions:
@@ -13,6 +19,13 @@ phases:
       - npm ci
       - echo Running tests
       - npm run testCoverage
+      - echo Uploading to SonarQube for SAST analysis
+      - wget $SONARQUBE_SCANNER_PACKAGE_URL -O sonar-scanner.zip
+      # We use this way of unzipping, because the zip contains a root folder whose name isn't the same as the zip. So this just makes life easier.
+      - unzip -d sonar-scanner sonar-scanner.zip && mv sonar-scanner/*/* sonar-scanner
+      - export BASE_DIR=$(pwd)
+      - export PATH=$PATH:$BASE_DIR/sonar-scanner/bin/
+      - sonar-scanner -Dsonar.host.url=$SONARQUBE_ENDPOINT -Dsonar.login=$SONARQUBE_TOKEN
   build:
     commands:
       - echo Build started on `date`

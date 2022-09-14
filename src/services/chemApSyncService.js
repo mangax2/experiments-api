@@ -1,7 +1,11 @@
 import {
+  cloneDeep,
+  differenceWith,
   groupBy,
   isEqual,
+  omit,
   sortBy,
+  uniq,
   uniqWith,
 } from 'lodash'
 import { dbRead } from '../db/DbManager'
@@ -16,14 +20,43 @@ const { getFullErrorCode } = require('@monsantoit/error-decorator')()
 
 const qandaTimingCode = 'APP_TIM'
 const qandaAppRateTag = 'APP_RATE'
-const chemicalQAndATags = [qandaAppRateTag]
-const chemicalQAndACodes = [qandaTimingCode, 'APP_MET']
+const qandaAppMethodCode = 'APP_MET'
+const qandaAppVolumeTag = 'APP_VOL'
+const qandaMixSizeTag = 'MIX_SIZE'
+const qandaAppPlacementCode = 'APPPLCT'
+const qandaAppPlacementDetailCode = 'APPPLCDT'
+const qandaAppEquipmentCode = 'APP_EQUIP'
+const chemicalQAndATags = [
+  qandaAppRateTag,
+  qandaAppVolumeTag,
+  qandaMixSizeTag,
+]
+const chemicalQAndACodes = [
+  qandaTimingCode,
+  qandaAppMethodCode,
+  qandaAppPlacementCode,
+  qandaAppPlacementDetailCode,
+  qandaAppEquipmentCode,
+]
+
+export const getErrorFromChemAP = (err) => {
+  if (err.response) {
+    if (err.response.body && !isEqual(err.response.body, {})) {
+      return err.response.body
+    }
+    return `${err.response.statusCode}: ${err.response.text}`
+  }
+  if (err.message) {
+    return err.message
+  }
+  return err
+}
 
 const sendApiPostRequest = async (url, headers, request, errorMsg, errorCode, requestId) => {
   try {
     return await HttpUtil.post(`${apiUrls.chemApAPIUrl}${url}`, headers, request)
   } catch (error) {
-    console.error(`[[${requestId}]] ${errorMsg}`, errorCode, error.message)
+    console.error(`[[${requestId}]] ${errorMsg}`, errorCode, getErrorFromChemAP(error))
     throw AppError.internalServerError(errorMsg, undefined, getFullErrorCode(errorCode))
   }
 }
@@ -41,9 +74,9 @@ const createChemApPlan = async (experiment, owner, headers, requestId) => {
   return result.body.id
 }
 
-const updateChemApPlan = async (planId, experiment, owner, chemicals, headers, requestId) => {
+const updateChemApPlan = async (planId, experiment, owner, intents, headers, requestId) => {
   const request = {
-    chemicals,
+    intents,
     name: experiment.name,
     owners: owner.user_ids,
     ownerGroups: owner.group_ids,
@@ -53,7 +86,7 @@ const updateChemApPlan = async (planId, experiment, owner, chemicals, headers, r
     return await HttpUtil.put(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers, request)
   } catch (error) {
     const message = `An error occurred to update a chemAp plan: ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G8001'))
   }
 }
@@ -73,12 +106,45 @@ const createPlanAssociation = async (planId, experimentId, headers, requestId) =
   await sendApiPostRequest('/plan-associations', headers, request, message, '1G2001', requestId)
 }
 
+const getChemApPlan = async (planId, headers, requestId) => {
+  try {
+    const response = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/plans/${planId}?includeIncomplete=true`, headers)
+    return response.body
+  } catch (error) {
+    const message = `An error occurred while retrieving chemAp plan: ${planId}`
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
+    throw AppError.internalServerError(message, undefined, getFullErrorCode('1GA001'))
+  }
+}
+
+export const createIntentAssociations = async (
+  planId,
+  intentsWithTreatments,
+  headers,
+  requestId,
+) => {
+  const { intents } = await getChemApPlan(planId, headers, requestId)
+  const associations = intents.flatMap(intent => {
+    const matchingIntentTreatment = intentsWithTreatments.find(intentWithTreatment =>
+      intentWithTreatment.intent.intentNumber === intent.intentNumber)
+    return matchingIntentTreatment.treatmentIds.map(treatmentId => ({
+      intentId: intent.id,
+      externalEntity: 'treatment',
+      externalEntityId: treatmentId,
+      isSource: true,
+    }))
+  })
+
+  const message = `An error occurred to create intent associations for plan ${planId}`
+  await sendApiPostRequest('/intent-associations', headers, associations, message, '1G9001', requestId)
+}
+
 const deleteChemApPlan = async (planId, headers, requestId) => {
   try {
     return await HttpUtil.delete(`${apiUrls.chemApAPIUrl}/plans/${planId}`, headers)
   } catch (error) {
     const message = `An error occurred to delete a chemAp plan: ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G3001'))
   }
 }
@@ -91,7 +157,7 @@ const createPlanTimings = async (planId, targetTimings, headers, requestId) => {
     return await HttpUtil.put(`${apiUrls.chemApAPIUrl}/target-timings?planId=${planId}`, headers, targetTimings)
   } catch (error) {
     const message = `An error occurred while creating target timings for planId ${planId}`
-    console.error(`[[${requestId}]] ${message}`, error.message)
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
     throw AppError.internalServerError(message, undefined, getFullErrorCode('1G7001'))
   }
 }
@@ -134,9 +200,9 @@ const validateExperimentChemicalProperties = (factorProperties, requestId) => {
   }
 
   const unclearQAndATags = chemicalQAndATags.filter((tag) =>
-    factorProperties.filter((property) => property.multi_question_tag === tag).length > 1)
+    factorProperties.filter((property) => property.multi_question_tag === tag && property.object_type === 'QandAV3').length > 1)
   const unclearQAndACodes = chemicalQAndACodes.filter((code) =>
-    factorProperties.filter((property) => property.question_code === code).length > 1)
+    factorProperties.filter((property) => property.question_code === code && property.object_type === 'QandAV3').length > 1)
   const unclearQAndAData = [...unclearQAndACodes, ...unclearQAndATags]
 
   if (unclearQAndAData.length > 0) {
@@ -174,94 +240,185 @@ export const getUniqueTimings = (timingProperty, levelDetails, timingUomMap, req
   }))
 }
 
-const applyTimingCodesToChemicals = (baseChemicals, timingDetails, timingCodeMap, timingUomMap) => {
-  const targetTimingCodes = timingDetails.map((detail) =>
-    timingCodeMap.get(getTimingDescriptionFromDetail(detail, timingUomMap)))
-  return baseChemicals.map((chemical) => ({
-    ...chemical,
-    targetTimingCodes,
-  }))
-}
+const convertQandaDetail = (detail, questionCode) => ({
+  isPlaceholder: detail.value_type === 'placeholder',
+  questionCode: questionCode || detail.question_code,
+  uomCode: detail.uom_code,
+  value: detail.value || detail.text,
+})
 
-const applyDetailRowToChemicals = (
-  baseChemicals,
+const applyDetailRowToIntents = (
+  baseIntents,
+  methodDetail,
+  volumeDetail,
+  mixSizeDetail,
+  equipmentDetail,
+  placementDetail,
+  placementDetailDetail,
   chemicalDetail,
   appRateDetail,
   timingDetail,
   timingCodeMap,
   timingUomMap,
 ) => {
-  if (chemicalDetail) {
-    baseChemicals = baseChemicals.map((chemical) => ({
-      ...chemical,
-      entryType: chemicalDetail.value_type,
-      materialCategory: chemicalDetail.value ? 'catalog' : undefined,
-      materialId: chemicalDetail.value || undefined,
-      placeholder: chemicalDetail.text || undefined,
+  if (methodDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      applicationMethod: convertQandaDetail(methodDetail, qandaAppMethodCode),
     }))
   }
 
-  if (appRateDetail) {
-    baseChemicals = baseChemicals.map((chemical) => ({
-      ...chemical,
-      applicationRate: {
-        questionCode: appRateDetail.question_code,
-        value: appRateDetail.text,
-        uomCode: appRateDetail.uom_code,
-      },
+  if (volumeDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      applicationVolume: convertQandaDetail(volumeDetail),
     }))
   }
 
-  if (timingDetail) {
-    baseChemicals = applyTimingCodesToChemicals(baseChemicals, [timingDetail], timingCodeMap,
-      timingUomMap)
+  if (mixSizeDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      mixSize: convertQandaDetail(mixSizeDetail),
+    }))
   }
-  return baseChemicals
+
+  if (equipmentDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      applicationEquipment: convertQandaDetail(equipmentDetail, qandaAppEquipmentCode),
+    }))
+  }
+
+  if (placementDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      applicationPlacement: convertQandaDetail(placementDetail, qandaAppPlacementCode),
+    }))
+  }
+
+  if (placementDetailDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      applicationPlacementDetails: convertQandaDetail(placementDetailDetail,
+        qandaAppPlacementDetailCode),
+    }))
+  }
+
+  if (chemicalDetail || appRateDetail || timingDetail) {
+    baseIntents.forEach((intent) => {
+      intent.chemicals = intent.chemicals || [{}]
+    })
+
+    if (chemicalDetail) {
+      baseIntents = baseIntents.map((intent) => ({
+        ...intent,
+        chemicals: intent.chemicals.map((chemical) => ({
+          ...chemical,
+          entryType: chemicalDetail.value_type,
+          materialCategory: chemicalDetail.value ? 'catalog' : undefined,
+          materialId: chemicalDetail.value || undefined,
+          placeholder: chemicalDetail.text || undefined,
+        })),
+      }))
+    }
+
+    if (appRateDetail) {
+      baseIntents = baseIntents.map((intent) => ({
+        ...intent,
+        chemicals: intent.chemicals.map((chemical) => ({
+          ...chemical,
+          applicationRate: convertQandaDetail(appRateDetail),
+        })),
+      }))
+    }
+
+    if (timingDetail) {
+      const targetTimingCode =
+        timingCodeMap.get(getTimingDescriptionFromDetail(timingDetail, timingUomMap))
+      baseIntents = baseIntents.map((intent) => ({
+        ...intent,
+        targetTimingCode,
+        chemicals: intent.chemicals.map((chemical) => ({
+          ...chemical,
+          targetTimingCodes: [targetTimingCode],
+        })),
+      }))
+    }
+  }
+
+  return baseIntents
 }
 
-const createChemicalsFromDetails = (
-  baseChemicals,
+const filterByPropertyGenerator = (property) => (detail) =>
+  detail.factor_properties_for_level_id === property?.id
+  && detail.value_type !== 'noTreatment'
+
+const createIntentsFromDetails = (
+  baseIntents,
   details,
   relevantProperties,
   timingCodeMap,
   timingUomMap,
 ) => {
-  const timingDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.timing.id
-      && detail.value_type !== 'noTreatment')
-  const chemicalDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.chemical.id
-      && detail.value_type !== 'noTreatment')
-  const appRateDetails = details.filter((detail) =>
-    detail.factor_properties_for_level_id === relevantProperties.applicationRate.id
-      && detail.value_type !== 'noTreatment')
+  const timingDetails = details.filter(filterByPropertyGenerator(relevantProperties.timing))
+  const chemicalDetails = details.filter(filterByPropertyGenerator(relevantProperties.chemical))
+  const appRateDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationRate))
+  const appMethodDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationMethod))
+  const appVolumeDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationVolume))
+  const mixSizeDetails = details.filter(filterByPropertyGenerator(relevantProperties.mixSize))
+  const appPlacementDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationPlacement))
+  const appPlacementDetailDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationPlacementDetails))
+  const appEquipmentDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.applicationEquipment))
 
-  if (chemicalDetails.length > 1 || appRateDetails.length > 1) {
-    const detailsToLoopThrough = chemicalDetails.length === 0 ? appRateDetails : chemicalDetails
-    return sortBy(detailsToLoopThrough, 'row_number').flatMap((loopingDetail) => {
-      const rowNumber = loopingDetail.row_number
+  const allRowNumbers = uniq([
+    appMethodDetails,
+    appVolumeDetails,
+    mixSizeDetails,
+    appPlacementDetails,
+    appPlacementDetailDetails,
+    appEquipmentDetails,
+    chemicalDetails,
+    appRateDetails,
+    timingDetails,
+  ].filter(array => array.length > 0)
+    .flatMap(array => array.map(detail => detail.row_number)))
+    .sort()
+
+  if (allRowNumbers.length > 0) {
+    return allRowNumbers.flatMap((rowNumber) => {
+      const findByRowNumber = detail => detail.row_number === rowNumber
+      const appMethodDetail = appMethodDetails.find(findByRowNumber)
+      const appVolumeDetail = appVolumeDetails.find(findByRowNumber)
+      const mixSizeDetail = mixSizeDetails.find(findByRowNumber)
+      const appPlacementDetail = appPlacementDetails.find(findByRowNumber)
+      const appPlacementDetailDetail = appPlacementDetailDetails.find(findByRowNumber)
+      const appEquipmentDetail = appEquipmentDetails.find(findByRowNumber)
       const chemicalDetail = chemicalDetails.find((detail) => detail.row_number === rowNumber)
       const appRateDetail = appRateDetails.find((detail) => detail.row_number === rowNumber)
-      const timingDetail = timingDetails.find((detail) => detail.row_number === rowNumber)
+      const timingDetail = timingDetails.find(findByRowNumber)
 
-      return applyDetailRowToChemicals(baseChemicals, chemicalDetail, appRateDetail, timingDetail,
-        timingCodeMap, timingUomMap)
+      return applyDetailRowToIntents(
+        baseIntents,
+        appMethodDetail,
+        appVolumeDetail,
+        mixSizeDetail,
+        appEquipmentDetail,
+        appPlacementDetail,
+        appPlacementDetailDetail,
+        chemicalDetail,
+        appRateDetail,
+        timingDetail,
+        timingCodeMap,
+        timingUomMap)
     })
   }
-  if (chemicalDetails.length === 1 || appRateDetails.length === 1) {
-    const chemicalDetail = chemicalDetails[0]
-    const appRateDetail = appRateDetails[0]
-    const timingDetail = timingDetails[0]
-
-    return applyDetailRowToChemicals(baseChemicals, chemicalDetail, appRateDetail, timingDetail,
-      timingCodeMap, timingUomMap)
-  }
-  if (timingDetails.length > 0) {
-    const sortedTimingDetails = sortBy(timingDetails, 'row_number')
-    return applyTimingCodesToChemicals(baseChemicals, sortedTimingDetails, timingCodeMap,
-      timingUomMap)
-  }
-  return baseChemicals
+  return baseIntents
 }
 
 const createTreatmentsFromCombinationElements = (combinationElements, factorLevelDetailsMap) =>
@@ -276,13 +433,81 @@ const createTreatmentsFromCombinationElements = (combinationElements, factorLeve
     return [
       ...agg,
       {
+        treatmentId: ce.treatment_id,
         treatmentNumber: ce.treatment_number,
         factorLevels: [factorLevel],
       },
     ]
   }, [])
 
-export const getChemicalsWithGroups = (
+const collapseChemicals = (intent) => {
+  const chemicals = intent.chemicals || []
+  const uniqueChemicals = chemicals.reduce((chemicalArray, chemical) => {
+    const matchedChemical = chemicalArray.find(uniqueChemical =>
+      isEqual(omit(uniqueChemical, ['targetTimingCodes']), omit(chemical, ['targetTimingCodes'])))
+    if (matchedChemical) {
+      matchedChemical.targetTimingCodes = [
+        ...(matchedChemical.targetTimingCodes),
+        ...(chemical.targetTimingCodes),
+      ]
+      return chemicalArray
+    }
+    return [
+      ...chemicalArray,
+      chemical,
+    ]
+  }, [])
+  uniqueChemicals.forEach((chemical) => {
+    chemical.targetTimingCodes = uniq(chemical.targetTimingCodes)
+  })
+  intent.chemicals = uniqueChemicals
+}
+
+const applyTimingsToChemicalsAcrossIntents = (intents) => {
+  const chemicals = intents.flatMap(intent => intent.chemicals || [])
+    .reduce((chemicalArray, chemical) => {
+      const matchedChemical = chemicalArray.find(uniqueChemical =>
+        isEqual(omit(uniqueChemical.key, ['targetTimingCodes']), omit(chemical, ['targetTimingCodes'])))
+      if (matchedChemical) {
+        matchedChemical.chemicals.push(chemical)
+        return chemicalArray
+      }
+      return [
+        ...chemicalArray,
+        {
+          key: chemical,
+          chemicals: [chemical],
+        },
+      ]
+    }, [])
+  chemicals.forEach((chemicalSet) => {
+    const targetTimingCodes = uniq(chemicalSet.chemicals.flatMap(chemical =>
+      chemical.targetTimingCodes || []))
+    chemicalSet.chemicals.forEach((chemical) => {
+      chemical.targetTimingCodes = targetTimingCodes
+    })
+  })
+}
+
+const collapseIntents = (intents) => {
+  const uniqueIntents = intents.reduce((intentArray, intent) => {
+    const matchedIntent = intentArray.find(uniqueIntent =>
+      isEqual(omit(uniqueIntent, ['chemicals']), omit(intent, ['chemicals'])))
+    if (matchedIntent) {
+      matchedIntent.chemicals = [...(matchedIntent.chemicals), ...(intent.chemicals)]
+      return intentArray
+    }
+    return [
+      ...intentArray,
+      intent,
+    ]
+  }, [])
+  uniqueIntents.forEach(collapseChemicals)
+  applyTimingsToChemicalsAcrossIntents(uniqueIntents)
+  return uniqueIntents
+}
+
+export const getIntentsForTreatments = (
   factorLevelDetails,
   factorPropertyData,
   combinationElements,
@@ -297,27 +522,86 @@ export const getChemicalsWithGroups = (
     factorLevelDetailsMap)
   const sortedTreatments = sortBy(treatments, 'treatmentNumber')
 
-  const applicationRateProperty = factorPropertyData.find((prop) =>
-    prop.multi_question_tag === qandaAppRateTag)
+  const findByQandaCode = qandaCode => factorPropertyData.find((prop) =>
+    prop.question_code === qandaCode && prop.object_type === 'QandAV3')
+  const findByQandaTag = qandaTag => factorPropertyData.find((prop) =>
+    prop.multi_question_tag === qandaTag && prop.object_type === 'QandAV3')
   const chemicalProperty = factorPropertyData.find((property) =>
     property.object_type === 'Catalog' && property.material_type === 'CHEMICAL')
   const relevantProperties = {
-    applicationRate: applicationRateProperty,
+    applicationEquipment: findByQandaCode(qandaAppEquipmentCode),
+    applicationMethod: findByQandaCode(qandaAppMethodCode),
+    applicationPlacement: findByQandaCode(qandaAppPlacementCode),
+    applicationPlacementDetails: findByQandaCode(qandaAppPlacementDetailCode),
+    applicationRate: findByQandaTag(qandaAppRateTag),
+    applicationVolume: findByQandaTag(qandaAppVolumeTag),
     chemical: chemicalProperty,
+    mixSize: findByQandaTag(qandaMixSizeTag),
     timing: timingProperty,
   }
 
-  const factorLevelsToChemicalsReducer = (currentChemicals, levelDetails) =>
-    createChemicalsFromDetails(currentChemicals, levelDetails, relevantProperties, timingCodeMap,
+  const factorLevelsToIntentsReducer = (currentIntents, levelDetails) =>
+    createIntentsFromDetails(currentIntents, levelDetails, relevantProperties, timingCodeMap,
       timingUomMap)
-  const chemicalsForTreatments = sortedTreatments.map((treatment) =>
-    treatment.factorLevels.reduce(factorLevelsToChemicalsReducer, [{}]))
+  return sortedTreatments.flatMap((treatment) => {
+    const allIntents = treatment.factorLevels.reduce(factorLevelsToIntentsReducer, [{}])
+    const uniqueIntents = collapseIntents(allIntents)
+    return {
+      intents: uniqueIntents,
+      treatmentId: treatment.treatmentId,
+    }
+  })
+}
 
-  const uniqueChemicalGroups = uniqWith(chemicalsForTreatments, isEqual)
-  return uniqueChemicalGroups.flatMap((chemicals, index) => chemicals.map((chemical) => {
-    chemical.chemicalGroupNumber = index + 1
-    return chemical
-  }))
+const assignGroupNumber = (chemicals, groupNumber) => {
+  chemicals.forEach((chemical) => {
+    chemical.chemicalGroupNumber = groupNumber
+  })
+}
+
+const getUniqueChemicalGroups = (uniqueChemicalGroups, chemicals) => {
+  const matchingIndex = uniqueChemicalGroups.findIndex(chemicalGroup =>
+    isEqual(chemicalGroup, chemicals))
+  if (matchingIndex === -1) {
+    const groupCopy = cloneDeep(chemicals)
+    assignGroupNumber(chemicals, uniqueChemicalGroups.length + 1)
+    return [
+      ...uniqueChemicalGroups,
+      groupCopy,
+    ]
+  }
+  assignGroupNumber(chemicals, matchingIndex + 1)
+  return uniqueChemicalGroups
+}
+
+export const getUniqueIntentsWithTreatment = (intentsByTreatment) => {
+  const chemicalsByTreatment = intentsByTreatment.map(intentTreatments =>
+    intentTreatments.intents.flatMap(intent => intent.chemicals))
+  chemicalsByTreatment.reduce(getUniqueChemicalGroups, [])
+
+  const uniqueIntentsWithTreatmentNumber = []
+  intentsByTreatment.forEach((treatmentIntents) => {
+    treatmentIntents.intents.forEach((intent) => {
+      const matchingIntent = uniqueIntentsWithTreatmentNumber.find(intentGroup =>
+        isEqual(intentGroup.intent, intent))
+      if (matchingIntent) {
+        matchingIntent.treatmentIds = [
+          ...(matchingIntent.treatmentIds),
+          treatmentIntents.treatmentId,
+        ]
+      } else {
+        uniqueIntentsWithTreatmentNumber.push({
+          intent,
+          treatmentIds: [treatmentIntents.treatmentId],
+        })
+      }
+    })
+  })
+  uniqueIntentsWithTreatmentNumber.forEach((intentGroup, index) => {
+    intentGroup.intent.intentNumber = index + 1
+  })
+
+  return uniqueIntentsWithTreatmentNumber
 }
 
 export const getTimingQuestionUoms = async () => {
@@ -351,8 +635,10 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   const uniqueTimings = getUniqueTimings(timingProperty, factorLevelDetailsData, timingUomMap,
     context.requestId)
 
-  const chemicalsWithGroups = getChemicalsWithGroups(factorLevelDetailsData, factorPropertyData,
+  const intentsForTreatments = getIntentsForTreatments(factorLevelDetailsData, factorPropertyData,
     combinationElements, uniqueTimings, timingUomMap, timingProperty)
+  const uniqueIntentsWithTreatment = getUniqueIntentsWithTreatment(intentsForTreatments)
+  const uniqueIntents = uniqueIntentsWithTreatment.map(intentGroup => intentGroup.intent)
 
   const planId = await createChemApPlan(experimentData, ownerData, headers, context.requestId)
   try {
@@ -360,8 +646,9 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
       createPlanAssociation(planId, body.experimentId, headers, context.requestId),
       createPlanTimings(planId, uniqueTimings, headers, context.requestId),
     ])
-    await updateChemApPlan(planId, experimentData, ownerData, chemicalsWithGroups, headers,
+    await updateChemApPlan(planId, experimentData, ownerData, uniqueIntents, headers,
       context.requestId)
+    await createIntentAssociations(planId, uniqueIntentsWithTreatment, headers, context.requestId)
   } catch (error) {
     await deleteChemApPlan(planId, headers, context.requestId)
     throw (error)
@@ -370,4 +657,56 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
   return { planId }
 }
 
-export default createAndSyncChemApPlanFromExperiment
+const getIntentAssociationsByExperimentId = async (experimentId, header, requestId) => {
+  try {
+    const { body: planAssociations } = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/plan-associations?externalEntity=experiment&externalEntityId=${experimentId}`, header)
+    const planId = planAssociations[0]?.planId
+    const { body: intentAssociations } = await HttpUtil.getWithRetry(`${apiUrls.chemApAPIUrl}/intent-associations?planId=${planId}`, header)
+    return intentAssociations
+  } catch (error) {
+    const message = `An error occurred while retrieving chemAp details for experiment ${experimentId}`
+    console.error(`[[${requestId}]] ${message}`, getErrorFromChemAP(error))
+    throw AppError.internalServerError(message, undefined, getFullErrorCode('1GC001'))
+  }
+}
+
+const createSetEntryAssociations = (treatmentAssociations, experimentalUnits) =>
+  experimentalUnits.filter((unit) => unit.set_entry_id).flatMap(unit => {
+    const matchingTreatmentAssociations = treatmentAssociations.filter(assoc =>
+      Number(assoc.externalEntityId) === unit.treatment_id)
+    return matchingTreatmentAssociations.map(assoc => ({
+      intentId: assoc.intentId,
+      externalEntity: 'set entry',
+      externalEntityId: unit.set_entry_id.toString(),
+      isSource: false,
+    }))
+  })
+
+export const addSetAssociationsToChemAP = async ({ experimentId }, context) => {
+  const header = await OAuthUtil.getAuthorizationHeaders()
+  const [
+    experimentalUnits,
+    intentAssociations,
+  ] = await Promise.all([
+    dbRead.unit.findAllByExperimentId(experimentId),
+    getIntentAssociationsByExperimentId(experimentId, header, context.requestId),
+  ])
+  const treatmentAssociations = intentAssociations.filter(assoc => assoc.externalEntity === 'treatment' && assoc.isSource)
+  const existingSetEntryAssociations = intentAssociations.filter(assoc => assoc.externalEntity === 'set entry' && !assoc.isSource)
+    .map(assoc => ({
+      intentId: assoc.intentId,
+      externalEntity: assoc.externalEntity,
+      externalEntityId: assoc.externalEntityId,
+      isSource: assoc.isSource,
+    }))
+  const setEntryAssociations = createSetEntryAssociations(treatmentAssociations, experimentalUnits)
+
+  const newSetEntryAssociations = differenceWith(setEntryAssociations,
+    existingSetEntryAssociations, isEqual)
+
+  if (newSetEntryAssociations.length > 0) {
+    const headers = [...header, { headerName: 'username', headerValue: context.userId }]
+    const message = `An error occurred while trying to associate intents to set entries for experiment ${experimentId}`
+    await sendApiPostRequest('/intent-associations', headers, newSetEntryAssociations, message, '1GB001', context.requestId)
+  }
+}

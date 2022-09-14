@@ -29,20 +29,6 @@ type Block {
   units: [ExperimentalUnit]
 }
 
-type ClusterComposite {
-  text: String
-  value: ID
-  label: String
-  objectType: String
-  questionCode: String
-  uomCode: String
-  catalogType: String
-  isPlaceholder: Boolean
-  valueType: String
-  multiQuestionTag: String
-  items: [ClusterComposite]
-}
-
 type CombinationElement {
   id: Int
   treatmentVariableLevelId: Int
@@ -88,8 +74,6 @@ type Experiment {
   responseVariables: [ResponseVariable]
   designSpecifications: [DesignSpecificationDetail]
   treatmentVariables: [TreatmentVariable]
-  groups: [Group]
-  groupsJSON: JSON
   owners: Owner
   treatments: [Treatment]
   unitSpecificationDetails: [UnitSpecificationDetail]
@@ -107,8 +91,6 @@ type ExperimentalSet {
   refGroupTypeId: Int
   setId: Int
   treatments: [Treatment]
-  groupValues: [GroupValue]
-  groupsJSON: JSON
   setEntries: [ExperimentalUnit]
   block: String
   blockId: Int
@@ -167,27 +149,12 @@ type TreatmentVariable {
 
 type TreatmentVariableLevel {
   id: Int
-  value: TreatmentVariableLevelValue
-  valueJSON: JSON
   treatmentVariableId: Int
   auditInfo: AuditInfo
   treatmentVariable: TreatmentVariable
   nestedLevels: [TreatmentVariableLevel]
   associatedLevels: [TreatmentVariableLevel]
-  treatmentVariableLevelDetails: [[TreatmentVariableLevelDetail]]
   treatmentVariableLevelFlatDetails: [TreatmentVariableLevelFlatDetail]
-}
-
-type TreatmentVariableLevelDetail {
-  objectType: String
-  label: String
-  questionCode: String
-  multiQuestionTag: String
-  catalogType: String
-  valueType: String
-  text: String,
-  value: String
-  uomCode: String
 }
 
 type TreatmentVariableLevelFlatDetail {
@@ -201,11 +168,6 @@ type TreatmentVariableLevelFlatDetail {
   text: String,
   value: String
   uomCode: String
-}
-
-type TreatmentVariableLevelValue {
-  items: [ClusterComposite]
-  objectType: String
 }
 
 type Group {
@@ -233,6 +195,8 @@ type Owner {
   experimentId: Int
   userIds: [String]
   groupIds: [String]
+  reviewerUserIds: [String]
+  reviewerGroupIds: [String]
   auditInfo: AuditInfo
 }
 
@@ -268,7 +232,6 @@ type Treatment {
   treatmentNumber: Int
   notes: String
   inAllBlocks: Boolean,
-  block: String,
   blockId: Int
   auditInfo: AuditInfo
   combinationElements: [CombinationElement]

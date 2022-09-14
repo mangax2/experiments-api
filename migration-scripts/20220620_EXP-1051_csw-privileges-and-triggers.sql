@@ -1,13 +1,3 @@
-GRANT SELECT ON TABLE unit                                              TO csw_exp_messenger_user;
-GRANT SELECT ON TABLE treatment_block                                   TO csw_exp_messenger_user;
-GRANT SELECT ON TABLE location_association                              TO csw_exp_messenger_user;
-GRANT SELECT ON TABLE location_associations_to_send_to_csw              TO csw_exp_messenger_user;
-GRANT SELECT ON TABLE deleted_location_associations_to_send_to_csw      TO csw_exp_messenger_user;
-
-GRANT DELETE ON TABLE location_associations_to_send_to_csw              TO csw_exp_messenger_user;
-GRANT DELETE ON TABLE deleted_location_associations_to_send_to_csw      TO csw_exp_messenger_user;
-
-
 CREATE TABLE deleted_location_associations_to_send_to_csw (
     id integer not null
 );
@@ -50,3 +40,12 @@ CREATE TRIGGER units_after_delete
     REFERENCING OLD TABLE AS old_table
     FOR EACH STATEMENT
     EXECUTE FUNCTION record_deleted_unit_location_association_ids();
+
+GRANT SELECT ON TABLE unit                                              TO csw_exp_messenger_user;
+GRANT SELECT ON TABLE treatment_block                                   TO csw_exp_messenger_user;
+GRANT SELECT ON TABLE location_association                              TO csw_exp_messenger_user;
+GRANT SELECT ON TABLE location_associations_to_send_to_csw              TO csw_exp_messenger_user;
+GRANT SELECT ON TABLE deleted_location_associations_to_send_to_csw      TO csw_exp_messenger_user;
+
+GRANT DELETE ON TABLE location_associations_to_send_to_csw              TO csw_exp_messenger_user;
+GRANT DELETE ON TABLE deleted_location_associations_to_send_to_csw      TO csw_exp_messenger_user;

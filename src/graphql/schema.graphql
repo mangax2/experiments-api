@@ -90,6 +90,7 @@ type ExperimentalSet {
   experimentId: Int
   refGroupTypeId: Int
   setId: Int
+  treatments: [Treatment]
   setEntries: [ExperimentalUnit]
   block: String
   blockId: Int

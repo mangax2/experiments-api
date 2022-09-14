@@ -152,6 +152,8 @@ export default {
   ExperimentalSet: {
     setEntries: (entity, args, context) =>
       context.loaders.unitsBySetId.load([entity.setId]),
+    treatments: (entity, args, context) =>
+      context.loaders.treatmentBySetIds.load([entity.setId]),
   },
   ExperimentalUnit: {
     treatmentId: entity => (has(entity, 'treatment_id') ? entity.treatment_id : entity.treatmentId),

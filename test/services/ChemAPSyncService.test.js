@@ -63,7 +63,7 @@ describe('ChemApSyncService', () => {
   beforeEach(() => {
     apiUrls.chemApAPIUrl = 'chemApAPIUrl'
     dbRead.experiments.find = mockResolve({ name: 'test' })
-    dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester'], group_ids: [] })
+    dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester1'], group_ids: [] })
     dbRead.factorLevelDetails.findByExperimentId = mockResolve([
       { factor_properties_for_level_id: 6, text: '1' },
       { factor_properties_for_level_id: 6, text: '2' },
@@ -105,6 +105,15 @@ describe('ChemApSyncService', () => {
     expect(AppError.badRequest).toHaveBeenCalledWith('The experiment does not have any chemical data', undefined, '1G5001')
   })
 
+  test('should fail when current user is not owner of experiment', async () => {
+    dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester999'], group_ids: [] })
+    try {
+      await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+    expect(AppError.badRequest).toHaveBeenCalledWith('User must be an owner of the Experiment to create a Chemical Application Plan', undefined, '3D8001')
+  })
+
   test('should fail when experiment has duplicate QandA properties', async () => {
     dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
       { object_type: 'Catalog', material_type: 'CHEMICAL' },
@@ -139,7 +148,7 @@ describe('ChemApSyncService', () => {
     expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/plans',
       [{ headerName: 'username', headerValue: 'tester1' }],
       {
-        isTemplate: false, name: 'test', ownerGroups: [], owners: ['tester'],
+        isTemplate: false, name: 'test', ownerGroups: [], owners: ['tester1'],
       })
   })
 
@@ -150,7 +159,7 @@ describe('ChemApSyncService', () => {
     expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/plans',
       [{ headerName: 'username', headerValue: 'tester1' }],
       {
-        isTemplate: false, name: 'test', ownerGroups: [], owners: ['tester'],
+        isTemplate: false, name: 'test', ownerGroups: [], owners: ['tester1'],
       })
     expect(HttpUtil.post).toHaveBeenCalledWith('chemApAPIUrl/plan-associations',
       [{ headerName: 'username', headerValue: 'tester1' }],
@@ -166,7 +175,7 @@ describe('ChemApSyncService', () => {
     expect(result).toEqual({ planId: 123 })
   })
 
-  test('when chemAp fails to be created, an error is throw', async () => {
+  test('when chemAp fails to be created, an error is thrown', async () => {
     HttpUtil.post.mockReturnValueOnce(Promise.reject(new Error('test message')))
     try {
       await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })

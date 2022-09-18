@@ -175,6 +175,16 @@ class OwnerValidator extends SchemaValidator {
       return Promise.resolve()
     })
   }
+
+  @setErrorCode('3D8000')
+  chemApOwnerCheck = (ownerIds, userId) => {
+    if (!ownerIds.includes(userId)) {
+      const errorMessage = 'User must be an owner of the Experiment to create a Chemical Application Plan'
+      return Promise.reject(AppError.badRequest(errorMessage, undefined, getFullErrorCode('3D8001')))
+    }
+
+    return Promise.resolve()
+  }
 }
 
 module.exports = OwnerValidator

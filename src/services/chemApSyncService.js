@@ -14,6 +14,7 @@ import OAuthUtil from './utility/OAuthUtil'
 import configurator from '../configs/configurator'
 import AppError from './utility/AppError'
 import QuestionsUtil from './utility/QuestionsUtil'
+import OwnerValidator from '../validations/OwnerValidator'
 
 const apiUrls = configurator.get('urls')
 const { getFullErrorCode } = require('@monsantoit/error-decorator')()
@@ -623,6 +624,10 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
     factorLevelDetailsData,
     combinationElements,
   ] = await getExperimentData(body.experimentId, context.requestId)
+
+  const validator = new OwnerValidator()
+  await validator.chemApOwnerCheck(ownerData.user_ids, context.userId)
+
   const questionPromise = getTimingQuestionUoms()
 
   validateExperimentChemicalProperties(factorPropertyData, context.requestId)

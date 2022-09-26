@@ -105,15 +105,6 @@ describe('ChemApSyncService', () => {
     expect(AppError.badRequest).toHaveBeenCalledWith('The experiment does not have any chemical data', undefined, '1G5001')
   })
 
-  test('should fail when current user is not owner of experiment', async () => {
-    dbRead.owner.findByExperimentId = mockResolve({ user_ids: ['tester999'], group_ids: [] })
-    try {
-      await createAndSyncChemApPlanFromExperiment({ experimentId: 1 }, { userId: 'tester1' })
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-    expect(AppError.badRequest).toHaveBeenCalledWith('User must be an owner of the Experiment to create a Chemical Application Plan', undefined, '3D8001')
-  })
-
   test('should fail when experiment has duplicate QandA properties', async () => {
     dbRead.factorPropertiesForLevel.findByExperimentId = mockResolve([
       { object_type: 'Catalog', material_type: 'CHEMICAL' },

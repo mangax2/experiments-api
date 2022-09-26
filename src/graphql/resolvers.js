@@ -38,26 +38,37 @@ export default {
       partial ?
         context.loaders.experimentsByPartialName.load(name) :
         context.loaders.experimentsByName.load(name),
-    // 'null' is passed here because the load function won't take null
-    // and a string is an invalid type for this call, so it's guaranteed to act the way we need
-    getExperimentBySetId: (entity, args, context) => {
-      if (args.setId !== null && args.setId < 1) {
-        throw new Error('Set Id should be greater than 0')
+    getExperimentsInfo: (entity, args, context) => {
+      if (args.criteria === "setId") {
+        if(args.values !== null && args.values[0] < 1) {
+          throw new Error('Set Id should be greater than 0')
+        }
+        return context.loaders.experimentBySetId.load(args.criteria.setId || 'null')
       }
-      return context.loaders.experimentBySetId.load(args.setId || 'null')
+      else if(args.criteria === "experimentId") {
+        if(args.acceptType === "experiments") {
+          return context.loaders.experiments.load(args.values[0])
+        }
+        else {
+          return context.loaders.templates.load(args.values[0])
+        }
+      }
+      else if(args.criteria === "name") {
+        context.loaders.experimentsByName.load(args.values[0])
+      }
+      else if(args.criteria === "owner") {
+        context.loaders.experimentsByCriteria.load(
+          { criteria: "owner", value: args.value[0], isTemplate: args.acceptType === "templates" })
+      }
+      else {
+        throw new Error('Criteria must be specified')
+      }
     },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
     getTemplatesByCriteria: (entity, args, context) =>
       context.loaders.experimentsByCriteria.load(
         { criteria: args.criteria, value: args.value, isTemplate: true }),
-    // -1 is passed here because these loaders load all experiments/templates,
-    // so the ID is irrelevant.
-    // It is specified because data loader requires an ID to associate with cached results.
-    getAllExperiments: (entity, args, context) =>
-      context.loaders.experiments.load(-1),
-    getAllTemplates: (entity, args, context) =>
-      context.loaders.templates.load(-1),
     getTreatmentVariablesByExperimentId: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(args.experimentId),
     getTreatmentsByExperimentId: (entity, args, context) =>

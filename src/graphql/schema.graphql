@@ -39,6 +39,14 @@ type CombinationElement {
 
 enum Criteria {
   owner
+  setId
+  experimentId
+  name
+}
+
+enum AcceptType {
+  experiments
+  templates
 }
 
 type ResponseVariable {
@@ -128,6 +136,7 @@ type ExperimentInfo {
   auditInfo: AuditInfo
   owners: Owner
   analysisModel: AnalysisModel
+  isTemplate: Boolean
 }
 
 type Tag {
@@ -205,10 +214,8 @@ type Query {
   getExperimentsByIds(ids: [Int!]!, allowTemplate: Boolean): [Experiment]
   getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!, partial: Boolean): [Experiment]
-  getExperimentBySetId(setId: Int): [ExperimentInfo]
+  getExperimentsInfo(values: [Int!], criteria: Criteria, acceptType: [AcceptType!]): [ExperimentInfo]
   getTemplateById(id: Int!): Experiment
-  getAllExperiments: [ExperimentInfo]
-  getAllTemplates: [ExperimentInfo]
   getTemplatesByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getTreatmentVariablesByExperimentId(experimentId: Int!): [TreatmentVariable]
   getTreatmentsByExperimentId(experimentId: Int!): [Treatment]

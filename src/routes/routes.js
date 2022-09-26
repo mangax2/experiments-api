@@ -324,6 +324,7 @@ router.post('/deactivations', (req, res, next) => new ExperimentalUnitService().
 
 router.post('/chemAP-sync', async (req, res, next) => {
   try {
+    await new SecurityService().permissionsCheck(req.body.experimentId, req.context, false)
     await chemApSyncInputSchemaValidate(req.body)
     const value = await createAndSyncChemApPlanFromExperiment(req.body, req.context)
     res.json(value)

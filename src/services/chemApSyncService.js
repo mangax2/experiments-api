@@ -623,7 +623,6 @@ export const createAndSyncChemApPlanFromExperiment = async (body, context) => {
     factorLevelDetailsData,
     combinationElements,
   ] = await getExperimentData(body.experimentId, context.requestId)
-
   const questionPromise = getTimingQuestionUoms()
 
   validateExperimentChemicalProperties(factorPropertyData, context.requestId)

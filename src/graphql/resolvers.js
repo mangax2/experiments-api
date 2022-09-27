@@ -39,30 +39,42 @@ export default {
         context.loaders.experimentsByPartialName.load(name) :
         context.loaders.experimentsByName.load(name),
     getExperimentsInfo: (entity, args, context) => {
-      if (args.criteria === "setId") {
-        if(args.values !== null && args.values[0] < 1) {
-          throw new Error('Set Id should be greater than 0')
+      const { values, criteria, acceptType } = args
+
+      if (criteria === 'setId') {
+        return Promise.all(
+          uniq(values).map(value => {
+            if (value !== null && value < 1) {
+              throw new Error('Set Id should be greater than 0')
+            }
+            return context.loaders.experimentBySetId.load(value || 'null')
+          }))
+          .then(experiments => compact([].concat(...experiments)))
+      }
+      if (criteria === 'experimentId') {
+        if (!acceptType || acceptType.length === 0) {
+          throw new Error('An accept type [experiments/templates] must be supplied when fetching by experimentId')
         }
-        return context.loaders.experimentBySetId.load(args.criteria.setId || 'null')
+        return Promise.all(
+          uniq(values).map(value => {
+            if (acceptType.length === 2) {
+              return context.loaders.experiment.load({ id: value, allowTemplate: true })
+            }
+            return acceptType[0] === 'experiments' ? context.loaders.experiment.load({ id: value, allowTemplate: false }) : context.loaders.template.load(value)
+          },
+          ))
+          .then(experiments => compact([].concat(...experiments)))
       }
-      else if(args.criteria === "experimentId") {
-        if(args.acceptType === "experiments") {
-          return context.loaders.experiments.load(args.values[0])
+
+        if (!acceptType || acceptType.length === 0) {
+          throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
+        } else if (acceptType.length === 1) {
+          return context.loaders[acceptType[0]].load(-1)
         }
-        else {
-          return context.loaders.templates.load(args.values[0])
-        }
-      }
-      else if(args.criteria === "name") {
-        context.loaders.experimentsByName.load(args.values[0])
-      }
-      else if(args.criteria === "owner") {
-        context.loaders.experimentsByCriteria.load(
-          { criteria: "owner", value: args.value[0], isTemplate: args.acceptType === "templates" })
-      }
-      else {
-        throw new Error('Criteria must be specified')
-      }
+        return Promise.all(
+          [context.loaders[acceptType[0]].load(-1),
+          context.loaders[acceptType[1]].load(-1)])
+          .then(experiments => compact([].concat(...experiments)))
     },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),

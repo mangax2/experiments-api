@@ -3549,10 +3549,6 @@
           "type": "integer",
           "description": "unique id for entity"
         },
-        "isControl": {
-          "type": "boolean",
-          "description": "isControl boolean value to mark a treatment as control"
-        },
         "treatmentNumber": {
           "type": "integer",
           "description": "number of the treatment."
@@ -3593,18 +3589,6 @@
             "$ref": "#/definitions/CompositeTreatmentsCombinationElementGET"
           }
         },
-        "inAllBlocks": {
-          "type": "boolean",
-          "description": "boolean to specify if the treatment is in all blocks."
-        },
-        "block": {
-          "type": "string",
-          "description": "the block that the treatment belongs to."
-        },
-        "blockId": {
-          "type": "integer",
-          "description": "the ID for the block that the treatment belongs to."
-        },
         "blocks": {
           "type": "array",
           "items": {
@@ -3613,10 +3597,6 @@
               "name": {
                 "type": "string",
                 "description": "the block that the treatment belongs to."
-              },
-              "blockId": {
-                "type": "integer",
-                "description": "the ID for the block that the treatment belongs to."
               },
               "numPerRep": {
                 "type": "integer",
@@ -3744,10 +3724,6 @@
         "location": {
           "type": "integer",
           "description": "location number of experimental unit."
-        },
-        "block": {
-          "type": "string",
-          "description": "the block that the experimental unit belongs to."
         }
       }
     },
@@ -3808,14 +3784,6 @@
         "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
-        },
-        "block": {
-          "type": "string",
-          "description": "the block that the experimental unit belongs to."
-        },
-        "blockId": {
-          "type": "integer",
-          "description": "the ID for the block that the experimental unit belongs to."
         },
         "createdDate": {
           "type": "string",
@@ -4156,14 +4124,6 @@
         "set_id": {
           "type": "integer",
           "description": "The Set Id that is associated to the location in the Experiment"
-        },
-        "block": {
-          "type": "string",
-          "description": "the block the set is associated to"
-        },
-        "blockId": {
-          "type": "integer",
-          "description": "the ID for the block that the set is associated to"
         }
       }
     },
@@ -4488,12 +4448,6 @@
               }
             }
           },
-          "block": {
-            "type": "string"
-          },
-          "inAllBlocks": {
-            "type": "boolean"
-          },
           "blocks": {
             "type": "array",
             "items": {
@@ -4501,9 +4455,6 @@
               "properties": {
                 "name": {
                   "type": "string"
-                },
-                "blockId": {
-                  "type": "number"
                 },
                 "numPerRep": {
                   "type": "number"

@@ -261,6 +261,22 @@ const applyDetailRowToIntents = (
   timingCodeMap,
   timingUomMap,
 ) => {
+  if ([
+    methodDetail,
+    volumeDetail,
+    mixSizeDetail,
+    equipmentDetail,
+    placementDetail,
+    placementDetailDetail,
+    chemicalDetail,
+    appRateDetail,
+    timingDetail,
+  ].find(detail => detail?.value_type === 'noTreatment')) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      noTreatment: true,
+    }))
+  }
   if (methodDetail) {
     baseIntents = baseIntents.map((intent) => ({
       ...intent,
@@ -351,7 +367,6 @@ const applyDetailRowToIntents = (
 
 const filterByPropertyGenerator = (property) => (detail) =>
   detail.factor_properties_for_level_id === property?.id
-  && detail.value_type !== 'noTreatment'
 
 const createIntentsFromDetails = (
   baseIntents,
@@ -501,7 +516,7 @@ const collapseIntents = (intents) => {
       ...intentArray,
       intent,
     ]
-  }, [])
+  }, []).filter(intent => !intent.noTreatment)
   uniqueIntents.forEach(collapseChemicals)
   applyTimingsToChemicalsAcrossIntents(uniqueIntents)
   return uniqueIntents

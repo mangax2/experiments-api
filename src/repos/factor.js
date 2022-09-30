@@ -65,7 +65,41 @@ class factorRepo {
   }
 
   @setErrorCode('573000')
-  findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any(`SELECT  f.*, fla.associated_level_id as associatedLevel,
+  json_agg(json_build_object('questionCode',
+    CASE WHEN fpl.multi_question_tag IS NOT NULL THEN
+      fld.question_code
+    ELSE
+      fpl.question_code
+    END,
+    'rowNumber',
+    row_number,
+    'objectType',
+    object_type,
+    'label',
+    label,
+    'multiQuestionTag',
+    multi_question_tag,
+    'catalogType',
+    material_type,
+    'valueType',
+    value_type,
+    'text',
+    text,
+    'value',
+    fld.value,
+    'uomCode',
+    uom_code)) AS json_out
+FROM
+      factor f
+  INNER JOIN factor_properties_for_level fpl ON f.id=fpl.factor_id
+  INNER JOIN factor_level_details fld ON fld.factor_properties_for_level_id = fpl.id
+  INNER JOIN factor_level fl on fl.factor_id=f.id
+  LEFT JOIN factor_level_association fla on fla.nested_level_id=fl.id
+     GROUP  BY fla.associated_level_id,f.id, fl.id
+    
+having
+  f.experiment_id =$1`, experimentId)
 
   @setErrorCode('574000')
   all = () => this.rep.any('SELECT * FROM factor')

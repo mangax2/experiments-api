@@ -39,7 +39,10 @@ export default {
         context.loaders.experimentsByPartialName.load(name) :
         context.loaders.experimentsByName.load(name),
     getExperimentsInfo: (entity, args, context) => {
-      const { values, criteria, acceptType } = args
+      const {
+        values, criteriaValue, criteria, acceptType, first, offset = 0,
+      } = args
+      const desiredRecordCount = first ? first + offset : undefined
 
       if (criteria === 'setId') {
         return Promise.all(
@@ -63,18 +66,33 @@ export default {
             return acceptType[0] === 'experiments' ? context.loaders.experiment.load({ id: value, allowTemplate: false }) : context.loaders.template.load(value)
           },
           ))
-          .then(experiments => compact([].concat(...experiments)))
+          .then(experiments => compact([].concat(...experiments)).slice(offset, desiredRecordCount))
+      }
+      if (criteria === 'name') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        return context.loaders.experimentsByPartialName.load(criteriaValue)
+        .then((experiments) => experiments.slice(offset, desiredRecordCount))
+      }
+      if (criteria === 'owner') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        return context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: false }).then((experiments) => experiments.slice(offset, desiredRecordCount))
       }
 
-        if (!acceptType || acceptType.length === 0) {
-          throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
-        } else if (acceptType.length === 1) {
-          return context.loaders[acceptType[0]].load(-1)
-        }
-        return Promise.all(
-          [context.loaders[acceptType[0]].load(-1),
-          context.loaders[acceptType[1]].load(-1)])
-          .then(experiments => compact([].concat(...experiments)))
+      if (!acceptType || acceptType.length === 0) {
+        throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
+      } else if (acceptType.length === 1) {
+        return context.loaders[acceptType[0]].load(-1)
+      }
+      return Promise.all(
+        [context.loaders[acceptType[0]].load(-1),
+        context.loaders[acceptType[1]].load(-1)])
+        .then(experiments => compact([].concat(...experiments)).slice(offset, desiredRecordCount))
     },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),

@@ -214,7 +214,7 @@ type Query {
   getExperimentsByIds(ids: [Int!]!, allowTemplate: Boolean): [Experiment]
   getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!, partial: Boolean): [Experiment]
-  getExperimentsInfo(values: [Int!], criteria: Criteria, acceptType: [AcceptType!]): [ExperimentInfo]
+  getExperimentsInfo(values: [Int!], criteriaValue: String, criteria: Criteria, acceptType: [AcceptType!], first: Int, offset: Int): [ExperimentInfo]
   getTemplateById(id: Int!): Experiment
   getTemplatesByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getTreatmentVariablesByExperimentId(experimentId: Int!): [TreatmentVariable]

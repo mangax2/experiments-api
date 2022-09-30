@@ -89,7 +89,7 @@ class factorRepo {
     'value',
     fld.value,
     'uomCode',
-    uom_code)) AS json_out
+    uom_code)) AS treatmentVariableLevelDetails
 FROM
       factor f
   INNER JOIN factor_properties_for_level fpl ON f.id=fpl.factor_id

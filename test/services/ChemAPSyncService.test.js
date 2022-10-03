@@ -2191,24 +2191,7 @@ describe('ChemApSyncService', () => {
 
       expect(intents).toEqual([
         {
-          intents: [{
-            chemicals: [
-              {
-                entryType: 'placeholder',
-                placeholder: '1',
-                targetTimingCodes: [],
-              },
-              {
-                applicationRate: {
-                  isPlaceholder: false,
-                  questionCode: 'APP_RATE1',
-                  value: '5',
-                  uomCode: 'uom',
-                },
-                targetTimingCodes: [],
-              },
-            ],
-          }],
+          intents: [],
           treatmentId: 1,
         },
       ])
@@ -2327,6 +2310,253 @@ describe('ChemApSyncService', () => {
             }],
             targetTimingCode: 'A',
           }],
+          treatmentId: 1,
+        },
+      ])
+    })
+
+    test('does not parse any intent from a single variable level row when some data is no treatment', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '5',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 7,
+          value_type: 'exact',
+          value: 'appMetGuid',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 8,
+          value_type: 'noTreatment',
+          question_code: 'APP_VOL1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 9,
+          value_type: 'exact',
+          text: '8',
+          question_code: 'MIX_SIZE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+      ]
+      const combinationElements = [
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+      ]
+
+      const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(intents).toEqual([
+        {
+          intents: [],
+          treatmentId: 1,
+        },
+      ])
+    })
+
+    test('does not parse intents if any property from any treatment variable that would make up the intent is no treatment', () => {
+      const factorLevelDetails = [
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '1',
+          value_type: 'placeholder',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 2,
+          text: '2',
+          value_type: 'placeholder',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 6,
+          text: '1',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '5',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 4,
+          value_type: 'exact',
+          text: '6',
+          question_code: 'APP_RATE1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 7,
+          value_type: 'exact',
+          value: 'appMetGuid',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 7,
+          value_type: 'exact',
+          value: 'appMetGuid2',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 8,
+          value_type: 'placeholder',
+          text: '7',
+          question_code: 'APP_VOL1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 9,
+          value_type: 'exact',
+          text: '8',
+          question_code: 'MIX_SIZE1',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 9,
+          value_type: 'exact',
+          text: '8',
+          question_code: 'MIX_SIZE1',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 10,
+          value_type: 'placeholder',
+          text: '9',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 2,
+          factor_properties_for_level_id: 11,
+          value_type: 'placeholder',
+          text: '10',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 12,
+          value_type: 'exact',
+          text: 'equipmentGUID',
+          uom_code: 'uom',
+          row_number: 1,
+        },
+        {
+          factor_level_id: 1,
+          factor_properties_for_level_id: 12,
+          value_type: 'noTreatment',
+          uom_code: 'uom',
+          row_number: 2,
+        },
+      ]
+      const combinationElements = [
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 1 },
+        { treatment_id: 1, treatment_number: 1, factor_level_id: 2 },
+      ]
+
+      const intents = getIntentsForTreatments(factorLevelDetails, factorProperties, combinationElements,
+        uniqueTimings, timingUomMap, timingProperty)
+
+      expect(intents).toEqual([
+        {
+          intents: [
+            {
+              applicationMethod: {
+                isPlaceholder: false,
+                questionCode: 'APP_MET',
+                uomCode: 'uom',
+                value: 'appMetGuid',
+              },
+              applicationVolume: {
+                isPlaceholder: true,
+                questionCode: 'APP_VOL1',
+                uomCode: 'uom',
+                value: '7',
+              },
+              mixSize: {
+                isPlaceholder: false,
+                questionCode: 'MIX_SIZE1',
+                uomCode: 'uom',
+                value: '8',
+              },
+              applicationEquipment: {
+                isPlaceholder: false,
+                questionCode: 'APP_EQUIP',
+                uomCode: 'uom',
+                value: 'equipmentGUID',
+              },
+              applicationPlacement: {
+                isPlaceholder: true,
+                questionCode: 'APPPLCT',
+                uomCode: 'uom',
+                value: '9',
+              },
+              applicationPlacementDetails: {
+                isPlaceholder: true,
+                questionCode: 'APPPLCDT',
+                uomCode: 'uom',
+                value: '10',
+              },
+              chemicals: [{
+                applicationRate: {
+                  isPlaceholder: false,
+                  questionCode: 'APP_RATE1',
+                  value: '5',
+                  uomCode: 'uom',
+                },
+                entryType: 'placeholder',
+                placeholder: '1',
+                targetTimingCodes: ['A'],
+              }],
+              targetTimingCode: 'A',
+            },
+          ],
           treatmentId: 1,
         },
       ])
@@ -2849,6 +3079,19 @@ describe('ChemApSyncService', () => {
           treatmentIds: [2],
         },
       ])
+    })
+
+    test('returns an empty array if no treatments had intents', () => {
+      const intentsByTreatment = [
+        {
+          intents: [],
+          treatmentId: 1,
+        },
+      ]
+
+      const result = getUniqueIntentsWithTreatment(intentsByTreatment)
+
+      expect(result).toEqual([])
     })
   })
 

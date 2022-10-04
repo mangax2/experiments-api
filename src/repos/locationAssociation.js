@@ -21,10 +21,16 @@ class locationAssociationRepo {
       
   
   @setErrorCode('5P2000')
-  findBySetId = (setId,) => this.rep.oneOrNone('SELECT * FROM location_association WHERE set_id = $1', setId)
+  findBySetId = (setId,) => this.rep.oneOrNone(`
+    SELECT la.*, b.name as block, b.experiment_id
+    FROM location_association la, block b
+    WHERE la.block_id = b.id AND set_id = $1`, setId)
 
   @setErrorCode('5P3000')
-  findByExperimentId = (experimentId) => this.rep.any('SELECT la.*, b.name as block_name FROM location_association la, block b WHERE la.block_id = b.id AND b.experiment_id = $1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any(`
+    SELECT la.*, b.name as block, b.experiment_id
+    FROM location_association la, block b
+    WHERE la.block_id = b.id AND b.experiment_id = $1`, experimentId)
 
   @setErrorCode('5P7000')
   batchFindExperimentBySetId = (setIds) => {

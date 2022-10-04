@@ -152,7 +152,7 @@ router.get('/experiments/:id/unit-specification-details', (req, res, next) => ne
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/location-association', (req, res, next) => new LocationAssociationWithBlockService().getByExperimentId(req.params.id)
+router.get('/experiments/:id/block-locations', (req, res, next) => new LocationAssociationWithBlockService().getByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 

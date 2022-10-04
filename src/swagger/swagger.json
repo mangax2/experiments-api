@@ -35,13 +35,14 @@
         }
       }
     },
-    "/experiments/{id}/groups": {
+    "/experiments/{id}/block-locations": {
       "patch": {
-        "summary": "partially update group",
-        "description": "Allows for groups to be partially updated. Currently only allows the update of the setId field.",
-        "operationId": "patchGroup",
+        "summary": "partially update block locations",
+        "description": "Allows for block locations to be partially updated. Currently only allows the update of the setId field.",
+        "operationId": "patchBlockLocation",
         "tags": [
-          "Groups"
+          "BlockLocation",
+          "Sets"
         ],
         "produces": [
           "application/json"
@@ -58,16 +59,16 @@
             "required": true
           },
           {
-            "name": "Group",
+            "name": "SetAssociation",
             "in": "body",
             "required": true,
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/GroupPayloadForPATCH"
+                "$ref": "#/definitions/SetAssocationPayloadForPATCH"
               }
             },
-            "description": "The Group to patch"
+            "description": "The information to associate a set to a block-location"
           },
           {
             "name": "username",
@@ -79,7 +80,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Group Patch SUCCESS"
+            "description": "BlockLocation Patch SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input"
@@ -4073,16 +4074,20 @@
         }
       }
     },
-    "GroupPayloadForPATCH": {
+    "SetAssocationPayloadForPATCH": {
       "type": "object",
       "properties": {
-        "id": {
+        "blockId": {
           "type": "integer",
-          "description": "id of group to update."
+          "description": "id of the block to associate to the set"
+        },
+        "location": {
+          "type": "integer",
+          "description": "the location number to associate to the set"
         },
         "setId": {
           "type": "integer",
-          "description": "set id for the group."
+          "description": "set id for the block-location"
         }
       }
     },

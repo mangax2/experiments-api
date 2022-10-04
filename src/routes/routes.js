@@ -126,7 +126,7 @@ router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummary
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
+router.patch('/experiments/:id/block-locations', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
   .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
     return res.sendStatus(200)

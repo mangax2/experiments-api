@@ -99,7 +99,7 @@ class locationAssociationRepo {
     const values = associations.map(association => ({
       location: association.location,
       set_id: association.setId,
-      block_id: association.block_id,
+      block_id: association.blockId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,

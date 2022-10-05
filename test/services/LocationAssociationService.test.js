@@ -28,8 +28,7 @@ describe('LocationAssociationService', () => {
         { blockId: 1, location: 9, setId: 2 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -44,8 +43,7 @@ describe('LocationAssociationService', () => {
         { blockId: 10, location: 1, setId: 2 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 1 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -60,8 +58,7 @@ describe('LocationAssociationService', () => {
         { blockId: 5, location: 1, setId: 456 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 1 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -76,8 +73,7 @@ describe('LocationAssociationService', () => {
         { blockId: 1, location: 2, setId: 456 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -102,8 +98,7 @@ describe('LocationAssociationService', () => {
         { blockId: 3, location: 2, setId: 456 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -128,8 +123,7 @@ describe('LocationAssociationService', () => {
         { blockId: 3, location: 2, setId: 456 },
       ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)

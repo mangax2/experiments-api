@@ -2,27 +2,18 @@ import _ from 'lodash'
 import Transactional from '@monsantoit/pg-transactional'
 import { dbRead, dbWrite } from '../db/DbManager'
 import AppError from './utility/AppError'
-import ExperimentsService from './ExperimentsService'
-import ExperimentalUnitService from './ExperimentalUnitService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
 // Error Codes 1YXXXX
 class LocationAssociationService {
-  constructor() {
-    this.experimentService = ExperimentsService
-    this.experimentalUnitService = new ExperimentalUnitService()
-  }
-
   @setErrorCode('1Y1000')
   @Transactional('associateSetsToLocations')
   associateSetsToLocations = async (experimentId, newAssociations, context, tx) => {
     const [units, blocks, locationAssociations] = await Promise.all([
-      this.experimentalUnitService
-        .getExperimentalUnitsByExperimentIdNoValidate(experimentId),
+      dbRead.unit.findAllByExperimentId(experimentId),
       dbRead.block.findByExperimentId(experimentId),
       dbRead.locationAssociation.findByExperimentId(experimentId),
-      this.experimentService.verifyExperimentExists(experimentId, false, context),
     ])
     const locations = _.uniq(_.map(units, 'location'))
 
@@ -30,6 +21,12 @@ class LocationAssociationService {
 
     return dbWrite.locationAssociation.batchCreate(newAssociations, context, tx)
   }
+
+  @setErrorCode('1Y2000')
+  getByExperimentId = (id) => dbRead.locationAssociation.findByExperimentId(id)
+
+  @setErrorCode('1Y3000')
+  getBySetId = (id) => dbRead.locationAssociation.findBySetId(id)
 }
 
 const validateNewAssociations = (

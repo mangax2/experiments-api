@@ -206,14 +206,14 @@ describe('GroupExperimentalUnitService', () => {
 
   describe('verifySetAndGetDetails', () => {
     test('returns the expected data', () => {
-      target.locationAssocWithBlockService.getBySetId = mockResolve({
+      target.locationAssociationService.getBySetId = mockResolve({
         location: 1, experiment_id: 5, set_id: 3, block_id: 44,
       })
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       dbRead.refDesignSpecification.all = mockResolve([{ id: 12, name: 'Reps' }, { id: 11, name: 'Min Rep' }, { id: 13, name: 'Locations' }])
 
       return target.verifySetAndGetDetails(3, {}).then((result) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(3)
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5)
         expect(dbRead.refDesignSpecification.all).toBeCalledWith()
 
@@ -227,12 +227,12 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when set is not found', (done) => {
-      target.locationAssocWithBlockService.getBySetId = mockResolve()
+      target.locationAssociationService.getBySetId = mockResolve()
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve([{ ref_design_spec_id: 12, value: 2 }])
       AppError.notFound = mock()
 
       return target.verifySetAndGetDetails(3, {}).catch(() => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(3)
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).not.toBeCalled()
         expect(AppError.notFound).toBeCalledWith('No set found for id 3', undefined, '1FK001')
 
@@ -241,7 +241,7 @@ describe('GroupExperimentalUnitService', () => {
     })
 
     test('throws correct error when number of reps not found', (done) => {
-      target.locationAssocWithBlockService.getBySetId = mockResolve({
+      target.locationAssociationService.getBySetId = mockResolve({
         location: 1, experiment_id: 5, set_id: 3, block_id: 44,
       })
       dbRead.designSpecificationDetail = { findAllByExperimentId: mockResolve([{ ref_design_spec_id: 13, value: 2 }]) }
@@ -249,7 +249,7 @@ describe('GroupExperimentalUnitService', () => {
       AppError.badRequest = mock()
 
       return target.verifySetAndGetDetails(3, {}).catch(() => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(3)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(3)
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5)
         expect(dbRead.refDesignSpecification.all).toBeCalledWith()
         expect(AppError.badRequest).toBeCalledWith('The specified set (id 3) does not have a minimum number of reps and cannot be reset.', undefined, '1FK002')
@@ -264,7 +264,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
-      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
+      target.locationAssociationService.getByExperimentId = mockResolve('setIds')
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -316,7 +316,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
+        expect(target.locationAssociationService.getByExperimentId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
@@ -328,7 +328,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       dbRead.unit.findAllByExperimentId = mockResolve('units')
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
-      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
+      target.locationAssociationService.getByExperimentId = mockResolve('setIds')
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -346,7 +346,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
+        expect(target.locationAssociationService.getByExperimentId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FO001')
@@ -357,7 +357,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1, block: null }, { location: 2, block: null }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: null }])
-      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
+      target.locationAssociationService.getByExperimentId = mockResolve('setIds')
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -409,7 +409,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
+        expect(target.locationAssociationService.getByExperimentId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -424,7 +424,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1, block: 3 }, { location: 2, block: 1 }])
       target.treatmentWithBlockService.getTreatmentsByExperimentId = mockResolve([{ id: 7, block: 3 }, { id: 8, in_all_blocks: true }])
-      target.locationAssocWithBlockService.getByExperimentId = mockResolve('setIds')
+      target.locationAssociationService.getByExperimentId = mockResolve('setIds')
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -491,7 +491,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentId).toBeCalled()
-        expect(target.locationAssocWithBlockService.getByExperimentId).toBeCalled()
+        expect(target.locationAssociationService.getByExperimentId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toHaveBeenCalledTimes(2)
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
@@ -524,7 +524,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       target.experimentalUnitService.getExperimentalUnitsBySetIds = mockResolve([{ location: 1, block: null }])
       target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experiment_id: 5 })
+      target.locationAssociationService.getBySetId = mockResolve({ location: 1, block: null, experiment_id: 5 })
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { items: [{}] } }, { id: 5, factor_id: 1, value: { items: [{}, {}] } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -576,7 +576,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.batchFindAllByTreatmentIds).toBeCalled()
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
+        expect(target.locationAssociationService.getBySetId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalledWith('cosmos-group-generation-lambda-dev', JSON.stringify(expectedLambdaPayload))
         expect(AppError.internalServerError).not.toBeCalled()
@@ -588,7 +588,7 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       target.experimentalUnitService.getExperimentalUnitsBySetIds = mockResolve('units')
       target.treatmentWithBlockService.getTreatmentsByBySetIds = mockResolve([{ id: 7, block: null }])
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ location: 1, block: null, experimentId: 5 })
+      target.locationAssociationService.getBySetId = mockResolve({ location: 1, block: null, experimentId: 5 })
       dbRead.factor.findByExperimentId = mockResolve([{ id: 1, name: 'var1' }])
       dbRead.factorLevel.findByExperimentId = mockResolve([{ id: 3, factor_id: 1, value: { } }])
       dbRead.designSpecificationDetail.findAllByExperimentId = mockResolve('designSpecs')
@@ -606,7 +606,7 @@ describe('GroupExperimentalUnitService', () => {
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalled()
         expect(dbRead.refDesignSpecification.all).toBeCalled()
         expect(dbRead.combinationElement.batchFindAllByTreatmentIds).toBeCalled()
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
+        expect(target.locationAssociationService.getBySetId).toBeCalled()
         expect(dbRead.experiments.findExperimentOrTemplate).toHaveBeenCalled()
         expect(AWSUtil.callLambda).toBeCalled()
         expect(AppError.internalServerError).toBeCalledWith('An error occurred while generating groups.', undefined, '1FC001')
@@ -661,7 +661,7 @@ describe('GroupExperimentalUnitService', () => {
   describe('getSetInformationBySetId', () => {
     test('getting a group and units with a valid set id', () => {
       target = new GroupExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssociationService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,
@@ -685,7 +685,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an invalid set id', () => {
       target = new GroupExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
+      target.locationAssociationService.getBySetId = mockResolve({ set_id: 4871, experiment_id: 112, location: 1 })
       target.formatSetResponse = mockResolve({})
       return target.getSetInformationBySetId(4871).then((group) => {
         expect(target.formatSetResponse).toHaveBeenCalled()
@@ -695,7 +695,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with an empty return of the db query', () => {
       target = new GroupExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve(null)
+      target.locationAssociationService.getBySetId = mockResolve(null)
       target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,
@@ -712,7 +712,7 @@ describe('GroupExperimentalUnitService', () => {
 
     test('getting a group and units with a failed db query', () => {
       target = new GroupExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockReject('error')
+      target.locationAssociationService.getBySetId = mockReject('error')
       target.formatSetResponse = mockResolve({
         id: 1,
         setId: 4781,

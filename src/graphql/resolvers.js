@@ -38,26 +38,74 @@ export default {
       partial ?
         context.loaders.experimentsByPartialName.load(name) :
         context.loaders.experimentsByName.load(name),
-    // 'null' is passed here because the load function won't take null
-    // and a string is an invalid type for this call, so it's guaranteed to act the way we need
-    getExperimentBySetId: (entity, args, context) => {
-      if (args.setId !== null && args.setId < 1) {
-        throw new Error('Set Id should be greater than 0')
+    getExperimentsInfo: async (entity, args, context) => {
+      const {
+        values, criteriaValue, criteria, acceptType, limit, offset = 0,
+      } = args
+      const endRecordIndex = limit ? limit + offset : undefined
+      let experiments = []
+      let pageResults = []
+
+      if (!acceptType || acceptType.length === 0) {
+        throw new Error('An accept type [experiments/templates] must be supplied')
       }
-      return context.loaders.experimentBySetId.load(args.setId || 'null')
+
+      if (criteria === 'setId') {
+        experiments = await Promise.all(
+          uniq(values).map(value => {
+            if (value !== null && value < 1) {
+              throw new Error('Set Id should be greater than 0')
+            }
+            return context.loaders.experimentBySetId.load(value || 'null')
+          }))
+      } else if (criteria === 'experimentId') {
+        experiments = await Promise.all(
+          uniq(values).map(value => {
+            if (acceptType.length === 2) {
+              return context.loaders.experiment.load({ id: value, allowTemplate: true })
+            }
+            return acceptType[0] === 'experiments' ? context.loaders.experiment.load({ id: value, allowTemplate: false }) : context.loaders.template.load(value)
+          },
+        ))
+      } else if (criteria === 'name') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        experiments = await context.loaders.experimentsByPartialName.load(criteriaValue)
+      } else if (criteria === 'owner') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        experiments = await context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: false })
+      } else { // no criteria supplied. go grab all everything subject to acceptType
+        if (!acceptType || acceptType.length === 0) {
+          throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
+        }
+        if (acceptType.length === 1) {
+          experiments = await context.loaders[acceptType[0]].load(-1)
+        } else {
+          experiments = await Promise.all(
+            [context.loaders[acceptType[0]].load(-1),
+            context.loaders[acceptType[1]].load(-1)],
+          )
+        }
+      }
+
+      experiments = compact([].concat(...experiments))
+      pageResults = experiments.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: experiments.length,
+        pageResultsLength: pageResults.length,
+      }
     },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),
     getTemplatesByCriteria: (entity, args, context) =>
       context.loaders.experimentsByCriteria.load(
         { criteria: args.criteria, value: args.value, isTemplate: true }),
-    // -1 is passed here because these loaders load all experiments/templates,
-    // so the ID is irrelevant.
-    // It is specified because data loader requires an ID to associate with cached results.
-    getAllExperiments: (entity, args, context) =>
-      context.loaders.experiments.load(-1),
-    getAllTemplates: (entity, args, context) =>
-      context.loaders.templates.load(-1),
     getTreatmentVariablesByExperimentId: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(args.experimentId),
     getTreatmentsByExperimentId: (entity, args, context) =>

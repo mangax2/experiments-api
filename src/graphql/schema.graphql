@@ -139,6 +139,14 @@ type ExperimentInfo {
   isTemplate: Boolean
 }
 
+type ExperimentInfoResults {
+    pageResults: [ExperimentInfo]
+    "totalResultsLength is the amount of results before pagination is applied"
+    totalResultsLength: Int
+    "pageResultsLength is the amount of results after pagination is applied"
+    pageResultsLength: Int
+}
+
 type Tag {
   category: String
   value: String
@@ -214,7 +222,7 @@ type Query {
   getExperimentsByIds(ids: [Int!]!, allowTemplate: Boolean): [Experiment]
   getExperimentsByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getExperimentsByName(name: String!, partial: Boolean): [Experiment]
-  getExperimentsInfo(values: [Int!], criteriaValue: String, criteria: Criteria, acceptType: [AcceptType!], first: Int, offset: Int): [ExperimentInfo]
+  getExperimentsInfo(values: [Int!], criteriaValue: String, criteria: Criteria, acceptType: [AcceptType!], limit: Int, offset: Int): ExperimentInfoResults
   getTemplateById(id: Int!): Experiment
   getTemplatesByCriteria(criteria: Criteria!, value: [String!]!): [Experiment]
   getTreatmentVariablesByExperimentId(experimentId: Int!): [TreatmentVariable]

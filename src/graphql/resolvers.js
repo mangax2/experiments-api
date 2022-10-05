@@ -38,61 +38,68 @@ export default {
       partial ?
         context.loaders.experimentsByPartialName.load(name) :
         context.loaders.experimentsByName.load(name),
-    getExperimentsInfo: (entity, args, context) => {
+    getExperimentsInfo: async (entity, args, context) => {
       const {
-        values, criteriaValue, criteria, acceptType, first, offset = 0,
+        values, criteriaValue, criteria, acceptType, limit, offset = 0,
       } = args
-      const desiredRecordCount = first ? first + offset : undefined
+      const endRecordIndex = limit ? limit + offset : undefined
+      let experiments = []
+      let pageResults = []
+
+      if (!acceptType || acceptType.length === 0) {
+        throw new Error('An accept type [experiments/templates] must be supplied')
+      }
 
       if (criteria === 'setId') {
-        return Promise.all(
+        experiments = await Promise.all(
           uniq(values).map(value => {
             if (value !== null && value < 1) {
               throw new Error('Set Id should be greater than 0')
             }
             return context.loaders.experimentBySetId.load(value || 'null')
           }))
-          .then(experiments => compact([].concat(...experiments)))
-      }
-      if (criteria === 'experimentId') {
-        if (!acceptType || acceptType.length === 0) {
-          throw new Error('An accept type [experiments/templates] must be supplied when fetching by experimentId')
-        }
-        return Promise.all(
+      } else if (criteria === 'experimentId') {
+        experiments = await Promise.all(
           uniq(values).map(value => {
             if (acceptType.length === 2) {
               return context.loaders.experiment.load({ id: value, allowTemplate: true })
             }
             return acceptType[0] === 'experiments' ? context.loaders.experiment.load({ id: value, allowTemplate: false }) : context.loaders.template.load(value)
           },
-          ))
-          .then(experiments => compact([].concat(...experiments)).slice(offset, desiredRecordCount))
-      }
-      if (criteria === 'name') {
+        ))
+      } else if (criteria === 'name') {
         if (!criteriaValue) {
           throw new Error('A criteriaValue is required when querying by name/owner.')
         }
 
-        return context.loaders.experimentsByPartialName.load(criteriaValue)
-        .then((experiments) => experiments.slice(offset, desiredRecordCount))
-      }
-      if (criteria === 'owner') {
+        experiments = await context.loaders.experimentsByPartialName.load(criteriaValue)
+      } else if (criteria === 'owner') {
         if (!criteriaValue) {
           throw new Error('A criteriaValue is required when querying by name/owner.')
         }
 
-        return context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: false }).then((experiments) => experiments.slice(offset, desiredRecordCount))
+        experiments = await context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: false })
+      } else { // no criteria supplied. go grab all everything subject to acceptType
+        if (!acceptType || acceptType.length === 0) {
+          throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
+        }
+        if (acceptType.length === 1) {
+          experiments = await context.loaders[acceptType[0]].load(-1)
+        } else {
+          experiments = await Promise.all(
+            [context.loaders[acceptType[0]].load(-1),
+            context.loaders[acceptType[1]].load(-1)],
+          )
+        }
       }
 
-      if (!acceptType || acceptType.length === 0) {
-        throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
-      } else if (acceptType.length === 1) {
-        return context.loaders[acceptType[0]].load(-1)
+      experiments = compact([].concat(...experiments))
+      pageResults = experiments.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: experiments.length,
+        pageResultsLength: pageResults.length,
       }
-      return Promise.all(
-        [context.loaders[acceptType[0]].load(-1),
-        context.loaders[acceptType[1]].load(-1)])
-        .then(experiments => compact([].concat(...experiments)).slice(offset, desiredRecordCount))
     },
     getTemplateById: (entity, args, context) =>
       context.loaders.template.load(args.id),

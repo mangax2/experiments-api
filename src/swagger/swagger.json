@@ -129,7 +129,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Pagination argument to offset the amount of returned results",
+            "description": "Pagination argument to offset the returned results",
             "type": "integer"
           }
         ],
@@ -137,10 +137,7 @@
           "200": {
             "description": "An array of experiments",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ExperimentResponse"
-              }
+              "$ref": "#/definitions/PaginatedExperimentResponse"
             }
           },
           "401": {
@@ -1998,7 +1995,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Pagination argument to offset the amount of returned results",
+            "description": "Pagination argument to offset the returned results",
             "type": "integer"
           }
         ],
@@ -2006,10 +2003,7 @@
           "200": {
             "description": "An array of templates",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/ExperimentResponse"
-              }
+              "$ref": "#/definitions/PaginatedExperimentResponse"
             }
           },
           "401": {
@@ -3941,6 +3935,26 @@
         "randomizationStrategyCode": {
           "type": "string",
           "description": "The type of randomization to be used for this experiment"
+        }
+      }
+    },
+    "PaginatedExperimentResponse": {
+      "type": "object",
+      "properties": {
+        "pageResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExperimentResponse"
+          },
+          "description": "array of paginated results subject to offset/limit"
+        },
+        "totalResultsLength": {
+          "type": "integer",
+          "description": "The amount of results prior to applying pagination"
+        },
+        "pageResultsLength": {
+          "type": "integer",
+          "description": "The amount of results after applying pagination"
         }
       }
     },

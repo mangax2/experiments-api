@@ -64,7 +64,7 @@ router.put('/experiments/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 router.get('/experiments', (req, res, next) => {
-  const limit = Number(req?.query?.limit)
+  const limit = Number(req?.query?.limit) || 1000
   const offset = Number(req?.query?.offset) || 0
   const endRecordIndex = limit ? limit + offset : undefined
 
@@ -217,7 +217,7 @@ router.post('/templates', (req, res, next) => new ExperimentsService().manageTem
   .then(value => res.json(value))
   .catch(err => next(err)))
 router.get('/templates', (req, res, next) => {
-  const limit = Number(req?.query?.limit)
+  const limit = Number(req?.query?.limit) || 1000
   const offset = Number(req?.query?.offset) || 0
   const endRecordIndex = limit ? limit + offset : undefined
 

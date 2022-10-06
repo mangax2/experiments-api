@@ -119,6 +119,18 @@
             "description": "Tag values comma separated list",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Pagination argument to limit the amount of returned results",
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination argument to offset the amount of returned results",
+            "type": "integer"
           }
         ],
         "responses": {
@@ -1976,6 +1988,18 @@
             "description": "Tag values comma separated list",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Pagination argument to limit the amount of returned results",
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination argument to offset the amount of returned results",
+            "type": "integer"
           }
         ],
         "responses": {

@@ -64,8 +64,21 @@ router.put('/experiments/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 router.get('/experiments', (req, res, next) => {
+  const limit = Number(req?.query?.limit)
+  const offset = Number(req?.query?.offset) || 0
+  const endRecordIndex = limit ? limit + offset : undefined
+
   new ExperimentsService().getExperiments(req.query, false, req.context)
-    .then(experiments => res.json(experiments))
+    .then(experiments => {
+      const pageResults = experiments.slice(offset, endRecordIndex)
+        res.json(
+        {
+          totalResultsLength: experiments.length,
+          pageResultsLength: pageResults.length,
+          pageResults,
+        })
+    },
+    )
     .catch(err => next(err))
 })
 router.get('/experiments/:id', (req, res, next) => {
@@ -204,8 +217,21 @@ router.post('/templates', (req, res, next) => new ExperimentsService().manageTem
   .then(value => res.json(value))
   .catch(err => next(err)))
 router.get('/templates', (req, res, next) => {
+  const limit = Number(req?.query?.limit)
+  const offset = Number(req?.query?.offset) || 0
+  const endRecordIndex = limit ? limit + offset : undefined
+
   new ExperimentsService().getExperiments(req.query, true, req.context)
-    .then(templates => res.json(templates))
+    .then(templates => {
+      const pageResults = templates.slice(offset, endRecordIndex)
+        res.json(
+        {
+          totalResultsLength: templates.length,
+          pageResultsLength: pageResults.length,
+          pageResults,
+        })
+    },
+    )
     .catch(err => next(err))
 })
 router.get('/templates/:id', (req, res, next) => {

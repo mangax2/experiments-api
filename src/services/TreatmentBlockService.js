@@ -3,7 +3,7 @@ import Transactional from '@monsantoit/pg-transactional'
 import { dbRead, dbWrite } from '../db/DbManager'
 import AppError from './utility/AppError'
 import BlockService from './BlockService'
-import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import LocationAssociationService from './LocationAssociationService'
 
 const { getFullErrorCode, setErrorCode } = require('@monsantoit/error-decorator')()
 
@@ -30,10 +30,10 @@ const isUpdateNeededForExactMatch = (tb, tbInDb) => tb.numPerRep !== tbInDb.num_
 class TreatmentBlockService {
   constructor(
     blockService = new BlockService(),
-    locAssocService = new LocationAssociationWithBlockService(),
+    locationAssociationService = new LocationAssociationService(),
   ) {
     this.blockService = blockService
-    this.locationAssocWithBlockService = locAssocService
+    this.locationAssocWithBlockService = locationAssociationService
   }
 
   @setErrorCode('1V1000')

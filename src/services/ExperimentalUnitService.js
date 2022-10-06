@@ -11,7 +11,7 @@ import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
-import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import LocationAssociationService from './LocationAssociationService'
 import KafkaProducer from './kafka/KafkaProducer'
 import validateSetEntryIdPairs from '../validations/SetEntryIdPairsValidator'
 
@@ -45,7 +45,7 @@ class ExperimentalUnitService {
     this.validator = new ExperimentalUnitValidator()
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
-    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
+    this.locationAssociationService = new LocationAssociationService()
   }
 
   @setErrorCode('172000')
@@ -128,7 +128,7 @@ class ExperimentalUnitService {
   @setErrorCode('17F000')
   @Transactional('updateUnitsForSet')
   updateUnitsForSet = (setId, experimentalUnits, context, tx) =>
-    this.locationAssocWithBlockService.getBySetId(setId).then((setInfo) => {
+    this.locationAssociationService.getBySetId(setId).then((setInfo) => {
       if (!setInfo) {
         throw AppError.notFound(`No experiment found for Set Id ${setId}`, undefined, getFullErrorCode('17F001'))
       }

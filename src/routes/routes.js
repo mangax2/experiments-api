@@ -13,7 +13,6 @@ import FactorDependentCompositeService from '../services/FactorDependentComposit
 import FactorService from '../services/FactorService'
 import ListsService from '../services/ListsService'
 import LocationAssociationService from '../services/LocationAssociationService'
-import LocationAssociationWithBlockService from '../services/LocationAssociationWithBlockService'
 import PreferencesService from '../services/PreferencesService'
 import SecurityService from '../services/SecurityService'
 import TreatmentDetailsService from '../services/TreatmentDetailsService'
@@ -126,7 +125,7 @@ router.get('/experiments/:id/summary', (req, res, next) => new ExperimentSummary
   .then(summary => res.json(summary))
   .catch(err => next(err)))
 
-router.patch('/experiments/:id/groups', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
+router.patch('/experiments/:id/block-locations', (req, res, next) => new LocationAssociationService().associateSetsToLocations(req.params.id, req.body, req.context)
   .then(() => {
     sendKafkaNotification('update', parseInt(req.params.id, 10))
     return res.sendStatus(200)
@@ -152,7 +151,7 @@ router.get('/experiments/:id/unit-specification-details', (req, res, next) => ne
   .then(values => res.json(values))
   .catch(err => next(err)))
 
-router.get('/experiments/:id/location-association', (req, res, next) => new LocationAssociationWithBlockService().getByExperimentId(req.params.id)
+router.get('/experiments/:id/block-locations', (req, res, next) => new LocationAssociationService().getByExperimentId(req.params.id)
   .then(values => res.json(values))
   .catch(err => next(err)))
 

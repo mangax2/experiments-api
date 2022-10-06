@@ -145,7 +145,7 @@ export default {
   },
   AssociatedSet: {
     blockId: property('block_id'),
-    blockName: property('block_name'),
+    blockName: property('block'),
     setId: property('set_id'),
   },
   Block: {

@@ -220,13 +220,13 @@ describe('ExperimentalUnitService', () => {
   describe('updateUnitsForSet', () => {
     test('returns an error if the set is not found', () => {
       target = new ExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve()
+      target.locationAssociationService.getBySetId = mockResolve()
       dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve()
       const testError = { message: 'error' }
       AppError.notFound = mock(testError)
 
       return target.updateUnitsForSet(5, [], {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).toBeCalledWith('No experiment found for Set Id 5', undefined, '17F001')
         expect(err).toBe(testError)
         expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).not.toBeCalled()
@@ -240,7 +240,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 19 },
       ]
       target = new ExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
+      target.locationAssociationService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
       dbRead.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
@@ -263,7 +263,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).then(() => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).not.toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
@@ -284,7 +284,7 @@ describe('ExperimentalUnitService', () => {
         { setEntryId: 19, factorLevelIds: [] },
       ]
       target = new ExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 5 })
+      target.locationAssociationService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 5 })
       dbRead.designSpecificationDetail.getRandomizationStrategyIdByExperimentId = mockResolve({ value: '2' })
       dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
@@ -306,7 +306,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('One or more entries used a treatment from a block that does not match the set\'s block.', undefined, '17F003')
         expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
@@ -325,7 +325,7 @@ describe('ExperimentalUnitService', () => {
       ]
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
+      target.locationAssociationService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block_id: 3 })
       dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom-build-on-map' })
       dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
@@ -344,7 +344,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)
         expect(dbRead.experiments.find).toBeCalledWith(7, false)
@@ -363,7 +363,7 @@ describe('ExperimentalUnitService', () => {
       ]
       const testError = { message: 'error' }
       target = new ExperimentalUnitService()
-      target.locationAssocWithBlockService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
+      target.locationAssociationService.getBySetId = mockResolve({ experiment_id: 7, location: 1, block: null })
       dbRead.experiments.find = mockResolve({ randomization_strategy_code: 'custom' })
       dbRead.combinationElement.findAllByExperimentIdIncludingControls = mockResolve([
         { factor_level_id: 13, treatment_id: 23 },
@@ -378,7 +378,7 @@ describe('ExperimentalUnitService', () => {
       target.mergeSetEntriesToUnits = mockResolve()
 
       return target.updateUnitsForSet(5, entries, {}, testTx).catch((err) => {
-        expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+        expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
         expect(AppError.notFound).not.toBeCalled()
         expect(AppError.badRequest).toBeCalledWith('This endpoint only supports sets/experiments with a "Custom - Build on Map" randomization strategy.', undefined, '17F004')
         expect(dbRead.combinationElement.findAllByExperimentIdIncludingControls).toBeCalledWith(7)

@@ -6,12 +6,12 @@ import configurator from '../../configs/configurator'
 import KafkaProducer from '../kafka/KafkaProducer'
 import AppError from '../utility/AppError'
 import ExperimentalUnitService from '../ExperimentalUnitService'
-import LocationAssociationWithBlockService from '../LocationAssociationWithBlockService'
+import LocationAssociationService from '../LocationAssociationService'
 
 class ManageRepsAndUnitsListener {
   experimentalUnitService = new ExperimentalUnitService()
 
-  locationAssocWithBlockService = new LocationAssociationWithBlockService()
+  locationAssociationService = new LocationAssociationService()
 
   listen() {
     const params = {
@@ -66,7 +66,7 @@ class ManageRepsAndUnitsListener {
     if (set.setId && set.entryChanges) {
       const { setId } = set
       const unitsFromMessage = set.entryChanges
-      return this.locationAssocWithBlockService.getBySetId(setId).then((assoc) => {
+      return this.locationAssociationService.getBySetId(setId).then((assoc) => {
         if (!assoc) {
           return Promise.reject(AppError.notFound(`No experiment found for setId "${set.setId}".`))
         }

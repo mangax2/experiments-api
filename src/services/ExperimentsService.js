@@ -16,7 +16,7 @@ import TagService from './TagService'
 import FactorService from './FactorService'
 import AnalysisModelService from './AnalysisModelService'
 import { notifyChanges } from '../decorators/notifyChanges'
-import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import LocationAssociationService from './LocationAssociationService'
 import DesignSpecificationDetailService from './DesignSpecificationDetailService'
 import KafkaProducer from './kafka/KafkaProducer'
 
@@ -45,7 +45,7 @@ class ExperimentsService {
     this.duplicationService = new DuplicationService()
     this.factorService = new FactorService()
     this.analysisModelService = new AnalysisModelService()
-    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
+    this.locationAssociationService = new LocationAssociationService()
     this.designSpecificationDetailService = new DesignSpecificationDetailService()
   }
 
@@ -292,7 +292,7 @@ class ExperimentsService {
   deleteExperiment(id, context, isTemplate, tx) {
     return this.securityService.permissionsCheck(id, context, isTemplate).then((permissions) => {
       if (permissions.includes('write')) {
-        return this.locationAssocWithBlockService.getByExperimentId(id).then(async (associations) => {
+        return this.locationAssociationService.getByExperimentId(id).then(async (associations) => {
           if (associations.length > 0) {
             throw AppError.badRequest('Unable to delete experiment as it is associated with a' +
               ' set', undefined, getFullErrorCode('15A002'))

@@ -95,7 +95,7 @@ describe('ManageRepsAndUnitsListener', () => {
         kafkaConfig.topics = { repPackingResultTopic: 'topic', product360Outgoing: 'prod360' }
         kafkaConfig.schema = { product360Outgoing: 1 }
         const message = { setId: 5, entryChanges: [] }
-        target.locationAssocWithBlockService = {
+        target.locationAssociationService = {
           getBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })),
         }
         target.experimentalUnitService = {
@@ -112,7 +112,7 @@ describe('ManageRepsAndUnitsListener', () => {
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).then(() => {
-          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+          expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, true)
         })
@@ -121,7 +121,7 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when on error', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5, entryChanges: [] }
-        target.locationAssocWithBlockService = {
+        target.locationAssociationService = {
           getBySetId: jest.fn(() => Promise.resolve({ experiment_id: 5, location: 7 })),
         }
         target.experimentalUnitService = {
@@ -138,7 +138,7 @@ describe('ManageRepsAndUnitsListener', () => {
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch(() => {
-          expect(target.locationAssocWithBlockService.getBySetId).toBeCalledWith(5)
+          expect(target.locationAssociationService.getBySetId).toBeCalledWith(5)
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).toBeCalledWith(5, [], 7, treatmentBlocks, { userId: 'REP_PACKING', isRepPacking: true }, testTx)
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
         })
@@ -147,7 +147,7 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when on bad format', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5 }
-        target.locationAssocWithBlockService = {
+        target.locationAssociationService = {
           getBySetId: jest.fn(),
         }
         target.experimentalUnitService = {
@@ -164,7 +164,7 @@ describe('ManageRepsAndUnitsListener', () => {
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
-          expect(target.locationAssocWithBlockService.getBySetId).not.toBeCalled()
+          expect(target.locationAssociationService.getBySetId).not.toBeCalled()
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).not.toBeCalled()
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
           expect(err.status).toBe(400)
@@ -176,7 +176,7 @@ describe('ManageRepsAndUnitsListener', () => {
       test('publishes a failure when no groups found', () => {
         const target = new ManageRepsAndUnitsListener()
         const message = { setId: 5, entryChanges: [] }
-        target.locationAssocWithBlockService = {
+        target.locationAssociationService = {
           getBySetId: jest.fn(() => Promise.resolve()),
         }
         target.experimentalUnitService = {
@@ -193,7 +193,7 @@ describe('ManageRepsAndUnitsListener', () => {
         const testTx = { tx: {} }
 
         return target.adjustExperimentWithRepPackChanges(message, testTx).catch((err) => {
-          expect(target.locationAssocWithBlockService.getBySetId).toBeCalled()
+          expect(target.locationAssociationService.getBySetId).toBeCalled()
           expect(target.experimentalUnitService.mergeSetEntriesToUnits).not.toBeCalled()
           expect(ManageRepsAndUnitsListener.sendResponseMessage).toBeCalledWith(5, false)
           expect(err.status).toBe(404)

@@ -35,65 +35,6 @@
         }
       }
     },
-    "/experiments/{id}/groups": {
-      "patch": {
-        "summary": "partially update group",
-        "description": "Allows for groups to be partially updated. Currently only allows the update of the setId field.",
-        "operationId": "patchGroup",
-        "tags": [
-          "Groups"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "description": "experiment id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Group",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/GroupPayloadForPATCH"
-              }
-            },
-            "description": "The Group to patch"
-          },
-          {
-            "name": "username",
-            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
-            "in": "header",
-            "type": "string",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Group Patch SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-
     "/experiments": {
       "get": {
         "summary": "get all experiment entities",
@@ -986,13 +927,13 @@
         }
       }
     },
-    "/experiments/{id}/location-association": {
+    "/experiments/{id}/block-locations": {
       "get": {
         "summary": "location associations from an experiment.",
         "description": "Returns Sets associations to all locations in a given experiment",
-        "operationId": "getLocationAssociationByExperimentId",
+        "operationId": "getBlockLocationByExperimentId",
         "tags": [
-          "Location Association"
+          "BlockLocation"
         ],
         "produces": [
           "application/json"
@@ -1011,7 +952,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/LocationAssociation"
+                "$ref": "#/definitions/BlockLocation"
               }
             }
           },
@@ -1032,6 +973,63 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          }
+        }
+      },
+      "patch": {
+        "summary": "partially update block locations",
+        "description": "Allows for block locations to be partially updated. Currently only allows the update of the setId field.",
+        "operationId": "patchBlockLocation",
+        "tags": [
+          "BlockLocation",
+          "Sets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "SetAssociation",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SetAssocationPayloadForPATCH"
+              }
+            },
+            "description": "The information to associate a set to a block-location"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "BlockLocation Patch SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -4073,16 +4071,20 @@
         }
       }
     },
-    "GroupPayloadForPATCH": {
+    "SetAssocationPayloadForPATCH": {
       "type": "object",
       "properties": {
-        "id": {
+        "blockId": {
           "type": "integer",
-          "description": "id of group to update."
+          "description": "id of the block to associate to the set"
+        },
+        "location": {
+          "type": "integer",
+          "description": "the location number to associate to the set"
         },
         "setId": {
           "type": "integer",
-          "description": "set id for the group."
+          "description": "set id for the block-location"
         }
       }
     },
@@ -4142,10 +4144,14 @@
         }
       }
     },
-    "LocationAssociation": {
+    "BlockLocation": {
       "type": "object",
       "properties": {
-        "experiment_id": {
+        "id": {
+          "type": "integer",
+          "description": "the id of the block-location record"
+        },
+        "experimentId": {
           "type": "integer",
           "description": "Experiment Id"
         },
@@ -4153,17 +4159,33 @@
           "type": "integer",
           "description": "The location the Set is associated to"
         },
-        "set_id": {
+        "setId": {
           "type": "integer",
           "description": "The Set Id that is associated to the location in the Experiment"
         },
         "block": {
           "type": "string",
-          "description": "the block the set is associated to"
+          "description": "the name of the block the set is associated to"
         },
         "blockId": {
           "type": "integer",
           "description": "the ID for the block that the set is associated to"
+        },
+        "createdDate": {
+          "type": "string",
+          "description": "created timestamp in UTC."
+        },
+        "createdUserId": {
+          "type": "string",
+          "description": "created user id for audit tracking."
+        },
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
+        },
+        "modifiedUserId": {
+          "type": "string",
+          "description": "modified user id for audit tracking."
         }
       }
     },

@@ -8,7 +8,7 @@ import FactorService from './FactorService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
 import TreatmentBlockService from './TreatmentBlockService'
-import LocationAssociationWithBlockService from './LocationAssociationWithBlockService'
+import LocationAssociationService from './LocationAssociationService'
 import { dbRead, dbWrite } from '../db/DbManager'
 import AppUtil from './utility/AppUtil'
 import AppError from './utility/AppError'
@@ -65,7 +65,7 @@ class GroupExperimentalUnitService {
     this.securityService = new SecurityService()
     this.factorService = new FactorService()
     this.unitValidator = new ExperimentalUnitValidator()
-    this.locationAssocWithBlockService = new LocationAssociationWithBlockService()
+    this.locationAssociationService = new LocationAssociationService()
     this.treatmentBlockService = new TreatmentBlockService()
   }
 
@@ -145,7 +145,7 @@ class GroupExperimentalUnitService {
 
   @setErrorCode('1FK000')
   verifySetAndGetDetails = (setId, context) =>
-    this.locationAssocWithBlockService.getBySetId(setId).then((locAssociation) => {
+    this.locationAssociationService.getBySetId(setId).then((locAssociation) => {
       if (!locAssociation) {
         console.error(`[[${context.requestId}]] No set found for id ${setId}.`)
         throw AppError.notFound(`No set found for id ${setId}`, undefined, getFullErrorCode('1FK001'))
@@ -199,7 +199,7 @@ class GroupExperimentalUnitService {
       dbRead.experiments.findExperimentOrTemplate(experimentId),
       this.treatmentWithBlockService.getTreatmentsByExperimentId(experimentId),
       dbRead.unit.findAllByExperimentId(experimentId),
-      this.locationAssocWithBlockService.getByExperimentId(experimentId),
+      this.locationAssociationService.getByExperimentId(experimentId),
     ]).then((
       [
         variables,
@@ -252,7 +252,7 @@ class GroupExperimentalUnitService {
     Promise.all([
       this.treatmentWithBlockService.getTreatmentsByBySetIds([setId]),
       this.experimentalUnitService.getExperimentalUnitsBySetIds([setId]),
-      this.locationAssocWithBlockService.getBySetId(setId),
+      this.locationAssociationService.getBySetId(setId),
     ]).then(([
       treatments,
       units,
@@ -321,7 +321,7 @@ class GroupExperimentalUnitService {
   ))
 
   @setErrorCode('1FQ000')
-  getSetInformationBySetId = setId => this.locationAssocWithBlockService.getBySetId(setId)
+  getSetInformationBySetId = setId => this.locationAssociationService.getBySetId(setId)
     .then((setAssociation) => {
       if (!setAssociation) return {}
       const inflectedSetAssociation = inflector.transform(setAssociation, 'camelizeLower')

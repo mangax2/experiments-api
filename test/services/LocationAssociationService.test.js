@@ -22,50 +22,13 @@ describe('LocationAssociationService', () => {
   })
 
   describe('associateSetsToLocations', () => {
-    test('rejects when passed in group id has invalid location value', async () => {
-      const groups = [{ id: '1' }]
-      AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
-      target.experimentService.verifyExperimentExists = mockResolve({})
-
-      try {
-        await target.associateSetsToLocations(1, groups, testContext, testTx)
-      } catch (err) {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to determine location from group id', null, '1Y1001')
-      }
-    })
-
-    test('rejects when experiment id from group id does not match the routes id', async () => {
-      const groups = [{ id: '1.2' }]
-      AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
-
-      try {
-        await target.associateSetsToLocations(2, groups, testContext, testTx)
-      } catch (err) {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Experiment Id from Group Id does not match Experiment Id on route', null, '1Y1003')
-      }
-    })
-
-    test('rejects when passed in group id has location value that is not a number', async () => {
-      const groups = [{ id: '1.abc' }]
-      AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([])
-      target.experimentService.verifyExperimentExists = mockResolve({})
-
-      try {
-        await target.associateSetsToLocations(1, groups, testContext, testTx)
-      } catch (err) {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Unable to determine location from group id', null, '1Y1001')
-      }
-    })
-
     test('rejects when at least one passed in group id has a location that the experiment does not have', async () => {
-      const groups = [{ id: '1.1' }, { id: '1.9' }]
+      const groups = [
+        { blockId: 1, location: 1, setId: 1 },
+        { blockId: 1, location: 9, setId: 2 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -75,10 +38,12 @@ describe('LocationAssociationService', () => {
     })
 
     test('rejects when an invalid block is passed in for blocking', async () => {
-      const groups = [{ id: '1.1.4' }, { id: '1.9.1' }]
+      const groups = [
+        { blockId: 1, location: 1, setId: 1 },
+        { blockId: 10, location: 1, setId: 2 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 1 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -88,10 +53,12 @@ describe('LocationAssociationService', () => {
     })
 
     test('rejects when the request has a set association for a location/block that already has a set', async () => {
-      const groups = [{ id: '1.1.block 001', setId: 123 }, { id: '1.2.block 001', setId: 456 }]
+      const groups = [
+        { blockId: 1, location: 1, setId: 123 },
+        { blockId: 5, location: 1, setId: 456 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 1 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 1 }])
 
       try {
         await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -101,10 +68,12 @@ describe('LocationAssociationService', () => {
     })
 
     test('calls to persist location, set, experiment associations', async () => {
-      const groups = [{ id: '1.1', setId: 123 }, { id: '1.2', setId: 456 }]
+      const groups = [
+        { blockId: 1, location: 1, setId: 123 },
+        { blockId: 1, location: 2, setId: 456 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -113,21 +82,23 @@ describe('LocationAssociationService', () => {
         {
           location: 1,
           setId: 123,
-          block_id: 1,
+          blockId: 1,
         },
         {
           location: 2,
           setId: 456,
-          block_id: 1,
+          blockId: 1,
         },
       ], testContext, testTx)
     })
 
     test('calls to persist location, set, experiment, block associations', async () => {
-      const groups = [{ id: '1.1.1', setId: 123 }, { id: '1.2.2', setId: 456 }]
+      const groups = [
+        { blockId: 2, location: 1, setId: 123 },
+        { blockId: 3, location: 2, setId: 456 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -136,21 +107,23 @@ describe('LocationAssociationService', () => {
         {
           location: 1,
           setId: 123,
-          block_id: 2,
+          blockId: 2,
         },
         {
           location: 2,
           setId: 456,
-          block_id: 3,
+          blockId: 3,
         },
       ], testContext, testTx)
     })
 
     test('handles blocks with a period in the name', async () => {
-      const groups = [{ id: '1.1.Test 2.5', setId: 123 }, { id: '1.2.2', setId: 456 }]
+      const groups = [
+        { blockId: 4, location: 1, setId: 123 },
+        { blockId: 3, location: 2, setId: 456 },
+      ]
       AppError.badRequest = mock()
-      target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ location: 1 }, { location: 2 }])
-      target.experimentService.verifyExperimentExists = mockResolve({})
+      dbRead.unit.findAllByExperimentId = mockResolve([{ location: 1 }, { location: 2 }])
       dbWrite.locationAssociation.batchCreate = mockResolve()
 
       await target.associateSetsToLocations(1, groups, testContext, testTx)
@@ -159,12 +132,12 @@ describe('LocationAssociationService', () => {
         {
           location: 1,
           setId: 123,
-          block_id: 4,
+          blockId: 4,
         },
         {
           location: 2,
           setId: 456,
-          block_id: 3,
+          blockId: 3,
         },
       ], testContext, testTx)
     })

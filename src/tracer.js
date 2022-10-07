@@ -14,7 +14,7 @@ tracer.use('http', {
 
 tracer.use('express', {
   hooks: {
-    request: (span, req, res) => {
+    request: (span, req) => {
       span.setTag('client_id', req.context.clientId)
       span.setTag('user_id', req.context.userId)
     },

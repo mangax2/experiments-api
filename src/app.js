@@ -68,6 +68,15 @@ configurator.init().then(() => {
   app.use(compression())
 
   if (process.env.NODE_ENV === 'production') {
+    const datadogEnvMap = {
+      dev: 'develop',
+      np: 'nonprod',
+      prod: 'prod',
+    }
+
+    const datadogEnv = datadogEnvMap[process.env.VAULT_ENV]
+    const datadogService = `exp-api-${process.env.VAULT_ENV}`
+
     require('./tracer')
     const connectDatadog = require('connect-datadog')
     app.use(connectDatadog({
@@ -76,19 +85,17 @@ configurator.init().then(() => {
       method: true,
       path: true,
       response_code: true,
-      tags: ['service:experiments-api', `env:${process.env.VAULT_ENV}`],
+      tags: [`service:${datadogService}`, `env:${datadogEnv}`],
     }))
 
-    if (['np', 'prod'].includes(process.env.VAULT_ENV)) {
-      const customMetricsMiddleware = require('@monsantoit/custom-datadog-metrics-express-middleware')
-      app.use(customMetricsMiddleware.default({
-        environment: process.env.VAULT_ENV === 'prod' ? 'production' : 'non-prod',
-        clientId: configurator.get('client.clientId'),
-        clientSecret: configurator.get('client.clientSecret'),
-        serviceName: 'experiments-api',
-        appName: 'Experiments API',
-      }))
-    }
+    const { customDatadogMetricsExpressMiddleware } = require('@monsantoit/custom-datadog-metrics-express-middleware')
+    app.use(customDatadogMetricsExpressMiddleware({
+      environment: datadogEnv,
+      clientId: configurator.get('client.clientId'),
+      clientSecret: configurator.get('client.clientSecret'),
+      serviceName: datadogService,
+      appName: 'Experiments API',
+    }))
   }
 
   const { makeExecutableSchema } = require('graphql-tools')

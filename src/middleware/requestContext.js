@@ -69,19 +69,18 @@ function requestContextMiddlewareFunction(req, res, next) {
   res.set('X-Request-Id', req.context.requestId)
   res.set('Access-Control-Expose-Headers', 'X-Request-Id')
 
-  if (_.startsWith(req.url, '/experiments-api-graphql/graphql')) {
-    // Need to set a user if undefined for audit
-    // Need to retrieve client id for audit
-
-    if (req.context.userId === undefined) {
-      req.context.userId = 'SERVICE-USER'
-    }
-
-    req.context.clientId = getClientIdFromToken(req.headers)
-  } else if (req.context.userId === undefined
-    && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)) {
+  if (
+    !_.startsWith(req.url, '/experiments-api-graphql/graphql')
+    && req.context.userId === undefined
+    && _.includes(['POST', 'PUT', 'PATCH', 'DELETE'], req.method)
+  ) {
     throw AppError.badRequest('username value is invalid/missing in header')
   }
+
+  if (req.context.userId === undefined) {
+    req.context.userId = 'SERVICE-USER'
+  }
+  req.context.clientId = getClientIdFromToken(req.headers)
   next()
 }
 

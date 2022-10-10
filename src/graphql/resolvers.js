@@ -40,7 +40,7 @@ export default {
         context.loaders.experimentsByName.load(name),
     getExperimentsInfo: async (entity, args, context) => {
       const {
-        values, criteriaValue, criteria, acceptType, limit, offset = 0,
+        values, criteriaValue, criteria, acceptType, limit = 1000, offset = 0,
       } = args
       const endRecordIndex = limit ? limit + offset : undefined
       let experiments = []
@@ -220,6 +220,7 @@ export default {
       context.loaders.ownersByExperimentIds.load(entity.id),
     analysisModel: (entity, args, context) =>
       context.loaders.analysisModel.load(entity.id),
+    isTemplate: property('is_template'),
   },
   TreatmentVariable: {
     experimentId: property('experiment_id'),

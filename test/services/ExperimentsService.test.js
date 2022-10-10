@@ -404,8 +404,8 @@ describe('ExperimentsService', () => {
       target.populateOwners = mockResolve(['KMCCL'])
       target.populateTagsForAllExperiments = mock()
 
-      return target.getExperiments('', false).then(() => {
-        expect(target.isFilterRequest).toHaveBeenCalledWith('')
+      return target.getExperiments({includeTags: true}, false).then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith({includeTags: true})
         expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
         expect(target.getAllExperiments).toHaveBeenCalled()
         expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}], false)
@@ -1125,7 +1125,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
-      target.locationAssociationService.getByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = {
         body: {
@@ -1149,7 +1149,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
-      target.locationAssociationService.getByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 500
       error.response = { }
@@ -1166,7 +1166,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
-      target.locationAssociationService.getByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const error = new Error()
       error.status = 404
       error.response = { text: '' }
@@ -1176,7 +1176,7 @@ describe('ExperimentsService', () => {
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false)
         expect(dbWrite.experiments.remove).toHaveBeenCalledWith(1, false, testTx)
-        expect(target.locationAssociationService.getByExperimentId).toHaveBeenCalled()
+        expect(target.locationAssocWithBlockService.getByExperimentId).toHaveBeenCalled()
         expect(AppError.badRequest).not.toHaveBeenCalled()
       })
     })
@@ -1184,7 +1184,7 @@ describe('ExperimentsService', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
       dbWrite.experiments.remove = mockResolve({})
-      target.locationAssociationService.getByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       const headers = [{ authorization: 'Bearer akldsjf;alksdjf;alksdjf;' }]
       const response = undefined
       target.tagService.deleteTagsForExperimentId = mockResolve()
@@ -1209,12 +1209,12 @@ describe('ExperimentsService', () => {
     test('throws an error  when experiment is associated to a set', () => {
       target.securityService.getUserPermissionsForExperiment = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
-      target.locationAssociationService.getByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve([{ experiment_id: 1842, location: 1, set_id: 9888909 }])
       AppError.badRequest = mock()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {
         expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(1, testContext, false)
-        expect(target.locationAssociationService.getByExperimentId).toHaveBeenCalledWith(1)
+        expect(target.locationAssocWithBlockService.getByExperimentId).toHaveBeenCalledWith(1)
         expect(AppError.badRequest).toHaveBeenCalled()
       })
     })
@@ -1222,7 +1222,7 @@ describe('ExperimentsService', () => {
     test('throws an error when data is undefined', () => {
       dbWrite.experiments.remove = mockResolve()
       target.securityService.permissionsCheck = mockResolve(['write'])
-      target.locationAssociationService.getByExperimentId = mockResolve({})
+      target.locationAssocWithBlockService.getByExperimentId = mockResolve({})
       AppError.notFound = mock()
 
       return target.deleteExperiment(1, testContext, false, testTx).then(() => {}, () => {

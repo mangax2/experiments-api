@@ -127,7 +127,7 @@ class ExperimentsService {
     }
     return this.getAllExperiments(isTemplate)
       .then(data => Promise.all(
-        [this.populateOwners(data), this.populateTagsForAllExperiments(data, isTemplate)],
+        [this.populateOwners(data), 'includeTags' in queryString ? this.populateTagsForAllExperiments(data, isTemplate) : Promise.resolve()],
       )
         .then(() => data))
   }

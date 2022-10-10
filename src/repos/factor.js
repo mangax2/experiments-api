@@ -65,7 +65,54 @@ class factorRepo {
   }
 
   @setErrorCode('573000')
-  findByExperimentId = (experimentId) => this.rep.any('SELECT * FROM factor WHERE experiment_id=$1', experimentId)
+  findByExperimentId = (experimentId) => this.rep.any(`
+  
+
+  WITH w as (select DISTINCT f.id, fl_parent.factor_id AS associated_factor_id
+
+    from factor f
+
+    join factor_level fl on f.id = fl.factor_id
+
+    join factor_level_association fla on fla.nested_level_id = fl.id
+    left join factor_level fl_parent on fla.associated_level_id = fl_parent.id
+    )
+    select f.* ,w.associated_factor_id as associated_treatment_variable_id,
+    (
+      SELECT jsonb_agg(fl) as treatmentVariableLevels
+        FROM (select  fl.id as associatedTreatmentVariableId,fl.created_user_id ,associated_level_id,
+                (select jsonb_agg(factorLevelDetails) as treatmentVariableLevelDetails from (
+                    select 'questionCode',
+  CASE WHEN fpl.multi_question_tag IS NOT NULL THEN
+    fld.question_code
+  ELSE
+    fpl.question_code
+  END,
+  'rowNumber',
+  row_number,
+  'objectType',
+  object_type,
+  'label',
+  label,
+  'multiQuestionTag',
+  multi_question_tag,
+  'catalogType',
+  material_type,
+  'valueType',
+  value_type,
+  'text',
+  text,
+  'value',
+  fld.value,
+  'uomCode',
+  uom_code from factor_properties_for_level fpl 
+                    inner join factor_level_details fld on fpl.id= fld.factor_properties_for_level_id 
+                    where factor_id=f.id)
+                 as factorLevelDetails)
+                from factor_level fl LEFT JOIN factor_level_association fla on fla.nested_level_id=fl.id 
+                
+                where factor_id = f.id) as fl)
+  from factor f left join w on f.id=w.id where experiment_id=$1`, experimentId)
 
   @setErrorCode('574000')
   all = () => this.rep.any('SELECT * FROM factor')

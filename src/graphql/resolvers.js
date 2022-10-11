@@ -51,13 +51,17 @@ export default {
       }
 
       if (criteria === 'setId') {
-        experiments = await Promise.all(
-          uniq(values).map(value => {
-            if (value !== null && value < 1) {
-              throw new Error('Set Id should be greater than 0')
-            }
-            return context.loaders.experimentBySetId.load(value || 'null')
-          }))
+        if (!values || values.length === 0) {
+          experiments = await context.loaders.experimentBySetId.load('null')
+        } else {
+          experiments = await Promise.all(
+            uniq(values).map(value => {
+              if (value !== null && value < 1) {
+                throw new Error('Set Id should be greater than 0')
+              }
+              return context.loaders.experimentBySetId.load(value || 'null')
+            }))
+        }
       } else if (criteria === 'experimentId') {
         experiments = await Promise.all(
           uniq(values).map(value => {

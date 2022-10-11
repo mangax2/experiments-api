@@ -412,6 +412,21 @@ describe('ExperimentsService', () => {
       })
     })
 
+    test('calls getAllExperiments but does not fetch tags', () => {
+      target.isFilterRequest = mock(false)
+      target.getExperimentsByFilters = mock()
+      target.getAllExperiments = mockResolve([{}])
+      target.populateOwners = mockResolve(['KMCCL'])
+      target.populateTagsForAllExperiments = mock()
+
+      return target.getExperiments({}, false).then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith({})
+        expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
+        expect(target.getAllExperiments).toHaveBeenCalled()
+        expect(target.populateTagsForAllExperiments).not.toHaveBeenCalled()
+      })
+    })
+
     test('calls getExperimentsByFilters', () => {
       target.isFilterRequest = mock(true)
       target.getExperimentsByFilters = mockResolve()

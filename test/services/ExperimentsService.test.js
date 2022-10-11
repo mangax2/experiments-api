@@ -404,8 +404,8 @@ describe('ExperimentsService', () => {
       target.populateOwners = mockResolve(['KMCCL'])
       target.populateTagsForAllExperiments = mock()
 
-      return target.getExperiments({includeTags: true}, false).then(() => {
-        expect(target.isFilterRequest).toHaveBeenCalledWith({includeTags: true})
+      return target.getExperiments({ includeTags: true }, false).then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith({ includeTags: true })
         expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
         expect(target.getAllExperiments).toHaveBeenCalled()
         expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}], false)

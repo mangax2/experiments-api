@@ -36,7 +36,7 @@ export default {
     // eslint-disable-next-line no-confusing-arrow
     getExperimentsByName: (_, { name, partial = false }, context) =>
       partial ?
-        context.loaders.experimentsByPartialName.load(name) :
+        context.loaders.experimentsByPartialName.load({ name, isTemplate: false }, false) :
         context.loaders.experimentsByName.load(name),
     getExperimentsInfo: async (entity, args, context) => {
       const {
@@ -72,25 +72,21 @@ export default {
           throw new Error('A criteriaValue is required when querying by name/owner.')
         }
 
-        experiments = await context.loaders.experimentsByPartialName.load(criteriaValue)
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders.experimentsByPartialName.load({ name: criteriaValue, isTemplate: type === 'templates' }),
+        ))
       } else if (criteria === 'owner') {
         if (!criteriaValue) {
           throw new Error('A criteriaValue is required when querying by name/owner.')
         }
 
-        experiments = await context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: false })
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: type === 'templates' }),
+        ))
       } else { // no criteria supplied. go grab all everything subject to acceptType
-        if (!acceptType || acceptType.length === 0) {
-          throw new Error('One or both accept type(experiments/templates) must be supplied when fetching all')
-        }
-        if (acceptType.length === 1) {
-          experiments = await context.loaders[acceptType[0]].load(-1)
-        } else {
-          experiments = await Promise.all(
-            [context.loaders[acceptType[0]].load(-1),
-            context.loaders[acceptType[1]].load(-1)],
-          )
-        }
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders[type].load(-1),
+        ))
       }
 
       experiments = compact([].concat(...experiments))

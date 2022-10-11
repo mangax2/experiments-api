@@ -67,8 +67,8 @@ class experimentsRepo {
     this.rep.any('SELECT * FROM experiment WHERE name = $1 AND is_template = FALSE', name)
 
   @setErrorCode('559000')
-  batchFindExperimentsByPartialName = name =>
-    this.rep.any('SELECT * FROM experiment WHERE position(lower($1) IN lower(name)) > 0 AND is_template = FALSE', name)
+  batchFindExperimentsByPartialName = args => 
+    this.rep.any('SELECT * FROM experiment WHERE position(lower($1) IN lower(name)) > 0 AND is_template = $2', [args.name, args.isTemplate])
 
   @setErrorCode('55B000')
   findExperimentsByUserIdOrGroup = (isTemplate, userId, groupIds) => this.rep.any(

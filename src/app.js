@@ -1,3 +1,4 @@
+require('./tracer')
 const configurator = require('./configs/configurator')
 
 configurator.init().then(() => {
@@ -74,37 +75,12 @@ configurator.init().then(() => {
       prod: 'prod',
     }
 
-    const datadogEnv = datadogEnvMap[process.env.VAULT_ENV]
-    const datadogService = `exp-api-${process.env.VAULT_ENV}`
-
-    const ddTracer = require('./tracer')
-    const connectDatadog = require('connect-datadog')
-    app.use(connectDatadog({
-      protocol: true,
-      base_url: true,
-      method: true,
-      path: true,
-      response_code: true,
-      tags: [`service:${datadogService}`, `env:${datadogEnv}`],
-    }))
-
-    app.use((req, res, next) => {
-      const span = ddTracer.scope().active()
-      if (span !== null) {
-        span.setTag('request_id', req.context.requestId)
-        span.setTag('is_api_request', req.context.isApiRequest)
-        span.setTag('client.id', req.context.clientId)
-        span.setTag('client.user_id', req.context.userId)
-      }
-      next()
-    })
-
     const { customDatadogMetricsExpressMiddleware } = require('@monsantoit/custom-datadog-metrics-express-middleware')
     app.use(customDatadogMetricsExpressMiddleware({
-      environment: datadogEnv,
+      environment: datadogEnvMap[process.env.VAULT_ENV],
       clientId: configurator.get('client.clientId'),
       clientSecret: configurator.get('client.clientSecret'),
-      serviceName: datadogService,
+      serviceName: `exp-api-${process.env.VAULT_ENV}`,
       appName: 'Experiments API',
     }))
   }

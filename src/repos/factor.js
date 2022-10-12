@@ -79,32 +79,23 @@ class factorRepo {
     )
     select f.* ,w.associated_factor_id as associated_treatment_variable_id,
     (
-      SELECT jsonb_agg(fl) as treatmentVariableLevels
+      SELECT jsonb_agg(fl) as treatment_variable_levels
         FROM (select  fl.id as associatedTreatmentVariableId,fl.created_user_id ,associated_level_id,
-                (select jsonb_agg(factorLevelDetails) as treatmentVariableLevelDetails from (
-                    select 'questionCode',
+                (select jsonb_agg(factorLevelDetails) as treatment_variable_level_details from (
+                    select 
   CASE WHEN fpl.multi_question_tag IS NOT NULL THEN
     fld.question_code
   ELSE
     fpl.question_code
   END,
-  'rowNumber',
   row_number,
-  'objectType',
   object_type,
-  'label',
   label,
-  'multiQuestionTag',
   multi_question_tag,
-  'catalogType',
   material_type,
-  'valueType',
   value_type,
-  'text',
   text,
-  'value',
   fld.value,
-  'uomCode',
   uom_code from factor_properties_for_level fpl 
                     inner join factor_level_details fld on fpl.id= fld.factor_properties_for_level_id 
                     where factor_id=f.id)

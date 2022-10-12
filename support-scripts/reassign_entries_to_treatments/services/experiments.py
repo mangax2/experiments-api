@@ -22,6 +22,8 @@ getUnitsByExperimentIdQuery = """
 query GetUnitsByExperimentId($experimentId: Int!) {
   getUnitsByExperimentId(experimentId:$experimentId) {
     id,
+    block,
+    blockId,
     treatmentId,
     setEntryId
   }
@@ -31,6 +33,9 @@ getTreatmentsByExperimentIdQuery = """
 query GetTreatmentsByExperimentId($experimentId: Int!) {
   getTreatmentsByExperimentId(experimentId:$experimentId){
     id, 
+    isControl,
+    inAllBlocks,
+    blockId,
     combinationElements{
       id,
       treatmentVariableLevelId,
@@ -99,7 +104,7 @@ def parseTreatments(treatments):
 
 def parseExperimentResponses(units, treatments):
   unitsFrame = pd.DataFrame(units)
-  unitsFrame = unitsFrame.dropna().astype(dict(id='int64', treatmentId='int64', setEntryId='int64'))  # if Set entries aren't associated yet, they will be 'NaN' (which we don't care about)
+  unitsFrame = unitsFrame.dropna().astype(dict(id='int64', blockId='int64', treatmentId='int64', setEntryId='int64', block='object'))  # if Set entries aren't associated yet, they will be 'NaN' (which we don't care about)
   unitsFrame = unitsFrame.rename(columns={"setEntryId": "entryId", "id": "experimentalUnitId"})
   parsedTreatments = parseTreatments(treatments)
   txFrame = pd.DataFrame(parsedTreatments)

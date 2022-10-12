@@ -3614,6 +3614,10 @@
                 "type": "string",
                 "description": "the block that the treatment belongs to."
               },
+              "blockId": {
+                "type": "integer",
+                "description": "the ID for the block that the treatment belongs to."
+              },
               "numPerRep": {
                 "type": "integer",
                 "description": "the number of times the treatment occurs per rep."
@@ -3740,6 +3744,10 @@
         "location": {
           "type": "integer",
           "description": "location number of experimental unit."
+        },
+        "block": {
+          "type": "string",
+          "description": "the block that the experimental unit belongs to."
         }
       }
     },
@@ -3800,6 +3808,14 @@
         "setEntryId": {
           "type": "integer",
           "description": "the set entry id for the experimental unit"
+        },
+        "block": {
+          "type": "string",
+          "description": "the block that the experimental unit belongs to."
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "the ID for the block that the experimental unit belongs to."
         },
         "createdDate": {
           "type": "string",
@@ -4080,6 +4096,10 @@
     "SetAssocationPayloadForPATCH": {
       "type": "object",
       "properties": {
+        "blockId": {
+          "type": "integer",
+          "description": "id of the block to associate to the set"
+        },
         "location": {
           "type": "integer",
           "description": "the location number to associate to the set"
@@ -4164,6 +4184,14 @@
         "setId": {
           "type": "integer",
           "description": "The Set Id that is associated to the location in the Experiment"
+        },
+        "block": {
+          "type": "string",
+          "description": "the name of the block the set is associated to"
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "the ID for the block that the set is associated to"
         },
         "createdDate": {
           "type": "string",
@@ -4511,6 +4539,9 @@
               "properties": {
                 "name": {
                   "type": "string"
+                },
+                "blockId": {
+                  "type": "number"
                 },
                 "numPerRep": {
                   "type": "number"

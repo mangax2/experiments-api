@@ -404,11 +404,26 @@ describe('ExperimentsService', () => {
       target.populateOwners = mockResolve(['KMCCL'])
       target.populateTagsForAllExperiments = mock()
 
-      return target.getExperiments('', false).then(() => {
-        expect(target.isFilterRequest).toHaveBeenCalledWith('')
+      return target.getExperiments({ includeTags: true }, false).then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith({ includeTags: true })
         expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
         expect(target.getAllExperiments).toHaveBeenCalled()
         expect(target.populateTagsForAllExperiments).toHaveBeenCalledWith([{}], false)
+      })
+    })
+
+    test('calls getAllExperiments but does not fetch tags', () => {
+      target.isFilterRequest = mock(false)
+      target.getExperimentsByFilters = mock()
+      target.getAllExperiments = mockResolve([{}])
+      target.populateOwners = mockResolve(['KMCCL'])
+      target.populateTagsForAllExperiments = mock()
+
+      return target.getExperiments({}, false).then(() => {
+        expect(target.isFilterRequest).toHaveBeenCalledWith({})
+        expect(target.getExperimentsByFilters).not.toHaveBeenCalled()
+        expect(target.getAllExperiments).toHaveBeenCalled()
+        expect(target.populateTagsForAllExperiments).not.toHaveBeenCalled()
       })
     })
 

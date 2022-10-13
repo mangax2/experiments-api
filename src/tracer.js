@@ -1,17 +1,11 @@
-const datadogEnvMap = {
-  dev: 'develop',
-  np: 'nonprod',
-  prod: 'prod',
-}
+const tracer = require('dd-trace')
 
-const datadogEnv = datadogEnvMap[process.env.VAULT_ENV]
-const datadogService = `exp-api-${process.env.VAULT_ENV}`
-
-const tracer = require('dd-trace').init({
-  debug: true,
+tracer.init({
+  enabled: true,
+  logInjection: false,
+  debug: false,
+  analytics: true,
   runtimeMetrics: true,
-  env: datadogEnv,
-  service: datadogService,
 })
 
 tracer.use('http', {

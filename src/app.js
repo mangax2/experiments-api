@@ -1,4 +1,7 @@
-require('./tracer')
+if (process.env.NODE_ENV === 'production') {
+  require('./tracer')
+}
+
 const configurator = require('./configs/configurator')
 
 configurator.init().then(() => {
@@ -74,6 +77,16 @@ configurator.init().then(() => {
       np: 'nonprod',
       prod: 'prod',
     }
+
+    const connectDatadog = require('connect-datadog')
+    app.use(connectDatadog({
+      protocol: true,
+      base_url: true,
+      method: true,
+      path: true,
+      response_code: true,
+      tags: [`service:exp-api-${process.env.VAULT_ENV}`, `env:${datadogEnvMap[process.env.VAULT_ENV]}`],
+    }))
 
     const { customDatadogMetricsExpressMiddleware } = require('@monsantoit/custom-datadog-metrics-express-middleware')
     app.use(customDatadogMetricsExpressMiddleware({

@@ -27,11 +27,7 @@ class treatmentRepo {
   FROM treatment_block_info
   GROUP BY treatment_id
 )
-SELECT t.*,
-  json_array_length(gtbi.blocks) > 1 AS in_all_blocks,
-  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'name' ELSE NULL END AS block,
-  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'blockId' ELSE NULL END AS block_id,
-  gtbi.blocks
+SELECT t.*, gtbi.blocks
 FROM treatment t
 INNER JOIN grouped_treatment_block_info gtbi ON t.id = gtbi.treatment_id
 WHERE experiment_id = $1
@@ -158,11 +154,7 @@ ORDER BY id ASC`, experimentId)
   FROM treatment_block_info
   GROUP BY treatment_id
 )
-SELECT t.*, la.set_id,
-  json_array_length(gtbi.blocks) > 1 AS in_all_blocks,
-  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'name' ELSE NULL END AS block,
-  CASE WHEN json_array_length(gtbi.blocks) = 1 THEN gtbi.blocks -> 0 -> 'blockId' ELSE NULL END AS block_id,
-  gtbi.blocks
+SELECT t.*, la.set_id, gtbi.blocks
 FROM treatment t
   INNER JOIN treatment_block tb ON t.id = tb.treatment_id
   INNER JOIN block b ON tb.block_id = b.id

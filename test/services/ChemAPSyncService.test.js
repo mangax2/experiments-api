@@ -398,6 +398,8 @@ describe('ChemApSyncService', () => {
       { id: 10, object_type: 'QandAV3', question_code: 'APPPLCT' },
       { id: 11, object_type: 'QandAV3', question_code: 'APPPLCDT' },
       { id: 12, object_type: 'QandAV3', question_code: 'APP_EQUIP' },
+      { id: 13, object_type: 'QandAV3', question_code: 'NOZT' },
+      { id: 14, object_type: 'QandAV3', question_code: 'AIAELOADR' },
     ]
     const uniqueTimings = [
       { code: 'A', description: '1' },
@@ -2277,6 +2279,8 @@ describe('ChemApSyncService', () => {
         { id: 10, object_type: 'QandAV3', question_code: 'APPPLCT' },
         { id: 11, object_type: 'QandAV3', question_code: 'APPPLCDT' },
         { id: 12, object_type: 'QandAV3', question_code: 'APP_EQUIP' },
+        { id: 13, object_type: 'QandAV3', question_code: 'NOZT' },
+        { id: 14, object_type: 'QandAV3', question_code: 'AIAELOADR' },
       ]
 
       const intents = getIntentsForTreatments(factorLevelDetails, localFactorProperties, combinationElements,
@@ -2296,6 +2300,12 @@ describe('ChemApSyncService', () => {
               questionCode: 'MIX_SIZE1',
               uomCode: 'uom',
               value: '8',
+            },
+            nozzleType: {
+              isPlaceholder: false,
+              questionCode: 'NOZT',
+              uomCode: 'uom',
+              value: 'appMetGuid',
             },
             chemicals: [{
               applicationRate: {

@@ -26,6 +26,8 @@ const qandaMixSizeTag = 'MIX_SIZE'
 const qandaAppPlacementCode = 'APPPLCT'
 const qandaAppPlacementDetailCode = 'APPPLCDT'
 const qandaAppEquipmentCode = 'APP_EQUIP'
+const qandaNozzleTypeCode = 'NOZT'
+const qandaLoadingRatioCode = 'AIAELOADR'
 const chemicalQAndATags = [
   qandaAppRateTag,
   qandaAppVolumeTag,
@@ -37,6 +39,8 @@ const chemicalQAndACodes = [
   qandaAppPlacementCode,
   qandaAppPlacementDetailCode,
   qandaAppEquipmentCode,
+  qandaNozzleTypeCode,
+  qandaLoadingRatioCode,
 ]
 
 export const getErrorFromChemAP = (err) => {
@@ -258,6 +262,8 @@ const applyDetailRowToIntents = (
   chemicalDetail,
   appRateDetail,
   timingDetail,
+  nozzleTypeDetail,
+  loadingRatioDetail,
   timingCodeMap,
   timingUomMap,
 ) => {
@@ -271,6 +277,8 @@ const applyDetailRowToIntents = (
     chemicalDetail,
     appRateDetail,
     timingDetail,
+    nozzleTypeDetail,
+    loadingRatioDetail,
   ].find(detail => detail?.value_type === 'noTreatment')) {
     baseIntents = baseIntents.map((intent) => ({
       ...intent,
@@ -302,6 +310,13 @@ const applyDetailRowToIntents = (
     baseIntents = baseIntents.map((intent) => ({
       ...intent,
       applicationEquipment: convertQandaDetail(equipmentDetail, qandaAppEquipmentCode),
+    }))
+  }
+
+  if (nozzleTypeDetail) {
+    baseIntents = baseIntents.map((intent) => ({
+      ...intent,
+      nozzleType: convertQandaDetail(nozzleTypeDetail, qandaNozzleTypeCode),
     }))
   }
 
@@ -348,6 +363,16 @@ const applyDetailRowToIntents = (
       }))
     }
 
+    if (loadingRatioDetail) {
+      baseIntents = baseIntents.map((intent) => ({
+        ...intent,
+        chemicals: intent.chemicals.map((chemical) => ({
+          ...chemical,
+          loadingRatio: convertQandaDetail(loadingRatioDetail, qandaLoadingRatioCode),
+        })),
+      }))
+    }
+
     if (timingDetail) {
       const targetTimingCode =
         timingCodeMap.get(getTimingDescriptionFromDetail(timingDetail, timingUomMap))
@@ -390,6 +415,10 @@ const createIntentsFromDetails = (
     relevantProperties.applicationPlacementDetails))
   const appEquipmentDetails = details.filter(filterByPropertyGenerator(
     relevantProperties.applicationEquipment))
+  const nozzleTypeDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.nozzleType))
+  const loadingRatioDetails = details.filter(filterByPropertyGenerator(
+    relevantProperties.loadingRatio))
 
   const allRowNumbers = uniq([
     appMethodDetails,
@@ -401,6 +430,8 @@ const createIntentsFromDetails = (
     chemicalDetails,
     appRateDetails,
     timingDetails,
+    nozzleTypeDetails,
+    loadingRatioDetails,
   ].filter(array => array.length > 0)
     .flatMap(array => array.map(detail => detail.row_number)))
     .sort()
@@ -414,6 +445,8 @@ const createIntentsFromDetails = (
       const appPlacementDetail = appPlacementDetails.find(findByRowNumber)
       const appPlacementDetailDetail = appPlacementDetailDetails.find(findByRowNumber)
       const appEquipmentDetail = appEquipmentDetails.find(findByRowNumber)
+      const nozzleTypeDetail = nozzleTypeDetails.find(findByRowNumber)
+      const loadingRatioDetail = loadingRatioDetails.find(findByRowNumber)
       const chemicalDetail = chemicalDetails.find((detail) => detail.row_number === rowNumber)
       const appRateDetail = appRateDetails.find((detail) => detail.row_number === rowNumber)
       const timingDetail = timingDetails.find(findByRowNumber)
@@ -429,6 +462,8 @@ const createIntentsFromDetails = (
         chemicalDetail,
         appRateDetail,
         timingDetail,
+        nozzleTypeDetail,
+        loadingRatioDetail,
         timingCodeMap,
         timingUomMap)
     })
@@ -551,7 +586,9 @@ export const getIntentsForTreatments = (
     applicationRate: findByQandaTag(qandaAppRateTag),
     applicationVolume: findByQandaTag(qandaAppVolumeTag),
     chemical: chemicalProperty,
+    loadingRatio: findByQandaCode(qandaLoadingRatioCode),
     mixSize: findByQandaTag(qandaMixSizeTag),
+    nozzleType: findByQandaCode(qandaNozzleTypeCode),
     timing: timingProperty,
   }
 

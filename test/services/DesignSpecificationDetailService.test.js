@@ -190,7 +190,6 @@ describe('DesignSpecificationDetailService', () => {
       }
       const designSpecs = { locations: '5', reps: '3', minReps: '' }
       target = new DesignSpecificationDetailService()
-      target.deleteDesignSpecificationDetails = mockResolve()
       target.batchUpdateDesignSpecificationDetails = mockResolve()
       target.batchCreateDesignSpecificationDetails = mockResolve()
       target.securityService.permissionsCheck = mockResolve()
@@ -200,7 +199,6 @@ describe('DesignSpecificationDetailService', () => {
         expect(target.securityService.permissionsCheck).toBeCalledWith(5, testContext, false)
         expect(dbRead.designSpecificationDetail.findAllByExperimentId).toBeCalledWith(5)
         expect(dbRead.refDesignSpecification.all).toBeCalled()
-        expect(target.deleteDesignSpecificationDetails).toBeCalledWith([3, 6], testContext, testTx)
         expect(target.batchUpdateDesignSpecificationDetails).toBeCalledWith([{
           id: 4, refDesignSpecId: 12, value: '5', hasMatch: true,
         }], testContext, testTx)

@@ -110,12 +110,10 @@ class DesignSpecificationDetailService {
           eds.hasMatch = !!match
         })
 
-        const [updates, deletes] = _.partition(existingDesignSpecs, eds => eds.hasMatch)
+        const [updates] = _.partition(existingDesignSpecs, eds => eds.hasMatch)
         const inflectedUpdates = inflector.transform(updates, 'camelizeLower', true)
-        const idsToDelete = _.map(_.filter(deletes, d => d.ref_design_spec_id !== refMapper.randomizationstrategyid), 'id')
 
         return tx.batch([
-          this.deleteDesignSpecificationDetails(idsToDelete, context, tx),
           this.batchUpdateDesignSpecificationDetails(inflectedUpdates, context, tx),
           this.batchCreateDesignSpecificationDetails(adds, context, tx),
         ])

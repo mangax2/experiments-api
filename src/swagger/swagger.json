@@ -846,10 +846,7 @@
           "200": {
             "description": "Design Specification Detail Entities",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/DesignSpecificationDetail"
-              }
+              "$ref": "#/definitions/DesignSpecificationDetail"
             }
           },
           "400": {
@@ -872,9 +869,9 @@
           }
         }
       },
-      "put": {
-        "summary": "Save all design specification details for an experiment",
-        "description": "Save all design specification details for an experiment",
+      "patch": {
+        "summary": "Save specific design specification details for an experiment",
+        "description": "Save specific design specification details for an experiment",
         "operationId": "save-design-specification-detailsByExperimentId",
         "tags": [
           "Design Specification Detail"
@@ -2691,10 +2688,7 @@
           "200": {
             "description": "Design Specification Detail Entities",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/DesignSpecificationDetail"
-              }
+              "$ref": "#/definitions/DesignSpecificationDetail"
             }
           },
           "400": {
@@ -2717,9 +2711,9 @@
           }
         }
       },
-      "put": {
-        "summary": "Save all design specification details for a template",
-        "description": "Save all design specification details for a template",
+      "patch": {
+        "summary": "Save specific design specification details for a template",
+        "description": "Save specific design specification details for a template",
         "operationId": "save-design-specification-detailsByTemplateId",
         "tags": [
           "Design Specification Detail"

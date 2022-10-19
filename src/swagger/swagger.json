@@ -3565,10 +3565,6 @@
           "type": "integer",
           "description": "unique id for entity"
         },
-        "isControl": {
-          "type": "boolean",
-          "description": "isControl boolean value to mark a treatment as control"
-        },
         "treatmentNumber": {
           "type": "integer",
           "description": "number of the treatment."
@@ -3608,18 +3604,6 @@
           "items": {
             "$ref": "#/definitions/CompositeTreatmentsCombinationElementGET"
           }
-        },
-        "inAllBlocks": {
-          "type": "boolean",
-          "description": "boolean to specify if the treatment is in all blocks."
-        },
-        "block": {
-          "type": "string",
-          "description": "the block that the treatment belongs to."
-        },
-        "blockId": {
-          "type": "integer",
-          "description": "the ID for the block that the treatment belongs to."
         },
         "blocks": {
           "type": "array",
@@ -4547,12 +4531,6 @@
                 }
               }
             }
-          },
-          "block": {
-            "type": "string"
-          },
-          "inAllBlocks": {
-            "type": "boolean"
           },
           "blocks": {
             "type": "array",

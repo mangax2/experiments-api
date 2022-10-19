@@ -136,6 +136,10 @@ class locationAssociationRepo {
       'SELECT max(location) FROM location_association la, block b WHERE la.block_id = b.id and b.experiment_id = $1',
       experimentId,
     )
+
+  @setErrorCode('5PA000')
+  findByLocationAndBlockId = (location, blockId) => 
+    this.rep.oneOrNone('SELECT * FROM location_association WHERE location = $1 AND block_id = $2', [location, blockId])
 }
 
 module.exports = (rep, pgp) => new locationAssociationRepo(rep, pgp)

@@ -10,6 +10,8 @@ import QuestionsUtil from './utility/QuestionsUtil'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentService from './TreatmentService'
 import ExperimentsService from './ExperimentsService'
+import SecurityService from './SecurityService'
+import TreatmentBlockService from './TreatmentBlockService'
 import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
 import LocationAssociationService from './LocationAssociationService'
 import KafkaProducer from './kafka/KafkaProducer'
@@ -46,6 +48,8 @@ class ExperimentalUnitService {
     this.treatmentService = new TreatmentService()
     this.experimentService = new ExperimentsService()
     this.locationAssociationService = new LocationAssociationService()
+    this.securityService = new SecurityService()
+    this.treatmentBlockService = new TreatmentBlockService()
   }
 
   @setErrorCode('172000')
@@ -221,22 +225,11 @@ class ExperimentalUnitService {
   }
 
   @setErrorCode('17I000')
-  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => {
-    const promises = []
-    if (unitsToBeCreated.length > 0) {
-      promises.push(dbWrite.unit.batchCreate(unitsToBeCreated, context, tx))
-    }
-    if (unitsToBeUpdated.length > 0) {
-      promises.push(dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx))
-    }
-    return tx.batch(promises)
-      .then(() => {
-        if (unitsToBeDeleted.length > 0) {
-          return dbWrite.unit.batchRemove(unitsToBeDeleted, tx)
-        }
-        return Promise.resolve()
-      })
-  }
+  saveToDb = (unitsToBeCreated, unitsToBeUpdated, unitsToBeDeleted, context, tx) => Promise.all([
+    dbWrite.unit.batchCreate(unitsToBeCreated, context, tx),
+    dbWrite.unit.batchUpdate(unitsToBeUpdated, context, tx),
+    dbWrite.unit.batchRemove(unitsToBeDeleted, tx),
+  ])
 
   @setErrorCode('17J000')
   @Transactional('deactivateExperimentalUnitsTx')
@@ -341,6 +334,106 @@ class ExperimentalUnitService {
     }
 
     return dbWrite.unit.batchUpdateSetEntryIds(setEntryPairs, context, tx)
+  }
+
+  @notifyChanges('update', 0)
+  @setErrorCode('17O000')
+  @Transactional('saveBlockLocationUnits')
+  saveBlockLocationUnits = async (experimentId, blockLocations, context, isTemplate, tx) => {
+    if (blockLocations.length > 20) {
+      throw AppError.badRequest('No more than 20 blockLocations can be saved in one request.', undefined, getFullErrorCode('17O003'))
+    }
+    const units = blockLocations.flatMap(blockLocation => blockLocation.units.map(unit => {
+      unit.location = blockLocation.location
+      unit.blockId = blockLocation.blockId
+      return unit
+    }))
+    if (units.length > 10000) {
+      throw AppError.badRequest('No more than 10,000 experimental units can be saved in one request.', undefined, getFullErrorCode('17O004'))
+    }
+    await this.securityService.permissionsCheck(experimentId, context, isTemplate)
+    const [existingBlockLocations, treatmentBlocks] = await Promise.all([
+      dbRead.locationAssociation.findByExperimentId(experimentId),
+      this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId),
+    ])
+
+    const matchedBlockLocations = blockLocations.map(blockLocation => existingBlockLocations.find(
+      ebl => blockLocation.blockId === ebl.block_id && blockLocation.location === ebl.location))
+
+    units.forEach(unit => {
+      const { id } = treatmentBlocks.find(tb =>
+        tb.treatment_id === unit.treatmentId && tb.block_id === unit.blockId) || {}
+      unit.treatmentBlockId = id
+    })
+
+    const unitsWithInvalidTreatmentBlock = units.filter(unit => !unit.treatmentBlockId)
+    if (unitsWithInvalidTreatmentBlock.length > 0) {
+      throw AppError.badRequest(`${unitsWithInvalidTreatmentBlock.length} experimental units have invalid treatment/block values.`, undefined, getFullErrorCode('17O001'))
+    }
+
+    const blockLocationsWithSetId = matchedBlockLocations.filter(bl => bl?.set_id)
+    if (blockLocationsWithSetId.length > 0) {
+      throw AppError.badRequest('Cannot modify experimental units that have been assigned to a set.', undefined, getFullErrorCode('17O002'))
+    }
+
+    const uniqueBlockLocations = blockLocations.map(blockLocation => ({
+      location: blockLocation.location,
+      blockId: blockLocation.blockId,
+    }))
+    const existingUnits = await dbRead.unit.findByBlockLocations(uniqueBlockLocations)
+
+    const { adds, deletes } = this.compareWithExistingUnits(existingUnits, units)
+
+    await this.saveToDb(adds, [], deletes, context, tx)
+  }
+
+  @setErrorCode('17P000')
+  compareWithExistingUnits = (existingUnits, newUnits) => {
+    const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
+      const matchingUnit = _.find(newUnits,
+        nu => (eu.treatment_block_id || eu.treatmentBlockId) === nu.treatmentBlockId &&
+          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
+      if (matchingUnit) {
+        matchingUnit.matched = true
+        return undefined
+      }
+      return eu
+    }))
+    const adds = _.filter(newUnits, nu => !nu.matched)
+    const deletes = unitsToDeletesFromDB.map(u => u.id)
+    return {
+      adds,
+      deletes,
+    }
+  }
+
+  @notifyChanges('update', 0)
+  @setErrorCode('17Q000')
+  @Transactional('deleteByBlockLocation')
+  deleteByBlockLocation = async (experimentId, queryParams, context, isTemplate, tx) => {
+    const {
+      blockId,
+      location,
+    } = queryParams
+    if (!location || !blockId) {
+      throw AppError.badRequest('Both location and blockId fields are required.', undefined, getFullErrorCode('1FQ001'))
+    }
+
+    await this.securityService.permissionsCheck(experimentId, context, isTemplate)
+    const [block, blockLocation] = await Promise.all([
+      dbRead.block.findByBlockId(blockId),
+      dbRead.locationAssociation.findByLocationAndBlockId(location, blockId),
+    ])
+
+    if (!block || block.experiment_id !== Number(experimentId)) {
+      throw AppError.badRequest(`Block id '${blockId}' does not belong to experiment '${experimentId}'.`, undefined, getFullErrorCode('1FQ002'))
+    }
+
+    if (blockLocation?.set_id) {
+      throw AppError.badRequest(`Block id '${blockId}' and location '${location}' is mapped to set '${blockLocation.set_id}'. These units cannot be deleted until the set has been deleted.`, undefined, getFullErrorCode('1FQ003'))
+    }
+
+    await dbWrite.unit.deleteByBlockLocation(blockId, location, tx)
   }
 }
 

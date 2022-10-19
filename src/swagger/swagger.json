@@ -714,59 +714,6 @@
         }
       }
     },
-    "/experiments/{id}/design-experimental-units": {
-      "post": {
-        "summary": "posts design specification details and experimental units",
-        "description": "This service will update the design specification details and units",
-        "operationId": "postComposites_design-experimental-unitsByExperimentId",
-        "tags": [
-          "Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Composites Design Specifications And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
-            }
-          },
-          {
-            "name": "username",
-            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
-            "in": "header",
-            "type": "string",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite design-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/experiments/{id}/response-variables": {
       "get": {
         "summary": "get all response variables for given experiment id.",
@@ -1030,6 +977,122 @@
         "responses": {
           "200": {
             "description": "BlockLocation Patch SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "save units for block location",
+        "description": "Allows for units to be saved by block locations.",
+        "operationId": "postExperimentBlockLocation",
+        "tags": [
+          "BlockLocation",
+          "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "BlockLocations",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BlockLocationForPOST"
+              }
+            },
+            "description": "The information to save units by block-location"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "BlockLocation POST SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete units block locations",
+        "description": "Allows for experimental units to be delete by block-location. Does not work if the block location is associated to a set",
+        "operationId": "deleteExperimentBlockLocation",
+        "tags": [
+          "BlockLocation",
+          "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "description": "The location part of the block-location"
+          },
+          {
+            "name": "blockId",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "description": "The block part of the block-location"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "BlockLocation DELETE SUCCESS"
           },
           "400": {
             "description": "Invalid/Problematic Input"
@@ -2320,6 +2383,124 @@
         }
       }
     },
+    "/templates/{id}/block-locations": {
+      "post": {
+        "summary": "save units for block location",
+        "description": "Allows for units to be saved by block locations.",
+        "operationId": "postTemplateBlockLocation",
+        "tags": [
+          "BlockLocation",
+          "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "BlockLocations",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BlockLocationForPOST"
+              }
+            },
+            "description": "The information to save units by block-location"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "BlockLocation POST SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete units block locations",
+        "description": "Allows for experimental units to be delete by block-location. Does not work if the block location is associated to a set",
+        "operationId": "deleteTemplateBlockLocation",
+        "tags": [
+          "BlockLocation",
+          "Experimental Units"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "experiment id",
+            "in": "path",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "description": "The location part of the block-location"
+          },
+          {
+            "name": "blockId",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "description": "The block part of the block-location"
+          },
+          {
+            "name": "username",
+            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
+            "in": "header",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "BlockLocation DELETE SUCCESS"
+          },
+          "400": {
+            "description": "Invalid/Problematic Input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/templates/{id}/treatments": {
       "get": {
         "summary": "get all treatments and combination elements for a given Template id",
@@ -2555,59 +2736,6 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
-          }
-        }
-      }
-    },
-    "/templates/{id}/design-experimental-units": {
-      "post": {
-        "summary": "posts design specification details and experimental units",
-        "description": "This service will update the design specification details and units",
-        "operationId": "postComposites_design-experimental-unitsByTemplateId",
-        "tags": [
-          "Experimental Units"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "type": "integer",
-            "required": true
-          },
-          {
-            "name": "Composites Design Specifications And Units",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CompositeDesignSpecificationDetailAndUnitsPOST"
-            }
-          },
-          {
-            "name": "username",
-            "description": "An optional header to allow APIs to indicate which user they are modifying data on behalf of. This is only required for API-to-API calls.",
-            "in": "header",
-            "type": "string",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "composite design-experimental-units operation SUCCESS"
-          },
-          "400": {
-            "description": "Invalid/Problematic Input"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -3438,6 +3566,37 @@
         }
       }
     },
+    "BlockLocationForPOST": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "integer",
+          "description": "The location part of the block-location"
+        },
+        "blockId": {
+          "type": "integer",
+          "description": "The block part of the block-location"
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rep": {
+                "type": "integer",
+                "description": "The rep number of the experimental unit"
+              },
+              "treatmentId": {
+                "type": "integer",
+                "description": "The id of the treatment that the experimental unit will receieve"
+              }
+            },
+            "required": ["rep", "treatmentId"]
+          }
+        }
+      },
+      "required": ["location", "blockId", "units"]
+    },
     "BlockRenameRequest": {
       "type": "array",
       "items": {
@@ -3503,20 +3662,6 @@
         "objectType": {
           "type": "string",
           "description": "Indicates the type of item object.  This value will be 'Cluster' for this object."
-        }
-      }
-    },
-    "CompositeDesignSpecificationDetailAndUnitsPOST": {
-      "type": "object",
-      "properties": {
-        "units": {
-          "$ref": "#/definitions/UnitsPOST"
-        },
-        "designSpecifications": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DesignSpecificationDetail"
-          }
         }
       }
     },
@@ -3743,27 +3888,6 @@
         },
         "errorMessage": {
           "type": "string"
-        }
-      }
-    },
-    "ExperimentalUnitCompositeOperation": {
-      "type": "object",
-      "properties": {
-        "treatmentId": {
-          "type": "integer",
-          "description": "id of treatmentId entity."
-        },
-        "rep": {
-          "type": "integer",
-          "description": "rep number of experimental unit."
-        },
-        "location": {
-          "type": "integer",
-          "description": "location number of experimental unit."
-        },
-        "block": {
-          "type": "string",
-          "description": "the block that the experimental unit belongs to."
         }
       }
     },
@@ -4833,12 +4957,6 @@
           "type": "integer",
           "description": "Reference to Unit Specification"
         }
-      }
-    },
-    "UnitsPOST": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/ExperimentalUnitCompositeOperation"
       }
     },
     "UnitType": {

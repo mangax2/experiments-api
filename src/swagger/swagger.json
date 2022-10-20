@@ -4685,17 +4685,9 @@
           "type": "string",
           "description": "name of the treatment variable"
         },
-        "refFactorTypeId": {
-          "type": "integer",
-          "description": "id of treatment variable type entity"
-        },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity"
-        },
-        "refDataSourceId": {
-          "type": "string",
-          "description": "id of treatment variable data source"
         },
         "tier": {
           "type": "string",
@@ -4738,7 +4730,7 @@
                 "type": "string",
                 "description": "id of associated variable level"
               },
-              "associatedtreatmentvariableid": {
+              "associatedTreatmentVariableId": {
                 "type": "integer",
                 "description": "id of associated treatment variable "
               },
@@ -4769,15 +4761,19 @@
                     },
                     "valueType": {
                       "type": "string",
-                      "description": "Indicates value types.  This may be one of: 'Exact', 'Placeholder', or 'No treatm ent'"
+                      "description": "Indicates value types"
                     },
                     "objectType": {
                       "type": "string",
-                      "description": "Indicates the type of item object.  This may be one of: 'Catalog', 'Other', or 'Composite'"
+                      "description": "Indicates the type of item object"
                     },
                     "materialType": {
                       "type": "string",
                       "description": "Indicates the material type"
+                    },
+                    "materialCategory": {
+                      "type": "string",
+                      "description": "Indicates the material category"
                     },
                     "questionCode": {
                       "type": "string",

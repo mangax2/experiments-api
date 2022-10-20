@@ -77,10 +77,12 @@ class factorRepo {
     join factor_level_association fla on fla.nested_level_id = fl.id
     left join factor_level fl_parent on fla.associated_level_id = fl_parent.id
     )
-    select f.* ,w.associated_factor_id as associated_treatment_variable_id,
+    select f.id,f.name,f.experiment_id,f.tier,f.created_user_id,f.created_date,f.modified_user_id,
+    f.modified_date,f.is_blocking_factor_only
+    ,w.associated_factor_id as associated_treatment_variable_id,
     (
       SELECT jsonb_agg(fl) as treatment_variable_levels
-        FROM (select  fl.id as associatedTreatmentVariableId,fl.created_user_id ,associated_level_id,
+        FROM (select  fl.id as associated_treatment_variable_id,fl.created_user_id ,associated_level_id,
                 (select jsonb_agg(factorLevelDetails) as treatment_variable_level_details from (
                     select 
   CASE WHEN fpl.multi_question_tag IS NOT NULL THEN
@@ -93,6 +95,7 @@ class factorRepo {
   label,
   multi_question_tag,
   material_type,
+  material_category,
   value_type,
   text,
   fld.value,

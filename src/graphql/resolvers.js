@@ -118,8 +118,17 @@ export default {
       context.loaders.groupsByExperimentIds.load(args.experimentId),
     getUnitsByExperimentId: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(args.experimentId),
-    getUnitsBySetEntryIds: (entity, args, context) =>
-      context.loaders.unitsBySetEntryIds.load(args.setEntryIds),
+    getUnitsBySetEntryIds: async (entity, args, context) => {
+      const { setEntryIds, limit = 1000, offset = 0 } = args
+      const endRecordIndex = limit ? limit + offset : undefined
+      const units = await context.loaders.unitsBySetEntryIds.load(setEntryIds)
+      const pageResults = units.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: units.length,
+        pageResultsLength: pageResults.length,
+      }
+    },
     getSetBySetId: (entity, args, context) =>
       context.loaders.setBySetIds.load(args.setId),
     getSetsBySetId: (entity, args, context) =>
@@ -132,15 +141,35 @@ export default {
       emptyInputIdCheck(args.setId)
       return context.loaders.treatmentBySetIds.load(args.setId)
     },
-    getBlocksByBlockIds: (entity, args, context) => {
-      emptyInputIdCheck(args.blockId)
-      maxIdCountCheck(args.blockId, settings.maxBlocksToRetrieve)
-      return context.loaders.blocksByBlockIds.load(args.blockId)
+    getBlocksByBlockIds: async (entity, args, context) => {
+      const { blockId, limit = 1000, offset = 0 } = args
+      const endRecordIndex = limit ? limit + offset : undefined
+
+      emptyInputIdCheck(blockId)
+      maxIdCountCheck(blockId, settings.maxBlocksToRetrieve)
+
+      const blocks = await context.loaders.blocksByBlockIds.load(blockId)
+      const pageResults = blocks.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: blocks.length,
+        pageResultsLength: pageResults.length,
+      }
     },
-    getLocationBlocksByIds: (entity, args, context) => {
-      emptyInputIdCheck(args.ids)
-      maxIdCountCheck(args.ids, MAX_LOCATION_BLOCKS)
-      return context.loaders.locationBlocksByLocationBlockIds.load(args.ids)
+    getLocationBlocksByIds: async (entity, args, context) => {
+      const { ids, limit = 1000, offset = 0 } = args
+      const endRecordIndex = limit ? limit + offset : undefined
+
+      emptyInputIdCheck(ids)
+      maxIdCountCheck(ids, MAX_LOCATION_BLOCKS)
+
+      const locationBlocks = await context.loaders.locationBlocksByLocationBlockIds.load(ids)
+      const pageResults = locationBlocks.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: locationBlocks.length,
+        pageResultsLength: pageResults.length,
+      }
     },
   },
   AssociatedSet: {

@@ -231,13 +231,13 @@ type Query {
   getDesignSpecificationDetailsByExperimentId(experimentId: Int!): [DesignSpecificationDetail]
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
-  getUnitsBySetEntryIds(setEntryIds: [Int!]!): [ExperimentalUnit]
+  getUnitsBySetEntryIds(setEntryIds: [Int!]!, limit: Int, offset: Int): [ExperimentalUnit]
   getSetBySetId(setId: Int!): ExperimentalSet
   getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
-  getBlocksByBlockIds(blockId: [Int!]!): [Block]
-  getLocationBlocksByIds(ids: [Int!]!): [LocationBlock]
+  getBlocksByBlockIds(blockId: [Int!]!, limit: Int, offset: Int): [Block]
+  getLocationBlocksByIds(ids: [Int!]!, limit: Int, offset: Int): [LocationBlock]
 }
 
 type Treatment {

@@ -27,7 +27,7 @@ class treatmentRepo {
   FROM treatment_block_info
   GROUP BY treatment_id
 )
-SELECT t.*, gtbi.blocks
+SELECT t.id, t.treatment_number, t.notes, t.experiment_id, t.created_user_id, t.created_date, t.modified_user_id, t.modified_date, t.control_types, gtbi.blocks
 FROM treatment t
 INNER JOIN grouped_treatment_block_info gtbi ON t.id = gtbi.treatment_id
 WHERE experiment_id = $1

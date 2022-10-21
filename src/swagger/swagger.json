@@ -4655,39 +4655,111 @@
         },
         "name": {
           "type": "string",
-          "description": "name of the treatment variable."
-        },
-        "refTreatmentVariableType": {
-          "type": "integer",
-          "description": "id of TreatmentVariableType entity"
+          "description": "name of the treatment variable"
         },
         "experimentId": {
           "type": "integer",
           "description": "id of experiment entity"
         },
-        "createdDate": {
+        "tier": {
           "type": "string",
-          "description": "created timestamp in UTC."
+          "description": "tier of treatment variable"
         },
         "createdUserId": {
           "type": "string",
           "description": "created user id for audit tracking."
         },
-        "modifiedDate": {
+        "createdDate": {
           "type": "string",
-          "description": "Modified timestamp in UTC."
+          "description": "created timestamp in UTC."
         },
         "modifiedUserId": {
           "type": "string",
           "description": "modified user id for audit tracking."
         },
-        "tier": {
-          "type": "integer",
-          "description": "tier is used categorize treatment variables in to main/sub/sub-sub etc  plots (valid Range : 1 to 10)"
+        "modifiedDate": {
+          "type": "string",
+          "description": "Modified timestamp in UTC."
         },
         "isBlockingFactorOnly": {
           "type": "boolean",
           "description": "indicates whether the treatment variable should be analyzed or if it only exists to enable blocking"
+        },
+        "associatedTreatmentVariableId": {
+          "type": "string",
+          "description": "Id of associated treatment variable"
+        },
+        "treatmentVariableLevels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "createdUserId": {
+                "type": "string",
+                "description": "created user id for audit tracking."
+              },
+              "associatedLevelId": {
+                "type": "string",
+                "description": "id of associated variable level"
+              },
+              "associatedTreatmentVariableId": {
+                "type": "integer",
+                "description": "id of associated treatment variable "
+              },
+              "treatmentVariableLevelDetails": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "In the case of a simple treatment variable, this is the plain-text value.  In the case of a property type of catalog, this is the plain-text value specified when a catalog item could not be found."
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "The name of the property.  In the case of simple treatment variables, this will be the same as the name of the treatment variables.  In the case of complex treatment variables, this will be the name of the property."
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "Value of the unit specification detail"
+                    },
+                    "uomCode": {
+                      "type": "string",
+                      "description": "Reference to Unit of Measure"
+                    },
+                    "rowNumber": {
+                      "type": "integer",
+                      "description": "Row number"
+                    },
+                    "valueType": {
+                      "type": "string",
+                      "description": "Indicates value types"
+                    },
+                    "objectType": {
+                      "type": "string",
+                      "description": "Indicates the type of item object"
+                    },
+                    "materialType": {
+                      "type": "string",
+                      "description": "Indicates the material type"
+                    },
+                    "materialCategory": {
+                      "type": "string",
+                      "description": "Indicates the material category"
+                    },
+                    "questionCode": {
+                      "type": "string",
+                      "description": "refers to Q&A application , its an optional field"
+                    },
+                    "multiQuestionTag": {
+                      "type": "string",
+                      "description": "refers to multi Question Tag"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

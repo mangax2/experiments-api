@@ -20,24 +20,69 @@ const emptyInputIdCheck = (ids) => {
 
 export default {
   Query: {
-    getExperimentById: (entity, args, context) =>
-      context.loaders.experiment.load({ id: args.id, allowTemplate: args.allowTemplate }),
-    getExperimentsByIds: (entity, args, context) => {
-      maxIdCountCheck(args.ids, settings.maxExperimentsToRetrieve)
-      return Promise.all(
-        uniq(args.ids).map(id =>
-          context.loaders.experiment.load({ id, allowTemplate: args.allowTemplate }),
+    getExperiments: async (entity, args, context) => {
+      const {
+        values, criteriaValue, criteria, acceptType, limit = 1000, offset = 0,
+      } = args
+      const endRecordIndex = limit ? limit + offset : undefined
+      let experiments = []
+      let pageResults = []
+
+      if (!acceptType || acceptType.length === 0) {
+        throw new Error('An accept type [experiments/templates] must be supplied')
+      }
+
+      if (criteria === 'setId') {
+        if (!values || values.length === 0) {
+          experiments = await context.loaders.experimentBySetId.load('null')
+        } else {
+          experiments = await Promise.all(
+            uniq(values).map(value => {
+              if (value !== null && value < 1) {
+                throw new Error('Set Id should be greater than 0')
+              }
+              return context.loaders.experimentBySetId.load(value || 'null')
+            }))
+        }
+      } else if (criteria === 'experimentId') {
+        experiments = await Promise.all(
+          uniq(values).map(value => {
+            if (acceptType.length === 2) {
+              return context.loaders.experiment.load({ id: value, allowTemplate: true })
+            }
+            return acceptType[0] === 'experiments' ? context.loaders.experiment.load({ id: value, allowTemplate: false }) : context.loaders.template.load(value)
+          },
         ))
-        .then(experiments => compact(experiments))
+      } else if (criteria === 'name') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders.experimentsByPartialName.load({ name: criteriaValue, isTemplate: type === 'templates' }),
+        ))
+      } else if (criteria === 'owner') {
+        if (!criteriaValue) {
+          throw new Error('A criteriaValue is required when querying by name/owner.')
+        }
+
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders.experimentsByCriteria.load({ criteria: 'owner', value: [criteriaValue], isTemplate: type === 'templates' }),
+        ))
+      } else { // no criteria supplied. go grab all everything subject to acceptType
+        experiments = await Promise.all(acceptType.map((type) =>
+          context.loaders[type].load(-1),
+        ))
+      }
+
+      experiments = compact([].concat(...experiments))
+      pageResults = experiments.slice(offset, endRecordIndex)
+      return {
+        pageResults,
+        totalResultsLength: experiments.length,
+        pageResultsLength: pageResults.length,
+      }
     },
-    getExperimentsByCriteria: (entity, args, context) =>
-      context.loaders.experimentsByCriteria.load(
-        { criteria: args.criteria, value: args.value, isTemplate: false }),
-    // eslint-disable-next-line no-confusing-arrow
-    getExperimentsByName: (_, { name, partial = false }, context) =>
-      partial ?
-        context.loaders.experimentsByPartialName.load({ name, isTemplate: false }, false) :
-        context.loaders.experimentsByName.load(name),
     getExperimentsInfo: async (entity, args, context) => {
       const {
         values, criteriaValue, criteria, acceptType, limit = 1000, offset = 0,
@@ -101,11 +146,6 @@ export default {
         pageResultsLength: pageResults.length,
       }
     },
-    getTemplateById: (entity, args, context) =>
-      context.loaders.template.load(args.id),
-    getTemplatesByCriteria: (entity, args, context) =>
-      context.loaders.experimentsByCriteria.load(
-        { criteria: args.criteria, value: args.value, isTemplate: true }),
     getTreatmentVariablesByExperimentId: (entity, args, context) =>
       context.loaders.factorByExperimentIds.load(args.experimentId),
     getTreatmentsByExperimentId: (entity, args, context) =>

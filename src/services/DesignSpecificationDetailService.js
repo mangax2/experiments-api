@@ -94,11 +94,11 @@ class DesignSpecificationDetailService {
           refMapper[refSpec.name.replace(/\s/g, '').toLowerCase()] = refSpec.id
         })
 
-        const newDesignSpecs = _.filter(_.map(designSpecifications, (value, key) => ({
+        const newDesignSpecs = _.map(designSpecifications, (value, key) => ({
           value,
           experimentId: Number(experimentId),
           refDesignSpecId: refMapper[key.toLowerCase()],
-        })), ds => !(_.isNil(ds.value) || ds.value === ''))
+        }))
 
         const adds = _.differenceBy(newDesignSpecs, existingDesignSpecs,
           ds => ds.refDesignSpecId || ds.ref_design_spec_id)
@@ -106,12 +106,14 @@ class DesignSpecificationDetailService {
         _.forEach(existingDesignSpecs, (eds) => {
           const match = _.find(newDesignSpecs,
             nds => nds.refDesignSpecId === eds.ref_design_spec_id)
-          eds.value = _.get(match, 'value')
-          eds.hasMatch = !!match
+          const newVal = _.get(match, 'value')
+          eds.update = (newVal !== eds.value)
+          eds.value = newVal || eds.value
+          eds.delete = newVal === '' || newVal === null
         })
 
-        const [updates, deletes] = _.partition(existingDesignSpecs, eds => eds.hasMatch)
-        const inflectedUpdates = inflector.transform(updates, 'camelizeLower', true)
+        const [updates, deletes] = _.partition(existingDesignSpecs, eds => !eds.delete)
+        const inflectedUpdates = inflector.transform(updates.filter((eds) => eds.update), 'camelizeLower', true)
         const idsToDelete = _.map(_.filter(deletes, d => d.ref_design_spec_id !== refMapper.randomizationstrategyid), 'id')
 
         return tx.batch([

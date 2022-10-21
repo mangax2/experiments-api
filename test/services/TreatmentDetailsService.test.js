@@ -52,29 +52,25 @@ describe('TreatmentDetailsService', () => {
           created_user_id: 'tester1',
           modified_date: 'date string 2',
           modified_user_id: 'tester2',
-          block: 'block-001',
-          blockId: 1,
-          inAllBlocks: false,
           blocks: [{ name: 'block-001', numPerRep: 1 }],
-          is_control: false,
           notes: undefined,
           treatment_number: 1,
           control_types: [],
           combination_elements: [
             {
               id: 1,
-              factor_id: 1,
-              factor_name: 'test',
-              factor_level: {
+              treatmentVariableId: 1,
+              treatmentVariableName: 'test',
+              treatmentVariableLevel: {
                 id: 1,
                 items: [],
               },
             },
             {
               id: 2,
-              factor_id: 2,
-              factor_name: 'test2',
-              factor_level: {
+              treatmentVariableId: 2,
+              treatmentVariableName: 'test2',
+              treatmentVariableLevel: {
                 id: 2,
                 items: [],
               },

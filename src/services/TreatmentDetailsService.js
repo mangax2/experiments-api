@@ -66,20 +66,17 @@ class TreatmentDetailsService {
       _.map(combinationElements, combinationElement => ({
         id: combinationElement.id,
         treatment_id: combinationElement.treatment_id,
-        factor_id: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
-        factor_name: groupedFactorLevels[combinationElement.factor_level_id][0].factor_name,
-        factor_level: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
+        treatmentVariableId: groupedFactorLevels[combinationElement.factor_level_id][0].factor_id,
+        treatmentVariableName:
+          groupedFactorLevels[combinationElement.factor_level_id][0].factor_name,
+        treatmentVariableLevel: _.omit(groupedFactorLevels[combinationElement.factor_level_id][0], ['factor_id', 'factor_name']),
       })), 'treatment_id')
 
     return _.map(treatments, treatment => ({
       id: treatment.id,
       experiment_id: treatment.experiment_id,
       treatment_number: treatment.treatment_number,
-      is_control: (treatment.control_types || []).length > 0,
-      block: treatment.block,
-      blockId: treatment.block_id,
       blocks: treatment.blocks,
-      inAllBlocks: treatment.in_all_blocks,
       notes: treatment.notes,
       control_types: treatment.control_types || [],
       created_date: treatment.created_date,

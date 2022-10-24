@@ -29,6 +29,14 @@ type Block {
   units: [ExperimentalUnit]
 }
 
+type BlockResults {
+    pageResults: [Block]
+    "totalResultsLength is the amount of results before pagination is applied"
+    totalResultsLength: Int
+    "pageResultsLength is the amount of results after pagination is applied"
+    pageResultsLength: Int
+}
+
 type CombinationElement {
   id: Int
   treatmentVariableLevelId: Int
@@ -134,6 +142,14 @@ type ExperimentalUnit {
   deactivationReason: String
 }
 
+type ExperimentalUnitResults {
+    pageResults: [ExperimentalUnit]
+    "totalResultsLength is the amount of results before pagination is applied"
+    totalResultsLength: Int
+    "pageResultsLength is the amount of results after pagination is applied"
+    pageResultsLength: Int
+}
+
 type ExperimentInfo {
   id: Int
   name: String
@@ -234,13 +250,13 @@ type Query {
   getDesignSpecificationDetailsByExperimentId(experimentId: Int!): [DesignSpecificationDetail]
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
-  getUnitsBySetEntryIds(setEntryIds: [Int!]!): [ExperimentalUnit]
+  getUnitsBySetEntryIds(setEntryIds: [Int!]!, limit: Int, offset: Int): ExperimentalUnitResults
   getSetBySetId(setId: Int!): ExperimentalSet
   getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
-  getBlocksByBlockIds(blockId: [Int!]!): [Block]
-  getLocationBlocksByIds(ids: [Int!]!): [LocationBlock]
+  getBlocksByBlockIds(blockId: [Int!]!, limit: Int, offset: Int): BlockResults
+  getLocationBlocksByIds(ids: [Int!]!, limit: Int, offset: Int): LocationBlockResults
 }
 
 type Treatment {
@@ -302,4 +318,12 @@ type LocationBlock {
   location: Int
   setId: Int
   units: [ExperimentalUnit]
+}
+
+type LocationBlockResults {
+    pageResults: [LocationBlock]
+    "totalResultsLength is the amount of results before pagination is applied"
+    totalResultsLength: Int
+    "pageResultsLength is the amount of results after pagination is applied"
+    pageResultsLength: Int
 }

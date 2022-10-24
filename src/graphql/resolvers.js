@@ -18,6 +18,16 @@ const emptyInputIdCheck = (ids) => {
   }
 }
 
+const getPaginatedResults = (data, limit, offset) => {
+  const endRecordIndex = limit ? limit + offset : undefined
+  const pageResults = data.slice(offset, endRecordIndex)
+  return {
+    pageResults,
+    totalResultsLength: data.length,
+    pageResultsLength: pageResults.length,
+  }
+}
+
 export default {
   Query: {
     getExperiments: async (entity, args, context) => {
@@ -158,8 +168,11 @@ export default {
       context.loaders.groupsByExperimentIds.load(args.experimentId),
     getUnitsByExperimentId: (entity, args, context) =>
       context.loaders.unitByExperimentIds.load(args.experimentId),
-    getUnitsBySetEntryIds: (entity, args, context) =>
-      context.loaders.unitsBySetEntryIds.load(args.setEntryIds),
+    getUnitsBySetEntryIds: async (entity, args, context) => {
+      const { setEntryIds, limit = 1000, offset = 0 } = args
+      const units = await context.loaders.unitsBySetEntryIds.load(setEntryIds)
+      return getPaginatedResults(units, limit, offset)
+    },
     getSetBySetId: (entity, args, context) =>
       context.loaders.setBySetIds.load(args.setId),
     getSetsBySetId: (entity, args, context) =>
@@ -172,15 +185,23 @@ export default {
       emptyInputIdCheck(args.setId)
       return context.loaders.treatmentBySetIds.load(args.setId)
     },
-    getBlocksByBlockIds: (entity, args, context) => {
-      emptyInputIdCheck(args.blockId)
-      maxIdCountCheck(args.blockId, settings.maxBlocksToRetrieve)
-      return context.loaders.blocksByBlockIds.load(args.blockId)
+    getBlocksByBlockIds: async (entity, args, context) => {
+      const { blockId, limit = 1000, offset = 0 } = args
+
+      emptyInputIdCheck(blockId)
+      maxIdCountCheck(blockId, settings.maxBlocksToRetrieve)
+
+      const blocks = await context.loaders.blocksByBlockIds.load(blockId)
+      return getPaginatedResults(blocks, limit, offset)
     },
-    getLocationBlocksByIds: (entity, args, context) => {
-      emptyInputIdCheck(args.ids)
-      maxIdCountCheck(args.ids, MAX_LOCATION_BLOCKS)
-      return context.loaders.locationBlocksByLocationBlockIds.load(args.ids)
+    getLocationBlocksByIds: async (entity, args, context) => {
+      const { ids, limit = 1000, offset = 0 } = args
+
+      emptyInputIdCheck(ids)
+      maxIdCountCheck(ids, MAX_LOCATION_BLOCKS)
+
+      const locationBlocks = await context.loaders.locationBlocksByLocationBlockIds.load(ids)
+      return getPaginatedResults(locationBlocks, limit, offset)
     },
   },
   AssociatedSet: {

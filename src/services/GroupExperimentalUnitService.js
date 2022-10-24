@@ -7,16 +7,14 @@ import SecurityService from './SecurityService'
 import FactorService from './FactorService'
 import ExperimentalUnitValidator from '../validations/ExperimentalUnitValidator'
 import TreatmentWithBlockService from './TreatmentWithBlockService'
-import TreatmentBlockService from './TreatmentBlockService'
 import LocationAssociationService from './LocationAssociationService'
-import { dbRead, dbWrite } from '../db/DbManager'
-import AppUtil from './utility/AppUtil'
+import { dbRead } from '../db/DbManager'
 import AppError from './utility/AppError'
 import AWSUtil from './utility/AWSUtil'
 import HttpUtil from './utility/HttpUtil'
 import OAuthUtil from './utility/OAuthUtil'
 import configurator from '../configs/configurator'
-import { notifyChanges, sendKafkaNotification } from '../decorators/notifyChanges'
+import { sendKafkaNotification } from '../decorators/notifyChanges'
 
 const apiUrls = configurator.get('urls')
 const aws = configurator.get('aws')
@@ -66,23 +64,6 @@ class GroupExperimentalUnitService {
     this.factorService = new FactorService()
     this.unitValidator = new ExperimentalUnitValidator()
     this.locationAssociationService = new LocationAssociationService()
-    this.treatmentBlockService = new TreatmentBlockService()
-  }
-
-  @setErrorCode('1F5000')
-  batchDeleteExperimentalUnits = (unitDeletes, tx) => {
-    if (unitDeletes.length === 0) {
-      return Promise.resolve()
-    }
-    return dbWrite.unit.batchRemove(_.map(unitDeletes, 'id'), tx)
-  }
-
-  @setErrorCode('1FA000')
-  createExperimentalUnits = (experimentId, units, context, tx) => {
-    if (units.length === 0) {
-      return Promise.resolve()
-    }
-    return dbWrite.unit.batchCreate(units, context, tx)
   }
 
   @setErrorCode('1FM000')
@@ -94,7 +75,7 @@ class GroupExperimentalUnitService {
       dbRead.treatmentBlock.findByBlockId(blockId).then((treatmentBlocks) => {
         const units = this.createUnits(location, treatmentBlocks, numberOfReps)
 
-        return this.saveUnitsBySetId(setId, experimentId, units, context, tx)
+        return this.saveUnitsBySetId(setId, units, context, tx)
           .then(() =>
             this.getSetEntriesFromSet(setId, numberOfReps, treatmentBlocks.length, context))
           .then((result) => {
@@ -373,46 +354,6 @@ class GroupExperimentalUnitService {
     return _.compact(_.concat(group.units, childGroupUnits))
   }
 
-  @notifyChanges('update', 0)
-  @setErrorCode('1FV000')
-  @Transactional('saveDesignSpecsAndUnitDetails')
-  saveDesignSpecsAndUnits = (experimentId, designSpecsAndUnits, context, isTemplate, tx) => {
-    if (designSpecsAndUnits) {
-      const { designSpecifications, units } = designSpecsAndUnits
-      const numberOfLocations = _.max(_.map(units, 'location'))
-      return this.unitValidator.validate(units, 'POST')
-        .then(() => Promise.all([
-          dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets(experimentId),
-          this.treatmentBlockService.getTreatmentBlocksByExperimentId(experimentId),
-        ]))
-        .then(([locations, treatmentBlocks]) => {
-          if (units && (numberOfLocations < locations.max)) {
-            throw AppError.badRequest('Cannot remove locations from an experiment that are' +
-                ' linked to sets', undefined, getFullErrorCode('1FV002'))
-          }
-
-          _.forEach(units, (unit) => {
-            unit.block = _.toString(unit.block) || null
-          })
-
-          const unitsWithTBs =
-            this.addTreatmentBlocksToUnits(units, treatmentBlocks)
-          this.validateUnitsTBs(unitsWithTBs)
-
-          return tx.batch([
-            this.saveUnitsByExperimentId(experimentId, unitsWithTBs, isTemplate, context, tx),
-            this.designSpecificationDetailService.saveDesignSpecifications(
-              designSpecifications, experimentId, isTemplate, context, tx,
-            ),
-          ]).then(() => {
-            AppUtil.createCompositePostResponse()
-          })
-        })
-    }
-
-    throw AppError.badRequest('Design Specifications and Units object must be defined', undefined, getFullErrorCode('1FV001'))
-  }
-
   addTreatmentBlocksToUnits = (units, treatmentBlocks) => _.map(units, (unit) => {
     const treatmentBlockId = this.findTreatmentBlockId(unit, treatmentBlocks)
     return ({ ...unit, treatmentBlockId })
@@ -424,63 +365,36 @@ class GroupExperimentalUnitService {
     return treatmentBlock ? treatmentBlock.id : null
   }
 
-  validateUnitsTBs = (unitWithTBs) => {
-    const unitsWithInvalidTreatmentBlock = _.filter(unitWithTBs, unit => !unit.treatmentBlockId)
-    if (unitsWithInvalidTreatmentBlock.length > 0) {
-      throw AppError.badRequest(`${unitsWithInvalidTreatmentBlock.length} units have invalid treatment block values.`, undefined, getFullErrorCode('1FV003'))
-    }
-  }
-
   @setErrorCode('1FW000')
   @Transactional('saveUnitsByExperimentId')
   saveUnitsByExperimentId = (experimentId, units, isTemplate, context, tx) =>
     this.securityService.permissionsCheck(experimentId, context, isTemplate)
       .then(() => this.compareWithExistingUnitsByExperiment(experimentId, units)
         .then(comparisonResults =>
-          this.saveComparedUnits(experimentId, comparisonResults, context, tx)),
+          this.saveComparedUnits(comparisonResults, context, tx)),
       )
 
   @setErrorCode('1FX000')
-  saveUnitsBySetId = (setId, experimentId, units, context, tx) =>
+  saveUnitsBySetId = (setId, units, context, tx) =>
     this.compareWithExistingUnitsBySetId(setId, units)
       .then(comparisonResults =>
-        this.saveComparedUnits(experimentId, comparisonResults, context, tx))
+    this.saveComparedUnits(comparisonResults, context, tx))
 
   @setErrorCode('1FY000')
-  saveComparedUnits = (experimentId, comparisonUnits, context, tx) => tx.batch([
-    this.createExperimentalUnits(experimentId, comparisonUnits.adds, context, tx),
-    this.batchDeleteExperimentalUnits(comparisonUnits.deletes, tx),
-  ])
+  saveComparedUnits = ({ adds, deletes }, context, tx) =>
+    this.experimentalUnitService.saveToDb(adds, [], deletes, context, tx)
 
   @setErrorCode('1FZ000')
   compareWithExistingUnitsByExperiment = (experimentId, newUnits) =>
     this.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate(experimentId)
-      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
+      .then(existingUnits => this.experimentalUnitService.compareWithExistingUnits(existingUnits,
+        newUnits))
 
   @setErrorCode('1Fa000')
   compareWithExistingUnitsBySetId = (setId, newUnits) =>
     dbRead.unit.batchFindAllBySetId(setId, true)
-      .then(existingUnits => this.compareWithExistingUnits(existingUnits, newUnits))
-
-  @setErrorCode('1Fb000')
-  compareWithExistingUnits = (existingUnits, newUnits) => {
-    const unitsToDeletesFromDB = _.compact(_.map(existingUnits, (eu) => {
-      const matchingUnit = _.find(newUnits,
-        nu => (eu.treatment_block_id || eu.treatmentBlockId) === nu.treatmentBlockId &&
-          eu.rep === nu.rep && eu.location === nu.location && !nu.matched)
-      if (matchingUnit) {
-        matchingUnit.matched = true
-        return undefined
-      }
-      return eu
-    }))
-    const adds = _.filter(newUnits, nu => !nu.matched)
-    const deletes = _.map(unitsToDeletesFromDB, u => inflector.transform(u, 'camelizeLower'))
-    return {
-      adds,
-      deletes,
-    }
-  }
+      .then(existingUnits => this.experimentalUnitService.compareWithExistingUnits(existingUnits,
+        newUnits))
 }
 
 module.exports = GroupExperimentalUnitService

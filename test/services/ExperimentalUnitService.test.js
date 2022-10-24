@@ -498,10 +498,10 @@ describe('ExperimentalUnitService', () => {
       dbWrite.unit.batchUpdate = mockResolve()
       dbWrite.unit.batchRemove = mockResolve()
 
-      return target.saveToDb(9, [], [], [], testTx).then(() => {
-        expect(dbWrite.unit.batchCreate).not.toBeCalled()
-        expect(dbWrite.unit.batchUpdate).not.toBeCalled()
-        expect(dbWrite.unit.batchRemove).not.toBeCalled()
+      return target.saveToDb([], [], [], {}, testTx).then(() => {
+        expect(dbWrite.unit.batchCreate).toBeCalledWith([], {}, testTx)
+        expect(dbWrite.unit.batchUpdate).toBeCalledWith([], {}, testTx)
+        expect(dbWrite.unit.batchRemove).toBeCalledWith([], testTx)
       })
     })
   })
@@ -918,6 +918,263 @@ describe('ExperimentalUnitService', () => {
         expect(error).toBe(testError)
         expect(AppError.badRequest).toHaveBeenCalled()
       })
+    })
+  })
+
+  describe('saveBlockLocationUnits', () => {
+    let originalCompare
+    beforeEach(() => {
+      AppError.badRequest = mock(new Error('error'))
+      target.securityService.permissionsCheck = mockResolve()
+      originalCompare = target.compareWithExistingUnits
+    })
+    afterEach(() => {
+      target.compareWithExistingUnits = originalCompare
+    })
+    test('throws error if there are more than 20 blockLocations', async () => {
+      const blockLocations = [...Array(21)].map((x, i) => ({ location: i, blockId: 100 }))
+
+      try {
+        await target.saveBlockLocationUnits(101, blockLocations, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('No more than 20 blockLocations can be saved in one request.', undefined, '17O003')
+      }
+    })
+
+    test('throws error if there are more than 10000 units', async () => {
+      const blockLocations = [{
+        location: 1,
+        blockId: 100,
+        units: [...Array(10001)].map((x, i) => ({ treatmentId: i, rep: 1 })),
+      }]
+
+      try {
+        await target.saveBlockLocationUnits(101, blockLocations, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('No more than 10,000 experimental units can be saved in one request.', undefined, '17O004')
+      }
+    })
+
+    test('throws error if any units cannot be matched to a treatment block', async () => {
+      const blockLocations = [{
+        location: 1,
+        blockId: 100,
+        units: [...Array(100)].map((x, i) => ({ treatmentId: i, rep: 1 })),
+      }]
+      dbRead.locationAssociation.findByExperimentId = mockResolve([])
+      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([
+        ...[...Array(50)].map((x, i) => ({ id: 1000 + i, block_id: 100, treatment_id: i })),
+      ])
+
+      try {
+        await target.saveBlockLocationUnits(101, blockLocations, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('50 experimental units have invalid treatment/block values.', undefined, '17O001')
+      }
+    })
+
+    test('throws error if any blockLocation is assigned to a set', async () => {
+      const blockLocations = [{
+        location: 1,
+        blockId: 100,
+        units: [...Array(100)].map((x, i) => ({ treatmentId: i, rep: 1 })),
+      }]
+      dbRead.locationAssociation.findByExperimentId = mockResolve([
+        { block_id: 100, location: 1, set_id: 1234 },
+      ])
+      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([
+        ...[...Array(100)].map((x, i) => ({ id: 1000 + i, block_id: 100, treatment_id: i })),
+      ])
+
+      try {
+        await target.saveBlockLocationUnits(101, blockLocations, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Cannot modify experimental units that have been assigned to a set.', undefined, '17O002')
+      }
+    })
+
+    test('determines units to add and delete then passes those to saveToDb', async () => {
+      const blockLocations = [{
+        location: 1,
+        blockId: 100,
+        units: [...Array(100)].map((x, i) => ({ treatmentId: i, rep: 1 })),
+      }]
+      dbRead.locationAssociation.findByExperimentId = mockResolve([])
+      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve([
+        ...[...Array(100)].map((x, i) => ({ id: 1000 + i, block_id: 100, treatment_id: i })),
+      ])
+      const existingUnits = [...Array(50)].map((x, i) => ({
+        id: i,
+        treatment_block_id: 1000 + i,
+        location: 1,
+        rep: 1,
+      }))
+      const newUnits = [...Array(100)].map((x, i) => ({
+        treatmentId: i,
+        rep: 1,
+        location: 1,
+        blockId: 100,
+        treatmentBlockId: 1000 + i,
+      }))
+      dbRead.unit.findByBlockLocations = mockResolve(existingUnits)
+      const adds = [
+        { treatmentBlockId: 1020, location: 1, rep: 1 },
+        { treatmentBlockId: 1030, location: 1, rep: 1 },
+      ]
+      const deletes = [9876, 8765]
+      target.compareWithExistingUnits = mock({ adds, deletes })
+      target.saveToDb = mockResolve()
+
+      await target.saveBlockLocationUnits(101, blockLocations, {}, false, testTx)
+
+      expect(target.compareWithExistingUnits).toHaveBeenCalledWith(existingUnits, newUnits)
+      expect(target.saveToDb).toHaveBeenCalledWith(adds, [], deletes, {}, testTx)
+    })
+  })
+
+  describe('compareWithExistingUnits', () => {
+    test('existing units from DB contains more units', () => {
+      const result = target.compareWithExistingUnits(
+        [
+          {
+            id: 1,
+            treatment_block_id: 1,
+            rep: 1,
+            location: 3,
+          },
+          {
+            id: 2,
+            treatment_block_id: 2,
+            rep: 1,
+            location: 3,
+          },
+          {
+            id: 3,
+            treatment_block_id: 1,
+            rep: 2,
+            location: 3,
+          },
+          {
+            id: 4,
+            treatment_block_id: 2,
+            rep: 2,
+            location: 3,
+          },
+        ],
+        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
+      )
+
+      expect(result.deletes).toEqual([1, 2, 4])
+      expect(result.adds).toEqual([])
+    })
+
+    test('existing units from DB contains less units', () => {
+      const result = target.compareWithExistingUnits(
+        [{ treatment_block_id: 1, rep: 1, location: 3 }],
+        [{ treatmentBlockId: 1, rep: 1, location: 3 },
+          { treatmentBlockId: 2, rep: 1, location: 3 },
+          { treatmentBlockId: 1, rep: 2, location: 3 },
+          { treatmentBlockId: 2, rep: 2, location: 3 }],
+      )
+
+      expect(result.adds).toEqual([{ treatmentBlockId: 2, rep: 1, location: 3 },
+        { treatmentBlockId: 1, rep: 2, location: 3 },
+        { treatmentBlockId: 2, rep: 2, location: 3 }])
+      expect(result.deletes).toEqual([])
+    })
+
+    test('existing units from DB contains duplicate treatment in rep', () => {
+      const result = target.compareWithExistingUnits(
+        [
+          {
+            id: 1,
+            treatment_block_id: 1,
+            rep: 1,
+            location: 3,
+          },
+          {
+            id: 2,
+            treatment_block_id: 2,
+            rep: 1,
+            location: 3,
+          },
+          {
+            id: 3,
+            treatment_block_id: 1,
+            rep: 2,
+            location: 3,
+          },
+          {
+            id: 4,
+            treatmentBlockId: 1,
+            rep: 2,
+            location: 3,
+          },
+          {
+            id: 5,
+            treatment_block_id: 2,
+            rep: 2,
+            location: 3,
+          },
+        ],
+        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
+      )
+
+      expect(result.deletes).toEqual([1, 2, 4, 5])
+      expect(result.adds).toEqual([])
+    })
+  })
+
+  describe('deleteByBlockLocation', () => {
+    beforeEach(() => {
+      AppError.badRequest = mock(new Error('error'))
+      dbWrite.unit.deleteByBlockLocation = mockResolve()
+      target.securityService.permissionsCheck = mockResolve()
+    })
+
+    test('throws an error if blockId is not provided', async () => {
+      try {
+        await target.deleteByBlockLocation(1, { location: 2 }, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Both location and blockId fields are required.', undefined, '1FQ001')
+      }
+    })
+
+    test('throws an error if location is not provided', async () => {
+      try {
+        await target.deleteByBlockLocation(1, { blockId: 2 }, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Both location and blockId fields are required.', undefined, '1FQ001')
+      }
+    })
+
+    test('throws an error if the block does not belong to the experiment', async () => {
+      dbRead.block.findByBlockId = mockResolve({ id: 3, name: '', experiment_id: 4 })
+      dbRead.locationAssociation.findByLocationAndBlockId = mockResolve(undefined)
+      try {
+        await target.deleteByBlockLocation(1, { location: 2, blockId: 3 }, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Block id \'3\' does not belong to experiment \'1\'.', undefined, '1FQ002')
+      }
+    })
+
+    test('throws an error if the blockLocation is assigned to a set', async () => {
+      dbRead.block.findByBlockId = mockResolve({ id: 3, name: '', experiment_id: 1 })
+      dbRead.locationAssociation.findByLocationAndBlockId = mockResolve({ id: 5, set_id: 1234 })
+      try {
+        await target.deleteByBlockLocation(1, { location: 2, blockId: 3 }, {}, false, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Block id \'3\' and location \'2\' is mapped to set \'1234\'. These units cannot be deleted until the set has been deleted.', undefined, '1FQ003')
+      }
+    })
+
+    test('deletes the units by blockId and location number', async () => {
+      dbRead.block.findByBlockId = mockResolve({ id: 3, name: '', experiment_id: 1 })
+      dbRead.locationAssociation.findByLocationAndBlockId = mockResolve(undefined)
+
+      await target.deleteByBlockLocation(1, { location: 2, blockId: 3 }, {}, false, testTx)
+
+      expect(dbWrite.unit.deleteByBlockLocation).toHaveBeenCalledWith(3, 2, testTx)
     })
   })
 })

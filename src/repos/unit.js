@@ -90,6 +90,9 @@ class unitRepo {
   
   @setErrorCode('5J9000')
   batchCreate = (units, context, tx = this.rep) => {
+    if (units.length === 0) {
+      return Promise.resolve()
+    }
     const columnSet = new this.pgp.helpers.ColumnSet(
       [{ name: 'treatment_block_id', cast: 'int' }, 'rep', 'set_entry_id', 'created_user_id', 'created_date', 'modified_user_id', 'modified_date', 'location'],
       { table: 'unit' },
@@ -113,6 +116,9 @@ class unitRepo {
 
   @setErrorCode('5JA000')
   batchUpdate = (units, context, tx = this.rep) => {
+    if (units.length === 0) {
+      return Promise.resolve()
+    }
     const columnSet = new this.pgp.helpers.ColumnSet(
       ['?id', { name: 'treatment_block_id', cast: 'int' }, 'rep', {
         name: 'set_entry_id',
@@ -240,6 +246,20 @@ class unitRepo {
 
     return this.rep.any('SELECT t.experiment_id FROM treatment_block tb INNER JOIN treatment t ON tb.treatment_id = t.id WHERE tb.id IN ($1:csv)', [treatmentBlockIds])
   }
+
+  @setErrorCode('5JP000')
+  deleteByBlockLocation = (blockId, location, tx = this.rep) => tx.none(`
+    DELETE FROM unit
+    WHERE treatment_block_id in (SELECT id FROM treatment_block WHERE block_id = $1)
+      AND location = $2`, [blockId, location])
+
+  @setErrorCode('5JQ000')
+  findByBlockLocations = (blockLocations) => this.rep.any(`
+    WITH block_locations_for_query(location, block_id) AS (VALUES${this.pgp.helpers.values(blockLocations, ['location', 'blockId'])})
+    SELECT u.*, tb.treatment_id, tb.block_id
+    FROM unit u
+      INNER JOIN treatment_block tb ON u.treatment_block_id = tb.id
+      INNER JOIN block_locations_for_query blfq ON u.location = blfq.location AND tb.block_id = blfq.block_id`)
 }
 
 module.exports = (rep, pgp) => new unitRepo(rep, pgp)

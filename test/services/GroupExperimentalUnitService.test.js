@@ -3,8 +3,7 @@ import {
 } from '../jestUtil'
 import GroupExperimentalUnitService from '../../src/services/GroupExperimentalUnitService'
 import AppError from '../../src/services/utility/AppError'
-import AppUtil from '../../src/services/utility/AppUtil'
-import { dbRead, dbWrite } from '../../src/db/DbManager'
+import { dbRead } from '../../src/db/DbManager'
 import AWSUtil from '../../src/services/utility/AWSUtil'
 import HttpUtil from '../../src/services/utility/HttpUtil'
 import OAuthUtil from '../../src/services/utility/OAuthUtil'
@@ -14,60 +13,11 @@ describe('GroupExperimentalUnitService', () => {
   kafkaProducerMocker()
 
   let target
-  const testContext = {}
   const testTx = { tx: {}, batch: promises => Promise.all(promises) }
 
   beforeEach(() => {
     target = new GroupExperimentalUnitService()
     target.unitValidator = { validate: () => Promise.resolve() }
-  })
-
-  describe('batchDeleteExperimentalUnits', () => {
-    test('does not call experimentalUnitService if no units passed in', () => {
-      dbWrite.unit = { batchRemove: mockResolve() }
-
-      return target.batchDeleteExperimentalUnits([], testTx).then(() => {
-        expect(dbWrite.unit.batchRemove).not.toBeCalled()
-      })
-    })
-
-    test('does call experimentalUnitService if units are passed in', () => {
-      dbWrite.unit = { batchRemove: mockResolve() }
-
-      return target.batchDeleteExperimentalUnits([{ id: 5 }], testTx).then(() => {
-        expect(dbWrite.unit.batchRemove).toBeCalledWith([5], testTx)
-      })
-    })
-  })
-
-  describe('createExperimentalUnits', () => {
-    test('does nothing if no units are passed in', () => {
-      dbWrite.unit.batchCreate = mockResolve()
-
-      return target.createExperimentalUnits(1, [], testContext, testTx).then((data) => {
-        expect(dbWrite.unit.batchCreate).not.toBeCalled()
-        expect(data).toEqual(undefined)
-      })
-    })
-
-    test('batch creates experimental units', () => {
-      dbWrite.unit.batchCreate = mockResolve([1])
-
-      return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then((data) => {
-        expect(dbWrite.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
-        expect(data).toEqual([1])
-      })
-    })
-
-    test('rejects when batchCreate fails', () => {
-      const error = { message: 'error' }
-      dbWrite.unit.batchCreate = mockReject(error)
-
-      return target.createExperimentalUnits(1, [{ treatmentId: 1 }], testContext, testTx).then(() => {}, (err) => {
-        expect(dbWrite.unit.batchCreate).toHaveBeenCalledWith([{ treatmentId: 1 }], testContext, testTx)
-        expect(err).toEqual(error)
-      })
-    })
   })
 
   describe('resetSet', () => {
@@ -159,7 +109,7 @@ describe('GroupExperimentalUnitService', () => {
       target.resetSet(setId, {}, testTx).then(() => {
         expect(target.verifySetAndGetDetails).toBeCalledWith(setId, {})
         expect(dbRead.treatmentBlock.findByBlockId).toBeCalledWith(setDetails.blockId)
-        expect(target.saveUnitsBySetId).toBeCalledWith(setId, setDetails.experimentId, generatedUnits, {}, testTx)
+        expect(target.saveUnitsBySetId).toBeCalledWith(setId, generatedUnits, {}, testTx)
         expect(OAuthUtil.getAuthorizationHeaders).toBeCalledWith()
         expect(HttpUtil.getWithRetry).toBeCalledWith('testUrl/sets/5?entries=true', header)
         expect(HttpUtil.patch).toBeCalledWith('testUrl/sets/5', header, { entries: [{}, {}, {}, {}, {}, {}], layout: null })
@@ -895,134 +845,6 @@ describe('GroupExperimentalUnitService', () => {
     })
   })
 
-  describe('saveDesignSpecsAndUnits', () => {
-    const experimentId = 1
-    const treatmentBlocks = [
-      { name: '1', treatment_id: 11, id: 111 },
-      { name: '2', treatment_id: 22, id: 222 },
-    ]
-    const designSpecifications = { locations: '1', reps: '2' }
-
-    beforeEach(() => {
-      dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets = mockResolve({ max: 2 })
-      target.treatmentBlockService.getTreatmentBlocksByExperimentId = mockResolve(treatmentBlocks)
-      target.addTreatmentBlocksToUnits = mock([])
-      target.designSpecificationDetailService.saveDesignSpecifications = mockResolve()
-      target.saveUnitsByExperimentId = mockResolve()
-      AppUtil.createCompositePostResponse = mock()
-      AppError.badRequest = mock()
-    })
-
-    test('saves design specifications and empty units', () => {
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
-        expect(dbRead.locationAssociation.findNumberOfLocationsAssociatedWithSets).toHaveBeenCalledWith(experimentId)
-        expect(target.treatmentBlockService.getTreatmentBlocksByExperimentId).toHaveBeenCalledWith(experimentId)
-        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(experimentId, [], false, testContext, testTx)
-        expect(target.designSpecificationDetailService.saveDesignSpecifications).toHaveBeenCalledWith(designSpecifications, 1, false, testContext, testTx)
-        expect(AppUtil.createCompositePostResponse).toHaveBeenCalled()
-      })
-    })
-
-    test('saves a list of units', () => {
-      const unitsForDB = [{
-        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: 222, location: 1,
-      }, {
-        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: 111, location: 2,
-      }]
-      target.addTreatmentBlocksToUnits = mock(unitsForDB)
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [{
-          rep: 1, treatmentId: 22, block: 2, location: 1,
-        }, {
-          rep: 1, treatmentId: 11, block: 1, location: 2,
-        }],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
-        expect(target.saveUnitsByExperimentId).toHaveBeenCalledWith(experimentId, unitsForDB, false, testContext, testTx)
-      })
-    })
-
-    test('converts undefined block to null', () => {
-      const expectedUnits = [{
-        rep: 1, treatmentId: 22, block: null, location: 1,
-      }, {
-        rep: 1, treatmentId: 11, block: null, location: 2,
-      }]
-      target.addTreatmentBlocksToUnits = mock()
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [{
-          rep: 1, treatmentId: 22, block: undefined, location: 1,
-        }, {
-          rep: 1, treatmentId: 11, block: undefined, location: 2,
-        }],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {
-        expect(target.addTreatmentBlocksToUnits).toHaveBeenCalledWith(expectedUnits, treatmentBlocks)
-      })
-    })
-
-    test('throws an error when treatment block combination is not valid for experiment', () => {
-      const unitsForDB = [{
-        rep: 1, treatmentId: 22, block: '2', treatmentBlockId: undefined, location: 1,
-      }, {
-        rep: 1, treatmentId: 11, block: '1', treatmentBlockId: undefined, location: 2,
-      }]
-      target.addTreatmentBlocksToUnits = mock(unitsForDB)
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [{
-          rep: 1, treatmentId: 44, block: 2, location: 1,
-        }, {
-          rep: 1, treatmentId: 11, block: 4, location: 2,
-        }],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('2 units have invalid treatment block values.', undefined, '1FV003')
-      })
-    })
-
-    test('throws an error when locations are less than set associated with locations', () => {
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [{
-          rep: 1, treatmentId: 44, block: 2, location: 1,
-        }],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).catch(() => {
-        expect(AppError.badRequest).toHaveBeenCalledWith('Cannot remove locations from an experiment that are linked to sets', undefined, '1FV002')
-      })
-    })
-
-    test('rejects when design specification call fails', () => {
-      const error = { message: 'error' }
-      target.designSpecificationDetailService.saveDesignSpecifications = mockReject(error)
-      const designSpecsAndUnits = {
-        designSpecifications,
-        units: [],
-      }
-
-      return target.saveDesignSpecsAndUnits(experimentId, designSpecsAndUnits, testContext, false, testTx).then(() => {}, (err) => {
-        expect(AppUtil.createCompositePostResponse).not.toHaveBeenCalled()
-        expect(err).toEqual(error)
-      })
-    })
-
-    test('throws a bad request when passed in object is null', () => {
-      expect(() => target.saveDesignSpecsAndUnits(experimentId, null, testContext, testTx)).toThrow()
-    })
-  })
-
   describe('saveUnitsByExperimentId', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
@@ -1033,7 +855,7 @@ describe('GroupExperimentalUnitService', () => {
         .then(() => {
           expect(target.securityService.permissionsCheck).toHaveBeenCalledWith(5, {}, false)
           expect(target.compareWithExistingUnitsByExperiment).toHaveBeenCalledWith(5, [])
-          expect(target.saveComparedUnits).toHaveBeenCalledWith(5, { adds: [], deletes: [] }, {}, testTx)
+          expect(target.saveComparedUnits).toHaveBeenCalledWith({ adds: [], deletes: [] }, {}, testTx)
         })
     })
   })
@@ -1043,10 +865,10 @@ describe('GroupExperimentalUnitService', () => {
       target = new GroupExperimentalUnitService()
       target.compareWithExistingUnitsBySetId = mockResolve({ adds: [], deletes: [] })
       target.saveComparedUnits = mockResolve()
-      return target.saveUnitsBySetId(5, 3, [], {}, testTx)
+      return target.saveUnitsBySetId(5, [], {}, testTx)
         .then(() => {
           expect(target.compareWithExistingUnitsBySetId).toHaveBeenCalledWith(5, [])
-          expect(target.saveComparedUnits).toHaveBeenCalledWith(3, { adds: [], deletes: [] }, {}, testTx)
+          expect(target.saveComparedUnits).toHaveBeenCalledWith({ adds: [], deletes: [] }, {}, testTx)
         })
     })
   })
@@ -1054,12 +876,10 @@ describe('GroupExperimentalUnitService', () => {
   describe('saveComparedUnits', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
-      target.createExperimentalUnits = mockResolve()
-      target.batchDeleteExperimentalUnits = mockResolve()
-      return target.saveComparedUnits(3, { adds: [], deletes: [] }, {}, testTx)
+      target.experimentalUnitService.saveToDb = mockResolve()
+      return target.saveComparedUnits({ adds: [{}], deletes: [1] }, {}, testTx)
         .then(() => {
-          expect(target.createExperimentalUnits).toHaveBeenCalledWith(3, [], {}, testTx)
-          expect(target.batchDeleteExperimentalUnits).toHaveBeenCalledWith([], testTx)
+          expect(target.experimentalUnitService.saveToDb).toHaveBeenCalledWith([{}], [], [1], {}, testTx)
         })
     })
   })
@@ -1067,11 +887,11 @@ describe('GroupExperimentalUnitService', () => {
   describe('compareWithExistingUnitsByExperiment', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
-      target.compareWithExistingUnits = mockResolve([{}])
+      target.experimentalUnitService.compareWithExistingUnits = mockResolve([{}])
       target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate = mockResolve([{ treatment_id: 2 }])
       return target.compareWithExistingUnitsByExperiment(3, [{ treatmentId: 3 }]).then(() => {
         expect(target.experimentalUnitService.getExperimentalUnitsByExperimentIdNoValidate).toHaveBeenCalledWith(3)
-        expect(target.compareWithExistingUnits).toHaveBeenCalledWith([{ treatment_id: 2 }], [{ treatmentId: 3 }])
+        expect(target.experimentalUnitService.compareWithExistingUnits).toHaveBeenCalledWith([{ treatment_id: 2 }], [{ treatmentId: 3 }])
       })
     })
   })
@@ -1080,65 +900,11 @@ describe('GroupExperimentalUnitService', () => {
     test('check functions are called and with correct parameters', () => {
       target = new GroupExperimentalUnitService()
       dbRead.unit.batchFindAllBySetId = mockResolve([{ treatment_id: 2 }])
-      target.compareWithExistingUnits = mockResolve([{}])
+      target.experimentalUnitService.compareWithExistingUnits = mockResolve([{}])
       return target.compareWithExistingUnitsBySetId(3, [{ treatmentId: 3 }]).then(() => {
         expect(dbRead.unit.batchFindAllBySetId).toHaveBeenCalledWith(3, true)
-        expect(target.compareWithExistingUnits).toHaveBeenCalledWith([{ treatment_id: 2 }], [{ treatmentId: 3 }])
+        expect(target.experimentalUnitService.compareWithExistingUnits).toHaveBeenCalledWith([{ treatment_id: 2 }], [{ treatmentId: 3 }])
       })
-    })
-  })
-
-  describe('compareWithExistingUnits', () => {
-    test('existing units from DB contains more units', () => {
-      target = new GroupExperimentalUnitService()
-      const result = target.compareWithExistingUnits(
-        [{ treatment_block_id: 1, rep: 1, location: 3 },
-          { treatment_block_id: 2, rep: 1, location: 3 },
-          { treatment_block_id: 1, rep: 2, location: 3 },
-          { treatment_block_id: 2, rep: 2, location: 3 },
-        ],
-        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
-      )
-
-      expect(result.deletes).toEqual([{ treatmentBlockId: 1, rep: 1, location: 3 },
-        { treatmentBlockId: 2, rep: 1, location: 3 },
-        { treatmentBlockId: 2, rep: 2, location: 3 }])
-      expect(result.adds).toEqual([])
-    })
-
-    test('existing units from DB contains less units', () => {
-      target = new GroupExperimentalUnitService()
-      const result = target.compareWithExistingUnits(
-        [{ treatment_block_id: 1, rep: 1, location: 3 }],
-        [{ treatmentBlockId: 1, rep: 1, location: 3 },
-          { treatmentBlockId: 2, rep: 1, location: 3 },
-          { treatmentBlockId: 1, rep: 2, location: 3 },
-          { treatmentBlockId: 2, rep: 2, location: 3 }],
-      )
-
-      expect(result.adds).toEqual([{ treatmentBlockId: 2, rep: 1, location: 3 },
-        { treatmentBlockId: 1, rep: 2, location: 3 },
-        { treatmentBlockId: 2, rep: 2, location: 3 }])
-      expect(result.deletes).toEqual([])
-    })
-
-    test('existing units from DB contains duplicate treatment in rep', () => {
-      target = new GroupExperimentalUnitService()
-      const result = target.compareWithExistingUnits(
-        [{ treatment_block_id: 1, rep: 1, location: 3 },
-          { treatment_block_id: 2, rep: 1, location: 3 },
-          { treatment_block_id: 1, rep: 2, location: 3 },
-          { treatmentBlockId: 1, rep: 2, location: 3 },
-          { treatment_block_id: 2, rep: 2, location: 3 },
-        ],
-        [{ treatmentBlockId: 1, rep: 2, location: 3 }],
-      )
-
-      expect(result.deletes).toEqual([{ treatmentBlockId: 1, rep: 1, location: 3 },
-        { treatmentBlockId: 2, rep: 1, location: 3 },
-        { treatmentBlockId: 1, rep: 2, location: 3 },
-        { treatmentBlockId: 2, rep: 2, location: 3 }])
-      expect(result.adds).toEqual([])
     })
   })
 

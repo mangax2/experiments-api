@@ -26,6 +26,7 @@ import KafkaProducer from '../services/kafka/KafkaProducer'
 import { sendKafkaNotification } from '../decorators/notifyChanges'
 import { treatmentInputSchemaValidate } from '../validations/TreatmentValidator'
 import chemApSyncInputSchemaValidate from '../validations/chemApSyncValidator'
+import { validateBlockLocationSaveInput } from '../validations/BlockLocationValidator'
 import {
   addSetAssociationsToChemAP,
   createAndSyncChemApPlanFromExperiment,
@@ -149,9 +150,21 @@ router.patch('/experiments/:id/design-specification-details', (req, res, next) =
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.post('/experiments/:id/design-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, false)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
+router.post('/experiments/:id/block-locations', async (req, res, next) => {
+  try {
+    await validateBlockLocationSaveInput(req.body)
+    await new ExperimentalUnitService().saveBlockLocationUnits(req.params.id, req.body, req.context,
+      false)
+    res.sendStatus(204)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/experiments/:id/block-locations', (req, res, next) =>
+  new ExperimentalUnitService().deleteByBlockLocation(req.params.id, req.query, req.context, false)
+    .then(() => res.sendStatus(204))
+    .catch(err => next(err)))
 
 router.get('/unit-types', (req, res, next) => new UnitTypeService().getAllUnitTypes()
   .then(values => res.json(values))
@@ -289,9 +302,21 @@ router.patch('/templates/:id/design-specification-details', (req, res, next) => 
   .then(value => res.json(value))
   .catch(err => next(err)))
 
-router.post('/templates/:id/design-experimental-units', (req, res, next) => new GroupExperimentalUnitService().saveDesignSpecsAndUnits(req.params.id, req.body, req.context, true)
-  .then(value => res.json(value))
-  .catch(err => next(err)))
+router.post('/templates/:id/block-locations', async (req, res, next) => {
+  try {
+    await validateBlockLocationSaveInput(req.body)
+    await new ExperimentalUnitService().saveBlockLocationUnits(req.params.id, req.body, req.context,
+      true)
+    res.sendStatus(204)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/templates/:id/block-locations', (req, res, next) =>
+  new ExperimentalUnitService().deleteByBlockLocation(req.params.id, req.query, req.context, true)
+    .then(() => res.sendStatus(204))
+    .catch(err => next(err)))
 
 router.get('/templates/:id/unit-specification-details', (req, res, next) => new UnitSpecificationDetailService().getUnitSpecificationDetailsByExperimentId(req.params.id, true, req.context)
   .then(values => res.json(values))

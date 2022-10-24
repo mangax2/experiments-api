@@ -9,7 +9,6 @@ import DesignSpecificationDetailService from '../services/DesignSpecificationDet
 import ExperimentalUnitService from '../services/ExperimentalUnitService'
 import ExperimentsService from '../services/ExperimentsService'
 import ExperimentSummaryService from '../services/ExperimentSummaryService'
-import FactorDependentCompositeService from '../services/FactorDependentCompositeService'
 import FactorService from '../services/FactorService'
 import ListsService from '../services/ListsService'
 import LocationAssociationService from '../services/LocationAssociationService'
@@ -97,10 +96,10 @@ router.get('/experiments/:id/response-variables', (req, res, next) => {
     .then(dependentVariables => res.json(dependentVariables))
     .catch(err => next(err))
 })
-router.post('/experiments/:id/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.params.id, req.context, false)
+router.put('/experiments/:id/treatment-variables', (req, res, next) => new FactorService().persistAllVariables(req.body, req.params.id, req.context, false)
   .then(success => res.json(success))
   .catch(err => next(err)))
-router.post('/templates/:id/variables', (req, res, next) => new FactorDependentCompositeService().persistAllVariables(req.body, req.params.id, req.context, true)
+router.put('/templates/:id/treatment-variables', (req, res, next) => new FactorService().persistAllVariables(req.body, req.params.id, req.context, true)
   .then(success => res.json(success))
   .catch(err => next(err)))
 router.get('/experiments/:id/treatment-variables', (req, res, next) => new FactorService().getFactorsByExperimentId(req.params.id, false, req.context)

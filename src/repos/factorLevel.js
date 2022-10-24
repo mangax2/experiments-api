@@ -43,7 +43,7 @@ class factorLevelRepo {
     const values = factorLevels.map(factorLevel => ({
       id: 'nextval(pg_get_serial_sequence(\'factor_level\', \'id\'))::integer',
       value: factorLevel.value,
-      factor_id: factorLevel.factorId,
+      factor_id: factorLevel.treatmentVariableLevelId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
@@ -72,7 +72,7 @@ class factorLevelRepo {
     const data = factorLevels.map(factorLevel => ({
       id: factorLevel.id,
       value: `CAST(${this.pgp.as.json(factorLevel.value)} AS jsonb)`,
-      factor_id: factorLevel.factorId,
+      factor_id: factorLevel.treatmentVariableLevelId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP'
     }))

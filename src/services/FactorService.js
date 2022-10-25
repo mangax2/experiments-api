@@ -1,5 +1,6 @@
 import some from 'lodash/some'
 import sortBy from 'lodash/sortBy'
+import uniq from 'lodash/uniq'
 import Transactional from '@monsantoit/pg-transactional'
 import AppError from './utility/AppError'
 import { dbRead, dbWrite } from '../db/DbManager'
@@ -93,7 +94,7 @@ class FactorService {
   ) => {
     const experimentId = Number(experimentIdString)
     await this.securityService.permissionsCheck(experimentId, context, isTemplate)
-    // Validate?
+    this.validateTreatmentVariables(treatmentVariables)
     await this.saveTreatmentVariables(experimentId, treatmentVariables, context, tx)
     await this.saveTreatmentVariableLevels(experimentId, treatmentVariables, context, tx)
     const properties = await
@@ -150,7 +151,6 @@ class FactorService {
     })
     const dbTreatmentVariableLevels = await dbRead.factorLevel.findByExperimentId(experimentId)
     const treatmentVariableLevels = treatmentVariables.flatMap(tv => tv.treatmentVariableLevels)
-    // iterate over treatmentVariables and construct old details structure
     dbTreatmentVariableLevels.forEach(dbLevel => {
       const matchedLevel = treatmentVariableLevels.find(level =>
         level.id === dbLevel.id && !level.isMatched)
@@ -241,10 +241,14 @@ class FactorService {
         level.treatmentVariableName === nestedLevel.associatedTreatmentVariableName &&
         level.levelNumber === nestedLevel.associatedTreatmentVariableLevelNumber)
       return {
-        associatedLevelId: parentLevel.id,
+        associatedLevelId: parentLevel?.id,
         nestedLevelId: nestedLevel.id,
       }
     })
+
+    if (associations.filter(assoc => !assoc.associatedLevelId).length > 0) {
+      throw AppError.badRequest('Invalid associations. Cannot find the associated level for at least one treatment variable level.', undefined, getFullErrorCode('1DE001'))
+    }
 
     dbAssociations.forEach(dbAssociation => {
       const matchingAssociation = associations.find(association =>
@@ -260,6 +264,32 @@ class FactorService {
     const adds = associations.filter(assoc => !assoc.isMatched)
     await dbWrite.factorLevelAssociation.batchRemove(deletes.map(assoc => assoc.id), tx)
     await dbWrite.factorLevelAssociation.batchCreate(adds, context, tx)
+  }
+
+  @setErrorCode('1DF000')
+  validateTreatmentVariables = (treatmentVariables) => {
+    const variableNames = treatmentVariables.map(tv => tv.name).filter(name => name)
+    if (treatmentVariables.length !== uniq(variableNames).length) {
+      throw AppError.badRequest('All variables must have a name and they must be unique.', undefined, getFullErrorCode('1DF001'))
+    }
+
+    const nestedVariables = treatmentVariables.filter(tv => tv.associatedTreatmentVariableName)
+    const levelsWithoutNesting = nestedVariables.flatMap(tv => tv.treatmentVariableLevels)
+      .filter(levels => !levels.associatedTreatmentVariableLevelNumber)
+    if (levelsWithoutNesting.length > 0) {
+      throw AppError.badRequest('All levels for nested variables must have an associated level.', undefined, getFullErrorCode('1DF002'))
+    }
+
+    const nonBlockingVariables = treatmentVariables.filter(tv => !tv.isBlockingFactorOnly)
+    if (nonBlockingVariables.length === 0) {
+      throw AppError.badRequest('At least one treatment variable must not be a blocking factor.', undefined, getFullErrorCode('1DF003'))
+    }
+
+    const treatmentVariablesWithoutLevels = treatmentVariables.filter(tv =>
+      tv.treatmentVariableLevels.length < 2)
+    if (treatmentVariablesWithoutLevels.length > 0) {
+      throw AppError.badRequest('Every treatment variable needs to have at least two levels.', undefined, getFullErrorCode('1DF004'))
+    }
   }
 }
 

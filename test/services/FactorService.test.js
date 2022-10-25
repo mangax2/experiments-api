@@ -1,6 +1,7 @@
-import { mockReject, mockResolve } from '../jestUtil'
+import { mock, mockReject, mockResolve } from '../jestUtil'
 import FactorService from '../../src/services/FactorService'
 import { dbRead, dbWrite } from '../../src/db/DbManager'
+import AppError from '../../src/services/utility/AppError'
 
 describe('FactorService', () => {
   let target
@@ -1002,6 +1003,140 @@ describe('FactorService', () => {
         { associatedLevelId: 103, nestedLevelId: 207 },
         { associatedLevelId: 104, nestedLevelId: 208 },
       ], testContext, testTx)
+    })
+
+    test('throws an exception if a level cannot find its associated level', async () => {
+      const requestTreatmentVariables = [
+        {
+          id: 1,
+          name: 'variableOne',
+          treatmentVariableLevels: [
+            { id: 101, levelNumber: 1 },
+            { id: 102, levelNumber: 2 },
+            { id: 103, levelNumber: 3 },
+            { id: 104, levelNumber: 4 },
+          ],
+        },
+        {
+          id: 2,
+          name: 'variableTwo',
+          associatedTreatmentVariableName: 'variableOne',
+          treatmentVariableLevels: [
+            { id: 201, levelNumber: 1, associatedTreatmentVariableLevelNumber: 1 },
+            { id: 202, levelNumber: 2, associatedTreatmentVariableLevelNumber: 2 },
+            { id: 203, levelNumber: 3, associatedTreatmentVariableLevelNumber: 3 },
+            { id: 204, levelNumber: 4, associatedTreatmentVariableLevelNumber: 4 },
+            { id: 205, levelNumber: 5, associatedTreatmentVariableLevelNumber: 1 },
+            { id: 206, levelNumber: 6, associatedTreatmentVariableLevelNumber: 2 },
+            { id: 207, levelNumber: 7, associatedTreatmentVariableLevelNumber: 3 },
+            { id: 208, levelNumber: 8, associatedTreatmentVariableLevelNumber: 5 },
+          ],
+        },
+      ]
+      const dbAssociations = [
+        { id: 11, associated_level_id: 101, nested_level_id: 201 },
+        { id: 12, associated_level_id: 102, nested_level_id: 202 },
+        { id: 13, associated_level_id: 103, nested_level_id: 203 },
+        { id: 14, associated_level_id: 104, nested_level_id: 204 },
+        { id: 15, associated_level_id: 105, nested_level_id: 205 },
+      ]
+      dbRead.factorLevelAssociation.findByExperimentId = mockResolve(dbAssociations)
+      dbWrite.factorLevelAssociation.batchRemove = mockResolve()
+      dbWrite.factorLevelAssociation.batchCreate = mockResolve()
+      AppError.badRequest = mock(new Error())
+
+      try {
+        await target.saveTreatmentVariableLevelAssociations(5, requestTreatmentVariables, testContext, testTx)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Invalid associations. Cannot find the associated level for at least one treatment variable level.', undefined, '1DE001')
+      }
+    })
+  })
+
+  describe('validateTreatmentVariables', () => {
+    test('throws an error if variables share a name', () => {
+      AppError.badRequest = mock(new Error())
+      const treatmentVariables = [
+        { name: 'test' },
+        { name: 'same' },
+        { name: 'same' },
+      ]
+
+      try {
+        target.validateTreatmentVariables(treatmentVariables)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('All variables must have a name and they must be unique.', undefined, '1DF001')
+      }
+    })
+
+    test('throws an error if variables does not have a name', () => {
+      AppError.badRequest = mock(new Error())
+      const treatmentVariables = [
+        { name: 'test' },
+        { name: 'test2' },
+        { },
+      ]
+
+      try {
+        target.validateTreatmentVariables(treatmentVariables)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('All variables must have a name and they must be unique.', undefined, '1DF001')
+      }
+    })
+
+    test('throws an error if a nested variable has unnested levels', () => {
+      AppError.badRequest = mock(new Error())
+      const treatmentVariables = [
+        { name: 'parent' },
+        {
+          name: 'nested',
+          associatedTreatmentVariableName: 'parent',
+          treatmentVariableLevels: [
+            { levelNumber: 1 },
+            { levelNumber: 2 },
+          ],
+        },
+      ]
+
+      try {
+        target.validateTreatmentVariables(treatmentVariables)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('All levels for nested variables must have an associated level.', undefined, '1DF002')
+      }
+    })
+
+    test('throws an error if all variables are blocking factors', () => {
+      AppError.badRequest = mock(new Error())
+      const treatmentVariables = [
+        { name: 'test', isBlockingFactorOnly: true },
+        { name: 'test2', isBlockingFactorOnly: true },
+      ]
+
+      try {
+        target.validateTreatmentVariables(treatmentVariables)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('At least one treatment variable must not be a blocking factor.', undefined, '1DF003')
+      }
+    })
+
+    test('throws an error if a variable has less than two levels', () => {
+      AppError.badRequest = mock(new Error())
+      const treatmentVariables = [
+        { name: 'test1', treatmentVariableLevels: [] },
+        {
+          name: 'test2',
+          treatmentVariableLevels: [
+            { levelNumber: 1 },
+            { levelNumber: 2 },
+          ],
+        },
+      ]
+
+      try {
+        target.validateTreatmentVariables(treatmentVariables)
+      } catch {
+        expect(AppError.badRequest).toHaveBeenCalledWith('Every treatment variable needs to have at least two levels.', undefined, '1DF004')
+      }
     })
   })
 })

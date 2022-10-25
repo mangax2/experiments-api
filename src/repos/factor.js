@@ -112,11 +112,11 @@ class factorRepo {
   all = () => this.rep.any('SELECT * FROM factor')
 
   @setErrorCode('575000')
-  batchCreate = (factors, context, tx = this.rep) => {
+  batchCreate = (experimentId, factors, context, tx = this.rep) => {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
         'name',
-        'ref_factor_type_id',
+        'ref_factor_type_id:raw',
         'experiment_id',
         'created_user_id',
         'created_date:raw',
@@ -128,8 +128,8 @@ class factorRepo {
       {table: 'factor'})
     const values = factors.map(factor => ({
       name: factor.name,
-      ref_factor_type_id: factor.refFactorTypeId,
-      experiment_id: factor.experimentId,
+      ref_factor_type_id: '(SELECT id FROM ref_factor_type WHERE type = \'Independent\')',
+      experiment_id: experimentId,
       created_user_id: context.userId,
       created_date: 'CURRENT_TIMESTAMP',
       modified_user_id: context.userId,
@@ -137,7 +137,7 @@ class factorRepo {
       tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`,
       is_blocking_factor_only: factor.isBlockingFactorOnly || false,
     }))
-    const query = `${this.pgp.helpers.insert(values, columnSet)} RETURNING id`
+    const query = `${this.pgp.helpers.insert(values, columnSet)} RETURNING id, name`
     return tx.any(query)
   }
 
@@ -147,8 +147,6 @@ class factorRepo {
       [
         '?id',
         'name',
-        'ref_factor_type_id',
-        'experiment_id',
         'modified_user_id',
         'modified_date:raw',
         'tier:raw',
@@ -158,8 +156,6 @@ class factorRepo {
     const data = factors.map(factor => ({
       id: factor.id,
       name: factor.name,
-      ref_factor_type_id: factor.refFactorTypeId,
-      experiment_id: factor.experimentId,
       modified_user_id: context.userId,
       modified_date: 'CURRENT_TIMESTAMP',
       tier: `CAST(${factor.tier === undefined ? null : factor.tier} AS numeric)`,

@@ -30,8 +30,8 @@ class factorLevelDetailsRepo {
       {table: 'temp_insert_factor_level_details'})
     const values = factorLevelDetails.map(factorLevelDetail => ({
       id: 'nextval(pg_get_serial_sequence(\'factor_level_details\', \'id\'))::integer',
-      factor_level_id: factorLevelDetail.factorLevelId,
-      factor_properties_for_level_id: factorLevelDetail.factorPropertiesForLevelId,
+      factor_level_id: factorLevelDetail.treatmentVariableLevelId,
+      factor_properties_for_level_id: factorLevelDetail.propertyId,
       row_number: factorLevelDetail.rowNumber,
       value_type: factorLevelDetail.valueType,
       text: factorLevelDetail.text,

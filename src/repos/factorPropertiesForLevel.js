@@ -33,7 +33,7 @@ class factorPropertiesForLevelRepo {
       {table: 'temp_insert_factor_properties_for_level'})
     const values = factorPropertiesForLevels.map(factorPropertiesForLevel => ({
       id: 'nextval(pg_get_serial_sequence(\'factor_properties_for_level\', \'id\'))::integer',
-      factor_id: factorPropertiesForLevel.factorId,
+      factor_id: factorPropertiesForLevel.treatmentVariableId,
       column_number: factorPropertiesForLevel.columnNumber,
       object_type: factorPropertiesForLevel.objectType,
       label: factorPropertiesForLevel.label,
@@ -49,7 +49,7 @@ class factorPropertiesForLevelRepo {
     // Split into two queries to drastically reduce the time it takes to audit the inserts for
     // large number of rows. This is likely due to the size of the query being writtent to the audit.logged_actions table.
     const query1 = `DROP TABLE IF EXISTS temp_insert_factor_properties_for_level; CREATE TEMP TABLE temp_insert_factor_properties_for_level AS TABLE factor_properties_for_level WITH NO DATA; ${this.pgp.helpers.insert(values, columnSet)};`
-    const query2 = "INSERT INTO factor_properties_for_level SELECT * FROM temp_insert_factor_properties_for_level RETURNING id"
+    const query2 = "INSERT INTO factor_properties_for_level SELECT * FROM temp_insert_factor_properties_for_level RETURNING *"
     return tx.query(query1)
       .then(() => tx.any(query2))
   }

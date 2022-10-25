@@ -116,7 +116,7 @@ class factorRepo {
     const columnSet = new this.pgp.helpers.ColumnSet(
       [
         'name',
-        'ref_factor_type_id:',
+        'ref_factor_type_id:raw',
         'experiment_id',
         'created_user_id',
         'created_date:raw',

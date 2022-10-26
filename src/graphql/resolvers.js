@@ -173,10 +173,14 @@ export default {
       const units = await context.loaders.unitsBySetEntryIds.load(setEntryIds)
       return getPaginatedResults(units, limit, offset)
     },
-    getSetBySetId: (entity, args, context) =>
-      context.loaders.setBySetIds.load(args.setId),
-    getSetsBySetId: (entity, args, context) =>
-      context.loaders.setsBySetIds.load(args.setIds),
+    getSets: (entity, args, context) => {
+      maxIdCountCheck(args.setIds, settings.maxExperimentsToRetrieve)
+      return context.loaders.setsBySetIds.load(args.setIds)
+    },
+    getSetsInfo: (entity, args, context) => {
+      maxIdCountCheck(args.setIds, settings.maxExperimentsToRetrieve)
+      return context.loaders.setsBySetIds.load(args.setIds)
+    },
     getSetEntriesBySetId: (entity, args, context) => {
       emptyInputIdCheck(args.setId)
       return context.loaders.unitsBySetId.load(args.setId)

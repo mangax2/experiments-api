@@ -9,6 +9,7 @@ describe('resolvers', () => {
   let setsLoadMock
   let criteriaLoadMock
   let nameLoadMock
+  let setsByIdMock
   let context
 
   beforeEach(() => {
@@ -19,6 +20,7 @@ describe('resolvers', () => {
     setsLoadMock = mock()
     criteriaLoadMock = mock()
     nameLoadMock = mock()
+    setsByIdMock = mock()
     context = {
       loaders: {
         experiment: {
@@ -42,11 +44,45 @@ describe('resolvers', () => {
         experimentsByPartialName: {
           load: nameLoadMock,
         },
+        setsBySetIds: {
+          load: setsByIdMock,
+        },
       },
     }
   })
 
   describe('Query', () => {
+    describe('getSets', () => {
+      test('getSets', () => {
+        const args = {
+          setIds: [1, 2, 3],
+        }
+
+        resolvers.Query.getSets(undefined, args, context)
+        expect(setsByIdMock).toHaveBeenCalledTimes(1)
+        expect(setsByIdMock).toHaveBeenCalledWith(args.setIds)
+      })
+
+      test('getSetsInfo', () => {
+        const args = {
+          setIds: [1, 2, 3],
+        }
+
+        resolvers.Query.getSetsInfo(undefined, args, context)
+        expect(setsByIdMock).toHaveBeenCalledTimes(1)
+        expect(setsByIdMock).toHaveBeenCalledWith(args.setIds)
+      })
+
+      test('getSets obeys limit of ids (10 atm)', () => {
+        const args = {
+          setIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        }
+
+        expect(() => resolvers.Query.getSetsInfo(undefined, args, context))
+          .toThrow('Request input ids exceeded the maximum length of 10')
+      })
+    })
+
     describe('getExperiments', () => {
       test('loads each id', () => {
         const args = {

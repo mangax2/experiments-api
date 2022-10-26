@@ -251,8 +251,8 @@ type Query {
   getGroupsByExperimentId(experimentId: Int!): [Group]
   getUnitsByExperimentId(experimentId: Int!): [ExperimentalUnit]
   getUnitsBySetEntryIds(setEntryIds: [Int!]!, limit: Int, offset: Int): ExperimentalUnitResults
-  getSetBySetId(setId: Int!): ExperimentalSet
-  getSetsBySetId(setIds: [Int!]!): [ExperimentalSetInfo]
+  getSets(setIds: [Int!]!): [ExperimentalSet]
+  getSetsInfo(setIds: [Int!]!): [ExperimentalSetInfo]
   getSetEntriesBySetId(setId: [Int!]!): [ExperimentalUnit]
   getTreatmentsBySetId(setId: [Int!]!): [Treatment]
   getBlocksByBlockIds(blockId: [Int!]!, limit: Int, offset: Int): BlockResults

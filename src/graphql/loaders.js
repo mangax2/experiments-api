@@ -56,9 +56,6 @@ function createLoaders() {
   const groupJsonBySetIdLoader = createMultiDataLoader(
     new GroupExperimentalUnitService().getGroupsAndUnitsForSet)
 
-  const groupBySetIdLoader = createMultiDataLoader(
-    new GroupExperimentalUnitService().getSetInformationBySetId)
-
   const setsBySetIdsLoader = createMultiDataLoader(
     new GroupExperimentalUnitService().getSetInformationBySetIds)
 
@@ -191,7 +188,6 @@ function createLoaders() {
     refFactorType: refFactorTypeByIdLoader,
     refUnitSpec: refUnitSpecByIdLoader,
     refUnitType: refUnitTypeByIdLoader,
-    setBySetIds: groupBySetIdLoader,
     setsBySetIds: setsBySetIdsLoader,
     tagsByExperimentId: tagsByExperimentIdLoader,
     template: templateByIdLoader,
